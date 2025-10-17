@@ -14,8 +14,8 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from auth import TokenData, UserRole
-from models import (
+from ethical_audit_service.auth import TokenData, UserRole
+from ethical_audit_service.models import (
     ComplianceResult,
     DecisionType,
     EthicalDecisionLog,

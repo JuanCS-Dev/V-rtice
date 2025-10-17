@@ -228,10 +228,10 @@ def create_app() -> FastAPI:
         }
 
     # Register routers
-    from api.routes import agents, coordination, health, lymphnode, metrics
-    from api.routes import websocket as websocket_events
-    from api.websocket import router as websocket_router
-    from api.routes.defensive_tools import router as defensive_router
+    from active_immune_core.api.routes import agents, coordination, health, lymphnode, metrics
+    from active_immune_core.api.routes import websocket as websocket_events
+    from active_immune_core.api.websocket import router as websocket_router
+    from active_immune_core.api.routes.defensive_tools import router as defensive_router
 
     app.include_router(health.router, prefix="/health", tags=["health"])
     app.include_router(metrics.router, prefix="/metrics", tags=["metrics"])

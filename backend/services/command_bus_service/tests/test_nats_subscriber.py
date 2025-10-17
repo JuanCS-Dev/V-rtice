@@ -1,12 +1,18 @@
 """Tests for NATS subscriber."""
 
 import asyncio
+from typing import TYPE_CHECKING, AsyncIterator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from c2l_executor import C2LCommandExecutor
 from models import C2LCommand, C2LCommandType, CommandReceipt
 from nats_subscriber import NATSSubscriber
+
+if TYPE_CHECKING:
+    from nats.aio.msg import Msg
+else:
+    Msg = object  # Runtime fallback
 
 
 @pytest.mark.asyncio
@@ -103,7 +109,7 @@ async def test_subscribe_message_processing():
     mock_msg.ack = AsyncMock()
 
     # Create async iterator mock
-    async def async_message_generator():  # noqa: ANN202
+    async def async_message_generator() -> AsyncIterator[object]:
         yield mock_msg
 
     # Mock subscription with async iterator
@@ -148,7 +154,7 @@ async def test_subscribe_message_processing_error():
     mock_msg.nak = AsyncMock()
 
     # Create async iterator mock
-    async def async_message_generator():  # noqa: ANN202
+    async def async_message_generator() -> AsyncIterator[object]:
         yield mock_msg
 
     # Mock subscription

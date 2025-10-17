@@ -62,8 +62,8 @@ def build_error_response(
     error_code: str,
     message: str,
     status_code: int,
-    details: dict[str, Any] = None,
-    request_id: str = None,
+    details: dict[str, Any] | None = None,
+    request_id: str | None = None,
 ) -> dict[str, Any]:
     """Build standardized error response dictionary.
 

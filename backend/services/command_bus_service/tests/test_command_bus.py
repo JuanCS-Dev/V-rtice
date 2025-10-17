@@ -1,6 +1,7 @@
 """Tests for command bus service."""
 
 import asyncio
+from typing import Any, Generator, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -18,7 +19,7 @@ client = TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
-def mock_nats_components():
+def mock_nats_components() -> Generator[Tuple[AsyncMock, AsyncMock], None, None]:
     """Mock NATS components for TestClient."""
     mock_publisher = AsyncMock()
     mock_subscriber = AsyncMock()
@@ -31,7 +32,7 @@ def mock_nats_components():
         yield mock_publisher, mock_subscriber
 
 
-def test_health_check(mock_nats_components) -> None:
+def test_health_check(mock_nats_components: Tuple[AsyncMock, AsyncMock]) -> None:
     """Test health check endpoint."""
     with TestClient(app) as client:
         response = client.get("/health/")

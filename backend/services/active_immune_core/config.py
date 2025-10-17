@@ -199,6 +199,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         env_prefix="ACTIVE_IMMUNE_",
+        extra="ignore",  # Ignore extra env vars
     )
 
     @validator("log_level")

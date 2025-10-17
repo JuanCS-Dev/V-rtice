@@ -143,7 +143,7 @@ async def test_cascade_terminate():
     executor = C2LCommandExecutor(publisher, kill_switch, audit_repo)
 
     # Mock _get_sub_agents to return empty (no infinite recursion)
-    executor._get_sub_agents = AsyncMock(return_value=[])
+    setattr(executor, "_get_sub_agents", AsyncMock(return_value=[]))
 
     command = C2LCommand(
         id=uuid4(),
@@ -283,7 +283,7 @@ async def test_cascade_with_sub_agents():
             return ["child-1", "child-2"]
         return []
 
-    executor._get_sub_agents = mock_get_sub_agents
+    setattr(executor, "_get_sub_agents", mock_get_sub_agents)
 
     command = C2LCommand(
         id=uuid4(),
@@ -397,7 +397,7 @@ async def test_cascade_terminate_with_failures():
             return ["child-1", "child-2", "child-3"]
         return []
 
-    executor._get_sub_agents = mock_get_sub_agents
+    setattr(executor, "_get_sub_agents", mock_get_sub_agents)
 
     # Mock execute to fail for child-2
     original_execute = executor.execute
@@ -419,7 +419,7 @@ async def test_cascade_terminate_with_failures():
             )
         return await original_execute(command)
 
-    executor.execute = mock_execute
+    setattr(executor, "execute", mock_execute)
 
     command = C2LCommand(
         id=uuid4(),

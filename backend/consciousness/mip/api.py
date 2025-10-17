@@ -19,9 +19,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from .config import get_settings
-from .core import ProcessIntegrityEngine
-from .models import (
+from consciousness.mip.config import get_settings
+from consciousness.mip.core import ProcessIntegrityEngine
+from consciousness.mip.models import (
     ActionPlan,
     ActionStep,
     EthicalVerdict,
@@ -31,12 +31,12 @@ from .models import (
     Effect,
     Precondition,
 )
-from .infrastructure.knowledge_base import (
+from consciousness.mip.infrastructure.knowledge_base import (
     KnowledgeBaseRepository,
     PrincipleQueryService,
     AuditTrailService,
 )
-from .infrastructure.knowledge_models import (
+from consciousness.mip.infrastructure.knowledge_models import (
     Principle,
     Decision,
     PrincipleLevel,

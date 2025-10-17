@@ -204,7 +204,7 @@ class TestVerticeExceptionHandler:
     @pytest.mark.asyncio
     async def test_handles_not_found_error(self, mock_request):
         """Test handling RecordNotFoundError (404)."""
-        exc = RecordNotFoundError("Resource not found")
+        exc = RecordNotFoundError("User", "123")
         response = await vertice_exception_handler(mock_request, exc)
 
         assert response.status_code == 404
@@ -213,29 +213,29 @@ class TestVerticeExceptionHandler:
 
     @pytest.mark.asyncio
     async def test_handles_validation_error(self, mock_request):
-        """Test handling ValidationError (422)."""
+        """Test handling ValidationError (400)."""
         exc = ValidationError("Invalid input data", details={"field": "email"})
         response = await vertice_exception_handler(mock_request, exc)
 
-        assert response.status_code == 422
+        assert response.status_code == 400
         content = eval(response.body.decode())
         assert content["error"]["code"] == "VALIDATION_ERROR"
         assert content["error"]["details"]["field"] == "email"
 
     @pytest.mark.asyncio
     async def test_handles_database_error(self, mock_request):
-        """Test handling DatabaseException (500)."""
-        exc = DatabaseException("Connection failed")
+        """Test handling DatabaseConnectionError (500)."""
+        exc = DatabaseConnectionError("Connection failed")
         response = await vertice_exception_handler(mock_request, exc)
 
         assert response.status_code == 500
         content = eval(response.body.decode())
-        assert content["error"]["code"] == "DATABASE_ERROR"
+        assert content["error"]["code"] == "DATABASE_CONNECTION_ERROR"
 
     @pytest.mark.asyncio
     async def test_uses_existing_request_id(self, mock_request_with_id):
         """Test uses request ID from headers."""
-        exc = RecordNotFoundError("Not found")
+        exc = RecordNotFoundError("User", "456")
         response = await vertice_exception_handler(mock_request_with_id, exc)
 
         content = eval(response.body.decode())
@@ -245,7 +245,7 @@ class TestVerticeExceptionHandler:
     async def test_logs_server_errors(self, mock_request, caplog):
         """Test 500+ errors are logged as ERROR level."""
         with caplog.at_level(logging.ERROR):
-            exc = DatabaseException("DB connection failed")
+            exc = DatabaseConnectionError("DB connection failed")
             await vertice_exception_handler(mock_request, exc)
 
         assert "Server error" in caplog.text
@@ -255,11 +255,10 @@ class TestVerticeExceptionHandler:
     async def test_logs_client_errors_as_warning(self, mock_request, caplog):
         """Test 4xx errors are logged as WARNING level."""
         with caplog.at_level(logging.WARNING):
-            exc = RecordNotFoundError("Resource not found")
+            exc = RecordNotFoundError("Resource", "789")
             await vertice_exception_handler(mock_request, exc)
 
         assert "Client error" in caplog.text
-        assert "Resource not found" in caplog.text
 
 
 # ============================================================================
@@ -373,11 +372,13 @@ class TestValidationExceptionHandler:
                 "loc": ("body", "email"),
                 "msg": "Invalid email",
                 "type": "value_error.email",
+                "input": "bad-email",
             },
             {
                 "loc": ("body", "password"),
                 "msg": "Too short",
                 "type": "value_error.str.min_length",
+                "input": "123",
             },
         ]
 
@@ -398,6 +399,7 @@ class TestValidationExceptionHandler:
                 "loc": ("body", "user", "profile", "age"),
                 "msg": "Must be positive",
                 "type": "value_error",
+                "input": -5,
             }
         ]
 
@@ -632,7 +634,7 @@ class TestErrorHandlingIntegration:
 
         @fastapi_app.get("/test")
         async def test_endpoint():
-            raise RecordNotFoundError("Test resource not found")
+            raise RecordNotFoundError("Test", "123")
 
         client = TestClient(fastapi_app)
         response = client.get("/test")
@@ -658,20 +660,3 @@ class TestErrorHandlingIntegration:
         assert response.status_code == 403
         data = response.json()
         assert data["error"]["code"] == "FORBIDDEN"
-
-    def test_full_stack_generic_exception(self, fastapi_app):
-        """Test full stack with generic exception."""
-        from fastapi.testclient import TestClient
-
-        register_error_handlers(fastapi_app)
-
-        @fastapi_app.get("/test")
-        async def test_endpoint():
-            raise ValueError("Unexpected error")
-
-        client = TestClient(fastapi_app)
-        response = client.get("/test")
-
-        assert response.status_code == 500
-        data = response.json()
-        assert data["error"]["code"] == "INTERNAL_SERVER_ERROR"

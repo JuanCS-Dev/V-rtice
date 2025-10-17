@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional
 
 from pydantic import Field, HttpUrl, PositiveInt, field_validator
 from pydantic_settings import BaseSettings
@@ -27,7 +26,7 @@ class TegumentarSettings(BaseSettings):
     reputation_refresh_interval: PositiveInt = Field(
         900, description="Seconds between IP reputation synchronisations."
     )
-    ip_reputation_sources: List[HttpUrl] = Field(
+    ip_reputation_sources: list[HttpUrl] = Field(
         default=[
             "https://lists.blocklist.de/lists/all.txt",
             "https://feodotracker.abuse.ch/downloads/ipblocklist.txt",
@@ -69,7 +68,7 @@ class TegumentarSettings(BaseSettings):
         "http://localhost:8021",
         description="Endpoint do Linfonodo Digital (Immunis API).",
     )
-    lymphnode_api_key: Optional[str] = Field(
+    lymphnode_api_key: str | None = Field(
         default=None,
         description="Token opcional para autenticação no Linfonodo (Bearer).",
     )
@@ -87,7 +86,7 @@ class TegumentarSettings(BaseSettings):
         "http://localhost:8600/api/mmei/v1",
         description="Endpoint for communicating posture and qualia with MAXIMUS.",
     )
-    sdnc_endpoint: Optional[HttpUrl] = Field(
+    sdnc_endpoint: HttpUrl | None = Field(
         "http://localhost:8181/restconf",
         description="Software defined network controller endpoint for permeability actions.",
     )
@@ -105,6 +104,7 @@ class TegumentarSettings(BaseSettings):
         case_sensitive = False
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Ignore env vars that don't match schema
 
     @field_validator("ip_reputation_sources", mode="before")
     def _split_reputation_sources(cls, value: object) -> object:
@@ -113,7 +113,7 @@ class TegumentarSettings(BaseSettings):
         return value
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> TegumentarSettings:
     """Cached accessor to avoid reparsing environment variables."""
 
