@@ -472,3 +472,105 @@ class TestEdgeCasesAndIntegration:
         
         with pytest.raises(ValidationError):
             validate_filename("../../etc/passwd")
+
+
+class TestEdgeCases100Percent:
+    """Testes adicionais para 100% de coverage"""
+    
+    def test_sanitize_sql_identifier_reserved_keyword(self):
+        """Test rejection of SQL reserved keywords"""
+        with pytest.raises(ValidationError) as exc_info:
+            sanitize_sql_identifier("SELECT")
+        assert "reserved keyword" in str(exc_info.value)
+        
+        with pytest.raises(ValidationError):
+            sanitize_sql_identifier("UNION")
+    
+    def test_detect_sql_injection_empty_string(self):
+        """Test detect_sql_injection with empty string"""
+        result = detect_sql_injection("")
+        assert result is False
+        
+        result = detect_sql_injection(None)
+        assert result is False
+    
+    def test_sanitize_shell_argument_empty_string(self):
+        """Test sanitize_shell_argument with empty input"""
+        result = sanitize_shell_argument("")
+        assert result == ""
+    
+    def test_detect_command_injection_empty_string(self):
+        """Test detect_command_injection with empty string"""
+        result = detect_command_injection("")
+        assert result is False
+        
+        result = detect_command_injection(None)
+        assert result is False
+    
+    def test_sanitize_path_empty_raises_error(self):
+        """Test sanitize_path with empty path raises error"""
+        with pytest.raises(ValidationError) as exc_info:
+            sanitize_path("")
+        assert "cannot be empty" in str(exc_info.value)
+    
+    def test_sanitize_ldap_dn_empty_string(self):
+        """Test sanitize_ldap_dn with empty string"""
+        result = sanitize_ldap_dn("")
+        assert result == ""
+    
+    def test_sanitize_ldap_filter_empty_string(self):
+        """Test sanitize_ldap_filter with empty string"""
+        result = sanitize_ldap_filter("")
+        assert result == ""
+    
+    def test_sanitize_nosql_operator_non_string_raises_error(self):
+        """Test sanitize_nosql_operator rejects non-strings"""
+        with pytest.raises(ValidationError) as exc_info:
+            sanitize_nosql_operator({"$ne": 1})
+        assert "must be a string" in str(exc_info.value)
+        
+        with pytest.raises(ValidationError):
+            sanitize_nosql_operator(123)
+    
+    def test_sanitize_http_header_empty_string(self):
+        """Test sanitize_http_header with empty string"""
+        result = sanitize_http_header("")
+        assert result == ""
+    
+    def test_normalize_unicode_empty_string(self):
+        """Test normalize_unicode with empty string"""
+        result = normalize_unicode("")
+        assert result == ""
+    
+    def test_sanitize_alphanumeric_empty_with_min_length(self):
+        """Test sanitize_alphanumeric empty string with min_length requirement"""
+        with pytest.raises(ValidationError) as exc_info:
+            sanitize_alphanumeric("", min_length=5)
+        assert "too short" in str(exc_info.value).lower()
+    
+    def test_sanitize_alphanumeric_empty_without_min_length(self):
+        """Test sanitize_alphanumeric empty string without min_length"""
+        result = sanitize_alphanumeric("", min_length=0)
+        assert result == ""
+    
+    def test_sanitize_alphanumeric_with_dashes(self):
+        """Test allow_dashes option"""
+        result = sanitize_alphanumeric("test-value-123", allow_dashes=True)
+        assert "test-value-123" == result
+    
+    def test_sanitize_alphanumeric_with_spaces(self):
+        """Test allow_spaces option"""
+        result = sanitize_alphanumeric("test value 123", allow_spaces=True)
+        assert "test value 123" == result
+    
+    def test_sanitize_email_empty_with_validate(self):
+        """Test sanitize_email empty string with validate=True"""
+        with pytest.raises(ValidationError) as exc_info:
+            sanitize_email("", validate=True)
+        assert "cannot be empty" in str(exc_info.value).lower()
+    
+    def test_sanitize_email_empty_without_validate(self):
+        """Test sanitize_email empty string with validate=False"""
+        result = sanitize_email("", validate=False)
+        assert result == ""
+

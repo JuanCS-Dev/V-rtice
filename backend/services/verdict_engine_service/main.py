@@ -15,13 +15,13 @@ import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import get_cache, get_repository
-from api import router as api_router
-from cache import VerdictCache
-from config import settings
-from kafka_consumer import start_consumer_task
-from verdict_repository import VerdictRepository
-from websocket_manager import ConnectionManager, websocket_handler
+from verdict_engine_service.api import get_cache, get_repository
+from verdict_engine_service.api import router as api_router
+from verdict_engine_service.kafka_consumer import start_consumer_task
+from verdict_engine_service.cache import VerdictCache
+from verdict_engine_service.config import settings
+from verdict_engine_service.verdict_repository import VerdictRepository
+from verdict_engine_service.websocket_manager import ConnectionManager, websocket_handler
 
 # Configure structured logging
 structlog.configure(
@@ -141,9 +141,9 @@ app.include_router(api_router)
 async def websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocket endpoint for real-time verdict streaming."""
     client_id = str(uuid4())  # pragma: no cover
-    ws_manager: ConnectionManager = app_state.get("ws_manager")  # type: ignore[assignment]  # pragma: no cover
-  # pragma: no cover
-    await websocket_handler(websocket, client_id, ws_manager)  # pragma: no cover
+    manager = app_state.get("ws_manager")  # pragma: no cover
+    assert isinstance(manager, ConnectionManager)  # pragma: no cover
+    await websocket_handler(websocket, client_id, manager)  # pragma: no cover
 
 
 # Root endpoint

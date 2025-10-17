@@ -129,7 +129,7 @@ async def test_repository_get_by_agent_with_since(repository: SemanticRepository
 @pytest.mark.asyncio
 async def test_create_pool() -> None:
     """Test create_pool function."""
-    from repository import create_pool
+    from narrative_filter_service.repository import create_pool
     # Mock test - actual pool creation requires DB
     # This tests that the function exists and is callable
     assert callable(create_pool)

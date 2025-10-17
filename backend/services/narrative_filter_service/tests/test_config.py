@@ -2,7 +2,7 @@
 
 def test_postgres_dsn_construction() -> None:
     """Test PostgreSQL DSN property."""
-    from config import settings
+    from narrative_filter_service.config import settings
 
     dsn = settings.postgres_dsn
     assert "postgresql+asyncpg://" in dsn
@@ -13,7 +13,7 @@ def test_postgres_dsn_construction() -> None:
 
 def test_kafka_settings() -> None:
     """Test Kafka configuration."""
-    from config import settings
+    from narrative_filter_service.config import settings
 
     assert settings.kafka_bootstrap_servers == "localhost:9092"
     assert settings.kafka_topic_input == "agent-communications"
@@ -22,7 +22,7 @@ def test_kafka_settings() -> None:
 
 def test_threshold_settings() -> None:
     """Test ML threshold settings."""
-    from config import settings
+    from narrative_filter_service.config import settings
 
     assert 0 < settings.alliance_threshold <= 1
     assert 0 < settings.inconsistency_threshold <= 1

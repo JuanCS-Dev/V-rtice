@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, status
 
-from models import HealthResponse
+from command_bus_service.models import HealthResponse
 
 router = APIRouter()
 

@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from verdict_engine_service.main import app
 
 
 @pytest.fixture
@@ -34,14 +34,14 @@ def test_app_metadata():
 def test_cors_middleware():
     """Test CORS middleware is configured."""
     # Check middleware is present - FastAPI wraps it
-    middleware_stack = [mw.cls.__name__ for mw in app.user_middleware]
-    assert "CORSMiddleware" in middleware_stack
+    middleware_stack = [str(mw.cls) for mw in app.user_middleware]
+    assert any("CORSMiddleware" in mw for mw in middleware_stack)
 
 
 def test_api_router_included():
     """Test API router is included."""
     # Check routes exist
-    route_paths = [route.path for route in app.routes]
+    route_paths = [getattr(route, "path", None) for route in app.routes]
     assert "/api/v1/verdicts/active" in route_paths
     assert "/api/v1/verdicts/{verdict_id}" in route_paths
     assert "/api/v1/verdicts/stats" in route_paths
@@ -50,7 +50,7 @@ def test_api_router_included():
 
 def test_websocket_route_exists():
     """Test WebSocket route exists."""
-    route_paths = [route.path for route in app.routes]
+    route_paths = [getattr(route, "path", None) for route in app.routes]
     assert "/ws/verdicts" in route_paths
 
 
@@ -71,7 +71,7 @@ async def test_lifespan_startup_shutdown(mocker):
 def test_dependency_overrides():
     """Test dependency injection overrides are set."""
     # Validate app_state structure
-    from main import app_state
+    from verdict_engine_service.main import app_state
 
     assert "repository" in app_state
     assert "cache" in app_state

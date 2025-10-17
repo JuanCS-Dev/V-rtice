@@ -11,12 +11,12 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from aiokafka import AIOKafkaConsumer
+from aiokafka import AIOKafkaConsumer  # type: ignore[import-untyped]
 
-from cache import VerdictCache
-from config import settings
-from models import Verdict
-from websocket_manager import ConnectionManager
+from verdict_engine_service.cache import VerdictCache
+from verdict_engine_service.config import settings
+from verdict_engine_service.models import Verdict
+from verdict_engine_service.websocket_manager import ConnectionManager
 
 logger = structlog.get_logger()
 

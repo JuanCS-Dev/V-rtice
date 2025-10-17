@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from asyncpg import Pool
+from asyncpg import Pool  # type: ignore[import-untyped]
 
 from narrative_filter_service.models import Alliance, PatternType, StrategicPattern
 
@@ -50,7 +50,7 @@ class StrategicPatternRepository:
                 pattern.inconsistency_score,
                 pattern.metadata,
             )
-            return row["id"]  # type: ignore[return-value]
+            return UUID(str(row["id"]))  # type: ignore[return-value]
 
     async def get_recent_patterns(
         self, pattern_type: PatternType | None = None, hours: int = 24, limit: int = 100
@@ -192,7 +192,7 @@ class AllianceRepository:
                 alliance.interaction_count,
                 alliance.status,
             )
-            return row["id"]  # type: ignore[return-value]
+            return UUID(str(row["id"]))  # type: ignore[return-value]
 
     async def get_active_alliances(self, agent_id: str | None = None) -> list[Alliance]:
         """Get active alliances.

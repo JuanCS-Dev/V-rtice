@@ -30,7 +30,7 @@ License: Proprietary
 
 from typing import Any, Dict, List, Optional
 
-from backend.shared.constants import ServicePorts
+from .constants import ServicePorts
 
 # ============================================================================
 # CONTACT & LICENSE INFORMATION

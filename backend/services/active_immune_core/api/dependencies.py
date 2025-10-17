@@ -12,7 +12,9 @@ from typing import Optional
 
 from fastapi import HTTPException, status
 
-from monitoring import HealthChecker, MetricsCollector, PrometheusExporter
+from ..monitoring.health_checker import HealthChecker
+from ..monitoring.metrics_collector import MetricsCollector
+from ..monitoring.prometheus_exporter import PrometheusExporter
 
 
 def get_prometheus_exporter() -> PrometheusExporter:

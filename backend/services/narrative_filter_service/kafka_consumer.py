@@ -4,7 +4,7 @@ import json
 from typing import Any
 
 import structlog
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer  # type: ignore[import-untyped]
 
 from narrative_filter_service.config import settings
 from narrative_filter_service.models import SemanticRepresentation

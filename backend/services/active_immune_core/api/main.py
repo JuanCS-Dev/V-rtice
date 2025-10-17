@@ -19,8 +19,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from monitoring import HealthChecker, MetricsCollector, PrometheusExporter
-from monitoring.health_checker import HealthStatus
+from ..monitoring.health_checker import HealthChecker, HealthStatus
+from ..monitoring.metrics_collector import MetricsCollector
+from ..monitoring.prometheus_exporter import PrometheusExporter
 
 logger = logging.getLogger(__name__)
 

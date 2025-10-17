@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from backend.shared.exceptions import ValidationError
+from .exceptions import ValidationError
 
 # ============================================================================
 # IP ADDRESS VALIDATORS

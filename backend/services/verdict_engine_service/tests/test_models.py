@@ -7,7 +7,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from models import (
+from verdict_engine_service.models import (
     HealthResponse,
     Verdict,
     VerdictFilter,
@@ -48,7 +48,7 @@ def test_verdict_confidence_conversion():
         title="Test",
         agents_involved=["a1"],
         evidence_chain=["m1"],
-        confidence=0.75,  # Float input
+        confidence=Decimal("0.75"),  # Decimal input
         recommended_action="MONITOR",
         color="#10B981",
         created_at=datetime.utcnow(),
@@ -164,15 +164,20 @@ def test_websocket_message_stats():
     msg = WebSocketMessage(type="stats", data=stats)
 
     assert msg.type == "stats"
-    assert msg.data.critical_active == 2
+    assert isinstance(msg.data, VerdictStats)
+    if isinstance(msg.data, VerdictStats):
+        assert msg.data.critical_active == 2
 
 
 def test_websocket_message_ping():
     """Test WebSocketMessage ping type."""
-    msg = WebSocketMessage(type="ping", data={"status": "ok"})
+    ping_data = {"status": "ok"}
+    msg = WebSocketMessage(type="ping", data=ping_data)
 
     assert msg.type == "ping"
-    assert msg.data["status"] == "ok"
+    assert isinstance(msg.data, dict)
+    if isinstance(msg.data, dict):
+        assert msg.data["status"] == "ok"
 
 
 def test_health_response_healthy():

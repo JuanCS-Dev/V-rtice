@@ -10,8 +10,8 @@ from datetime import datetime
 from typing import Any
 
 try:
-    import torch
-    from sentence_transformers import SentenceTransformer
+    import torch  # type: ignore[import-not-found, import-untyped]
+    from sentence_transformers import SentenceTransformer  # type: ignore[import-not-found, import-untyped]
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
@@ -49,7 +49,7 @@ class SemanticProcessor:
             return [0.1] * 384
 
         embedding = self.model.encode(text, convert_to_tensor=True, device=self.device)
-        return embedding.cpu().tolist()
+        return list(embedding.cpu().tolist())  # type: ignore[return-value]
 
     def classify_intent(self, text: str) -> tuple[IntentClassification, float]:
         """Classify intent of message using heuristic rules.

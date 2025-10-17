@@ -7,8 +7,8 @@ import structlog
 from fastapi import FastAPI
 from prometheus_client import make_asgi_app
 
-import health_api
-from config import settings
+from command_bus_service import health_api
+from command_bus_service.config import settings
 
 logger = structlog.get_logger()
 

@@ -22,7 +22,7 @@ Features:
 - Tamper detection
 
 Usage:
-    from backend.shared.audit_logger import AuditLogger
+    from shared.audit_logger import AuditLogger
 
     audit = AuditLogger()
 

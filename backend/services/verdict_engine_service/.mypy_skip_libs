@@ -1,0 +1,3 @@
+# Skip untyped external dependencies
+asyncpg
+aiokafka

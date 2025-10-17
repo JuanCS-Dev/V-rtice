@@ -42,7 +42,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from backend.shared.exceptions import ValidationError
+from .exceptions import ValidationError
 
 # ============================================================================
 # HTML/XML SANITIZATION (XSS Prevention)

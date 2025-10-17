@@ -48,7 +48,7 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from backend.shared.exceptions import VerticeException
+from .exceptions import VerticeException
 
 logger = logging.getLogger(__name__)
 

@@ -5,8 +5,8 @@ from uuid import uuid4
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from api import get_cache, get_repository
-from main import app
+from verdict_engine_service.api import get_cache, get_repository
+from verdict_engine_service.main import app
 
 
 @pytest.mark.asyncio
