@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 import networkx as nx
 from scipy.stats import entropy
 
-from config import settings
-from models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
+from narrative_filter_service.config import settings
+from narrative_filter_service.models import Alliance, PatternType, SemanticRepresentation, StrategicPattern
 
 
 class StrategicPatternDetector:
