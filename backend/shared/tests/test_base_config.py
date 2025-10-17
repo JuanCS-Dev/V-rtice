@@ -419,7 +419,21 @@ class TestBaseServiceConfigMethods:
         monkeypatch.delenv("API_KEY", raising=False)
         monkeypatch.delenv("JWT_SECRET", raising=False)
 
-        config = BaseServiceConfig()
+        # Use config without .env loading
+        from pydantic_settings import SettingsConfigDict
+        
+        class TestConfig(BaseServiceConfig):
+            model_config = SettingsConfigDict(
+                env_file=None,
+                env_file_encoding="utf-8",
+                env_nested_delimiter="__",
+                case_sensitive=False,
+                extra="ignore",
+                validate_default=True,
+                validate_assignment=True,
+            )
+        
+        config = TestConfig()
 
         with pytest.raises(ValueError) as exc_info:
             config.validate_required_vars("api_key", "jwt_secret")
