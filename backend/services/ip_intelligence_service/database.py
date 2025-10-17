@@ -17,7 +17,7 @@ IP-related queries.
 
 from typing import Dict, Optional
 
-from models import IPInfo
+from services.ip_intelligence_service.models import IPInfo
 
 # In-memory database for IP intelligence (mock)
 ip_intelligence_db: Dict[str, IPInfo] = {}

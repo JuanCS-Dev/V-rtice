@@ -106,7 +106,11 @@ async def test_broadcast_stats(mocker, sample_stats):
 
     await manager.broadcast_stats(sample_stats)
 
+    # Verify that send_json was called with a dict containing the stats
     websocket.send_json.assert_called_once()
+    call_args = websocket.send_json.call_args[0][0]
+    assert call_args["type"] == "stats"
+    assert call_args["data"]["total_count"] == sample_stats.total_count
 
 
 @pytest.mark.asyncio

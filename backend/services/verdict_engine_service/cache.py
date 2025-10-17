@@ -12,8 +12,8 @@ from uuid import UUID
 
 import redis.asyncio as redis
 
-from config import settings
-from models import Verdict, VerdictStats
+from services.verdict_engine_service.config import settings
+from services.verdict_engine_service.models import Verdict, VerdictStats
 
 
 class VerdictCache:
@@ -39,22 +39,11 @@ class VerdictCache:
 
     def _serialize(self, obj: Any) -> str:
         """Serialize Pydantic models to JSON."""
-        if isinstance(obj, Verdict | VerdictStats):
-            data = obj.model_dump(mode="json")
-            return json.dumps(self._encode_special_types(data))
+        if isinstance(obj, (Verdict, VerdictStats)):
+            return obj.model_dump_json()
         return json.dumps(obj)
 
-    def _encode_special_types(self, data: Any) -> Any:
-        """Encode special types for JSON."""
-        if isinstance(data, dict):
-            return {k: self._encode_special_types(v) for k, v in data.items()}
-        if isinstance(data, list):
-            return [self._encode_special_types(item) for item in data]
-        if isinstance(data, UUID | Decimal):
-            return str(data)
-        if isinstance(data, datetime):
-            return data.isoformat()
-        return data
+
 
     def _deserialize(self, data: str, model_class: type) -> Any:
         """Deserialize JSON to Pydantic model."""

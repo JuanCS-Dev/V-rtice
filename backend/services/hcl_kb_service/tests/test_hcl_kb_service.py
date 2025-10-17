@@ -19,8 +19,8 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_kb_service")
-from main import app, knowledge_base
-from models import HCLDataEntry, HCLDataType
+from services.hcl_kb_service.main import app, knowledge_base
+from services.hcl_kb_service.models import HCLDataEntry, HCLDataType
 
 # ==================== FIXTURES ====================
 

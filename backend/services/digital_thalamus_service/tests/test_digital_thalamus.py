@@ -26,7 +26,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/digital_thalamus_service")
-from api import app
+from services.digital_thalamus_service.api import app
 from attention_control import AttentionControl
 from sensory_gating import SensoryGating
 from signal_filtering import SignalFiltering

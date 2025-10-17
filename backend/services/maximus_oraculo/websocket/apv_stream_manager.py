@@ -27,7 +27,7 @@ from aiokafka import AIOKafkaConsumer
 from fastapi import WebSocket
 from pydantic import ValidationError
 
-from models.apv import APV
+from services.maximus_oraculo.models.apv import APV
 
 
 logger = logging.getLogger(__name__)

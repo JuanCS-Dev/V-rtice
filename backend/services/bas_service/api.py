@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from atomic_executor import AtomicExecutor
 from attack_techniques import AttackTechniques
 from metrics import MetricsCollector
-from models import AttackResult, AttackSimulation, SimulationStatus
+from services.bas_service.models import AttackResult, AttackSimulation, SimulationStatus
 from purple_team_engine import PurpleTeamEngine
 
 # Import observability

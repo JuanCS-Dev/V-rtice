@@ -26,7 +26,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 # Import FastAPI app and core components
-from api import app
+from services.auditory_cortex_service.api import app
 from binaural_correlation import BinauralCorrelation
 from c2_beacon_detector import C2BeaconDetector
 from cocktail_party_triage import CocktailPartyTriage

@@ -22,7 +22,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/hcl_executor_service")
-from main import app
+from services.hcl_executor_service.main import app
 
 # ==================== FIXTURES ====================
 

@@ -6,6 +6,6 @@ It imports the FastAPI application from the main module.
 The actual implementation is in main.py.
 """
 
-from main import app
+from services.hcl_kb_service.main import app
 
 __all__ = ["app"]

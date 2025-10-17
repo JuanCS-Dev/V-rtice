@@ -19,9 +19,8 @@ from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
 import database
-import models
-import schemas
-from database import get_db
+from services.social_eng_service import models, schemas
+from services.social_eng_service.database import get_db
 
 app = FastAPI(title="Maximus Social Engineering Service", version="1.0.0")
 

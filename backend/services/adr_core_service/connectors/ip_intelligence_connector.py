@@ -16,8 +16,8 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict
 
-from models.schemas import IpIntelligenceData
-from utils.logger import setup_logger
+from services.adr_core_service.models.schemas import IpIntelligenceData
+from services.adr_core_service.utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

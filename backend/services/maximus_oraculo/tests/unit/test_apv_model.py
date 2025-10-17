@@ -25,7 +25,7 @@ from pathlib import Path
 service_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(service_root))
 
-from models.apv import (
+from services.maximus_oraculo.models.apv import (
     APV,
     PriorityLevel,
     RemediationStrategy,

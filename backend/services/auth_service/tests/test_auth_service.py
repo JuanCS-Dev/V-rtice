@@ -25,7 +25,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 
 sys.path.insert(0, "/home/juan/vertice-dev/backend/services/auth_service")
-from main import ALGORITHM, SECRET_KEY, app, create_access_token
+from services.auth_service.main import ALGORITHM, SECRET_KEY, app, create_access_token
 
 # ==================== FIXTURES ====================
 

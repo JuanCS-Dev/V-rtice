@@ -16,7 +16,7 @@ import asyncpg
 # Configure logging
 logger = logging.getLogger(__name__)
 
-from models import (
+from services.ethical_audit_service.models import (
     ComplianceCheckRequest,
     DecisionHistoryQuery,
     EthicalDecisionLog,

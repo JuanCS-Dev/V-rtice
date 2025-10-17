@@ -19,7 +19,7 @@ from typing import Dict, List, Optional
 
 from atomic_executor import AtomicExecutor
 from metrics import MetricsCollector
-from models import AttackResult, AttackSimulation, AttackTechnique, SimulationStatus
+from services.bas_service.models import AttackResult, AttackSimulation, AttackTechnique, SimulationStatus
 
 
 class PurpleTeamEngine:

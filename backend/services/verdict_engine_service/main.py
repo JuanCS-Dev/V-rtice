@@ -17,11 +17,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api import get_cache, get_repository
 from api import router as api_router
-from cache import VerdictCache
-from config import settings
+from services.verdict_engine_service.cache import VerdictCache
+from services.verdict_engine_service.config import settings
 from kafka_consumer import start_consumer_task
-from verdict_repository import VerdictRepository
-from websocket_manager import ConnectionManager, websocket_handler
+from services.verdict_engine_service.verdict_repository import VerdictRepository
+from services.verdict_engine_service.websocket_manager import ConnectionManager, websocket_handler
 
 # Configure structured logging
 structlog.configure(

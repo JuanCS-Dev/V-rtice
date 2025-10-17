@@ -33,8 +33,8 @@ from auth import (
     require_auditor_or_admin,
     require_soc_or_admin,
 )
-from database import EthicalAuditDatabase
-from models import (
+from services.ethical_audit_service.database import EthicalAuditDatabase
+from services.ethical_audit_service.models import (
     ComplianceCheckRequest,
     ComplianceCheckResponse,
     ConsequentialistResult,

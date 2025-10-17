@@ -26,7 +26,7 @@ import redis.asyncio as aioredis
 from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError, KafkaError
 
-from config import settings
+from services.active_immune_core.config import settings
 from monitoring.health_checker import HealthStatus
 
 logger = logging.getLogger(__name__)

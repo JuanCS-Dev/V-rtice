@@ -2,8 +2,8 @@
 
 
 import structlog
-from config import settings
-from models import C2LCommand, CommandReceipt
+from services.command_bus_service.config import settings
+from services.command_bus_service.models import C2LCommand, CommandReceipt
 from nats.aio.client import Client as NATSClient
 from nats.js import JetStreamContext
 

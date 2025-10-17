@@ -10,8 +10,8 @@ from uuid import UUID
 
 import asyncpg
 
-from config import settings
-from models import Verdict, VerdictFilter, VerdictStats
+from services.verdict_engine_service.config import settings
+from services.verdict_engine_service.models import Verdict, VerdictFilter, VerdictStats
 
 
 class VerdictRepository:

@@ -95,29 +95,6 @@ def test_serialize_stats(sample_stats):
     assert str(sample_stats.total_count) in serialized
 
 
-def test_encode_special_types(sample_verdict):
-    """Test encoding of UUID, Decimal, datetime."""
-    cache = VerdictCache()
-
-    data = {
-        "id": sample_verdict.id,
-        "confidence": sample_verdict.confidence,
-        "timestamp": sample_verdict.timestamp,
-        "nested": {
-            "uuid": sample_verdict.id,
-        },
-        "list": [sample_verdict.id, sample_verdict.confidence],
-    }
-
-    encoded = cache._encode_special_types(data)
-
-    # UUIDs and Decimals should be strings
-    assert isinstance(encoded["id"], str)
-    assert isinstance(encoded["confidence"], str)
-    assert isinstance(encoded["timestamp"], str)
-    assert isinstance(encoded["nested"]["uuid"], str)
-
-
 def test_serialize_non_model_object():
     """Test serialization of non-Verdict/non-VerdictStats object."""
     cache = VerdictCache()

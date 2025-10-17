@@ -17,10 +17,10 @@ Social Engineering Service's API endpoints and business logic.
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
-from database import Base, get_db
-from main import app
+from services.social_eng_service.database import Base, get_db
+from services.social_eng_service.main import app
 
 # Use an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

@@ -24,7 +24,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
-from models import (
+from services.hitl_patch_service.models import (
     HITLDecisionRecord,
     PatchDecision,
     PatchPriority,

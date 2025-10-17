@@ -10,7 +10,7 @@ import json
 import structlog
 from fastapi import WebSocket, WebSocketDisconnect
 
-from models import Verdict, VerdictStats, WebSocketMessage
+from services.verdict_engine_service.models import Verdict, VerdictStats, WebSocketMessage
 
 logger = structlog.get_logger()
 

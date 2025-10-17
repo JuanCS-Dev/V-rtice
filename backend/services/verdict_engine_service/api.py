@@ -9,8 +9,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from cache import VerdictCache
-from models import (
+from services.verdict_engine_service.cache import VerdictCache
+from services.verdict_engine_service.models import (
     CategoryType,
     HealthResponse,
     SeverityLevel,
@@ -19,7 +19,7 @@ from models import (
     VerdictFilter,
     VerdictStats,
 )
-from verdict_repository import VerdictRepository
+from services.verdict_engine_service.verdict_repository import VerdictRepository
 
 router = APIRouter(prefix="/api/v1", tags=["verdicts"])
 

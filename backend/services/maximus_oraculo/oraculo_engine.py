@@ -22,7 +22,7 @@ from threat_feeds.osv_client import OSVClient
 from filtering.dependency_graph import DependencyGraphBuilder
 from filtering.relevance_filter import RelevanceFilter, RelevanceMatch
 from kafka_integration.apv_publisher import APVPublisher
-from models.apv import APV, CVSSScore, AffectedPackage, ASTGrepPattern
+from services.maximus_oraculo.models.apv import APV, CVSSScore, AffectedPackage, ASTGrepPattern
 
 logger = logging.getLogger(__name__)
 

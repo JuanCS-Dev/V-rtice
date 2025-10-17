@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
-from models import C2LCommand, C2LCommandType, CommandReceipt
+from services.command_bus_service.models import C2LCommand, C2LCommandType, CommandReceipt
 from nats_publisher import NATSPublisher
 
 

@@ -40,7 +40,7 @@ except ImportError:
 
 import httpx
 
-from models import (
+from services.web_attack_service.models import (
     AICoPilotRequest,
     AICoPilotResponse,
     AIGeneratedPayload,
