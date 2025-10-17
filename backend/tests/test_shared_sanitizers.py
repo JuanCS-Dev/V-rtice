@@ -12,7 +12,7 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.sanitizers import (
+from backend.shared.sanitizers import (
     sanitize_html,
     strip_html_tags,
     sanitize_xml,
@@ -32,7 +32,7 @@ from shared.sanitizers import (
     sanitize_email,
     truncate_string,
 )
-from shared.exceptions import ValidationError
+from backend.shared.exceptions import ValidationError
 
 
 class TestHTMLSanitization:
@@ -468,7 +468,7 @@ class TestEdgeCasesAndIntegration:
 
     def test_sanitize_filename_with_path_traversal(self):
         # Teste cruzado entre path e filename validation
-        from shared.validators import validate_filename
+        from backend.shared.validators import validate_filename
         
         with pytest.raises(ValidationError):
             validate_filename("../../etc/passwd")

@@ -13,7 +13,7 @@ from ipaddress import IPv4Address, IPv6Address
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.validators import (
+from backend.shared.validators import (
     validate_ipv4,
     validate_ipv6,
     validate_ip_address,
@@ -36,7 +36,7 @@ from shared.validators import (
     validate_string_length,
     validate_list_length,
 )
-from shared.exceptions import ValidationError
+from backend.shared.exceptions import ValidationError
 
 
 class TestIPv4Validation:

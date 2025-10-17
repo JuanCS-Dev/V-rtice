@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 from pydantic import Field, ValidationError
 
-from shared.base_config import (
+from backend.shared.base_config import (
     BaseServiceConfig,
     Environment,
     generate_env_example,

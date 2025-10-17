@@ -6,7 +6,7 @@ import pytest
 from datetime import datetime
 from typing import List
 
-from shared.response_models import (
+from backend.shared.response_models import (
     BaseResponse,
     SuccessResponse,
     ListResponse,

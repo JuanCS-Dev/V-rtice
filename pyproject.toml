@@ -142,6 +142,7 @@ group_by_package = true
 # ============================================================================
 [tool.pytest.ini_options]
 minversion = "7.0"
+pythonpath = "."
 testpaths = ["tests", "backend/tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
