@@ -1,6 +1,6 @@
 """Tests for command bus service."""
 
-
+import pytest
 from fastapi.testclient import TestClient
 
 from main import app
@@ -9,9 +9,16 @@ from models import C2LCommand, C2LCommandType, CommandStatus, KillSwitchLayer, K
 client = TestClient(app)
 
 
-def test_health_check() -> None:
+@pytest.fixture
+def test_client():
+    """Create test client with lifespan context."""
+    with TestClient(app) as client:
+        yield client
+
+
+def test_health_check(test_client: TestClient) -> None:
     """Test health check endpoint."""
-    response = client.get("/health/")
+    response = test_client.get("/health/")
     assert response.status_code == 200
 
     data = response.json()

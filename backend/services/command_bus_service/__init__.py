@@ -1,7 +1,7 @@
-"""Command Bus Service - HUB-AI Cockpit Soberano.
+"""Command Bus Service - Sovereign Command & Control (C2L).
 
-Barramento de Comando Soberano (C2L): Execução transacional de comandos sobre agentes.
-Inclui Kill Switch multi-camadas.
+Provides barramento de comando soberano for Cockpit Soberano.
+NATS-based, transactional, with 3-layer kill switch.
 """
 
 __version__ = "1.0.0"
