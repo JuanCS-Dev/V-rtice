@@ -22,8 +22,8 @@ from middleware.rate_limiter import (
     RateLimitMiddleware
 )
 
-# Import legacy API routes
-from api import *
+# Import explicit router (não usar wildcard)
+from api.ml_metrics import router as ml_metrics_router
 
 app = FastAPI(
     title="MAXIMUS Eureka Service",

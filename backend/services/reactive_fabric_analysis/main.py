@@ -17,9 +17,9 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 import os
 
-from backend.services.reactive_fabric_analysis.parsers import CowrieJSONParser
-from backend.services.reactive_fabric_analysis.ttp_mapper import TTPMapper
-from backend.services.reactive_fabric_analysis.models import (
+from parsers import CowrieJSONParser
+from ttp_mapper import TTPMapper
+from models import (
     AttackCreate,
     AttackSeverity,
     AnalysisStatus,

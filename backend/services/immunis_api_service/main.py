@@ -14,6 +14,6 @@ It provides a unified REST API for:
 - Cytokine signaling and inflammation control
 """
 
-from backend.services.immunis_api_service.api import app
+from api import app
 
 __all__ = ["app"]
