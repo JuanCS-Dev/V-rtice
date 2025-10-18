@@ -293,9 +293,11 @@
 
 .agents-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.5rem;
   margin-top: 1rem;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .agent-chip {
@@ -308,6 +310,9 @@
   text-transform: uppercase;
   color: #00ff9f;
   transition: all 0.2s;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .agent-chip:hover {
@@ -323,6 +328,9 @@
 .agent-name {
   display: block;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -829,7 +837,7 @@
   }
 
   .agents-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }
 
   .metrics-grid {
