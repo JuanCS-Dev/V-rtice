@@ -11,7 +11,6 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/api_gateway:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       - SINESP_SERVICE_URL=http://sinesp_service:80
       - CYBER_SERVICE_URL=http://cyber_service:80
@@ -103,13 +102,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8010/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # ============================
   # REDIS CACHE
   # ============================
@@ -181,7 +173,6 @@ services:
       - "8102:80"
     volumes:
       - ./backend/services/sinesp_service:/code
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -196,7 +187,6 @@ services:
     privileged: true
     ports:
       - "8103:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -208,7 +198,6 @@ services:
       - ./backend/services/domain_service:/app
     ports:
       - "8104:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -228,7 +217,6 @@ services:
       - "8105:80"
     environment:
       - CACHE_TTL_SECONDS=86400
-    command: uvicorn main:app --host 0.0.0.0 --port 80
     networks:
       - maximus-network
     restart: unless-stopped
@@ -246,7 +234,6 @@ services:
       - ./backend/services/network_monitor_service:/app
     ports:
       - "8120:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -261,7 +248,6 @@ services:
       - ./backend/services/nmap_service:/app
     ports:
       - "8106:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -292,7 +278,6 @@ services:
     volumes:
       - ./backend/services/osint_service:/app
       - osint-data:/app/data
-    command: uvicorn api:app --host 0.0.0.0 --port 8007 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -314,7 +299,6 @@ services:
     environment:
       - MODEL_PATH=/models
       - PYTHONUNBUFFERED=1
-    command: uvicorn api:app --host 0.0.0.0 --port 80 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -335,7 +319,6 @@ services:
       - ./backend/services/atlas_service:/app
     ports:
       - "8109:8000" # Expondo numa porta externa livre
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -350,7 +333,6 @@ services:
       - ./backend/services/auth_service:/app
     ports:
       - "8110:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     environment:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -375,7 +357,6 @@ services:
       - ./backend/services/vuln_scanner_service:/app
     ports:
       - "8111:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -399,7 +380,6 @@ services:
       - ./backend/services/social_eng_service:/app
     ports:
       - "8112:80"
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -414,7 +394,6 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
-    command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     networks:
@@ -445,7 +424,6 @@ services:
       - "8113:8013"
     volumes:
       - ./backend/services/threat_intel_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8013 --reload
     environment:
       - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY}
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
@@ -468,7 +446,6 @@ services:
       - "8114:8014"
     volumes:
       - ./backend/services/malware_analysis_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8014 --reload
     environment:
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
       - HYBRID_ANALYSIS_API_KEY=${HYBRID_ANALYSIS_API_KEY}
@@ -489,7 +466,6 @@ services:
       - "8115:8015"
     volumes:
       - ./backend/services/ssl_monitor_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8015 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -510,7 +486,6 @@ services:
       - "8130:8030"
     volumes:
       - ./backend/services/adr_core_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8030 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -527,7 +502,6 @@ services:
       - ./backend/services/maximus_integration_service:/app
       - ./backend/services/maximus_oraculo:/app/maximus_oraculo
       - ./backend/services/maximus_eureka:/app/maximus_eureka
-    command: uvicorn main:app --host 0.0.0.0 --port 8099 --reload
     environment:
       - ORACULO_TARGET_PATH=/app/maximus_oraculo
       - EUREKA_SCAN_PATH=/tmp/malware_samples
@@ -547,7 +521,6 @@ services:
       - "8125:8016"
     volumes:
       - ./backend/services/maximus_orchestrator_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
     environment:
       - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
       - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
@@ -578,13 +551,6 @@ services:
       - "8151:8001"  # Prometheus metrics
     volumes:
       - ./backend/services/maximus_core_service:/app
-    command: python main.py
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8100/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     environment:
       - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -628,7 +594,6 @@ services:
       - "8612:8612"
     volumes:
       - ./backend/services/ethical_audit_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8612 --reload
     environment:
       - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
     depends_on:
@@ -636,13 +601,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8612/health', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
   # ============================================================================
   # HCL SERVICES - Homeostatic Control Loop (Production Ready)
   # ============================================================================
@@ -982,7 +940,6 @@ services:
       - "8101:8031"
     volumes:
       - ./backend/services/google_osint_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8031 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8031/health')"]
       interval: 30s
@@ -1011,7 +968,6 @@ services:
       - "8300:8005"
     volumes:
       - ./backend/services/immunis_api_service:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8005 --reload
     environment:
       - MACROPHAGE_URL=http://immunis_macrophage_service:8312
       - NEUTROPHIL_URL=http://immunis_neutrophil_service:8313
@@ -1033,7 +989,6 @@ services:
       - "8312:8012"
     volumes:
       - ./backend/services/immunis_macrophage_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8012 --reload
     environment:
       - CUCKOO_API_URL=${CUCKOO_API_URL:-http://cuckoo:8090}
       - CUCKOO_API_KEY=${CUCKOO_API_KEY:-}
@@ -1049,7 +1004,6 @@ services:
       - "8313:8013"
     volumes:
       - ./backend/services/immunis_neutrophil_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8013 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1061,7 +1015,6 @@ services:
       - "8314:8014"
     volumes:
       - ./backend/services/immunis_dendritic_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8014 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1073,7 +1026,6 @@ services:
       - "8316:8016"
     volumes:
       - ./backend/services/immunis_bcell_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8016 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1085,7 +1037,6 @@ services:
       - "8317:8017"
     volumes:
       - ./backend/services/immunis_helper_t_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8017 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1097,7 +1048,6 @@ services:
       - "8318:8018"
     volumes:
       - ./backend/services/immunis_cytotoxic_t_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8018 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1109,7 +1059,6 @@ services:
       - "8319:8019"
     volumes:
       - ./backend/services/immunis_nk_cell_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8019 --reload
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1126,7 +1075,6 @@ services:
     volumes:
       - ./backend/services/hcl_analyzer_service:/app
       - hcl_analyzer_models:/models
-    command: uvicorn api:app --host 0.0.0.0 --port 8020 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8020/health')"]
       interval: 30s
@@ -1148,7 +1096,6 @@ services:
       - "8432:8021"
     volumes:
       - ./backend/services/hcl_executor_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8021 --reload
     environment:
       - KUBERNETES_SERVICE_HOST=${KUBERNETES_SERVICE_HOST:-}
       - KUBERNETES_SERVICE_PORT=${KUBERNETES_SERVICE_PORT:-}
@@ -1170,7 +1117,6 @@ services:
       - "8420:8022"
     volumes:
       - ./backend/services/hcl_kb_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8022 --reload
     environment:
       - QDRANT_URL=http://qdrant:6333
       - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
@@ -1194,7 +1140,6 @@ services:
       - "8423:8023"
     volumes:
       - ./backend/services/hcl_monitor_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8023 --reload
     environment:
       - PROMETHEUS_URL=http://prometheus:9090
     networks:
@@ -1215,7 +1160,6 @@ services:
     volumes:
       - ./backend/services/hcl_planner_service:/app
       - hcl_planner_models:/models
-    command: uvicorn api:app --host 0.0.0.0 --port 8024 --reload
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
@@ -1240,7 +1184,6 @@ services:
       - "8207:8007"
     volumes:
       - ./backend/services/auditory_cortex_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8007
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1252,7 +1195,6 @@ services:
       - "8206:8006"
     volumes:
       - ./backend/services/visual_cortex_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8006
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1264,7 +1206,6 @@ services:
       - "8208:8008"
     volumes:
       - ./backend/services/somatosensory_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8008
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1276,7 +1217,6 @@ services:
       - "8209:8009"
     volumes:
       - ./backend/services/chemical_sensing_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8009
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1288,7 +1228,6 @@ services:
       - "8210:8010"
     volumes:
       - ./backend/services/vestibular_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8010
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1300,7 +1239,6 @@ services:
       - "8211:8011"
     volumes:
       - ./backend/services/prefrontal_cortex_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8011
     environment:
       - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
       - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
@@ -1324,7 +1262,6 @@ services:
       - "8212:8012"
     volumes:
       - ./backend/services/digital_thalamus_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8012
     environment:
       - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
       - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
@@ -1348,17 +1285,9 @@ services:
       - "8213:8013"
     volumes:
       - ./backend/services/narrative_manipulation_filter:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8013
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8013/health/simple', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
   ai_immune_system:
     build: ./backend/services/ai_immune_system
     container_name: vertice-ai-immune
@@ -1366,7 +1295,6 @@ services:
       - "8214:8014"
     volumes:
       - ./backend/services/ai_immune_system:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8014
     environment:
       - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8211
       - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8212
@@ -1391,7 +1319,6 @@ services:
       - "8215:8015"
     volumes:
       - ./backend/services/homeostatic_regulation:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8015
     environment:
       - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
       - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
@@ -1429,7 +1356,6 @@ services:
       - ./backend/services/rte_service:/app
       - rte_models:/models
       - rte_quarantine:/quarantine
-    command: uvicorn api:app --host 0.0.0.0 --port 8026 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8026/health')"]
       interval: 30s
@@ -1448,7 +1374,6 @@ services:
     volumes:
       - ./backend/services/hpc_service:/app
       - hpc_models:/models
-    command: uvicorn main:app --host 0.0.0.0 --port 8027 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8027/health')"]
       interval: 30s
@@ -1474,7 +1399,6 @@ services:
       - "8610:8028"
     volumes:
       - ./backend/services/tataca_ingestion:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8028 --reload
     environment:
       # Service config
       - SERVICE_NAME=tataca_ingestion
@@ -1529,7 +1453,6 @@ services:
       - "8611:8029"
     volumes:
       - ./backend/services/seriema_graph:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8029 --reload
     environment:
       - NEO4J_URI=${NEO4J_URI:-bolt://neo4j:7687}
       - NEO4J_USER=${NEO4J_USER:-neo4j}
@@ -1563,7 +1486,6 @@ services:
       - ./backend/services/network_recon_service:/app
       - network_recon_logs:/var/log/network_recon
       - network_recon_data:/app/data
-    command: uvicorn api:app --host 0.0.0.0 --port 8032 --reload
     environment:
       - SERVICE_NAME=network_reconnaissance
       - SERVICE_PORT=8032
@@ -1612,7 +1534,6 @@ services:
       - nuclei_templates:/app/nuclei-templates
       - vuln_intel_logs:/var/log/vuln_intel
       - vuln_intel_data:/app/data
-    command: uvicorn api:app --host 0.0.0.0 --port 8033 --reload
     environment:
       - SERVICE_NAME=vulnerability_intelligence
       - SERVICE_PORT=8033
@@ -1655,7 +1576,6 @@ services:
     volumes:
       - ./backend/services/web_attack_service:/app
       - web_attack_logs:/var/log/web_attack
-    command: uvicorn api:app --host 0.0.0.0 --port 8034 --reload
     environment:
       - SERVICE_NAME=web_application_attack
       - SERVICE_PORT=8034
@@ -2013,13 +1933,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8018/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # Memory Consolidation Service
   memory_consolidation_service:
     build:
@@ -2049,13 +1962,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8019/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # Adaptive Immunity Service
   adaptive_immunity_service:
     build:
@@ -2088,13 +1994,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8020/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # Neuromodulation Service (FASE 8)
   neuromodulation_service:
     build: ./backend/services/neuromodulation_service
@@ -2103,7 +2002,6 @@ services:
       - "9093:8033"
     volumes:
       - ./backend/services/neuromodulation_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8033 --reload
     environment:
       - SERVICE_NAME=neuromodulation
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2114,13 +2012,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8033/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # Strategic Planning Service (FASE 8)
   strategic_planning_service:
     build: ./backend/services/strategic_planning_service
@@ -2129,7 +2020,6 @@ services:
       - "9094:8042"
     volumes:
       - ./backend/services/strategic_planning_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8042 --reload
     environment:
       - SERVICE_NAME=strategic_planning
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2140,13 +2030,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8042/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # Cloud Coordinator Service (FASE 10)
   cloud_coordinator_service:
     build: ./backend/services/cloud_coordinator_service
@@ -2155,7 +2038,6 @@ services:
       - "9095:8051"
     volumes:
       - ./backend/services/cloud_coordinator_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8051 --reload
     environment:
       - SERVICE_NAME=cloud_coordinator
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2164,13 +2046,6 @@ services:
     networks:
       - maximus-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8051/health')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
   # ============================================
   # NOVOS SERVIÇOS - 6 Adições Reais
   # ============================================
@@ -2183,7 +2058,6 @@ services:
       - "9099:8003"
     volumes:
       - ./backend/services/hsas_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8003 --reload
     environment:
       - SERVICE_NAME=hsas_service
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2205,7 +2079,6 @@ services:
       - "9100:8021"
     volumes:
       - ./backend/services/edge_agent_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8021 --reload
     environment:
       - SERVICE_NAME=edge_agent_service
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2227,7 +2100,6 @@ services:
       - "9103:8200"
     volumes:
       - ./backend/services/maximus_eureka:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8200 --reload
     environment:
       - SERVICE_NAME=maximus_eureka
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2272,13 +2144,15 @@ services:
       - "9106:8007"
     volumes:
       - ./backend/services/osint_service:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8007 --reload
     environment:
       - SERVICE_NAME=osint_service
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - PYTHONUNBUFFERED=1
       - CHROME_BIN=/usr/bin/chromium
       - CHROMEDRIVER_PATH=/usr/bin/chromedriver
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN:-}
     networks:
       - maximus-network
     restart: unless-stopped
@@ -2297,7 +2171,6 @@ services:
       - "9107:8012"
     volumes:
       - ./backend/services/reflex_triage_engine:/app
-    command: uvicorn api:app --host 0.0.0.0 --port 8012 --reload
     environment:
       - SERVICE_NAME=reflex_triage_engine
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -2533,7 +2406,6 @@ services:
       - "8003:8003"
     volumes:
       - ./backend/services/adaptive_immune_system:/app
-    command: uvicorn hitl.api.main:app --host 0.0.0.0 --port 8003 --reload
     environment:
       # Application
       - APP_NAME=Adaptive Immune System - HITL API
