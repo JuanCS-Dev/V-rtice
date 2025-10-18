@@ -48,3 +48,8 @@ watchfiles==1.1.0
     # via uvicorn
 websockets==15.0.1
     # via uvicorn
+aiokafka>=0.8.0
+async-timeout>=4.0.0
+redis[hiredis]>=5.0.0
+packaging>=23.0
+typing-extensions>=4.0.0
