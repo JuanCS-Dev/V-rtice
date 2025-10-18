@@ -86,6 +86,7 @@ class CredentialIntelReport:
     platform_presence: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
     statistics: Dict[str, Any] = field(default_factory=dict)
+    ai_analysis: Optional[Dict[str, Any]] = None  # NEW: AI-powered analysis
     error: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -109,6 +110,7 @@ class CredentialIntelReport:
             "platform_presence": self.platform_presence,
             "recommendations": self.recommendations,
             "statistics": self.statistics,
+            "ai_analysis": self.ai_analysis,  # NEW
             "error": self.error,
         }
 
@@ -204,7 +206,25 @@ class CredentialIntelWorkflow:
             # Phase 7: Generate statistics
             report.statistics = self._generate_statistics(report.findings, report.breach_count)
 
-            # Phase 8: Generate recommendations
+            # Phase 8: AI Analysis - NEW
+            logger.info("🤖 Starting AI analysis for credential exposure...")
+            try:
+                findings_dict = [asdict(f) for f in report.findings]
+                ai_analysis = self.ai_analyzer.analyze_credential_exposure(
+                    findings=findings_dict,
+                    target_email=target.email,
+                    target_username=target.username
+                )
+                report.ai_analysis = ai_analysis
+                logger.info(f"✅ AI analysis completed (urgency: {ai_analysis.get('urgency_score', 'N/A')})")
+            except Exception as ai_error:
+                logger.error(f"❌ AI analysis failed: {ai_error}")
+                report.ai_analysis = {
+                    "error": str(ai_error),
+                    "fallback": "AI analysis unavailable - using rule-based recommendations"
+                }
+
+            # Phase 9: Generate recommendations (enhanced by AI)
             report.recommendations = self._generate_recommendations(report.findings, report.exposure_score)
 
             # Mark complete

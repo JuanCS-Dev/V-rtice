@@ -92,6 +92,7 @@ class TargetProfileReport:
     se_score: float = 0.0
     recommendations: List[str] = field(default_factory=list)
     statistics: Dict[str, Any] = field(default_factory=dict)
+    ai_analysis: Optional[Dict[str, Any]] = None  # NEW: AI-powered analysis
     error: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -114,6 +115,7 @@ class TargetProfileReport:
             "se_score": self.se_score,
             "recommendations": self.recommendations,
             "statistics": self.statistics,
+            "ai_analysis": self.ai_analysis,  # NEW
             "error": self.error,
         }
 
@@ -211,7 +213,25 @@ class TargetProfilingWorkflow:
             # Phase 7: Generate statistics
             report.statistics = self._generate_statistics(report.findings, report)
 
-            # Phase 8: Generate recommendations
+            # Phase 8: AI Analysis - NEW
+            logger.info("🤖 Starting AI analysis for target profile...")
+            try:
+                findings_dict = [asdict(f) for f in report.findings]
+                ai_analysis = self.ai_analyzer.analyze_target_profile(
+                    findings=findings_dict,
+                    target_username=target.username,
+                    target_email=target.email
+                )
+                report.ai_analysis = ai_analysis
+                logger.info(f"✅ AI analysis completed")
+            except Exception as ai_error:
+                logger.error(f"❌ AI analysis failed: {ai_error}")
+                report.ai_analysis = {
+                    "error": str(ai_error),
+                    "fallback": "AI analysis unavailable - using rule-based recommendations"
+                }
+
+            # Phase 9: Generate recommendations (enhanced by AI)
             report.recommendations = self._generate_recommendations(report)
 
             # Mark complete
