@@ -15,7 +15,7 @@ services:
       - SINESP_SERVICE_URL=http://sinesp_service:80
       - CYBER_SERVICE_URL=http://cyber_service:80
       - DOMAIN_SERVICE_URL=http://domain_service:80
-      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:80
+      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8034
       - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8120
       - NMAP_SERVICE_URL=http://nmap_service:80
       - OSINT_SERVICE_URL=http://osint-service:8007
@@ -214,14 +214,14 @@ services:
     volumes:
       - ./backend/services/ip_intelligence_service:/app
     ports:
-      - "8105:80"
+      - "8105:8034"
     environment:
       - CACHE_TTL_SECONDS=86400
     networks:
       - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8034/health"]
       interval: 45s
       timeout: 15s
       retries: 5
