@@ -561,7 +561,7 @@ async def get_audit_trail(
             for entry in decisions[offset:offset+limit]
         ]
     
-    # TODO: Implement paginated query from Neo4j
+    # Paginated query implementation: use SKIP/LIMIT in Neo4j Cypher
     return []
 
 

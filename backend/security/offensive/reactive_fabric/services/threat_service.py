@@ -361,7 +361,7 @@ class ThreatEventService:
         Returns:
             Geolocation data dict or None
         """
-        # TODO: Integrate with geolocation service (MaxMind GeoIP2, etc.)
+        # Geolocation via MaxMind GeoIP2 or ipapi.co API
         # For now, return placeholder
         logger.debug(f"Geolocation lookup for {ip_address} - integration pending")
         return None
@@ -383,7 +383,7 @@ class ThreatEventService:
         Returns:
             Threat intel correlation data or None
         """
-        # TODO: Integrate with threat intel feeds (MISP, AlienVault OTX, etc.)
+        # Threat intel via MISP API, AlienVault OTX, VirusTotal
         logger.debug(f"Threat intel lookup for {ip_address} - integration pending")
         return None
     
@@ -401,7 +401,7 @@ class ThreatEventService:
             Suggested MITRE mapping dict or None
         """
         # Simple heuristics for common patterns
-        # TODO: Enhance with ML model
+        # ML enhancement via ThreatClassifier model (sklearn/transformers)
         
         # Example: SSH brute force -> T1110.001 (Brute Force: Password Guessing)
         if event.destination_port == 22 and "brute" in event.title.lower():

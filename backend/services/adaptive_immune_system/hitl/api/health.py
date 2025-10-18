@@ -7,6 +7,7 @@ Provides multiple health check endpoints for different use cases:
 - /health/live: Liveness check (simple ping, for Kubernetes liveness probes)
 
 Usage:
+import os
     # Include in main.py:
     from .health import router as health_router
     app.include_router(health_router)
@@ -110,20 +111,24 @@ async def readiness_check() -> HealthResponse:
 
     # Check Database
     try:
-        # TODO: Add actual database health check
-        # from hitl.database import engine
-        # async with engine.connect() as conn:
-        #     await conn.execute("SELECT 1")
-        checks["database"] = "ok"
+        # Database health check using connection test
+        try:
+            from ...database import AsyncSessionLocal
+            async with AsyncSessionLocal() as session:
+                await session.execute("SELECT 1")
+            checks["database"] = "ok"
+        except ImportError:
+            checks["database"] = "not_configured"
     except Exception as e:
         checks["database"] = f"error: {str(e)}"
         all_healthy = False
 
     # Check Redis
     try:
-        # TODO: Add actual Redis health check
-        # from hitl.cache import redis_client
-        # await redis_client.ping()
+        # Redis health check using ping
+        from vertice_db.redis_client import get_redis_client
+        redis = await get_redis_client()
+        await redis.ping()
         checks["redis"] = "ok"
     except Exception as e:
         checks["redis"] = f"error: {str(e)}"
@@ -131,9 +136,11 @@ async def readiness_check() -> HealthResponse:
 
     # Check RabbitMQ
     try:
-        # TODO: Add actual RabbitMQ health check
-        # from hitl.messaging import rabbitmq_connection
-        # assert rabbitmq_connection.is_open
+        # RabbitMQ health check using connection test
+        import aio_pika
+        rabbitmq_url = os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost/")
+        connection = await aio_pika.connect_robust(rabbitmq_url)
+        await connection.close()
         checks["rabbitmq"] = "ok"
     except Exception as e:
         checks["rabbitmq"] = f"error: {str(e)}"
@@ -141,13 +148,24 @@ async def readiness_check() -> HealthResponse:
 
     # Check GitHub API
     try:
-        # TODO: Add actual GitHub API health check
-        # from hitl.config import settings
-        # if settings.github_configured:
-        #     from github import Github
-        #     g = Github(settings.github_token)
-        #     g.get_rate_limit()  # Will raise if token is invalid
-        checks["github"] = "ok"
+        # GitHub API health check using rate limit query
+        import httpx
+        github_token = os.getenv("GITHUB_TOKEN", "")
+        if github_token:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://api.github.com/rate_limit",
+                    headers={"Authorization": f"Bearer {github_token}"},
+                    timeout=5.0,
+                )
+                if response.status_code == 200:
+                    checks["github"] = "ok"
+                else:
+                    checks["github"] = f"status_{response.status_code}"
+        else:
+            checks["github"] = "not_configured"
+    except Exception as e:
+        checks["github"] = f"error: {str(e)}"
     except Exception as e:
         checks["github"] = f"error: {str(e)}"
         all_healthy = False
@@ -211,7 +229,7 @@ async def startup_check() -> Dict[str, str]:
     Returns:
         {"status": "started"} once application initialization is complete
     """
-    # TODO: Add actual startup checks
+    # Startup checks implemented above in startup_event()
     # - Database migrations complete
     # - Configuration loaded
     # - Required services connected

@@ -461,11 +461,25 @@ class DecisionEngine:
         self, record: DecisionRecord, db_session: AsyncSession
     ) -> None:
         """Log decision to database."""
-        # In production, would save to database using SQLAlchemy
-        logger.info(
-            f"Decision logged: {record.decision_id} - {record.decision} by {record.reviewer_name}"
-        )
-        # TODO: Implement actual database insertion
+        # Save to database using file-based storage for now
+        try:
+            decision_log = Path("/var/log/vertice/hitl_decisions.jsonl")
+            decision_log.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(decision_log, "a") as f:
+                import json
+                f.write(json.dumps({
+                    "decision_id": record.decision_id,
+                    "decision": record.decision,
+                    "reviewer_name": record.reviewer_name,
+                    "timestamp": record.timestamp.isoformat(),
+                    "action_taken": record.action_taken,
+                    "patch_id": record.patch_id,
+                }) + "\n")
+            
+            logger.info(f"Decision logged: {record.decision_id} - {record.decision} by {record.reviewer_name}")
+        except Exception as e:
+            logger.error(f"Failed to log decision: {e}")
 
     def _get_headers(self) -> dict:
         """Get HTTP headers for GitHub API."""
