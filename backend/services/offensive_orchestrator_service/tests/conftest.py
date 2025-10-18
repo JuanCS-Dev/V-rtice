@@ -10,7 +10,7 @@ Provides:
 
 import os
 import asyncio
-from typing import Generator, AsyncGenerator, Dict, Any
+from typing import Generator, Dict, Any
 from uuid import uuid4, UUID
 from datetime import datetime
 
@@ -25,7 +25,6 @@ from backend.services.offensive_orchestrator_service.models import (
     CampaignPlan,
     ActionType,
     RiskLevel,
-    CampaignStatus,
     HOTLRequest,
 )
 from backend.services.offensive_orchestrator_service.config import (
@@ -72,7 +71,7 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 @pytest.fixture(scope="function")
 def test_db_engine():
     """Create in-memory SQLite database for testing."""
-    from sqlalchemy import event, TypeDecorator, CHAR
+    from sqlalchemy import TypeDecorator, CHAR
     from sqlalchemy.dialects.postgresql import UUID as PGUUID
     import uuid
 

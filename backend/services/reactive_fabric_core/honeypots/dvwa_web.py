@@ -4,12 +4,10 @@ Damn Vulnerable Web Application honeypot for capturing web attacks
 """
 
 import asyncio
-import json
 import logging
 import re
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from urllib.parse import unquote
 
 from .base_honeypot import BaseHoneypot, HoneypotType, AttackCapture, AttackStage

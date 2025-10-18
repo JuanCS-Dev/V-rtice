@@ -12,7 +12,6 @@ Governance: Constituição Vértice v2.5 - Padrão Pagani
 
 import pytest
 from datetime import datetime, timedelta
-from typing import Dict, Any
 import math
 
 

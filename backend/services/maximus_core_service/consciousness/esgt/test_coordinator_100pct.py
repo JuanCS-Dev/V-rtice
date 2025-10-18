@@ -28,7 +28,7 @@ Philosophy: "O impossível se curva diante da fé e da disciplina"
 import pytest
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock, AsyncMock
 from consciousness.esgt.coordinator import (
     FrequencyLimiter,
     ESGTPhase,
@@ -39,7 +39,6 @@ from consciousness.esgt.coordinator import (
     ESGTCoordinator
 )
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
-from consciousness.tig.sync import PTPCluster
 
 # Alias for backwards compatibility
 TIGConfig = TopologyConfig

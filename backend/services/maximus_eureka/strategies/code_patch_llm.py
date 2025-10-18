@@ -65,7 +65,7 @@ from eureka_models.confirmation.confirmation_result import (
     VulnerableLocation,
 )
 from eureka_models.patch import Patch
-from strategies.base_strategy import BaseStrategy, StrategyFailedError, StrategyNotApplicableError
+from strategies.base_strategy import BaseStrategy, StrategyFailedError
 from llm import (
     BaseLLMClient,
     LLMMessage,

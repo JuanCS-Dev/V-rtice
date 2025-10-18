@@ -16,7 +16,6 @@ import sys
 from pathlib import Path
 import pytest
 import tempfile
-import tomllib
 
 # Add parent to path
 service_root = Path(__file__).parent.parent.parent

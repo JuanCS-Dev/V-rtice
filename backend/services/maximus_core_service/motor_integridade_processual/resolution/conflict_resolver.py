@@ -12,8 +12,7 @@ from motor_integridade_processual.models.verdict import (
     FrameworkVerdict,
     FrameworkName,
     EthicalVerdict,
-    DecisionLevel,
-    RejectionReason
+    DecisionLevel
 )
 from motor_integridade_processual.models.action_plan import ActionPlan
 

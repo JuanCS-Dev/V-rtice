@@ -18,7 +18,6 @@ from datetime import datetime
 import json
 import logging
 import sys
-from typing import Any, Dict
 
 import aiohttp
 from test_framework import IntegrationTestFramework

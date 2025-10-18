@@ -3,7 +3,7 @@ Conflict Resolver - Sistema de resolução de conflitos entre frameworks éticos
 Core decision engine do MIP
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from .models import FrameworkScore, VerdictStatus, ActionPlan
 
 

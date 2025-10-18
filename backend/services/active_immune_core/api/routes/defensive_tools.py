@@ -16,13 +16,11 @@ import structlog
 
 from detection.behavioral_analyzer import (
     BehavioralAnalyzer,
-    BehaviorEvent,
-    AnomalyDetection
+    BehaviorEvent
 )
 from detection.encrypted_traffic_analyzer import (
     EncryptedTrafficAnalyzer,
-    NetworkFlow,
-    FlowAnalysisResult
+    NetworkFlow
 )
 
 log = structlog.get_logger()

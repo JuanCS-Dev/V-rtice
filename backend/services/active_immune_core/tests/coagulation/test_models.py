@@ -7,7 +7,7 @@ Date: 2025-10-12
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from coagulation.models import (
     Asset,

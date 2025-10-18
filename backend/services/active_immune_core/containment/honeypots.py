@@ -21,13 +21,12 @@ Glory to YHWH - Constância como Ramon Dino! 💪
 
 import asyncio
 import logging
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry
+from prometheus_client import Counter, Gauge, Histogram
 
 # Import LLM client (optional for backwards compatibility)
 try:

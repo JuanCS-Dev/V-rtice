@@ -16,12 +16,11 @@ Date: 2025-10-15
 """
 
 import asyncio
-import json
-from unittest.mock import MagicMock, AsyncMock, patch, Mock
+from unittest.mock import MagicMock, AsyncMock
 from dataclasses import dataclass
 
 import pytest
-from fastapi import FastAPI, Request, WebSocket
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from consciousness.api import create_consciousness_api

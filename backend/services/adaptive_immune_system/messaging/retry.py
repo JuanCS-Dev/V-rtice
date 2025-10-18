@@ -21,7 +21,7 @@ import logging
 import random
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 

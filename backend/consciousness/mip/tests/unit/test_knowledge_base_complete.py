@@ -8,7 +8,7 @@ Autor: Juan Carlos de Souza
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4, UUID
 from datetime import datetime
 

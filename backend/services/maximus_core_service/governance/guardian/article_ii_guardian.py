@@ -14,7 +14,6 @@ Date: 2025-10-13
 """
 
 import ast
-import asyncio
 import os
 import re
 import subprocess
@@ -266,7 +265,7 @@ class ArticleIIGuardian(GuardianAgent):
                     )
                 )
 
-        except Exception as e:
+        except Exception:
             # Error reading file - note but don't crash
             pass
 

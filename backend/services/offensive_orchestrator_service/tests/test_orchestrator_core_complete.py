@@ -3,13 +3,12 @@
 import pytest
 import json
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from orchestrator.core import (
     MaximusOrchestratorAgent,
     Campaign,
     CampaignStatus,
-    AgentType,
-    AgentCommand
+    AgentType
 )
 
 

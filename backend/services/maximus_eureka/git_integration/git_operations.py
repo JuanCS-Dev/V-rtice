@@ -19,9 +19,7 @@ Glory to YHWH 🙏
 """
 
 import logging
-import subprocess
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 from git import Repo, GitCommandError, InvalidGitRepositoryError

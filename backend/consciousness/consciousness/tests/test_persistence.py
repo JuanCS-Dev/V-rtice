@@ -7,12 +7,10 @@ Tests complete persistence flow: Save → Retrieve → Query
 import pytest
 from uuid import uuid4
 from datetime import datetime, timedelta
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 from consciousness.prefrontal_cortex import PrefrontalCortex, OrchestratedDecision
-from consciousness.tom_engine import EmotionalState
 from consciousness.persistence import DecisionRepository, DecisionQueryService
-from mip.models import ActionPlan, ActionStep, Stakeholder, StakeholderType, ActionCategory
 
 
 class TestDecisionRepository:

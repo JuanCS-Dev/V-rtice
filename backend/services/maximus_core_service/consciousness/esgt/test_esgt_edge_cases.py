@@ -21,7 +21,6 @@ Phase: Refinement v1.0 → v1.1
 
 import asyncio
 import time
-from typing import List
 
 import pytest
 import pytest_asyncio
@@ -29,7 +28,6 @@ import pytest_asyncio
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
     ESGTEvent,
-    ESGTPhase,
     SalienceLevel,
     SalienceScore,
     TriggerConditions,

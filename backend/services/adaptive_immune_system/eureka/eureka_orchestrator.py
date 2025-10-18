@@ -16,7 +16,6 @@ Follows the "Regra de Ouro":
 - 100% type hints
 """
 
-import asyncio
 import logging
 from pathlib import Path
 from typing import Dict, Optional
@@ -27,7 +26,6 @@ from .remediation import (
     LLMClient,
     RemedyGenerator,
     PatchValidator,
-    GeneratedPatch,
 )
 from .vcs import (
     GitHubClient,
@@ -35,10 +33,9 @@ from .vcs import (
     PRDescriptionGenerator,
     PRDescriptionContext,
 )
-from ..messaging.client import RabbitMQClient, get_rabbitmq_client
+from ..messaging.client import get_rabbitmq_client
 from ..messaging.publisher import HITLNotificationPublisher, RemedyStatusPublisher
 from ..models.wargame import WargameReportMessage
-from ..models.apv import APVStatusUpdate
 
 logger = logging.getLogger(__name__)
 

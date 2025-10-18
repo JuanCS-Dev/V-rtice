@@ -38,7 +38,7 @@ from time import perf_counter
 from typing import Any, ClassVar, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from .contradiction_detector import BeliefRevision, ContradictionDetector, RevisionOutcome
+from .contradiction_detector import BeliefRevision, ContradictionDetector
 from .introspection_engine import IntrospectionEngine, IntrospectionReport
 from .meta_monitor import MetaMonitor, MetaMonitoringReport
 

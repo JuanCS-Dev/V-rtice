@@ -5,8 +5,7 @@ Tests automated response planning and execution.
 """
 
 import asyncio
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -17,8 +16,7 @@ from ..response_orchestrator import (
     ResponsePlan,
     ResponseStatus,
     ResponsePriority,
-    ActionType,
-    SafetyCheck
+    ActionType
 )
 
 

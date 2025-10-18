@@ -5,7 +5,6 @@ from agent_communication.message import (
     ACPMessage,
     AgentType,
     MessageType,
-    TaskPriority,
 )
 from agent_communication.router import MessageRouter, MessageTransformer
 

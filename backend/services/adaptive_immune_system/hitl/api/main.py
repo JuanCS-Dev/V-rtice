@@ -20,7 +20,7 @@ Usage:
 import asyncio
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware

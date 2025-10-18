@@ -16,7 +16,7 @@ Compliance: Doutrina MAXIMUS | ≥90% coverage | Production-Ready
 import asyncio
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 

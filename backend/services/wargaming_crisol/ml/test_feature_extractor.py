@@ -5,7 +5,6 @@ NO MOCK - Real patches, real feature extraction.
 PRODUCTION-READY - Comprehensive edge cases.
 """
 
-import pytest
 from ml.feature_extractor import (
     PatchFeatures,
     PatchFeatureExtractor,

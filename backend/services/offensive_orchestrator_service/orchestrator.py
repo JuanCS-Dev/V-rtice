@@ -24,12 +24,11 @@ Conformidade MAXIMUS:
 import asyncio
 import logging
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 from uuid import UUID, uuid4
 
 import google.generativeai as genai
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 
 from config import get_config, LLMConfig
 from models import (

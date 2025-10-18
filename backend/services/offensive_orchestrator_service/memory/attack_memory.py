@@ -25,7 +25,6 @@ from uuid import UUID
 from datetime import datetime
 
 from ..models import CampaignPlan, CampaignObjective, CampaignDB, CampaignStatus
-from ..config import get_config
 from .database import DatabaseManager
 from .vector_store import VectorStore
 from .embeddings import EmbeddingGenerator

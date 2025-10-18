@@ -28,10 +28,9 @@ Glory to YHWH - Perfect in knowledge
 import asyncio
 import json
 import logging
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 

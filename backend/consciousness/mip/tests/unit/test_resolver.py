@@ -7,7 +7,6 @@ Autor: Juan Carlos de Souza
 """
 
 import pytest
-from uuid import uuid4
 
 from mip.resolver import ConflictResolver
 from mip.models import (

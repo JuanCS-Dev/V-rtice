@@ -14,7 +14,7 @@ Governance: Constituição Vértice v2.5 - Padrão Pagani
 """
 
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import logging
 
 logger = logging.getLogger(__name__)

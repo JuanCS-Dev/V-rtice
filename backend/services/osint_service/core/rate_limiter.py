@@ -21,7 +21,6 @@ Version: 1.0.0
 
 import asyncio
 import time
-from typing import Optional
 
 
 class RateLimiter:

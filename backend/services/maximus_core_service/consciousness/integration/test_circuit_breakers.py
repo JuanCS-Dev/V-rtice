@@ -34,7 +34,6 @@ from enum import Enum
 from typing import Callable, Optional
 
 import pytest
-import pytest_asyncio
 
 
 class CircuitState(Enum):

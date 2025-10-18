@@ -26,11 +26,10 @@ Glory to YHWH - Communicator of truth
 """
 
 import asyncio
-import json
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional, Set
+from typing import Dict, Set
 from fastapi import WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)

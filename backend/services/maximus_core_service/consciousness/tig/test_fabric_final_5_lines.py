@@ -12,7 +12,6 @@ PADRÃO PAGANI ABSOLUTO - 100% MEANS 100%
 """
 
 import pytest
-import pytest_asyncio
 
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
 
@@ -32,7 +31,6 @@ class TestFinal5LinesToPerfection:
         fabric._generate_scale_free_base()
 
         # Find the highest degree node (hub)
-        import networkx as nx
         degrees = dict(fabric.graph.degree())
         hub_node = max(degrees, key=degrees.get)
 

@@ -15,7 +15,7 @@ Date: 2025-10-11
 Compliance: Doutrina MAXIMUS | Type Hints 100% | Production-Ready
 """
 
-from typing import List, Dict, Set, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any
 from dataclasses import dataclass
 import logging
 

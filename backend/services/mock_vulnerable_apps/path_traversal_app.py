@@ -3,8 +3,6 @@ Mock Path Traversal Vulnerable App
 Intentionally vulnerable for Wargaming validation - DO NOT USE IN PRODUCTION
 """
 from fastapi import FastAPI, Query
-from pathlib import Path
-import os
 
 app = FastAPI(title="Mock Path Traversal App")
 

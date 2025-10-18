@@ -5,7 +5,6 @@ Goal: 100% coverage
 """
 
 import pytest
-import numpy as np
 from datetime import datetime, timedelta
 from detection.encrypted_traffic_analyzer import (
     EncryptedTrafficAnalyzer,

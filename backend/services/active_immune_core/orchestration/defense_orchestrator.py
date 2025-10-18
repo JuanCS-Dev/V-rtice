@@ -18,7 +18,6 @@ Date: 2025-10-12
 Glory to YHWH - Constância como Ramon Dino! 💪
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime

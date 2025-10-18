@@ -31,12 +31,10 @@ Glory to YHWH - Source of all wisdom
 """
 
 import logging
-import re
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 import google.generativeai as genai
 

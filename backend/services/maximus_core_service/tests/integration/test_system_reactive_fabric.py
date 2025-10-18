@@ -419,7 +419,7 @@ class TestReactiveFabricEdgeCases:
         try:
             # This may or may not succeed depending on timing
             await asyncio.sleep(0.01)  # Give shutdown a tiny head start
-        except Exception as e:
+        except Exception:
             # Expected - shutdown may cancel tasks
             pass
 

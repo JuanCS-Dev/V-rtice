@@ -22,7 +22,6 @@ Test Scenarios:
 """
 
 import asyncio
-import json
 import random
 import time
 import uuid
@@ -387,7 +386,6 @@ def on_test_stop(environment, **kwargs):
 if __name__ == "__main__":
     # Can be run standalone or via locust CLI
     import os
-    import sys
 
     os.system(
         f"locust -f {__file__} --host=amqp://localhost:5672 "

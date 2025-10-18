@@ -12,17 +12,16 @@ Lei Governante: Constituição Vértice v2.7
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 from uuid import UUID
 import json
 
-import psycopg2
-from psycopg2.extras import RealDictCursor, execute_values
+from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool
 
 from consciousness.prefrontal_cortex import OrchestratedDecision
-from consciousness.tom_engine import UserMentalState, EmotionalState
+from consciousness.tom_engine import UserMentalState
 from consciousness.compassion.event_detector import SufferingEvent
 from consciousness.compassion.compassion_planner import CompassionPlan
 

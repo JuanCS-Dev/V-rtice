@@ -4,7 +4,6 @@ FastAPI-based Human-in-the-Loop decision system with JWT + 2FA
 """
 
 import asyncio
-import hashlib
 import logging
 import secrets
 from datetime import datetime, timedelta

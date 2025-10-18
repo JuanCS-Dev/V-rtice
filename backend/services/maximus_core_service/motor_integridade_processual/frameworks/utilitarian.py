@@ -12,7 +12,6 @@ Uses Bentham's 7 dimensions + Mill's qualitative distinctions.
 Lei Governante: Constituição Vértice v2.6 - Lei Zero (Imperativo do Florescimento)
 """
 
-from typing import List
 from motor_integridade_processual.frameworks.base import AbstractEthicalFramework
 from motor_integridade_processual.models.action_plan import ActionPlan, ActionStep, Effect
 from motor_integridade_processual.models.verdict import (

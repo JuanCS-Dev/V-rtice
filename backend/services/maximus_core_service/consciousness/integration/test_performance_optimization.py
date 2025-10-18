@@ -17,7 +17,7 @@ Sprint: Consciousness Refinement Day 8
 import asyncio
 import time
 import statistics
-from typing import List, Dict, Any
+from typing import List, Dict
 from dataclasses import dataclass
 import pytest
 import pytest_asyncio

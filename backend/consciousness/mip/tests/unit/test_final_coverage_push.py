@@ -8,8 +8,6 @@ Autor: Juan Carlos de Souza
 """
 
 import pytest
-from uuid import uuid4
-from datetime import datetime
 
 from mip.frameworks import *
 from mip.models import *

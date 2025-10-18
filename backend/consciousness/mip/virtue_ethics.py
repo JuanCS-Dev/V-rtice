@@ -5,7 +5,7 @@ Implementa avaliação baseada em excelência de caráter e virtudes.
 Baseado em Aristóteles e conceito de "Golden Mean" (meio-termo).
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any
 from enum import Enum
 from .base_framework import EthicalFramework
 from .models import ActionPlan, FrameworkScore

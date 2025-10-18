@@ -19,11 +19,9 @@ Philosophy: "100% coverage como testemunho de que perfeição é possível"
 import pytest
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock
 
 from consciousness.mmei.monitor import (
     InternalStateMonitor,
-    InteroceptionConfig,
     PhysicalMetrics,
     AbstractNeeds,
     NeedUrgency,
@@ -31,7 +29,6 @@ from consciousness.mmei.monitor import (
     RateLimiter,
     MAX_GOALS_PER_MINUTE,
     MAX_ACTIVE_GOALS,
-    MAX_GOAL_QUEUE_SIZE,
     GOAL_DEDUP_WINDOW_SECONDS,
 )
 

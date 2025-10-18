@@ -7,7 +7,7 @@ Desenvolvido para bioética médica, adaptado para IA.
 
 from typing import Dict, Any, List
 from .base_framework import EthicalFramework
-from .models import ActionPlan, FrameworkScore, Stakeholder
+from .models import ActionPlan, FrameworkScore
 
 
 class Principialism(EthicalFramework):

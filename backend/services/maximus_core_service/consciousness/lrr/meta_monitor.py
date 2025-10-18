@@ -10,10 +10,10 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from statistics import mean, stdev
-from typing import Iterable, List, Optional, Sequence, TYPE_CHECKING
+from typing import List, Sequence, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .recursive_reasoner import ReasoningLevel, ReasoningStep, RecursiveReasoningResult
+    from .recursive_reasoner import ReasoningLevel, RecursiveReasoningResult
 
 
 @dataclass(slots=True)

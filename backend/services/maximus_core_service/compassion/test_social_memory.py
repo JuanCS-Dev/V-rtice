@@ -14,8 +14,7 @@ Date: 2025-10-14
 
 import asyncio
 import pytest
-from datetime import datetime, timedelta
-from typing import Dict, Any
+from datetime import datetime
 
 # Use SQLite for tests (fallback when PostgreSQL unavailable)
 from compassion.social_memory_sqlite import (

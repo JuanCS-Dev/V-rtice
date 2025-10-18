@@ -22,8 +22,7 @@ Governance: Constituição Vértice v2.5 - Padrão Pagani
 import asyncio
 import asyncpg
 from collections import OrderedDict
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 from typing import Dict, Any, Optional
 import logging
 

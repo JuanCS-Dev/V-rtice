@@ -3,15 +3,11 @@ Forensic Analyzer
 Advanced multi-layer behavioral and payload analysis for attack events
 """
 
-import asyncio
-import hashlib
-import json
 import logging
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Any, Tuple
-from urllib.parse import urlparse, parse_qs
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
 

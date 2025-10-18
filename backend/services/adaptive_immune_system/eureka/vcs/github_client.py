@@ -9,16 +9,13 @@ Creates security fix PRs with:
 - Status checks integration
 """
 
-import asyncio
 import base64
-import json
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import aiohttp
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 

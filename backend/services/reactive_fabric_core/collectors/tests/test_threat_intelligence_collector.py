@@ -4,10 +4,7 @@ Tests for Threat Intelligence Collector.
 Tests integration with external threat intelligence feeds and APIs.
 """
 
-import asyncio
-import json
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aioresponses import aioresponses

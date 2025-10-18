@@ -7,7 +7,7 @@ Date: 2025-10-14
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 import httpx
 
 from analyzers.breach_data_analyzer_refactored import BreachDataAnalyzer, RateLimitError

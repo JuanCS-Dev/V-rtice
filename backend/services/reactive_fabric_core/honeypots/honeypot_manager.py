@@ -6,7 +6,6 @@ Coordinates all honeypots and integrates with honeytoken system
 import asyncio
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 from .base_honeypot import BaseHoneypot, AttackCapture

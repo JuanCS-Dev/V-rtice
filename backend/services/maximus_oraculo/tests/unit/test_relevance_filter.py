@@ -16,13 +16,12 @@ import sys
 from pathlib import Path
 import pytest
 import tempfile
-from datetime import datetime
 
 # Add parent to path
 service_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(service_root))
 
-from filtering.dependency_graph import DependencyGraphBuilder, PackageDependency, ServiceDependencies
+from filtering.dependency_graph import DependencyGraphBuilder
 from filtering.relevance_filter import RelevanceFilter, RelevanceMatch
 
 

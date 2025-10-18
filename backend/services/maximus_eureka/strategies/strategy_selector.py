@@ -19,7 +19,7 @@ Author: MAXIMUS Team
 Date: 2025-01-10
 """
 
-from typing import List, Optional
+from typing import List
 import logging
 
 # Import APV from Oráculo

@@ -9,7 +9,6 @@ Lei Governante: Constituição Vértice v2.7
 """
 
 import logging
-import time
 from contextlib import asynccontextmanager
 from typing import List, Optional, Dict, Any
 from uuid import UUID

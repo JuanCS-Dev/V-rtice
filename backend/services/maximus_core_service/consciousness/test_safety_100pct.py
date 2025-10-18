@@ -24,15 +24,13 @@ Status: Padrão Pagani Absoluto - 100% Coverage Sprint
 """
 
 import asyncio
-import json
 import time
 from datetime import datetime
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from consciousness.safety import (
-    AnomalyDetector,
     ConsciousnessSafetyProtocol,
     IncidentReport,
     KillSwitch,

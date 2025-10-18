@@ -479,7 +479,6 @@ class TestEventCollectorCoverage:
     @pytest.mark.asyncio
     async def test_collect_events_exception_during_collection(self, mock_consciousness_system):
         """Cover main exception handler by breaking sub-collector (lines 162-163)."""
-        from unittest.mock import AsyncMock
 
         # Make _collect_esgt_events raise an unhandled exception
         # (it has its own try-except, but we'll break it at a deeper level)

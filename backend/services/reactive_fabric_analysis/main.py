@@ -20,10 +20,8 @@ import os
 from backend.services.reactive_fabric_analysis.parsers import CowrieJSONParser
 from backend.services.reactive_fabric_analysis.ttp_mapper import TTPMapper
 from backend.services.reactive_fabric_analysis.models import (
-    ForensicCapture,
     AttackCreate,
     AttackSeverity,
-    ProcessingStatus,
     AnalysisStatus,
 )
 

@@ -16,7 +16,6 @@ Requirements:
 import pytest
 import subprocess
 import json
-import sys
 from pathlib import Path
 from typing import List, Dict, Any
 

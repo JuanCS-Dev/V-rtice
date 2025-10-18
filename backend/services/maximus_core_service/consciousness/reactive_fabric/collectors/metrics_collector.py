@@ -20,7 +20,7 @@ Sprint: Reactive Fabric Sprint 3
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 import logging
 
 logger = logging.getLogger(__name__)

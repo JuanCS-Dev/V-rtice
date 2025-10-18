@@ -16,13 +16,11 @@ Authors: Claude Code + Juan
 Date: 2025-10-15
 """
 
-import asyncio
-import json
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import FastAPI
@@ -33,10 +31,6 @@ from consciousness.api import (
     create_consciousness_api,
     SalienceInput,
     ArousalAdjustment,
-    ConsciousnessStateResponse,
-    ESGTEventResponse,
-    SafetyStatusResponse,
-    SafetyViolationResponse,
     EmergencyShutdownRequest,
 )
 

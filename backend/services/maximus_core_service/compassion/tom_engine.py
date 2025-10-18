@@ -19,7 +19,6 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 import logging
 import json
-import hashlib
 
 from compassion.social_memory_sqlite import (
     SocialMemorySQLite,

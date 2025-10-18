@@ -13,8 +13,7 @@ Authors: Claude Code + Juan
 Date: 2025-10-15
 """
 
-import asyncio
-from unittest.mock import MagicMock, AsyncMock, Mock
+from unittest.mock import MagicMock
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 

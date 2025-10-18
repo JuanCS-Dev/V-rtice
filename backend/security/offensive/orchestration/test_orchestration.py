@@ -5,7 +5,7 @@ Validates attack chains, campaign management, and intelligence fusion.
 """
 import pytest
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from .attack_chain import (
     AttackChain,
     AttackStage,

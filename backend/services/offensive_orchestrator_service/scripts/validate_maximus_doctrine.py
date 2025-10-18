@@ -10,8 +10,7 @@ Verifica conformidade com princípios MAXIMUS:
 import ast
 import os
 import sys
-from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Tuple
 
 # ANSI colors
 RED = '\033[91m'

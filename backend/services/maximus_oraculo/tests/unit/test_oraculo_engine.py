@@ -11,8 +11,7 @@ Compliance: TDD | E2E Testing | Integration
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import AsyncMock, patch
 import tempfile
 
 # Add parent to path
@@ -20,7 +19,6 @@ service_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(service_root))
 
 from oraculo_engine import OraculoEngine
-from backend.services.maximus_oraculo.models.apv import APV
 
 
 class TestOraculoEngine:

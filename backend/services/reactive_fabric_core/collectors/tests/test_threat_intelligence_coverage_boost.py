@@ -4,12 +4,11 @@ Additional tests to boost Threat Intelligence Collector coverage to >95%.
 Focuses on uncovered edge cases, error paths, and integration scenarios.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
-from aiohttp import ClientError, ClientResponseError
+from aiohttp import ClientError
 
 from ..threat_intelligence_collector import (
     ThreatIntelligenceCollector,

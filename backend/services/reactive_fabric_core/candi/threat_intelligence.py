@@ -4,12 +4,10 @@ Integration with MISP and threat intelligence feeds
 """
 
 import asyncio
-import hashlib
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Any
 
 from .forensic_analyzer import ForensicReport
 

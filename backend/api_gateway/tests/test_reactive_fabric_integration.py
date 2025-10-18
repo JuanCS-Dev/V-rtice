@@ -7,7 +7,6 @@ Phase 1 compliance: passive intelligence only, HITL authorization required.
 
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock, patch
 
 # We need to mock the reactive fabric imports before importing main
 import sys

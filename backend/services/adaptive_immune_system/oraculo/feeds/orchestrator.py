@@ -8,16 +8,16 @@ deduplication, and database persistence.
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set
+from typing import Dict, Optional
 
 from sqlalchemy.orm import Session
 
-from ...database import DatabaseClient, get_db_client
+from ...database import DatabaseClient
 from ...database.models import Threat, FeedSyncStatus
 from ...models.threat import ThreatCreate
 from .nvd_client import NVDClient, NVDVulnerability
 from .ghsa_client import GHSAClient, GHSAVulnerability
-from .osv_client import OSVClient, OSVVulnerability
+from .osv_client import OSVClient
 
 logger = logging.getLogger(__name__)
 

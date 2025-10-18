@@ -47,9 +47,9 @@ Date: 2025-10-12
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict
 
-from consciousness.esgt.coordinator import SalienceScore, SalienceLevel, ESGTCoordinator
+from consciousness.esgt.coordinator import SalienceScore, ESGTCoordinator
 
 
 @dataclass

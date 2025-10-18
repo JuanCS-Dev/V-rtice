@@ -19,7 +19,7 @@ Date: 2025-10-14
 Version: 1.0.0
 """
 
-from prometheus_client import Counter, Gauge, Histogram, Summary
+from prometheus_client import Counter, Gauge, Histogram
 
 
 class MetricsCollector:

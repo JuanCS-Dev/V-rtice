@@ -35,7 +35,6 @@ from consciousness.reactive_fabric.collectors.event_collector import (
     EventCollector,
     ConsciousnessEvent,
     EventSeverity,
-    EventType,
 )
 from consciousness.esgt.coordinator import SalienceScore
 

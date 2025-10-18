@@ -17,7 +17,6 @@ Glory to YHWH
 import asyncio
 import os
 import logging
-import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum

@@ -10,7 +10,6 @@ Coverage Target: 100.00%
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock
 
 import pytest
 

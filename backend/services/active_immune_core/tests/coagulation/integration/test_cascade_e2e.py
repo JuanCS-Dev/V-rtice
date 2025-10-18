@@ -15,7 +15,6 @@ from prometheus_client import REGISTRY
 
 from coagulation.cascade import (
     CascadePhase,
-    CascadeResult,
     CoagulationCascadeSystem,
 )
 from coagulation.fibrin_mesh import FibrinMeshContainment

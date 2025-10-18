@@ -9,30 +9,20 @@ Target: 454 statements, 118 branches -> 100%
 
 import pytest
 from unittest.mock import Mock, patch, AsyncMock, PropertyMock
-from datetime import datetime
 
 from ethical_guardian import (
     EthicalGuardian,
     EthicalDecisionResult,
     EthicalDecisionType,
-    GovernanceCheckResult,
     EthicsCheckResult,
-    XAICheckResult,
-    ComplianceCheckResult,
     FairnessCheckResult,
     PrivacyCheckResult,
-    FLCheckResult,
-    HITLCheckResult,
 )
 
-from governance import PolicyType, GovernanceConfig, GovernanceAction
+from governance import PolicyType
 from ethics import EthicalVerdict
-from compliance import RegulationType
-from privacy import PrivacyBudget, PrivacyLevel
-from fairness import ProtectedAttribute
-from hitl import ActionType, AutomationLevel, RiskLevel
-from xai import ExplanationType, DetailLevel
-from federated_learning import FLStatus
+from hitl import RiskLevel
+from xai import ExplanationType
 
 
 # ===== FIXTURES =====
@@ -909,8 +899,7 @@ Lines to cover:
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, PropertyMock, MagicMock
-import asyncio
+from unittest.mock import Mock, patch, AsyncMock, PropertyMock
 
 from ethical_guardian import (
     EthicalGuardian,
@@ -920,7 +909,7 @@ from ethical_guardian import (
 
 from governance import PolicyType
 from ethics import EthicalVerdict
-from hitl import RiskLevel, ActionType
+from hitl import RiskLevel
 from xai import ExplanationType
 
 

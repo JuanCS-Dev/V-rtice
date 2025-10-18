@@ -24,12 +24,9 @@ Philosophy: "A ovelha perdida deve ser encontrada" - Lei I validation
 """
 
 import pytest
-import asyncio
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock
 from consciousness.prefrontal_cortex import (
-    PrefrontalCortex,
-    SocialSignal,
-    CompassionateResponse
+    PrefrontalCortex
 )
 from compassion.tom_engine import ToMEngine
 from motor_integridade_processual.arbiter.decision import DecisionArbiter

@@ -3,7 +3,7 @@ Orchestration Engine - AI-driven attack chain coordination.
 
 Coordinates multi-stage offensive operations with ML decision-making.
 """
-from typing import List, Dict, Optional, Any, Callable
+from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum

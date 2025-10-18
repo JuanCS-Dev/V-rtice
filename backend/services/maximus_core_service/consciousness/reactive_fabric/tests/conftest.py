@@ -10,7 +10,6 @@ Sprint: Reactive Fabric Sprint 3 - Test Coverage
 import time
 import pytest
 from unittest.mock import AsyncMock, MagicMock
-from typing import Any, Dict
 
 
 # Helper for AsyncMock in tests

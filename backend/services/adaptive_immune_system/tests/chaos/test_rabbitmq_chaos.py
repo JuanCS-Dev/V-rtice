@@ -24,13 +24,12 @@ import random
 import time
 import uuid
 from datetime import datetime
-from typing import List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # Import messaging components
-from messaging.client import RabbitMQClient, get_rabbitmq_client
+from messaging.client import RabbitMQClient
 from messaging.publisher import APVPublisher, WargameReportPublisher
 from messaging.consumer import HITLNotificationConsumer
 from backend.services.adaptive_immune_system.models.apv import APVDispatchMessage

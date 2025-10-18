@@ -3,11 +3,9 @@ Kill Switch - Emergency Consciousness Shutdown
 Critical safety mechanism for immediate termination.
 """
 import logging
-import signal
-import sys
 from datetime import datetime
 from typing import List, Callable, Optional, Dict, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)

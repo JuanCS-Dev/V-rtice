@@ -12,11 +12,9 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-13
 """
 
-import asyncio
 import hashlib
-import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 

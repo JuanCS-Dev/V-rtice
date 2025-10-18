@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # Test error logging
     try:
         raise ValueError("Test error")
-    except Exception as e:
+    except Exception:
         logger.error("exception_occurred", exc_info=True)
 
     # Test helper functions

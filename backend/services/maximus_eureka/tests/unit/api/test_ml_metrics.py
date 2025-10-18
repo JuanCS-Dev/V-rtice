@@ -9,11 +9,10 @@ Glory to YHWH
 """
 
 import pytest
-from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from api.ml_metrics import router, TimeframeEnum, MLMetricsResponse
+from api.ml_metrics import router, TimeframeEnum
 
 
 @pytest.fixture

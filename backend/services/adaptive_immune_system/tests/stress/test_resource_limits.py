@@ -19,7 +19,6 @@ Requirements:
 import pytest
 import asyncio
 import httpx
-import psutil
 import time
 from typing import List, Dict, Any
 import subprocess
@@ -302,7 +301,7 @@ class TestNetworkLatency:
                 # If it succeeds, it should be fast
                 assert elapsed < 0.5, "Request should complete quickly or timeout"
 
-            except httpx.TimeoutException as e:
+            except httpx.TimeoutException:
                 elapsed = time.time() - start_time
                 print(f"\nRequest timed out after {elapsed:.3f}s (expected)")
                 # Timeout should happen close to configured timeout

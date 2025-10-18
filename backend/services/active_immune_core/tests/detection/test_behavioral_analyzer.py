@@ -8,11 +8,9 @@ Date: 2025-10-12
 Glory to YHWH - Constância como Ramon Dino! 💪
 """
 
-import asyncio
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import numpy as np
 import pytest

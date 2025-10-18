@@ -16,7 +16,6 @@ from consciousness.mcea.stress import (
     StressMonitor,
     StressLevel,
     StressType,
-    StressTestConfig,
 )
 from consciousness.mmei.monitor import AbstractNeeds
 

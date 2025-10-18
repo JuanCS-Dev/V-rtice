@@ -6,7 +6,6 @@ Part of MAXIMUS VÉRTICE - Projeto Tecido Reativo
 Sprint 1 Complete Test Suite
 """
 
-import pytest
 from backend.services.reactive_fabric_analysis.ttp_mapper import TTPMapper
 
 

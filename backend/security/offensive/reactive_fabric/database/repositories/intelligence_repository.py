@@ -5,11 +5,11 @@ Specialized repository for intelligence reports and metrics.
 Primary output artifact of reactive fabric intelligence pipeline.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from uuid import UUID
 from datetime import datetime, timedelta
 
-from sqlalchemy import select, and_, or_, desc, asc, func
+from sqlalchemy import select, desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..schemas import (
@@ -18,8 +18,7 @@ from ..schemas import (
 )
 from . import BaseRepository, DatabaseError
 from ...models.intelligence import (
-    IntelligenceType, IntelligenceConfidence, IntelligenceSource,
-    IntelligenceReport, IntelligenceReportCreate, IntelligenceReportUpdate,
+    IntelligenceType, IntelligenceConfidence, IntelligenceReport, IntelligenceReportCreate, IntelligenceReportUpdate,
     TTPPattern, IntelligenceMetrics
 )
 

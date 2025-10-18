@@ -24,7 +24,7 @@ async def example_complete_workflow():
     4. Human approves actions
     5. Actions are implemented
     """
-    from candi import CANDICore, ThreatLevel
+    from candi import CANDICore
     from hitl.candi_integration import HITLIntegration, register_hitl_with_candi
 
     logger.info("=" * 60)

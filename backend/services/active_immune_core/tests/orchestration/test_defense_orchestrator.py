@@ -10,7 +10,6 @@ Authors: MAXIMUS Team
 Date: 2025-10-12
 """
 
-import asyncio
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
@@ -30,7 +29,7 @@ from orchestration.defense_orchestrator import (
     DefenseResponse,
     OrchestrationError,
 )
-from response.automated_response import Playbook, PlaybookResult, ThreatContext
+from response.automated_response import Playbook, PlaybookResult
 
 
 @pytest.fixture

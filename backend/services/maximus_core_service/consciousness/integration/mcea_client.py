@@ -8,7 +8,7 @@ import logging
 
 import httpx
 
-from consciousness.mcea.controller import ArousalLevel, ArousalState
+from consciousness.mcea.controller import ArousalState
 
 logger = logging.getLogger(__name__)
 

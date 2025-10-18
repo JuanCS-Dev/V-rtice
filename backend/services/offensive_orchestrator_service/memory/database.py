@@ -14,7 +14,7 @@ from typing import Optional, List, Dict, Any
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy import create_engine, select, and_, or_
+from sqlalchemy import create_engine, select, and_
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 

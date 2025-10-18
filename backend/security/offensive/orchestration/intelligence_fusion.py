@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Set, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-import asyncio
 from ..core.base import OffensiveTool, ToolResult, ToolMetadata
 from ..core.exceptions import OffensiveToolError
 

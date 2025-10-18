@@ -20,7 +20,7 @@ import asyncio
 import logging
 import time
 from enum import Enum
-from typing import Any, Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ class CircuitBreaker:
             await self._on_success()
             return result
 
-        except self.expected_exception as e:
+        except self.expected_exception:
             # Expected failure - record and potentially open circuit
             await self._on_failure()
             raise

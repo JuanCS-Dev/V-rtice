@@ -8,7 +8,7 @@ Autor: Juan Carlos de Souza
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock
 from fastapi.testclient import TestClient
 from uuid import uuid4
 
@@ -20,7 +20,6 @@ from mip.models import (
     Stakeholder,
     StakeholderType,
     ActionCategory,
-    Effect,
     EthicalVerdict,
     VerdictStatus,
     FrameworkScore,
@@ -480,7 +479,6 @@ class TestDecisionsEndpoints:
 
     def test_get_audit_trail_with_kb_disconnected(self, test_client_with_mocks):
         """Deve usar fallback in-memory quando KB desconectado."""
-        from mip.models import AuditTrailEntry
         from datetime import datetime
 
         app.state.kb_connected = False

@@ -3,7 +3,6 @@ Base Framework - Interface comum para todos os frameworks éticos
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from .models import ActionPlan, FrameworkScore
 
 

@@ -9,7 +9,7 @@ quantitative coherence metrics (Conway 2005).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
+from typing import Sequence
 
 from consciousness.episodic_memory import Episode
 from consciousness.temporal_binding import TemporalBinder

@@ -10,7 +10,7 @@ from ..config import TegumentarSettings, get_settings
 from .ml.anomaly_detector import AnomalyDetector
 from .ml.feature_extractor import FeatureExtractor
 from .signature_engine import Signature, SignatureEngine
-from .stateful_inspector import FlowObservation, InspectorAction, InspectorDecision
+from .stateful_inspector import FlowObservation, InspectorAction
 
 logger = logging.getLogger(__name__)
 

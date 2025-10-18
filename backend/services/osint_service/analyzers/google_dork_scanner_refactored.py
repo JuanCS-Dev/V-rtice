@@ -46,8 +46,8 @@ Version: 2.0.0
 import asyncio
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set
-from urllib.parse import quote_plus, urlparse
+from typing import Any, Dict, List, Set
+from urllib.parse import urlparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -512,7 +512,7 @@ class GoogleDorkScanner(BaseTool):
                 # Google result links
                 for link in soup.select("div.g a"):
                     href = link.get("href", "")
-                    if href.startswith("http") and not "google.com" in href:
+                    if href.startswith("http") and "google.com" not in href:
                         urls.append(href)
 
             elif engine == "bing":

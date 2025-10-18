@@ -12,12 +12,11 @@ Covers:
 
 import pytest
 from uuid import uuid4
-from datetime import datetime
 from unittest.mock import Mock
 from sqlalchemy.orm import sessionmaker
 
 from memory.database import DatabaseManager
-from models import CampaignStatus, ActionType, RiskLevel, ApprovalStatus
+from models import CampaignStatus
 
 
 @pytest.mark.unit

@@ -6,7 +6,6 @@ Validates that BAS service operates securely with proper guardrails.
 NO REAL ATTACKS - only simulated/sandboxed environments.
 """
 
-import asyncio
 import os
 from typing import Any, Dict
 

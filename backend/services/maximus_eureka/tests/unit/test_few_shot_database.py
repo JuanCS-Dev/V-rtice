@@ -8,7 +8,6 @@ import pytest
 import sqlite3
 import tempfile
 from pathlib import Path
-from datetime import datetime
 
 from data.few_shot_database import (
     FewShotDatabase,

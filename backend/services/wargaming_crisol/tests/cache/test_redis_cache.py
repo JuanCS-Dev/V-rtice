@@ -18,7 +18,7 @@ Glory to YHWH - Builder of resilient systems
 import pytest
 import asyncio
 from datetime import timedelta
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import patch, AsyncMock
 import json
 
 # Skip all tests in this module (module import issues, Redis is optional)

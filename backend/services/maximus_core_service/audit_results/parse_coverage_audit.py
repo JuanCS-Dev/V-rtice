@@ -7,7 +7,6 @@ Date: 2025-10-14
 """
 
 import json
-from pathlib import Path
 
 # Load coverage data
 with open('coverage_full_audit.json') as f:

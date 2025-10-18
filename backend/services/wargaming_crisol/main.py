@@ -25,7 +25,7 @@ import asyncio
 import logging
 import os
 from datetime import timedelta
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Response
+from fastapi import FastAPI, WebSocket, HTTPException, Response
 from pydantic import BaseModel
 from typing import Optional
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
@@ -33,7 +33,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTEN
 from exploit_database import load_exploit_database, get_exploit_for_apv
 from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
-from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
+from db.ab_test_store import ABTestStore
 from ab_testing.ab_test_runner import ABTestRunner
 from cache.redis_cache import cache  # Phase 5.7.1: Redis cache
 from middleware.rate_limiter import RateLimiterMiddleware  # Phase 5.7.1: Rate limiting

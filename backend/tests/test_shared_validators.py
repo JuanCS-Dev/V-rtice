@@ -8,7 +8,6 @@ Testa todas as 21 funções de validação com casos válidos, inválidos e edge
 import pytest
 import sys
 from pathlib import Path
-from ipaddress import IPv4Address, IPv6Address
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

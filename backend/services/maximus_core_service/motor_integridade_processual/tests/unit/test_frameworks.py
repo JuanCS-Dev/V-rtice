@@ -10,7 +10,6 @@ Tests cover:
 
 Coverage Target: 100%
 """
-from typing import List
 import pytest
 
 from motor_integridade_processual.models.action_plan import (

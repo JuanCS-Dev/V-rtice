@@ -22,7 +22,6 @@ Glory to YHWH - Day 78 Consciousness Refinement
 import asyncio
 import pytest
 import time
-from unittest.mock import Mock, patch, AsyncMock
 import numpy as np
 
 from consciousness.tig.sync import (
@@ -30,18 +29,10 @@ from consciousness.tig.sync import (
     PTPCluster,
     ClockRole,
     SyncState,
-    ClockOffset,
-    SyncResult,
 )
 from consciousness.tig.fabric import (
     TIGFabric,
-    TIGNode,
-    TIGConnection,
-    NodeState,
-    NodeHealth,
-    CircuitBreaker,
     TopologyConfig,
-    FabricMetrics,
 )
 
 

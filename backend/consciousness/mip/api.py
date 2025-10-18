@@ -17,19 +17,13 @@ from uuid import UUID
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from consciousness.mip.config import get_settings
 from consciousness.mip.core import ProcessIntegrityEngine
 from consciousness.mip.models import (
     ActionPlan,
-    ActionStep,
     EthicalVerdict,
-    VerdictStatus,
-    Stakeholder,
-    ActionCategory,
-    Effect,
-    Precondition,
 )
 from consciousness.mip.infrastructure.knowledge_base import (
     KnowledgeBaseRepository,
@@ -37,7 +31,6 @@ from consciousness.mip.infrastructure.knowledge_base import (
     AuditTrailService,
 )
 from consciousness.mip.infrastructure.knowledge_models import (
-    Principle,
     Decision,
     PrincipleLevel,
     DecisionStatus,

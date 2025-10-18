@@ -18,7 +18,6 @@ import time
 from unittest.mock import patch
 
 import pytest
-import pytest_asyncio
 
 from consciousness.tig.fabric import (
     TIGFabric,
@@ -152,7 +151,6 @@ class TestIITValidationEdgeCases:
 
     def test_validate_iit_compliance_path_length_violation(self):
         """Test path length violation detection (line 431)."""
-        import numpy as np
 
         metrics = FabricMetrics(
             node_count=16,
@@ -272,7 +270,6 @@ class TestSmallWorldRewiringEdgeCases:
         fabric._generate_scale_free_base()
 
         # Check if graph has uniform degree (all nodes same degree)
-        import networkx as nx
         degrees = dict(fabric.graph.degree())
         degree_values = list(degrees.values())
 
@@ -321,7 +318,6 @@ class TestMetricsComputationEdgeCases:
         fabric._establish_connections()
 
         # Force disconnect by removing some edges
-        import networkx as nx
         edges_to_remove = list(fabric.graph.edges())[:2]
         for edge in edges_to_remove:
             fabric.graph.remove_edge(*edge)
@@ -388,7 +384,6 @@ class TestBottleneckDetectionEdgeCases:
         fabric._establish_connections()
 
         # Force disconnection
-        import networkx as nx
         edges = list(fabric.graph.edges())
         if len(edges) > 5:
             # Remove enough edges to potentially disconnect

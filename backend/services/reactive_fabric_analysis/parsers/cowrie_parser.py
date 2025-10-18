@@ -9,7 +9,7 @@ Sprint 1: Real implementation - NO MOCK, NO PLACEHOLDER
 import json
 import structlog
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from datetime import datetime
 
 from backend.services.reactive_fabric_analysis.parsers.base import (

@@ -10,7 +10,7 @@ Date: 2025-10-15
 
 import pytest
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
 from coagulation.cascade import CoagulationCascadeSystem
 from coagulation.models import (

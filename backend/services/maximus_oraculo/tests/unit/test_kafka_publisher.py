@@ -18,9 +18,8 @@ Compliance: TDD | Coverage ≥90%
 import sys
 from pathlib import Path
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 from datetime import datetime
-import json
 
 # Add parent to path
 service_root = Path(__file__).parent.parent.parent

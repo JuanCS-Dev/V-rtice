@@ -18,7 +18,6 @@ Date: 2025-10-15
 
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
-from dataclasses import dataclass
 
 from consciousness.system import (
     ConsciousnessSystem,

@@ -4,18 +4,15 @@ Testes Unitários - Motor de Integridade Processual
 """
 
 import pytest
-from uuid import uuid4
 
 from mip import (
     ProcessIntegrityEngine,
     ActionPlan,
     ActionStep,
     Stakeholder,
-    ActionCategory,
     StakeholderType,
     VerdictStatus,
-    Effect,
-    Precondition
+    Effect
 )
 
 

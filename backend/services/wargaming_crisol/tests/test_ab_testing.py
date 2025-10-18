@@ -10,7 +10,6 @@ Glory to YHWH - Validator of Truth
 """
 
 import pytest
-import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
 

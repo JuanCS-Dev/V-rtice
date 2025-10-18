@@ -24,8 +24,8 @@ Conformidade:
 import asyncio
 import logging
 import json
-from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Any
+from datetime import datetime
+from typing import Optional, List, Dict
 from uuid import UUID
 from pathlib import Path
 

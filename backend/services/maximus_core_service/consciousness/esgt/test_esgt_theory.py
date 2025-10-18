@@ -17,7 +17,6 @@ import pytest_asyncio
 
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
-    ESGTPhase,
     SalienceScore,
     TriggerConditions,
 )

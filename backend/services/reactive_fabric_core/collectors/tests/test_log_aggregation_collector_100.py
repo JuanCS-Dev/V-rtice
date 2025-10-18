@@ -4,13 +4,11 @@ Additional tests for Log Aggregation Collector to achieve 100% coverage.
 Tests edge cases and error paths not covered by main test suite.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from aioresponses import aioresponses
-import aiohttp
 
 from ..log_aggregation_collector import (
     LogAggregationCollector,

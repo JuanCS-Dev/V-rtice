@@ -12,13 +12,9 @@ Covers:
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from typing import List
+from unittest.mock import patch
 
 from memory.embeddings import EmbeddingGenerator
-from models import CampaignObjective, CampaignPlan, RiskLevel
-from uuid import uuid4
-from datetime import datetime
 
 
 @pytest.mark.unit

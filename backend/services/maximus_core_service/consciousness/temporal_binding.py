@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Iterable, List, Sequence
+from typing import List, Sequence
 
 from consciousness.episodic_memory import Episode, windowed_temporal_accuracy
 

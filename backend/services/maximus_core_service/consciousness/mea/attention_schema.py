@@ -16,7 +16,7 @@ Responsibilities
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from statistics import fmean, pstdev
 from typing import Deque, Dict, Iterable, List, Sequence
 

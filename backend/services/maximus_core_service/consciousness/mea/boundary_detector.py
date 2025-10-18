@@ -8,9 +8,9 @@ accounts of self-other distinction.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from statistics import pstdev
-from typing import Deque, Iterable, Tuple
+from typing import Deque, Iterable
 from collections import deque
 
 

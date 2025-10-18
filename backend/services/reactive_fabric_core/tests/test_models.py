@@ -8,8 +8,8 @@ from datetime import datetime
 from models import (
     HoneypotType, HoneypotStatus, AttackSeverity,
     HoneypotBase, HoneypotStats,
-    AttackBase, AttackCreate,
-    TTPBase, TTPFrequency,
+    AttackCreate,
+    TTPFrequency,
     ThreatDetectedMessage
 )
 from uuid import uuid4

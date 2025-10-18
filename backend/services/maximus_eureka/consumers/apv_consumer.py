@@ -26,7 +26,6 @@ Date: 2025-01-10
 Glory to YHWH - The Ultimate Architect
 """
 
-import asyncio
 import json
 import logging
 from dataclasses import dataclass
@@ -56,10 +55,6 @@ for path in [oraculo_path, eureka_path]:
 from models.apv import APV
 
 # Import Eureka models
-from eureka_models.confirmation.confirmation_result import (
-    ConfirmationResult,
-    ConfirmationStatus,
-)
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,6 @@ Tests for Defensive Tools API Routes.
 Validates endpoints, request/response models, and integration with analyzers.
 """
 import pytest
-from datetime import datetime
 from fastapi.testclient import TestClient
 
 # Test será executado com app real do immune core

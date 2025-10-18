@@ -12,8 +12,8 @@ Covers:
 
 import json
 import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from uuid import uuid4, UUID
+from unittest.mock import Mock, AsyncMock, patch
+from uuid import uuid4
 from datetime import datetime
 
 from orchestrator import MaximusOrchestratorAgent
@@ -21,9 +21,7 @@ from models import (
     CampaignObjective,
     CampaignPlan,
     CampaignStatus,
-    ActionType,
     RiskLevel,
-    HOTLRequest,
     HOTLResponse,
     ApprovalStatus,
 )

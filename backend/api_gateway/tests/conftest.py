@@ -5,9 +5,7 @@ Shared fixtures and configuration for API Gateway tests.
 """
 
 import pytest
-from typing import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock, patch
-import sys
 
 # Mock external dependencies before any imports
 @pytest.fixture(scope="session", autouse=True)

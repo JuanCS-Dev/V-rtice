@@ -15,7 +15,6 @@ from prometheus_client import (
     CONTENT_TYPE_LATEST,
 )
 from typing import Optional
-import time
 
 
 # Create custom registry (avoids conflicts with other Prometheus clients)

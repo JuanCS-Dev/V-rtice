@@ -42,7 +42,6 @@ Date: 2025-10-14
 Version: 2.0.0
 """
 
-import hashlib
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
@@ -226,7 +225,7 @@ class BreachDataAnalyzer(BaseTool):
                 else:
                     self.logger.warning("unsupported_source", source=source)
                     source_results[source] = {"success": False, "error": "Not implemented"}
-            except (ValueError, RateLimitError, httpx.HTTPStatusError, httpx.ConnectError) as e:
+            except (ValueError, RateLimitError, httpx.HTTPStatusError, httpx.ConnectError):
                 # Re-raise critical errors (auth failures, rate limits, network errors, validation errors)
                 raise
             except Exception as e:

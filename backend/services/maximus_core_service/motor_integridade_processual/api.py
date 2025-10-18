@@ -35,7 +35,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from motor_integridade_processual.models.action_plan import ActionPlan
-from motor_integridade_processual.models.verdict import EthicalVerdict, FrameworkName, DecisionLevel, FrameworkVerdict
+from motor_integridade_processual.models.verdict import EthicalVerdict, FrameworkName, DecisionLevel
 from motor_integridade_processual.frameworks.kantian import KantianDeontology
 from motor_integridade_processual.frameworks.utilitarian import UtilitarianCalculus
 from motor_integridade_processual.frameworks.virtue import VirtueEthics
@@ -43,7 +43,7 @@ from motor_integridade_processual.frameworks.principialism import Principialism
 from motor_integridade_processual.resolution.conflict_resolver import ConflictResolver
 
 # CBR Engine Integration
-from justice.cbr_engine import CBREngine, CBRResult
+from justice.cbr_engine import CBREngine
 from justice.precedent_database import PrecedentDB, CasePrecedent
 from justice.validators import create_default_validators
 import os

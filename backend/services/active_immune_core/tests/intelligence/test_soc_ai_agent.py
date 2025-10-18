@@ -8,7 +8,7 @@ Date: 2025-10-12
 
 import json
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -16,7 +16,6 @@ from active_immune_core.intelligence.soc_ai_agent import (
     AttackIntent,
     NextStepPrediction,
     SOCAIAgent,
-    SOCAIAgentError,
     SecurityEvent,
     ThreatAssessment,
 )

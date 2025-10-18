@@ -21,7 +21,7 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
 
-from performance.benchmark_suite import BenchmarkMetrics, BenchmarkResult, BenchmarkSuite
+from performance.benchmark_suite import BenchmarkMetrics, BenchmarkSuite
 
 
 @pytest.fixture

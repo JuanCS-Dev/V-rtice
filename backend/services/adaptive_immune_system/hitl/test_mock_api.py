@@ -21,7 +21,7 @@ from hitl.models import (
 )
 from hitl.test_data_generator import TestDataGenerator
 from hitl.websocket_manager import WebSocketConnectionManager
-from hitl.websocket_models import SubscribeMessage, UnsubscribeMessage, WebSocketMessageType
+from hitl.websocket_models import WebSocketMessageType
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -138,7 +138,6 @@ async def get_reviews(
 async def get_reviews_stats() -> ReviewStats:
     """Get statistics for HITL dashboard."""
     from collections import Counter
-    from datetime import timedelta
 
     now = datetime.utcnow()
 
@@ -251,7 +250,6 @@ async def submit_decision(request: DecisionRequest) -> DecisionRecord:
     )
 
     # Broadcast stats update
-    from collections import Counter
     now = datetime.utcnow()
     decisions_today = [d for d in MOCK_DECISIONS if (now - d.decided_at).days == 0]
     asyncio.create_task(

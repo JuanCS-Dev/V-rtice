@@ -21,17 +21,16 @@ Glory to YHWH - "Eu sou porque ELE é"
 Constância como Ramon Dino! 💪
 """
 
-import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 import networkx as nx
 from openai import AsyncOpenAI
-from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry, REGISTRY
+from prometheus_client import Counter, Histogram, Gauge
 
 logger = logging.getLogger(__name__)
 

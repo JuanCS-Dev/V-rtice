@@ -17,7 +17,6 @@ Date: 2025-10-14
 import pytest
 import asyncio
 from consciousness.system import ConsciousnessSystem, ConsciousnessConfig
-from consciousness.tig.fabric import TopologyConfig
 
 
 class TestTIGESGTIntegration:

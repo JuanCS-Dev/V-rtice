@@ -5,9 +5,9 @@ Implementa avaliação baseada em dever e princípios universalizáveis.
 Poder de VETO absoluto quando detecta violação categórica.
 """
 
-from typing import List, Dict, Any
+from typing import Dict, Any
 from .base_framework import EthicalFramework
-from .models import ActionPlan, FrameworkScore, ActionStep, Stakeholder
+from .models import ActionPlan, FrameworkScore
 
 
 class KantianDeontology(EthicalFramework):

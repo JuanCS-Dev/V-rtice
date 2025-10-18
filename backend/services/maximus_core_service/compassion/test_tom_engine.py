@@ -10,7 +10,6 @@ Governance: Constituição Vértice v2.5 - Padrão Pagani
 """
 
 import pytest
-from typing import Dict, Any
 
 
 # ===========================================================================

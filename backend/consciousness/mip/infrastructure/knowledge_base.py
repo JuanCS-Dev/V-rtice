@@ -13,9 +13,7 @@ Autor: Juan Carlos de Souza
 Lei Governante: Constituição Vértice v2.6
 """
 
-import hashlib
 import logging
-from datetime import datetime
 from typing import Dict, List, Optional, Any
 from uuid import UUID
 
@@ -25,12 +23,8 @@ from neo4j.exceptions import Neo4jError
 from .knowledge_models import (
     Principle,
     Decision,
-    Precedent,
-    Concept,
     PrincipleLevel,
     DecisionStatus,
-    ViolationReport,
-    PrecedentOutcome,
     PrincipleHierarchy
 )
 

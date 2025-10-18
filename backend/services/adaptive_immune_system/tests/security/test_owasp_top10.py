@@ -21,11 +21,9 @@ Usage:
 
 import pytest
 import httpx
-import asyncio
 from pathlib import Path
 import re
 import subprocess
-from typing import List
 
 
 # --- Fixtures ---

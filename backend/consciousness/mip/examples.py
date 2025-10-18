@@ -2,7 +2,6 @@
 MIP Usage Examples - Demonstra como usar o Motor de Integridade Processual
 """
 
-from uuid import uuid4
 from .core import ProcessIntegrityEngine
 from .models import (
     ActionPlan,

@@ -9,7 +9,7 @@ import logging
 from typing import Callable, Optional
 
 import aio_pika
-from aio_pika import Channel, Connection, ExchangeType, Message, connect_robust
+from aio_pika import Channel, ExchangeType, Message, connect_robust
 from aio_pika.abc import AbstractRobustConnection
 
 logger = logging.getLogger(__name__)

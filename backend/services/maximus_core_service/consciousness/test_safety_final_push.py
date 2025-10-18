@@ -24,7 +24,7 @@ Status: Padrão Pagani Absoluto - 100% TARGET
 import asyncio
 import time
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -37,7 +37,6 @@ from consciousness.safety import (
     SafetyViolationType,
     ShutdownReason,
     StateSnapshot,
-    ThreatLevel,
     ThresholdMonitor,
     ViolationType,
     _ViolationTypeAdapter,

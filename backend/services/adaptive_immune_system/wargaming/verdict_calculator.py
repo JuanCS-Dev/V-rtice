@@ -13,11 +13,11 @@ Confidence Scoring:
 """
 
 import logging
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from pydantic import BaseModel, Field
 
-from .evidence_collector import WargameEvidence, StepEvidence
+from .evidence_collector import WargameEvidence
 
 logger = logging.getLogger(__name__)
 

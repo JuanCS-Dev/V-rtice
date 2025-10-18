@@ -22,8 +22,7 @@ Performance Optimizations:
 
 import asyncio
 import logging
-from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)

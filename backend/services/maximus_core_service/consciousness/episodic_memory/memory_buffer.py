@@ -3,10 +3,10 @@ Episodic Memory Buffer
 Short-term to long-term memory consolidation system.
 """
 from collections import deque
-from datetime import datetime, timedelta
-from typing import List, Dict, Optional, Callable
+from datetime import datetime
+from typing import List, Dict, Optional
 import logging
-from .event import Event, EventType, Salience
+from .event import Event, EventType
 
 logger = logging.getLogger(__name__)
 

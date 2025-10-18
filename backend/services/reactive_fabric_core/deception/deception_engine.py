@@ -10,7 +10,6 @@ This engine manages:
 Phase 1: PASSIVE deception only - monitoring without active engagement
 """
 
-import asyncio
 import hashlib
 import json
 import logging
@@ -18,7 +17,7 @@ import secrets
 import string
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field

@@ -4,7 +4,6 @@ Integration tests for PFC + MIP full ethical pipeline
 Tests complete flow: ToM → Compassion → DDL → MIP → PFC
 """
 
-import pytest
 from uuid import uuid4
 
 from consciousness.prefrontal_cortex import PrefrontalCortex

@@ -25,15 +25,12 @@ from backend.security.offensive.reactive_fabric.models import (
     ThreatIndicator,
     MITREMapping,
     ThreatEvent,
-    ThreatEventCreate,
-    # Deception models
     AssetType,
     AssetInteractionLevel,
     AssetStatus,
     AssetCredibility,
     AssetTelemetry,
     DeceptionAsset,
-    DeceptionAssetCreate,
     AssetInteractionEvent,
     # Intelligence models
     IntelligenceType,
@@ -42,7 +39,6 @@ from backend.security.offensive.reactive_fabric.models import (
     APTGroup,
     TTPPattern,
     IntelligenceReport,
-    IntelligenceReportCreate,
     IntelligenceMetrics,
     # HITL models
     ActionLevel,
@@ -50,7 +46,6 @@ from backend.security.offensive.reactive_fabric.models import (
     DecisionStatus,
     DecisionRationale,
     AuthorizationRequest,
-    AuthorizationRequestCreate,
     AuthorizationDecision,
     ApproverProfile,
 )

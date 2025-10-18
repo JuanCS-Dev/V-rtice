@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Any
 from integration import IntegrationService, IntegratedMission
 from orchestrator.core import Campaign, CampaignStatus
-from hotl.decision_system import ApprovalStatus
 
 
 @pytest.fixture

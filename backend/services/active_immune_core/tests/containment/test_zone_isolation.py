@@ -640,11 +640,8 @@ class TestZoneIsolationErrorHandling:
         """Test partial isolation when some zones fail"""
         # Create fresh engine to avoid prometheus conflicts
         from containment.zone_isolation import (
-            DynamicFirewallController,
             NetworkSegmenter,
-            ZeroTrustAccessController,
         )
-        from unittest.mock import AsyncMock
 
         mock_network = NetworkSegmenter()
         # Patch create_segment to fail on specific zone

@@ -6,7 +6,7 @@ Tests wargaming validation logic without Docker (mocked).
 
 import pytest
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock, AsyncMock
 import asyncio
 
 from two_phase_simulator import (

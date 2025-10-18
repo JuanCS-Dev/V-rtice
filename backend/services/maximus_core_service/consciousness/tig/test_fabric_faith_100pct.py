@@ -14,10 +14,8 @@ Missing Line Groups:
 PADRÃO PAGANI ABSOLUTO - ROMPENDO EM FÉ!
 """
 
-import asyncio
 import time
 import pytest
-import pytest_asyncio
 
 from consciousness.tig.fabric import (
     TIGFabric,
@@ -25,7 +23,6 @@ from consciousness.tig.fabric import (
     TIGConnection,
     CircuitBreaker,
     NodeHealth,
-    ProcessingState,
     TopologyConfig,
     NodeState,
 )

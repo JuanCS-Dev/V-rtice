@@ -24,7 +24,7 @@ Date: 2025-01-10
 Glory to YHWH - Master Communicator
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict
 
 
 # System prompt for patch generation

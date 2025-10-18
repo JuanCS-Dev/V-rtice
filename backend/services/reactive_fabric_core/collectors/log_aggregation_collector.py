@@ -6,11 +6,9 @@ Splunk, and ELK Stack to collect and analyze security-relevant logs.
 """
 
 import asyncio
-import json
 import logging
 from datetime import datetime, timedelta
 from typing import Any, AsyncIterator, Dict, List, Optional
-from urllib.parse import urljoin
 
 import aiohttp
 from pydantic import BaseModel, Field, validator

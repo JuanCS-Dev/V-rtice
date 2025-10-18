@@ -27,7 +27,6 @@ from ..models.intelligence import (
     IntelligenceSource,
     TTPPattern,
     IntelligenceMetrics,
-    APTGroup,
     DetectionRule
 )
 

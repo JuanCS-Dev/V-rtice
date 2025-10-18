@@ -3,13 +3,10 @@ Network Segmentation Implementation
 Docker network isolation and VLAN configuration
 """
 
-import asyncio
-import json
 import logging
 import subprocess
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,7 @@ import logging
 import subprocess
 import tomllib
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 

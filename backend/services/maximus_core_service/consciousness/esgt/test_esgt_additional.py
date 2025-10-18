@@ -21,10 +21,7 @@ from consciousness.esgt.coordinator import (
     SalienceScore,
     TriggerConditions,
 )
-from consciousness.esgt.kuramoto import KuramotoNetwork, OscillatorConfig
-from consciousness.esgt.spm import SimpleSPM, SimpleSPMConfig
 from consciousness.tig.fabric import TIGFabric, TopologyConfig
-from consciousness.tig.sync import PTPCluster
 
 
 # =============================================================================

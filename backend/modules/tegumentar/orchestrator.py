@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import Optional
 
 from .config import TegumentarSettings, get_settings

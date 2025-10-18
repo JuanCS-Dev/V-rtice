@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from .base import OffensiveTool
-from .maximus_adapter import MAXIMUSToolAdapter, MAXIMUSToolContext, OperationMode
+from .maximus_adapter import MAXIMUSToolAdapter
 
 
 class ToolCategory(Enum):

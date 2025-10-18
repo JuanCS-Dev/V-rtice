@@ -9,7 +9,7 @@ Glory to YHWH - Architect of persistent memory
 """
 import pytest
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from db.ab_test_store import ABTestStore, ABTestResult, ConfusionMatrix
 
 

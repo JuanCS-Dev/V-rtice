@@ -7,7 +7,7 @@ Primary value delivery mechanism for Phase 1: actionable threat intelligence.
 
 from typing import List, Optional, Dict, Any
 from uuid import UUID
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,9 +20,9 @@ from ..database.repositories.deception_repository import DeceptionAssetRepositor
 from ..models.intelligence import (
     IntelligenceReport, IntelligenceReportCreate, IntelligenceReportUpdate,
     IntelligenceType, IntelligenceConfidence, IntelligenceSource,
-    TTPPattern, IntelligenceMetrics, APTGroup
+    TTPPattern, IntelligenceMetrics
 )
-from ..models.threat import ThreatEvent, ThreatSeverity
+from ..models.threat import ThreatEvent
 from .threat_service import ThreatEventService
 
 

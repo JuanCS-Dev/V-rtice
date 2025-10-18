@@ -6,12 +6,10 @@ Uses isolated test environments (Docker containers) for safe execution.
 """
 
 import asyncio
-import json
 import logging
-import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 

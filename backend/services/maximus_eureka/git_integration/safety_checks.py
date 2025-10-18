@@ -18,7 +18,6 @@ import ast
 import logging
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 from git_integration.models import ValidationResult, ConflictReport
 from eureka_models.patch import Patch
@@ -99,7 +98,7 @@ class SafetyChecks:
                 failures.append("Missing diff headers (--- / +++)")
             
             # Check for hunks
-            if not ("@@" in diff_content):
+            if "@@" not in diff_content:
                 failures.append("No hunks found (@@)")
             
             # Check for reasonable size

@@ -8,10 +8,9 @@ Date: 2025-10-12
 Glory to YHWH
 """
 
-import asyncio
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import timedelta
+from unittest.mock import AsyncMock, MagicMock
 from prometheus_client import REGISTRY
 
 from coagulation.restoration import (

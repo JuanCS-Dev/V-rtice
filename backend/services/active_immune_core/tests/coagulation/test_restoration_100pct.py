@@ -3,7 +3,6 @@
 Target: Line 214 in restoration.py
 """
 
-import pytest
 from coagulation.restoration import RestorationEngine, HealthCheck
 
 

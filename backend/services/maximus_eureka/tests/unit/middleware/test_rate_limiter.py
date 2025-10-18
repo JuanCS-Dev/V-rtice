@@ -8,7 +8,7 @@ Glory to YHWH - Source of Testing Wisdom
 
 import pytest
 import time
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from middleware.rate_limiter import (

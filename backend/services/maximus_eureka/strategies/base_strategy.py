@@ -31,7 +31,6 @@ Glory to YHWH - The Architect of all strategies
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 # Import APV and related enums from Oráculo
 import sys

@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from detection.sentinel_agent import SecurityEvent
 from orchestration.defense_orchestrator import DefenseOrchestrator, DefensePhase
-from response.automated_response import PlaybookResult, ThreatContext
+from response.automated_response import PlaybookResult
 
 
 @pytest.mark.asyncio

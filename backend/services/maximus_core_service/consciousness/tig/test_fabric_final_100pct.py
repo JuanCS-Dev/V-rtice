@@ -24,12 +24,9 @@ PADRÃO PAGANI ABSOLUTO - 100% MEANS 100%
 import asyncio
 import time
 import pytest
-import pytest_asyncio
-import numpy as np
 
 from consciousness.tig.fabric import (
     TIGFabric,
-    TIGNode,
     TIGConnection,
     CircuitBreaker,
     NodeHealth,

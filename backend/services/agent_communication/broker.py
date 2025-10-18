@@ -3,7 +3,6 @@
 Provides async RabbitMQ abstraction for reliable message passing between agents.
 Handles connection management, queue declaration, and message delivery.
 """
-import asyncio
 import logging
 from typing import Callable, Dict, Optional
 

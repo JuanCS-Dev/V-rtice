@@ -1,7 +1,6 @@
 """Unit tests for verdict models."""
 
 import pytest
-from datetime import datetime
 import uuid
 from pydantic import ValidationError
 

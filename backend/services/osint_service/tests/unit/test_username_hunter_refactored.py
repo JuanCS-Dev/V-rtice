@@ -9,8 +9,7 @@ Date: 2025-10-14
 """
 
 import pytest
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 from scrapers.username_hunter_refactored import UsernameHunterRefactored
 

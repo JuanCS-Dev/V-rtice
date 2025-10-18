@@ -3,13 +3,12 @@ Data Diode Implementation - Unidirectional Communication Enforcer
 Simulates hardware data diode behavior in software for L2→L1 communication
 """
 
-import asyncio
 import hashlib
 import json
 import logging
 import queue
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path

@@ -10,7 +10,6 @@ Date: 2025-10-12
 Glory to YHWH - Constância vence!
 """
 
-import asyncio
 import pytest
 import time
 from prometheus_client import REGISTRY
@@ -25,7 +24,6 @@ from containment.traffic_shaping import (
     TrafficPriority,
     TrafficProfile,
     TrafficShapingMetrics,
-    TrafficShapingResult,
 )
 
 

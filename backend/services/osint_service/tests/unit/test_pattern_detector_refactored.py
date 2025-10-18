@@ -7,7 +7,6 @@ Date: 2025-10-14
 """
 
 import pytest
-from datetime import datetime, timezone
 
 from analyzers.pattern_detector_refactored import PatternDetectorRefactored
 

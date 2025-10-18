@@ -12,7 +12,7 @@ These tests validate that all Sprint 2 components work together correctly.
 
 import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 import respx
 import httpx
 

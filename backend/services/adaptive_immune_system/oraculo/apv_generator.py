@@ -8,15 +8,13 @@ generating APVs with vulnerable code signatures for precise detection.
 import logging
 import re
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Tuple
-from uuid import UUID, uuid4
+from typing import List, Optional, Tuple
 
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from ..database import DatabaseClient
 from ..database.models import APV, Dependency, Threat
-from ..models.apv import APVCreate, APVDispatchMessage
+from ..models.apv import APVDispatchMessage
 from ..messaging.client import RabbitMQClient, get_rabbitmq_client
 from ..messaging.publisher import APVPublisher
 from packaging import version as pkg_version

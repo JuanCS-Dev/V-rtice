@@ -9,17 +9,17 @@ import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from ...database import DatabaseClient, get_db_client
+from ...database import DatabaseClient
 from ...database.models import Dependency
 from ...models.dependency import DependencyCreate
-from .python_scanner import PythonScanner, PythonPackage
-from .javascript_scanner import JavaScriptScanner, JavaScriptPackage
-from .go_scanner import GoScanner, GoPackage
-from .docker_scanner import DockerScanner, DockerPackage
+from .python_scanner import PythonScanner
+from .javascript_scanner import JavaScriptScanner
+from .go_scanner import GoScanner
+from .docker_scanner import DockerScanner
 
 logger = logging.getLogger(__name__)
 

@@ -16,8 +16,7 @@ Compliance: Doutrina MAXIMUS | ≥90% coverage | Production-Ready
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Any
+from unittest.mock import AsyncMock, patch
 
 import pytest
 

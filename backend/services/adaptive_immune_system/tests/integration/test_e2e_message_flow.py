@@ -20,15 +20,13 @@ This test validates:
 - System handles the complete lifecycle
 """
 
-import asyncio
 import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from pydantic import BaseModel
 
 # Import all components
 from messaging.client import RabbitMQClient

@@ -13,7 +13,6 @@ Date: 2025-10-13
 """
 
 import asyncio
-import json
 import random
 from datetime import datetime, timedelta
 from pathlib import Path

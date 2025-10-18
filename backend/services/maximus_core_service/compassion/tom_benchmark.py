@@ -17,8 +17,6 @@ import logging
 from datetime import datetime
 
 from compassion.sally_anne_dataset import (
-    SALLY_ANNE_SCENARIOS,
-    EXPECTED_ANSWERS,
     DIFFICULTY_LEVELS,
     get_all_scenarios,
 )

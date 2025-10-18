@@ -9,14 +9,13 @@ from typing import List, Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy import select, and_, or_, desc, asc, func
+from sqlalchemy import select, and_, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..schemas import ThreatEventDB
 from . import BaseRepository, DatabaseError
 from ...models.threat import (
-    ThreatSeverity, ThreatCategory, DetectionSource,
-    ThreatEvent, ThreatEventCreate, ThreatEventUpdate, ThreatEventQuery
+    ThreatSeverity, ThreatEvent, ThreatEventCreate, ThreatEventUpdate, ThreatEventQuery
 )
 
 

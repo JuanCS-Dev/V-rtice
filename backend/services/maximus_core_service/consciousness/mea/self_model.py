@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import List, Tuple
 
 from .attention_schema import AttentionState
 from .boundary_detector import BoundaryAssessment

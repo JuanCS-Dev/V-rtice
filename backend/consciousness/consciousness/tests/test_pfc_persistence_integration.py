@@ -4,9 +4,8 @@ Test PFC + Persistence Integration
 Validates that PFC can automatically persist decisions to database.
 """
 
-import pytest
 from uuid import uuid4
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 from consciousness.prefrontal_cortex import PrefrontalCortex
 

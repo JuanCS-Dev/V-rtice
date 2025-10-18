@@ -29,9 +29,8 @@ Version: 2.0.0
 """
 
 import asyncio
-import os
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import tweepy
 

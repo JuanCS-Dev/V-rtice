@@ -10,8 +10,6 @@ This engine correlates events from multiple collectors to:
 Phase 1: PASSIVE orchestration only - no automated responses
 """
 
-import asyncio
-import hashlib
 import logging
 from collections import defaultdict, deque
 from datetime import datetime, timedelta

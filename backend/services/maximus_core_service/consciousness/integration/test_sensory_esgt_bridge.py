@@ -27,7 +27,6 @@ from consciousness.integration.sensory_esgt_bridge import (
     SalienceFactors,
     PredictionError,
 )
-from consciousness.esgt.coordinator import SalienceScore, ESGTEvent
 
 
 # ==================== FIXTURES ====================

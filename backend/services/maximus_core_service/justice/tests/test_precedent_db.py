@@ -9,7 +9,6 @@ Tests cover:
 
 import pytest
 from services.maximus_core_service.justice.precedent_database import PrecedentDB, CasePrecedent
-from datetime import datetime
 
 
 @pytest.fixture

@@ -18,7 +18,7 @@ Governance: Constituição Vértice v2.5 - Article IV (Operational Excellence)
 import logging
 import json
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

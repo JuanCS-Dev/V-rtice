@@ -25,10 +25,10 @@ PADRÃO PAGANI ABSOLUTO - 100% MEANS 100%
 """
 
 import pytest
-from consciousness.mea.attention_schema import AttentionSchemaModel, AttentionState, AttentionSignal
-from consciousness.mea.boundary_detector import BoundaryDetector, BoundaryAssessment
+from consciousness.mea.attention_schema import AttentionSchemaModel, AttentionSignal
+from consciousness.mea.boundary_detector import BoundaryDetector
 from consciousness.mea.prediction_validator import PredictionValidator
-from consciousness.mea.self_model import SelfModel, FirstPersonPerspective
+from consciousness.mea.self_model import SelfModel
 
 
 class TestAttentionSchemaFinal7Lines:

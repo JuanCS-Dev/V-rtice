@@ -4,13 +4,12 @@ Real-time alerts and notifications for HITL Console
 """
 
 import asyncio
-import json
 import logging
 from datetime import datetime
 from typing import Dict, Set, Optional, Any
 from enum import Enum
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)

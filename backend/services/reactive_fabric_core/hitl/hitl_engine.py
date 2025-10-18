@@ -6,12 +6,10 @@ Phase 1: PASSIVE operation - collects decisions but doesn't execute automated re
 """
 
 import asyncio
-import hashlib
-import json
 from collections import defaultdict
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 from uuid import uuid4
 
 from pydantic import BaseModel, Field

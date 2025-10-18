@@ -3,7 +3,7 @@ Data Exfiltration - Intelligent data extraction and exfiltration.
 
 AI-driven data discovery, classification, and secure exfiltration.
 """
-from typing import List, Dict, Optional, Set, BinaryIO
+from typing import List, Dict, Optional, Set
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path

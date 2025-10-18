@@ -4,10 +4,7 @@ Tests for Deception Engine.
 Tests honeytoken generation, decoy systems, trap documents, and breadcrumbs.
 """
 
-import asyncio
-import json
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -16,11 +13,6 @@ from ..deception_engine import (
     DeceptionConfig,
     DeceptionType,
     TokenType,
-    Honeytoken,
-    DecoySystem,
-    TrapDocument,
-    BreadcrumbTrail,
-    DeceptionEvent,
     HoneytokenGenerator
 )
 

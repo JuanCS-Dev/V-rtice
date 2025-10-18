@@ -14,7 +14,6 @@ Date: 2025-10-15
 """
 
 import pytest
-import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 import httpx
 
@@ -24,10 +23,9 @@ from consciousness.integration.esgt_subscriber import ESGTSubscriber, example_im
 from consciousness.integration.sensory_esgt_bridge import (
     SensoryESGTBridge,
     PredictionError,
-    SensoryContext,
-    SalienceFactors
+    SensoryContext
 )
-from consciousness.esgt.coordinator import ESGTEvent, SalienceScore, SalienceLevel
+from consciousness.esgt.coordinator import ESGTEvent
 from consciousness.mcea.controller import ArousalState, ArousalLevel
 from consciousness.mmei.monitor import AbstractNeeds
 

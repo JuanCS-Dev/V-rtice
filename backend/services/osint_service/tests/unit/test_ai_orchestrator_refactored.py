@@ -7,7 +7,7 @@ Date: 2025-10-14
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 from ai_orchestrator_refactored import AIOrchestratorRefactored
 

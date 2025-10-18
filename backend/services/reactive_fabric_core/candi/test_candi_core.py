@@ -12,12 +12,11 @@ from typing import Dict, Any
 from .candi_core import (
     CANDICore,
     ThreatLevel,
-    AnalysisResult,
-    Incident
+    AnalysisResult
 )
-from .forensic_analyzer import ForensicAnalyzer, ForensicReport
-from .attribution_engine import AttributionEngine, AttributionResult
-from .threat_intelligence import ThreatIntelligence, ThreatIntelReport
+from .forensic_analyzer import ForensicAnalyzer
+from .attribution_engine import AttributionEngine
+from .threat_intelligence import ThreatIntelligence
 
 
 # ============================================================================
@@ -606,7 +605,7 @@ class TestErrorHandling:
         try:
             result = await candi_core.analyze_honeypot_event(invalid_event)
             assert result is not None
-        except Exception as e:
+        except Exception:
             # Exception is acceptable, but should not crash the system
             assert candi_core._running
 

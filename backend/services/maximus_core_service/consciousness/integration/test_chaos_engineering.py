@@ -23,23 +23,19 @@ Success Criteria:
 """
 
 import asyncio
-import random
 import time
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
 
 from consciousness.esgt.coordinator import (
     ESGTCoordinator,
-    ESGTPhase,
     SalienceScore,
 )
 from consciousness.tig.fabric import (
     TIGFabric,
     TopologyConfig,
-    TIGNode,
     NodeState,
 )
 
@@ -617,7 +613,6 @@ async def test_runaway_ignition_prevention(chaos_test_system):
 @pytest.mark.asyncio
 async def test_chaos_test_count():
     """Verify we have exactly 20 chaos engineering tests."""
-    import inspect
 
     # Count test functions in this module
     test_functions = [

@@ -15,10 +15,10 @@ Token bucket = Cytokine production limits (prevent cytokine storm)
 Refill rate = Immune response regulation
 """
 
-from fastapi import Request, HTTPException
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from typing import Dict, Tuple
+from typing import Dict
 import time
 import logging
 

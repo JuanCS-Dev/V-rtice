@@ -24,7 +24,6 @@ from consciousness.safety import (
     ConsciousnessSafetyProtocol,
     KillSwitch,
     SafetyLevel,
-    SafetyThresholds,
     SafetyViolation,
     SafetyViolationType,
     ShutdownReason,

@@ -6,7 +6,6 @@ Handles client connections, subscriptions, and message broadcasting.
 
 import logging
 import uuid
-from datetime import datetime
 from typing import Dict, List, Set
 
 from fastapi import WebSocket
@@ -16,8 +15,6 @@ from hitl.websocket_models import (
     DecisionNotification,
     NewAPVNotification,
     StatsUpdateNotification,
-    WebSocketMessage,
-    WebSocketMessageType,
 )
 
 logger = logging.getLogger(__name__)

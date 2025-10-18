@@ -13,7 +13,6 @@ Target missing lines (91.46% → 100.00%):
 PADRÃO PAGANI ABSOLUTO - 100% MEANS 100%
 """
 
-import asyncio
 import pytest
 import pytest_asyncio
 import numpy as np
@@ -22,7 +21,6 @@ from consciousness.biomimetic_safety_bridge import (
     BiomimeticSafetyBridge,
     BridgeConfig,
 )
-from consciousness.neuromodulation.coordinator_hardened import ModulationRequest
 
 
 @pytest_asyncio.fixture

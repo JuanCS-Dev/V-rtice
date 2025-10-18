@@ -4,16 +4,13 @@ Database honeypot with realistic fake data and honeytokens
 """
 
 import asyncio
-import hashlib
 import json
 import logging
 import random
-import string
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from .base_honeypot import BaseHoneypot, HoneypotType, AttackCapture, AttackStage
+from .base_honeypot import BaseHoneypot, HoneypotType
 
 logger = logging.getLogger(__name__)
 

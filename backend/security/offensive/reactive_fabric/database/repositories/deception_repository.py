@@ -9,13 +9,13 @@ from typing import List, Optional, Dict, Any
 from uuid import UUID
 from datetime import datetime
 
-from sqlalchemy import select, and_, or_, desc, asc, func
+from sqlalchemy import select, and_, or_, desc, asc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..schemas import DeceptionAssetDB, AssetInteractionEventDB
 from . import BaseRepository, DatabaseError
 from ...models.deception import (
-    AssetType, AssetInteractionLevel, AssetStatus,
+    AssetType, AssetStatus,
     DeceptionAsset, DeceptionAssetCreate, DeceptionAssetUpdate,
     AssetInteractionEvent
 )

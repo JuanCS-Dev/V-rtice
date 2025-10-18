@@ -5,8 +5,6 @@ Corresponds to database schema defined in schema.sql.
 """
 
 import uuid
-from datetime import datetime
-from typing import List, Optional
 
 from sqlalchemy import (
     ARRAY,

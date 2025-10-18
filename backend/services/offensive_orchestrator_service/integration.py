@@ -10,11 +10,11 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 
-from orchestrator.core import MaximusOrchestratorAgent, Campaign, CampaignStatus
+from orchestrator.core import MaximusOrchestratorAgent, Campaign
 from agents.recon.agent import ReconAgent, ReconMission, ReconPhase
 from agents.exploit.agent import ExploitAgent, ExploitMission, Vulnerability
 from agents.postexploit.agent import PostExploitAgent, PostExploitMission, CompromisedHost
-from agents.analysis.agent import AnalysisAgent, DifficultyLevel
+from agents.analysis.agent import AnalysisAgent
 from hotl.decision_system import HOTLDecisionSystem, ActionType
 
 logger = logging.getLogger(__name__)

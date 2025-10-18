@@ -18,11 +18,9 @@ from containment.honeypots import (
     AttackerProfile,
     DeceptionEngine,
     HoneypotConfig,
-    HoneypotDeployment,
     HoneypotLevel,
     HoneypotMetrics,
     HoneypotOrchestrator,
-    HoneypotResult,
     HoneypotType,
     TTPs,
 )
@@ -421,7 +419,6 @@ class TestDeceptionEngineLLM:
     def test_llm_import_error_fallback(self):
         """Test fallback when LLM client import fails (lines 35-37)"""
         import sys
-        import importlib
         from unittest.mock import patch
         import builtins
 

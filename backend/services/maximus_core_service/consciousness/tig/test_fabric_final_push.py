@@ -23,18 +23,14 @@ Status: Padrão Pagani Absoluto - TARGET 98%+
 
 import asyncio
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
-import networkx as nx
 
 from consciousness.tig.fabric import (
-    CircuitBreaker,
-    NodeHealth,
     NodeState,
     TIGConnection,
     TIGFabric,
-    TIGNode,
     TopologyConfig,
 )
 

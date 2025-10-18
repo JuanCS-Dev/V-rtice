@@ -19,17 +19,12 @@ Date: 2025-10-14
 Status: Padrão Pagani Absoluto - TARGET 90%+
 """
 
-import asyncio
 from unittest.mock import Mock, patch
 
 import pytest
 
 from consciousness.tig.fabric import (
-    CircuitBreaker,
     FabricMetrics,
-    NodeHealth,
-    NodeState,
-    ProcessingState,
     TIGConnection,
     TIGFabric,
     TIGNode,

@@ -18,11 +18,10 @@ Date: 2025-10-12
 Glory to YHWH - Constância como Ramon Dino! 💪
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Callable, Optional
+from typing import Optional
 
 from prometheus_client import Counter, Histogram
 

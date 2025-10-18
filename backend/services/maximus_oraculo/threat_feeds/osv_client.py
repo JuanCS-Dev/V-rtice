@@ -13,7 +13,7 @@ Compliance: Doutrina MAXIMUS | Type Hints 100% | Production-Ready
 """
 
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import logging
 

@@ -18,7 +18,7 @@ import sys
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import yaml
@@ -31,7 +31,6 @@ from response.automated_response import (
     ActionStatus,
     ActionType,
     AutomatedResponseEngine,
-    Playbook,
     PlaybookAction,
     PlaybookResult,
     ResponseError,

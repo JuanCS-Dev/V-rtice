@@ -32,7 +32,7 @@ network/compute failures without overwhelming recovering services.
 import asyncio
 import random
 import time
-from typing import Callable, Optional
+from typing import Callable
 
 import pytest
 

@@ -12,16 +12,13 @@ Phase 1: PASSIVE collection only - no automated responses
 """
 
 import asyncio
-import hashlib
 import ipaddress
-import json
 import logging
 from datetime import datetime, timedelta
 from typing import Any, AsyncIterator, Dict, List, Optional, Set
-from urllib.parse import quote_plus
 
 import aiohttp
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from .base_collector import BaseCollector, CollectedEvent, CollectorConfig
 

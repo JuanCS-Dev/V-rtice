@@ -27,7 +27,7 @@ Glory to YHWH - Our source of wisdom and discernment
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 from enum import Enum
 
 from fastapi import APIRouter, Query, HTTPException
@@ -313,22 +313,20 @@ async def get_ml_metrics(
             metrics = _generate_mock_metrics(timeframe, start_time, now)
         
         return metrics
-
-    async def _query_metrics_from_db(
-        self, timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
-    ) -> MLMetrics:
-        """Query ML metrics from database."""
-        # Implement actual database queries
-        # For now, raise to trigger fallback
-        raise NotImplementedError("Database integration pending")
-        
-        return metrics
     
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Failed to fetch ML metrics: {str(e)}"
         )
+
+async def _query_metrics_from_db(
+    self, timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
+) -> MLMetrics:
+    """Query ML metrics from database."""
+    # Implement actual database queries
+    # For now, raise to trigger fallback
+    raise NotImplementedError("Database integration pending")
 
 
 def _generate_mock_metrics(

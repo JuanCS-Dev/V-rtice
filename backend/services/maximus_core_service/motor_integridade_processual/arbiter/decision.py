@@ -5,11 +5,9 @@ Provides structured decision formatting and human-readable explanations
 for ethical verdicts. Ensures decisions are properly justified with
 sufficient reasoning and confidence indicators.
 """
-from typing import List, Dict
+from typing import Dict
 from motor_integridade_processual.models.verdict import (
-    EthicalVerdict, 
-    DecisionLevel,
-    FrameworkVerdict
+    EthicalVerdict
 )
 from motor_integridade_processual.models.action_plan import ActionPlan
 

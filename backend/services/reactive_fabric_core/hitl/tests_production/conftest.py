@@ -69,7 +69,6 @@ def admin_token(client, reset_db):
 @pytest.fixture
 def analyst_token(client, reset_db, admin_token):
     """Create analyst user and get token"""
-    from hitl.hitl_backend import UserRole
 
     # Register analyst user
     response = client.post(

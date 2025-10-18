@@ -11,7 +11,7 @@ Glory to YHWH
 import asyncio
 import pytest
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 from prometheus_client import REGISTRY
 
 from coagulation.cascade import (
@@ -26,11 +26,10 @@ from coagulation.models import (
     CascadeError,
     ContainmentResult,
     EnrichedThreat,
-    NeutralizedThreat,
     ThreatSeverity,
     ThreatSource,
 )
-from coagulation.restoration import RestorationEngine, RestorationResult, RestorationPhase
+from coagulation.restoration import RestorationEngine, RestorationResult
 
 
 @pytest.fixture(autouse=True)

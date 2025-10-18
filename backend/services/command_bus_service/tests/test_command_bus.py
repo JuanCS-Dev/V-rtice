@@ -1,7 +1,7 @@
 """Tests for command bus service."""
 
 import asyncio
-from typing import Any, Generator, Tuple
+from typing import Generator, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest

@@ -7,19 +7,14 @@ Autor: Juan Carlos de Souza
 """
 
 import pytest
-from uuid import uuid4
-from datetime import datetime
 
 from mip.infrastructure.knowledge_models import (
     Principle,
     Decision,
     Precedent,
     Concept,
-    ViolationReport,
-    PrecedentOutcome,
     PrincipleLevel,
     DecisionStatus,
-    ViolationSeverity,
 )
 
 

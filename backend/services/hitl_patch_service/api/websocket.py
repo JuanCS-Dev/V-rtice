@@ -25,7 +25,7 @@ from datetime import datetime
 from typing import Set
 from uuid import uuid4
 
-from fastapi import WebSocket, WebSocketDisconnect, status
+from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 
 

@@ -24,7 +24,6 @@ Target SLAs:
 
 from locust import HttpUser, task, between, events
 from locust.contrib.fasthttp import FastHttpUser
-import json
 import uuid
 import random
 from typing import Dict, Any

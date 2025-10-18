@@ -4,15 +4,14 @@ Additional tests to boost Log Aggregation Collector coverage to >95%.
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from aiohttp import ClientResponseError, ClientError
 
 from ..log_aggregation_collector import (
     LogAggregationCollector,
-    LogAggregationConfig,
-    SecurityEventPattern
+    LogAggregationConfig
 )
 
 

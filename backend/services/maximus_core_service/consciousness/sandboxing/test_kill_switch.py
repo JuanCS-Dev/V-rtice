@@ -2,7 +2,7 @@
 Tests for Kill Switch
 """
 import pytest
-from consciousness.sandboxing.kill_switch import KillSwitch, TriggerType, KillSwitchTrigger
+from consciousness.sandboxing.kill_switch import KillSwitch, TriggerType
 
 
 def test_kill_switch_initialization():

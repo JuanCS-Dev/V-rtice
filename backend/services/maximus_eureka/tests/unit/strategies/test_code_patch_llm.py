@@ -18,7 +18,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from strategies.code_patch_llm import CodePatchLLMStrategy
-from llm import LLMMessage, LLMResponse
+from llm import LLMResponse
 
 # Import models
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "maximus_oraculo"))

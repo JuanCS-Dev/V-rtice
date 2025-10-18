@@ -6,13 +6,11 @@ Orquestra validação ética multi-framework
 import time
 from datetime import datetime
 from typing import Optional, List
-from uuid import uuid4
 
 from .models import (
     ActionPlan,
     EthicalVerdict,
     VerdictStatus,
-    FrameworkScore,
     AuditTrailEntry
 )
 from .frameworks import (

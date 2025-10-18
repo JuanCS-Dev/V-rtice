@@ -17,7 +17,7 @@ Date: 2025-10-15
 import pytest
 import time
 import psutil
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from consciousness.sandboxing import ConsciousnessContainer, ResourceLimits
 from consciousness.sandboxing.kill_switch import KillSwitch, TriggerType
 from consciousness.sandboxing.resource_limiter import ResourceLimiter

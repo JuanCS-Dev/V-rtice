@@ -7,17 +7,15 @@ Sprint 1: Real implementation
 
 import asyncpg
 import structlog
-from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from typing import List, Optional
+from datetime import datetime
 from uuid import UUID
-import os
 
 from .models import (
     Honeypot, HoneypotCreate, HoneypotStats, HoneypotStatus,
     Attack, AttackCreate, AttackSummary,
     TTP, TTPCreate, TTPFrequency,
-    IOC, IOCCreate,
-    ForensicCapture, ForensicCaptureCreate, ProcessingStatus
+    IOC, ForensicCapture, ForensicCaptureCreate, ProcessingStatus
 )
 
 logger = structlog.get_logger()

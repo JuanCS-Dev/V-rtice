@@ -10,11 +10,10 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-14
 """
 
-import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -27,7 +26,7 @@ from .base import (
     InterventionType,
     VetoAction,
 )
-from .coordinator import CoordinatorMetrics, GuardianCoordinator
+from .coordinator import GuardianCoordinator
 
 # ============================================================================
 # FIXTURES

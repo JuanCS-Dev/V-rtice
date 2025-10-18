@@ -29,7 +29,7 @@ from .tom_engine import ToMEngine, UserMentalState
 
 # Import MIP for full ethical pipeline
 from mip.core import ProcessIntegrityEngine
-from mip.models import ActionPlan, ActionStep, Stakeholder, StakeholderType, ActionCategory, EthicalVerdict
+from mip.models import ActionPlan, EthicalVerdict
 
 
 @dataclass

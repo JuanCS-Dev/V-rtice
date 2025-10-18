@@ -16,7 +16,6 @@ from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Depends
-from fastapi.responses import JSONResponse
 
 from models import (
     CampaignObjective,
@@ -25,10 +24,8 @@ from models import (
     HOTLRequest,
     HOTLResponse,
     ApprovalStatus,
-    ErrorResponse,
 )
 from orchestrator import MaximusOrchestratorAgent
-from config import get_config
 
 
 logger = logging.getLogger(__name__)

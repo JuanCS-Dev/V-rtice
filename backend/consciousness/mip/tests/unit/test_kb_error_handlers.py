@@ -7,16 +7,14 @@ Lei Governante: Constituição Vértice v2.7
 Padrão: PADRÃO PAGANI ABSOLUTO (100%)
 """
 import pytest
-from uuid import uuid4, UUID
+from uuid import uuid4
 from datetime import datetime
 
 from mip.infrastructure.knowledge_base import (
     KnowledgeBaseRepository,
 )
 from mip.infrastructure.knowledge_models import (
-    Principle,
     Decision,
-    PrincipleLevel,
     DecisionStatus,
     ViolationSeverity,
 )

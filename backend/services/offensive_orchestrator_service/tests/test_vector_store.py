@@ -15,12 +15,10 @@ Covers:
 
 import pytest
 from uuid import uuid4
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 from memory.vector_store import VectorStore
 from qdrant_client.http import models as qdrant_models
-from qdrant_client.http.exceptions import UnexpectedResponse
 
 
 @pytest.mark.unit

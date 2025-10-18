@@ -5,7 +5,7 @@ Data validation and serialization
 Sprint 1: Real implementation
 """
 
-from pydantic import BaseModel, Field, IPvAnyAddress
+from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from enum import Enum

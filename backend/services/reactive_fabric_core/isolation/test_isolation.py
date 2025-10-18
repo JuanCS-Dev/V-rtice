@@ -3,12 +3,10 @@ Tests for Network Isolation Components
 """
 
 import asyncio
-import json
 import pytest
-import time
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
-from .data_diode import DataDiode, DiodeDirection, DiodePacket
+from .data_diode import DataDiode, DiodeDirection
 from .firewall import NetworkFirewall, FirewallRule, FirewallAction, Protocol
 from .network_segmentation import NetworkSegmentation, DockerNetwork
 from .kill_switch import KillSwitch, EmergencyShutdown, ShutdownLevel, ComponentType, KillTarget

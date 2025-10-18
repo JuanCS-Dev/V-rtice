@@ -6,11 +6,10 @@ Target: ≥95% code coverage
 Padrão Pagani: All error paths tested, production-grade validation
 """
 
-import pytest
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
-from typing import List, Dict
+from typing import Dict
 
 
 # ============================================================================

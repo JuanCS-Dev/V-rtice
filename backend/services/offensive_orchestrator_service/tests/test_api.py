@@ -17,19 +17,11 @@ import os
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from uuid import uuid4
-from datetime import datetime
 
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
 from api import router
-from models import (
-    CampaignObjective,
-    CampaignPlan,
-    CampaignStatus,
-    RiskLevel,
-    ApprovalStatus,
-)
 
 
 # Mock environment variables before importing anything else

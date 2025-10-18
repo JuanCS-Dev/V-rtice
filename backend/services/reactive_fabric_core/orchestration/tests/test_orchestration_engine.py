@@ -4,9 +4,7 @@ Tests for Orchestration Engine.
 Tests event correlation, pattern detection, and threat scoring.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -15,7 +13,6 @@ from ..orchestration_engine import (
     OrchestrationConfig,
     OrchestrationEvent,
     CorrelationRule,
-    ThreatScore,
     ThreatCategory,
     EventCorrelationWindow,
     EventCorrelator,

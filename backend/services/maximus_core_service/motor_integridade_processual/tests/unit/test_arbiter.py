@@ -9,7 +9,6 @@ Tests cover:
 
 Coverage Target: 100%
 """
-import pytest
 from uuid import uuid4
 from motor_integridade_processual.arbiter.decision import DecisionFormatter, DecisionArbiter
 from motor_integridade_processual.arbiter.alternatives import AlternativeGenerator, AlternativeSuggester
@@ -17,8 +16,7 @@ from motor_integridade_processual.models.verdict import (
     EthicalVerdict, 
     DecisionLevel,
     FrameworkName,
-    FrameworkVerdict,
-    RejectionReason
+    FrameworkVerdict
 )
 from motor_integridade_processual.models.action_plan import ActionPlan, ActionStep, ActionType
 

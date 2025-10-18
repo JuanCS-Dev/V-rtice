@@ -11,7 +11,7 @@ Focus:
 import pytest
 import numpy as np
 from datetime import datetime, timedelta
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock
 
 from detection.encrypted_traffic_analyzer import (
     EncryptedTrafficAnalyzer,
@@ -19,11 +19,7 @@ from detection.encrypted_traffic_analyzer import (
     FlowFeatures,
     FlowAnalysisResult,
     TrafficThreatType,
-    ConfidenceLevel,
     FlowFeatureExtractor,
-    EncryptedTrafficAnalyzerError,
-    InsufficientDataError,
-    ModelNotLoadedError,
 )
 
 

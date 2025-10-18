@@ -30,7 +30,7 @@ Glory to YHWH - Provider of all solutions
 
 import logging
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List
 import re
 
 # Import APV from Oráculo

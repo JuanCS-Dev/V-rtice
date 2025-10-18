@@ -5,16 +5,14 @@ Generates ethical alternatives for action plans that were rejected
 or received low ethical scores. Suggests modifications to improve
 alignment with ethical frameworks.
 """
-from typing import List, Dict, Optional
+from typing import List, Optional
 from copy import deepcopy
 from motor_integridade_processual.models.action_plan import (
     ActionPlan, 
-    ActionStep,
-    ActionType
+    ActionStep
 )
 from motor_integridade_processual.models.verdict import (
     EthicalVerdict,
-    DecisionLevel,
     RejectionReason
 )
 

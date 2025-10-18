@@ -27,10 +27,9 @@ CONTRACT: 100% OU NADA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
-import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -535,7 +534,6 @@ class TestGitStatusChecking:
     async def test_check_git_status_main_branch_uncommitted_violations(self, guardian):
         """Test _check_git_status detects uncommitted files with violations on main (covers lines 343-351)."""
         # Create a Python file with violation in /home/juan/vertice-dev (the expected root)
-        import tempfile
         violation_file = Path("/home/juan/vertice-dev") / "temp_test_mock_violation.py"
 
         try:

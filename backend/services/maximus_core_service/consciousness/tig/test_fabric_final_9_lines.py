@@ -14,12 +14,10 @@ Date: 2025-10-15
 
 import pytest
 import networkx as nx
-import numpy as np
 
 from consciousness.tig.fabric import (
     TIGFabric,
     TopologyConfig,
-    FabricMetrics,
 )
 
 

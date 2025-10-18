@@ -7,7 +7,7 @@ Sprint 1: Real implementation
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 from pathlib import Path
 from datetime import datetime
 

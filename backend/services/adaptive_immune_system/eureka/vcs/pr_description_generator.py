@@ -11,7 +11,7 @@ Creates rich markdown descriptions with:
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 

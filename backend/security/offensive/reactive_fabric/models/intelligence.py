@@ -12,7 +12,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
 class IntelligenceType(str, Enum):

@@ -15,17 +15,14 @@ Date: 2025-10-15
 """
 
 import pytest
-from datetime import datetime, timedelta
 from consciousness.lrr import (
     Belief,
     BeliefGraph,
-    BeliefType,
     Contradiction,
     ContradictionType,
     RecursiveReasoner,
     ResolutionStrategy,
 )
-from consciousness.lrr.recursive_reasoner import ReasoningLevel
 
 
 # ============================================================================
@@ -318,7 +315,7 @@ class TestMetaMonitorMissingLines:
 
     def test_line_199_generate_recommendations_with_issues(self):
         """Line 199: Generate recommendations with total_levels < 2."""
-        from consciousness.lrr.meta_monitor import MetaMonitor, BiasInsight
+        from consciousness.lrr.meta_monitor import MetaMonitor
         from consciousness.lrr.meta_monitor import CalibrationMetrics
 
         monitor = MetaMonitor()

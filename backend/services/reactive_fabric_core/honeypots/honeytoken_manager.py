@@ -3,19 +3,16 @@ Intelligent Honeytoken Management System
 Creates, plants, and monitors honeytokens across all honeypots
 """
 
-import asyncio
-import hashlib
 import json
 import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta
 from enum import Enum
-from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
 
 import aioredis
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend
 

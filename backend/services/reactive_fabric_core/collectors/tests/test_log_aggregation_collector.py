@@ -4,19 +4,14 @@ Tests for Log Aggregation Collector.
 Tests the collection, parsing, and analysis of logs from various backends.
 """
 
-import asyncio
-import json
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aioresponses import aioresponses
 
-from ..base_collector import CollectorHealth, CollectorMetrics
+from ..base_collector import CollectorHealth
 from ..log_aggregation_collector import (
     LogAggregationCollector,
-    LogAggregationConfig,
-    SecurityEventPattern
+    LogAggregationConfig
 )
 
 

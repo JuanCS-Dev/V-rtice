@@ -8,7 +8,7 @@ Date: 2025-10-12
 
 import pytest
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 from detection.sentinel_agent import SecurityEvent
 from orchestration.defense_orchestrator import DefenseOrchestrator, DefensePhase

@@ -3,12 +3,10 @@ Attribution Engine
 ML-powered threat actor identification and attribution scoring
 """
 
-import asyncio
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Any
 
 from .forensic_analyzer import ForensicReport
 from .threat_intelligence import ThreatIntelReport

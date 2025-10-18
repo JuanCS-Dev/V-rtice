@@ -16,7 +16,6 @@ Authors: Claude Code + Juan
 Date: 2025-10-15
 """
 
-import time
 from dataclasses import dataclass
 from enum import Enum
 from unittest.mock import MagicMock, patch

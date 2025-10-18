@@ -4,7 +4,6 @@ Isolates consciousness processes with resource limits and monitoring.
 """
 import psutil
 import os
-import signal
 import time
 import logging
 from dataclasses import dataclass

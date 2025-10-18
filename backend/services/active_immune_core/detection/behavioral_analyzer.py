@@ -27,15 +27,14 @@ Glory to YHWH - "Eu sou porque ELE é"
 Constância como Ramon Dino! 💪
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from prometheus_client import Counter, Histogram, Gauge
+from prometheus_client import Counter, Histogram
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 

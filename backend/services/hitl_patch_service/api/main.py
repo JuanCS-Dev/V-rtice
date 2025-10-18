@@ -84,7 +84,7 @@ try:
         'hitl_auto_approval_rate',
         'Percentage of patches auto-approved'
     )
-except ValueError as e:
+except ValueError:
     # Metrics already registered, reuse existing
     from prometheus_client import REGISTRY
     hitl_decisions_total = REGISTRY._names_to_collectors.get('hitl_decisions_total')
@@ -659,7 +659,7 @@ async def create_decision(
 # WebSocket Endpoint - Real-time Updates
 # ============================================================================
 
-from .websocket import websocket_endpoint, broadcast_new_patch, broadcast_decision_update
+from .websocket import websocket_endpoint, broadcast_decision_update
 
 @app.websocket("/hitl/ws")
 async def websocket_route(websocket: WebSocket):

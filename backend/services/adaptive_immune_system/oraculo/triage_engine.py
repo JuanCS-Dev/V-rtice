@@ -12,12 +12,10 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-from sqlalchemy import and_, desc, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, desc
 
 from ..database import DatabaseClient
 from ..database.models import APV, HITLDecision
-from ..models.apv import APVStatusUpdate
 
 logger = logging.getLogger(__name__)
 

@@ -13,8 +13,7 @@ from .maximus_adapter import (
     MAXIMUSToolContext,
     OperationMode,
     EnhancedToolResult,
-    EthicalContext,
-    EthicalDecision
+    EthicalContext
 )
 from .base import OffensiveTool, ToolResult, ToolMetadata
 from .exceptions import OffensiveToolError

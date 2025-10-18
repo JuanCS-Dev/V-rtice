@@ -2,10 +2,7 @@
 Testes para shared.base_config
 Coverage target: 100% ABSOLUTO
 """
-import os
 import pytest
-from pathlib import Path
-from typing import Optional
 from pydantic import Field, ValidationError
 
 from backend.shared.base_config import (

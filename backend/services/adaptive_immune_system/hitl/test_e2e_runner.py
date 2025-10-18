@@ -10,14 +10,12 @@ Tests:
 """
 
 import asyncio
-import json
 import logging
 import time
 from typing import Any, Dict, List
 
 import aiohttp
 
-from hitl.test_data_generator import TestDataGenerator, generate_mock_apv_json
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

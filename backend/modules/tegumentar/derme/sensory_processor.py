@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import math
 import time
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, Dict, Optional
+from typing import Deque
 
 from .deep_inspector import InspectionResult
 from .stateful_inspector import FlowObservation, InspectorAction

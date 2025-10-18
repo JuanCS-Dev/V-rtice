@@ -24,7 +24,6 @@ Date: 2025-10-15
 Target: 166 statements → 0 missed → 100.00%
 """
 
-import asyncio
 import time
 
 import numpy as np

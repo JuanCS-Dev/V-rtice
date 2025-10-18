@@ -20,10 +20,8 @@ from ..database.session import get_db_session
 from ..models.hitl import (
     HITLDecision,
     HITLDecisionCreate,
-    HITLDecisionUpdate,
     HITLDecisionType,
     HITLDecisionStatus,
-    HITLDecisionOutcome,
     HITLApprovalLevel,
     HITLAuditLog,
     HITLMetrics

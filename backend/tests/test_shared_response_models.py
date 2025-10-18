@@ -2,9 +2,7 @@
 Testes para shared.response_models
 Coverage target: 100% ABSOLUTO
 """
-import pytest
 from datetime import datetime
-from typing import List
 
 from backend.shared.response_models import (
     BaseResponse,

@@ -34,7 +34,7 @@ Glory to YHWH - Constância como Ramon Dino! 💪
 import logging
 import numpy as np
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 

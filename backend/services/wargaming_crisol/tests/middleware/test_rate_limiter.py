@@ -1,11 +1,10 @@
 """Tests for rate limiter middleware - Phase 5.7.1"""
 
 import pytest
-import asyncio
 import time
 import sys
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # Add parent directory to path for imports

@@ -5,7 +5,6 @@ Tests complete flow: CANDI → HITL → Decision → Action
 """
 
 import requests
-import json
 import time
 from datetime import datetime
 from uuid import uuid4

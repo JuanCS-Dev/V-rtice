@@ -15,7 +15,7 @@ Lei Governante: Constituição Vértice v2.6 - All Laws
 
 from typing import List, Dict
 from motor_integridade_processual.frameworks.base import AbstractEthicalFramework
-from motor_integridade_processual.models.action_plan import ActionPlan, ActionStep
+from motor_integridade_processual.models.action_plan import ActionPlan
 from motor_integridade_processual.models.verdict import (
     FrameworkVerdict,
     FrameworkName,

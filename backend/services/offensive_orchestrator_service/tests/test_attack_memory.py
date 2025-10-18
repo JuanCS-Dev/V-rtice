@@ -17,10 +17,10 @@ Covers:
 import pytest
 from uuid import uuid4
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock, patch
 
 from memory.attack_memory import AttackMemorySystem
-from models import CampaignPlan, CampaignObjective, CampaignStatus, RiskLevel
+from models import CampaignStatus
 
 
 @pytest.mark.unit

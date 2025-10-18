@@ -118,7 +118,7 @@ class CircuitBreaker:
             
             return result
         
-        except asyncio.TimeoutError as e:
+        except asyncio.TimeoutError:
             logger.warning(
                 f"Circuit breaker '{self.name}': Timeout after "
                 f"{self.timeout.total_seconds()}s"

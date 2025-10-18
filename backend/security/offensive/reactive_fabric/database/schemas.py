@@ -6,11 +6,10 @@ Aligns with Pydantic models but adds database-specific constraints.
 """
 
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, DateTime, JSON, Enum as SQLEnum, 
+    Column, String, Integer, Float, Boolean, DateTime, Enum as SQLEnum, 
     ForeignKey, Index, CheckConstraint, Text, ARRAY
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB

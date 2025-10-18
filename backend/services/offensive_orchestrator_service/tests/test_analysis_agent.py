@@ -1,7 +1,6 @@
 """Complete tests for Analysis Agent - 100% coverage."""
 
 import pytest
-from datetime import datetime
 from agents.analysis.agent import (
     AnalysisAgent,
     Curriculum,

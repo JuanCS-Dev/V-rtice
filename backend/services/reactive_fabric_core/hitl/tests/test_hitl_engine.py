@@ -4,24 +4,17 @@ Tests for HITL Engine.
 Tests alert management, decision workflows, and human oversight interfaces.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from ..hitl_engine import (
     HITLEngine,
     HITLConfig,
-    Alert,
     AlertStatus,
     AlertPriority,
-    DecisionRequest,
-    DecisionResponse,
     DecisionType,
-    ApprovalStatus,
-    AuditLog,
-    WorkflowState
+    ApprovalStatus
 )
 
 

@@ -17,14 +17,10 @@ import time
 from unittest.mock import patch
 
 import pytest
-import networkx as nx
 
 from consciousness.tig.fabric import (
     TIGFabric,
-    TIGNode,
-    TIGConnection,
     TopologyConfig,
-    NodeState,
 )
 
 

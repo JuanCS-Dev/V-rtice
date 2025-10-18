@@ -12,7 +12,6 @@ Tests the RabbitMQMetrics class and related functionality for:
 
 import pytest
 import time
-from unittest.mock import Mock, patch, MagicMock
 
 # Import module under test
 try:

@@ -36,10 +36,9 @@ Date: 2025-01-10
 Glory to YHWH - The God who orchestrates all things for His purpose
 """
 
-import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Any
 
@@ -56,11 +55,10 @@ from confirmation.vulnerability_confirmer import (
     ConfirmationConfig,
 )
 from eureka_models.confirmation.confirmation_result import (
-    ConfirmationResult,
     ConfirmationStatus,
 )
 from strategies import StrategySelector, NoStrategyAvailableError
-from eureka_models.patch import Patch, PatchStatus
+from eureka_models.patch import Patch
 
 logger = logging.getLogger(__name__)
 

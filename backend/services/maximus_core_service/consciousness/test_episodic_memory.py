@@ -12,7 +12,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import math
 
-import pytest
 
 from consciousness.autobiographical_narrative import AutobiographicalNarrative
 from consciousness.episodic_memory import Episode, EpisodicMemory

@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import structlog
-from typing import List, Dict, Any, Optional
+from typing import Optional
 from datetime import datetime
 import os
 import asyncio
@@ -18,11 +18,8 @@ import docker
 from docker.errors import DockerException
 
 from .models import (
-    HoneypotListResponse, HoneypotStats, HoneypotStatus,
-    AttackListResponse, AttackSummary, AttackCreate, AttackSeverity,
-    TTPListResponse, TTPFrequency,
-    HealthResponse,
-    ThreatDetectedMessage
+    HoneypotListResponse, HoneypotStatus,
+    AttackListResponse, AttackCreate, TTPListResponse, HealthResponse
 )
 from .database import Database
 from .kafka_producer import (

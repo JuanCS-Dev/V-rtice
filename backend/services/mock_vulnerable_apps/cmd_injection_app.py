@@ -4,7 +4,6 @@ Intentionally vulnerable for Wargaming validation - DO NOT USE IN PRODUCTION
 """
 from fastapi import FastAPI, Query
 import subprocess
-import os
 
 app = FastAPI(title="Mock Command Injection App")
 

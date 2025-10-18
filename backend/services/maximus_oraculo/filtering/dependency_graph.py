@@ -13,7 +13,7 @@ Compliance: Doutrina MAXIMUS | Type Hints 100% | Production-Ready
 
 import tomllib  # type: ignore[import-not-found] # Python 3.11+ built-in
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple, Union
+from typing import Dict, List, Set, Optional, Union
 from dataclasses import dataclass, field
 import logging
 import re

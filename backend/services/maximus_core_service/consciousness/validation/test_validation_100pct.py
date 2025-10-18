@@ -15,13 +15,11 @@ Date: 2025-10-15
 import pytest
 import time
 from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 import networkx as nx
-import numpy as np
 
 from consciousness.validation.metacognition import (
-    MetacognitionValidator,
-    MetacognitionMetrics
+    MetacognitionValidator
 )
 from consciousness.validation.coherence import (
     CoherenceValidator,

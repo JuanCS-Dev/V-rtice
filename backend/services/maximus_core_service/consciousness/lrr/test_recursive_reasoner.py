@@ -20,7 +20,6 @@ Date: 2025-10-08
 Status: DOUTRINA VÉRTICE v2.0 COMPLIANT
 """
 
-import asyncio
 from datetime import datetime, timedelta
 
 import pytest
@@ -38,7 +37,6 @@ from . import (
     MetaMonitor,
     MetaMonitoringReport,
     RecursiveReasoner,
-    RecursiveReasoningResult,
     Resolution,
     ResolutionStrategy,
     RevisionOutcome,

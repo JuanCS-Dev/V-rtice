@@ -4,11 +4,10 @@ Integrated tests for PFC orchestration
 Tests complete flow: ToM → Compassion → DDL → PFC decision
 """
 
-import pytest
 from uuid import uuid4
 
-from consciousness.tom_engine import ToMEngine, UserMentalState, EmotionalState
-from consciousness.prefrontal_cortex import PrefrontalCortex, OrchestratedDecision
+from consciousness.tom_engine import ToMEngine, EmotionalState
+from consciousness.prefrontal_cortex import PrefrontalCortex
 
 
 class TestToMEngine:

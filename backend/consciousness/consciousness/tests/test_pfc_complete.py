@@ -4,10 +4,9 @@ Complete coverage tests for PFC
 Covers all remaining branches and edge cases.
 """
 
-import pytest
 from uuid import uuid4
 
-from consciousness.prefrontal_cortex import PrefrontalCortex, OrchestratedDecision
+from consciousness.prefrontal_cortex import PrefrontalCortex
 from consciousness.tom_engine import EmotionalState
 
 

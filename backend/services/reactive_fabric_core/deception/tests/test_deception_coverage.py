@@ -4,16 +4,12 @@ Additional tests for Deception Engine to increase coverage.
 
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from ..deception_engine import (
     DeceptionEngine,
     DeceptionConfig,
-    DecoySystem,
-    TrapDocument,
-    BreadcrumbTrail,
     HoneytokenGenerator,
     TokenType
 )

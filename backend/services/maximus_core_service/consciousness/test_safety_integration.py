@@ -28,7 +28,7 @@ from consciousness.prometheus_metrics import (
     update_metrics,
     update_violation_metrics,
 )
-from consciousness.safety import ThreatLevel, SafetyThresholds, SafetyViolationType
+from consciousness.safety import SafetyThresholds
 from consciousness.system import ConsciousnessConfig, ConsciousnessSystem
 
 # ==================== FIXTURES ====================

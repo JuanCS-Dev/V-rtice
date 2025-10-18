@@ -9,7 +9,6 @@ Compliance: Doutrina MAXIMUS | Type Hints 100% | Production-Ready
 """
 
 from typing import List, Optional, Dict, Any
-import asyncio
 import logging
 import json
 from datetime import datetime

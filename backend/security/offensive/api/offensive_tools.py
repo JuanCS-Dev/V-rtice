@@ -9,9 +9,9 @@ Philosophy: Powerful tools with ethical guardrails.
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header
 from prometheus_client import Counter, Histogram
-from pydantic import BaseModel, Field, validator, IPvAnyAddress
+from pydantic import BaseModel, Field, validator
 import structlog
 
 from ..core.tool_registry import registry, ToolCategory
@@ -320,7 +320,7 @@ async def list_offensive_tools(
             categories=categories
         )
         
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid category: {category}"
