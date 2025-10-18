@@ -86,8 +86,8 @@ class CredentialIntelReport:
     platform_presence: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
     statistics: Dict[str, Any] = field(default_factory=dict)
-    ai_analysis: Optional[Dict[str, Any]] = None  # NEW: AI-powered analysis
-    error: Optional[str] = None
+    ai_analysis: Optional[Dict[str, Any]] = field(default=None)  # FIX: use field(default=None)
+    error: Optional[str] = field(default=None)  # FIX: use field(default=None)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""

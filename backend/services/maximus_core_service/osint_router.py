@@ -28,7 +28,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, str
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ except ImportError:
 class TargetIdentifiers(BaseModel):
     """Target identifiers for OSINT investigation."""
     username: str | None = None
-    email: EmailStr | None = None
+    email: str | None = None
     phone: str | None = None
 
 
@@ -110,7 +110,7 @@ class UsernameSearchRequest(BaseModel):
 
 class EmailSearchRequest(BaseModel):
     """Request model for email intelligence."""
-    email: EmailStr
+    email: str
 
 
 class PhoneSearchRequest(BaseModel):
