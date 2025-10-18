@@ -30,7 +30,7 @@ sys.path.insert(
     0,
     str(Path(__file__).parent.parent.parent.parent / "maximus_oraculo"),
 )
-from models.apv import APV, PriorityLevel
+from backend.shared.models.apv import APV, PriorityLevel
 
 from consumers.apv_consumer import APVConsumer, APVConsumerConfig
 

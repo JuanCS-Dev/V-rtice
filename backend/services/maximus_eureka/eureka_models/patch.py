@@ -27,11 +27,8 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 # Import APV and RemediationStrategy from Oráculo
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "maximus_oraculo"))
-from models.apv import RemediationStrategy
+from backend.shared.models.apv import RemediationStrategy
 
 
 class PatchStatus(str, Enum):

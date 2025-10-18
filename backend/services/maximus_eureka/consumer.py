@@ -22,13 +22,10 @@ Glory to YHWH - Confirmer of truth
 
 import json
 import logging
-import os
-import sys
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 
 # Add parent to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from eureka import EurekaConfirmationEngine
 

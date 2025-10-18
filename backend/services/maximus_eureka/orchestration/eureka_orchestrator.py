@@ -43,11 +43,8 @@ from datetime import datetime
 from typing import Optional, Any
 
 # APV from Oráculo
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "maximus_oraculo"))
-from models.apv import APV
+from backend.shared.models.apv import APV
 
 from consumers.apv_consumer import APVConsumer, APVConsumerConfig
 from confirmation.vulnerability_confirmer import (

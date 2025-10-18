@@ -21,8 +21,7 @@ from strategies.code_patch_llm import CodePatchLLMStrategy
 from llm import LLMResponse
 
 # Import models
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "maximus_oraculo"))
-from models.apv import APV, AffectedPackage, ASTGrepPattern, RemediationStrategy
+from backend.shared.models.apv import APV, AffectedPackage, ASTGrepPattern, RemediationStrategy
 
 
 # ===================== CODE PATCH LLM TESTS =====================

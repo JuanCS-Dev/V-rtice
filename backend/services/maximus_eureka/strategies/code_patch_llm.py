@@ -46,19 +46,7 @@ import logging
 from pathlib import Path
 from typing import Optional, List
 
-# Import APV from Oráculo
-import sys
-
-oraculo_path = Path(__file__).parent.parent.parent / "maximus_oraculo"
-if str(oraculo_path) not in sys.path:
-    sys.path.insert(0, str(oraculo_path))
-
-from models.apv import APV, RemediationStrategy
-
-# Import Eureka models
-eureka_path = Path(__file__).parent.parent
-if str(eureka_path) not in sys.path:
-    sys.path.insert(0, str(eureka_path))
+from backend.shared.models.apv import APV, RemediationStrategy
 
 from eureka_models.confirmation.confirmation_result import (
     ConfirmationResult,

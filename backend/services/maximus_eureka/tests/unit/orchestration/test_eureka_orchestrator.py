@@ -31,7 +31,7 @@ for path in [eureka_path, oraculo_path]:
     if path_str not in sys.path:
         sys.path.insert(0, path_str)
 
-from models.apv import APV, AffectedPackage, ASTGrepPattern
+from backend.shared.models.apv import APV, AffectedPackage, ASTGrepPattern
 
 from orchestration.eureka_orchestrator import (
     EurekaOrchestrator,

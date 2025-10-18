@@ -30,29 +30,14 @@ import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Callable, Optional
 
 from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 from pydantic import ValidationError
 
-# Setup Python path for cross-service imports
-import sys
-from pathlib import Path
-
-# Add both Oráculo (for APV) and Eureka (for eureka_models)
-current_file = Path(__file__).resolve()
-eureka_path = current_file.parent.parent
-oraculo_path = eureka_path.parent / "maximus_oraculo"
-
-for path in [oraculo_path, eureka_path]:
-    path_str = str(path)
-    if path_str not in sys.path:
-        sys.path.insert(0, path_str)
-
 # Import APV from Oráculo
-from models.apv import APV
+from backend.shared.models.apv import APV
 
 # Import Eureka models
 

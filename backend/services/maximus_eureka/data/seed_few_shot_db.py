@@ -24,10 +24,8 @@ Date: 2025-10-11
 """
 
 import sys
-from pathlib import Path
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from data.few_shot_database import FewShotDatabase, VulnerabilityFix, DifficultyLevel
 

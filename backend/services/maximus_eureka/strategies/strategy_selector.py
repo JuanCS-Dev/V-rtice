@@ -23,11 +23,8 @@ from typing import List
 import logging
 
 # Import APV from Oráculo
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "maximus_oraculo"))
-from models.apv import APV
+from backend.shared.models.apv import APV
 
 from eureka_models.confirmation.confirmation_result import ConfirmationResult
 from strategies.base_strategy import BaseStrategy

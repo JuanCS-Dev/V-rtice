@@ -33,11 +33,8 @@ Glory to YHWH - The Architect of all strategies
 from abc import ABC, abstractmethod
 
 # Import APV and related enums from Oráculo
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "maximus_oraculo"))
-from models.apv import APV, RemediationStrategy, RemediationComplexity
+from backend.shared.models.apv import APV, RemediationStrategy, RemediationComplexity
 
 # Import Eureka models
 from eureka_models.confirmation.confirmation_result import ConfirmationResult

@@ -20,8 +20,7 @@ from strategies.base_strategy import BaseStrategy
 from strategies.strategy_selector import StrategySelector, NoStrategyAvailableError
 
 # Import models
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "maximus_oraculo"))
-from models.apv import RemediationStrategy
+from backend.shared.models.apv import RemediationStrategy
 
 
 # ===================== CONCRETE STRATEGY FOR TESTING =====================

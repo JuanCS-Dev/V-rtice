@@ -19,8 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from strategies.dependency_upgrade import DependencyUpgradeStrategy
 
 # Import models
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent / "maximus_oraculo"))
-from models.apv import APV, AffectedPackage, RemediationStrategy
+from backend.shared.models.apv import APV, AffectedPackage, RemediationStrategy
 
 
 # ===================== DEPENDENCY UPGRADE TESTS =====================

@@ -923,14 +923,15 @@ services:
   # MAXIMUS EUREKA - Deep Malware Analysis
   maximus-eureka:
     build:
-      context: ./backend/services/maximus_eureka
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: services/maximus_eureka/Dockerfile
     container_name: maximus-eureka
     ports:
       - "8151:8036"  # Fixed: Dockerfile uses 8036, not 8200
     environment:
       SERVICE_NAME: maximus_eureka
       LOG_LEVEL: INFO
+      PYTHONPATH: "/app:/app/backend"
     volumes:
       - eureka_reports:/app/reports
       - eureka_playbooks:/app/playbooks
