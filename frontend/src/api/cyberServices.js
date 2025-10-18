@@ -96,22 +96,24 @@ export const analyzeIP = async (ip) => {
 
 /**
  * Detecta e analisa o IP público do usuário
+ * WORKAROUND: Usa ipify.org para detecção + analyzeIP para análise
  */
 export const analyzeMyIP = async () => {
   try {
-    const response = await fetch(`${API_ENDPOINTS.IP_INTELLIGENCE}/analyze-my-ip`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(`My IP Analysis failed: ${response.status}`);
+    // Step 1: Detectar IP público usando ipify
+    const ipifyResponse = await fetch('https://api.ipify.org?format=json');
+    if (!ipifyResponse.ok) {
+      throw new Error('Failed to detect public IP');
     }
-
-    const data = await response.json();
+    const { ip } = await ipifyResponse.json();
+    
+    // Step 2: Analisar o IP detectado
+    const analysisResult = await analyzeIP(ip);
+    
     return {
       success: true,
-      ...data
+      ip,
+      ...analysisResult
     };
   } catch (error) {
     logger.error('Error analyzing my IP:', error);
