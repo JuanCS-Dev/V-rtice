@@ -644,6 +644,176 @@
   font-style: italic;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   AI ANALYSIS SECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.osint-ai-analysis-section {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #0f3460;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.osint-ai-analysis-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #4499ff, #cc44ff, #ff9944);
+}
+
+.osint-ai-analysis-section h4 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 25px;
+  text-shadow: 0 0 10px rgba(68, 153, 255, 0.5);
+}
+
+.osint-ai-error {
+  background: rgba(255, 68, 68, 0.1);
+  border: 1px solid #ff4444;
+  border-radius: 4px;
+  padding: 15px;
+  color: #ff4444;
+}
+
+.osint-ai-error small {
+  display: block;
+  margin-top: 5px;
+  color: #cc3333;
+  font-size: 12px;
+}
+
+.osint-ai-risk {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.osint-ai-label {
+  font-size: 14px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.osint-ai-risk-badge {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.osint-ai-risk-badge.critical {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff0000;
+  border: 1px solid #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.osint-ai-risk-badge.high {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+}
+
+.osint-ai-risk-badge.medium {
+  background: rgba(255, 153, 68, 0.2);
+  color: #ff9944;
+  border: 1px solid #ff9944;
+}
+
+.osint-ai-risk-badge.low {
+  background: rgba(255, 204, 68, 0.2);
+  color: #ffcc44;
+  border: 1px solid #ffcc44;
+}
+
+.osint-ai-insights,
+.osint-ai-vectors,
+.osint-ai-recommendations,
+.osint-ai-summary {
+  margin-top: 20px;
+}
+
+.osint-ai-insights h5,
+.osint-ai-vectors h5,
+.osint-ai-recommendations h5,
+.osint-ai-summary h5 {
+  font-size: 14px;
+  font-weight: bold;
+  color: #4499ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.osint-ai-insights-list,
+.osint-ai-vectors-list,
+.osint-ai-recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.osint-ai-insights-list li,
+.osint-ai-vectors-list li,
+.osint-ai-recommendations-list li {
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid #0f3460;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.osint-ai-insights-list li::before {
+  content: '🔍 ';
+}
+
+.osint-ai-vectors-list li::before {
+  content: '🎯 ';
+}
+
+.osint-ai-recommendations-list li::before {
+  content: '💡 ';
+}
+
+.osint-ai-insights-list li:hover,
+.osint-ai-vectors-list li:hover,
+.osint-ai-recommendations-list li:hover {
+  background: rgba(68, 153, 255, 0.1);
+  border-left-color: #4499ff;
+  transform: translateX(5px);
+}
+
+.osint-ai-summary p {
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #e0e0e0;
+}
+
 /* Recommendations */
 .osint-recommendations-section {
   background: #1a1a1a;

@@ -851,6 +851,76 @@ export const OSINTWorkflowsPanel = () => {
           </div>
         </div>
 
+        {/* AI Analysis Section - MAXIMUS AI Insights */}
+        {workflowReport.ai_analysis && (
+          <div className="osint-ai-analysis-section">
+            <h4>🤖 MAXIMUS AI Analysis</h4>
+            
+            {workflowReport.ai_analysis.error ? (
+              <div className="osint-ai-error">
+                <p>⚠️ AI Analysis unavailable</p>
+                <small>{workflowReport.ai_analysis.fallback}</small>
+              </div>
+            ) : (
+              <>
+                {/* Risk Assessment */}
+                {workflowReport.ai_analysis.risk_score !== undefined && (
+                  <div className="osint-ai-risk">
+                    <span className="osint-ai-label">AI Risk Assessment:</span>
+                    <span className={`osint-ai-risk-badge ${workflowReport.ai_analysis.risk_level || 'medium'}`}>
+                      {workflowReport.ai_analysis.risk_level?.toUpperCase() || 'ANALYZING'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Key Findings */}
+                {workflowReport.ai_analysis.critical_insights && (
+                  <div className="osint-ai-insights">
+                    <h5>🔍 Key Findings</h5>
+                    <ul className="osint-ai-insights-list">
+                      {workflowReport.ai_analysis.critical_insights.map((insight, idx) => (
+                        <li key={idx}>{insight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Attack Vectors */}
+                {workflowReport.ai_analysis.attack_vectors && (
+                  <div className="osint-ai-vectors">
+                    <h5>🎯 Identified Attack Vectors</h5>
+                    <ul className="osint-ai-vectors-list">
+                      {workflowReport.ai_analysis.attack_vectors.map((vector, idx) => (
+                        <li key={idx}>{vector}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* AI Recommendations */}
+                {workflowReport.ai_analysis.recommendations && (
+                  <div className="osint-ai-recommendations">
+                    <h5>💡 AI Recommendations</h5>
+                    <ul className="osint-ai-recommendations-list">
+                      {workflowReport.ai_analysis.recommendations.map((rec, idx) => (
+                        <li key={idx}>{rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Executive Summary */}
+                {workflowReport.ai_analysis.executive_summary && (
+                  <div className="osint-ai-summary">
+                    <h5>📋 Executive Summary</h5>
+                    <p>{workflowReport.ai_analysis.executive_summary}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
         {/* Findings Table */}
         {workflowReport.findings && workflowReport.findings.length > 0 && (
           <div className="osint-findings-section">
