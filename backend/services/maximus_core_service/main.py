@@ -13,6 +13,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from _demonstration.maximus_integrated import MaximusIntegrated
 from pydantic import BaseModel
 
@@ -29,6 +30,19 @@ from adw_router import router as adw_router
 from hitl import DecisionQueue, HITLConfig, HITLDecisionFramework, OperatorInterface, SLAConfig
 
 app = FastAPI(title="Maximus Core Service", version="1.0.0")
+
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Vite dev server
+        "http://localhost:3000",  # Alternative frontend port
+        "http://localhost:8000",  # API Gateway
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 maximus_ai: MaximusIntegrated | None = None
 
 # HITL components (initialized on startup)
