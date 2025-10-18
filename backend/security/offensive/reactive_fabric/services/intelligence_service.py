@@ -4,6 +4,8 @@ Reactive Fabric - Intelligence Service.
 Business logic for threat intelligence fusion, analysis and reporting.
 Primary value delivery mechanism for Phase 1: actionable threat intelligence.
 """
+from sqlalchemy import select
+from ..database.schemas import IntelligenceReportEventLink, IntelligenceReportAssetLink
 
 from typing import List, Optional, Dict, Any
 from uuid import UUID
@@ -410,6 +412,10 @@ class IntelligenceService:
         # TTP patterns queried from threat_reports collection with time filter
         novel_ttps = 0  # Placeholder
         ttp_patterns = 0  # Placeholder
+        
+        # Initialize collections
+        hypotheses = []
+        measures = []
         
         # Create metrics snapshot
         metrics = IntelligenceMetrics(

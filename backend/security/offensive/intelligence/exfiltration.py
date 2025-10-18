@@ -328,7 +328,7 @@ class DataExfiltrator(OffensiveTool):
         # Convert to lowercase for case-insensitive matching
         try:
             text = content.decode('utf-8', errors='ignore').lower()
-        except:
+        except Exception:
             return DataClassification.INTERNAL, []
         
         keywords_found = []

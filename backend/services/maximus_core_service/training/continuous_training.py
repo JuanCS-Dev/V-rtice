@@ -176,7 +176,7 @@ class ContinuousTrainingPipeline:
             import torch
 
             torch.save(new_model.state_dict(), checkpoint_path)
-        except:
+        except Exception:
             logger.warning("Could not save model checkpoint")
 
         self.registry.register_model(model_path=checkpoint_path, metadata=metadata)

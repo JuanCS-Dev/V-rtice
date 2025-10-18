@@ -240,7 +240,7 @@ class LymphnodeMetrics:
                 threats = loop.run_until_complete(self.total_ameacas_detectadas.get())
                 neutralizations = loop.run_until_complete(self.total_neutralizacoes.get())
                 metrics_str = f"threats={threats}, neutralizations={neutralizations}"
-        except:
+        except Exception:
             metrics_str = "metrics=?"
 
         return f"LymphnodeMetrics(lymphnode={self.lymphnode_id}, {metrics_str})"

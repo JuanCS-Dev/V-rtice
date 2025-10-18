@@ -232,7 +232,7 @@ class NetworkScanner(OffensiveTool):
                 )
                 if data:
                     port_obj.banner = data.decode('utf-8', errors='ignore')
-            except:
+            except Exception:
                 pass
             
             writer.close()

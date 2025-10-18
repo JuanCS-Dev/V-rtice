@@ -731,7 +731,7 @@ async def broadcast_decision(decision: OrchestratedDecision):
     for ws in app.state.ws_connections:
         try:
             await ws.send_json(message)
-        except:
+        except Exception:
             disconnected.add(ws)
 
     # Remove disconnected clients

@@ -275,7 +275,7 @@ class LinfonodoDigital:
                 return HomeostaticState.VIGILANCIA
             else:
                 temp = loop.run_until_complete(self.temperatura_regional.get())
-        except:
+        except Exception:
             # Fallback
             temp = 37.0
 

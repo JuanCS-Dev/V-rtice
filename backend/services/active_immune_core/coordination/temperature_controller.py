@@ -275,7 +275,7 @@ class TemperatureController:
             else:
                 temp = loop.run_until_complete(self.temperature.get())
                 temp_str = f"{temp:.1f}°C"
-        except:
+        except Exception:
             temp_str = "?.?°C"
 
         return f"TemperatureController(lymphnode={self.lymphnode_id}, temp={temp_str})"

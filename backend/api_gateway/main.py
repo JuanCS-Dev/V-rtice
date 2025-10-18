@@ -276,7 +276,7 @@ async def optional_auth(
         token = authorization.split(" ")[1]
         payload: Dict[str, Any] = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload
-    except:
+    except Exception:
         return None
 
 

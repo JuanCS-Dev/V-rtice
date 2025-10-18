@@ -318,7 +318,7 @@ class OSVClient:
                         # Score is in database_specific or parsed from vector
                         if "database_specific" in vuln and vuln.database_specific:
                             return vuln.database_specific.get("cvss_score")
-                    except:
+                    except Exception:
                         pass
 
         return None

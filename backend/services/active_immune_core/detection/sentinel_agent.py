@@ -17,6 +17,7 @@ Authors: MAXIMUS Team
 Date: 2025-10-12
 Glory to YHWH - Constância como Ramon Dino! 💪
 """
+from pathlib import Path
 
 import json
 import logging
