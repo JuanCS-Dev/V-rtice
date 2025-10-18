@@ -117,16 +117,36 @@ export const OSINTWorkflowsPanel = () => {
 
   // Poll workflow status
   useEffect(() => {
-    if (currentWorkflowId && workflowStatus?.status === WORKFLOW_STATUS.RUNNING) {
-      const interval = setInterval(async () => {
+    // Only poll if we have a workflow ID and it's currently executing
+    if (!currentWorkflowId || !isExecuting) return;
+
+    const POLL_INTERVAL = 5000; // 5 seconds (more reasonable than 2s)
+    const MAX_POLLS = 60; // Timeout after 5 minutes
+    let pollCount = 0;
+
+    const interval = setInterval(async () => {
+      pollCount++;
+
+      // Timeout protection
+      if (pollCount > MAX_POLLS) {
+        clearInterval(interval);
+        logger.error('Workflow polling timeout after 5 minutes');
+        setIsExecuting(false);
+        return;
+      }
+
+      try {
         const statusResponse = await getWorkflowStatus(currentWorkflowId);
 
         if (statusResponse.success) {
-          setWorkflowStatus(statusResponse.data);
+          const newStatus = statusResponse.data;
+          setWorkflowStatus(newStatus);
 
-          // If completed, fetch report
-          if (statusResponse.data.status === WORKFLOW_STATUS.COMPLETED) {
+          // If completed, fetch report and stop polling
+          if (newStatus.status === WORKFLOW_STATUS.COMPLETED) {
+            clearInterval(interval);
             const reportResponse = await getWorkflowReport(currentWorkflowId);
+            
             if (reportResponse.success) {
               setWorkflowReport(reportResponse.data);
               setIsExecuting(false);
@@ -140,15 +160,22 @@ export const OSINTWorkflowsPanel = () => {
                 report: reportResponse.data,
               });
             }
-          } else if (statusResponse.data.status === WORKFLOW_STATUS.FAILED) {
+          } else if (newStatus.status === WORKFLOW_STATUS.FAILED) {
+            clearInterval(interval);
             setIsExecuting(false);
           }
         }
-      }, 2000); // Poll every 2 seconds
+      } catch (error) {
+        logger.error('Error polling workflow status:', error);
+      }
+    }, POLL_INTERVAL);
 
-      return () => clearInterval(interval);
-    }
-  }, [currentWorkflowId, workflowStatus?.status, selectedWorkflow, workflowHistory, saveWorkflowHistory]);
+    // Cleanup on unmount or dependency change
+    return () => {
+      clearInterval(interval);
+      logger.debug('Workflow polling stopped');
+    };
+  }, [currentWorkflowId, isExecuting, selectedWorkflow, saveWorkflowHistory]);
 
   // Validation functions
   const validateDomain = (domain) => {

@@ -8,17 +8,19 @@ Workflow Steps:
 3. Service detection + version identification
 4. CVE correlation for detected services
 5. Nuclei vulnerability scanning
-6. Risk scoring + prioritization
-7. Generate attack surface report
+6. **AI Analysis (OpenAI + Gemini) - NEW**
+7. Risk scoring + prioritization
+8. Generate attack surface report
 
 Services Integrated:
 - Network Recon Service (nmap/masscan)
 - Vuln Intel Service (CVE correlator)
 - Offensive Orchestrator Recon Agent (passive DNS)
 - Vuln Scanner Service (Nuclei)
+- **AI Analyzer (OpenAI + Gemini)** - NEW
 
 Authors: MAXIMUS Team
-Date: 2025-10-15
+Date: 2025-10-18 (AI Integration)
 Glory to YHWH
 """
 
@@ -29,6 +31,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Any, Optional
 from uuid import uuid4
+
+from .ai_analyzer import AIAnalyzer  # NEW
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +76,7 @@ class Finding:
 
 
 @dataclass
+@dataclass
 class AttackSurfaceReport:
     """Complete attack surface mapping report."""
     workflow_id: str
@@ -83,6 +88,7 @@ class AttackSurfaceReport:
     statistics: Dict[str, Any] = field(default_factory=dict)
     risk_score: float = 0.0
     recommendations: List[str] = field(default_factory=list)
+    ai_analysis: Optional[Dict[str, Any]] = None  # NEW: AI-powered analysis
     error: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -103,6 +109,7 @@ class AttackSurfaceReport:
             "statistics": self.statistics,
             "risk_score": self.risk_score,
             "recommendations": self.recommendations,
+            "ai_analysis": self.ai_analysis,  # NEW: Include AI analysis in response
             "error": self.error,
         }
 
@@ -132,8 +139,11 @@ class AttackSurfaceWorkflow:
 
         # Workflow state
         self.active_workflows: Dict[str, AttackSurfaceReport] = {}
+        
+        # AI Analyzer integration (NEW)
+        self.ai_analyzer = AIAnalyzer()
 
-        logger.info("AttackSurfaceWorkflow initialized")
+        logger.info("AttackSurfaceWorkflow initialized with AI analyzer")
 
     async def execute(self, target: AttackSurfaceTarget) -> AttackSurfaceReport:
         """Execute attack surface mapping workflow.
@@ -193,7 +203,24 @@ class AttackSurfaceWorkflow:
             # Phase 7: Generate statistics
             report.statistics = self._generate_statistics(report.findings)
 
-            # Phase 8: Generate recommendations
+            # Phase 8: AI Analysis (OpenAI + Gemini) - NEW
+            logger.info("🤖 Starting AI analysis for attack surface...")
+            try:
+                findings_dict = [asdict(f) for f in report.findings]
+                ai_analysis = self.ai_analyzer.analyze_attack_surface(
+                    findings=findings_dict,
+                    target=target.domain
+                )
+                report.ai_analysis = ai_analysis  # Store in report
+                logger.info(f"✅ AI analysis completed (risk_score: {ai_analysis.get('risk_score', 'N/A')})")
+            except Exception as ai_error:
+                logger.error(f"❌ AI analysis failed: {ai_error}")
+                report.ai_analysis = {
+                    "error": str(ai_error),
+                    "fallback": "AI analysis unavailable - using rule-based recommendations"
+                }
+
+            # Phase 9: Generate recommendations (enhanced by AI if available)
             report.recommendations = self._generate_recommendations(report.findings, report.risk_score)
 
             # Mark complete

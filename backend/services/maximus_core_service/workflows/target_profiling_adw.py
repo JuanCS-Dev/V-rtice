@@ -30,6 +30,7 @@ from uuid import uuid4
 logger = logging.getLogger(__name__)
 
 
+from .ai_analyzer import AIAnalyzer  # AI Integration
 class WorkflowStatus(Enum):
     """Workflow execution status."""
     PENDING = "pending"
@@ -137,6 +138,8 @@ class TargetProfilingWorkflow:
 
         # Workflow state
         self.active_workflows: Dict[str, TargetProfileReport] = {}
+        self.ai_analyzer = AIAnalyzer()  # AI analyzer
+        logger.info("TargetProfilingWorkflow initialized with AI analyzer")
 
         logger.info("TargetProfilingWorkflow initialized")
 
@@ -163,6 +166,8 @@ class TargetProfilingWorkflow:
         )
 
         self.active_workflows[workflow_id] = report
+        self.ai_analyzer = AIAnalyzer()  # AI analyzer
+        logger.info("TargetProfilingWorkflow initialized with AI analyzer")
 
         try:
             logger.info(f"Starting deep profiling for {target.username or target.email or target.name} (workflow_id={workflow_id})")
@@ -711,6 +716,8 @@ class TargetProfilingWorkflow:
             Workflow status dictionary or None
         """
         report = self.active_workflows.get(workflow_id)
+        self.ai_analyzer = AIAnalyzer()  # AI analyzer
+        logger.info("TargetProfilingWorkflow initialized with AI analyzer")
         if not report:
             return None
 
