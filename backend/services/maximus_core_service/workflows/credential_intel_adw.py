@@ -166,73 +166,80 @@ class CredentialIntelWorkflow:
         logger.info("CredentialIntelWorkflow initialized with AI analyzer")
 
         try:
-            logger.info(f"Starting credential intelligence for {target.email or target.username} (workflow_id={workflow_id})")
+            # Wrap entire workflow execution in timeout
+            async with asyncio.timeout(120):  # 2 minutes max
+                logger.info(f"Starting credential intelligence for {target.email or target.username} (workflow_id={workflow_id})")
 
-            # Phase 1: HIBP breach data search
-            if target.email or target.username:
-                breach_findings = await self._search_breaches(target.email, target.username)
-                report.findings.extend(breach_findings)
-                report.breach_count = len(breach_findings)
-                logger.info(f"Phase 1: Found {len(breach_findings)} breaches")
+                # Phase 1: HIBP breach data search
+                if target.email or target.username:
+                    breach_findings = await self._search_breaches(target.email, target.username)
+                    report.findings.extend(breach_findings)
+                    report.breach_count = len(breach_findings)
+                    logger.info(f"Phase 1: Found {len(breach_findings)} breaches")
 
-            # Phase 2: Google dorking for exposed credentials
-            if target.include_dorking and (target.email or target.username):
-                dork_findings = await self._google_dork_search(target.email, target.username)
-                report.findings.extend(dork_findings)
-                logger.info(f"Phase 2: Found {len(dork_findings)} dorking results")
+                # Phase 2: Google dorking for exposed credentials
+                if target.include_dorking and (target.email or target.username):
+                    dork_findings = await self._google_dork_search(target.email, target.username)
+                    report.findings.extend(dork_findings)
+                    logger.info(f"Phase 2: Found {len(dork_findings)} dorking results")
 
-            # Phase 3: Dark web monitoring
-            if target.include_darkweb and (target.email or target.username):
-                darkweb_findings = await self._monitor_darkweb(target.email, target.username)
-                report.findings.extend(darkweb_findings)
-                logger.info(f"Phase 3: Found {len(darkweb_findings)} dark web mentions")
+                # Phase 3: Dark web monitoring
+                if target.include_darkweb and (target.email or target.username):
+                    darkweb_findings = await self._monitor_darkweb(target.email, target.username)
+                    report.findings.extend(darkweb_findings)
+                    logger.info(f"Phase 3: Found {len(darkweb_findings)} dark web mentions")
 
-            # Phase 4: Username enumeration across platforms
-            if target.username:
-                username_findings = await self._enumerate_username(target.username)
-                report.findings.extend(username_findings)
-                report.platform_presence = [f.details["platform"] for f in username_findings if f.details.get("found")]
-                logger.info(f"Phase 4: Found {len(report.platform_presence)} platform presences")
+                # Phase 4: Username enumeration across platforms
+                if target.username:
+                    username_findings = await self._enumerate_username(target.username)
+                    report.findings.extend(username_findings)
+                    report.platform_presence = [f.details["platform"] for f in username_findings if f.details.get("found")]
+                    logger.info(f"Phase 4: Found {len(report.platform_presence)} platform presences")
 
-            # Phase 5: Social media profile discovery
-            if target.include_social and target.username:
-                social_findings = await self._discover_social_profiles(target.username)
-                report.findings.extend(social_findings)
-                logger.info(f"Phase 5: Found {len(social_findings)} social profiles")
+                # Phase 5: Social media profile discovery
+                if target.include_social and target.username:
+                    social_findings = await self._discover_social_profiles(target.username)
+                    report.findings.extend(social_findings)
+                    logger.info(f"Phase 5: Found {len(social_findings)} social profiles")
 
-            # Phase 6: Calculate exposure score
-            report.exposure_score = self._calculate_exposure_score(report.findings, report.breach_count)
+                # Phase 6: Calculate exposure score
+                report.exposure_score = self._calculate_exposure_score(report.findings, report.breach_count)
 
-            # Phase 7: Generate statistics
-            report.statistics = self._generate_statistics(report.findings, report.breach_count)
+                # Phase 7: Generate statistics
+                report.statistics = self._generate_statistics(report.findings, report.breach_count)
 
-            # Phase 8: AI Analysis - NEW
-            logger.info("🤖 Starting AI analysis for credential exposure...")
-            try:
-                findings_dict = [asdict(f) for f in report.findings]
-                ai_analysis = self.ai_analyzer.analyze_credential_exposure(
-                    findings=findings_dict,
-                    target_email=target.email,
-                    target_username=target.username
-                )
-                report.ai_analysis = ai_analysis
-                logger.info(f"✅ AI analysis completed (urgency: {ai_analysis.get('urgency_score', 'N/A')})")
-            except Exception as ai_error:
-                logger.error(f"❌ AI analysis failed: {ai_error}")
-                report.ai_analysis = {
-                    "error": str(ai_error),
-                    "fallback": "AI analysis unavailable - using rule-based recommendations"
-                }
+                # Phase 8: AI Analysis - NEW
+                logger.info("🤖 Starting AI analysis for credential exposure...")
+                try:
+                    findings_dict = [asdict(f) for f in report.findings]
+                    ai_analysis = self.ai_analyzer.analyze_credential_exposure(
+                        findings=findings_dict,
+                        target_email=target.email,
+                        target_username=target.username
+                    )
+                    report.ai_analysis = ai_analysis
+                    logger.info(f"✅ AI analysis completed (urgency: {ai_analysis.get('urgency_score', 'N/A')})")
+                except Exception as ai_error:
+                    logger.error(f"❌ AI analysis failed: {ai_error}")
+                    report.ai_analysis = {
+                        "error": str(ai_error),
+                        "fallback": "AI analysis unavailable - using rule-based recommendations"
+                    }
 
-            # Phase 9: Generate recommendations (enhanced by AI)
-            report.recommendations = self._generate_recommendations(report.findings, report.exposure_score)
+                # Phase 9: Generate recommendations (enhanced by AI)
+                report.recommendations = self._generate_recommendations(report.findings, report.exposure_score)
 
-            # Mark complete
-            report.status = WorkflowStatus.COMPLETED
+                # Mark complete
+                report.status = WorkflowStatus.COMPLETED
+                report.completed_at = datetime.utcnow().isoformat()
+
+                logger.info(f"Credential intelligence completed: {len(report.findings)} findings, exposure_score={report.exposure_score:.2f}")
+
+        except asyncio.TimeoutError:
+            logger.error(f"Credential intelligence workflow timeout after 120s")
+            report.status = WorkflowStatus.FAILED
+            report.error = "Workflow execution timeout (120s) - external services may be unreachable"
             report.completed_at = datetime.utcnow().isoformat()
-
-            logger.info(f"Credential intelligence completed: {len(report.findings)} findings, exposure_score={report.exposure_score:.2f}")
-
         except Exception as e:
             logger.error(f"Credential intelligence workflow failed: {e}")
             report.status = WorkflowStatus.FAILED

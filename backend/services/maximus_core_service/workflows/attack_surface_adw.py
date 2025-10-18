@@ -167,67 +167,74 @@ class AttackSurfaceWorkflow:
         self.active_workflows[workflow_id] = report
 
         try:
-            logger.info(f"Starting attack surface mapping for {target.domain} (workflow_id={workflow_id})")
+            # Wrap entire workflow execution in timeout
+            async with asyncio.timeout(180):  # 3 minutes max for attack surface
+                logger.info(f"Starting attack surface mapping for {target.domain} (workflow_id={workflow_id})")
 
-            # Phase 1: Subdomain enumeration (passive DNS)
-            subdomains = await self._enumerate_subdomains(target.domain, target.include_subdomains)
-            report.findings.extend(subdomains)
-            logger.info(f"Phase 1: Found {len(subdomains)} subdomains")
+                # Phase 1: Subdomain enumeration (passive DNS)
+                subdomains = await self._enumerate_subdomains(target.domain, target.include_subdomains)
+                report.findings.extend(subdomains)
+                logger.info(f"Phase 1: Found {len(subdomains)} subdomains")
 
-            # Phase 2: Port scanning on all discovered targets
-            all_targets = [target.domain] + [f.details["subdomain"] for f in subdomains]
-            port_scan_findings = await self._scan_ports(all_targets, target.port_range)
-            report.findings.extend(port_scan_findings)
-            logger.info(f"Phase 2: Found {len(port_scan_findings)} open ports")
+                # Phase 2: Port scanning on all discovered targets
+                all_targets = [target.domain] + [f.details["subdomain"] for f in subdomains]
+                port_scan_findings = await self._scan_ports(all_targets, target.port_range)
+                report.findings.extend(port_scan_findings)
+                logger.info(f"Phase 2: Found {len(port_scan_findings)} open ports")
 
-            # Phase 3: Service detection on open ports
-            service_findings = await self._detect_services(port_scan_findings)
-            report.findings.extend(service_findings)
-            logger.info(f"Phase 3: Detected {len(service_findings)} services")
+                # Phase 3: Service detection on open ports
+                service_findings = await self._detect_services(port_scan_findings)
+                report.findings.extend(service_findings)
+                logger.info(f"Phase 3: Detected {len(service_findings)} services")
 
-            # Phase 4: CVE correlation for detected services
-            cve_findings = await self._correlate_cves(service_findings)
-            report.findings.extend(cve_findings)
-            logger.info(f"Phase 4: Found {len(cve_findings)} CVEs")
+                # Phase 4: CVE correlation for detected services
+                cve_findings = await self._correlate_cves(service_findings)
+                report.findings.extend(cve_findings)
+                logger.info(f"Phase 4: Found {len(cve_findings)} CVEs")
 
-            # Phase 5: Nuclei vulnerability scanning (if deep scan)
-            if target.scan_depth == "deep":
-                nuclei_findings = await self._nuclei_scan(all_targets)
-                report.findings.extend(nuclei_findings)
-                logger.info(f"Phase 5: Nuclei found {len(nuclei_findings)} vulnerabilities")
+                # Phase 5: Nuclei vulnerability scanning (if deep scan)
+                if target.scan_depth == "deep":
+                    nuclei_findings = await self._nuclei_scan(all_targets)
+                    report.findings.extend(nuclei_findings)
+                    logger.info(f"Phase 5: Nuclei found {len(nuclei_findings)} vulnerabilities")
 
-            # Phase 6: Calculate risk score
-            report.risk_score = self._calculate_risk_score(report.findings)
+                # Phase 6: Calculate risk score
+                report.risk_score = self._calculate_risk_score(report.findings)
 
-            # Phase 7: Generate statistics
-            report.statistics = self._generate_statistics(report.findings)
+                # Phase 7: Generate statistics
+                report.statistics = self._generate_statistics(report.findings)
 
-            # Phase 8: AI Analysis (OpenAI + Gemini) - NEW
-            logger.info("🤖 Starting AI analysis for attack surface...")
-            try:
-                findings_dict = [asdict(f) for f in report.findings]
-                ai_analysis = self.ai_analyzer.analyze_attack_surface(
-                    findings=findings_dict,
-                    target=target.domain
-                )
-                report.ai_analysis = ai_analysis  # Store in report
-                logger.info(f"✅ AI analysis completed (risk_score: {ai_analysis.get('risk_score', 'N/A')})")
-            except Exception as ai_error:
-                logger.error(f"❌ AI analysis failed: {ai_error}")
-                report.ai_analysis = {
-                    "error": str(ai_error),
-                    "fallback": "AI analysis unavailable - using rule-based recommendations"
-                }
+                # Phase 8: AI Analysis (OpenAI + Gemini) - NEW
+                logger.info("🤖 Starting AI analysis for attack surface...")
+                try:
+                    findings_dict = [asdict(f) for f in report.findings]
+                    ai_analysis = self.ai_analyzer.analyze_attack_surface(
+                        findings=findings_dict,
+                        target=target.domain
+                    )
+                    report.ai_analysis = ai_analysis  # Store in report
+                    logger.info(f"✅ AI analysis completed (risk_score: {ai_analysis.get('risk_score', 'N/A')})")
+                except Exception as ai_error:
+                    logger.error(f"❌ AI analysis failed: {ai_error}")
+                    report.ai_analysis = {
+                        "error": str(ai_error),
+                        "fallback": "AI analysis unavailable - using rule-based recommendations"
+                    }
 
-            # Phase 9: Generate recommendations (enhanced by AI if available)
-            report.recommendations = self._generate_recommendations(report.findings, report.risk_score)
+                # Phase 9: Generate recommendations (enhanced by AI if available)
+                report.recommendations = self._generate_recommendations(report.findings, report.risk_score)
 
-            # Mark complete
-            report.status = WorkflowStatus.COMPLETED
+                # Mark complete
+                report.status = WorkflowStatus.COMPLETED
+                report.completed_at = datetime.utcnow().isoformat()
+
+                logger.info(f"Attack surface mapping completed: {len(report.findings)} findings, risk_score={report.risk_score:.2f}")
+
+        except asyncio.TimeoutError:
+            logger.error(f"Attack surface workflow timeout after 180s")
+            report.status = WorkflowStatus.FAILED
+            report.error = "Workflow execution timeout (180s) - external services may be unreachable"
             report.completed_at = datetime.utcnow().isoformat()
-
-            logger.info(f"Attack surface mapping completed: {len(report.findings)} findings, risk_score={report.risk_score:.2f}")
-
         except Exception as e:
             logger.error(f"Attack surface workflow failed: {e}")
             report.status = WorkflowStatus.FAILED

@@ -172,74 +172,81 @@ class TargetProfilingWorkflow:
         logger.info("TargetProfilingWorkflow initialized with AI analyzer")
 
         try:
-            logger.info(f"Starting deep profiling for {target.username or target.email or target.name} (workflow_id={workflow_id})")
+            # Wrap entire workflow execution in timeout
+            async with asyncio.timeout(150):  # 2.5 minutes max
+                logger.info(f"Starting deep profiling for {target.username or target.email or target.name} (workflow_id={workflow_id})")
 
-            # Phase 1: Email/phone extraction and validation
-            contact_findings = await self._analyze_contact_info(target.email, target.phone)
-            report.findings.extend(contact_findings)
-            report.contact_info = self._extract_contact_summary(contact_findings)
-            logger.info(f"Phase 1: Analyzed contact info - {len(contact_findings)} findings")
+                # Phase 1: Email/phone extraction and validation
+                contact_findings = await self._analyze_contact_info(target.email, target.phone)
+                report.findings.extend(contact_findings)
+                report.contact_info = self._extract_contact_summary(contact_findings)
+                logger.info(f"Phase 1: Analyzed contact info - {len(contact_findings)} findings")
 
-            # Phase 2: Social media scraping
-            if target.include_social and target.username:
-                social_findings = await self._scrape_social_media(target.username)
-                report.findings.extend(social_findings)
-                report.social_profiles = self._extract_social_profiles(social_findings)
-                logger.info(f"Phase 2: Found {len(report.social_profiles)} social profiles")
+                # Phase 2: Social media scraping
+                if target.include_social and target.username:
+                    social_findings = await self._scrape_social_media(target.username)
+                    report.findings.extend(social_findings)
+                    report.social_profiles = self._extract_social_profiles(social_findings)
+                    logger.info(f"Phase 2: Found {len(report.social_profiles)} social profiles")
 
-            # Phase 3: Username platform enumeration
-            if target.username:
-                platform_findings = await self._enumerate_platforms(target.username)
-                report.findings.extend(platform_findings)
-                report.platform_presence = [f.details["platform"] for f in platform_findings if f.details.get("found")]
-                logger.info(f"Phase 3: Found presence on {len(report.platform_presence)} platforms")
+                # Phase 3: Username platform enumeration
+                if target.username:
+                    platform_findings = await self._enumerate_platforms(target.username)
+                    report.findings.extend(platform_findings)
+                    report.platform_presence = [f.details["platform"] for f in platform_findings if f.details.get("found")]
+                    logger.info(f"Phase 3: Found presence on {len(report.platform_presence)} platforms")
 
-            # Phase 4: Image metadata extraction
-            if target.include_images and target.image_url:
-                image_findings = await self._analyze_images(target.image_url)
-                report.findings.extend(image_findings)
-                report.locations.extend(self._extract_locations(image_findings))
-                logger.info(f"Phase 4: Analyzed images - {len(image_findings)} findings")
+                # Phase 4: Image metadata extraction
+                if target.include_images and target.image_url:
+                    image_findings = await self._analyze_images(target.image_url)
+                    report.findings.extend(image_findings)
+                    report.locations.extend(self._extract_locations(image_findings))
+                    logger.info(f"Phase 4: Analyzed images - {len(image_findings)} findings")
 
-            # Phase 5: Pattern detection
-            pattern_findings = await self._detect_patterns(report.findings)
-            report.findings.extend(pattern_findings)
-            report.behavioral_patterns = self._extract_patterns(pattern_findings)
-            logger.info(f"Phase 5: Detected {len(report.behavioral_patterns)} behavioral patterns")
+                # Phase 5: Pattern detection
+                pattern_findings = await self._detect_patterns(report.findings)
+                report.findings.extend(pattern_findings)
+                report.behavioral_patterns = self._extract_patterns(pattern_findings)
+                logger.info(f"Phase 5: Detected {len(report.behavioral_patterns)} behavioral patterns")
 
-            # Phase 6: Calculate SE vulnerability score
-            report.se_score, report.se_vulnerability = self._calculate_se_vulnerability(report.findings, report)
+                # Phase 6: Calculate SE vulnerability score
+                report.se_score, report.se_vulnerability = self._calculate_se_vulnerability(report.findings, report)
 
-            # Phase 7: Generate statistics
-            report.statistics = self._generate_statistics(report.findings, report)
+                # Phase 7: Generate statistics
+                report.statistics = self._generate_statistics(report.findings, report)
 
-            # Phase 8: AI Analysis - NEW
-            logger.info("🤖 Starting AI analysis for target profile...")
-            try:
-                findings_dict = [asdict(f) for f in report.findings]
-                ai_analysis = self.ai_analyzer.analyze_target_profile(
-                    findings=findings_dict,
-                    target_username=target.username,
-                    target_email=target.email
-                )
-                report.ai_analysis = ai_analysis
-                logger.info(f"✅ AI analysis completed")
-            except Exception as ai_error:
-                logger.error(f"❌ AI analysis failed: {ai_error}")
-                report.ai_analysis = {
-                    "error": str(ai_error),
-                    "fallback": "AI analysis unavailable - using rule-based recommendations"
-                }
+                # Phase 8: AI Analysis - NEW
+                logger.info("🤖 Starting AI analysis for target profile...")
+                try:
+                    findings_dict = [asdict(f) for f in report.findings]
+                    ai_analysis = self.ai_analyzer.analyze_target_profile(
+                        findings=findings_dict,
+                        target_username=target.username,
+                        target_email=target.email
+                    )
+                    report.ai_analysis = ai_analysis
+                    logger.info(f"✅ AI analysis completed")
+                except Exception as ai_error:
+                    logger.error(f"❌ AI analysis failed: {ai_error}")
+                    report.ai_analysis = {
+                        "error": str(ai_error),
+                        "fallback": "AI analysis unavailable - using rule-based recommendations"
+                    }
 
-            # Phase 9: Generate recommendations (enhanced by AI)
-            report.recommendations = self._generate_recommendations(report)
+                # Phase 9: Generate recommendations (enhanced by AI)
+                report.recommendations = self._generate_recommendations(report)
 
-            # Mark complete
-            report.status = WorkflowStatus.COMPLETED
+                # Mark complete
+                report.status = WorkflowStatus.COMPLETED
+                report.completed_at = datetime.utcnow().isoformat()
+
+                logger.info(f"Target profiling completed: {len(report.findings)} findings, SE_score={report.se_score:.2f}")
+
+        except asyncio.TimeoutError:
+            logger.error(f"Target profiling workflow timeout after 150s")
+            report.status = WorkflowStatus.FAILED
+            report.error = "Workflow execution timeout (150s) - external services may be unreachable"
             report.completed_at = datetime.utcnow().isoformat()
-
-            logger.info(f"Target profiling completed: {len(report.findings)} findings, SE_score={report.se_score:.2f}")
-
         except Exception as e:
             logger.error(f"Target profiling workflow failed: {e}")
             report.status = WorkflowStatus.FAILED

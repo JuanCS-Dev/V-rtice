@@ -61,25 +61,6 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
   // INITIALIZATION & DATA LOADING
   // ═══════════════════════════════════════════════════════════════════════
 
-  useEffect(() => {
-    loadSafetyData();
-    connectWebSocket();
-
-    // Polling backup (caso WebSocket falhe)
-    const interval = setInterval(() => {
-      if (!wsConnected) {
-        loadSafetyData();
-      }
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-    };
-  }, [loadSafetyData, connectWebSocket, wsConnected]);
-
   const loadSafetyData = useCallback(async () => {
     setLoading(true);
 
@@ -116,6 +97,25 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
       }
     );
   }, [loadSafetyData]);
+
+  useEffect(() => {
+    loadSafetyData();
+    connectWebSocket();
+
+    // Polling backup (caso WebSocket falhe)
+    const interval = setInterval(() => {
+      if (!wsConnected) {
+        loadSafetyData();
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, [loadSafetyData, connectWebSocket, wsConnected]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // EMERGENCY SHUTDOWN HANDLERS

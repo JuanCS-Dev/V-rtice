@@ -2141,7 +2141,7 @@ services:
     container_name: vertice-osint_service
     env_file: .env
     ports:
-      - "9106:8007"
+      - "9106:8049"
     volumes:
       - ./backend/services/osint_service:/app
     environment:
@@ -2157,7 +2157,7 @@ services:
       - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8049/health"]
       interval: 30s
       timeout: 10s
       retries: 3
