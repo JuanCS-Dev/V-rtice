@@ -114,5 +114,47 @@ async def get_ip_details(ip_address: str) -> IPInfo:
     return ip_info
 
 
+@app.post("/analyze-my-ip")
+async def analyze_my_ip() -> Dict:
+    """Detects client's public IP and performs full analysis.
+    
+    Uses ip-api.com to get client's real IP address (works behind proxies/NAT).
+    
+    Returns:
+        Dict with detected IP and full analysis (geolocation, threats, etc.)
+    """
+    import httpx
+    
+    try:
+        # Detect public IP using ip-api.com (free, no auth required)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get("http://ip-api.com/json/")
+            if response.status_code != 200:
+                raise HTTPException(status_code=503, detail="Failed to detect public IP")
+            
+            data = response.json()
+            detected_ip = data.get("query")
+            
+            if not detected_ip:
+                raise HTTPException(status_code=500, detail="Could not determine public IP")
+        
+        # Perform full analysis on detected IP
+        print(f"[API] Analyzing detected IP: {detected_ip}")
+        ip_info = await get_ip_data(detected_ip)
+        
+        return {
+            "ip": detected_ip,
+            "source": "ip-api.com",
+            "analysis": ip_info.dict() if ip_info else None,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Timeout detecting public IP")
+    except Exception as e:
+        print(f"[ERROR] analyze-my-ip failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to analyze IP: {str(e)}")
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8022)
