@@ -29,6 +29,10 @@ from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
+# Global workflow storage (shared across instances)
+_ACTIVE_WORKFLOWS: Dict[str, Any] = {}
+
+
 
 from .ai_analyzer import AIAnalyzer  # AI Integration
 class WorkflowStatus(Enum):
@@ -134,7 +138,7 @@ class CredentialIntelWorkflow:
         self.osint_url = osint_service_url if osint_service_url != "http://localhost:8036" else os.getenv("OSINT_SERVICE_URL", "http://localhost:8036")
 
         # Workflow state
-        self.active_workflows: Dict[str, CredentialIntelReport] = {}
+        self.active_workflows = _ACTIVE_WORKFLOWS
         self.ai_analyzer = AIAnalyzer()  # AI analyzer
         logger.info("CredentialIntelWorkflow initialized with AI analyzer")
 

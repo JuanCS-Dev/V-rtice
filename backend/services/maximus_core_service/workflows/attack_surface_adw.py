@@ -36,6 +36,10 @@ from .ai_analyzer import AIAnalyzer  # NEW
 
 logger = logging.getLogger(__name__)
 
+# Global workflow storage (shared across instances)
+_ACTIVE_WORKFLOWS: Dict[str, Any] = {}
+
+
 
 class WorkflowStatus(Enum):
     """Workflow execution status."""
@@ -137,7 +141,7 @@ class AttackSurfaceWorkflow:
         self.vuln_scanner_url = vuln_scanner_service_url
 
         # Workflow state
-        self.active_workflows: Dict[str, AttackSurfaceReport] = {}
+        self.active_workflows = _ACTIVE_WORKFLOWS
         
         # AI Analyzer integration (NEW)
         self.ai_analyzer = AIAnalyzer()
