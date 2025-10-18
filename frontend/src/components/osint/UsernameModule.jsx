@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiClient } from '@/api/client';
+import { searchUsername } from '@/api/osintService';
 import logger from '@/utils/logger';
 
 const UsernameModule = () => {
@@ -17,50 +17,32 @@ const UsernameModule = () => {
     setResults(null);
 
     try {
-      const data = await apiClient.post('/api/investigate/auto', {
-        username: username
-      });
+      const response = await searchUsername(username, { deep_analysis: false });
 
-      if (data.success && data.data) {
-        // Estrutura retornada pelo /api/investigate/auto
-        const investigationData = data.data;
+      if (response.success && response.data) {
+        const data = response.data;
         
-        // Extrair dados detalhados do username hunter se disponível
-        let platformsFound = [];
-        let totalFound = 0;
-        
-        if (investigationData.username_analysis) {
-          const usernameData = investigationData.username_analysis;
-          platformsFound = (usernameData.found_platforms || []).map(p => ({
-            platform: p.platform || 'Unknown',
-            url: p.url || '#',
-            status: p.found ? 'found' : 'not_found',
-            confidence: p.confidence || 0,
-            last_activity: null
-          }));
-          totalFound = usernameData.found_count || 0;
-        }
-        
+        // Adapt response to UI format
         const adaptedResults = {
           username: username,
-          platforms_found: platformsFound,
-          total_found: totalFound,
-          confidence_score: investigationData.confidence_score || 0,
-          risk_level: investigationData.risk_assessment?.risk_level || 'UNKNOWN',
-          patterns: investigationData.patterns_found || [],
-          recommendations: investigationData.recommendations || [],
-          data_sources: investigationData.data_sources || [],
-          timestamp: investigationData.timestamp,
-          investigation_id: investigationData.investigation_id
+          platforms_found: data.platforms_found || [],
+          total_found: data.platforms_found?.length || 0,
+          confidence_score: Math.round(data.profile_data?.activity_level === 'high' ? 85 : 
+                                     data.profile_data?.activity_level === 'medium' ? 60 : 35),
+          risk_level: 'INFO',
+          patterns: [],
+          recommendations: [],
+          data_sources: ['Username Enumeration'],
+          timestamp: data.timestamp,
+          profile_data: data.profile_data
         };
         setResults(adaptedResults);
       } else {
-        throw new Error('Dados inválidos recebidos');
+        throw new Error(response.error || 'Dados inválidos recebidos');
       }
     } catch (error) {
       logger.error('Erro na busca:', error);
 
-      // REGRA DE OURO: No mock fallback in production
       // Return empty results with error indicator
       setResults({
         username: username,

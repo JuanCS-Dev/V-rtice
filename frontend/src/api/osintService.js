@@ -19,15 +19,15 @@
 
 import logger from '@/utils/logger';
 
-// MAXIMUS Core Service endpoint
-const MAXIMUS_BASE_URL = 'http://localhost:8001';
+// MAXIMUS Core Service endpoint (OSINT router está aqui)
+const OSINT_BASE_URL = 'http://localhost:9106';
 
 /**
  * Generic API request handler with error handling
  */
 const apiRequest = async (endpoint, options = {}) => {
   try {
-    const url = endpoint.startsWith('http') ? endpoint : `${MAXIMUS_BASE_URL}${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${OSINT_BASE_URL}${endpoint}`;
     
     const response = await fetch(url, {
       headers: {
