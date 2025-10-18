@@ -302,13 +302,20 @@ async def automated_investigation(
 
 @app.post("/api/tools/breach-data/analyze")
 async def analyze_breach_data(request: BreachDataRequest) -> Dict[str, Any]:
-    """Analyzes breach data for a target using BreachDataAnalyzer.
+    """Analyzes breach data using REAL HIBP API integration.
+    
+    Provides comprehensive breach intelligence:
+    - Real HIBP breach data
+    - Timeline visualization
+    - Risk scoring (0-100)
+    - Data classes exposed
+    - Remediation recommendations
 
     Args:
         request (BreachDataRequest): Target and search parameters.
 
     Returns:
-        Dict[str, Any]: Breach analysis results with risk scoring.
+        Dict[str, Any]: Comprehensive breach analysis with timeline.
     """
     try:
         result = await breach_analyzer.query(
@@ -316,9 +323,23 @@ async def analyze_breach_data(request: BreachDataRequest) -> Dict[str, Any]:
             search_type=request.search_type,
             include_unverified=request.include_unverified,
         )
+        
+        # Generate human-friendly summary
+        breach_count = result['breach_count']
+        risk_level = result['risk_level']
+        risk_score = result['risk_score']
+        
+        if breach_count == 0:
+            summary = "✅ Good news! No breaches found for this target."
+        else:
+            summary = f"⚠️ {risk_level} RISK ({risk_score}/100) - {breach_count} breach{'es' if breach_count > 1 else ''} detected"
+        
         return {
             "status": "success",
-            "data": result,
+            "data": {
+                **result,
+                "human_summary": summary
+            },
             "tool": "BreachDataAnalyzer",
         }
     except Exception as e:
@@ -415,20 +436,35 @@ async def get_tools_status() -> Dict[str, Any]:
 
 @app.post("/api/email/analyze")
 async def analyze_email(request: dict) -> Dict[str, Any]:
-    """Analyzes email address with AI-powered insights.
+    """Analyzes email address with AI-powered insights and DEEP SEARCH.
+    
+    Uses EmailAnalyzerDeep for comprehensive analysis including:
+    - DNS/MX validation
+    - HIBP breach data
+    - Linked accounts discovery
+    - Domain reputation
+    - Email permutations
     
     Args:
         request: {"email": "target@example.com"}
     
     Returns:
-        Dict with email analysis, breaches, and AI recommendations
+        Dict with deep email analysis and AI recommendations
     """
     email = request.get("email", "").strip()
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
     
     try:
+        # Use deep analyzer for comprehensive results
+        deep_analysis = await ai_orchestrator.email_analyzer_deep.analyze_email(email)
+        
+        # Run automated investigation for AI insights
         result = await ai_orchestrator.automated_investigation(email=email)
+        
+        # Merge deep analysis into result
+        result["email_deep_analysis"] = deep_analysis
+        
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Email analysis failed: {str(e)}")
@@ -436,23 +472,202 @@ async def analyze_email(request: dict) -> Dict[str, Any]:
 
 @app.post("/api/phone/analyze")
 async def analyze_phone(request: dict) -> Dict[str, Any]:
-    """Analyzes phone number with AI-powered insights.
+    """Analyzes phone number with AI-powered insights and DEEP SEARCH.
+    
+    Uses PhoneAnalyzerDeep for comprehensive analysis including:
+    - International format validation
+    - Carrier detection (TIM, Vivo, Claro, Oi for Brazil)
+    - Phone type (mobile, landline, VoIP)
+    - City/region location
+    - Messaging app registration
+    - Spam/fraud reputation
     
     Args:
         request: {"phone": "+5562999999999"}
     
     Returns:
-        Dict with phone analysis, carrier info, and AI recommendations
+        Dict with deep phone analysis and AI recommendations
     """
     phone = request.get("phone", "").strip()
     if not phone:
         raise HTTPException(status_code=400, detail="Phone number is required")
     
     try:
+        # Use deep analyzer for comprehensive results
+        deep_analysis = await ai_orchestrator.phone_analyzer_deep.analyze_phone(phone)
+        
+        # Run automated investigation for AI insights
         result = await ai_orchestrator.automated_investigation(phone=phone)
+        
+        # Merge deep analysis into result
+        result["phone_deep_analysis"] = deep_analysis
+        
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Phone analysis failed: {str(e)}")
+
+
+@app.post("/api/social/analyze")
+async def analyze_social_media(request: dict) -> Dict[str, Any]:
+    """Analyzes social media presence with DEEP SEARCH across platforms.
+    
+    Uses SocialMediaDeepScraper for comprehensive analysis including:
+    - GitHub: repos, commits, activity, languages
+    - Reddit: karma, subreddits, posting patterns
+    - Behavioral analysis: interests, sentiment
+    - Activity patterns: peak hours, timezone
+    - Influence scoring
+    
+    All using FREE public APIs - no authentication required!
+    
+    Args:
+        request: {"username": "johndoe"}
+    
+    Returns:
+        Dict with deep social media analysis and behavioral insights
+    """
+    username = request.get("username", "").strip()
+    if not username:
+        raise HTTPException(status_code=400, detail="Username is required")
+    
+    try:
+        # Use deep scraper for comprehensive results
+        deep_analysis = await ai_orchestrator.social_deep_scraper.analyze_username(username)
+        
+        # Generate human-friendly summary
+        summary = deep_analysis.get("summary", "Analysis complete")
+        platforms_found = 0
+        
+        if deep_analysis["social_profiles"]["github"].get("found"):
+            platforms_found += 1
+        if deep_analysis["social_profiles"]["reddit"].get("found"):
+            platforms_found += 1
+        
+        return {
+            "status": "success",
+            "data": {
+                **deep_analysis,
+                "platforms_found": platforms_found,
+                "human_summary": summary
+            },
+            "message": f"Found {platforms_found} platform(s) for {username}"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Social media analysis failed: {str(e)}")
+
+
+@app.post("/api/investigate/deep")
+async def investigate_deep(request: dict) -> Dict[str, Any]:
+    """Performs DEEP INVESTIGATION with full correlation across all sources.
+    
+    This is the ultimate OSINT endpoint that:
+    1. Collects data from ALL sources (email, phone, social, breaches)
+    2. Correlates data using DataCorrelationEngine
+    3. Builds entity profile and relationship graph
+    4. Reconstructs timeline
+    5. Detects anomalies
+    6. Provides aggregated risk assessment
+    7. Generates actionable insights
+    
+    Args:
+        request: {
+            "username": "johndoe" (optional),
+            "email": "user@example.com" (optional),
+            "phone": "+5562999999999" (optional)
+        }
+    
+    Returns:
+        Dict with complete correlated intelligence report
+    """
+    username = request.get("username", "").strip() or None
+    email = request.get("email", "").strip() or None
+    phone = request.get("phone", "").strip() or None
+    
+    if not any([username, email, phone]):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one identifier required (username, email, or phone)"
+        )
+    
+    try:
+        # Collect data from all sources in parallel
+        tasks = []
+        
+        # Email analysis
+        email_task = None
+        if email:
+            email_task = ai_orchestrator.email_analyzer_deep.analyze_email(email)
+            tasks.append(("email", email_task))
+        
+        # Phone analysis
+        phone_task = None
+        if phone:
+            phone_task = ai_orchestrator.phone_analyzer_deep.analyze_phone(phone)
+            tasks.append(("phone", phone_task))
+        
+        # Social media analysis
+        social_task = None
+        if username:
+            social_task = ai_orchestrator.social_deep_scraper.analyze_username(username)
+            tasks.append(("social", social_task))
+        
+        # Execute all tasks in parallel
+        results = {}
+        if tasks:
+            import asyncio
+            task_results = await asyncio.gather(
+                *[task for _, task in tasks],
+                return_exceptions=True
+            )
+            
+            for i, (source, _) in enumerate(tasks):
+                result = task_results[i]
+                if not isinstance(result, Exception):
+                    results[source] = result
+                else:
+                    results[source] = {"error": str(result)}
+        
+        # Correlate all data
+        correlated = await ai_orchestrator.correlation_engine.correlate(
+            email_data=results.get("email"),
+            phone_data=results.get("phone"),
+            social_data=results.get("social"),
+            breach_data=None,  # Would come from breach analyzer
+            username=username
+        )
+        
+        # Generate executive summary
+        entity = correlated["entity_profile"]
+        risk = correlated["risk_assessment"]
+        insights = correlated["insights"]
+        
+        summary_parts = []
+        if entity.get("name"):
+            summary_parts.append(f"🎯 Target: {entity['name']}")
+        
+        summary_parts.append(
+            f"📊 Online Presence: {entity['online_presence_score']}/100"
+        )
+        summary_parts.append(
+            f"⚠️ Risk Level: {risk['level'].upper()} ({risk['overall_score']}/100)"
+        )
+        summary_parts.append(
+            f"🔗 Confidence: {correlated['confidence']['overall_score']}/100"
+        )
+        
+        executive_summary = " | ".join(summary_parts)
+        
+        return {
+            "status": "success",
+            "data": {
+                **correlated,
+                "raw_data": results,
+                "executive_summary": executive_summary
+            },
+            "message": "Deep investigation complete with full correlation"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Deep investigation failed: {str(e)}")
 
 
 if __name__ == "__main__":

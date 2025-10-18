@@ -13,6 +13,8 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
+logger = logging.getLogger(__name__)
+
 try:
     from sklearn.ensemble import IsolationForest
     from sklearn.preprocessing import StandardScaler
@@ -21,8 +23,6 @@ try:
 except ImportError:
     SKLEARN_AVAILABLE = False
     logger.warning("scikit-learn not available - anomaly detection disabled")
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

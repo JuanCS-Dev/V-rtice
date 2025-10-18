@@ -27,6 +27,12 @@ dependencies = [
     # AI APIs
     "google-generativeai>=0.3.0",
     "openai>=1.0.0",
+    # DEEP SEARCH dependencies
+    "dnspython>=2.4.0",       # DNS/MX validation
+    "email-validator>=2.1.0",  # Email validation
+    "pwnedpasswords>=2.0.0",   # HIBP integration
+    "python-whois>=0.8.0",     # Domain analysis
+    "phonenumbers>=8.13.0",    # Phone validation
 ]
 
 [project.optional-dependencies]

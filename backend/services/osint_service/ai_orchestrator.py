@@ -23,12 +23,16 @@ from typing import Any, Dict, List, Optional
 
 from ai_processor import AIProcessor
 from analyzers.email_analyzer_refactored import EmailAnalyzerRefactored
+from analyzers.email_analyzer_deep import EmailAnalyzerDeep
 from analyzers.image_analyzer_refactored import ImageAnalyzerRefactored
 from analyzers.pattern_detector_refactored import PatternDetectorRefactored
 from analyzers.phone_analyzer_refactored import PhoneAnalyzerRefactored
+from analyzers.phone_analyzer_deep import PhoneAnalyzerDeep
+from analyzers.data_correlation_engine import DataCorrelationEngine
 from report_generator import ReportGenerator
 from scrapers.discord_scraper_refactored import DiscordScraperRefactored
 from scrapers.social_scraper_refactored import SocialScraperRefactored
+from scrapers.social_media_deep_scraper import SocialMediaDeepScraper
 from scrapers.username_hunter_refactored import UsernameHunterRefactored
 
 
@@ -43,17 +47,21 @@ class AIOrchestrator:
     def __init__(self):
         """Initializes the AIOrchestrator with instances of scrapers, analyzers, and other components."""
         self.social_scraper = SocialScraperRefactored()
+        self.social_deep_scraper = SocialMediaDeepScraper()  # Deep analysis
         self.username_hunter = UsernameHunterRefactored()
         self.discord_scraper = DiscordScraperRefactored()
         self.email_analyzer = EmailAnalyzerRefactored()
+        self.email_analyzer_deep = EmailAnalyzerDeep()  # Deep analysis
         self.phone_analyzer = PhoneAnalyzerRefactored()
+        self.phone_analyzer_deep = PhoneAnalyzerDeep()  # Deep analysis
         self.image_analyzer = ImageAnalyzerRefactored()
         self.pattern_detector = PatternDetectorRefactored()
+        self.correlation_engine = DataCorrelationEngine()  # Correlation layer
         self.report_generator = ReportGenerator()
         self.ai_processor = AIProcessor()
 
         self.active_investigations: Dict[str, Dict[str, Any]] = {}
-        print("[AIOrchestrator] Initialized OSINT AI Orchestrator.")
+        print("[AIOrchestrator] Initialized OSINT AI Orchestrator with Deep Search + Correlation.")
 
     async def start_investigation(
         self,

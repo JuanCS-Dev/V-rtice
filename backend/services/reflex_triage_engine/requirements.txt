@@ -26,6 +26,8 @@ idna==3.10
     # via
     #   anyio
     #   httpx
+numpy==2.3.4
+    # via reflex-triage-engine (pyproject.toml)
 pydantic==2.12.0
     # via
     #   reflex-triage-engine (pyproject.toml)
@@ -33,6 +35,8 @@ pydantic==2.12.0
 pydantic-core==2.41.1
     # via pydantic
 python-dotenv==1.1.1
+    # via reflex-triage-engine (pyproject.toml)
+python-multipart==0.0.20
     # via reflex-triage-engine (pyproject.toml)
 sniffio==1.3.1
     # via anyio

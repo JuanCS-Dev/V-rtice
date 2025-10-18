@@ -991,6 +991,7 @@ services:
       start_period: 10s
     environment:
       - REDIS_URL=redis://redis:6379/3
+      - PYTHONPATH=/app:/app/backend
     depends_on:
       - redis
     networks:
@@ -1036,6 +1037,7 @@ services:
     environment:
       - CUCKOO_API_URL=${CUCKOO_API_URL:-http://cuckoo:8090}
       - CUCKOO_API_KEY=${CUCKOO_API_KEY:-}
+      - KAFKA_BOOTSTRAP_SERVERS=hcl-kafka:9092
     networks:
       - maximus-network
     restart: unless-stopped
@@ -1150,6 +1152,7 @@ services:
     environment:
       - KUBERNETES_SERVICE_HOST=${KUBERNETES_SERVICE_HOST:-}
       - KUBERNETES_SERVICE_PORT=${KUBERNETES_SERVICE_PORT:-}
+      - PYTHONPATH=/app:/app/backend
     networks:
       - maximus-network
     restart: unless-stopped

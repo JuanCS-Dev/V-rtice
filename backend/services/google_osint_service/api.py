@@ -10,6 +10,6 @@ The actual implementation is in main.py, which handles:
 - Situational awareness data collection
 """
 
-from backend.services.google_osint_service.main import app
+from main import app
 
 __all__ = ["app"]
