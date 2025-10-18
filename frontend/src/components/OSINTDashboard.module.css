@@ -60,8 +60,10 @@
 .contentArea {
   flex: 1;
   padding: var(--space-lg);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
+  min-height: 0;
 }
 
 /* ============================================

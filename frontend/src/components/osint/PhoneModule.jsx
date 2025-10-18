@@ -21,7 +21,7 @@ const PhoneModule = () => {
     try {
       const data = await apiClient.post('/api/phone/analyze', { phone: phone.trim() });
 
-      if (data.status === 'success') {
+      if (data.status === 'success' && data.data) {
         setResult(data.data);
       } else {
         setError(data.detail || 'Erro ao analisar telefone');
@@ -41,7 +41,7 @@ const PhoneModule = () => {
           📱 PHONE INTELLIGENCE
         </h2>
         <p className="text-red-400/70 text-sm mb-6">
-          Análise de números telefônicos, operadoras e aplicativos de mensagem
+          Análise de números telefônicos com AI-powered carrier detection
         </p>
 
         <div className="space-y-4">
@@ -60,114 +60,63 @@ const PhoneModule = () => {
           </button>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="mt-4 p-4 border border-red-400/50 rounded-lg bg-red-400/5">
             <p className="text-red-400">❌ {error}</p>
           </div>
         )}
 
-        {/* Results Display */}
         {result && (
-          <div className="mt-6 space-y-4 max-h-[600px] overflow-y-auto" style={{scrollbarWidth:'thin',scrollbarColor:'#ef4444 rgba(0,0,0,0.3)'}}>
-            <style jsx>{`div::-webkit-scrollbar{width:8px}div::-webkit-scrollbar-track{background:rgba(0,0,0,0.3);border-radius:4px}div::-webkit-scrollbar-thumb{background:#ef4444;border-radius:4px}div::-webkit-scrollbar-thumb:hover{background:#f87171}`}</style>
-            <h3 className="text-red-400 font-bold text-lg">📊 Resultados da Análise</h3>
-
-            {/* Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">📱 Informações Básicas</h4>
-                <div className="space-y-1 text-sm">
-                  <p className="text-red-300">Número: <span className="text-white">{result.normalized}</span></p>
-                  <p className="text-red-300">Válido: <span className={`font-bold ${result.valid ? 'text-green-400' : 'text-red-400'}`}>
-                    {result.valid ? '✅ Sim' : '❌ Não'}
-                  </span></p>
-                  <p className="text-red-300">País: <span className="text-white">{result.location?.country}</span></p>
-                  <p className="text-red-300">Região: <span className="text-white">{result.location?.region}</span></p>
+          <div className="mt-6 space-y-4 max-h-[600px] overflow-y-auto">
+            {result.ai_analysis && (
+              <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-400/50 rounded-lg p-4">
+                <h3 className="text-purple-400 font-bold mb-2 flex items-center">
+                  🤖 AI Analysis ({result.ai_analysis.provider})
+                </h3>
+                <div className="text-purple-300 text-sm whitespace-pre-wrap">
+                  {result.ai_analysis.summary}
                 </div>
               </div>
+            )}
 
-              <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">📡 Operadora</h4>
-                <div className="space-y-1 text-sm">
-                  <p className="text-red-300">Nome: <span className="text-white">{result.carrier?.name}</span></p>
-                  <p className="text-red-300">Tipo: <span className="text-white">{result.carrier?.type}</span></p>
-                  {result.brazil_info && (
-                    <>
-                      <p className="text-red-300">DDD: <span className="text-white">{result.brazil_info.ddd}</span></p>
-                      <p className="text-red-300">Estado: <span className="text-white">{result.brazil_info.state}</span></p>
-                    </>
-                  )}
-                </div>
+            <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
+              <h4 className="text-red-400 font-medium mb-2">⚠️ Risk Assessment</h4>
+              <div className="space-y-2">
+                <p className="text-red-300">
+                  <span className="font-bold">Level:</span> {result.risk_assessment?.risk_level || 'UNKNOWN'}
+                </p>
+                <p className="text-red-300">
+                  <span className="font-bold">Score:</span> {result.risk_assessment?.risk_score || 0}/100
+                </p>
+                <p className="text-red-300">
+                  <span className="font-bold">Confidence:</span> {result.confidence_score || 0}%
+                </p>
               </div>
             </div>
 
-            {/* Risk Analysis */}
-            {result.risk_analysis && (
-              <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">⚠️ Análise de Risco</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-red-300">Nível:</span>
-                    <span className={`font-bold px-2 py-1 rounded text-xs ${
-                      result.risk_analysis.level === 'LOW' ? 'bg-green-400/20 text-green-400' :
-                      result.risk_analysis.level === 'MEDIUM' ? 'bg-yellow-400/20 text-yellow-400' :
-                      'bg-red-400/20 text-red-400'
-                    }`}>
-                      {result.risk_analysis.level}
-                    </span>
-                    <span className="text-white">({result.risk_analysis.score}/100)</span>
-                  </div>
-                  {result.risk_analysis.factors && result.risk_analysis.factors.length > 0 && (
-                    <div>
-                      <p className="text-red-300 text-sm">Fatores:</p>
-                      <ul className="text-red-200 text-xs space-y-1 ml-4">
-                        {result.risk_analysis.factors.map((factor, index) => (
-                          <li key={index}>• {factor}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Messaging Apps */}
-            {result.messaging_apps && (
-              <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">💬 Apps de Mensagem</h4>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  {Object.entries(result.messaging_apps).map(([app, info]) => (
-                    <div key={app} className="flex items-center space-x-2">
-                      <span className="text-red-300 capitalize">{app}:</span>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        info.available === 'yes' ? 'bg-green-400/20 text-green-400' :
-                        info.available === 'no' ? 'bg-red-400/20 text-red-400' :
-                        'bg-gray-400/20 text-gray-400'
-                      }`}>
-                        {info.available === 'yes' ? '✅' : info.available === 'no' ? '❌' : '❓'}
-                      </span>
-                    </div>
+            {result.recommendations && result.recommendations.length > 0 && (
+              <div className="bg-black/40 border border-yellow-400/30 rounded-lg p-4">
+                <h4 className="text-yellow-400 font-medium mb-2">💡 Recommendations</h4>
+                <ul className="space-y-2">
+                  {result.recommendations.map((rec, idx) => (
+                    <li key={idx} className="text-yellow-300 text-sm">
+                      • <span className="font-bold">{rec.action}:</span> {rec.description}
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
 
-            {/* Brasil Specific Info */}
-            {result.brazil_info?.operator_hints && (
-              <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">🇧🇷 Informações Brasil</h4>
-                <div className="text-sm space-y-1">
-                  <p className="text-red-300">Região: <span className="text-white">{result.brazil_info.region}</span></p>
-                  <div>
-                    <p className="text-red-300">Dicas da Operadora:</p>
-                    <ul className="text-red-200 text-xs space-y-1 ml-4">
-                      {result.brazil_info.operator_hints.map((hint, index) => (
-                        <li key={index}>• {hint}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+            {result.patterns_found && result.patterns_found.length > 0 && (
+              <div className="bg-black/40 border border-cyan-400/30 rounded-lg p-4">
+                <h4 className="text-cyan-400 font-medium mb-2">🔍 Patterns Detected</h4>
+                <ul className="space-y-2">
+                  {result.patterns_found.map((pattern, idx) => (
+                    <li key={idx} className="text-cyan-300 text-sm">
+                      <span className="font-bold">{pattern.type}:</span> {pattern.description}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
