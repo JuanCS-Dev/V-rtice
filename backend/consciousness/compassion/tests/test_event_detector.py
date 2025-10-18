@@ -8,7 +8,7 @@ import pytest
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from compassion.event_detector import EventDetector, EventType, SufferingEvent
+from consciousness.compassion.event_detector import EventDetector, EventType, SufferingEvent
 
 
 class TestSufferingEvent:

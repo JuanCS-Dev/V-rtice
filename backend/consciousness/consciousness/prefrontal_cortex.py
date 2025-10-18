@@ -22,8 +22,8 @@ consciousness_path = Path(__file__).parent.parent
 if str(consciousness_path) not in sys.path:
     sys.path.insert(0, str(consciousness_path))
 
-from compassion.event_detector import EventDetector, SufferingEvent
-from compassion.compassion_planner import CompassionPlanner, CompassionPlan
+from consciousness.compassion.event_detector import EventDetector, SufferingEvent
+from consciousness.compassion.compassion_planner import CompassionPlanner, CompassionPlan
 from justice.deontic_reasoner import DeonticReasoner, ComplianceResult
 from .tom_engine import ToMEngine, UserMentalState
 

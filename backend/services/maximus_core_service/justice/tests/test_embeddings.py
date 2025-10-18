@@ -8,7 +8,7 @@ Tests cover:
 """
 
 import pytest
-from justice.embeddings import CaseEmbedder
+from services.maximus_core_service.justice.embeddings import CaseEmbedder
 
 # Try to import sklearn for similarity testing
 try:

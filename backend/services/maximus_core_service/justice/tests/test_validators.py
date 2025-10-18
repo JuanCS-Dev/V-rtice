@@ -7,7 +7,7 @@ Tests cover:
 """
 
 import pytest
-from justice.validators import (
+from services.maximus_core_service.justice.validators import (
     ConstitutionalValidator,
     RiskLevelValidator,
     CompositeValidator,

@@ -8,8 +8,8 @@ import pytest
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from compassion.event_detector import EventType, SufferingEvent
-from compassion.compassion_planner import (
+from consciousness.compassion.event_detector import EventType, SufferingEvent
+from consciousness.compassion.compassion_planner import (
     CompassionPlan,
     CompassionPlanner,
     InterventionType,

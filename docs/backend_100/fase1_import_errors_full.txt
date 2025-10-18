@@ -1,0 +1,642 @@
+__ ERROR collecting consciousness/compassion/tests/test_compassion_planner.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/compassion/tests/test_compassion_planner.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+____ ERROR collecting consciousness/compassion/tests/test_event_detector.py ____
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/compassion/tests/test_event_detector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+________ ERROR collecting consciousness/consciousness/tests/test_api.py ________
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+____ ERROR collecting consciousness/consciousness/tests/test_persistence.py ____
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_persistence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting consciousness/consciousness/tests/test_pfc_complete.py ____
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_pfc_complete.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__ ERROR collecting consciousness/consciousness/tests/test_pfc_integration.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_pfc_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting consciousness/consciousness/tests/test_pfc_mip_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_pfc_mip_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting consciousness/consciousness/tests/test_pfc_persistence_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_pfc_persistence_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting consciousness/consciousness/tests/test_tom_complete.py ____
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/consciousness/tests/test_tom_complete.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__________ ERROR collecting consciousness/mip/tests/unit/test_api.py ___________
+ImportError while importing test module '/home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___________ ERROR collecting libs/vertice_core/tests/test_config.py ____________
+import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_config.py
+--
+____________ ERROR collecting libs/vertice_db/tests/test_models.py _____________
+import file mismatch:
+imported module 'test_models' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_models.py
+--
+_________ ERROR collecting service_template/tests/unit/test_config.py __________
+import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_config.py
+--
+______ ERROR collecting service_template/tests/unit/test_dependencies.py _______
+import file mismatch:
+imported module 'test_dependencies' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_api/tests/test_dependencies.py
+--
+_______ ERROR collecting service_template/tests/unit/test_exceptions.py ________
+import file mismatch:
+imported module 'test_exceptions' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_core/tests/test_exceptions.py
+--
+_________ ERROR collecting service_template/tests/unit/test_models.py __________
+import file mismatch:
+imported module 'test_models' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_models.py
+--
+_________ ERROR collecting service_template/tests/unit/test_session.py _________
+import file mismatch:
+imported module 'test_session' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_db/tests/test_session.py
+--
+_ ERROR collecting services/active_immune_core/monitoring/test_health_checker.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/active_immune_core/monitoring/test_health_checker.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/active_immune_core/monitoring/test_metrics_collector.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/active_immune_core/monitoring/test_metrics_collector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/active_immune_core/monitoring/test_prometheus_exporter.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/active_immune_core/monitoring/test_prometheus_exporter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__ ERROR collecting services/active_immune_core/tests/llm/test_llm_client.py ___
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/active_immune_core/tests/llm/test_llm_client.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/adaptive_immune_system/hitl/test_data_generator.py _
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+___ ERROR collecting services/adaptive_immune_system/hitl/test_e2e_runner.py ___
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+____ ERROR collecting services/adaptive_immune_system/hitl/test_mock_api.py ____
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+_ ERROR collecting services/adaptive_immune_system/tests/chaos/test_rabbitmq_chaos.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/adaptive_immune_system/tests/chaos/test_rabbitmq_chaos.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/adaptive_immune_system/tests/integration/test_e2e_message_flow.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/adaptive_immune_system/tests/integration/test_e2e_message_flow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/adaptive_immune_system/tests/load/test_rabbitmq_load.py _
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
+--
+_ ERROR collecting services/adaptive_immune_system/tests/security/test_dependencies.py _
+import file mismatch:
+imported module 'test_dependencies' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_api/tests/test_dependencies.py
+--
+_ ERROR collecting services/adaptive_immune_system/tests/security/test_owasp_top10.py _
+'security' not found in `markers` configuration option
+_ ERROR collecting services/adaptive_immune_system/tests/stress/test_breaking_point.py _
+'stress' not found in `markers` configuration option
+_ ERROR collecting services/adaptive_immune_system/tests/stress/test_resource_limits.py _
+'stress' not found in `markers` configuration option
+_ ERROR collecting services/auditory_cortex_service/tests/test_auditory_cortex.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/auditory_cortex_service/tests/test_auditory_cortex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/bas_service/tests/test_bas_integration.py ______
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/bas_service/tests/test_bas_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+______ ERROR collecting services/command_bus_service/tests/test_config.py ______
+import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_config.py
+--
+_ ERROR collecting services/maximus_core_service/test_neuromodulation_maximus_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/test_neuromodulation_maximus_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/attention_system/test_attention_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/attention_system/test_attention_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/autonomic_core/test_hcl_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/autonomic_core/test_hcl_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/consciousness/test_performance.py _
+'timeout' not found in `markers` configuration option
+___ ERROR collecting services/maximus_core_service/fairness/test_fairness.py ___
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/fairness/test_fairness.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/test_constitutional_validator.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/test_constitutional_validator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting services/maximus_core_service/justice/tests/test_cbr.py ___
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_cbr.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_cbr_edge_cases.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_cbr_edge_cases.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_cbr_performance.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_cbr_performance.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_constitutional_validator.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_constitutional_validator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_embeddings.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_embeddings.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_mip_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_mip_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_precedent_db.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_precedent_db.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/justice/tests/test_validators.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/justice/tests/test_validators.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/motor_integridade_processual/tests/unit/test_api.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/motor_integridade_processual/tests/unit/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/predictive_coding/test_predictive_coding_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/predictive_coding/test_predictive_coding_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/tests/test_batch_predictor.py _
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+_ ERROR collecting services/maximus_core_service/tests/test_constitutional_validator_100pct.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/tests/test_constitutional_validator_100pct.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/tests/test_distributed_trainer.py _
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+___ ERROR collecting services/maximus_core_service/tests/test_gpu_trainer.py ___
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+_ ERROR collecting services/maximus_core_service/tests/test_inference_engine.py _
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+__ ERROR collecting services/maximus_core_service/tests/test_onnx_exporter.py __
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+____ ERROR collecting services/maximus_core_service/tests/test_profiler.py _____
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+_____ ERROR collecting services/maximus_core_service/tests/test_pruner.py ______
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+____ ERROR collecting services/maximus_core_service/tests/test_quantizer.py ____
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+../.pyenv/versions/3.11.13/lib/python3.11/site-packages/_pytest/runner.py:372: in <lambda>
+--
+_ ERROR collecting services/maximus_core_service/tests/benchmarks/test_e2e_consciousness_benchmark.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/tests/benchmarks/test_e2e_consciousness_benchmark.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_core_service/tests/benchmarks/test_mmei_mcea_pipeline_benchmark.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_core_service/tests/benchmarks/test_mmei_mcea_pipeline_benchmark.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting services/maximus_eureka/tests/unit/test_apv_consumer.py ___
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/test_apv_consumer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/maximus_eureka/tests/unit/test_ast_grep.py _____
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/test_ast_grep.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting services/maximus_eureka/tests/unit/test_patch_models.py ___
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/test_patch_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__ ERROR collecting services/maximus_eureka/tests/unit/api/test_ml_metrics.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/api/test_ml_metrics.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_eureka/tests/unit/orchestration/test_eureka_orchestrator.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/orchestration/test_eureka_orchestrator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_eureka/tests/unit/strategies/test_base_strategy.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/strategies/test_base_strategy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_eureka/tests/unit/strategies/test_code_patch_llm.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/strategies/test_code_patch_llm.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_eureka/tests/unit/strategies/test_dependency_upgrade.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_eureka/tests/unit/strategies/test_dependency_upgrade.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/maximus_oraculo_v2/tests/intel/test_narrative_filter.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/maximus_oraculo_v2/tests/intel/test_narrative_filter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+___ ERROR collecting services/narrative_filter_service/tests/test_config.py ____
+import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_config.py
+--
+___ ERROR collecting services/narrative_filter_service/tests/test_health.py ____
+import file mismatch:
+imported module 'test_health' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_api/tests/test_health.py
+--
+____ ERROR collecting services/narrative_filter_service/tests/test_main.py _____
+import file mismatch:
+imported module 'test_main' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/service_template/tests/unit/test_main.py
+--
+___ ERROR collecting services/narrative_filter_service/tests/test_models.py ____
+import file mismatch:
+imported module 'test_models' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_models.py
+--
+_ ERROR collecting services/narrative_filter_service/tests/test_repository.py __
+import file mismatch:
+imported module 'test_repository' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/libs/vertice_db/tests/test_repository.py
+--
+_ ERROR collecting services/narrative_filter_service/tests/test_repository_100.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/narrative_filter_service/tests/test_repository_100.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/narrative_filter_service/tests/test_semantic_processor.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/narrative_filter_service/tests/test_semantic_processor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/narrative_filter_service/tests/test_strategic_detector.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/narrative_filter_service/tests/test_strategic_detector.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/narrative_filter_service/tests/test_verdict_synthesizer.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/narrative_filter_service/tests/test_verdict_synthesizer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/network_recon_service/tests/test_network_recon_service.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/network_recon_service/tests/test_network_recon_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_analysis_agent.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_analysis_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__ ERROR collecting services/offensive_orchestrator_service/tests/test_api.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_attack_memory.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_attack_memory.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_config.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_config.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_database.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_database.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_embeddings.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_embeddings.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_exploit_agent.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_exploit_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_hotl_complete.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_hotl_complete.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_hotl_noncritical.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_hotl_noncritical.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_hotl_system.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_hotl_system.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_integration.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_models.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_orchestrator.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_orchestrator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_orchestrator_core.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_orchestrator_core.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_orchestrator_core_complete.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_orchestrator_core_complete.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_postexploit_agent.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_postexploit_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_recon_agent.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_recon_agent.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/offensive_orchestrator_service/tests/test_vector_store.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/offensive_orchestrator_service/tests/test_vector_store.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+____ ERROR collecting services/osint_service/tests/test_integration_e2e.py _____
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/test_integration_e2e.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/osint_service/tests/test_osint_service.py ______
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/test_osint_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_ai_orchestrator_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_ai_orchestrator_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_ai_processor_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_ai_processor_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_breach_data_analyzer_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_breach_data_analyzer_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_dark_web_monitor_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_dark_web_monitor_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_discord_scraper_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_discord_scraper_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_email_analyzer_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_email_analyzer_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_google_dork_scanner_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_google_dork_scanner_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_image_analyzer_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_image_analyzer_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_pattern_detector_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_pattern_detector_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_phone_analyzer_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_phone_analyzer_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_report_generator_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_report_generator_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_social_scraper_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_social_scraper_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/osint_service/tests/unit/test_username_hunter_refactored.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/osint_service/tests/unit/test_username_hunter_refactored.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/prefrontal_cortex_service/tests/test_prefrontal_cortex.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/prefrontal_cortex_service/tests/test_prefrontal_cortex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/reactive_fabric_core/hitl/tests/test_hitl_coverage.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/reactive_fabric_core/hitl/tests/test_hitl_coverage.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/reactive_fabric_core/hitl/tests/test_hitl_engine.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/reactive_fabric_core/hitl/tests/test_hitl_engine.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/reactive_fabric_core/tests/test_models.py ______
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/reactive_fabric_core/tests/test_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+____________ ERROR collecting services/rte_service/test_latency.py _____________
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/rte_service/test_latency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+______ ERROR collecting services/verdict_engine_service/tests/test_api.py ______
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/verdict_engine_service/tests/test_api.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/verdict_engine_service/tests/test_cache.py _____
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/verdict_engine_service/tests/test_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+____ ERROR collecting services/verdict_engine_service/tests/test_config.py _____
+import file mismatch:
+imported module 'test_config' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_config.py
+--
+_ ERROR collecting services/verdict_engine_service/tests/test_kafka_consumer.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/verdict_engine_service/tests/test_kafka_consumer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_____ ERROR collecting services/verdict_engine_service/tests/test_main.py ______
+import file mismatch:
+imported module 'test_main' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/service_template/tests/unit/test_main.py
+--
+____ ERROR collecting services/verdict_engine_service/tests/test_models.py _____
+import file mismatch:
+imported module 'test_models' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/consciousness/mip/tests/unit/test_models.py
+--
+_ ERROR collecting services/verdict_engine_service/tests/test_verdict_repository.py _
+import file mismatch:
+imported module 'test_verdict_repository' has this __file__ attribute:
+  /home/juan/vertice-dev/backend/services/narrative_filter_service/tests/test_verdict_repository.py
+--
+_ ERROR collecting services/verdict_engine_service/tests/test_websocket_manager.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/verdict_engine_service/tests/test_websocket_manager.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/visual_cortex_service/tests/test_visual_cortex.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/visual_cortex_service/tests/test_visual_cortex.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/vuln_intel_service/tests/test_vuln_intel_service.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/vuln_intel_service/tests/test_vuln_intel_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+__ ERROR collecting services/wargaming_crisol/tests/cache/test_redis_cache.py __
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/wargaming_crisol/tests/cache/test_redis_cache.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/wargaming_crisol/tests/middleware/test_rate_limiter.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/wargaming_crisol/tests/middleware/test_rate_limiter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+--
+_ ERROR collecting services/web_attack_service/tests/test_web_attack_service.py _
+ImportError while importing test module '/home/juan/vertice-dev/backend/services/web_attack_service/tests/test_web_attack_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:

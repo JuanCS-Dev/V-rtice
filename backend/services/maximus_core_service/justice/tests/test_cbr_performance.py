@@ -15,8 +15,8 @@ import pytest
 import asyncio
 import time
 import gc
-from justice.cbr_engine import CBREngine
-from justice.precedent_database import PrecedentDB, CasePrecedent
+from services.maximus_core_service.justice.cbr_engine import CBREngine
+from services.maximus_core_service.justice.precedent_database import PrecedentDB, CasePrecedent
 
 
 @pytest.mark.asyncio

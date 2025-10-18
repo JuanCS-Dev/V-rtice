@@ -23,6 +23,23 @@ export default defineConfig({
 
     // Global setup
     globals: true,
+    
+    // Environment options
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+      },
+    },
+    
+    // Define env variables for tests
+    env: {
+      VITE_NARRATIVE_FILTER_API: 'http://localhost:5000',
+      VITE_VERDICT_ENGINE_API: 'http://localhost:5001',
+      VITE_VERDICT_ENGINE_WS: 'ws://localhost:5001/ws/verdicts',
+      VITE_WS_VERDICT_STREAM: 'ws://localhost:5001/ws/verdicts',
+      VITE_ALLIANCE_GRAPH_API: 'http://localhost:5000/graph',
+      NODE_ENV: 'test'
+    },
 
     // Setup files
     setupFiles: ['./src/tests/setup.js'],

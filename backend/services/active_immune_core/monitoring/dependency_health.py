@@ -27,7 +27,7 @@ from aiokafka import AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError, KafkaError
 
 from backend.services.active_immune_core.config import settings
-from monitoring.health_checker import HealthStatus
+from services.active_immune_core.monitoring.health_checker import HealthStatus
 
 logger = logging.getLogger(__name__)
 

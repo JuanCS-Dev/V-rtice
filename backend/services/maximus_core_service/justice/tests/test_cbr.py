@@ -8,8 +8,8 @@ Tests cover:
 """
 
 import pytest
-from justice.cbr_engine import CBREngine, CBRResult
-from justice.precedent_database import PrecedentDB, CasePrecedent
+from services.maximus_core_service.justice.cbr_engine import CBREngine, CBRResult
+from services.maximus_core_service.justice.precedent_database import PrecedentDB, CasePrecedent
 
 
 # Mock validator for testing

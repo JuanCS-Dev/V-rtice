@@ -23,8 +23,8 @@ from psycopg2.pool import ThreadedConnectionPool
 
 from consciousness.prefrontal_cortex import OrchestratedDecision
 from consciousness.tom_engine import UserMentalState, EmotionalState
-from compassion.event_detector import SufferingEvent
-from compassion.compassion_planner import CompassionPlan
+from consciousness.compassion.event_detector import SufferingEvent
+from consciousness.compassion.compassion_planner import CompassionPlan
 
 logger = logging.getLogger(__name__)
 

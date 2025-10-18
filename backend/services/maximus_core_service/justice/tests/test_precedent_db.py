@@ -8,7 +8,7 @@ Tests cover:
 """
 
 import pytest
-from justice.precedent_database import PrecedentDB, CasePrecedent
+from services.maximus_core_service.justice.precedent_database import PrecedentDB, CasePrecedent
 from datetime import datetime
 
 

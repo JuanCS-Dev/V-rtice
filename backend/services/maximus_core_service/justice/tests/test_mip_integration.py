@@ -11,8 +11,8 @@ import pytest
 from fastapi.testclient import TestClient
 from motor_integridade_processual.api import app
 from motor_integridade_processual.models.action_plan import ActionPlan
-from justice.precedent_database import PrecedentDB, CasePrecedent
-from justice.cbr_engine import CBREngine
+from services.maximus_core_service.justice.precedent_database import PrecedentDB, CasePrecedent
+from services.maximus_core_service.justice.cbr_engine import CBREngine
 
 
 @pytest.fixture

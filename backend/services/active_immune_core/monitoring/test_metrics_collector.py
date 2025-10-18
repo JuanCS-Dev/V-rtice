@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from monitoring.metrics_collector import MetricsCollector
+from services.active_immune_core.monitoring.metrics_collector import MetricsCollector
 
 
 @pytest.fixture

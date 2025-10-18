@@ -12,7 +12,7 @@ import time
 
 import pytest
 
-from monitoring.prometheus_exporter import PrometheusExporter
+from services.active_immune_core.monitoring.prometheus_exporter import PrometheusExporter
 
 # Global counter to ensure unique namespaces for each test
 _test_counter = 0

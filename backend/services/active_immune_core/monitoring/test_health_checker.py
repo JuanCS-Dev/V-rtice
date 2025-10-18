@@ -13,7 +13,7 @@ from datetime import datetime
 
 import pytest
 
-from monitoring.health_checker import (
+from services.active_immune_core.monitoring.health_checker import (
     ComponentHealth,
     HealthChecker,
     HealthStatus,
