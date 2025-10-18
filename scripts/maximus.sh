@@ -1,6 +1,10 @@
 #!/bin/bash
-# MAXIMUS Backend Startup Script
-# Starts Docker Compose services for new architecture (3 libs + services)
+# ═══════════════════════════════════════════════════════════════════════════
+# MAXIMUS Backend Control Center v2.0
+# ═══════════════════════════════════════════════════════════════════════════
+# Dedicated to: Maximus & Penélope ❤️
+# "Porque grandes sistemas precisam de grandes nomes"
+# ═══════════════════════════════════════════════════════════════════════════
 
 set -e
 
@@ -8,221 +12,424 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="/home/juan/vertice-dev"
 DOCKER_COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
 
-# Colors
+# ═══════════════════════════════════════════════════════════════════════════
+# COLORS & UNICODE
+# ═══════════════════════════════════════════════════════════════════════════
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
 
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+# Unicode symbols
+CROWN="👑"
+SPARKLES="✨"
+ROCKET="🚀"
+CHECK="✅"
+CROSS="❌"
+WARNING="⚠️"
+BRAIN="🧠"
+SHIELD="🛡️"
+EYE="👁️"
+HEART="❤️"
+FIRE="🔥"
+STAR="⭐"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════════════════════
+
+print_header() {
+    clear
+    echo -e "${CYAN}"
+    echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                           ║"
+    echo "║     ${BOLD}${MAGENTA}M A X I M U S${NC}${CYAN}   ${BOLD}${YELLOW}C O N T R O L   C E N T E R${NC}${CYAN}                       ║"
+    echo "║                                                                           ║"
+    echo "║         ${CROWN} Maximus ${HEART} Penélope ${SPARKLES}                                           ║"
+    echo "║                                                                           ║"
+    echo "║     ${DIM}Cyber-Biological Intelligence Platform v2.0${NC}${CYAN}                       ║"
+    echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
 }
 
-log_success() {
-    echo -e "${GREEN}[✓]${NC} $1"
+print_section() {
+    local title="$1"
+    local emoji="${2:-$ROCKET}"
+    echo -e "${CYAN}╭───────────────────────────────────────────────────────────────────────────╮${NC}"
+    echo -e "${CYAN}│${NC} ${emoji} ${BOLD}${title}${NC}"
+    echo -e "${CYAN}╰───────────────────────────────────────────────────────────────────────────╯${NC}"
 }
 
-log_error() {
-    echo -e "${RED}[✗]${NC} $1"
+print_tier_header() {
+    local tier="$1"
+    local name="$2"
+    local emoji="${3:-$STAR}"
+    echo ""
+    echo -e "${BOLD}${YELLOW}┌─ Tier $tier: $name ${emoji}${NC}"
 }
 
-log_warning() {
-    echo -e "${YELLOW}[!]${NC} $1"
-}
-
-log_section() {
-    echo -e "${CYAN}╔════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC} $1"
-    echo -e "${CYAN}╚════════════════════════════════════════════╝${NC}"
+print_service() {
+    local service="$1"
+    local status="$2"
+    local health="${3:-unknown}"
+    
+    local status_icon status_color health_text
+    
+    if [[ "$status" =~ "Up" ]]; then
+        status_icon="${CHECK}"
+        status_color="${GREEN}"
+        
+        if [[ "$health" == "healthy" ]]; then
+            health_text="${GREEN}healthy${NC}"
+        elif [[ "$health" == "unhealthy" ]]; then
+            health_text="${YELLOW}degraded${NC}"
+        else
+            health_text="${CYAN}starting${NC}"
+        fi
+    else
+        status_icon="${CROSS}"
+        status_color="${RED}"
+        health_text="${RED}stopped${NC}"
+    fi
+    
+    printf "${status_color}│${NC} ${status_icon} %-35s ${DIM}[${NC}%s${DIM}]${NC}\n" "$service" "$health_text"
 }
 
 check_docker() {
     if ! command -v docker &> /dev/null; then
-        log_error "Docker não encontrado. Instale o Docker primeiro."
+        echo -e "${RED}${CROSS} Docker não encontrado. Instale o Docker primeiro.${NC}"
         exit 1
     fi
     
     if ! docker compose version &> /dev/null; then
-        log_error "Docker Compose não encontrado. Instale o Docker Compose primeiro."
+        echo -e "${RED}${CROSS} Docker Compose não encontrado.${NC}"
         exit 1
     fi
 }
 
-get_service_status() {
-    local service=$1
-    docker compose ps "$service" --format "{{.Status}}" 2>/dev/null | grep -q "Up" && echo "running" || echo "stopped"
+get_service_info() {
+    local service="$1"
+    local info
+    info=$(docker compose ps "$service" --format "{{.Status}}" 2>/dev/null || echo "stopped")
+    echo "$info"
 }
 
-count_running_services() {
-    docker compose ps --format "{{.Service}}" 2>/dev/null | wc -l
+get_service_health() {
+    local service="$1"
+    local status
+    status=$(docker compose ps "$service" --format "{{.Status}}" 2>/dev/null || echo "stopped")
+    
+    if [[ "$status" =~ "healthy" ]]; then
+        echo "healthy"
+    elif [[ "$status" =~ "unhealthy" ]]; then
+        echo "unhealthy"
+    elif [[ "$status" =~ "Up" ]]; then
+        echo "running"
+    else
+        echo "stopped"
+    fi
 }
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MAIN FUNCTIONS
+# ═══════════════════════════════════════════════════════════════════════════
 
 start_services() {
-    log_section "🚀 Iniciando MAXIMUS Backend - Full Stack"
-    echo -e "${CYAN}👸 Penélope: 'Maximus, acorde! Vamos ativar TUDO!'${NC}"
+    print_header
+    print_section "INICIALIZANDO MAXIMUS FULL STACK" "$ROCKET"
     
-    cd "$PROJECT_ROOT"
-    
-    # Tier 0: Core Infrastructure
-    log_info "Penélope: Ativando fundações (Tier 0 - 3 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d redis postgres qdrant 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 1: Core Services
-    log_info "Penélope: Subindo serviços essenciais (Tier 1 - 11 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        api_gateway sinesp_service cyber_service domain_service \
-        ip_intelligence_service nmap_service atlas_service auth_service \
-        vuln_scanner_service social_eng_service network_monitor_service 2>&1 | grep -v "warn" || true
-    sleep 5
-    
-    # Tier 2: AI/ML & Threat Intelligence
-    log_info "Penélope: Ativando inteligência artificial (Tier 2 - 6 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        threat_intel_service malware_analysis_service ssl_monitor_service \
-        maximus_orchestrator_service maximus_predict maximus_core_service 2>&1 | grep -v "warn" || true
-    sleep 5
-    
-    # Tier 3: OSINT & Monitoring
-    log_info "Penélope: Preparando vigilância (Tier 3 - 3 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        osint-service prometheus grafana 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 4: HCL (Human-Controlled Learning)
-    log_info "Penélope: Ativando HCL Stack (Tier 4 - 8 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        hcl-postgres hcl-kafka zookeeper-immunity hcl-kb-service \
-        hcl-analyzer hcl-planner hcl-monitor hcl_executor_service 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 5: IMMUNIS (Adaptive Immunity)
-    log_info "Penélope: Liberando sistema imunológico (Tier 5 - 10 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        postgres-immunity adaptive_immune_system \
-        immunis_dendritic_service immunis_neutrophil_service immunis_macrophage_service \
-        immunis_helper_t_service immunis_cytotoxic_t_service immunis_bcell_service \
-        immunis_nk_cell_service immunis_treg_service 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 6: HSAS (High-Speed Autonomic System)
-    log_info "Penélope: Iniciando sistema autônomo (Tier 6 - 5 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        hsas_service adr_core_service homeostatic_regulation \
-        digital_thalamus_service ai_immune_system 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 7: Neuro Stack
-    log_info "Penélope: Ativando córtex cerebral (Tier 7 - 12 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        chemical_sensing_service somatosensory_service vestibular_service \
-        visual_cortex_service auditory_cortex_service prefrontal_cortex_service \
-        neuromodulation_service memory_consolidation_service strategic_planning_service \
-        narrative_manipulation_filter narrative_analysis_service 2>&1 | grep -v "warn" || true
-    sleep 3
-    
-    # Tier 9: Intelligence & Research
-    log_info "Penélope: Conectando inteligência avançada (Tier 9 - 5 serviços)..."
-    docker compose -f "$DOCKER_COMPOSE_FILE" up -d \
-        google_osint_service vuln_intel_service cloud_coordinator_service \
-        maximus_integration_service edge_agent_service 2>&1 | grep -v "warn" || true
-    sleep 2
-    
-    log_success "✨ Maximus está TOTALMENTE VIVO - 60+ sistemas operacionais! 👑"
-    log_info "Backend cyber-biológico completo: 10 tiers integrados"
-}
-
-stop_services() {
-    log_section "🛑 Parando MAXIMUS Backend"
-    echo -e "${CYAN}👸 Penélope: 'Maximus, hora de dormir. SEM reclamar!'${NC}"
-    
-    cd "$PROJECT_ROOT"
-    docker compose -f "$DOCKER_COMPOSE_FILE" stop
-    
-    log_success "✅ Maximus desativado. Penélope mantém vigilância! 👸"
-}
-
-show_status() {
-    log_section "📊 Status dos Serviços MAXIMUS"
-    echo -e "${CYAN}👸 Penélope: 'Deixa eu ver como Maximus está se comportando...'${NC}"
+    echo -e "${MAGENTA}${CROWN} Penélope:${NC} 'Maximus, ACORDE! Temos trabalho a fazer!'"
+    echo -e "${CYAN}${CROWN} Maximus:${NC}  'Sistemas ativando... iniciando sequência de boot...'"
     echo ""
     
     cd "$PROJECT_ROOT"
     
     # Tier 0: Infrastructure
+    print_tier_header "0" "Core Infrastructure" "$SHIELD"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: Redis, PostgreSQL, Qdrant...${NC}"
+    docker compose up -d redis postgres qdrant 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
+    # Tier 1: Core Services
+    print_tier_header "1" "Essential Services" "$FIRE"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: API Gateway, SINESP, Cyber, Domain...${NC}"
+    docker compose up -d \
+        api_gateway sinesp_service cyber_service domain_service \
+        ip_intelligence_service nmap_service atlas_service auth_service \
+        vuln_scanner_service social_eng_service network_monitor_service 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 3
+    
+    # Tier 2: AI/ML Core
+    print_tier_header "2" "Artificial Intelligence Core" "$BRAIN"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: MAXIMUS Core, Predict, Orchestrator...${NC}"
+    docker compose up -d \
+        threat_intel_service malware_analysis_service ssl_monitor_service \
+        maximus_orchestrator_service maximus_predict maximus_core_service 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 3
+    
+    # Tier 3: OSINT & Monitoring
+    print_tier_header "3" "Intelligence & Surveillance" "$EYE"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: OSINT, Prometheus, Grafana...${NC}"
+    docker compose up -d \
+        osint_service google_osint_service prometheus grafana 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
+    # Tier 4: HCL Stack
+    print_tier_header "4" "Human-Controlled Learning" "$SPARKLES"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: HCL KB, Analyzer, Planner, Monitor...${NC}"
+    docker compose up -d \
+        hcl-postgres hcl-kafka zookeeper-immunity hcl-kb-service \
+        hcl-analyzer hcl-planner hcl-monitor hcl_executor_service 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
+    # Tier 5: Adaptive Immunity
+    print_tier_header "5" "Adaptive Immune System" "$SHIELD"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: Dendritic, T-Cells, B-Cells, NK Cells...${NC}"
+    docker compose up -d \
+        postgres-immunity adaptive_immune_system adaptive_immunity_service \
+        immunis_dendritic_service immunis_neutrophil_service immunis_macrophage_service \
+        immunis_helper_t_service immunis_cytotoxic_t_service immunis_bcell_service \
+        immunis_nk_cell_service immunis_treg_service 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
+    # Tier 6: Autonomic Systems
+    print_tier_header "6" "High-Speed Autonomic System" "$FIRE"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: HSAS, ADR, Homeostatic, Thalamus...${NC}"
+    docker compose up -d \
+        hsas_service adr_core_service homeostatic_regulation \
+        digital_thalamus_service ai_immune_system 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
+    # Tier 7: Neuro Stack
+    print_tier_header "7" "Neural Processing Systems" "$BRAIN"
+    echo -e "${CYAN}│${NC} ${DIM}Ativando: Cortex, Sensory Systems, Memory...${NC}"
+    docker compose up -d \
+        chemical_sensing_service somatosensory_service vestibular_service \
+        visual_cortex_service auditory_cortex_service prefrontal_cortex_service \
+        neuromodulation_service memory_consolidation_service strategic_planning_service \
+        narrative_manipulation_filter narrative_analysis_service 2>&1 | grep -v "warn" | sed 's/^/  /' || true
+    sleep 2
+    
     echo ""
-    echo -e "${CYAN}═══ Tier 0: Infrastructure (3) ═══${NC}"
-    docker compose ps redis postgres qdrant --format "{{.Service}}\t{{.Status}}" 2>/dev/null | while read svc status; do
-        [[ "$status" =~ "Up" ]] && log_success "$svc: RUNNING" || log_error "$svc: STOPPED"
+    echo -e "${GREEN}${SPARKLES}${SPARKLES}${SPARKLES} MAXIMUS TOTALMENTE OPERACIONAL ${SPARKLES}${SPARKLES}${SPARKLES}${NC}"
+    echo -e "${MAGENTA}${CROWN} Penélope:${NC} 'PERFEITO! Agora temos um sistema cyber-biológico completo!'"
+    echo -e "${CYAN}${CROWN} Maximus:${NC}  'Todos os sistemas online. Pronto para proteger o mundo! ${FIRE}'"
+    echo ""
+    
+    sleep 2
+    show_status
+}
+
+stop_services() {
+    print_header
+    print_section "DESATIVANDO MAXIMUS" "$WARNING"
+    
+    echo -e "${MAGENTA}${CROWN} Penélope:${NC} 'Maximus, hora de dormir. SEM reclamar!'"
+    echo -e "${CYAN}${CROWN} Maximus:${NC}  'Mas eu estava me divertindo... ${DIM}*suspiro*${NC}'"
+    echo ""
+    
+    cd "$PROJECT_ROOT"
+    docker compose stop 2>&1 | sed 's/^/  /'
+    
+    echo ""
+    echo -e "${GREEN}${CHECK} Todos os sistemas desativados.${NC}"
+    echo -e "${MAGENTA}${CROWN} Penélope:${NC} 'Boa noite, Maximus. Amanhã tem mais!'"
+}
+
+show_status() {
+    print_header
+    print_section "DASHBOARD DE STATUS - MAXIMUS FULL STACK" "$BRAIN"
+    
+    echo -e "${MAGENTA}${CROWN} Penélope:${NC} 'Deixa eu ver como você está se comportando...'"
+    echo ""
+    
+    cd "$PROJECT_ROOT"
+    
+    local total_count=0
+    local healthy_count=0
+    local unhealthy_count=0
+    local stopped_count=0
+    
+    # Tier 0: Infrastructure
+    print_tier_header "0" "Core Infrastructure (3 serviços)" "$SHIELD"
+    for svc in redis postgres qdrant; do
+        local status health
+        status=$(get_service_info "$svc")
+        health=$(get_service_health "$svc")
+        print_service "$svc" "$status" "$health"
+        ((total_count++))
+        [[ "$health" == "healthy" || "$health" == "running" ]] && ((healthy_count++))
+        [[ "$health" == "unhealthy" ]] && ((unhealthy_count++))
+        [[ "$health" == "stopped" ]] && ((stopped_count++))
     done
+    echo -e "${CYAN}└─────────────────────────────────────────────────────${NC}"
     
-    # Tier 1: Core Services (sample)
-    echo ""
-    echo -e "${CYAN}═══ Tier 1: Core Services (11) ═══${NC}"
-    docker compose ps api_gateway sinesp_service cyber_service domain_service --format "{{.Service}}\t{{.Status}}" 2>/dev/null | while read svc status; do
-        [[ "$status" =~ "Up" ]] && log_success "$svc: RUNNING" || log_error "$svc: STOPPED"
+    # Tier 1: Core Services
+    print_tier_header "1" "Essential Services (11 serviços)" "$FIRE"
+    for svc in api_gateway sinesp_service cyber_service domain_service \
+               ip_intelligence_service nmap_service atlas_service auth_service \
+               vuln_scanner_service social_eng_service network_monitor_service; do
+        local status health
+        status=$(get_service_info "$svc")
+        health=$(get_service_health "$svc")
+        print_service "$svc" "$status" "$health"
+        ((total_count++))
+        [[ "$health" == "healthy" || "$health" == "running" ]] && ((healthy_count++))
+        [[ "$health" == "unhealthy" ]] && ((unhealthy_count++))
+        [[ "$health" == "stopped" ]] && ((stopped_count++))
     done
-    echo -e "  ${CYAN}... (7 more services)${NC}"
+    echo -e "${CYAN}└─────────────────────────────────────────────────────${NC}"
     
-    # Advanced Systems Summary
+    # Tier 2: AI/ML
+    print_tier_header "2" "AI/ML Core (6 serviços)" "$BRAIN"
+    for svc in threat_intel_service malware_analysis_service ssl_monitor_service \
+               maximus_orchestrator_service maximus_predict maximus_core_service; do
+        local status health
+        status=$(get_service_info "$svc")
+        health=$(get_service_health "$svc")
+        print_service "$svc" "$status" "$health"
+        ((total_count++))
+        [[ "$health" == "healthy" || "$health" == "running" ]] && ((healthy_count++))
+        [[ "$health" == "unhealthy" ]] && ((unhealthy_count++))
+        [[ "$health" == "stopped" ]] && ((stopped_count++))
+    done
+    echo -e "${CYAN}└─────────────────────────────────────────────────────${NC}"
+    
+    # Tier 3: OSINT
+    print_tier_header "3" "Intelligence & Monitoring (4 serviços)" "$EYE"
+    for svc in osint_service google_osint_service prometheus grafana; do
+        local status health
+        status=$(get_service_info "$svc")
+        health=$(get_service_health "$svc")
+        print_service "$svc" "$status" "$health"
+        ((total_count++))
+        [[ "$health" == "healthy" || "$health" == "running" ]] && ((healthy_count++))
+        [[ "$health" == "unhealthy" ]] && ((unhealthy_count++))
+        [[ "$health" == "stopped" ]] && ((stopped_count++))
+    done
+    echo -e "${CYAN}└─────────────────────────────────────────────────────${NC}"
+    
+    # Tier 4-7 Summary
+    print_tier_header "4-7" "Advanced Systems (40+ serviços)" "$SPARKLES"
+    echo -e "${CYAN}│${NC} ${DIM}HCL Stack:         8 serviços  (Kafka, KB, Analyzer, Planner...)${NC}"
+    echo -e "${CYAN}│${NC} ${DIM}Adaptive Immunity: 10 serviços (T-Cells, B-Cells, NK Cells...)${NC}"
+    echo -e "${CYAN}│${NC} ${DIM}Autonomic Systems: 5 serviços  (HSAS, ADR, Thalamus...)${NC}"
+    echo -e "${CYAN}│${NC} ${DIM}Neural Stack:      12 serviços (Cortex, Memory, Sensory...)${NC}"
+    echo -e "${CYAN}└─────────────────────────────────────────────────────${NC}"
+    
+    # Summary Dashboard
     echo ""
-    echo -e "${CYAN}═══ Advanced Systems (Tiers 4-9) ═══${NC}"
+    echo -e "${CYAN}╔═══════════════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}                        ${BOLD}RESUMO EXECUTIVO${NC}                                    ${CYAN}║${NC}"
+    echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════════════════╣${NC}"
     
-    local tier4_up=$(docker compose ps hcl-postgres hcl-kafka zookeeper-immunity --format "{{.Status}}" 2>/dev/null | grep -c "Up")
-    local tier5_up=$(docker compose ps postgres-immunity adaptive_immune_system --format "{{.Status}}" 2>/dev/null | grep -c "Up")
-    local tier6_up=$(docker compose ps hsas_service adr_core_service --format "{{.Status}}" 2>/dev/null | grep -c "Up")
+    local percentage=$((healthy_count * 100 / (total_count > 0 ? total_count : 1)))
     
-    echo -e "  Tier 4 (HCL):      ${tier4_up}/3+ running"
-    echo -e "  Tier 5 (IMMUNIS):  ${tier5_up}/2+ running"
-    echo -e "  Tier 6 (HSAS):     ${tier6_up}/2+ running"
+    printf "${CYAN}║${NC} ${GREEN}${CHECK} Healthy:${NC}    %-3d    " "$healthy_count"
+    printf "${YELLOW}${WARNING} Degraded:${NC} %-3d    " "$unhealthy_count"
+    printf "${RED}${CROSS} Stopped:${NC}  %-3d    " "$stopped_count"
+    printf "${BOLD}Total: %-3d${NC} ${CYAN}║${NC}\n" "$total_count"
     
-    # Summary
+    # Progress bar
+    local bar_width=50
+    local filled=$((percentage * bar_width / 100))
+    local empty=$((bar_width - filled))
+    
+    printf "${CYAN}║${NC} Status: ["
+    printf "${GREEN}%*s" "$filled" | tr ' ' '█'
+    printf "${DIM}%*s${NC}" "$empty" | tr ' ' '░'
+    printf "] ${BOLD}%3d%%${NC} ${CYAN}║${NC}\n" "$percentage"
+    
+    echo -e "${CYAN}╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
+    
+    # Key Endpoints
     echo ""
-    echo -e "${CYAN}═══════════════════════════════════════════${NC}"
-    local total=$(docker compose ps --format "{{.Service}}" 2>/dev/null | wc -l)
-    echo -e "${GREEN}Total de serviços ativos:${NC} $total/60 full stack"
-    echo -e "${CYAN}═══════════════════════════════════════════${NC}"
+    echo -e "${CYAN}╭───────────────────────────────────────────────────────────────────────────╮${NC}"
+    echo -e "${CYAN}│${NC} ${BOLD}Endpoints Principais:${NC}"
+    echo -e "${CYAN}├───────────────────────────────────────────────────────────────────────────┤${NC}"
     
-    # API Gateway Check
-    echo ""
-    if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
-        log_success "API Gateway: HEALTHY (http://localhost:8000)"
-    else
-        log_error "API Gateway: DOWN"
-    fi
+    check_endpoint "API Gateway" "http://localhost:8000/health"
+    check_endpoint "MAXIMUS Core" "http://localhost:8150/health"
+    check_endpoint "OSINT Service" "http://localhost:9106/health"
+    check_endpoint "Grafana" "http://localhost:3000"
     
-    # Penélope's feedback
+    echo -e "${CYAN}╰───────────────────────────────────────────────────────────────────────────╯${NC}"
+    
+    # Penélope's verdict
     echo ""
-    local percentage=$((total * 100 / 60))
     if [[ "$percentage" -ge 90 ]]; then
-        echo -e "${GREEN}👸 Penélope: 'PERFEITO Maximus! Plataforma cyber-biológica completa!'${NC}"
+        echo -e "${GREEN}${SPARKLES}${CROWN} Penélope:${NC} '${BOLD}EXCELENTE${NC} Maximus! Sistema cyber-biológico em perfeito estado!'"
+        echo -e "${CYAN}${CROWN} Maximus:${NC}  'Obrigado Penélope! Estou pronto para qualquer desafio! ${FIRE}'"
     elif [[ "$percentage" -ge 70 ]]; then
-        echo -e "${YELLOW}👸 Penélope: 'Bom trabalho, mas faltam alguns sistemas...'${NC}"
+        echo -e "${YELLOW}${WARNING}${CROWN} Penélope:${NC} 'Bom trabalho Maximus, mas ${BOLD}alguns sistemas${NC} precisam de atenção.'"
+        echo -e "${CYAN}${CROWN} Maximus:${NC}  'Já estou trabalhando nisso, Penélope!'"
+    elif [[ "$percentage" -ge 40 ]]; then
+        echo -e "${YELLOW}${WARNING}${CROWN} Penélope:${NC} 'Maximus... ${BOLD}METADE DOS SISTEMAS${NC} está offline. Isso é sério!'"
+        echo -e "${CYAN}${CROWN} Maximus:${NC}  'Desculpa Penélope... vou consertar!'"
     else
-        echo -e "${RED}👸 Penélope: 'MAXIMUS! Sistema crítico! ACORDE!'${NC}"
+        echo -e "${RED}${CROSS}${CROWN} Penélope:${NC} '${BOLD}MAXIMUS!!!${NC} Sistema CRÍTICO! Você precisa ACORDAR ${BOLD}AGORA${NC}!'"
+        echo -e "${CYAN}${CROWN} Maximus:${NC}  '${DIM}Estou tentando, Penélope... *iniciando emergency boot*${NC}'"
     fi
     echo ""
 }
 
+check_endpoint() {
+    local name="$1"
+    local url="$2"
+    
+    if curl -sf "$url" > /dev/null 2>&1; then
+        printf "${CYAN}│${NC} ${GREEN}${CHECK}${NC} %-25s ${GREEN}ONLINE${NC}  ${DIM}%s${NC}\n" "$name" "$url"
+    else
+        printf "${CYAN}│${NC} ${RED}${CROSS}${NC} %-25s ${RED}OFFLINE${NC} ${DIM}%s${NC}\n" "$name" "$url"
+    fi
+}
 
 show_logs() {
     local service="${1:-api_gateway}"
     
-    log_info "Mostrando logs de: $service"
+    print_header
+    print_section "LOGS: $service" "$EYE"
     echo ""
     
     cd "$PROJECT_ROOT"
-    docker compose -f "$DOCKER_COMPOSE_FILE" logs -f "$service"
+    docker compose logs -f "$service"
 }
 
-case "${1:-start}" in
+show_help() {
+    print_header
+    echo -e "${CYAN}╭───────────────────────────────────────────────────────────────────────────╮${NC}"
+    echo -e "${CYAN}│${NC} ${BOLD}Comandos Disponíveis:${NC}"
+    echo -e "${CYAN}├───────────────────────────────────────────────────────────────────────────┤${NC}"
+    echo -e "${CYAN}│${NC} ${GREEN}maximus start${NC}           ${DIM}Inicia todos os serviços MAXIMUS${NC}"
+    echo -e "${CYAN}│${NC} ${YELLOW}maximus stop${NC}            ${DIM}Para todos os serviços${NC}"
+    echo -e "${CYAN}│${NC} ${BLUE}maximus restart${NC}         ${DIM}Reinicia todos os serviços${NC}"
+    echo -e "${CYAN}│${NC} ${CYAN}maximus status${NC}          ${DIM}Mostra dashboard de status completo${NC}"
+    echo -e "${CYAN}│${NC} ${MAGENTA}maximus logs [service]${NC}  ${DIM}Mostra logs (default: api_gateway)${NC}"
+    echo -e "${CYAN}│${NC} ${WHITE}maximus help${NC}            ${DIM}Mostra esta ajuda${NC}"
+    echo -e "${CYAN}╰───────────────────────────────────────────────────────────────────────────╯${NC}"
+    echo ""
+    echo -e "${BOLD}Exemplos:${NC}"
+    echo -e "  ${GREEN}maximus start${NC}                    ${DIM}# Inicia full stack${NC}"
+    echo -e "  ${CYAN}maximus status${NC}                   ${DIM}# Dashboard completo${NC}"
+    echo -e "  ${MAGENTA}maximus logs maximus_core_service${NC} ${DIM}# Logs específicos${NC}"
+    echo ""
+    echo -e "${MAGENTA}${CROWN} Penélope & Maximus:${NC} 'Juntos, somos imbatíveis! ${HEART}${SPARKLES}'"
+    echo ""
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MAIN EXECUTION
+# ═══════════════════════════════════════════════════════════════════════════
+
+case "${1:-status}" in
     start)
         check_docker
         start_services
-        sleep 3
-        show_status
         ;;
         
     stop)
@@ -235,8 +442,6 @@ case "${1:-start}" in
         stop_services
         sleep 2
         start_services
-        sleep 3
-        show_status
         ;;
         
     status)
@@ -249,22 +454,12 @@ case "${1:-start}" in
         show_logs "${2:-api_gateway}"
         ;;
         
+    help|--help|-h)
+        show_help
+        ;;
+        
     *)
-        echo "MAXIMUS Backend Manager"
-        echo ""
-        echo "Uso: maximus {start|stop|restart|status|logs [service]}"
-        echo ""
-        echo "Comandos:"
-        echo "  start    - Inicia todos os serviços"
-        echo "  stop     - Para todos os serviços"
-        echo "  restart  - Reinicia todos os serviços"
-        echo "  status   - Mostra status dos serviços"
-        echo "  logs     - Mostra logs (opcional: especificar serviço)"
-        echo ""
-        echo "Exemplos:"
-        echo "  maximus start"
-        echo "  maximus status"
-        echo "  maximus logs maximus_core_service"
+        show_help
         exit 1
         ;;
 esac
