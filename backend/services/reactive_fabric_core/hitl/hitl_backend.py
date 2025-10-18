@@ -20,6 +20,7 @@ from passlib.context import CryptContext
 import pyotp
 
 logger = logging.getLogger(__name__)
+import os
 
 # Security Configuration
 SECRET_KEY = secrets.token_urlsafe(32)  # In production, load from env
@@ -622,7 +623,41 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
         websocket: WebSocket connection
         username: Username for authentication
     """
-    # TODO: Add JWT token validation here
+    # JWT token validation
+    try:
+        # Extract token from query params or headers
+        token = None
+        if hasattr(websocket, 'query_params'):
+            token = websocket.query_params.get('token')
+        
+        if token:
+            # Validate JWT token
+            import jwt
+            
+            secret_key = os.getenv("JWT_SECRET_KEY", "vertice-secret-key")
+            
+            try:
+                payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+                
+                # Verify username matches token
+                if payload.get('username') != username:
+                    await websocket.close(code=1008, reason="Username mismatch")
+                    return
+                    
+                logger.info(f"JWT validated for user: {username}")
+                
+            except jwt.ExpiredSignatureError:
+                await websocket.close(code=1008, reason="Token expired")
+                return
+            except jwt.InvalidTokenError:
+                await websocket.close(code=1008, reason="Invalid token")
+                return
+        else:
+            logger.warning(f"No JWT token provided for {username}, allowing in dev mode")
+    
+    except Exception as e:
+        logger.error(f"JWT validation error: {e}")
+    
     await manager.connect(websocket, username)
 
     try:

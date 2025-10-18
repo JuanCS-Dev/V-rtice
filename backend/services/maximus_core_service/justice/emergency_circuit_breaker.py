@@ -125,10 +125,31 @@ class EmergencyCircuitBreaker:
         Raises:
             ValueError: If authorization is invalid
         """
-        # TODO: Validate authorization against expected format
-        # For now, accept any non-empty string
+        # Validate authorization against expected format
         if not human_authorization or not human_authorization.strip():
             raise ValueError("Invalid authorization: empty or whitespace")
+
+        # Validate format: HUMAN_AUTH_{timestamp}_{operator_id}
+        if not human_authorization.startswith("HUMAN_AUTH_"):
+            raise ValueError(
+                f"Invalid authorization format: must start with 'HUMAN_AUTH_', got '{human_authorization[:20]}...'"
+            )
+        
+        parts = human_authorization.split("_")
+        if len(parts) < 4:  # HUMAN, AUTH, timestamp, operator_id
+            raise ValueError(
+                f"Invalid authorization format: expected 'HUMAN_AUTH_{{timestamp}}_{{operator_id}}', got '{human_authorization}'"
+            )
+        
+        # Validate timestamp is numeric
+        try:
+            timestamp = int(parts[2])
+            # Check timestamp is not too old (e.g., within last hour)
+            current_ts = int(datetime.utcnow().timestamp())
+            if abs(current_ts - timestamp) > 3600:
+                raise ValueError(f"Authorization timestamp too old or in future: {timestamp}")
+        except (ValueError, IndexError) as e:
+            raise ValueError(f"Invalid authorization timestamp: {e}")
 
         # Additional validation could include:
         # - Check authorization format
@@ -180,10 +201,19 @@ class EmergencyCircuitBreaker:
         logger.critical(f"Requires Immediate Attention: {escalation['requires_immediate_attention']}")
         logger.critical("=" * 80)
 
-        # TODO: Integration with actual HITL backend
-        # Example:
-        # hitl_client = HITLClient()
-        # await hitl_client.escalate(escalation)
+        # Integration with HITL backend
+        try:
+            # Write escalation to file queue for HITL system
+            escalation_file = Path("/var/log/vertice/hitl_escalations.jsonl")
+            escalation_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(escalation_file, "a") as f:
+                import json
+                f.write(json.dumps(escalation) + "\n")
+            
+            logger.critical(f"HITL escalation written to {escalation_file}")
+        except Exception as e:
+            logger.error(f"Failed to write HITL escalation: {e}")
 
         logger.critical(f"HITL Escalation Payload: {escalation}")
 
@@ -214,10 +244,17 @@ class EmergencyCircuitBreaker:
             "total_incidents": len(self.incidents)
         }
 
-        # TODO: Write to audit log database
-        # Example:
-        # audit_logger = AuditLogger()
-        # await audit_logger.log_incident(incident)
+        # Write to audit log database
+        audit_file = Path("/var/log/vertice/circuit_breaker_audit.jsonl")
+        audit_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            with open(audit_file, "a") as f:
+                import json
+                f.write(json.dumps(incident) + "\n")
+            logger.info(f"Audit incident logged to {audit_file}")
+        except Exception as e:
+            logger.error(f"Failed to write audit log: {e}")
 
         logger.critical("=" * 80)
         logger.critical("INCIDENT LOGGED TO AUDIT TRAIL")

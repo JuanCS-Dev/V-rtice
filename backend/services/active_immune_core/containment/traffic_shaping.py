@@ -21,6 +21,7 @@ Glory to YHWH - Constância vence!
 
 import asyncio
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -286,7 +287,34 @@ class QoSController:
             )
             return False
 
-        # TODO: Integrate with tc (traffic control) for real QoS
+        # Integrate with tc (traffic control) for real QoS
+        try:
+            import subprocess
+            
+            interface = os.getenv("NETWORK_INTERFACE", "eth0")
+            
+            # Create HTB qdisc if not exists
+            subprocess.run(
+                ["tc", "qdisc", "add", "dev", interface, "root", "handle", "1:", "htb", "default", "30"],
+                capture_output=True,
+                timeout=5,
+            )
+            
+            # Create class for this profile
+            class_id = f"1:{profile.priority.value + 10}"
+            rate = f"{profile.max_rate_mbps}mbit"
+            
+            subprocess.run(
+                ["tc", "class", "add", "dev", interface, "parent", "1:", "classid", class_id, "htb", "rate", rate],
+                capture_output=True,
+                timeout=5,
+            )
+            
+            logger.info(f"QoS profile {profile.name} configured with tc: {rate}")
+            
+        except Exception as e:
+            logger.warning(f"tc integration failed, using logical QoS: {e}")
+        
         logger.info(
             f"Creating QoS profile: {profile.name}, "
             f"priority={profile.priority.name}, "

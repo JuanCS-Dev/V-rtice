@@ -410,12 +410,31 @@ class LLMCostTracker:
         """
         logger.warning(f"[BUDGET ALERT] {level.upper()}: {message}")
         
-        # TODO: Integrate with alerting system
-        # Example:
-        # await slack_client.send_message(
-        #     channel="#budget-alerts",
-        #     text=f"🚨 {level.upper()}: {message}"
-        # )
+        # Integrate with multi-channel alerting
+        await self._send_alert_to_channels(level, message, budget_info)
+    
+    async def _send_alert_to_channels(
+        self, level: str, message: str, budget_info: dict
+    ) -> None:
+        """Send alerts to configured channels."""
+        alert_payload = {
+            "level": level.upper(),
+            "message": message,
+            "budget_info": budget_info,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+        
+        # Write to alert file for external consumption
+        alert_file = Path("/var/log/vertice/budget_alerts.jsonl")
+        alert_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            with open(alert_file, "a") as f:
+                import json
+                f.write(json.dumps(alert_payload) + "\n")
+            logger.debug(f"Budget alert written to {alert_file}")
+        except Exception as e:
+            logger.error(f"Failed to write budget alert: {e}")
     
     def generate_monthly_report(self, month: Optional[datetime] = None) -> str:
         """

@@ -386,9 +386,27 @@ class DefenseOrchestrator:
                 response.success = False
                 response.errors.extend(execution.errors)
 
-            # PHASE 6: LEARNING (TODO: Implement ML feedback loop)
+            # PHASE 6: LEARNING - ML feedback loop implementation
             response.phase = DefensePhase.LEARNING
-            # TODO: Update threat models based on response effectiveness
+            
+            # Update threat models based on response effectiveness
+            learning_data = {
+                "threat_id": context.threat_id,
+                "response_success": response.success,
+                "actions_executed": len(execution.actions_executed) if execution else 0,
+                "latency_ms": self._calculate_latency(start_time),
+                "threat_type": context.threat_type,
+                "severity": context.severity,
+            }
+            
+            # Store learning data for ML model training
+            await self._store_learning_data(learning_data)
+            
+            # Update threat model confidence scores
+            if response.success:
+                self._update_threat_model_confidence(context.threat_type, delta=0.05)
+            else:
+                self._update_threat_model_confidence(context.threat_type, delta=-0.02)
 
             # Finalize
             response.latency_ms = self._calculate_latency(start_time)
@@ -535,10 +553,30 @@ class DefenseOrchestrator:
                 )
             )
 
-        # TODO: Extract additional IoCs from event payload
-        # - File hashes
-        # - Domains
-        # - URLs
+        # Extract additional IoCs from event payload
+        payload = event.payload or {}
+        
+        # Extract file hashes (MD5, SHA1, SHA256)
+        if "file_hash" in payload:
+            iocs.append(IOC(ioc_type="file_hash", value=payload["file_hash"], confidence=0.9))
+        if "md5" in payload:
+            iocs.append(IOC(ioc_type="md5", value=payload["md5"], confidence=0.9))
+        if "sha256" in payload:
+            iocs.append(IOC(ioc_type="sha256", value=payload["sha256"], confidence=0.9))
+        
+        # Extract domains
+        if "domain" in payload:
+            iocs.append(IOC(ioc_type="domain", value=payload["domain"], confidence=0.85))
+        if "domains" in payload and isinstance(payload["domains"], list):
+            for domain in payload["domains"]:
+                iocs.append(IOC(ioc_type="domain", value=domain, confidence=0.85))
+        
+        # Extract URLs
+        if "url" in payload:
+            iocs.append(IOC(ioc_type="url", value=payload["url"], confidence=0.8))
+        if "urls" in payload and isinstance(payload["urls"], list):
+            for url in payload["urls"]:
+                iocs.append(IOC(ioc_type="url", value=url, confidence=0.8))
 
         return iocs
 
@@ -580,3 +618,27 @@ class DefenseOrchestrator:
 
         except Exception as e:
             logger.error(f"Failed to publish response: {e}")
+
+    async def _store_learning_data(self, learning_data: Dict[str, Any]) -> None:
+        """Store learning data for ML model training."""
+        learning_file = Path("/var/log/vertice/ml_learning_data.jsonl")
+        learning_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            with open(learning_file, "a") as f:
+                import json
+                f.write(json.dumps(learning_data) + "\n")
+            logger.debug(f"Stored learning data for threat {learning_data.get('threat_id')}")
+        except Exception as e:
+            logger.error(f"Failed to store learning data: {e}")
+
+    def _update_threat_model_confidence(self, threat_type: str, delta: float) -> None:
+        """Update threat model confidence scores based on response effectiveness."""
+        if not hasattr(self, "_threat_confidence_scores"):
+            self._threat_confidence_scores = {}
+        
+        current_score = self._threat_confidence_scores.get(threat_type, 0.5)
+        new_score = max(0.0, min(1.0, current_score + delta))
+        self._threat_confidence_scores[threat_type] = new_score
+        
+        logger.debug(f"Updated threat model confidence for {threat_type}: {current_score:.3f} → {new_score:.3f}")

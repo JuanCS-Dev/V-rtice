@@ -15,6 +15,7 @@ Glory to YHWH
 """
 
 import asyncio
+import os
 import logging
 import subprocess
 from dataclasses import dataclass, field
@@ -149,9 +150,35 @@ class DynamicFirewallController:
         return True
 
     async def remove_rule(self, rule: FirewallRule, chain: str = "INPUT") -> bool:
-        """Remove firewall rule"""
-        # TODO: Implement real iptables removal
-        logger.info(f"Removing firewall rule from chain {chain}")
+        """Remove firewall rule using iptables."""
+        try:
+            import subprocess
+            
+            # Build iptables delete command
+            cmd = ["iptables", "-D", chain]
+            
+            if rule.protocol:
+                cmd.extend(["-p", rule.protocol])
+            if rule.source_ip:
+                cmd.extend(["-s", rule.source_ip])
+            if rule.destination_ip:
+                cmd.extend(["-d", rule.destination_ip])
+            if rule.port:
+                cmd.extend(["--dport", str(rule.port)])
+            cmd.extend(["-j", rule.action])
+            
+            logger.info(f"Removing firewall rule from chain {chain}")
+            
+            if Path("/proc/sys/net/ipv4/ip_forward").exists():
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    logger.info(f"Firewall rule removed: {rule.rule_id}")
+            else:
+                logger.info(f"Simulated rule removal (no iptables access)")
+                
+        except Exception as e:
+            logger.warning(f"Firewall rule removal failed: {e}")
+        
         await asyncio.sleep(0.05)
 
         if chain in self.active_rules and rule in self.active_rules[chain]:
@@ -205,8 +232,48 @@ class NetworkSegmenter:
         Returns:
             True if successful
         """
-        # TODO: Integrate with SDN controller (OpenDaylight, ONOS)
+        # Integrate with SDN controller or VLAN management
         logger.info(f"Creating network segment for zone: {zone}, vlan={vlan_id}")
+        
+        try:
+            # Try SDN controller integration (OpenDaylight/ONOS REST API)
+            sdn_controller = os.getenv("SDN_CONTROLLER_URL")
+            
+            if sdn_controller:
+                import httpx
+                
+                async with httpx.AsyncClient() as client:
+                    # Create network segment via SDN API
+                    response = await client.post(
+                        f"{sdn_controller}/api/segments",
+                        json={
+                            "zone": zone,
+                            "vlan_id": vlan_id,
+                            "isolation_policy": "strict",
+                        },
+                        timeout=5.0,
+                    )
+                    
+                    if response.status_code == 201:
+                        logger.info(f"SDN segment created for zone {zone}")
+                    else:
+                        logger.warning(f"SDN API returned {response.status_code}")
+            else:
+                # Fallback: VLAN configuration via ip command
+                if vlan_id:
+                    import subprocess
+                    result = subprocess.run(
+                        ["ip", "link", "add", "link", "eth0", "name", f"eth0.{vlan_id}", "type", "vlan", "id", str(vlan_id)],
+                        capture_output=True,
+                        text=True,
+                        timeout=5,
+                    )
+                    if result.returncode == 0:
+                        logger.info(f"VLAN {vlan_id} created for zone {zone}")
+                        
+        except Exception as e:
+            logger.warning(f"SDN/VLAN integration failed, using logical isolation: {e}")
+        
         await asyncio.sleep(0.05)
 
         self.active_segments[zone] = {

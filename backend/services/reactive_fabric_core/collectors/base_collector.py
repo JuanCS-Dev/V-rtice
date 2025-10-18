@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, AsyncIterator
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -235,8 +236,55 @@ class BaseCollector(ABC):
                 f"{event.event_id} - {event.severity}"
             )
 
-        # TODO: Send to event processing pipeline (Kafka/Redis)
-        # This will be implemented when integrating with orchestration engine
+        # Send to event processing pipeline (Kafka/Redis)
+        await self._send_to_pipeline(event)
+    
+    async def _send_to_pipeline(self, event: SecurityEvent) -> None:
+        """Send event to processing pipeline (Kafka or Redis)."""
+        try:
+            # Try Kafka first
+            from kafka import KafkaProducer
+            import json
+            
+            kafka_broker = os.getenv("KAFKA_BROKER", "localhost:9092")
+            producer = KafkaProducer(
+                bootstrap_servers=[kafka_broker],
+                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+            )
+            
+            # Publish to Kafka topic
+            producer.send('security_events', {
+                "event_id": event.event_id,
+                "severity": event.severity.value,
+                "event_type": event.event_type,
+                "timestamp": event.timestamp.isoformat(),
+                "data": event.data,
+            })
+            producer.flush()
+            
+            logger.debug(f"Event {event.event_id} sent to Kafka")
+            
+        except Exception as kafka_error:
+            logger.debug(f"Kafka unavailable: {kafka_error}")
+            
+            # Fallback to Redis
+            try:
+                from vertice_db.redis_client import get_redis_client
+                import json
+                
+                redis = await get_redis_client()
+                await redis.lpush('security_events', json.dumps({
+                    "event_id": event.event_id,
+                    "severity": event.severity.value,
+                    "event_type": event.event_type,
+                    "timestamp": event.timestamp.isoformat(),
+                    "data": event.data,
+                }))
+                
+                logger.debug(f"Event {event.event_id} sent to Redis")
+                
+            except Exception as redis_error:
+                logger.warning(f"Event pipeline unavailable: {redis_error}")
 
     def get_metrics(self) -> CollectorMetrics:
         """

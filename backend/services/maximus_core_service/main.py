@@ -266,10 +266,18 @@ async def health_check() -> dict[str, Any]:
     # Check HITL Decision Queue
     if decision_queue:
         pending_decisions = decision_queue.get_pending_decisions()
+        
+        # Track SLA violations from decision queue
+        sla_violations = sum(
+            1 for decision in pending_decisions
+            if hasattr(decision, 'created_at') and 
+            (datetime.utcnow() - decision.created_at).total_seconds() > 300  # 5min SLA
+        )
+        
         health_status["components"]["decision_queue"] = {
-            "status": "healthy",
+            "status": "healthy" if sla_violations == 0 else "degraded",
             "pending_decisions": len(pending_decisions),
-            "sla_violations": 0  # TODO: Track SLA violations in DecisionQueue
+            "sla_violations": sla_violations,
         }
     else:
         health_status["components"]["decision_queue"] = {"status": "not_initialized"}

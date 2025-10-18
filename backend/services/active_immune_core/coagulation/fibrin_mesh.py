@@ -246,8 +246,7 @@ class FibrinMeshContainment:
             # Generate mesh ID
             mesh_id = self._generate_mesh_id(threat)
 
-            # Apply containment layers (simulated for now)
-            # TODO: Integrate with real zone isolator, traffic shaper, firewall
+            # Apply containment layers with real integrations
             zone_result = await self._apply_zone_isolation(policy)
             traffic_result = await self._apply_traffic_shaping(policy)
             firewall_result = await self._apply_firewall_rules(policy)
@@ -332,11 +331,25 @@ class FibrinMeshContainment:
         # Start with zones from blast radius
         zones = set(blast_radius.affected_zones)
 
-        # Add source zone if identifiable
-        # TODO: Implement zone mapping from IP/subnet
+        # Implement zone mapping from IP/subnet
         if source.subnet:
-            # Placeholder logic
-            zones.add("APPLICATION")
+            # Map subnet to network zone
+            subnet_str = str(source.subnet)
+            
+            # DMZ: Public-facing (0.0.0.0/0, external IPs)
+            if subnet_str.startswith("0.0.0.0") or not source.subnet.is_private:
+                zones.add("DMZ")
+            # APPLICATION: Private application tier (10.0.0.0/8, 172.16.0.0/12)
+            elif subnet_str.startswith("10.") or subnet_str.startswith("172.16"):
+                zones.add("APPLICATION")
+            # DATA: Database tier (192.168.0.0/16)
+            elif subnet_str.startswith("192.168"):
+                zones.add("DATA")
+            # MANAGEMENT: Admin/monitoring (specific subnets)
+            elif subnet_str.startswith("10.255"):
+                zones.add("MANAGEMENT")
+            else:
+                zones.add("APPLICATION")  # Default fallback
 
         return list(zones) if zones else ["DMZ"]
 
@@ -415,14 +428,46 @@ class FibrinMeshContainment:
         Returns:
             Zone isolation result
         """
-        # TODO: Integrate with real zone isolator
-        logger.info(f"Applying zone isolation: zones={policy.affected_zones}")
-        await asyncio.sleep(0.1)  # Simulate network operation
-        return {
-            "status": "applied",
-            "zones": policy.affected_zones,
-            "method": "simulated",
-        }
+        # Integrate with real ZoneIsolationEngine
+        try:
+            from ..containment.zone_isolation import ZoneIsolationEngine, IsolationLevel
+            
+            isolator = ZoneIsolationEngine()
+            results = []
+            
+            for zone in policy.affected_zones:
+                # Map mesh strength to isolation level
+                isolation_level = {
+                    "light": IsolationLevel.MONITORING,
+                    "moderate": IsolationLevel.RATE_LIMITING,
+                    "heavy": IsolationLevel.BLOCKING,
+                    "maximum": IsolationLevel.FULL_ISOLATION,
+                }.get(policy.strength, IsolationLevel.BLOCKING)
+                
+                # Apply isolation per zone
+                zone_result = await isolator.isolate_zone(
+                    zone=zone,
+                    level=isolation_level,
+                    duration_seconds=policy.duration_seconds or 3600,
+                )
+                results.append(zone_result)
+            
+            logger.info(f"Zone isolation applied: {len(results)} zones isolated")
+            return {
+                "status": "applied",
+                "zones": policy.affected_zones,
+                "method": "zone_isolation_engine",
+                "results": results,
+            }
+        except Exception as e:
+            logger.error(f"Zone isolation failed: {e}")
+            await asyncio.sleep(0.1)
+            return {
+                "status": "failed",
+                "zones": policy.affected_zones,
+                "method": "fallback",
+                "error": str(e),
+            }
 
     async def _apply_traffic_shaping(self, policy: FibrinMeshPolicy) -> Dict[str, Any]:
         """
@@ -434,10 +479,50 @@ class FibrinMeshContainment:
         Returns:
             Traffic shaping result
         """
-        # TODO: Integrate with real traffic shaper
-        logger.info(f"Applying traffic shaping: strength={policy.strength}")
-        await asyncio.sleep(0.1)  # Simulate network operation
-        return {"status": "applied", "strength": policy.strength, "method": "simulated"}
+        # Integrate with real TrafficShaper
+        try:
+            from ..containment.traffic_shaping import TrafficShaper, TrafficPriority
+            
+            shaper = TrafficShaper()
+            
+            # Map mesh strength to rate limits
+            rate_limits = {
+                "light": (1000, "requests/minute"),  # 1000 req/min
+                "moderate": (500, "requests/minute"),  # 500 req/min
+                "heavy": (100, "requests/minute"),  # 100 req/min
+                "maximum": (10, "requests/minute"),  # 10 req/min
+            }
+            
+            rate, unit = rate_limits.get(policy.strength, (100, "requests/minute"))
+            
+            # Apply rate limiting to affected zones
+            shaping_results = []
+            for zone in policy.affected_zones:
+                result = await shaper.apply_rate_limit(
+                    target=zone,
+                    rate=rate,
+                    unit=unit,
+                    priority=TrafficPriority.LOW,
+                )
+                shaping_results.append(result)
+            
+            logger.info(f"Traffic shaping applied: {policy.strength} strength")
+            return {
+                "status": "applied",
+                "strength": policy.strength,
+                "method": "traffic_shaper",
+                "rate": f"{rate}/{unit}",
+                "results": shaping_results,
+            }
+        except Exception as e:
+            logger.error(f"Traffic shaping failed: {e}")
+            await asyncio.sleep(0.1)
+            return {
+                "status": "failed",
+                "strength": policy.strength,
+                "method": "fallback",
+                "error": str(e),
+            }
 
     async def _apply_firewall_rules(self, policy: FibrinMeshPolicy) -> Dict[str, Any]:
         """
@@ -449,16 +534,44 @@ class FibrinMeshContainment:
         Returns:
             Firewall rule result
         """
-        # TODO: Integrate with real firewall controller
-        logger.info(
-            f"Applying firewall rules: {len(policy.isolation_rules)} rules"
-        )
-        await asyncio.sleep(0.1)  # Simulate network operation
-        return {
-            "status": "applied",
-            "rules_count": len(policy.isolation_rules),
-            "method": "simulated",
-        }
+        # Integrate with real ZoneIsolationEngine firewall
+        try:
+            from ..containment.zone_isolation import ZoneIsolationEngine, FirewallRule
+            
+            isolator = ZoneIsolationEngine()
+            applied_rules = []
+            
+            # Convert policy isolation rules to firewall rules
+            for rule_spec in policy.isolation_rules:
+                fw_rule = FirewallRule(
+                    rule_id=f"fibrin_{rule_spec.get('id', 'auto')}",
+                    source_ip=rule_spec.get("source_ip", "0.0.0.0/0"),
+                    dest_ip=rule_spec.get("dest_ip"),
+                    port=rule_spec.get("port"),
+                    protocol=rule_spec.get("protocol", "tcp"),
+                    action=rule_spec.get("action", "DROP"),
+                )
+                
+                # Apply firewall rule
+                result = await isolator.apply_firewall_rule(fw_rule)
+                applied_rules.append(result)
+            
+            logger.info(f"Firewall rules applied: {len(applied_rules)} rules")
+            return {
+                "status": "applied",
+                "rules_count": len(policy.isolation_rules),
+                "method": "zone_isolation_firewall",
+                "rules": applied_rules,
+            }
+        except Exception as e:
+            logger.error(f"Firewall rules failed: {e}")
+            await asyncio.sleep(0.1)
+            return {
+                "status": "failed",
+                "rules_count": len(policy.isolation_rules),
+                "method": "fallback",
+                "error": str(e),
+            }
 
     async def _schedule_fibrinolysis(
         self, mesh_id: str, duration: timedelta
@@ -495,9 +608,37 @@ class FibrinMeshContainment:
         policy = self.active_meshes[mesh_id]
 
         # Remove isolation (reverse order of application)
-        # TODO: Integrate with real controllers
-        logger.info(f"Dissolving mesh {mesh_id}")
-        await asyncio.sleep(0.1)
+        # Integrate with real controllers for cleanup
+        logger.info(f"Dissolving mesh {mesh_id}: {len(policy.affected_zones)} zones")
+        
+        try:
+            from ..containment.zone_isolation import ZoneIsolationEngine
+            from ..containment.traffic_shaping import TrafficShaper
+            
+            isolator = ZoneIsolationEngine()
+            shaper = TrafficShaper()
+            
+            # Remove zone isolations
+            for zone in policy.affected_zones:
+                await isolator.remove_zone_isolation(zone)
+                logger.debug(f"Zone isolation removed: {zone}")
+            
+            # Remove traffic shaping
+            for zone in policy.affected_zones:
+                await shaper.remove_rate_limit(zone)
+                logger.debug(f"Traffic shaping removed: {zone}")
+            
+            # Remove firewall rules
+            for rule in policy.isolation_rules:
+                rule_id = f"fibrin_{rule.get('id', 'auto')}"
+                await isolator.remove_firewall_rule(rule_id)
+                logger.debug(f"Firewall rule removed: {rule_id}")
+            
+            logger.info(f"Mesh {mesh_id} dissolved successfully with real controllers")
+            
+        except Exception as e:
+            logger.error(f"Mesh dissolution partial failure: {e}")
+            await asyncio.sleep(0.1)
 
         # Remove from active tracking
         del self.active_meshes[mesh_id]
@@ -524,12 +665,73 @@ class FibrinMeshContainment:
 
         policy = self.active_meshes[mesh_id]
 
-        # TODO: Implement real health checks
-        # For now, simulate healthy status
-        zone_health = {"status": "healthy", "zones": policy.affected_zones}
-        traffic_health = {"status": "healthy", "effectiveness": 0.95}
-
-        effectiveness = 0.95  # Simulated
+        # Implement real health checks on mesh integrity
+        zone_health = {"status": "unknown", "zones": policy.affected_zones, "details": []}
+        traffic_health = {"status": "unknown", "effectiveness": 0.0}
+        effectiveness = 0.0
+        
+        try:
+            from ..containment.zone_isolation import ZoneIsolationEngine
+            
+            isolator = ZoneIsolationEngine()
+            
+            # Check if zones are still isolated
+            healthy_zones = 0
+            for zone in policy.affected_zones:
+                zone_status = await isolator.check_zone_status(zone)
+                
+                if zone_status.get("isolation_active"):
+                    healthy_zones += 1
+                    zone_health["details"].append({
+                        "zone": zone,
+                        "status": "healthy",
+                        "isolation_level": zone_status.get("level"),
+                    })
+                else:
+                    zone_health["details"].append({
+                        "zone": zone,
+                        "status": "degraded",
+                        "reason": "isolation_inactive",
+                    })
+                    logger.warning(f"Mesh {mesh_id}: Zone {zone} isolation degraded")
+            
+            # Calculate zone health percentage
+            zone_effectiveness = healthy_zones / len(policy.affected_zones) if policy.affected_zones else 0
+            zone_health["status"] = "healthy" if zone_effectiveness > 0.8 else "degraded"
+            
+            # Check traffic shaping effectiveness
+            if policy.strength in ["heavy", "maximum"]:
+                # Verify rate limits are being enforced
+                traffic_metrics = await self._check_traffic_metrics(policy.affected_zones)
+                breaches = traffic_metrics.get("rate_limit_breaches", 0)
+                
+                if breaches > 10:
+                    traffic_health["status"] = "degraded"
+                    traffic_health["breaches"] = breaches
+                    logger.warning(f"Mesh {mesh_id}: Traffic shaping ineffective ({breaches} breaches)")
+                else:
+                    traffic_health["status"] = "healthy"
+                    
+                traffic_effectiveness = max(0, 1 - (breaches / 100))
+            else:
+                traffic_health["status"] = "healthy"
+                traffic_effectiveness = 1.0
+            
+            # Overall effectiveness
+            effectiveness = (zone_effectiveness + traffic_effectiveness) / 2
+            
+            # If mesh degraded, trigger repair
+            if effectiveness < 0.7:
+                logger.error(f"Mesh {mesh_id} health check FAILED - triggering repair")
+                await self._repair_mesh(mesh_id, policy)
+            else:
+                logger.debug(f"Mesh {mesh_id} health check PASSED: {effectiveness:.2%}")
+                
+        except Exception as e:
+            logger.error(f"Health check failed for mesh {mesh_id}: {e}")
+            zone_health["status"] = "error"
+            traffic_health["status"] = "error"
+            effectiveness = 0.0
 
         return FibrinMeshHealth(
             mesh_id=mesh_id,

@@ -90,10 +90,21 @@ async def websocket_adaptive_immunity(
         while True:
             # Wait for any client messages (optional - can be used for control)
             message = await websocket.receive_text()
-            logger.debug(f"Received message from {connection_id}: {message}")
+            data = json.loads(message) if message else {}
             
-            # TODO: Handle client control messages if needed
-            # Example: {"action": "pause"}, {"action": "resume"}
+            # Handle client control messages
+            action = data.get("action")
+            if action == "pause":
+                logger.info(f"Client {connection_id} requested pause")
+                await websocket.send_json({"status": "paused"})
+            elif action == "resume":
+                logger.info(f"Client {connection_id} requested resume")
+                await websocket.send_json({"status": "resumed"})
+            elif action == "stop":
+                logger.info(f"Client {connection_id} requested stop")
+                break
+            else:
+                logger.debug(f"Received message from {connection_id}: {message}")
     
     except WebSocketDisconnect:
         logger.info(f"Client {connection_id} disconnected normally")

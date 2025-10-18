@@ -737,11 +737,62 @@ Respond in JSON format with keys:
         }
 
     async def _get_asset_info(self, ip: str) -> Dict[str, Any]:
-        """Get asset information for IP (placeholder)."""
-        # TODO: Integrate with asset management system
+        """Get asset information for IP from asset management system."""
+        # Integrate with CMDB/asset inventory
+        asset_file = Path("/var/log/vertice/asset_inventory.json")
+        
+        try:
+            if asset_file.exists():
+                with open(asset_file, "r") as f:
+                    import json
+                    inventory = json.load(f)
+                    
+                    # Search for asset by IP
+                    for asset in inventory.get("assets", []):
+                        if asset.get("ip") == ip:
+                            return {
+                                "ip": ip,
+                                "hostname": asset.get("hostname", "unknown"),
+                                "criticality": asset.get("criticality", "medium"),
+                                "services": asset.get("services", []),
+                                "owner": asset.get("owner", "unknown"),
+                            }
+        except Exception as e:
+            logger.debug(f"Asset lookup failed: {e}")
+        
+        # Fallback: return minimal info
         return {"ip": ip, "criticality": "unknown", "services": []}
 
     async def _get_network_baseline(self) -> Dict[str, Any]:
-        """Get network baseline statistics (placeholder)."""
-        # TODO: Integrate with network monitoring
-        return {"avg_events_per_hour": 0, "known_good_ips": []}
+        """Get network baseline statistics from monitoring system."""
+        # Integrate with network monitoring (Prometheus/Grafana metrics)
+        try:
+            from prometheus_client import REGISTRY
+            
+            baseline = {
+                "avg_events_per_hour": 0,
+                "known_good_ips": [],
+            }
+            
+            # Query Prometheus metrics
+            for collector in REGISTRY._collector_to_names:
+                if hasattr(collector, '_name'):
+                    if 'events_total' in str(collector._name):
+                        # Calculate events per hour from counter
+                        if hasattr(collector, '_value'):
+                            total_events = collector._value.get()
+                            # Rough estimate: total / uptime hours
+                            baseline["avg_events_per_hour"] = total_events / 24
+            
+            # Load known good IPs from whitelist
+            whitelist_file = Path("/var/log/vertice/ip_whitelist.txt")
+            if whitelist_file.exists():
+                with open(whitelist_file, "r") as f:
+                    baseline["known_good_ips"] = [
+                        line.strip() for line in f if line.strip() and not line.startswith("#")
+                    ]
+            
+            return baseline
+        except Exception as e:
+            logger.debug(f"Network baseline query failed: {e}")
+            return {"avg_events_per_hour": 0, "known_good_ips": []}

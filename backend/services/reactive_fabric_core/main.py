@@ -197,9 +197,11 @@ app = FastAPI(
 )
 
 # CORS middleware (allow frontend access)
+ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict to frontend domain in production
+    allow_origins=ALLOWED_ORIGINS,  # Restrict via environment variable
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -231,7 +233,7 @@ async def health_check():
         version="1.0.0",
         database_connected=db_healthy,
         kafka_connected=kafka_healthy,
-        redis_connected=False  # TODO: Add Redis health check if needed
+        redis_connected=await _check_redis_health(),
     )
 
 
@@ -566,3 +568,16 @@ async def create_attack(attack: AttackCreate):
         logger.error("create_attack_error", error=str(e))
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
+
+async def _check_redis_health() -> bool:
+    """Check Redis connection health."""
+    try:
+        from vertice_db.redis_client import get_redis_client
+        
+        redis = await get_redis_client()
+        await redis.ping()
+        return True
+    except Exception as e:
+        logger.debug(f"Redis health check failed: {e}")
+        return False

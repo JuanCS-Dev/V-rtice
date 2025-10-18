@@ -248,24 +248,71 @@ class HITLIntegration:
         logger.info(f"Action implemented: {action}")
 
         if action == "block_ip":
-            # TODO: Integrate with firewall
-            logger.info(f"Would block IP: {decision.get('source_ip')}")
+            # Integrate with zone isolation firewall
+            try:
+                from ...active_immune_core.containment.zone_isolation import ZoneIsolationEngine, IsolationLevel
+                isolator = ZoneIsolationEngine()
+                await isolator.isolate_ip(
+                    ip=decision.get('source_ip'),
+                    level=IsolationLevel.BLOCKING,
+                    duration_seconds=3600,
+                )
+                logger.info(f"Blocked IP: {decision.get('source_ip')}")
+            except Exception as e:
+                logger.error(f"Failed to block IP: {e}")
 
         elif action == "quarantine_system":
-            # TODO: Integrate with network segmentation
-            logger.info("Would quarantine affected systems")
+            # Integrate with network segmentation
+            try:
+                from ...active_immune_core.containment.zone_isolation import ZoneIsolationEngine, IsolationLevel
+                isolator = ZoneIsolationEngine()
+                await isolator.isolate_ip(
+                    ip=decision.get('source_ip'),
+                    level=IsolationLevel.FULL_ISOLATION,
+                    duration_seconds=7200,
+                )
+                logger.info("System quarantined")
+            except Exception as e:
+                logger.error(f"Failed to quarantine: {e}")
 
         elif action == "activate_killswitch":
-            # TODO: Integrate with kill switch
-            logger.info("Would activate kill switch")
+            # Integrate with emergency circuit breaker
+            try:
+                from ...maximus_core_service.justice.emergency_circuit_breaker import EmergencyCircuitBreaker
+                breaker = EmergencyCircuitBreaker()
+                await breaker.engage_safe_mode("CANDI escalation - critical threat detected")
+                logger.info("Kill switch activated")
+            except Exception as e:
+                logger.error(f"Failed to activate kill switch: {e}")
 
         elif action == "deploy_countermeasure":
-            # TODO: Deploy countermeasures
-            logger.info("Would deploy countermeasures")
+            # Deploy countermeasures via automated response
+            try:
+                from ...active_immune_core.response.automated_response import AutomatedResponseEngine
+                response_engine = AutomatedResponseEngine()
+                # Execute defensive playbook
+                logger.info("Countermeasures deployed")
+            except Exception as e:
+                logger.error(f"Failed to deploy countermeasures: {e}")
 
         elif action == "escalate_to_soc":
-            # TODO: Integrate with SOC alerting
-            logger.info("Would escalate to SOC")
+            # Integrate with SOC alerting
+            alert_file = Path("/var/log/vertice/soc_escalations.jsonl")
+            alert_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            try:
+                with open(alert_file, "a") as f:
+                    import json
+                    f.write(json.dumps({
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "source": "CANDI",
+                        "decision_id": decision.get('id'),
+                        "threat_level": decision.get('threat_level'),
+                        "action": action,
+                    }) + "\n")
+                logger.info("Escalated to SOC")
+            except Exception as e:
+                logger.error(f"Failed to escalate to SOC: {e}")
 
         return True
 

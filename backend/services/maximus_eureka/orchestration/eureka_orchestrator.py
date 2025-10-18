@@ -355,9 +355,23 @@ class EurekaOrchestrator:
                         # Record patch metrics
                         self.metrics.record_patch(patch, strategy.strategy_type.value)
                         
-                        # TODO Phase 4: Apply patch to Git + create PR
-                        # git_service.apply_patch(patch)
-                        # pr_url = github_service.create_pr(patch)
+                        # Apply patch to Git + create PR
+                        try:
+                            from ..git_integration.pr_creator import PRCreator
+                            
+                            pr_creator = PRCreator()
+                            pr_result = await pr_creator.create_remediation_pr(
+                                apv=apv,
+                                patch=patch,
+                                strategy_type=strategy.strategy_type.value,
+                            )
+                            
+                            logger.info(f"✅ PR created: {pr_result.get('pr_url')}")
+                            patch.metadata["pr_url"] = pr_result.get("pr_url")
+                            patch.metadata["pr_number"] = pr_result.get("pr_number")
+                        except Exception as e:
+                            logger.error(f"Failed to create PR for {apv.cve_id}: {e}")
+                            # Continue execution even if PR creation fails
                         
                     except NoStrategyAvailableError as e:
                         logger.warning(

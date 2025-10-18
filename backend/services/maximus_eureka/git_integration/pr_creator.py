@@ -317,12 +317,12 @@ class PRCreator:
             "description": f"Security patch for {patch.cve_id}",
             "file_count": len(patch.files_modified),
             "file_list": self._format_file_list(patch.files_modified),
-            "services": None,  # TODO: Extract from APV metadata if available
+            "services": self._extract_services_from_apv(patch),
             "diff_snippet": self._get_diff_snippet(patch.diff_content),
             "full_diff": patch.diff_content,
             "patch_id": patch.patch_id,
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "version": "1.0.0",  # TODO: Extract from config
+            "version": self._extract_version_from_config(),
         }
         
         return template.render(**context)
@@ -375,14 +375,43 @@ class PRCreator:
         Returns:
             Markdown badge string
         """
-        # TODO: Extract actual severity from APV metadata
-        # For now, use confidence as proxy
-        if patch.confidence_score >= 0.9:
-            return "![HIGH](https://img.shields.io/badge/severity-HIGH-red)"
-        elif patch.confidence_score >= 0.7:
-            return "![MEDIUM](https://img.shields.io/badge/severity-MEDIUM-orange)"
-        else:
-            return "![LOW](https://img.shields.io/badge/severity-LOW-yellow)"
+        # Extract actual severity from APV metadata
+        severity = "MEDIUM"  # Default
+        
+        if hasattr(patch, 'metadata') and patch.metadata:
+            # Try to extract severity from various sources
+            if 'severity' in patch.metadata:
+                severity = str(patch.metadata['severity']).upper()
+            elif 'cvss_score' in patch.metadata:
+                cvss = float(patch.metadata['cvss_score'])
+                if cvss >= 9.0:
+                    severity = "CRITICAL"
+                elif cvss >= 7.0:
+                    severity = "HIGH"
+                elif cvss >= 4.0:
+                    severity = "MEDIUM"
+                else:
+                    severity = "LOW"
+            elif 'priority' in patch.metadata:
+                priority = str(patch.metadata['priority']).upper()
+                severity = priority if priority in ["CRITICAL", "HIGH", "MEDIUM", "LOW"] else severity
+        
+        # Fallback to confidence as proxy if no metadata
+        if severity == "MEDIUM" and hasattr(patch, 'confidence_score'):
+            if patch.confidence_score >= 0.9:
+                severity = "HIGH"
+            elif patch.confidence_score < 0.7:
+                severity = "LOW"
+        
+        # Return appropriate badge
+        color_map = {
+            "CRITICAL": "red",
+            "HIGH": "red",
+            "MEDIUM": "orange",
+            "LOW": "yellow",
+        }
+        color = color_map.get(severity, "orange")
+        return f"![{severity}](https://img.shields.io/badge/severity-{severity}-{color})"
 
     def _format_file_list(self, files: list[str]) -> str:
         """
@@ -462,3 +491,54 @@ class PRCreator:
         if hasattr(self, "github"):
             self.github.close()
             logger.debug("GitHub API connection closed")
+
+    def _extract_services_from_apv(self, patch: Patch) -> Optional[List[str]]:
+        """Extract affected services from APV metadata."""
+        services = []
+        
+        if hasattr(patch, 'metadata') and patch.metadata:
+            if 'affected_services' in patch.metadata:
+                services = patch.metadata['affected_services']
+            elif 'services' in patch.metadata:
+                services = patch.metadata['services']
+            elif 'components' in patch.metadata:
+                services = patch.metadata['components']
+        
+        # Extract from file paths if no metadata
+        if not services and hasattr(patch, 'files_modified'):
+            service_patterns = ['service/', 'services/', 'backend/', 'api/']
+            for file_path in patch.files_modified:
+                for pattern in service_patterns:
+                    if pattern in file_path:
+                        service_name = file_path.split(pattern)[1].split('/')[0]
+                        if service_name not in services:
+                            services.append(service_name)
+        
+        return services if services else None
+
+    def _extract_version_from_config(self) -> str:
+        """Extract version from config file."""
+        try:
+            # Try pyproject.toml
+            config_path = Path("pyproject.toml")
+            if config_path.exists():
+                with open(config_path, "r") as f:
+                    for line in f:
+                        if 'version' in line and '=' in line:
+                            version = line.split('=')[1].strip().strip('"').strip("'")
+                            return version
+            
+            # Try package.json
+            config_path = Path("package.json")
+            if config_path.exists():
+                with open(config_path, "r") as f:
+                    import json
+                    data = json.load(f)
+                    if 'version' in data:
+                        return data['version']
+            
+            # Fallback
+            return "1.0.0"
+        except Exception as e:
+            logger.debug(f"Version extraction failed: {e}")
+            return "1.0.0"

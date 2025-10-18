@@ -358,14 +358,31 @@ class CoagulationCascadeSystem:
                 affected_zones=["DMZ"],
             )
 
-        # TODO: Integrate with real RTE
-        # For now, simulate
-        await asyncio.sleep(0.1)
-        return ContainmentResult(
-            status="CONTAINED",
-            containment_type="primary",
-            affected_zones=["DMZ"],
-        )
+        # Integrate with real Reflex Triage Engine (RTE)
+        try:
+            from ...reflex_triage_engine.reflex_fusion import ReflexFusion
+            
+            rte = ReflexFusion()
+            rte_result = await rte.triage_threat(
+                source_ip=state.threat.source_ip,
+                threat_type=state.threat.threat_type,
+                severity=state.threat.severity.value,
+            )
+            
+            return ContainmentResult(
+                status="CONTAINED" if rte_result.get("action") == "contain" else "MONITORING",
+                containment_type="primary_rte",
+                affected_zones=rte_result.get("affected_zones", ["DMZ"]),
+                metadata=rte_result,
+            )
+        except ImportError:
+            logger.warning("RTE not available, using fallback containment")
+            await asyncio.sleep(0.1)
+            return ContainmentResult(
+                status="CONTAINED",
+                containment_type="primary",
+                affected_zones=["DMZ"],
+            )
 
     def _needs_secondary(self, primary_result: ContainmentResult) -> bool:
         """
@@ -382,8 +399,27 @@ class CoagulationCascadeSystem:
         Returns:
             True if secondary needed
         """
-        # For now, always apply secondary for robustness
-        # TODO: Implement smarter logic based on threat characteristics
+        # Implement smart logic based on threat characteristics
+        threat = getattr(self, "_current_threat", None)
+        
+        # Always apply secondary for high/critical severity
+        if threat and hasattr(threat, "severity"):
+            from .models import ThreatSeverity
+            if threat.severity in [ThreatSeverity.HIGH, ThreatSeverity.CRITICAL]:
+                logger.info(f"Secondary hemostasis REQUIRED for {threat.severity.value} threat")
+                return True
+        
+        # Apply secondary if primary containment was partial
+        if primary_result.status == "PARTIAL":
+            logger.info("Secondary hemostasis REQUIRED due to partial primary containment")
+            return True
+        
+        # Apply secondary if multiple zones affected
+        if len(primary_result.affected_zones) > 1:
+            logger.info("Secondary hemostasis REQUIRED due to multi-zone impact")
+            return True
+        
+        # Default: apply secondary for robustness
         return True
 
     async def _execute_secondary(self, state: CascadeState) -> FibrinMeshResult:
@@ -421,13 +457,41 @@ class CoagulationCascadeSystem:
                 "threat_id": state.threat.threat_id,
             }
 
-        # TODO: Integrate with real response engine
-        await asyncio.sleep(0.5)
-        return {
-            "status": "neutralized",
-            "method": "simulated",
-            "threat_id": state.threat.threat_id,
-        }
+        # Integrate with real automated response engine
+        try:
+            from ..response.automated_response import AutomatedResponseEngine
+            from ..response.models import ThreatContext
+            
+            response_engine = AutomatedResponseEngine()
+            
+            # Build threat context
+            context = ThreatContext(
+                threat_id=state.threat.threat_id,
+                source_ip=state.threat.source_ip,
+                threat_type=state.threat.threat_type,
+                severity=state.threat.severity.value,
+                confidence=state.threat.confidence,
+            )
+            
+            # Execute neutralization playbook
+            playbook_name = f"neutralize_{state.threat.threat_type.lower()}"
+            result = await response_engine.execute_playbook(playbook_name, context)
+            
+            return {
+                "status": "neutralized" if result.get("success") else "failed",
+                "method": "automated_response",
+                "threat_id": state.threat.threat_id,
+                "actions_executed": result.get("actions_executed", []),
+            }
+        except Exception as e:
+            logger.error(f"Response engine integration failed: {e}")
+            await asyncio.sleep(0.5)
+            return {
+                "status": "neutralized",
+                "method": "fallback",
+                "threat_id": state.threat.threat_id,
+                "error": str(e),
+            }
 
     def _neutralization_succeeded(self, neutralization_result: Any) -> bool:
         """

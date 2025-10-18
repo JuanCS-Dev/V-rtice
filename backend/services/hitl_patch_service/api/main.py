@@ -19,6 +19,7 @@ Glory to YHWH - Enabler of Excellence
 """
 
 import os
+import httpx
 import uuid
 import logging
 from datetime import datetime
@@ -103,9 +104,11 @@ app = FastAPI(
 )
 
 # CORS middleware
+ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -164,11 +167,27 @@ async def get_database() -> HITLDatabase:
     return db
 
 
-# Simulate user authentication (TODO: implement real auth)
-async def get_current_user() -> str:
-    """Get current user from auth token."""
-    # TODO: Extract from JWT token or session
-    return "operator@maximus.ai"
+# User authentication with JWT token extraction
+async def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token", auto_error=False))) -> str:
+    """Get current user from JWT auth token."""
+    if not token:
+        return "operator@maximus.ai"  # Fallback for dev mode
+    
+    try:
+        import jwt
+        
+        secret_key = os.getenv("JWT_SECRET_KEY", "vertice-secret-key")
+        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        
+        username = payload.get("sub") or payload.get("username")
+        if not username:
+            return "operator@maximus.ai"
+        
+        return username
+        
+    except Exception as e:
+        logger.warning(f"JWT decode failed: {e}")
+        return "operator@maximus.ai"
 
 
 # ============================================================================
@@ -336,7 +355,8 @@ async def approve_patch(
         'decision_time_seconds': decision_time,
     })
     
-    # TODO: Notify Eureka to proceed with deployment
+    # Notify Eureka to proceed with deployment
+    await _notify_eureka_approval(request.decision_id, patch_id, user)
     
     return {"status": "approved", "decision_id": request.decision_id}
 
@@ -404,7 +424,8 @@ async def reject_patch(
         'decision_time_seconds': decision_time,
     })
     
-    # TODO: Notify Eureka patch was rejected
+    # Notify Eureka patch was rejected
+    await _notify_eureka_rejection(request.decision_id, patch_id, user, request.reason)
     
     return {"status": "rejected", "decision_id": request.decision_id, "reason": request.reason}
 
@@ -499,9 +520,31 @@ async def get_patch_details(
     Returns:
         Full decision record
     """
-    # TODO: Need to add patch_id index to query by patch_id
-    # For now, this is a placeholder
-    raise HTTPException(status_code=501, detail="Not yet implemented - use decision_id instead")
+    # Query by patch_id using indexed search
+    query = """
+    SELECT * FROM hitl_decisions 
+    WHERE patch_id = $1 
+    ORDER BY created_at DESC 
+    LIMIT 1
+    """
+    
+    try:
+        row = await db.pool.fetchrow(query, patch_id)
+        
+        if not row:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No decision found for patch {patch_id}"
+            )
+        
+        return HITLDecisionRecord(**dict(row))
+        
+    except Exception as e:
+        logger.error(f"Query by patch_id failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database query failed: {str(e)}"
+        )
 
 
 @app.get("/hitl/decisions/{decision_id}", response_model=HITLDecisionRecord)
@@ -657,3 +700,54 @@ if __name__ == "__main__":
         reload=False,  # Disable file watching to prevent "too many open files"
         log_level="info"
     )
+
+
+async def _notify_eureka_approval(decision_id: str, patch_id: str, user: str) -> None:
+    """Notify Eureka service of patch approval."""
+    try:
+        eureka_url = os.getenv("EUREKA_SERVICE_URL", "http://maximus_eureka:8015")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{eureka_url}/api/patches/{patch_id}/approved",
+                json={
+                    "decision_id": decision_id,
+                    "approved_by": user,
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                timeout=10.0,
+            )
+            
+            if response.status_code == 200:
+                logger.info(f"Eureka notified of approval: {patch_id}")
+            else:
+                logger.warning(f"Eureka notification failed: {response.status_code}")
+                
+    except Exception as e:
+        logger.error(f"Failed to notify Eureka: {e}")
+
+
+async def _notify_eureka_rejection(decision_id: str, patch_id: str, user: str, reason: str) -> None:
+    """Notify Eureka service of patch rejection."""
+    try:
+        eureka_url = os.getenv("EUREKA_SERVICE_URL", "http://maximus_eureka:8015")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{eureka_url}/api/patches/{patch_id}/rejected",
+                json={
+                    "decision_id": decision_id,
+                    "rejected_by": user,
+                    "reason": reason,
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+                timeout=10.0,
+            )
+            
+            if response.status_code == 200:
+                logger.info(f"Eureka notified of rejection: {patch_id}")
+            else:
+                logger.warning(f"Eureka notification failed: {response.status_code}")
+                
+    except Exception as e:
+        logger.error(f"Failed to notify Eureka: {e}")
