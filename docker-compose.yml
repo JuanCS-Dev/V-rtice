@@ -522,7 +522,7 @@ services:
     volumes:
       - ./backend/services/maximus_orchestrator_service:/app
     environment:
-      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8034
       - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
       - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
       - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
@@ -561,7 +561,7 @@ services:
       - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
       - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
       - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
-      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
+      - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8034
       - NMAP_SERVICE_URL=http://nmap_service:80
       - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
       - DOMAIN_SERVICE_URL=http://domain_service:80
