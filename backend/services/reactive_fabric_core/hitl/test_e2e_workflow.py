@@ -45,7 +45,7 @@ def test_e2e_workflow():
 
     tokens = response.json()
     access_token = tokens["access_token"]
-    print(f"✅ Login successful")
+    print("✅ Login successful")
     print(f"   Token: {access_token[:50]}...")
     print(f"   Requires 2FA: {tokens['requires_2fa']}")
 
@@ -60,7 +60,7 @@ def test_e2e_workflow():
     assert response.status_code == 200
 
     status = response.json()
-    print(f"✅ System Status:")
+    print("✅ System Status:")
     print(f"   Pending Decisions: {status['pending_decisions']}")
     print(f"   Critical Pending: {status['critical_pending']}")
     print(f"   Total Users: {status['total_users']}")
@@ -108,7 +108,7 @@ def test_e2e_workflow():
         "created_at": datetime.now().isoformat()
     }
 
-    print(f"📊 CANDI Analysis Summary:")
+    print("📊 CANDI Analysis Summary:")
     print(f"   Analysis ID: {analysis_id}")
     print(f"   Threat Level: {decision_request['threat_level']}")
     print(f"   Actor: {decision_request['attributed_actor']}")
@@ -128,7 +128,7 @@ def test_e2e_workflow():
     assert response.status_code == 200, f"Submit failed: {response.text}"
 
     submit_result = response.json()
-    print(f"✅ Decision submitted to HITL queue")
+    print("✅ Decision submitted to HITL queue")
     print(f"   Analysis ID: {submit_result['analysis_id']}")
 
     # ============================================================================
@@ -147,7 +147,7 @@ def test_e2e_workflow():
 
     if pending:
         decision = pending[0]
-        print(f"\n📋 Decision Details:")
+        print("\n📋 Decision Details:")
         print(f"   Analysis ID: {decision['analysis_id']}")
         print(f"   Threat: {decision['threat_level']}")
         print(f"   Actor: {decision['attributed_actor']}")
@@ -167,7 +167,7 @@ def test_e2e_workflow():
 
     decision_detail = response.json()
     print(f"✅ Retrieved decision details for {analysis_id}")
-    print(f"\n   Recommended Actions:")
+    print("\n   Recommended Actions:")
     for i, action in enumerate(decision_detail['recommended_actions'], 1):
         print(f"   {i}. {action}")
 
@@ -216,7 +216,7 @@ def test_e2e_workflow():
     assert response.status_code == 200
 
     final_response = response.json()
-    print(f"✅ Decision Response Retrieved")
+    print("✅ Decision Response Retrieved")
     print(f"   Status: {final_response['status'].upper()}")
     print(f"   Notes: {final_response['notes']}")
 
@@ -232,7 +232,7 @@ def test_e2e_workflow():
     assert response.status_code == 200
 
     stats = response.json()
-    print(f"✅ Decision Statistics:")
+    print("✅ Decision Statistics:")
     print(f"   Total Pending: {stats['total_pending']}")
     print(f"   Critical Pending: {stats['critical_pending']}")
     print(f"   Total Completed: {stats['total_completed']}")

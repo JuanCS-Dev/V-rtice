@@ -181,7 +181,7 @@ class DependencyGraphBuilder:
             
             # Skip if this is the root pyproject.toml
             if service_dir == self.repo_root:
-                logger.debug(f"Skipping root pyproject.toml")
+                logger.debug("Skipping root pyproject.toml")
                 return None
             
             service_deps = ServiceDependencies(

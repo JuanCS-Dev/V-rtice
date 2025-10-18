@@ -332,7 +332,7 @@ class TestStressIntegration:
 
         # Get initial stats
         initial_stats = get_container_stats(container_name)
-        print(f"Initial state:")
+        print("Initial state:")
         print(f"  CPU: {initial_stats['cpu_percent']:.2f}%")
         print(f"  Memory: {initial_stats['memory_usage_mb']:.2f}MB ({initial_stats['memory_percent']:.1f}%)")
 
@@ -359,7 +359,7 @@ class TestStressIntegration:
 
         # Get final stats
         final_stats = get_container_stats(container_name)
-        print(f"\nFinal state:")
+        print("\nFinal state:")
         print(f"  CPU: {final_stats['cpu_percent']:.2f}%")
         print(f"  Memory: {final_stats['memory_usage_mb']:.2f}MB ({final_stats['memory_percent']:.1f}%)")
 
@@ -368,7 +368,7 @@ class TestStressIntegration:
         error_count = sum(1 for r in all_responses if isinstance(r, httpx.Response) and r.status_code >= 400)
         exception_count = sum(1 for r in all_responses if isinstance(r, Exception))
 
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  Total requests: {len(all_responses)}")
         print(f"  Successful: {success_count} ({success_count/len(all_responses)*100:.1f}%)")
         print(f"  Errors: {error_count}")

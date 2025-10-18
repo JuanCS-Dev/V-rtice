@@ -421,7 +421,7 @@ class DataOrchestrator:
         if not reasons:
             reasons.append("high computed salience")
 
-        return f"ESGT trigger: " + ", ".join(reasons)
+        return "ESGT trigger: " + ", ".join(reasons)
 
     def _calculate_confidence(
         self,

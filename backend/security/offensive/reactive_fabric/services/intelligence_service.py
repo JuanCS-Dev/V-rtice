@@ -625,12 +625,12 @@ class IntelligenceService:
         analysis_result: Dict[str, Any]
     ) -> str:
         """Generate detailed technical analysis section."""
-        analysis = f"## Threat Overview\n\n"
+        analysis = "## Threat Overview\n\n"
         analysis += f"Total Events Analyzed: {len(events)}\n"
         analysis += f"Unique Source IPs: {analysis_result['unique_attackers']}\n"
         analysis += f"TTPs Observed: {', '.join(analysis_result['ttps_observed'])}\n\n"
         
-        analysis += f"## Attacker Behavior\n\n"
+        analysis += "## Attacker Behavior\n\n"
         for source_ip, ip_events in analysis_result['attacker_groups'].items():
             analysis += f"**Source IP: {source_ip}**\n"
             analysis += f"- Total Events: {len(ip_events)}\n"
@@ -640,7 +640,7 @@ class IntelligenceService:
             analysis += f"- Last Seen: {max(e.timestamp for e in ip_events)}\n\n"
         
         if analysis_result['attack_chains']:
-            analysis += f"## Attack Chains\n\n"
+            analysis += "## Attack Chains\n\n"
             for chain in analysis_result['attack_chains']:
                 analysis += f"**Chain from {chain['source_ip']}** (Duration: {chain['duration_hours']:.1f}h)\n"
                 for event in chain['events']:

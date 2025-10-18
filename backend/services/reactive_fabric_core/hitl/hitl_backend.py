@@ -599,8 +599,8 @@ async def startup_event():
     logger.info("=" * 60)
     logger.info("HITL Console Backend Starting...")
     logger.info("=" * 60)
-    logger.info(f"Default Admin: username='admin', password='ChangeMe123!'")
-    logger.info(f"API Docs: http://localhost:8000/api/docs")
+    logger.info("Default Admin: username='admin', password='ChangeMe123!'")
+    logger.info("API Docs: http://localhost:8000/api/docs")
     logger.info("=" * 60)
 
 

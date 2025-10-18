@@ -98,12 +98,12 @@ async def example_complete_workflow():
     candi_stats = candi.get_stats()
     hitl_stats = hitl.get_stats()
 
-    logger.info(f"  CANDI:")
+    logger.info("  CANDI:")
     logger.info(f"    Total analyzed: {candi_stats['total_analyzed']}")
     logger.info(f"    APT detected: {candi_stats['by_threat_level']['APT']}")
     logger.info(f"    HITL requests: {candi_stats['hitl_requests']}")
 
-    logger.info(f"  HITL:")
+    logger.info("  HITL:")
     logger.info(f"    Total submitted: {hitl_stats['total_submitted']}")
     logger.info(f"    Pending decisions: {hitl_stats['pending_decisions']}")
 
@@ -219,7 +219,7 @@ async def example_websocket_alerts():
 
                     if data.get("type") == "alert":
                         alert = data["alert"]
-                        logger.info(f"\n🚨 ALERT RECEIVED:")
+                        logger.info("\n🚨 ALERT RECEIVED:")
                         logger.info(f"  Type: {alert['alert_type']}")
                         logger.info(f"  Priority: {alert['priority']}")
                         logger.info(f"  Title: {alert['title']}")

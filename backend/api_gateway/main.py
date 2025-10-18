@@ -472,7 +472,7 @@ async def get_ocorrencia_tipos_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=SINESP_SERVICE_URL,
-        endpoint=f"/ocorrencias/tipos",
+        endpoint="/ocorrencias/tipos",
         service_name="sinesp-service",
     )
 
@@ -483,7 +483,7 @@ async def get_heatmap_data_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=SINESP_SERVICE_URL,
-        endpoint=f"/ocorrencias/heatmap",
+        endpoint="/ocorrencias/heatmap",
         service_name="sinesp-service",
     )
 
@@ -772,7 +772,7 @@ async def search_username_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/username/search",
+        endpoint="/api/username/search",
         service_name="osint-service",
         timeout=120.0,
     )
@@ -784,7 +784,7 @@ async def analyze_email_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/email/analyze",
+        endpoint="/api/email/analyze",
         service_name="osint-service",
         timeout=120.0,
     )
@@ -796,7 +796,7 @@ async def analyze_phone_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/phone/analyze",
+        endpoint="/api/phone/analyze",
         service_name="osint-service",
         timeout=120.0,
     )
@@ -808,7 +808,7 @@ async def get_social_profile_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/social/profile",
+        endpoint="/api/social/profile",
         service_name="osint-service",
         timeout=180.0,
     )
@@ -820,7 +820,7 @@ async def analyze_image_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/image/analyze",
+        endpoint="/api/image/analyze",
         service_name="osint-service",
         timeout=300.0,
     )
@@ -832,7 +832,7 @@ async def comprehensive_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/search/comprehensive",
+        endpoint="/api/search/comprehensive",
         service_name="osint-service",
         timeout=240.0,
     )
@@ -844,7 +844,7 @@ async def get_osint_stats_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/api/stats",
+        endpoint="/api/stats",
         service_name="osint-service",
     )
 
@@ -854,7 +854,7 @@ async def osint_health_check_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=OSINT_SERVICE_URL,
-        endpoint=f"/health",
+        endpoint="/health",
         service_name="osint-service",
     )
 
@@ -868,7 +868,7 @@ async def google_basic_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/search/basic",
+        endpoint="/api/search/basic",
         service_name="google-osint-service",
         timeout=180.0,
     )
@@ -880,7 +880,7 @@ async def google_advanced_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/search/advanced",
+        endpoint="/api/search/advanced",
         service_name="google-osint-service",
         timeout=300.0,
     )
@@ -892,7 +892,7 @@ async def google_documents_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/search/documents",
+        endpoint="/api/search/documents",
         service_name="google-osint-service",
         timeout=240.0,
     )
@@ -904,7 +904,7 @@ async def google_images_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/search/images",
+        endpoint="/api/search/images",
         service_name="google-osint-service",
         timeout=180.0,
     )
@@ -916,7 +916,7 @@ async def google_social_search_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/search/social",
+        endpoint="/api/search/social",
         service_name="google-osint-service",
         timeout=180.0,
     )
@@ -928,7 +928,7 @@ async def google_dork_patterns_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/dorks/patterns",
+        endpoint="/api/dorks/patterns",
         service_name="google-osint-service",
     )
 
@@ -939,7 +939,7 @@ async def google_osint_stats_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/api/stats",
+        endpoint="/api/stats",
         service_name="google-osint-service",
     )
 
@@ -949,7 +949,7 @@ async def google_osint_health_proxy(request: Request):
     return await proxy_request(
         request=request,
         service_url=GOOGLE_OSINT_SERVICE_URL,
-        endpoint=f"/health",
+        endpoint="/health",
         service_name="google-osint-service",
     )
 

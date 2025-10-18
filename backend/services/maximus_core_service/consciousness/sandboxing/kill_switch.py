@@ -98,7 +98,7 @@ class KillSwitch:
         self.activation_history.append(activation_record)
         
         # Critical alert
-        logger.critical(f"🚨 KILL SWITCH ACTIVATED 🚨")
+        logger.critical("🚨 KILL SWITCH ACTIVATED 🚨")
         logger.critical(f"Reason: {reason}")
         logger.critical(f"Trigger: {trigger_type.value}")
         logger.critical(f"Time: {activation_time.isoformat()}")

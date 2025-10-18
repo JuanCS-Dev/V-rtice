@@ -82,7 +82,7 @@ class EmergencyCircuitBreaker:
         logger.critical(f"Level: {violation.level.name}")
         logger.critical(f"Type: {violation.violation_type.value if violation.violation_type else 'Unknown'}")
         logger.critical(f"Description: {violation.description}")
-        logger.critical(f"Evidence:")
+        logger.critical("Evidence:")
         for i, evidence_item in enumerate(violation.evidence, 1):
             logger.critical(f"  {i}. {evidence_item}")
         logger.critical(f"Action Details: {violation.action}")

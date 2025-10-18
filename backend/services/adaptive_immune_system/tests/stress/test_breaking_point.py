@@ -267,19 +267,19 @@ async def test_find_breaking_point():
         # Find last good level (before breaking point)
         last_good = results[-2] if len(results) > 1 else baseline
 
-        print(f"\n✅ Maximum Capacity:")
+        print("\n✅ Maximum Capacity:")
         print(f"  Users: {last_good.users}")
         print(f"  RPS: {last_good.requests_per_second:.2f}")
         print(f"  P95 latency: {last_good.p95_latency_ms:.0f}ms")
         print(f"  Error rate: {last_good.error_rate_percent:.2f}%")
 
-        print(f"\n❌ Breaking Point:")
+        print("\n❌ Breaking Point:")
         print(f"  Users: {breaking_point.users}")
         print(f"  RPS: {breaking_point.requests_per_second:.2f}")
         print(f"  P95 latency: {breaking_point.p95_latency_ms:.0f}ms")
         print(f"  Error rate: {breaking_point.error_rate_percent:.2f}%")
 
-        print(f"\n📊 Degradation:")
+        print("\n📊 Degradation:")
         print(f"  Latency increase: {breaking_point.p95_latency_ms / last_good.p95_latency_ms:.1f}x")
         print(f"  Throughput decrease: {breaking_point.requests_per_second / last_good.requests_per_second:.1f}x")
         print(f"  Error rate increase: {breaking_point.error_rate_percent - last_good.error_rate_percent:.2f}%")
@@ -287,12 +287,12 @@ async def test_find_breaking_point():
     else:
         # Completed all levels without breaking
         max_result = results[-1]
-        print(f"\n✅ System handled maximum tested load:")
+        print("\n✅ System handled maximum tested load:")
         print(f"  Users: {max_result.users}")
         print(f"  RPS: {max_result.requests_per_second:.2f}")
         print(f"  P95 latency: {max_result.p95_latency_ms:.0f}ms")
         print(f"  Error rate: {max_result.error_rate_percent:.2f}%")
-        print(f"\n💡 Consider testing higher loads")
+        print("\n💡 Consider testing higher loads")
 
     # Performance curve
     print("\n📈 Performance Curve:")
@@ -313,7 +313,7 @@ async def test_find_breaking_point():
     else:
         max_result = results[-1]
         print(f"  - System can handle > {max_result.users} users")
-        print(f"  - Run extended load test to validate sustained performance")
+        print("  - Run extended load test to validate sustained performance")
 
     print("=" * 60)
 

@@ -294,7 +294,7 @@ class TestDependencyGraphIntegration:
         
         # Log stats for visibility
         stats = builder.get_stats()
-        print(f"\nMAXIMUS Dependency Graph Stats:")
+        print("\nMAXIMUS Dependency Graph Stats:")
         print(f"  Services: {stats['total_services']}")
         print(f"  Unique Packages: {stats['total_packages']}")
         print(f"  Total Dependencies: {stats['total_dependencies']}")

@@ -281,8 +281,8 @@ def main() -> int:
     
     print("\n✅ PORT REGISTRY VALID")
     print(f"   Total services: {registry['metadata']['total_services']}")
-    print(f"   No conflicts detected")
-    print(f"   All ranges correct\n")
+    print("   No conflicts detected")
+    print("   All ranges correct\n")
     return 0
 
 

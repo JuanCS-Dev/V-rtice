@@ -152,7 +152,7 @@ class DynamicFirewallController:
                 if result.returncode == 0:
                     logger.info(f"Firewall rule applied: {rule.rule_id}")
             else:
-                logger.info(f"Simulated firewall rule (no iptables access)")
+                logger.info("Simulated firewall rule (no iptables access)")
         except Exception as e:
             logger.warning(f"Firewall rule application failed: {e}")
 
@@ -191,7 +191,7 @@ class DynamicFirewallController:
                 if result.returncode == 0:
                     logger.info(f"Firewall rule removed: {rule.rule_id}")
             else:
-                logger.info(f"Simulated rule removal (no iptables access)")
+                logger.info("Simulated rule removal (no iptables access)")
                 
         except Exception as e:
             logger.warning(f"Firewall rule removal failed: {e}")

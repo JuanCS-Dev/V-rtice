@@ -478,7 +478,7 @@ async def test_performance_memory_stability(theory_coordinator):
     
     # History should be bounded
     assert final_history_size < 200, f"History grew too large: {final_history_size}"
-    assert final_history_size > 30, f"History too aggressively pruned"
+    assert final_history_size > 30, "History too aggressively pruned"
     
     growth = final_history_size - initial_history_size
     assert growth < 150, f"Unbounded growth: +{growth}"

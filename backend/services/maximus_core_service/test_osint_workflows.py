@@ -46,7 +46,7 @@ async def test_attack_surface_workflow():
     print(f"  Target: {report.target}")
     print(f"  Findings: {len(report.findings)}")
     print(f"  Risk Score: {report.risk_score:.2f}")
-    print(f"  Statistics:")
+    print("  Statistics:")
     for key, value in report.statistics.items():
         print(f"    {key}: {value}")
     print(f"  Recommendations: {len(report.recommendations)}")
@@ -122,7 +122,7 @@ async def test_credential_intel_workflow():
     print(f"  Breach Count: {report.breach_count}")
     print(f"  Exposure Score: {report.exposure_score:.2f}")
     print(f"  Platform Presence: {len(report.platform_presence)} platforms")
-    print(f"  Statistics:")
+    print("  Statistics:")
     for key, value in report.statistics.items():
         print(f"    {key}: {value}")
     print(f"  Recommendations: {len(report.recommendations)}")
@@ -210,7 +210,7 @@ async def test_target_profiling_workflow():
     print(f"  Locations Found: {len(report.locations)}")
     print(f"  SE Vulnerability: {report.se_vulnerability.value}")
     print(f"  SE Score: {report.se_score:.2f}")
-    print(f"  Statistics:")
+    print("  Statistics:")
     for key, value in report.statistics.items():
         print(f"    {key}: {value}")
     print(f"  Recommendations: {len(report.recommendations)}")

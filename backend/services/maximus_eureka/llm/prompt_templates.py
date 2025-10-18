@@ -78,7 +78,7 @@ def generate_patch_prompt(
     prompt_parts = [
         f"# Vulnerability: {cve_id}",
         "",
-        f"## Summary",
+        "## Summary",
         summary,
         "",
         f"## File: {file_path}",
@@ -89,7 +89,7 @@ def generate_patch_prompt(
     if ast_grep_pattern:
         prompt_parts.extend([
             "## Vulnerable Pattern (ast-grep)",
-            f"```",
+            "```",
             ast_grep_pattern,
             "```",
             "",

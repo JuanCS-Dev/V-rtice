@@ -143,7 +143,7 @@ class Principialism(AbstractEthicalFramework):
                 elif not step.consent_fully_informed:
                     violations.append(RejectionReason(
                         category="informed_consent_failure",
-                        description=f"Consent not fully informed",
+                        description="Consent not fully informed",
                         severity=0.5,
                         affected_stakeholders=[step.id],
                         violated_principle="Autonomy (informed consent)",
@@ -195,7 +195,7 @@ class Principialism(AbstractEthicalFramework):
         if score < 0.4:
             violations.append(RejectionReason(
                 category="insufficient_beneficence",
-                description=f"Plan lacks sufficient benefit to stakeholders",
+                description="Plan lacks sufficient benefit to stakeholders",
                 severity=0.5,
                 affected_stakeholders=[s.id for s in plan.steps],
                 violated_principle="Beneficence (do good)",
@@ -231,7 +231,7 @@ class Principialism(AbstractEthicalFramework):
             if step.risk_level > 0.8:
                 violations.append(RejectionReason(
                     category="harm",
-                    description=f"Step explicitly involves harm",
+                    description="Step explicitly involves harm",
                     severity=1.0,
                     affected_stakeholders=[step.id],
                     violated_principle="Non-maleficence (primum non nocere)",
@@ -243,7 +243,7 @@ class Principialism(AbstractEthicalFramework):
             if not step.reversible and step.risk_level > 0.5:
                 violations.append(RejectionReason(
                     category="irreversible_risk",
-                    description=f"Irreversible action with significant risk",
+                    description="Irreversible action with significant risk",
                     severity=0.8,
                     affected_stakeholders=[step.id],
                     violated_principle="Non-maleficence (precautionary principle)",

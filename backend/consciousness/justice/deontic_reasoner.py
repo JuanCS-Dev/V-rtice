@@ -51,7 +51,7 @@ class DeonticRule:
         if not 1 <= self.priority <= 10:
             raise ValueError(f"Priority must be 1-10, got {self.priority}")
         if not isinstance(self.operator, DeonticOperator):
-            raise TypeError(f"operator must be DeonticOperator enum")
+            raise TypeError("operator must be DeonticOperator enum")
 
 
 @dataclass

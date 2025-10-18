@@ -138,7 +138,7 @@ class DependencyOrchestrator:
     async def _scan_python(self) -> None:
         """Scan Python dependencies."""
         ecosystem = "python"
-        logger.info(f"📥 Starting Python dependency scan")
+        logger.info("📥 Starting Python dependency scan")
 
         try:
             scanner = PythonScanner(self.project_path)
@@ -185,7 +185,7 @@ class DependencyOrchestrator:
     async def _scan_javascript(self) -> None:
         """Scan JavaScript/npm dependencies."""
         ecosystem = "javascript"
-        logger.info(f"📥 Starting JavaScript dependency scan")
+        logger.info("📥 Starting JavaScript dependency scan")
 
         try:
             scanner = JavaScriptScanner(self.project_path)
@@ -232,7 +232,7 @@ class DependencyOrchestrator:
     async def _scan_go(self) -> None:
         """Scan Go module dependencies."""
         ecosystem = "go"
-        logger.info(f"📥 Starting Go dependency scan")
+        logger.info("📥 Starting Go dependency scan")
 
         try:
             scanner = GoScanner(self.project_path)

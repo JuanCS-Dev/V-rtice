@@ -48,7 +48,7 @@ def main():
     topic = os.getenv('KAFKA_APV_TOPIC', 'apv-detected')
     group_id = os.getenv('KAFKA_CONSUMER_GROUP', 'eureka-confirmation')
     
-    logger.info(f"Starting Eureka Kafka Consumer")
+    logger.info("Starting Eureka Kafka Consumer")
     logger.info(f"Bootstrap servers: {kafka_bootstrap}")
     logger.info(f"Topic: {topic}")
     logger.info(f"Group ID: {group_id}")

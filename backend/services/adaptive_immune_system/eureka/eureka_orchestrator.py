@@ -221,7 +221,7 @@ class EurekaOrchestrator:
             # ========================================
             # STAGE 1: CONFIRMATION
             # ========================================
-            logger.info(f"📊 Stage 1/5: Vulnerability Confirmation")
+            logger.info("📊 Stage 1/5: Vulnerability Confirmation")
 
             confirmation_result = await self.confirmation_engine.confirm_apv(
                 apv_id=apv_id,
@@ -273,7 +273,7 @@ class EurekaOrchestrator:
             # ========================================
             # STAGE 2: REMEDY GENERATION
             # ========================================
-            logger.info(f"🔧 Stage 2/5: Remedy Generation")
+            logger.info("🔧 Stage 2/5: Remedy Generation")
 
             try:
                 remedy_result = await self.remedy_generator.generate_remedy(
@@ -333,7 +333,7 @@ class EurekaOrchestrator:
             # ========================================
             # STAGE 3: PATCH VALIDATION
             # ========================================
-            logger.info(f"🧪 Stage 3/5: Patch Validation")
+            logger.info("🧪 Stage 3/5: Patch Validation")
 
             validation_result = await self.patch_validator.validate_patch(
                 primary_patch
@@ -371,7 +371,7 @@ class EurekaOrchestrator:
             pr_result = None
 
             if create_pr and self.github_client:
-                logger.info(f"🔀 Stage 4/5: PR Creation")
+                logger.info("🔀 Stage 4/5: PR Creation")
 
                 try:
                     # Generate PR description
@@ -462,7 +462,7 @@ class EurekaOrchestrator:
             # ========================================
             # STAGE 5: COMPLETION
             # ========================================
-            logger.info(f"✅ Stage 5/5: Pipeline Complete")
+            logger.info("✅ Stage 5/5: Pipeline Complete")
 
             return {
                 "status": "success",

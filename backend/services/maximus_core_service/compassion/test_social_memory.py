@@ -318,7 +318,7 @@ async def test_retrieval_latency_p95():
         p95 = latencies_sorted[950]
         p99 = latencies_sorted[990]
 
-        print(f"\nLatency Benchmark (1000 retrievals):")
+        print("\nLatency Benchmark (1000 retrievals):")
         print(f"  p50: {p50:.2f}ms")
         print(f"  p95: {p95:.2f}ms")
         print(f"  p99: {p99:.2f}ms")
@@ -359,7 +359,7 @@ async def test_cache_hit_rate_target():
         stats = memory.get_cache_stats()
         hit_rate = stats["hit_rate"]
 
-        print(f"\nCache Performance:")
+        print("\nCache Performance:")
         print(f"  Hit rate: {hit_rate:.1%}")
         print(f"  Hits: {stats['hits']}")
         print(f"  Misses: {stats['misses']}")

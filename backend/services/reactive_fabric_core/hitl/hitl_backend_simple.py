@@ -293,9 +293,9 @@ if __name__ == "__main__":
     print("=" * 60)
     print("HITL Console Backend - Simple Mode (Testing)")
     print("=" * 60)
-    print(f"Starting server on http://0.0.0.0:8001")
-    print(f"Health check: http://localhost:8001/health")
-    print(f"API Status: http://localhost:8001/api/status")
+    print("Starting server on http://0.0.0.0:8001")
+    print("Health check: http://localhost:8001/health")
+    print("API Status: http://localhost:8001/api/status")
     print("=" * 60)
 
     uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")

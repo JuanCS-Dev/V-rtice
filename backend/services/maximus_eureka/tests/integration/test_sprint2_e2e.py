@@ -352,7 +352,7 @@ async def test_e2e_complete_remediation_flow(
     # Generate cost breakdown
     breakdown = cost_tracker.get_cost_by_strategy()
     
-    print(f"✅ E2E 4: Complete flow executed successfully")
+    print("✅ E2E 4: Complete flow executed successfully")
     print(f"  - WAF Rule: {rule.rule_id}")
     print(f"  - Breaking Changes: {report.overall_risk.value}")
     print(f"  - Total Cost: ${cost_tracker.get_monthly_cost():.4f}")
@@ -403,7 +403,7 @@ async def test_e2e_cost_budget_enforcement(tmp_path):
                 output_tokens=5000
             )
         
-        print(f"✅ E2E 5: Budget enforcement working - prevented overspend")
+        print("✅ E2E 5: Budget enforcement working - prevented overspend")
     else:
         print(f"⚠️  E2E 5: Budget not exceeded yet, but status: {status['status']}")
 

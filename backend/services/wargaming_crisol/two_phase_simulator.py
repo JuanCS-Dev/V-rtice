@@ -329,7 +329,7 @@ class TwoPhaseSimulator:
         
         # For now: Mock deployment (Docker integration comes next)
         # In production: Deploy vulnerable version in Docker container
-        logger.info(f"Phase 1: Executing exploit against vulnerable version...")
+        logger.info("Phase 1: Executing exploit against vulnerable version...")
         
         try:
             # Execute exploit
@@ -385,7 +385,7 @@ class TwoPhaseSimulator:
         
         # For now: Mock deployment (Docker integration comes next)
         # In production: Deploy patched version in Docker container
-        logger.info(f"Phase 2: Executing exploit against patched version...")
+        logger.info("Phase 2: Executing exploit against patched version...")
         
         try:
             # Execute exploit

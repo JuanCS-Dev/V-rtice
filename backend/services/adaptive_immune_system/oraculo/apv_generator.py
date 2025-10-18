@@ -66,13 +66,13 @@ class VulnerableCodeSignature:
 
         if "CWE-502" in cwe_ids:  # Deserialization
             return (
-                rf"import\s+(pickle|yaml|marshal).*?\.load\s*\(",
+                r"import\s+(pickle|yaml|marshal).*?\.load\s*\(",
                 "regex",
             )
 
         if "CWE-22" in cwe_ids:  # Path Traversal
             return (
-                rf"open\s*\(\s*.*?\+.*?\)",
+                r"open\s*\(\s*.*?\+.*?\)",
                 "regex",
             )
 

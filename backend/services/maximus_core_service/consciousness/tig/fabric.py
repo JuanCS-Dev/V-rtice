@@ -583,7 +583,7 @@ class TIGFabric:
 
         self._initializing = True
         print(f"🧠 TIG Fabric: Starting background initialization ({self.config.node_count} nodes)...")
-        print(f"   Service will start immediately - topology builds in background")
+        print("   Service will start immediately - topology builds in background")
 
         # Launch initialization in background
         self._init_task = asyncio.create_task(self._background_init())

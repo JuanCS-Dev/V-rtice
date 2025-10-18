@@ -60,7 +60,7 @@ class CompassionPlan:
         if not 1 <= self.priority <= 10:
             raise ValueError(f"Priority must be 1-10, got {self.priority}")
         if not isinstance(self.intervention_type, InterventionType):
-            raise TypeError(f"intervention_type must be InterventionType enum")
+            raise TypeError("intervention_type must be InterventionType enum")
 
 
 class CompassionPlanner:

@@ -450,15 +450,15 @@ def seed_database(db_path: str = "data/few_shot_examples.db"):
     
     # Print statistics
     stats = db.get_statistics()
-    print(f"\n📊 Database Statistics:")
+    print("\n📊 Database Statistics:")
     print(f"  Total examples: {stats['total']}")
-    print(f"  By CWE:")
+    print("  By CWE:")
     for cwe, cnt in sorted(stats['by_cwe'].items()):
         print(f"    {cwe}: {cnt}")
-    print(f"  By language:")
+    print("  By language:")
     for lang, cnt in sorted(stats['by_language'].items()):
         print(f"    {lang}: {cnt}")
-    print(f"  By difficulty:")
+    print("  By difficulty:")
     for diff, cnt in sorted(stats['by_difficulty'].items()):
         print(f"    {diff}: {cnt}")
 

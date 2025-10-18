@@ -164,7 +164,7 @@ class ConsciousnessSystem:
             self.tig_fabric = TIGFabric(tig_config)
             await self.tig_fabric.initialize_async()  # Returns immediately, builds in background
             print(f"  ✅ TIG Fabric initializing in background ({self.config.tig_node_count} nodes)")
-            print(f"     Service starting - TIG will be ready shortly")
+            print("     Service starting - TIG will be ready shortly")
 
             # 2. TRACK 1: Initialize Social Cognition Components (ToM, Metacognition, PFC)
             print("  ├─ Creating Social Cognition components (ToM, Metacognition, PFC)...")

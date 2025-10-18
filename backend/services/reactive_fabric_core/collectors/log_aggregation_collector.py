@@ -338,7 +338,7 @@ class LogAggregationCollector(BaseCollector):
                 },
                 tags=[
                     f"pattern:{matched_pattern.name}",
-                    f"backend:elasticsearch",
+                    "backend:elasticsearch",
                     *[f"mitre:{t}" for t in matched_pattern.mitre_techniques]
                 ]
             )
@@ -443,7 +443,7 @@ class LogAggregationCollector(BaseCollector):
                 },
                 tags=[
                     f"pattern:{matched_pattern.name}",
-                    f"backend:splunk",
+                    "backend:splunk",
                     *[f"mitre:{t}" for t in matched_pattern.mitre_techniques]
                 ]
             )
@@ -521,7 +521,7 @@ class LogAggregationCollector(BaseCollector):
                 },
                 tags=[
                     f"pattern:{matched_pattern.name}",
-                    f"backend:graylog",
+                    "backend:graylog",
                     *[f"mitre:{t}" for t in matched_pattern.mitre_techniques]
                 ]
             )

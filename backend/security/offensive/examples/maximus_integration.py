@@ -52,10 +52,10 @@ async def registry_exploration():
     print("=" * 60)
     
     stats = registry.get_stats()
-    print(f"\nRegistry Statistics:")
+    print("\nRegistry Statistics:")
     print(f"  Total tools: {stats['total_tools']}")
     
-    print(f"\nAvailable Tools:")
+    print("\nAvailable Tools:")
     for tool_info in registry.list_tools():
         print(f"\n  {tool_info.name}")
         print(f"    Category: {tool_info.category.value}")

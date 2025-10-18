@@ -82,7 +82,7 @@ class TriageEngine:
         Returns:
             Dictionary with triage statistics
         """
-        logger.info(f"🔍 Starting APV triage" + (f" for project: {project}" if project else ""))
+        logger.info("🔍 Starting APV triage" + (f" for project: {project}" if project else ""))
 
         stats = {
             "total_triaged": 0,

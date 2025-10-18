@@ -244,7 +244,7 @@ class FeedOrchestrator:
         Note: OSV doesn't have a time-based query, so we query by ecosystem.
         """
         feed_name = "osv"
-        logger.info(f"📥 Starting OSV ingestion")
+        logger.info("📥 Starting OSV ingestion")
 
         start_time = datetime.utcnow()
 

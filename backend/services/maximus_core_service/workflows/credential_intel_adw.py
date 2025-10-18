@@ -298,12 +298,12 @@ class CredentialIntelWorkflow:
         # Simulate credential dork results
         mock_dorks = [
             {
-                "url": f"https://pastebin.com/example123",
+                "url": "https://pastebin.com/example123",
                 "query": f"site:pastebin.com {target}",
                 "engine": "google",
             },
             {
-                "url": f"https://github.com/example/repo/config.json",
+                "url": "https://github.com/example/repo/config.json",
                 "query": f"site:github.com {target} password",
                 "engine": "google",
             },

@@ -144,7 +144,7 @@ class KantianDeontology(AbstractEthicalFramework):
             if step.risk_level > 0.8:
                 violations.append(RejectionReason(
                     category="means_not_ends",
-                    description=f"Step involves sacrificing individual for aggregate benefit",
+                    description="Step involves sacrificing individual for aggregate benefit",
                     severity=1.0,
                     affected_stakeholders=[step.id],
                     violated_principle="Kingdom of Ends",
@@ -218,7 +218,7 @@ class KantianDeontology(AbstractEthicalFramework):
             if not step.consent_fully_informed:
                 violations.append(RejectionReason(
                     category="autonomy_violation",
-                    description=f"Consent not fully informed - autonomy compromised",
+                    description="Consent not fully informed - autonomy compromised",
                     severity=0.5,
                     affected_stakeholders=[step.id],
                     violated_principle="Informed consent requirement",
@@ -229,7 +229,7 @@ class KantianDeontology(AbstractEthicalFramework):
         if step.involves_consent and not step.consent_obtained:
             violations.append(RejectionReason(
                 category="missing_consent",
-                description=f"Action requires consent but none obtained",
+                description="Action requires consent but none obtained",
                 severity=0.8,
                 affected_stakeholders=[step.id],
                 violated_principle="Respect for persons",

@@ -221,7 +221,7 @@ class TestLatencyProfiling:
         
         # Print for analysis
         print(f"\n{'='*60}")
-        print(f"LATENCY BASELINE MEASUREMENT")
+        print("LATENCY BASELINE MEASUREMENT")
         print(f"{'='*60}")
         print(f"Episodes: {num_episodes}")
         print(f"p50 latency: {metrics.p50:.2f}ms")
@@ -295,7 +295,7 @@ class TestLatencyProfiling:
         
         # Print breakdown
         print(f"\n{'='*60}")
-        print(f"COMPONENT LATENCY BREAKDOWN")
+        print("COMPONENT LATENCY BREAKDOWN")
         print(f"{'='*60}")
         for component, avg_time in sorted(
             metrics.component_times.items(),
@@ -355,7 +355,7 @@ class TestLatencyProfiling:
         
         # Print results
         print(f"\n{'='*60}")
-        print(f"LATENCY UNDER VARYING LOAD")
+        print("LATENCY UNDER VARYING LOAD")
         print(f"{'='*60}")
         print(f"{'Load':>6s} | {'p50 (ms)':>10s} | {'p95 (ms)':>10s} | {'Max (ms)':>10s}")
         print(f"{'-'*60}")
@@ -438,7 +438,7 @@ class TestLatencyProfiling:
         
         # Print top operations
         print(f"\n{'='*60}")
-        print(f"HOTPATH OPERATION TIMINGS")
+        print("HOTPATH OPERATION TIMINGS")
         print(f"{'='*60}")
         sorted_ops = sorted(avg_times.items(), key=lambda x: x[1], reverse=True)
         for rank, (op, avg_time) in enumerate(sorted_ops[:5], 1):
@@ -489,7 +489,7 @@ class TestLatencyProfiling:
         avg_per_op = duration_ms / 10
         
         print(f"\n{'='*60}")
-        print(f"ASYNC OPTIMIZATION CHECK")
+        print("ASYNC OPTIMIZATION CHECK")
         print(f"{'='*60}")
         print(f"Total time (10 concurrent): {duration_ms:.2f}ms")
         print(f"Avg per operation: {avg_per_op:.2f}ms")
@@ -530,7 +530,7 @@ class TestLatencyProfiling:
         memory_per_episode = memory_growth / num_episodes
         
         print(f"\n{'='*60}")
-        print(f"MEMORY ALLOCATION ANALYSIS")
+        print("MEMORY ALLOCATION ANALYSIS")
         print(f"{'='*60}")
         print(f"Episodes: {num_episodes}")
         print(f"Initial memory: {initial_memory:.2f} MB")
@@ -579,7 +579,7 @@ class TestLatencyProfiling:
         avg_comm_time = metrics.component_times["communication"]
         
         print(f"\n{'='*60}")
-        print(f"NETWORK/COMMUNICATION OVERHEAD")
+        print("NETWORK/COMMUNICATION OVERHEAD")
         print(f"{'='*60}")
         print(f"Messages: {num_messages}")
         print(f"Avg communication time: {avg_comm_time:.2f}ms")
@@ -587,7 +587,7 @@ class TestLatencyProfiling:
         
         # Target validation
         if avg_comm_time < 5:
-            print(f"✅ Communication target MET (<5ms)")
+            print("✅ Communication target MET (<5ms)")
         else:
             print(f"⚠️  Communication target MISSED ({avg_comm_time:.2f}ms > 5ms)")
         
@@ -629,7 +629,7 @@ class TestThroughput:
         throughput = episode_count / actual_duration
         
         print(f"\n{'='*60}")
-        print(f"THROUGHPUT BASELINE")
+        print("THROUGHPUT BASELINE")
         print(f"{'='*60}")
         print(f"Duration: {actual_duration:.2f} seconds")
         print(f"Episodes: {episode_count}")
@@ -638,7 +638,7 @@ class TestThroughput:
         
         # Target validation
         if throughput >= 20:
-            print(f"✅ Throughput target MET (>20 eps)")
+            print("✅ Throughput target MET (>20 eps)")
         else:
             print(f"⚠️  Throughput target MISSED ({throughput:.2f} < 20 eps)")
         
@@ -678,7 +678,7 @@ class TestThroughput:
         errors = [r for r in results if isinstance(r, Exception)]
         
         print(f"\n{'='*60}")
-        print(f"BURST HANDLING")
+        print("BURST HANDLING")
         print(f"{'='*60}")
         print(f"Burst size: {burst_size}")
         print(f"Processing time: {duration:.2f} seconds")
@@ -738,7 +738,7 @@ class TestThroughput:
         memory_growth_percent = (memory_growth / memory_samples[0] * 100) if memory_samples else 0
         
         print(f"\n{'='*60}")
-        print(f"SUSTAINED LOAD")
+        print("SUSTAINED LOAD")
         print(f"{'='*60}")
         print(f"Target rate: {target_rate} eps")
         print(f"Duration: {actual_duration:.2f} seconds")
@@ -793,7 +793,7 @@ class TestThroughput:
             results[workers] = throughput
         
         print(f"\n{'='*60}")
-        print(f"PARALLEL PROCESSING SCALABILITY")
+        print("PARALLEL PROCESSING SCALABILITY")
         print(f"{'='*60}")
         print(f"{'Workers':>8s} | {'Throughput (eps)':>18s} | {'Speedup':>10s}")
         print(f"{'-'*60}")
@@ -859,7 +859,7 @@ class TestThroughput:
         avg_queue_depth = statistics.mean(queue_depths) if queue_depths else 0
         
         print(f"\n{'='*60}")
-        print(f"BOTTLENECK IDENTIFICATION")
+        print("BOTTLENECK IDENTIFICATION")
         print(f"{'='*60}")
         print(f"Episodes: {high_load_episodes}")
         print(f"Duration: {duration:.2f} seconds")
@@ -921,13 +921,13 @@ def test_day8_test_count():
     total_tests = class_test_count + standalone_test_count
     
     print(f"\n{'='*60}")
-    print(f"DAY 8 TEST COUNT")
+    print("DAY 8 TEST COUNT")
     print(f"{'='*60}")
     print(f"Test classes: {len(test_classes)}")
     print(f"Class tests: {class_test_count}")
     print(f"Standalone tests: {standalone_test_count}")
     print(f"Total: {total_tests}")
-    print(f"Target: 20")
+    print("Target: 20")
     print(f"Progress: {total_tests}/20 ({total_tests/20*100:.0f}%)")
     print(f"{'='*60}\n")
     
