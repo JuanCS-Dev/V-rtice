@@ -67,12 +67,10 @@ export const ADWPanel = () => {
   useEffect(() => {
     loadInitialData();
 
-    // Polling interval for real-time updates
-    const interval = setInterval(() => {
-      loadInitialData();
-    }, 5000); // 5 second refresh
-
-    return () => clearInterval(interval);
+    // Polling DISABLED to prevent constant reloads
+    // Uncomment line below to enable 30s auto-refresh
+    // const interval = setInterval(() => loadInitialData(), 30000);
+    // return () => clearInterval(interval);
   }, []);
 
   const loadInitialData = async () => {
