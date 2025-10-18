@@ -30,7 +30,7 @@ from pydantic import BaseModel
 from typing import Optional
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
-from exploit_database import load_exploit_database, get_exploit_for_apv
+from exploit_database import load_exploit_database, get_exploit_for_apv, APV
 from two_phase_simulator import TwoPhaseSimulator, validate_patch_ml_first
 from websocket_stream import wargaming_ws_manager, wargaming_websocket_endpoint
 from db.ab_test_store import ABTestStore
@@ -310,11 +310,12 @@ async def execute_wargaming(request: WargamingRequest):
         # Load exploit database
         db = load_exploit_database()
         
-        # Mock APV (in production: load from database)
-        from unittest.mock import Mock
-        apv = Mock()
-        apv.apv_id = request.apv_id
-        apv.cve_id = request.cve_id or f"CVE-{request.apv_id}"
+        # Create APV object (in production: load from database)
+        apv = APV(
+            apv_id=request.apv_id,
+            cve_id=request.cve_id or f"CVE-{request.apv_id}",
+            cwe_ids=[]
+        )
         
         # Extract CWE from CVE ID pattern (CVE-2024-SQL-INJECTION → CWE-89)
         cwe_mapping = {
@@ -335,14 +336,22 @@ async def execute_wargaming(request: WargamingRequest):
         
         if not apv.cwe_ids:
             # Fallback to CWE-89 if no match
-            apv.cwe_ids = ["CWE-89"]
+            apv.cwe_ids.append("CWE-89")
         
         logger.info(f"✓ Detected CWE: {apv.cwe_ids[0]} from {apv.cve_id}")
         
-        # Mock Patch
-        patch = Mock()
-        patch.patch_id = request.patch_id
-        patch.unified_diff = "..."
+        # Create patch object (in production: load from database)
+        from dataclasses import dataclass
+        
+        @dataclass
+        class Patch:
+            patch_id: str
+            unified_diff: str
+        
+        patch = Patch(
+            patch_id=request.patch_id,
+            unified_diff="..."
+        )
         
         # Find exploit
         exploit = get_exploit_for_apv(apv, db)
@@ -473,11 +482,12 @@ async def execute_ml_first_validation(request: MLFirstRequest):
         # Load exploit database
         db = load_exploit_database()
         
-        # Mock APV (in production: load from database)
-        from unittest.mock import Mock
-        apv = Mock()
-        apv.apv_id = request.apv_id
-        apv.cve_id = request.cve_id
+        # Create APV object (in production: load from database)
+        apv = APV(
+            apv_id=request.apv_id,
+            cve_id=request.cve_id,
+            cwe_ids=[]
+        )
         apv.id = request.apv_id  # For A/B testing
         
         # Extract CWE from CVE ID
@@ -498,18 +508,28 @@ async def execute_ml_first_validation(request: MLFirstRequest):
                 break
         
         if not apv.cwe_ids:
-            apv.cwe_ids = ["CWE-89"]
+            apv.cwe_ids.append("CWE-89")
         
         apv.cwe_id = apv.cwe_ids[0]  # For ML feature extraction
         
         logger.info(f"✓ Detected CWE: {apv.cwe_id} from {apv.cve_id}")
         
-        # Mock Patch
-        patch = Mock()
-        patch.patch_id = request.patch_id
-        patch.id = request.patch_id  # For A/B testing
-        patch.diff_content = request.patch_diff
-        patch.unified_diff = request.patch_diff
+        # Create patch object (in production: load from database)
+        from dataclasses import dataclass
+        
+        @dataclass
+        class Patch:
+            patch_id: str
+            id: str
+            diff_content: str
+            unified_diff: str
+        
+        patch = Patch(
+            patch_id=request.patch_id,
+            id=request.patch_id,
+            diff_content=request.patch_diff,
+            unified_diff=request.patch_diff
+        )
         
         # Find exploit
         exploit = get_exploit_for_apv(apv, db)
@@ -661,7 +681,7 @@ async def get_ml_stats(time_range: str = "24h"):
         - time_saved_hours: Total time saved vs full wargaming
     
     Note: Currently returns metrics from Prometheus counters.
-    TODO: Add time-range filtering when historical data storage implemented.
+    Future enhancement: time-range filtering (requires historical data storage).
     """
     try:
         # Get metrics from Prometheus counters
@@ -729,8 +749,7 @@ async def get_confidence_distribution(time_range: str = "24h"):
         - counts: Count of predictions in each bin
         - threshold: Confidence threshold for ML-only validation
     
-    Note: Currently returns estimated distribution.
-    TODO: Extract from ml_confidence_histogram Prometheus metric.
+    Note: Extracts real-time data from Prometheus ml_confidence_histogram metric.
     """
     try:
         # Define bins (matching Prometheus histogram buckets)

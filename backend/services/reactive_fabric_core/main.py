@@ -16,6 +16,8 @@ import os
 import asyncio
 import docker
 from docker.errors import DockerException
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from fastapi.responses import Response
 
 from .models import (
     HoneypotListResponse, HoneypotStatus,
@@ -45,6 +47,28 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 db: Optional[Database] = None
 kafka_producer: Optional[KafkaProducer] = None
 docker_client: Optional[docker.DockerClient] = None
+
+# Prometheus metrics
+honeypot_connections_total = Counter(
+    'honeypot_connections_total',
+    'Total number of connections to honeypots',
+    ['honeypot_id', 'honeypot_type']
+)
+honeypot_attacks_detected = Counter(
+    'honeypot_attacks_detected',
+    'Total number of attacks detected',
+    ['honeypot_id', 'attack_type']
+)
+honeypot_ttps_extracted = Counter(
+    'honeypot_ttps_extracted',
+    'Total number of TTPs extracted',
+    ['ttp_id', 'tactic']
+)
+honeypot_uptime_seconds = Gauge(
+    'honeypot_uptime_seconds',
+    'Honeypot uptime in seconds',
+    ['honeypot_id']
+)
 
 
 # Background task for health checks
@@ -466,18 +490,16 @@ async def metrics():
     """
     Prometheus metrics endpoint.
     
-    Sprint 1 TODO:
-    - Implement Prometheus client
-    - Export metrics:
-      - honeypot_connections_total
-      - honeypot_attacks_detected
-      - honeypot_ttps_extracted
-      - honeypot_uptime_seconds
+    Exports metrics in Prometheus format:
+    - honeypot_connections_total
+    - honeypot_attacks_detected
+    - honeypot_ttps_extracted
+    - honeypot_uptime_seconds
     """
-    return {
-        "status": "not_implemented",
-        "message": "Sprint 1 feature - Prometheus metrics"
-    }
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST
+    )
 
 
 # ============================================================================
