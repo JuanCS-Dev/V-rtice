@@ -151,61 +151,204 @@ show_status() {
     
     cd "$PROJECT_ROOT"
     
-    # Tier 0: Infrastructure
+    # Tier 0: Core Infrastructure
     echo ""
     echo -e "${CYAN}═══ Tier 0: Infrastructure (3) ═══${NC}"
-    docker compose ps redis postgres qdrant --format "{{.Service}}\t{{.Status}}" 2>/dev/null | while read svc status; do
-        [[ "$status" =~ "Up" ]] && log_success "$svc: RUNNING" || log_error "$svc: STOPPED"
+    
+    local tier0=("redis:6379" "postgres:5432" "qdrant:6333")
+    local tier0_up=0
+    for service_port in "${tier0[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING → :$port"
+            ((tier0_up++))
+        else
+            log_error "$service: STOPPED"
+        fi
     done
     
-    # Tier 1: Core Services (sample)
+    # Tier 1: Core Services
     echo ""
     echo -e "${CYAN}═══ Tier 1: Core Services (11) ═══${NC}"
-    docker compose ps api_gateway sinesp_service cyber_service domain_service --format "{{.Service}}\t{{.Status}}" 2>/dev/null | while read svc status; do
-        [[ "$status" =~ "Up" ]] && log_success "$svc: RUNNING" || log_error "$svc: STOPPED"
-    done
-    echo -e "  ${CYAN}... (7 more services)${NC}"
     
-    # Advanced Systems Summary
+    local tier1=(
+        "api_gateway:8000"
+        "sinesp_service:8102"
+        "cyber_service:8103"
+        "domain_service:8104"
+        "ip_intelligence_service:8105"
+        "nmap_service:8106"
+        "atlas_service:8109"
+        "auth_service:8110"
+        "vuln_scanner_service:8111"
+        "social_eng_service:8112"
+        "network_monitor_service:8120"
+    )
+    
+    local tier1_up=0
+    for service_port in "${tier1[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            if [ "$service" = "api_gateway" ]; then
+                log_success "⭐ $service: RUNNING → http://localhost:$port"
+            else
+                log_success "$service: RUNNING → :$port"
+            fi
+            ((tier1_up++))
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # Tier 2: AI/ML & Threat Intelligence
+    echo ""
+    echo -e "${CYAN}═══ Tier 2: AI/ML Services (6) ═══${NC}"
+    
+    local tier2=(
+        "threat_intel_service:8113"
+        "malware_analysis_service:8114"
+        "ssl_monitor_service:8115"
+        "maximus_orchestrator_service:8125"
+        "maximus_predict:8126"
+        "maximus_core_service:8150"
+    )
+    
+    local tier2_up=0
+    for service_port in "${tier2[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING → :$port"
+            ((tier2_up++))
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # Tier 3: OSINT & Monitoring
+    echo ""
+    echo -e "${CYAN}═══ Tier 3: OSINT & Monitoring (3) ═══${NC}"
+    
+    local tier3=(
+        "osint-service:8036"
+        "prometheus:9090"
+        "grafana:3000"
+    )
+    
+    local tier3_up=0
+    for service_port in "${tier3[@]}"; do
+        IFS=':' read -r service port <<< "$service_port"
+        local status=$(get_service_status "$service")
+        if [ "$status" = "running" ]; then
+            log_success "$service: RUNNING → http://localhost:$port"
+            ((tier3_up++))
+        else
+            log_error "$service: STOPPED"
+        fi
+    done
+    
+    # Tier 4-9: Advanced Systems (summary only)
     echo ""
     echo -e "${CYAN}═══ Advanced Systems (Tiers 4-9) ═══${NC}"
     
-    local tier4_up=$(docker compose ps hcl-postgres hcl-kafka zookeeper-immunity --format "{{.Status}}" 2>/dev/null | grep -c "Up")
-    local tier5_up=$(docker compose ps postgres-immunity adaptive_immune_system --format "{{.Status}}" 2>/dev/null | grep -c "Up")
-    local tier6_up=$(docker compose ps hsas_service adr_core_service --format "{{.Status}}" 2>/dev/null | grep -c "Up")
+    local tier4_services=("hcl-postgres" "hcl-kafka" "zookeeper-immunity" "hcl-monitor" "hcl_executor_service")
+    local tier5_services=("postgres-immunity" "adaptive_immune_system" "immunis_dendritic_service" "immunis_neutrophil_service" "immunis_macrophage_service")
+    local tier6_services=("hsas_service" "adr_core_service" "homeostatic_regulation" "digital_thalamus_service" "ai_immune_system")
+    local tier7_services=("neuromodulation_service" "memory_consolidation_service" "strategic_planning_service" "prefrontal_cortex_service")
+    local tier9_services=("google_osint_service" "vuln_intel_service" "cloud_coordinator_service" "maximus_integration_service" "edge_agent_service")
     
-    echo -e "  Tier 4 (HCL):      ${tier4_up}/3+ running"
-    echo -e "  Tier 5 (IMMUNIS):  ${tier5_up}/2+ running"
-    echo -e "  Tier 6 (HSAS):     ${tier6_up}/2+ running"
+    local tier4_up=0 tier5_up=0 tier6_up=0 tier7_up=0 tier9_up=0
+    
+    for svc in "${tier4_services[@]}"; do
+        [[ "$(get_service_status "$svc")" = "running" ]] && ((tier4_up++))
+    done
+    
+    for svc in "${tier5_services[@]}"; do
+        [[ "$(get_service_status "$svc")" = "running" ]] && ((tier5_up++))
+    done
+    
+    for svc in "${tier6_services[@]}"; do
+        [[ "$(get_service_status "$svc")" = "running" ]] && ((tier6_up++))
+    done
+    
+    for svc in "${tier7_services[@]}"; do
+        [[ "$(get_service_status "$svc")" = "running" ]] && ((tier7_up++))
+    done
+    
+    for svc in "${tier9_services[@]}"; do
+        [[ "$(get_service_status "$svc")" = "running" ]] && ((tier9_up++))
+    done
+    
+    echo -e "  Tier 4 (HCL):      ${tier4_up}/${#tier4_services[@]}"
+    echo -e "  Tier 5 (IMMUNIS):  ${tier5_up}/${#tier5_services[@]}"
+    echo -e "  Tier 6 (HSAS):     ${tier6_up}/${#tier6_services[@]}"
+    echo -e "  Tier 7 (Neuro):    ${tier7_up}/${#tier7_services[@]}"
+    echo -e "  Tier 9 (Intel):    ${tier9_up}/${#tier9_services[@]}"
+    
+    # Health Check Summary
+    echo ""
+    echo -e "${CYAN}═══ Health Status ═══${NC}"
+    
+    local healthy=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "healthy" | wc -l)
+    local unhealthy=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "unhealthy" | wc -l)
+    local starting=$(docker compose ps --format "{{.Health}}" 2>/dev/null | grep "starting" | wc -l)
+    
+    echo -e "${GREEN}✓ Healthy:${NC} $healthy"
+    if [[ "$unhealthy" -gt 0 ]]; then
+        echo -e "${RED}✗ Unhealthy:${NC} $unhealthy"
+    else
+        echo -e "${GREEN}✓ Unhealthy:${NC} 0"
+    fi
+    if [[ "$starting" -gt 0 ]]; then
+        echo -e "${YELLOW}⟳ Starting:${NC} $starting"
+    fi
+    
+    # API Gateway Health Endpoint
+    echo ""
+    echo -e "${CYAN}═══ API Gateway Health ═══${NC}"
+    if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
+        echo -e "${GREEN}✓ API Gateway respondendo:${NC} http://localhost:8000/health"
+    else
+        echo -e "${RED}✗ API Gateway não está respondendo${NC}"
+    fi
     
     # Summary
     echo ""
+    local total=$(count_running_services)
+    local expected=60
     echo -e "${CYAN}═══════════════════════════════════════════${NC}"
-    local total=$(docker compose ps --format "{{.Service}}" 2>/dev/null | wc -l)
-    echo -e "${GREEN}Total de serviços ativos:${NC} $total/60 full stack"
+    echo -e "${GREEN}Total de serviços ativos:${NC} $total/$expected full stack"
+    echo -e ""
+    echo -e "  ${BLUE}Core Platform (Tiers 0-3):${NC}"
+    echo -e "    Tier 0: $tier0_up/3"
+    echo -e "    Tier 1: $tier1_up/11"
+    echo -e "    Tier 2: $tier2_up/6"
+    echo -e "    Tier 3: $tier3_up/3"
+    echo -e ""
+    echo -e "  ${BLUE}Advanced Systems (Tiers 4-9):${NC}"
+    echo -e "    Tier 4 (HCL):      ${tier4_up}/${#tier4_services[@]}"
+    echo -e "    Tier 5 (IMMUNIS):  ${tier5_up}/${#tier5_services[@]}"
+    echo -e "    Tier 6 (HSAS):     ${tier6_up}/${#tier6_services[@]}"
+    echo -e "    Tier 7 (Neuro):    ${tier7_up}/${#tier7_services[@]}"
+    echo -e "    Tier 9 (Intel):    ${tier9_up}/${#tier9_services[@]}"
     echo -e "${CYAN}═══════════════════════════════════════════${NC}"
-    
-    # API Gateway Check
-    echo ""
-    if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
-        log_success "API Gateway: HEALTHY (http://localhost:8000)"
-    else
-        log_error "API Gateway: DOWN"
-    fi
     
     # Penélope's feedback
-    echo ""
-    local percentage=$((total * 100 / 60))
+    local percentage=$((total * 100 / expected))
+    
     if [[ "$percentage" -ge 90 ]]; then
         echo -e "${GREEN}👸 Penélope: 'PERFEITO Maximus! Plataforma cyber-biológica completa!'${NC}"
     elif [[ "$percentage" -ge 70 ]]; then
         echo -e "${YELLOW}👸 Penélope: 'Bom trabalho, mas faltam alguns sistemas...'${NC}"
+    elif [[ "$percentage" -ge 50 ]]; then
+        echo -e "${YELLOW}👸 Penélope: 'Maximus, metade dos sistemas offline!'${NC}"
     else
         echo -e "${RED}👸 Penélope: 'MAXIMUS! Sistema crítico! ACORDE!'${NC}"
     fi
     echo ""
 }
-
 
 show_logs() {
     local service="${1:-api_gateway}"

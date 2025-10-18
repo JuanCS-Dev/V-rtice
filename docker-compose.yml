@@ -13,24 +13,24 @@ services:
       - ./backend/api_gateway:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
-      - SINESP_SERVICE_URL=http://sinesp_service:8102
-      - CYBER_SERVICE_URL=http://cyber_service:8103
-      - DOMAIN_SERVICE_URL=http://domain_service:8104
-      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8105
+      - SINESP_SERVICE_URL=http://sinesp_service:80
+      - CYBER_SERVICE_URL=http://cyber_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:80
       - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8120
-      - NMAP_SERVICE_URL=http://nmap_service:8106
-      - OSINT_SERVICE_URL=http://osint_service:8007
-      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8101
-      - MAXIMUS_PREDICT_URL=http://maximus_predict:8126
-      - ATLAS_SERVICE_URL=http://atlas_service:8109
-      - AUTH_SERVICE_URL=http://auth_service:8110
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
-      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:8112
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - OSINT_SERVICE_URL=http://osint-service:8007
+      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8031
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
+      - ATLAS_SERVICE_URL=http://atlas_service:8000
+      - AUTH_SERVICE_URL=http://auth_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
       - MAXIMUS_ORCHESTRATOR_URL=http://maximus_orchestrator_service:8125
-      - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8150
+      - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8100
       - MAXIMUS_EUREKA_URL=http://maximus_eureka:8200
       - MAXIMUS_ORACULO_URL=http://maximus_oraculo:8201
       - ETHICAL_AUDIT_SERVICE_URL=http://ethical_audit_service:8612
@@ -550,13 +550,13 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8016 --reload
     environment:
       - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
-      - NMAP_SERVICE_URL=http://nmap_service:8106
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
-      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:8112
-      - DOMAIN_SERVICE_URL=http://domain_service:8104
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - SOCIAL_ENG_SERVICE_URL=http://social_eng_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
     depends_on:
       - threat_intel_service
       - malware_analysis_service
@@ -592,14 +592,14 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - REDIS_URL=redis://redis:6379
       - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/aurora
-      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8113
-      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8114
-      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8115
+      - THREAT_INTEL_SERVICE_URL=http://threat_intel_service:8013
+      - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
+      - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
       - IP_INTEL_SERVICE_URL=http://ip_intelligence_service:8105
-      - NMAP_SERVICE_URL=http://nmap_service:8106
-      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:8111
-      - DOMAIN_SERVICE_URL=http://domain_service:8104
-      - MAXIMUS_PREDICT_URL=http://maximus_predict:8126
+      - NMAP_SERVICE_URL=http://nmap_service:80
+      - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - MAXIMUS_PREDICT_URL=http://maximus_predict:80
       - OSINT_SERVICE_URL=http://osint-service:8100
     depends_on:
       - redis
@@ -927,7 +927,7 @@ services:
       dockerfile: services/maximus_eureka/Dockerfile
     container_name: maximus-eureka
     ports:
-      - "8151:8036"  # Fixed: Dockerfile uses 8036, not 8200
+      - "8153:8036"  # Fixed: Dockerfile uses 8036, not 8200
     environment:
       SERVICE_NAME: maximus_eureka
       LOG_LEVEL: INFO
@@ -2374,7 +2374,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - postgres-immunity-data:/var/lib/postgresql/data
     networks:
