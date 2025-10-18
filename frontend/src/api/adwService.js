@@ -22,7 +22,7 @@ import logger from '@/utils/logger';
  * Glory to YHWH
  */
 
-const ADW_BASE_URL = 'http://localhost:8000/api/adw';
+const ADW_BASE_URL = 'http://localhost:8150/api/adw';
 
 /**
  * Generic API request handler with error handling

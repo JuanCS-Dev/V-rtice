@@ -547,7 +547,7 @@ services:
     build: ./backend/services/maximus_core_service
     container_name: maximus-core
     ports:
-      - "8150:8100"  # Fixed: Server runs on 8100 internally
+      - "8150:8150"  # Fixed: Server runs on 8150 internally
       - "8151:8001"  # Prometheus metrics
     volumes:
       - ./backend/services/maximus_core_service:/app
