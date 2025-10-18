@@ -65,12 +65,8 @@ app.add_middleware(
 # Include ML metrics router (Phase 5.5)
 app.include_router(ml_metrics_router)
 
-# Include legacy routes from api.py
-# These will be mounted at root level for backwards compatibility
-from api import app as legacy_app
-# Copy routes from legacy app
-for route in legacy_app.routes:
-    app.routes.append(route)
+# Legacy routes já estão no api.py separado, não precisam ser copiados
+# O api_server.py é o entry point principal
 
 
 @app.on_event("startup")
