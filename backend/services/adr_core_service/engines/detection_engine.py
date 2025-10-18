@@ -15,9 +15,9 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List
 
-from backend.services.adr_core_service.models.enums import DetectionType, IncidentSeverity
-from backend.services.adr_core_service.models.schemas import DetectionResult
-from backend.services.adr_core_service.utils.logger import setup_logger
+from models.enums import DetectionType, IncidentSeverity
+from models.schemas import DetectionResult
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

@@ -24,7 +24,7 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Orchestrator Service", version="1.0.0")
 
-# Configuration for Maximus sub-services (mock URLs)
+# Configuration for Maximus sub-services (from environment or defaults)
 MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8000")
 MAXIMUS_ATLAS_SERVICE_URL = os.getenv("MAXIMUS_ATLAS_SERVICE_URL", "http://localhost:8007")
 MAXIMUS_ORACULO_SERVICE_URL = os.getenv("MAXIMUS_ORACULO_SERVICE_URL", "http://localhost:8026")

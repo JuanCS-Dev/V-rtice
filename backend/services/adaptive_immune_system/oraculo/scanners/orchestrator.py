@@ -13,9 +13,9 @@ from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from ...database import DatabaseClient
-from ...database.models import Dependency
-from ...models.dependency import DependencyCreate
+from database import DatabaseClient
+from database.models import Dependency
+from models.dependency import DependencyCreate
 from .python_scanner import PythonScanner
 from .javascript_scanner import JavaScriptScanner
 from .go_scanner import GoScanner

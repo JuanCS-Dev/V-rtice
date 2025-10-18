@@ -19,26 +19,12 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from knowledge_base import KnowledgeBase, init_db
+
 app = FastAPI(title="Maximus Domain Service", version="1.0.0")
 
-# Mock Domain Knowledge Base
-domain_knowledge_base: Dict[str, Dict[str, Any]] = {
-    "cybersecurity": {
-        "description": "Knowledge related to cyber threats, vulnerabilities, and defense.",
-        "rules": ["block known malicious IPs", "alert on unusual login patterns"],
-        "entities": ["malware", "phishing", "APT"],
-    },
-    "environmental_monitoring": {
-        "description": "Knowledge related to environmental sensors, chemical compounds, and ecological patterns.",
-        "rules": ["alert on high methane levels", "track changes in air quality"],
-        "entities": ["methane", "CO2", "pollution"],
-    },
-    "physical_security": {
-        "description": "Knowledge related to physical access control, surveillance, and perimeter defense.",
-        "rules": ["alert on unauthorized access", "monitor camera feeds for anomalies"],
-        "entities": ["intruder", "access point", "camera"],
-    },
-}
+# Global knowledge base instance
+knowledge_base: Optional[KnowledgeBase] = None
 
 
 class DomainQueryRequest(BaseModel):
@@ -58,14 +44,21 @@ class DomainQueryRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Domain Service."""
-    print("🌐 Starting Maximus Domain Service...")
+    global knowledge_base
+    print("🧠 Starting Maximus Domain Service...")
+    init_db()
+    knowledge_base = KnowledgeBase()
+    print("✅ Knowledge base initialized")
     print("✅ Maximus Domain Service started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Domain Service."""
+    global knowledge_base
     print("👋 Shutting down Maximus Domain Service...")
+    if knowledge_base:
+        knowledge_base.close()
     print("🛑 Maximus Domain Service shut down.")
 
 
@@ -86,7 +79,7 @@ async def list_domains() -> List[str]:
     Returns:
         List[str]: A list of domain names.
     """
-    return list(domain_knowledge_base.keys())
+    return knowledge_base.list_domains()
 
 
 @app.get("/domain/{domain_name}")
@@ -102,14 +95,14 @@ async def get_domain_info(domain_name: str) -> Dict[str, Any]:
     Raises:
         HTTPException: If the domain is not found.
     """
-    domain_info = domain_knowledge_base.get(domain_name)
-    if not domain_info:
-        raise HTTPException(status_code=404, detail=f"Domain '{domain_name}' not found.")
-    return domain_info
+    result = knowledge_base.query_domain(domain_name, "")
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
 
 
 @app.post("/query_domain")
-async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
+async def query_domain_endpoint(request: DomainQueryRequest) -> Dict[str, Any]:
     """Queries a specific domain for information based on a natural language query.
 
     Args:
@@ -122,27 +115,13 @@ async def query_domain(request: DomainQueryRequest) -> Dict[str, Any]:
         HTTPException: If the domain is not found.
     """
     print(f"[API] Querying domain '{request.domain_name}' with: {request.query}")
-    domain_info = domain_knowledge_base.get(request.domain_name)
-    if not domain_info:
-        raise HTTPException(status_code=404, detail=f"Domain '{request.domain_name}' not found.")
-
-    await asyncio.sleep(0.1)  # Simulate processing
-
-    # Simple keyword-based query simulation
-    response = {"query": request.query, "domain": request.domain_name, "results": []}
-    if "rules" in request.query.lower():
-        response["results"].append({"type": "rules", "content": domain_info["rules"]})
-    if "entities" in request.query.lower():
-        response["results"].append({"type": "entities", "content": domain_info["entities"]})
-    if not response["results"]:
-        response["results"].append(
-            {
-                "type": "info",
-                "content": f"No specific information found for '{request.query}' in domain '{request.domain_name}'.",
-            }
-        )
-
-    return response
+    
+    result = knowledge_base.query_domain(request.domain_name, request.query, request.context)
+    
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    
+    return result
 
 
 if __name__ == "__main__":

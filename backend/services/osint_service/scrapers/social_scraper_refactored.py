@@ -192,7 +192,18 @@ class SocialScraperRefactored(BaseTool):
             Exception: If API call fails
         """
         if not self.twitter_client:
-            raise ValueError("Twitter API key not configured. Set TWITTER_BEARER_TOKEN.")
+            # Graceful degradation: return empty result instead of failing
+            self.logger.warning("twitter_client_unavailable", message="Twitter API disabled (paid API)")
+            return {
+                "platform": "twitter",
+                "target": target,
+                "search_type": search_type,
+                "tweets": [],
+                "user_profile": None,
+                "total_results": 0,
+                "api_available": False,
+                "message": "Twitter API requires paid subscription - feature temporarily unavailable"
+            }
 
         try:
             if search_type == "recent":

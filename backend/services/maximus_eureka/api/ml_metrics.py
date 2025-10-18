@@ -322,7 +322,7 @@ async def get_ml_metrics(
 
 async def _query_metrics_from_db(
     self, timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
-) -> MLMetrics:
+) -> MLMetricsResponse:
     """Query ML metrics from database."""
     # Implement actual database queries
     # For now, raise to trigger fallback

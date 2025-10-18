@@ -113,7 +113,7 @@ async def readiness_check() -> HealthResponse:
     try:
         # Database health check using connection test
         try:
-            from ...database import AsyncSessionLocal
+            from database import AsyncSessionLocal
             async with AsyncSessionLocal() as session:
                 await session.execute("SELECT 1")
             checks["database"] = "ok"

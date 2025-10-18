@@ -12,9 +12,9 @@ from typing import Dict, Optional
 
 from sqlalchemy.orm import Session
 
-from ...database import DatabaseClient
-from ...database.models import Threat, FeedSyncStatus
-from ...models.threat import ThreatCreate
+from database import DatabaseClient
+from database.models import Threat, FeedSyncStatus
+from models.threat import ThreatCreate
 from .nvd_client import NVDClient, NVDVulnerability
 from .ghsa_client import GHSAClient, GHSAVulnerability
 from .osv_client import OSVClient

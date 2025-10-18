@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
-from ...models import ReviewContext, ReviewListItem, ReviewStats
+from hitl.models import ReviewContext, ReviewListItem, ReviewStats
 
 logger = logging.getLogger(__name__)
 

@@ -15,8 +15,8 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...decision_engine import DecisionEngine
-from ...models import DecisionRequest, DecisionRecord, ReviewContext
+from hitl.decision_engine import DecisionEngine
+from hitl.models import DecisionRequest, DecisionRecord, ReviewContext
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ async def get_db_session() -> AsyncSession:
     """
     # Try to use SQLAlchemy async session if available
     try:
-        from ...database import AsyncSessionLocal
+        from database import AsyncSessionLocal
         async with AsyncSessionLocal() as session:
             yield session
     except ImportError:

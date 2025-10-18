@@ -16,21 +16,14 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from backend.services.hcl_kb_service.models import HCLDataEntry, HCLDataType
+from models import HCLDataType
+from database import HCLDataEntry, get_db, init_db
 
 app = FastAPI(title="Maximus HCL Knowledge Base Service", version="1.0.0")
-
-# In a real scenario, this would connect to a persistent database (e.g., PostgreSQL, MongoDB)
-# For this mock, we'll use an in-memory dictionary.
-knowledge_base: Dict[str, List[HCLDataEntry]] = {
-    HCLDataType.METRICS.value: [],
-    HCLDataType.ANALYSIS.value: [],
-    HCLDataType.PLAN.value: [],
-    HCLDataType.EXECUTION.value: [],
-}
 
 
 class StoreDataRequest(BaseModel):
@@ -49,6 +42,8 @@ class StoreDataRequest(BaseModel):
 async def startup_event():
     """Performs startup tasks for the HCL Knowledge Base Service."""
     print("📚 Starting Maximus HCL Knowledge Base Service...")
+    init_db()
+    print("✅ Database initialized")
     print("✅ Maximus HCL Knowledge Base Service started successfully.")
 
 
@@ -73,32 +68,43 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.post("/store_data")
-async def store_hcl_data(request: StoreDataRequest) -> Dict[str, Any]:
+async def store_hcl_data(
+    request: StoreDataRequest,
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
     """Stores HCL-related data in the knowledge base.
 
     Args:
         request (StoreDataRequest): The request body containing the data type and payload.
+        db (Session): Database session.
 
     Returns:
         Dict[str, Any]: A dictionary confirming the data storage.
     """
     print(f"[API] Storing {request.data_type.value} data.")
+    
     entry = HCLDataEntry(
-        timestamp=datetime.now().isoformat(),
-        data_type=request.data_type,
+        data_type=request.data_type.value,
         data=request.data,
+        entry_metadata={"stored_at": datetime.now().isoformat()}
     )
-    knowledge_base[request.data_type.value].append(entry)
-    await asyncio.sleep(0.05)  # Simulate database write
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    
     return {
         "status": "success",
         "message": f"{request.data_type.value} data stored.",
-        "entry_id": len(knowledge_base[request.data_type.value]) - 1,
+        "entry_id": entry.id,
     }
 
 
-@app.get("/retrieve_data/{data_type}", response_model=List[HCLDataEntry])
-async def retrieve_hcl_data(data_type: HCLDataType, limit: int = 10) -> List[HCLDataEntry]:
+@app.get("/retrieve_data/{data_type}")
+async def retrieve_hcl_data(
+    data_type: HCLDataType,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+) -> List[Dict[str, Any]]:
     """Retrieves HCL-related data from the knowledge base.
 
     Args:
@@ -106,25 +112,50 @@ async def retrieve_hcl_data(data_type: HCLDataType, limit: int = 10) -> List[HCL
         limit (int): The maximum number of entries to retrieve.
 
     Returns:
-        List[HCLDataEntry]: A list of HCL data entries.
+        List[Dict[str, Any]]: A list of HCL data entries.
     """
+    from sqlalchemy import desc
+    
     print(f"[API] Retrieving {data_type.value} data (limit: {limit}).")
-    await asyncio.sleep(0.05)  # Simulate database read
-    return knowledge_base.get(data_type.value, [])[-limit:]
+    
+    entries = db.query(HCLDataEntry).filter(
+        HCLDataEntry.data_type == data_type.value
+    ).order_by(desc(HCLDataEntry.created_at)).limit(limit).all()
+    
+    return [
+        {
+            "id": e.id,
+            "data_type": e.data_type,
+            "data": e.data,
+            "metadata": e.metadata,
+            "created_at": e.created_at.isoformat()
+        }
+        for e in entries
+    ]
 
 
 @app.get("/knowledge_summary")
-async def get_knowledge_summary() -> Dict[str, Any]:
+async def get_knowledge_summary(db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Provides a summary of the data stored in the knowledge base.
 
     Returns:
         Dict[str, Any]: A dictionary summarizing the knowledge base content.
     """
+    from sqlalchemy import func
+    
     summary = {"timestamp": datetime.now().isoformat()}
-    for data_type, entries in knowledge_base.items():
-        summary[data_type] = {
-            "count": len(entries),
-            "last_entry": entries[-1].timestamp if entries else "N/A",
+    for data_type in [HCLDataType.METRICS, HCLDataType.ANALYSIS, HCLDataType.PLAN, HCLDataType.EXECUTION]:
+        count = db.query(func.count(HCLDataEntry.id)).filter(
+            HCLDataEntry.data_type == data_type.value
+        ).scalar()
+        
+        last_entry = db.query(HCLDataEntry).filter(
+            HCLDataEntry.data_type == data_type.value
+        ).order_by(HCLDataEntry.created_at.desc()).first()
+        
+        summary[data_type.value] = {
+            "count": count,
+            "last_entry": last_entry.created_at.isoformat() if last_entry else "N/A",
         }
     return summary
 

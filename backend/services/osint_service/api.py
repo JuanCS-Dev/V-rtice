@@ -12,8 +12,11 @@ open-source information into actionable intelligence, supporting threat
 intelligence, risk assessment, and strategic planning within the Maximus AI system.
 """
 
+import asyncio
+import os
 from typing import Any, Dict, Optional, List
 
+import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -23,7 +26,28 @@ from analyzers.breach_data_analyzer_refactored import BreachDataAnalyzer
 from analyzers.google_dork_scanner_refactored import GoogleDorkScanner
 from analyzers.dark_web_monitor_refactored import DarkWebMonitor
 
-app = FastAPI(title="Maximus OSINT Service", version="1.0.0")
+# ============================================
+# MAXIMUS AI INTEGRATION
+# ============================================
+
+MAXIMUS_PREDICT_URL = os.getenv("MAXIMUS_PREDICT_URL", "http://maximus_predict:80")
+
+async def get_maximus_strategy(target: str, target_type: str, depth: str = "medium") -> Dict[str, Any]:
+    """Get investigation strategy from MAXIMUS AI."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{MAXIMUS_PREDICT_URL}/osint/analyze",
+                json={"target": target, "target_type": target_type, "investigation_depth": depth}
+            )
+            if response.status_code == 200:
+                return response.json()
+            return {}
+    except Exception as e:
+        print(f"[MAXIMUS] Error: {e}")
+        return {}
+
+app = FastAPI(title="Maximus OSINT Service - MAXIMUS AI Orchestrated", version="2.0.0")
 
 # Initialize OSINT Orchestrator
 ai_orchestrator = AIOrchestrator()
@@ -234,6 +258,15 @@ async def automated_investigation(
             detail="At least one identifier (username, email, phone, name, or image_url) must be provided."
         )
 
+    # Determine primary target for MAXIMUS strategy
+    target = request.username or request.email or request.phone or request.name or "unknown"
+    target_type = "username" if request.username else "email" if request.email else "phone" if request.phone else "name" if request.name else "unknown"
+    
+    # Get MAXIMUS AI strategic recommendations
+    maximus_strategy = await get_maximus_strategy(target, target_type, "medium")
+    if maximus_strategy:
+        print(f"[MAXIMUS OSINT] Strategy: {maximus_strategy.get('maximus_intelligence', {}).get('recommended_strategy', 'comprehensive')}")
+
     # Execute automated investigation
     result = await ai_orchestrator.automated_investigation(
         username=request.username,
@@ -245,10 +278,20 @@ async def automated_investigation(
         image_url=request.image_url,
     )
 
+    # Enhance with MAXIMUS intelligence
+    if maximus_strategy and "maximus_intelligence" in maximus_strategy:
+        result["maximus_orchestration"] = {
+            "strategy": maximus_strategy["maximus_intelligence"].get("recommended_strategy", "comprehensive"),
+            "threat_prediction": maximus_strategy["maximus_intelligence"].get("predicted_threat_level", "unknown"),
+            "confidence": maximus_strategy["maximus_intelligence"].get("confidence", 0.75),
+            "priority": maximus_strategy["maximus_intelligence"].get("investigation_priority", "medium"),
+            "orchestrator": "MAXIMUS AI v2.0"
+        }
+
     return {
         "success": True,
         "data": result,
-        "message": "Automated OSINT investigation completed successfully."
+        "message": "MAXIMUS AI-orchestrated OSINT investigation completed successfully."
     }
 
 
@@ -363,6 +406,53 @@ async def get_tools_status() -> Dict[str, Any]:
         },
         "message": "All world-class OSINT tools operational.",
     }
+
+
+# ============================================
+# EMAIL & PHONE ANALYSIS ENDPOINTS
+# ============================================
+
+
+@app.post("/api/email/analyze")
+async def analyze_email(request: dict) -> Dict[str, Any]:
+    """Analyzes email address with AI-powered insights.
+    
+    Args:
+        request: {"email": "target@example.com"}
+    
+    Returns:
+        Dict with email analysis, breaches, and AI recommendations
+    """
+    email = request.get("email", "").strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+    
+    try:
+        result = await ai_orchestrator.automated_investigation(email=email)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email analysis failed: {str(e)}")
+
+
+@app.post("/api/phone/analyze")
+async def analyze_phone(request: dict) -> Dict[str, Any]:
+    """Analyzes phone number with AI-powered insights.
+    
+    Args:
+        request: {"phone": "+5562999999999"}
+    
+    Returns:
+        Dict with phone analysis, carrier info, and AI recommendations
+    """
+    phone = request.get("phone", "").strip()
+    if not phone:
+        raise HTTPException(status_code=400, detail="Phone number is required")
+    
+    try:
+        result = await ai_orchestrator.automated_investigation(phone=phone)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Phone analysis failed: {str(e)}")
 
 
 if __name__ == "__main__":

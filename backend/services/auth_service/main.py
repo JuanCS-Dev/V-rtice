@@ -19,6 +19,9 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from database import User, get_db, init_db
 
 # Configuration for JWT
 SECRET_KEY = "your-super-secret-key"  # In production, use a strong, environment-variable-based key
@@ -28,20 +31,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 app = FastAPI(title="Maximus Authentication Service", version="1.0.0")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# Mock User Database (In a real app, this would be a proper database)
-users_db = {
-    "maximus_admin": {
-        "username": "maximus_admin",
-        "hashed_password": bcrypt.hashpw("adminpass".encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
-        "roles": ["admin", "user"],
-    },
-    "maximus_user": {
-        "username": "maximus_user",
-        "hashed_password": bcrypt.hashpw("userpass".encode("utf-8"), bcrypt.gensalt()).decode("utf-8"),
-        "roles": ["user"],
-    },
-}
 
 
 class Token(BaseModel):
@@ -98,32 +87,38 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 
-async def get_user(username: str) -> Optional[UserInDB]:
-    """Retrieves a user from the mock database by username.
+async def get_user(username: str, db: Session) -> Optional[UserInDB]:
+    """Retrieves a user from the database by username.
 
     Args:
         username (str): The username to retrieve.
+        db (Session): Database session.
 
     Returns:
         Optional[UserInDB]: The UserInDB object if found, None otherwise.
     """
-    user_data = users_db.get(username)
-    if user_data:
-        return UserInDB(**user_data)
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        return UserInDB(
+            username=user.username,
+            hashed_password=user.hashed_password,
+            roles=user.roles
+        )
     return None
 
 
-async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
-    """Authenticates a user against the mock database.
+async def authenticate_user(username: str, password: str, db: Session) -> Optional[UserInDB]:
+    """Authenticates a user against the database.
 
     Args:
         username (str): The username.
         password (str): The plain-text password.
+        db (Session): Database session.
 
     Returns:
         Optional[UserInDB]: The authenticated UserInDB object if successful, None otherwise.
     """
-    user = await get_user(username)
+    user = await get_user(username, db)
     if not user:
         return None
     if not bcrypt.checkpw(password.encode("utf-8"), user.hashed_password.encode("utf-8")):
@@ -131,7 +126,7 @@ async def authenticate_user(username: str, password: str) -> Optional[UserInDB]:
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """Retrieves the current authenticated user from the JWT token.
 
     Args:
@@ -153,7 +148,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        user = await get_user(username)
+        user = await get_user(username, db)
         if user is None:
             raise credentials_exception
         return User(username=user.username, roles=user.roles)
@@ -183,6 +178,8 @@ async def get_current_active_user(
 async def startup_event():
     """Performs startup tasks for the Authentication Service."""
     print("🔑 Starting Maximus Authentication Service...")
+    init_db()
+    print("✅ Database initialized with default users")
     print("✅ Maximus Authentication Service started successfully.")
 
 
@@ -204,11 +201,15 @@ async def health_check() -> Dict[str, str]:
 
 
 @app.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
     """Authenticates a user and returns an access token.
 
     Args:
         form_data (OAuth2PasswordRequestForm): Form data containing username and password.
+        db (Session): Database session.
 
     Returns:
         Token: The JWT access token.
@@ -216,7 +217,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     Raises:
         HTTPException: If authentication fails.
     """
-    user = await authenticate_user(form_data.username, form_data.password)
+    user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

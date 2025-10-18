@@ -50,3 +50,4 @@ typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.37.0
     # via adr-core-service (pyproject.toml)
+pyyaml==6.0.1

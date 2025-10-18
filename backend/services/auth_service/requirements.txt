@@ -6,6 +6,8 @@ anyio==4.11.0
     # via
     #   httpx
     #   starlette
+bcrypt==4.1.2
+    # via auth-service (main.py)
 certifi==2025.10.5
     # via
     #   httpcore
@@ -32,10 +34,18 @@ pydantic==2.12.0
     #   fastapi
 pydantic-core==2.41.1
     # via pydantic
+pyjwt==2.8.0
+    # via auth-service (main.py)
+psycopg2-binary==2.9.9
+    # via auth-service (PostgreSQL driver)
 python-dotenv==1.1.1
     # via auth-service (pyproject.toml)
+python-multipart==0.0.6
+    # via auth-service (OAuth2PasswordRequestForm)
 sniffio==1.3.1
     # via anyio
+sqlalchemy==2.0.23
+    # via auth-service (database.py)
 starlette==0.48.0
     # via fastapi
 typing-extensions==4.15.0

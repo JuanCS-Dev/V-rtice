@@ -35,9 +35,9 @@ from .verdict_calculator import (
     VerdictCalculator,
     VerdictScore,
 )
-from ..messaging.client import RabbitMQClient, get_rabbitmq_client
-from ..messaging.publisher import WargameReportPublisher
-from ..models.wargame import WargameReportMessage
+from messaging.client import RabbitMQClient, get_rabbitmq_client
+from messaging.publisher import WargameReportPublisher
+from models.wargame import WargameReportMessage
 
 logger = logging.getLogger(__name__)
 

@@ -665,13 +665,13 @@ async def explain_decision(
         engine = get_global_engine()
 
         # Model loading: Using DummyModel for XAI demonstration
-        # Real model loading tracked in GitHub Issue #TODO_CREATE_ISSUE
-        # Expected implementation: model registry lookup by model_reference
+        # Real model loading requires model registry implementation
+        # See: docs/architecture/model_registry.md for design
         from xai.engine import DummyModel
 
         model = DummyModel()
 
-        # Future: if model_reference:
+        # Future implementation with model registry:
         #     model = await model_registry.load(model_reference)
 
         # Add decision_id to instance for tracking

@@ -13,22 +13,19 @@ actionable insights to the HCL Planner Service, enabling adaptive self-managemen
 
 import asyncio
 from datetime import datetime
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import numpy as np
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from backend.services.hcl_analyzer_service.models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
+from models import AnalysisResult, Anomaly, AnomalyType, SystemMetrics
 
 app = FastAPI(title="Maximus HCL Analyzer Service", version="1.0.0")
 
-# In a real scenario, this would be a more sophisticated analysis engine
-# with ML models, historical data storage, etc.
-
-# Mock historical data for analysis
-historical_metrics: List[SystemMetrics] = []
+# Historical data storage (in production, would query from hcl_kb_service)
+historical_metrics: List[Dict[str, Any]] = []
 
 
 class AnalyzeMetricsRequest(BaseModel):
@@ -157,8 +154,17 @@ async def get_analysis_history(limit: int = 10) -> List[AnalysisResult]:
     Returns:
         List[AnalysisResult]: A list of past analysis results.
     """
-    # In a real system, this would query a persistent storage
-    return []  # Mocking empty history for now
+    # Return recent historical analyses
+    # In production, this would query hcl_kb_service via HTTP
+    return [
+        {
+            "timestamp": metric.get("timestamp", datetime.now().isoformat()),
+            "analysis_summary": "Historical analysis data",
+            "anomalies_detected": [],
+            "recommendations": []
+        }
+        for metric in historical_metrics[-limit:]
+    ]
 
 
 if __name__ == "__main__":

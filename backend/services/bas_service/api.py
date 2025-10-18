@@ -60,14 +60,14 @@ if OBSERVABILITY_AVAILABLE:
     )
     logger = get_logger(__name__, service="bas")
 else:
-    # Fallback to print
+    # Fallback logger when observability unavailable
     obs_metrics = None
-    class MockLogger:
+    class FallbackLogger:
         def info(self, msg, **kwargs): print(f"[INFO] {msg}")
         def error(self, msg, **kwargs): print(f"[ERROR] {msg}")
         def warning(self, msg, **kwargs): print(f"[WARN] {msg}")
         def debug(self, msg, **kwargs): print(f"[DEBUG] {msg}")
-    logger = MockLogger()
+    logger = FallbackLogger()
 
 
 app = FastAPI(title="Maximus BAS Service", version="1.0.0")

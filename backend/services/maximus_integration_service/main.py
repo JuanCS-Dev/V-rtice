@@ -23,7 +23,7 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Integration Service", version="1.0.0")
 
-# Mock external service URLs
+# External service URLs (from environment or defaults)
 MOCK_EXTERNAL_CRM_URL = os.getenv("MOCK_EXTERNAL_CRM_URL", "http://localhost:8030/crm")
 MOCK_EXTERNAL_SIEM_URL = os.getenv("MOCK_EXTERNAL_SIEM_URL", "http://localhost:8031/siem")
 

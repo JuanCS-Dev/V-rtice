@@ -22,14 +22,14 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from ai_processor import AIProcessor
-from analyzers.email_analyzer import EmailAnalyzer
-from analyzers.image_analyzer import ImageAnalyzer
-from analyzers.pattern_detector import PatternDetector
-from analyzers.phone_analyzer import PhoneAnalyzer
+from analyzers.email_analyzer_refactored import EmailAnalyzerRefactored
+from analyzers.image_analyzer_refactored import ImageAnalyzerRefactored
+from analyzers.pattern_detector_refactored import PatternDetectorRefactored
+from analyzers.phone_analyzer_refactored import PhoneAnalyzerRefactored
 from report_generator import ReportGenerator
-from scrapers.discord_bot import DiscordBotScraper
-from scrapers.social_scraper import SocialMediaScraper
-from scrapers.username_hunter import UsernameHunter
+from scrapers.discord_scraper_refactored import DiscordScraperRefactored
+from scrapers.social_scraper_refactored import SocialScraperRefactored
+from scrapers.username_hunter_refactored import UsernameHunterRefactored
 
 
 class AIOrchestrator:
@@ -42,13 +42,13 @@ class AIOrchestrator:
 
     def __init__(self):
         """Initializes the AIOrchestrator with instances of scrapers, analyzers, and other components."""
-        self.social_scraper = SocialMediaScraper()
-        self.username_hunter = UsernameHunter()
-        self.discord_scraper = DiscordBotScraper()
-        self.email_analyzer = EmailAnalyzer()
-        self.phone_analyzer = PhoneAnalyzer()
-        self.image_analyzer = ImageAnalyzer()
-        self.pattern_detector = PatternDetector()
+        self.social_scraper = SocialScraperRefactored()
+        self.username_hunter = UsernameHunterRefactored()
+        self.discord_scraper = DiscordScraperRefactored()
+        self.email_analyzer = EmailAnalyzerRefactored()
+        self.phone_analyzer = PhoneAnalyzerRefactored()
+        self.image_analyzer = ImageAnalyzerRefactored()
+        self.pattern_detector = PatternDetectorRefactored()
         self.report_generator = ReportGenerator()
         self.ai_processor = AIProcessor()
 
@@ -233,7 +233,7 @@ class AIOrchestrator:
         # Username investigation
         if username:
             try:
-                username_data = await self.username_hunter.scrape(username)
+                username_data = await self.username_hunter.query(target=username)
                 collected_data.append({"source": "username_hunter", "data": username_data})
                 data_sources.append("Username Databases")
             except Exception as e:
@@ -241,7 +241,7 @@ class AIOrchestrator:
 
             # Social media profiles
             try:
-                social_data = await self.social_scraper.scrape(username)
+                social_data = await self.social_scraper.query(target=username)
                 collected_data.append({"source": "social_media", "data": social_data})
                 data_sources.append("Social Media")
             except Exception as e:
@@ -250,7 +250,7 @@ class AIOrchestrator:
         # Email analysis
         if email:
             try:
-                email_analysis = self.email_analyzer.analyze_text(email)
+                email_analysis = await self.email_analyzer.analyze_text(email)
                 collected_data.append({"source": "email_analyzer", "data": email_analysis})
                 data_sources.append("Email Analysis")
             except Exception as e:
@@ -259,7 +259,7 @@ class AIOrchestrator:
         # Phone analysis
         if phone:
             try:
-                phone_analysis = self.phone_analyzer.analyze_text(phone)
+                phone_analysis = await self.phone_analyzer.analyze_text(phone)
                 collected_data.append({"source": "phone_analyzer", "data": phone_analysis})
                 data_sources.append("Phone Analysis")
             except Exception as e:
@@ -268,7 +268,7 @@ class AIOrchestrator:
         # Image analysis
         if image_url:
             try:
-                image_analysis = await self.image_analyzer.analyze_image(image_url)
+                image_analysis = await self.image_analyzer.query(target=image_url)
                 collected_data.append({"source": "image_analyzer", "data": image_analysis})
                 data_sources.append("Image Analysis")
             except Exception as e:
@@ -339,6 +339,13 @@ class AIOrchestrator:
         # Calculate confidence score
         confidence_score = min(95, 60 + len(data_sources) * 7)
 
+        # Extract detailed results from username hunter if available
+        username_details = None
+        for data in collected_data:
+            if data.get("source") == "username_hunter":
+                username_details = data.get("data", {})
+                break
+
         # Build comprehensive report
         report = {
             "investigation_id": investigation_id,
@@ -365,7 +372,16 @@ class AIOrchestrator:
                 "name": name,
                 "location": location
             },
-            "context": context or "General OSINT Investigation"
+            "context": context or "General OSINT Investigation",
+            # Add detailed username results if available
+            "username_analysis": username_details,
+            # Add AI analysis details
+            "ai_analysis": {
+                "provider": ai_summary.get("ai_provider", "unknown"),
+                "summary": ai_summary.get("ai_summary", ""),
+                "entities": ai_summary.get("extracted_entities", []),
+                "risk_assessment": ai_summary.get("risk_level", "UNKNOWN")
+            }
         }
 
         print(f"[AIOrchestrator] Automated investigation {investigation_id} completed")

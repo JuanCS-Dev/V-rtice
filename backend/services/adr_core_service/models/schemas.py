@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from backend.services.adr_core_service.models.enums import DetectionType, IncidentSeverity, ResponseActionType
+from models.enums import DetectionType, IncidentSeverity, ResponseActionType
 
 
 class DetectionResult(BaseModel):

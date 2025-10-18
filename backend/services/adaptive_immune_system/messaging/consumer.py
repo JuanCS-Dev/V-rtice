@@ -12,9 +12,9 @@ from typing import Callable
 import aio_pika
 
 from .client import RabbitMQClient
-from ..models.apv import APVDispatchMessage, APVStatusUpdate
-from ..models.wargame import WargameReportMessage
-from ..models.hitl import HITLNotificationMessage, HITLDecisionMessage, HITLStatusUpdate
+from models.apv import APVDispatchMessage, APVStatusUpdate
+from models.wargame import WargameReportMessage
+from models.hitl import HITLNotificationMessage, HITLDecisionMessage, HITLStatusUpdate
 
 logger = logging.getLogger(__name__)
 

@@ -15,8 +15,8 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict
 
-from backend.services.adr_core_service.models.schemas import ThreatIntelData
-from backend.services.adr_core_service.utils.logger import setup_logger
+from models.schemas import ThreatIntelData
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

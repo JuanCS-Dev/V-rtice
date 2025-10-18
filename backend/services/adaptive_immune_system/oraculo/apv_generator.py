@@ -12,11 +12,11 @@ from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from ..database import DatabaseClient
-from ..database.models import APV, Dependency, Threat
-from ..models.apv import APVDispatchMessage
-from ..messaging.client import RabbitMQClient, get_rabbitmq_client
-from ..messaging.publisher import APVPublisher
+from database import DatabaseClient
+from database.models import APV, Dependency, Threat
+from models.apv import APVDispatchMessage
+from messaging.client import RabbitMQClient, get_rabbitmq_client
+from messaging.publisher import APVPublisher
 from packaging import version as pkg_version
 
 logger = logging.getLogger(__name__)

@@ -23,8 +23,8 @@ from .models import (
     ReviewAction,
     ReviewContext,
 )
-from ..messaging.client import RabbitMQClient, get_rabbitmq_client
-from ..messaging.publisher import HITLDecisionPublisher
+from messaging.client import RabbitMQClient, get_rabbitmq_client
+from messaging.publisher import HITLDecisionPublisher
 
 logger = logging.getLogger(__name__)
 

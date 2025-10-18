@@ -25,7 +25,7 @@ import logging
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket
+from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket, Header
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response, JSONResponse
@@ -159,6 +159,42 @@ async def shutdown_event():
 # ============================================================================
 # Dependencies
 # ============================================================================
+
+async def verify_admin_token(x_admin_token: str = Header(None)) -> bool:
+    """
+    Verify admin authentication token.
+    
+    In production, this should verify against auth service.
+    For now, checks against environment variable.
+    
+    Args:
+        x_admin_token: Admin token from X-Admin-Token header
+        
+    Returns:
+        True if authenticated
+        
+    Raises:
+        HTTPException: If authentication fails
+    """
+    admin_token = os.getenv("HITL_ADMIN_TOKEN", "")
+    
+    if not admin_token:
+        # If no token configured, require any non-empty token
+        if not x_admin_token:
+            raise HTTPException(
+                status_code=401,
+                detail="Admin authentication required. Provide X-Admin-Token header."
+            )
+        return True
+    
+    if x_admin_token != admin_token:
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid admin token"
+        )
+    
+    return True
+
 
 async def get_database() -> HITLDatabase:
     """Get database instance."""
@@ -622,22 +658,26 @@ async def get_audit_logs(
 
 
 # ============================================================================
-# Admin Endpoints (TODO: Require admin auth)
+# Admin Endpoints (Protected by admin auth)
 # ============================================================================
 
 @app.post("/hitl/admin/create-decision")
 async def create_decision(
     record: HITLDecisionRecord,
-    db: HITLDatabase = Depends(get_database)
+    db: HITLDatabase = Depends(get_database),
+    _admin: bool = Depends(verify_admin_token)
 ):
     """
     Create a new HITL decision record.
+    
+    **Requires admin authentication via X-Admin-Token header.**
     
     This endpoint is called by Wargaming Crisol when a patch needs review.
     
     Args:
         record: Decision record to create
         db: Database instance
+        _admin: Admin verification (dependency)
         
     Returns:
         Created decision record

@@ -27,11 +27,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from .endpoints import apv_review_router, decisions_router
-from ..models import WebSocketMessage
+from hitl.models import WebSocketMessage
 
 # Import monitoring modules
 try:
-    from ..monitoring import PrometheusMiddleware, metrics, setup_tracing
+    from monitoring import PrometheusMiddleware, metrics, setup_tracing
     MONITORING_ENABLED = True
 except ImportError:
     MONITORING_ENABLED = False
@@ -39,9 +39,9 @@ except ImportError:
 
 # Import RabbitMQ modules for notification consumption
 try:
-    from ..messaging.client import get_rabbitmq_client
-    from ..messaging.consumer import HITLNotificationConsumer
-    from ..models.hitl import HITLNotificationMessage
+    from messaging.client import get_rabbitmq_client
+    from messaging.consumer import HITLNotificationConsumer
+    from models.hitl import HITLNotificationMessage
     RABBITMQ_ENABLED = True
 except ImportError:
     RABBITMQ_ENABLED = False

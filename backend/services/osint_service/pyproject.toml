@@ -12,7 +12,7 @@ dependencies = [
     # Phase 3: Production hardening dependencies
     "tenacity>=8.5.0",
     "prometheus-client>=0.21.0",
-    "redis[asyncio]>=5.0.0",
+    "redis>=5.0.0",
     "aiohttp>=3.9.0",
     # SocialMediaScraper dependencies
     "tweepy>=4.14.0",
@@ -21,6 +21,12 @@ dependencies = [
     "imagehash>=4.3.0",
     # DiscordBot dependencies
     "discord.py>=2.3.0",
+    # Web scraping dependencies
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    # AI APIs
+    "google-generativeai>=0.3.0",
+    "openai>=1.0.0",
 ]
 
 [project.optional-dependencies]

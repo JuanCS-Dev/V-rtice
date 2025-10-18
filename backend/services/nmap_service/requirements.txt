@@ -16,6 +16,8 @@ pydantic==2.12.0
     # via fastapi
 pydantic-core==2.41.1
     # via pydantic
+python-nmap==0.7.1
+    # via nmap-service (scanner.py)
 sniffio==1.3.1
     # via anyio
 starlette==0.48.0

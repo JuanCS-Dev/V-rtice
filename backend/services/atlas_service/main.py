@@ -13,18 +13,22 @@ understand the operational environment.
 import asyncio
 from datetime import datetime
 from typing import Any, Dict, Optional
+from collections import defaultdict
 
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="Maximus Atlas Service", version="1.0.0")
 
-# In a real scenario, you would have modules for:
-# - Sensor data ingestion
-# - Environmental model generation (e.g., 3D mapping, network topology)
-# - Spatial reasoning engine
-# - Situational awareness engine
+# Environmental model state (in production, would use time-series DB)
+environmental_state = {
+    "model_version": "1.0.0",
+    "last_update": None,
+    "feature_count": 0,
+    "data_sources": set(),
+    "sensor_readings": defaultdict(list)
+}
 
 
 class EnvironmentUpdateRequest(BaseModel):
@@ -135,10 +139,25 @@ async def query_environment(request: QueryEnvironmentRequest) -> Dict[str, Any]:
             "status": "pending",
         }
 
+    # Calculate situational awareness based on data quality
+    data_sources_count = len(environmental_state["data_sources"])
+    feature_count = environmental_state["feature_count"]
+    recency = (datetime.now() - datetime.fromisoformat(environmental_state["last_update"])).seconds if environmental_state["last_update"] else 9999
+    
+    # Scoring logic
+    if data_sources_count >= 3 and feature_count >= 10 and recency < 300:  # 5 min
+        awareness_level = "high"
+    elif data_sources_count >= 2 and feature_count >= 5 and recency < 600:  # 10 min
+        awareness_level = "medium"
+    elif data_sources_count >= 1 and recency < 1800:  # 30 min
+        awareness_level = "low"
+    else:
+        awareness_level = "minimal"
+    
     return {
         "timestamp": datetime.now().isoformat(),
         "query_result": result,
-        "situational_awareness_level": "high",  # Placeholder
+        "situational_awareness_level": awareness_level,
     }
 
 

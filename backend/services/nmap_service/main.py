@@ -21,12 +21,14 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from scanner import NmapScanner
+
 app = FastAPI(title="Maximus Nmap Service", version="1.0.0")
 
-# In a real scenario, this would integrate with a Python Nmap library
-# or execute Nmap commands directly.
+# Global scanner instance
+nmap_scanner: Optional[NmapScanner] = None
 
-# In-memory storage for Nmap scan results (mock)
+# Scan results storage (persisted scans)
 scan_results_db: Dict[str, Dict[str, Any]] = {}
 
 
@@ -47,7 +49,10 @@ class NmapScanRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Nmap Service."""
+    global nmap_scanner
     print("📡 Starting Maximus Nmap Service...")
+    nmap_scanner = NmapScanner()
+    print("✅ Nmap scanner initialized")
     print("✅ Maximus Nmap Service started successfully.")
 
 
@@ -111,7 +116,7 @@ async def get_nmap_scan_results(scan_id: str) -> Dict[str, Any]:
 
 
 async def perform_nmap_scan(scan_id: str, target: str, scan_type: str, options: Optional[List[str]]):
-    """Simulates an Nmap scan and stores its results.
+    """Performs real Nmap scan and stores results.
 
     Args:
         scan_id (str): The ID of the scan.
@@ -119,43 +124,19 @@ async def perform_nmap_scan(scan_id: str, target: str, scan_type: str, options: 
         scan_type (str): The type of Nmap scan.
         options (Optional[List[str]]): Additional Nmap command-line options.
     """
-    print(f"[NmapService] Performing simulated Nmap scan {scan_id} on {target}...")
-    await asyncio.sleep(random.uniform(2.0, 5.0))  # Simulate scan duration
-
-    # Mock Nmap output based on scan_type
-    output: Dict[str, Any] = {
-        "scan_type": scan_type,
-        "target": target,
-        "options": options,
-    }
-    if scan_type == "quick":
-        output["hosts_found"] = 1
-        output["open_ports"] = [80, 443]
-        output["details"] = "Quick scan completed."
-    elif scan_type == "full":
-        output["hosts_found"] = 1
-        output["open_ports"] = [22, 80, 443, 8080]
-        output["services"] = [
-            {"port": 22, "service": "ssh"},
-            {"port": 80, "service": "http"},
-        ]
-        output["os_detection"] = "Linux (mock)"
-        output["details"] = "Full scan completed."
-    elif scan_type == "port_scan":
-        output["hosts_found"] = 1
-        output["open_ports"] = [p for p in [21, 22, 23, 80, 443] if str(p) in str(options)]  # Simulate specific ports
-        output["details"] = "Specific port scan completed."
-    else:
-        output["status"] = "failed"
-        output["error"] = f"Unsupported scan type: {scan_type}"
-
-    scan_results_db[scan_id] = {
-        "scan_id": scan_id,
-        "status": "completed",
-        "timestamp": datetime.now().isoformat(),
-        "results": output,
-    }
-    print(f"[NmapService] Nmap scan {scan_id} completed.")
+    print(f"[NmapService] Performing scan {scan_id} on {target}...")
+    
+    # Execute real scan using scanner
+    results = nmap_scanner.execute_scan(target, scan_type, options)
+    
+    # Add scan metadata
+    results["scan_id"] = scan_id
+    results["status"] = "completed" if "error" not in results else "failed"
+    results["completed_at"] = datetime.now().isoformat()
+    
+    # Store results
+    scan_results_db[scan_id] = results
+    print(f"[NmapService] Scan {scan_id} completed")
 
 
 if __name__ == "__main__":

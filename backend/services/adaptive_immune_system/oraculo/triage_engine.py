@@ -14,8 +14,8 @@ from typing import Dict, List, Optional
 
 from sqlalchemy import and_, desc
 
-from ..database import DatabaseClient
-from ..database.models import APV, HITLDecision
+from database import DatabaseClient
+from database.models import APV, HITLDecision
 
 logger = logging.getLogger(__name__)
 

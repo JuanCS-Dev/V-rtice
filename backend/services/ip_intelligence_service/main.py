@@ -19,9 +19,9 @@ from typing import Dict
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from backend.services.ip_intelligence_service.config import get_settings
-from backend.services.ip_intelligence_service.database import get_ip_data, update_ip_data
-from backend.services.ip_intelligence_service.models import IPInfo, IPQuery
+from config import get_settings
+from database import get_ip_data, update_ip_data
+from models import IPInfo, IPQuery
 
 app = FastAPI(title="Maximus IP Intelligence Service", version="1.0.0")
 
@@ -67,44 +67,27 @@ async def query_ip_intelligence(query: IPQuery) -> IPInfo:
         HTTPException: If the IP address is not found or an error occurs.
     """
     print(f"[API] Querying IP intelligence for: {query.ip_address}")
+    
+    # Try to get from local cache first
     ip_info = await get_ip_data(query.ip_address)
+    
     if not ip_info:
-        # Simulate fetching from external source if not in local DB
-        print(f"[API] IP {query.ip_address} not in local cache, simulating external lookup.")
-        await asyncio.sleep(0.5)  # Simulate external API call
-        # Mock external lookup result
-        if query.ip_address == "8.8.8.8":
-            ip_info = IPInfo(
-                ip_address="8.8.8.8",
-                country="US",
-                city="Mountain View",
-                isp="Google LLC",
-                reputation="Clean",
-                threat_score=0.0,
-                last_checked=datetime.now().isoformat(),
-            )
-        elif query.ip_address == "1.2.3.4":
-            ip_info = IPInfo(
-                ip_address="1.2.3.4",
-                country="RU",
-                city="Moscow",
-                isp="EvilCorp Hosting",
-                reputation="Malicious",
-                threat_score=0.9,
-                last_checked=datetime.now().isoformat(),
-            )
-        else:
-            ip_info = IPInfo(
-                ip_address=query.ip_address,
-                country="Unknown",
-                city="Unknown",
-                isp="Unknown",
-                reputation="Neutral",
-                threat_score=0.5,
-                last_checked=datetime.now().isoformat(),
-            )
-        await update_ip_data(ip_info)  # Store in local DB
-
+        # Fetch from external APIs
+        print(f"[API] IP {query.ip_address} not in cache, querying external sources...")
+        from api_clients import lookup_ip_intelligence
+        
+        ip_info = await lookup_ip_intelligence(query.ip_address)
+        
+        # Cache the result
+        if ip_info:
+            await update_ip_data(ip_info)
+    
+    if not ip_info:
+        raise HTTPException(
+            status_code=404,
+            detail=f"IP intelligence not found for {query.ip_address}"
+        )
+    
     return ip_info
 
 

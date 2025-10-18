@@ -10,9 +10,9 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from .client import RabbitMQClient
-from ..models.apv import APVDispatchMessage, APVStatusUpdate
-from ..models.wargame import WargameReportMessage
-from ..models.hitl import HITLNotificationMessage, HITLDecisionMessage, HITLStatusUpdate
+from models.apv import APVDispatchMessage, APVStatusUpdate
+from models.wargame import WargameReportMessage
+from models.hitl import HITLNotificationMessage, HITLDecisionMessage, HITLStatusUpdate
 
 logger = logging.getLogger(__name__)
 

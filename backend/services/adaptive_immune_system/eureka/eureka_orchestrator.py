@@ -33,9 +33,9 @@ from .vcs import (
     PRDescriptionGenerator,
     PRDescriptionContext,
 )
-from ..messaging.client import get_rabbitmq_client
-from ..messaging.publisher import HITLNotificationPublisher, RemedyStatusPublisher
-from ..models.wargame import WargameReportMessage
+from messaging.client import get_rabbitmq_client
+from messaging.publisher import HITLNotificationPublisher, RemedyStatusPublisher
+from models.wargame import WargameReportMessage
 
 logger = logging.getLogger(__name__)
 

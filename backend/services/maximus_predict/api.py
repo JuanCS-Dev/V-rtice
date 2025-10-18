@@ -21,52 +21,12 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from ml_models import PredictiveModelManager
+
 app = FastAPI(title="Maximus Predict Service", version="1.0.0")
 
-
-# Mock ML Model (In a real scenario, this would be a loaded model)
-class MockPredictiveModel:
-    """Um mock para um modelo de Machine Learning preditivo.
-
-    Simula a funcionalidade de um modelo de ML para gerar previsões
-    com base em dados de entrada, para fins de teste e desenvolvimento.
-    """
-
-    def predict(self, data: dict[str, Any], prediction_type: str) -> dict[str, Any]:
-        """Simula a geração de uma previsão com base nos dados e tipo de previsão.
-
-        Args:
-            data (Dict[str, Any]): Os dados de entrada para a previsão.
-            prediction_type (str): O tipo de previsão a ser gerada (ex: 'resource_demand', 'threat_likelihood').
-
-        Returns:
-            Dict[str, Any]: Um dicionário contendo o valor previsto, confiança e outras informações.
-        """
-        # Simulate prediction logic
-        if prediction_type == "resource_demand":
-            predicted_value = data.get("current_load", 0) * 1.1 + np.random.rand() * 10
-            confidence = 0.85
-            return {
-                "predicted_value": predicted_value,
-                "unit": "requests/sec",
-                "confidence": confidence,
-            }
-        if prediction_type == "threat_likelihood":
-            likelihood = data.get("anomaly_score", 0) * 0.7 + np.random.rand() * 0.2
-            confidence = 0.70
-            return {
-                "likelihood": min(1.0, likelihood),
-                "confidence": confidence,
-                "threat_type": "DDoS",
-            }
-        return {
-            "predicted_value": None,
-            "confidence": 0.0,
-            "error": "Unknown prediction type",
-        }
-
-
-predictive_model = MockPredictiveModel()
+# Initialize real ML models
+predictive_model = PredictiveModelManager()
 
 
 class PredictionRequest(BaseModel):
@@ -130,6 +90,68 @@ async def generate_prediction_endpoint(request: PredictionRequest) -> dict[str, 
         "status": "success",
         "timestamp": datetime.now().isoformat(),
         "prediction": prediction_result,
+    }
+
+
+@app.post("/osint/analyze")
+async def osint_intelligent_analysis(request: dict) -> dict[str, Any]:
+    """MAXIMUS AI-powered OSINT analysis orchestration.
+    
+    This endpoint uses MAXIMUS predictive models to determine the best
+    investigation strategy and enrichment techniques for OSINT data.
+    
+    Args:
+        request: {
+            "target": str,
+            "target_type": "username|email|phone|domain|ip",
+            "investigation_depth": "surface|medium|deep",
+            "context": str (optional)
+        }
+    
+    Returns:
+        AI-orchestrated investigation results with strategic recommendations
+    """
+    target = request.get("target")
+    target_type = request.get("target_type", "unknown")
+    depth = request.get("investigation_depth", "medium")
+    context = request.get("context", "")
+    
+    if not target:
+        raise HTTPException(status_code=400, detail="Target is required")
+    
+    # MAXIMUS AI decides investigation strategy
+    strategy_prediction = predictive_model.predict({
+        "target_type": target_type,
+        "depth": depth,
+        "context": context,
+        "historical_success_rate": 0.85
+    }, "osint_strategy")
+    
+    # Determine threat level prediction
+    threat_prediction = predictive_model.predict({
+        "target": target,
+        "type": target_type,
+        "indicators": []
+    }, "threat_likelihood")
+    
+    return {
+        "status": "success",
+        "timestamp": datetime.now().isoformat(),
+        "maximus_intelligence": {
+            "recommended_strategy": strategy_prediction.get("prediction", {}).get("strategy", "comprehensive"),
+            "predicted_threat_level": threat_prediction.get("prediction", {}).get("threat_level", "unknown"),
+            "confidence": strategy_prediction.get("confidence", 0.75),
+            "recommended_tools": strategy_prediction.get("prediction", {}).get("tools", [
+                "username_hunter", "email_analyzer", "ai_processor"
+            ]),
+            "investigation_priority": strategy_prediction.get("prediction", {}).get("priority", "medium"),
+            "estimated_completion_time": strategy_prediction.get("prediction", {}).get("eta_seconds", 15)
+        },
+        "next_steps": [
+            "Execute OSINT investigation with recommended tools",
+            "Apply AI-powered correlation analysis",
+            "Generate threat intelligence report"
+        ]
     }
 
 

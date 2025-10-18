@@ -27,7 +27,7 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Maximus Immunis API Service", version="1.0.0")
 
-# Configuration for Immunis sub-services (mock URLs)
+# Configuration for Immunis sub-services (from environment or defaults)
 IMMUNIS_BCELL_SERVICE_URL = os.getenv("IMMUNIS_BCELL_SERVICE_URL", "http://localhost:8022")
 IMMUNIS_TCELL_SERVICE_URL = os.getenv("IMMUNIS_TCELL_SERVICE_URL", "http://localhost:8023")
 IMMUNIS_MACROPHAGE_SERVICE_URL = os.getenv("IMMUNIS_MACROPHAGE_SERVICE_URL", "http://localhost:8024")

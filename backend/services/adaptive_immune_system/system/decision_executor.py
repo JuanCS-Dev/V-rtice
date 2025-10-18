@@ -14,11 +14,11 @@ enabling distributed processing and horizontal scaling.
 import logging
 from typing import Optional
 
-from ..messaging.client import RabbitMQClient, get_rabbitmq_client
-from ..messaging.consumer import HITLDecisionConsumer
-from ..models.hitl import HITLDecisionMessage
-from ..oraculo.triage_engine import TriageEngine
-from ..database import DatabaseClient
+from messaging.client import RabbitMQClient, get_rabbitmq_client
+from messaging.consumer import HITLDecisionConsumer
+from models.hitl import HITLDecisionMessage
+from oraculo.triage_engine import TriageEngine
+from database import DatabaseClient
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +201,7 @@ class DecisionExecutor:
 
         # Store modifications in APV metadata
         with self.db_client.get_session() as session:
-            from ..database.models import APV
+            from database.models import APV
 
             apv = session.query(APV).filter(APV.id == decision.apv_id).first()
             if apv:
@@ -241,7 +241,7 @@ class DecisionExecutor:
 
         # Store escalation in metadata
         with self.db_client.get_session() as session:
-            from ..database.models import APV
+            from database.models import APV
 
             apv = session.query(APV).filter(APV.id == decision.apv_id).first()
             if apv:
