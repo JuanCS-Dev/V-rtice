@@ -27,13 +27,13 @@ import pytest
 
 from active_immune_core.agents.agent_factory import AgentFactory
 from active_immune_core.agents.models import AgenteState, AgentType
-from active_immune_core.coordination.agent_orchestrator import AgentOrchestrator
-from active_immune_core.coordination.exceptions import (
+from coordination.agent_orchestrator import AgentOrchestrator
+from coordination.exceptions import (
     AgentOrchestrationError,
     LymphnodeRateLimitError,
     LymphnodeResourceExhaustedError,
 )
-from active_immune_core.coordination.rate_limiter import ClonalExpansionRateLimiter
+from coordination.rate_limiter import ClonalExpansionRateLimiter
 
 # =============================================================================
 # TEST FIXTURES

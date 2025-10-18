@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from active_immune_core.coordination.homeostatic_controller import (
+from coordination.homeostatic_controller import (
     ActionType,
     HomeostaticController,
     SystemState,

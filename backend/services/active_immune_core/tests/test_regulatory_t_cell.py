@@ -294,7 +294,7 @@ class TestMachineLearning:
             justification="Test",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_001",
@@ -329,7 +329,7 @@ class TestMachineLearning:
             justification="High risk",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_reward",
@@ -403,7 +403,7 @@ class TestCytokineSecretion:
             justification="Test",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_il10",
@@ -437,7 +437,7 @@ class TestCytokineSecretion:
             justification="Test",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_il10_inc",
@@ -472,7 +472,7 @@ class TestCytokineSecretion:
             justification="Test",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_tgf",
@@ -558,7 +558,7 @@ class TestSelfMonitoring:
             justification="Test",
         )
 
-        from active_immune_core.agents.regulatory_t_cell import SuppressionDecision
+        from agents.regulatory_t_cell import SuppressionDecision
 
         decision = SuppressionDecision(
             decision_id="test_effective",

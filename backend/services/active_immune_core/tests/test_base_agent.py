@@ -222,7 +222,7 @@ class TestAgentCommunication:
 
     async def test_cytokine_processing_pro_inflammatory(self, test_agent):
         """Test that pro-inflammatory cytokines increase temperature"""
-        from active_immune_core.communication import CytokineMessage
+        from communication import CytokineMessage
 
         initial_temp = test_agent.state.temperatura_local
 
@@ -241,7 +241,7 @@ class TestAgentCommunication:
 
     async def test_cytokine_processing_anti_inflammatory(self, test_agent):
         """Test that anti-inflammatory cytokines decrease temperature"""
-        from active_immune_core.communication import CytokineMessage
+        from communication import CytokineMessage
 
         # Set high temperature
         test_agent.state.temperatura_local = 39.0
@@ -261,7 +261,7 @@ class TestAgentCommunication:
 
     async def test_hormone_processing_cortisol(self, test_agent):
         """Test cortisol hormone (suppresses sensitivity)"""
-        from active_immune_core.communication import HormoneMessage
+        from communication import HormoneMessage
 
         initial_sensitivity = test_agent.state.sensibilidade
 
@@ -280,7 +280,7 @@ class TestAgentCommunication:
 
     async def test_hormone_processing_adrenaline(self, test_agent):
         """Test adrenaline hormone (increases aggressiveness)"""
-        from active_immune_core.communication import HormoneMessage
+        from communication import HormoneMessage
 
         initial_aggression = test_agent.state.nivel_agressividade
 

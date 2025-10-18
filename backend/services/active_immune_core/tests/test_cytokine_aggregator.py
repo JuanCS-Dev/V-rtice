@@ -25,7 +25,7 @@ from datetime import datetime
 
 import pytest
 
-from active_immune_core.coordination.cytokine_aggregator import (
+from coordination.cytokine_aggregator import (
     CytokineAggregator,
     ProcessingResult,
 )

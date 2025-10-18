@@ -15,7 +15,7 @@ import pytest_asyncio
 
 from active_immune_core.agents import AgentType
 from active_immune_core.agents.models import AgenteState
-from active_immune_core.coordination.lymphnode import LinfonodoDigital
+from coordination.lymphnode import LinfonodoDigital
 
 # ==================== FIXTURES ====================
 

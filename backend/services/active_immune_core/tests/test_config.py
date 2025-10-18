@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from active_immune_core.config import Settings
+from config import Settings
 
 
 class TestSettings:

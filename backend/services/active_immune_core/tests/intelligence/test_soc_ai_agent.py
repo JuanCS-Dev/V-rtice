@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from active_immune_core.intelligence.soc_ai_agent import (
+from intelligence.soc_ai_agent import (
     AttackIntent,
     NextStepPrediction,
     SOCAIAgent,

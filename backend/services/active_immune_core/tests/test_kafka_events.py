@@ -11,7 +11,7 @@ Version: 1.0.0
 import pytest
 import pytest_asyncio
 
-from communication import (
+from active_immune_core.communication import (
     ExternalTopic,
     KafkaEventConsumer,
     KafkaEventProducer,

@@ -17,16 +17,16 @@ import pytest
 import pytest_asyncio
 
 from active_immune_core.agents.models import AgentType
-from active_immune_core.coordination.clonal_selection import (
+from coordination.clonal_selection import (
     ClonalSelectionEngine,
     FitnessMetrics,
 )
-from active_immune_core.coordination.homeostatic_controller import (
+from coordination.homeostatic_controller import (
     ActionType,
     HomeostaticController,
     SystemState,
 )
-from active_immune_core.coordination.lymphnode import LinfonodoDigital
+from coordination.lymphnode import LinfonodoDigital
 
 # ==================== FIXTURES ====================
 

@@ -22,7 +22,7 @@ Date: 2025-10-07
 
 import pytest
 
-from active_immune_core.coordination.temperature_controller import (
+from coordination.temperature_controller import (
     HomeostaticState,
     TemperatureController,
 )

@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 import pytest_asyncio
 
-from communication.hormones import HormoneMessage, HormoneMessenger, HormoneType
+from active_immune_core.communication.hormones import HormoneMessage, HormoneMessenger, HormoneType
 
 # ==================== FIXTURES ====================
 

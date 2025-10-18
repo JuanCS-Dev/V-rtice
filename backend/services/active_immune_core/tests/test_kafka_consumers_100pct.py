@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 import pytest_asyncio
 
-from communication.kafka_consumers import (
+from active_immune_core.communication.kafka_consumers import (
     ExternalTopic,
     KafkaEventConsumer,
 )

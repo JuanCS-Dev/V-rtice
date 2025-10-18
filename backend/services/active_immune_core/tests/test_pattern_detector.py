@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from active_immune_core.coordination.pattern_detector import (
+from coordination.pattern_detector import (
     PatternDetector,
     PatternType,
 )

@@ -22,7 +22,7 @@ Date: 2025-10-07
 
 import pytest
 
-from active_immune_core.coordination.lymphnode_metrics import LymphnodeMetrics
+from coordination.lymphnode_metrics import LymphnodeMetrics
 
 # =============================================================================
 # TEST FIXTURES

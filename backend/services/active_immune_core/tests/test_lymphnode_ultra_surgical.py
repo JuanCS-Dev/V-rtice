@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-from active_immune_core.coordination.lymphnode import LinfonodoDigital
+from coordination.lymphnode import LinfonodoDigital
 
 # ==================== FIXTURES ====================
 
