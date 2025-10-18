@@ -26,7 +26,7 @@ from pydantic import BaseModel
 
 from c2_engine import C2Engine
 from metrics import MetricsCollector
-from backend.services.c2_orchestration_service.models import Command, CommandResult, CommandStatus
+from models import Command, CommandResult, CommandStatus
 
 app = FastAPI(title="Maximus C2 Orchestration Service", version="1.0.0")
 

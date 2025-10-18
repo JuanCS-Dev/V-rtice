@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional
 from cobalt_strike_wrapper import CobaltStrikeWrapper
 from metasploit_wrapper import MetasploitWrapper
 from metrics import MetricsCollector
-from backend.services.c2_orchestration_service.models import Command, CommandResult, CommandStatus
+from models import Command, CommandResult, CommandStatus
 
 
 class C2Engine:

@@ -14,7 +14,7 @@ and the target's defensive response.
 import asyncio
 from typing import Any, Dict, Optional
 
-from backend.services.bas_service.models import AttackTechnique
+from models import AttackTechnique
 
 
 class AtomicExecutor:

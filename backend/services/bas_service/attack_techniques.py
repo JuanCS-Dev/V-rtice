@@ -13,7 +13,7 @@ up-to-date library of offensive capabilities for Maximus AI.
 
 from typing import Any, Dict, List, Optional
 
-from backend.services.bas_service.models import AttackTechnique
+from models import AttackTechnique
 
 
 class AttackTechniques:
