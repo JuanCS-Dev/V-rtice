@@ -76,7 +76,6 @@ class Finding:
 
 
 @dataclass
-@dataclass
 class AttackSurfaceReport:
     """Complete attack surface mapping report."""
     workflow_id: str
