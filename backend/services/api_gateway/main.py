@@ -79,6 +79,85 @@ async def health_check() -> Dict[str, str]:
     return {"status": "healthy", "message": "Maximus API Gateway is operational."}
 
 
+# ============================================================================
+# OSINT ADAPTERS (FASE II - Contract Translation)
+# ============================================================================
+
+@app.post("/api/google/search/basic")
+async def google_search_basic_adapter(request: Request):
+    """Adapter: Google OSINT Basic Search.
+    Translates: gateway format → microservice /query_osint format.
+    """
+    body = await request.json()
+    adapted_body = {
+        "query": body.get("query", ""),
+        "search_type": "web",
+        "limit": body.get("num_results", 10)
+    }
+    
+    service_url = os.getenv("GOOGLE_OSINT_SERVICE_URL", "http://google_osint_service:8016")
+    async with httpx.AsyncClient(timeout=180.0) as client:
+        try:
+            response = await client.post(f"{service_url}/query_osint", json=adapted_body)
+            response.raise_for_status()
+            return JSONResponse(content=response.json(), status_code=response.status_code)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Google OSINT service unavailable: {e}")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+@app.post("/api/domain/analyze")
+async def domain_analyze_adapter(request: Request):
+    """Adapter: Domain Analysis.
+    Translates: gateway format → microservice /query_domain format.
+    """
+    body = await request.json()
+    adapted_body = {
+        "domain_name": body.get("domain", ""),
+        "query": body.get("query", "Analyze this domain")
+    }
+    
+    service_url = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:8014")
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(f"{service_url}/query_domain", json=adapted_body)
+            response.raise_for_status()
+            return JSONResponse(content=response.json(), status_code=response.status_code)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Domain service unavailable: {e}")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+@app.post("/api/ip/analyze")
+async def ip_analyze_adapter(request: Request):
+    """Adapter: IP Intelligence Analysis.
+    Translates: gateway format → microservice /query_ip format.
+    """
+    body = await request.json()
+    adapted_body = {
+        "ip_address": body.get("ip", ""),
+        "query": body.get("query", "Analyze this IP address")
+    }
+    
+    service_url = os.getenv("IP_INTELLIGENCE_SERVICE_URL", "http://ip_intelligence_service:8034")
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(f"{service_url}/query_ip", json=adapted_body)
+            response.raise_for_status()
+            return JSONResponse(content=response.json(), status_code=response.status_code)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {e}")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+# ============================================================================
+# ORIGINAL ROUTES (Maximus Core Services)
+# ============================================================================
+
+
 @app.api_route("/core/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def route_core_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
     """Routes requests to the Maximus Core Service.

@@ -5,21 +5,21 @@ services:
   # API GATEWAY
   # ============================
   api_gateway:
-    build: ./backend/api_gateway
+    build:
+      context: ./backend
+      dockerfile: services/api_gateway/Dockerfile
     container_name: vertice-api-gateway
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/api_gateway:/app
     environment:
       - SINESP_SERVICE_URL=http://sinesp_service:80
       - CYBER_SERVICE_URL=http://cyber_service:80
-      - DOMAIN_SERVICE_URL=http://domain_service:80
+      - DOMAIN_SERVICE_URL=http://domain_service:8014
       - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8034
       - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8120
       - NMAP_SERVICE_URL=http://nmap_service:80
       - OSINT_SERVICE_URL=http://osint-service:8007
-      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8031
+      - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8016
       - MAXIMUS_PREDICT_URL=http://maximus_predict:80
       - ATLAS_SERVICE_URL=http://atlas_service:8000
       - AUTH_SERVICE_URL=http://auth_service:80
@@ -89,7 +89,9 @@ services:
   # OFFENSIVE TOOLS SERVICE
   # ============================
   offensive_tools_service:
-    build: ./backend/services/offensive_tools_service
+    build:
+      context: ./backend
+      dockerfile: services/offensive_tools_service/Dockerfile
     container_name: vertice-offensive-tools
     ports:
       - "8010:8010"
@@ -847,32 +849,6 @@ services:
     restart: unless-stopped
 
   # hPC - Hierarchical Predictive Coding (Bayesian inference)
-  hpc-service:
-    build:
-      context: ./backend/services/hpc_service
-      dockerfile: Dockerfile
-    container_name: hpc-service
-    ports:
-      - "8441:8006"
-    environment:
-      HPC_HOST: 0.0.0.0
-      HPC_PORT: 8006
-      NUM_FEATURES: 30
-      HIERARCHY_LEVELS: 4
-      LEARNING_RATE: 0.1
-      EXPLORATION_BUDGET: 100.0
-      LOG_LEVEL: INFO
-    volumes:
-      - hpc_models:/app/models
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - maximus-network
-    restart: unless-stopped
 
   # ============================================================================
   # MAXIMUS ADVANCED SERVICES - Eureka + Oráculo (Production Ready)
@@ -1568,7 +1544,9 @@ services:
       start_period: 40s
 
   web_attack_service:
-    build: ./backend/services/web_attack_service
+    build:
+      context: ./backend
+      dockerfile: services/web_attack_service/Dockerfile
     container_name: vertice-web-attack
     ports:
       - "8534:8034"  # Service API
@@ -1733,8 +1711,8 @@ services:
   # Offensive Security Gateway (Port 8037)
   offensive_gateway:
     build:
-      context: ./backend/services/offensive_gateway
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: services/offensive_gateway/Dockerfile
     container_name: offensive_gateway
     ports:
       - "8537:8037"  # API
@@ -2263,71 +2241,14 @@ services:
       retries: 5
 
   # Oráculo Threat Sentinel (APV Detection)
-  oraculo-threat-sentinel:
-    build:
-      context: ./backend/services
-      dockerfile: maximus_oraculo/Dockerfile
-    container_name: maximus-oraculo-threat-sentinel
-    depends_on:
-      kafka-immunity:
-        condition: service_healthy
-      postgres-immunity:
-        condition: service_healthy
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9092
-      - POSTGRES_HOST=postgres-immunity
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=adaptive_immunity
-      - POSTGRES_USER=maximus
-      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
-      - OSV_API_KEY=${OSV_API_KEY}
-      - LOG_LEVEL=INFO
-    ports:
-      - "8024:8024"
-    volumes:
-      - ./backend/services/maximus_oraculo:/app
-      - oraculo_sessions:/app/sessions
-    networks:
-      - maximus-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8024/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # Eureka Confirmation Service
-  eureka-confirmation:
-    build:
-      context: ./backend/services
-      dockerfile: maximus_eureka/Dockerfile
-    container_name: maximus-eureka-confirmation
-    depends_on:
-      kafka-immunity:
-        condition: service_healthy
-      postgres-immunity:
-        condition: service_healthy
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9092
-      - POSTGRES_HOST=postgres-immunity
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=adaptive_immunity
-      - POSTGRES_USER=maximus
-      - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - LOG_LEVEL=INFO
-    volumes:
-      - ./backend/services/maximus_eureka:/app
-      - eureka_reports:/app/reports
-    networks:
-      - maximus-network
-    restart: unless-stopped
 
   # Wargaming Crisol (Patch Validation)
   wargaming-crisol:
     build:
-      context: ./backend/services
-      dockerfile: wargaming_crisol/Dockerfile
+      context: ./backend
+      dockerfile: services/wargaming_crisol/Dockerfile
     container_name: maximus-wargaming-crisol
     ports:
       - "8026:8026"

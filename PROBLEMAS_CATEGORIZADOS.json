@@ -1,0 +1,235 @@
+{
+  "timestamp": "2025-10-18T23:07:45Z",
+  "fase": "FASE 2: CATEGORIZAÇÃO DE PROBLEMAS",
+  
+  "categoria_a_bloqueadores": [
+    {
+      "id": "BLOQ-001",
+      "prioridade": 1,
+      "severidade": "CRÍTICA",
+      "modulo": "ALL_BACKEND_SERVICES",
+      "descricao": "Nenhum container backend está rodando",
+      "causa_raiz": "docker system prune removeu todos os containers e imagens construídas",
+      "impacto": "Backend completamente inoperante - 0% funcional. Impossível testar qualquer endpoint ou workflow.",
+      "tempo_estimado_fix": "60-90min",
+      "dependencias": []
+    },
+    {
+      "id": "BLOQ-002",
+      "prioridade": 2,
+      "severidade": "CRÍTICA",
+      "modulo": "DATABASE_MIGRATIONS",
+      "descricao": "PostgreSQL database vazio - nenhuma tabela/schema",
+      "causa_raiz": "Migrations nunca foram executadas ou foram perdidas no prune",
+      "impacto": "Nenhum serviço que persiste dados pode funcionar (auth, osint, threat-intel, etc)",
+      "tempo_estimado_fix": "30min",
+      "dependencias": ["BLOQ-001"]
+    },
+    {
+      "id": "BLOQ-003",
+      "prioridade": 3,
+      "severidade": "ALTA",
+      "modulo": "DOCKER_COMPOSE_ORCHESTRATION",
+      "descricao": "24 serviços (27.6%) no filesystem não estão no docker-compose.yml",
+      "causa_raiz": "Desenvolvimento desacoplado - serviços criados mas não adicionados à orquestração",
+      "impacto": "~28% dos serviços desenvolvidos não podem ser deployados ou testados",
+      "servicos_orfaos_criticos": [
+        "active_immune_core",
+        "adaptive_immune_system",
+        "ai_immune_system",
+        "reactive_fabric_analysis",
+        "reactive_fabric_core",
+        "reflex_triage_engine",
+        "homeostatic_regulation",
+        "narrative_manipulation_filter"
+      ],
+      "tempo_estimado_fix": "45min",
+      "dependencias": []
+    },
+    {
+      "id": "BLOQ-004",
+      "prioridade": 4,
+      "severidade": "MÉDIA",
+      "modulo": "INCOMPLETE_SERVICES",
+      "descricao": "8 serviços sem Dockerfile ou requirements.txt",
+      "causa_raiz": "Desenvolvimento incompleto ou work-in-progress abandonado",
+      "impacto": "Serviços não podem ser containerizados até completados",
+      "servicos_afetados": [
+        "adaptive_immunity_db",
+        "agent_communication",
+        "command_bus_service",
+        "narrative_filter_service",
+        "purple_team",
+        "verdict_engine_service"
+      ],
+      "tempo_estimado_fix": "60min",
+      "dependencias": []
+    }
+  ],
+  
+  "categoria_b_falhas_funcionais": [
+    {
+      "id": "FUNC-001",
+      "prioridade": 5,
+      "severidade": "ALTA",
+      "modulo": "ALL_ENDPOINTS",
+      "descricao": "Nenhum endpoint backend respondendo",
+      "causa_raiz": "Consequência de BLOQ-001 (containers não rodando)",
+      "impacto": "0 endpoints funcionais. Impossível usar o sistema.",
+      "tempo_estimado_fix": "Resolvido quando BLOQ-001 for corrigido",
+      "dependencias": ["BLOQ-001", "BLOQ-002"]
+    },
+    {
+      "id": "FUNC-002",
+      "prioridade": 6,
+      "severidade": "ALTA",
+      "modulo": "E2E_WORKFLOWS",
+      "descricao": "Todos os 6 workflows E2E críticos estão quebrados",
+      "causa_raiz": "Consequência de BLOQ-001",
+      "impacto": "Nenhum fluxo completo funcional (OSINT, NLP, MAXIMUS, C2L, Auth, FileUpload)",
+      "tempo_estimado_fix": "Validar após BLOQ-001 e BLOQ-002",
+      "dependencias": ["BLOQ-001", "BLOQ-002"]
+    }
+  ],
+  
+  "categoria_c_dividas_tecnicas": [
+    {
+      "id": "DEBT-001",
+      "prioridade": 7,
+      "severidade": "BAIXA",
+      "modulo": "CODE_COMMENTS",
+      "descricao": "Alguns comentários mencionando 'mock' em código",
+      "causa_raiz": "Comentários/docstrings antigos ou serviços mock intencionais",
+      "impacto": "Mínimo - não viola Padrão Pagani de forma crítica",
+      "violacoes": [
+        "auth_service/main.py: docstring menciona mock",
+        "mock_vulnerable_apps/main.py: serviço inteiro é mock (intencional)"
+      ],
+      "tempo_estimado_fix": "10min",
+      "dependencias": []
+    },
+    {
+      "id": "DEBT-002",
+      "prioridade": 8,
+      "severidade": "MÉDIA",
+      "modulo": "TEST_COVERAGE",
+      "descricao": "Coverage de testes desconhecido - não medido ainda",
+      "causa_raiz": "Impossível rodar pytest sem containers",
+      "impacto": "Não sabemos se coverage ≥95% (requisito do Padrão Pagani)",
+      "tempo_estimado_fix": "Medir após BLOQ-001",
+      "dependencias": ["BLOQ-001"]
+    }
+  ],
+  
+  "categoria_d_seguranca": [
+    {
+      "id": "SEC-001",
+      "prioridade": 9,
+      "severidade": "MÉDIA",
+      "modulo": "DATABASE_CREDENTIALS",
+      "descricao": "Credenciais PostgreSQL hardcoded (vertice/vertice_password)",
+      "causa_raiz": "Setup inicial sem secrets management",
+      "impacto": "Risco de segurança em produção",
+      "tempo_estimado_fix": "20min (migrar para secrets)",
+      "dependencias": []
+    },
+    {
+      "id": "SEC-002",
+      "prioridade": 10,
+      "severidade": "DESCONHECIDA",
+      "modulo": "SECURITY_SCAN",
+      "descricao": "Scan de segurança (bandit) não executado",
+      "causa_raiz": "Dependente de BLOQ-001",
+      "impacto": "Vulnerabilidades desconhecidas",
+      "tempo_estimado_fix": "Executar após BLOQ-001",
+      "dependencias": ["BLOQ-001"]
+    }
+  ],
+  
+  "categoria_e_observabilidade": [
+    {
+      "id": "OBS-001",
+      "prioridade": 11,
+      "severidade": "ALTA",
+      "modulo": "HEALTHCHECKS",
+      "descricao": "Healthchecks de 85 serviços backend não validados",
+      "causa_raiz": "Containers não rodando",
+      "impacto": "Impossível saber estado real dos serviços",
+      "tempo_estimado_fix": "Validar após BLOQ-001",
+      "dependencias": ["BLOQ-001"]
+    },
+    {
+      "id": "OBS-002",
+      "prioridade": 12,
+      "severidade": "MÉDIA",
+      "modulo": "METRICS",
+      "descricao": "Prometheus/Grafana não validados",
+      "causa_raiz": "Containers não rodando",
+      "impacto": "Sem telemetria/métricas",
+      "tempo_estimado_fix": "Validar após BLOQ-001",
+      "dependencias": ["BLOQ-001"]
+    },
+    {
+      "id": "OBS-003",
+      "prioridade": 13,
+      "severidade": "MÉDIA",
+      "modulo": "LOGS",
+      "descricao": "Sistema de logging não validado",
+      "causa_raiz": "Containers não rodando",
+      "impacto": "Debugging dificultado",
+      "tempo_estimado_fix": "Validar após BLOQ-001",
+      "dependencias": ["BLOQ-001"]
+    }
+  ],
+  
+  "resumo_por_categoria": {
+    "categoria_a_bloqueadores": {
+      "total": 4,
+      "tempo_total_estimado": "195-225min (~3.5h)",
+      "impacto": "SISTEMA INOPERANTE"
+    },
+    "categoria_b_falhas_funcionais": {
+      "total": 2,
+      "tempo_total_estimado": "Dependente de Categoria A",
+      "impacto": "FUNCIONALIDADE ZERO"
+    },
+    "categoria_c_dividas_tecnicas": {
+      "total": 2,
+      "tempo_total_estimado": "10min + medição",
+      "impacto": "QUALIDADE COMPROMETIDA"
+    },
+    "categoria_d_seguranca": {
+      "total": 2,
+      "tempo_total_estimado": "20min + scan",
+      "impacto": "RISCOS DESCONHECIDOS"
+    },
+    "categoria_e_observabilidade": {
+      "total": 3,
+      "tempo_total_estimado": "Validação pós-fixes",
+      "impacto": "VISIBILIDADE ZERO"
+    }
+  },
+  
+  "ordem_de_execucao_recomendada": [
+    "1. BLOQ-001: Rebuild e restart de todos os containers (PRIORIDADE MÁXIMA)",
+    "2. BLOQ-002: Executar migrations PostgreSQL",
+    "3. BLOQ-003: Adicionar serviços órfãos ao docker-compose",
+    "4. BLOQ-004: Completar serviços incompletos",
+    "5. SEC-001: Migrar credenciais para secrets",
+    "6. FUNC-001/FUNC-002: Validar endpoints e workflows (teste)",
+    "7. DEBT-002: Medir coverage de testes",
+    "8. SEC-002: Executar security scan",
+    "9. OBS-001/002/003: Validar observabilidade (healthchecks, metrics, logs)",
+    "10. DEBT-001: Limpar comentários (cosmético)"
+  ],
+  
+  "caminho_critico": [
+    "BLOQ-001",
+    "BLOQ-002",
+    "FUNC-001",
+    "FUNC-002"
+  ],
+  
+  "tempo_total_estimado_ressurreicao": "4-5 horas (apenas categoria A + B)",
+  "tempo_total_100_absoluto": "6-8 horas (todas as categorias)"
+}

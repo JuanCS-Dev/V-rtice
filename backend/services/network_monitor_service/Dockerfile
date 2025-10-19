@@ -13,6 +13,7 @@ RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
 COPY --chown=appuser:appuser . .
 USER appuser
-HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8044/health || exit 1
+HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 \
+  CMD python -c "import httpx; exit(0 if httpx.get('http://localhost:8044/health', timeout=5).status_code == 200 else 1)" || exit 1
 EXPOSE 8044
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8044"]
