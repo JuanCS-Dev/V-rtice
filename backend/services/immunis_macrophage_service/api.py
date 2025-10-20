@@ -283,5 +283,7 @@ async def get_metrics() -> Dict[str, Any]:
     }
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8012)
+if __name__ == "__main__":  # pragma: no cover - dev entry point
+    # Port configurable via environment variable (docker-compose uses 8030)
+    port = int(os.getenv("PORT", "8030"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
