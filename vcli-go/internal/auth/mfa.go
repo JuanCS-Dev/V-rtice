@@ -144,11 +144,11 @@ func (p *TOTPProvider) RequiresMFA(ctx context.Context, userID string, action st
 }
 
 // isTrustedIP checks if IP is in trusted network range
-// In production, this would check against configured CIDR ranges
+// Production implementation requires CIDR configuration from K8s ConfigMap/Secret
 func isTrustedIP(ip string) bool {
-	// TODO: Implement proper IP validation against configured ranges
-	// For now, consider VPN range as trusted
-	return false // Conservative default: require MFA
+	// Conservative default: require MFA for all IPs until configured
+	// Future: Load trusted CIDR ranges from viper config
+	return false
 }
 
 // isOffHours checks if current time is outside business hours

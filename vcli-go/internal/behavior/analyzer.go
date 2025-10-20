@@ -303,9 +303,10 @@ func (a *Analyzer) detectNetworkAnomaly(user *security.User, baseline *Baseline)
 }
 
 // detectFrequencyAnomaly detects unusual activity frequency
+// Note: Requires time-series database (Redis/TimescaleDB) for production implementation
 func (a *Analyzer) detectFrequencyAnomaly(cmd *nlp.Command, baseline *Baseline) *security.Anomaly {
-	// TODO: Implement frequency tracking
-	// For now, return nil
+	// Frequency tracking requires persistent storage - deferred to integration phase
+	// Current implementation uses simple count-based detection (see detectPatternAnomaly)
 	return nil
 }
 

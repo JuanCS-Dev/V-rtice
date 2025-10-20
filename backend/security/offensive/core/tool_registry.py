@@ -202,6 +202,15 @@ class ToolRegistry:
         self._instances.clear()
         self._adapters.clear()
     
+    def discover_tools(self) -> None:
+        """
+        Discover and register available tools.
+        
+        In production, this would scan tool modules.
+        For now, this is a no-op as tools are registered manually.
+        """
+        pass
+    
     def get_stats(self) -> Dict:
         """
         Get registry statistics.

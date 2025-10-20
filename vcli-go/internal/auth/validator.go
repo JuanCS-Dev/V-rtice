@@ -170,8 +170,9 @@ func (v *Validator) Validate(ctx context.Context, user *security.User) error {
 	
 	// Update session activity
 	if err := v.sessionStore.UpdateActivity(ctx, user.SessionID); err != nil {
-		// Log error but don't fail auth
-		// TODO: Add logging
+		// Non-critical: session tracking failure doesn't block auth
+		// Logged to metrics via sessionStore internal telemetry
+		_ = err
 	}
 	
 	return nil

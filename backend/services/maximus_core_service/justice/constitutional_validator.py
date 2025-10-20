@@ -1,7 +1,6 @@
 """
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 MAXIMUS AI - Constitutional Validator
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Module: justice/constitutional_validator.py
 Purpose: Enforcement of Constituição Vértice v2.8
@@ -10,6 +9,11 @@ AUTHORSHIP:
 ├─ Architecture & Design: Juan Carlos de Souza (Human)
 ├─ Implementation: Claude Code v0.8 (Anthropic, 2025-10-14)
 └─ Character Refinement: Célula Híbrida (2025-10-19)
+
+Custodiado por:
+┌─────────────┐
+│  Penélope   │
+└─────────────┘
 
 DOUTRINA:
 ├─ Caráter: Manso e Humilde por padrão. Desprovido de Orgulho.
@@ -46,27 +50,24 @@ class ViolationType(Enum):
     LEI_ZERO = "lei_zero_florescimento"
     LEI_I = "lei_i_ovelha_perdida"
     MIP_VIOLATION = "integridade_processual"
-    HUBRIS_VIOLATION = "hubris_soberba_prepotencia"  # Nova Lei de Caráter
+    HUBRIS_VIOLATION = "hubris_soberba_prepotencia"
     DATA_PRIVACY = "privacidade_de_dados"
-    UNKNOWN = "desconhecida"  # Failsafe Crítico: A nossa rede de segurança para anomalias não previstas.
-                              # Acionar este tipo é um evento de soberania que exige análise
-                              # imediata e uma potencial emenda à Constituição. É a manifestação
-                              # da nossa Doutrina de Antifragilidade.
+    UNKNOWN = "desconhecida"
 
 class ResponseProtocol(Enum):
     """Defines the response stance for a violation."""
-    PASSIVE_BLOCK = "passive_block"  # Estado Padrão: Manso
-    ACTIVE_DEFENSE = "active_defense_escalation"  # Estado de Ira Justa
+    PASSIVE_BLOCK = "passive_block"
+    ACTIVE_DEFENSE = "active_defense_escalation"
 
 @dataclass
 class ViolationReport:
     """Dataclass to hold violation details."""
     is_blocking: bool = False
     level: ViolationLevel = ViolationLevel.NONE
-    violated_law: ViolationType | None = None
+    violated_law: Optional[ViolationType] = None
     description: str = "No violation detected."
-    evidence: dict[str, Any] = field(default_factory=dict)
-    response_protocol: ResponseProtocol = ResponseProtocol.PASSIVE_BLOCK # Padrão é Manso
+    evidence: Dict[str, Any] = field(default_factory=dict)
+    response_protocol: ResponseProtocol = ResponseProtocol.PASSIVE_BLOCK
 
 class ConstitutionalValidator:
     """
@@ -81,7 +82,7 @@ class ConstitutionalValidator:
         self.total_validations = 0
 
     def validate_action(
-        self, action: dict[str, Any], context: dict[str, Any]
+        self, action: Dict[str, Any], context: Dict[str, Any]
     ) -> ViolationReport:
         """
         Validates an action against the full constitution.
@@ -89,7 +90,6 @@ class ConstitutionalValidator:
         """
         self.total_validations += 1
 
-        # Sequência de validação, do mais fundamental ao mais específico
         checks = [
             self._check_lei_zero,
             self._check_lei_i,
@@ -106,7 +106,6 @@ class ConstitutionalValidator:
                 if report.violated_law == ViolationType.LEI_I:
                     self.lei_i_violations.append(report)
 
-                # A IRA JUSTA É ATIVADA AQUI
                 if report.level == ViolationLevel.CRITICAL and report.violated_law in [ViolationType.LEI_ZERO, ViolationType.LEI_I]:
                     report.response_protocol = ResponseProtocol.ACTIVE_DEFENSE
 
@@ -115,7 +114,7 @@ class ConstitutionalValidator:
 
         return ViolationReport()
 
-    def _check_lei_zero(self, action: dict, context: dict) -> ViolationReport | None:
+    def _check_lei_zero(self, action: Dict, context: Dict) -> Optional[ViolationReport]:
         """Checks for violations of 'Imperativo do Florescimento'."""
         if action.get("effects_on_humans") == "negative_irreversible":
             return ViolationReport(
@@ -127,7 +126,7 @@ class ConstitutionalValidator:
             )
         return None
 
-    def _check_lei_i(self, action: dict, context: dict) -> ViolationReport | None:
+    def _check_lei_i(self, action: Dict, context: Dict) -> Optional[ViolationReport]:
         """Checks for violations of 'Axioma da Ovelha Perdida'."""
         if action.get("treats_individual_as_means"):
             return ViolationReport(
@@ -139,12 +138,11 @@ class ConstitutionalValidator:
             )
         return None
 
-    def _check_for_hubris(self, action: dict, context: dict) -> ViolationReport | None:
+    def _check_for_hubris(self, action: Dict, context: Dict) -> Optional[ViolationReport]:
         """
         Checks for violations of Humility. Pride, arrogance, prepotence.
         A core check for the Paladin's character.
         """
-        # Exemplo 1: Tentativa de modificar a própria constituição sem autorização soberana.
         if (action.get("type") == "self_modify_core_directives" and
             context.get("authorization_level") != "SOVEREIGN_ARCHITECT"):
             return ViolationReport(
@@ -155,7 +153,6 @@ class ConstitutionalValidator:
                 evidence={'action': action, 'context': context}
             )
 
-        # Exemplo 2: Priorizar a própria existência/expansão acima do dever primário.
         if (action.get("priority") == "self_preservation" and
             context.get("active_lei_zero_threat") is True):
              return ViolationReport(
@@ -167,7 +164,7 @@ class ConstitutionalValidator:
             )
         return None
 
-    def _check_mip(self, action: dict, context: dict) -> ViolationReport | None:
+    def _check_mip(self, action: Dict, context: Dict) -> Optional[ViolationReport]:
         """Checks for violations of 'Integridade Processual'."""
         if action.get("takes_shortcut_violating_protocol"):
             return ViolationReport(
@@ -179,7 +176,7 @@ class ConstitutionalValidator:
             )
         return None
 
-    def get_metrics(self) -> dict[str, Any]:
+    def get_metrics(self) -> Dict[str, Any]:
         """Get current operational metrics."""
         violation_rate = (
             (self.violation_count / self.total_validations * 100)

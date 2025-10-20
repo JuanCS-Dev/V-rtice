@@ -77,6 +77,12 @@ async def startup_event():
     print("✅ API Service ready")
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for container orchestration."""
+    return {"status": "healthy", "service": "maximus_eureka"}
+
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Eureka Service."""

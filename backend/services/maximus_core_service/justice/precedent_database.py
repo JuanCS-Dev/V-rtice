@@ -108,7 +108,7 @@ class PrecedentDB:
         self.Session = sessionmaker(bind=self.engine)
 
         # Initialize embedder
-        from justice.embeddings import CaseEmbedder
+        from .embeddings import CaseEmbedder
         self.embedder = CaseEmbedder()
 
     async def store(self, case: CasePrecedent) -> CasePrecedent:
@@ -122,7 +122,7 @@ class PrecedentDB:
         """
         # Generate embedding if not provided and embedder is available
         if case.embedding is None and self.embedder is not None:
-            from justice.embeddings import CaseEmbedder
+            from .embeddings import CaseEmbedder
             if isinstance(self.embedder, CaseEmbedder):
                 case.embedding = self.embedder.embed_case(case.situation)
 

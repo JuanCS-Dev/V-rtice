@@ -11,14 +11,14 @@ Target: 100% coverage on core enforcement logic.
 """
 
 import pytest
-from services.maximus_core_service.justice.constitutional_validator import (
+from justice.constitutional_validator import (
     ConstitutionalValidator,
     ViolationLevel,
     ViolationType,
     ViolationReport,
     ConstitutionalViolation
 )
-from services.maximus_core_service.justice.emergency_circuit_breaker import EmergencyCircuitBreaker
+from justice.emergency_circuit_breaker import EmergencyCircuitBreaker
 
 
 class TestLeiI:

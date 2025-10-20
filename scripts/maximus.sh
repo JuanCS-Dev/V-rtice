@@ -47,22 +47,21 @@ PACKAGE="📦"
 
 print_header() {
     clear
-    echo -e "${CYAN}"
+    echo -e "${CYAN}${BOLD}"
     cat << "EOF"
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                                                                           ║
-║              ███╗   ███╗ █████╗ ██╗  ██╗██╗███╗   ███╗██╗   ██╗███████╗ ║
-║              ████╗ ████║██╔══██╗╚██╗██╔╝██║████╗ ████║██║   ██║██╔════╝ ║
-║              ██╔████╔██║███████║ ╚███╔╝ ██║██╔████╔██║██║   ██║███████╗ ║
-║              ██║╚██╔╝██║██╔══██║ ██╔██╗ ██║██║╚██╔╝██║██║   ██║╚════██║ ║
-║              ██║ ╚═╝ ██║██║  ██║██╔╝ ██╗██║██║ ╚═╝ ██║╚██████╔╝███████║ ║
-║              ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝ ║
-║                                                                           ║
+              ███╗   ███╗ █████╗ ██╗  ██╗██╗███╗   ███╗██╗   ██╗███████╗
+              ████╗ ████║██╔══██╗╚██╗██╔╝██║████╗ ████║██║   ██║██╔════╝
+              ██╔████╔██║███████║ ╚███╔╝ ██║██╔████╔██║██║   ██║███████╗
+              ██║╚██╔╝██║██╔══██║ ██╔██╗ ██║██║╚██╔╝██║██║   ██║╚════██║
+              ██║ ╚═╝ ██║██║  ██║██╔╝ ██╗██║██║ ╚═╝ ██║╚██████╔╝███████║
+              ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝
 EOF
-    echo -e "║           ${CROWN} ${BOLD}${MAGENTA}Maximus${NC}${CYAN} ${HEART} ${BOLD}${YELLOW}Penélope${NC}${CYAN} ${SPARKLES}  ${BOLD}${GREEN}Control Center v3.0${NC}${CYAN}           ║"
-    echo -e "║                                                                           ║"
-    echo -e "║        ${DIM}Cyber-Biological Intelligence Platform - PRIMOSO EDITION${NC}${CYAN}      ║"
-    echo -e "╚═══════════════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${NC}"
+    echo -e "${DIM}                           custodiado por:${NC}"
+    echo -e "${MAGENTA}${BOLD}                             Penélope${NC}"
+    echo ""
+    echo -e "${DIM}            Cyber-Biological Intelligence Platform${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 }
 
@@ -261,6 +260,23 @@ show_status() {
                 echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC}"
             elif [[ "$health" == "unhealthy" ]]; then
                 echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
+            elif [[ -z "$health" ]]; then
+                # Sem healthcheck = verificar manualmente se operacional
+                if [[ "$service" == "postgres" ]]; then
+                    if docker exec vertice-postgres pg_isready -U postgres &>/dev/null; then
+                        echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC} ${DIM}(no healthcheck)${NC}"
+                    else
+                        echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
+                    fi
+                elif [[ "$service" == "redis" ]]; then
+                    if docker exec vertice-redis redis-cli ping &>/dev/null; then
+                        echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC} ${DIM}(no healthcheck)${NC}"
+                    else
+                        echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
+                    fi
+                else
+                    echo -e "   ${HOURGLASS} ${BOLD}$service${NC} ${DIM}→${NC} ${CYAN}starting${NC}"
+                fi
             else
                 echo -e "   ${HOURGLASS} ${BOLD}$service${NC} ${DIM}→${NC} ${CYAN}starting${NC}"
             fi
@@ -287,7 +303,79 @@ show_status() {
         echo -e "${BOLD}${YELLOW}${HEART} Penélope:${NC} 'Calma, vamos resolver isso juntos!' ${SPARKLES}\n"
     fi
     
-    echo -e "${DIM}Dica: Use ${CYAN}maximus logs [service]${DIM} para investigar problemas${NC}\n"
+    # Menu interativo
+    show_status_menu "$unhealthy"
+}
+
+show_status_menu() {
+    local unhealthy_count="$1"
+    
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${YELLOW}O que deseja fazer?${NC}"
+    echo ""
+    echo -e "   ${BOLD}1)${NC} ${EYE} Exibir erros detalhados ${DIM}(containers degraded)${NC}"
+    echo -e "   ${BOLD}2)${NC} ${CHECK} Sair"
+    echo ""
+    echo -ne "${CYAN}Escolha uma opção [1-2]:${NC} "
+    
+    read -r choice
+    
+    case "$choice" in
+        1)
+            show_errors "$unhealthy_count"
+            ;;
+        2)
+            echo -e "\n${GREEN}${SPARKLES} Até logo!${NC}\n"
+            exit 0
+            ;;
+        *)
+            echo -e "\n${RED}${CROSS} Opção inválida!${NC}\n"
+            show_status_menu "$unhealthy_count"
+            ;;
+    esac
+}
+
+show_errors() {
+    local unhealthy_count="$1"
+    
+    clear
+    print_header
+    print_section "DIAGNÓSTICO DE ERROS" "$WARNING"
+    
+    if [[ "$unhealthy_count" -eq 0 ]]; then
+        echo -e "${GREEN}${CHECK} Nenhum erro detectado! Sistema saudável.${NC}\n"
+        echo -ne "${CYAN}Pressione ENTER para voltar...${NC}"
+        read -r
+        show_status
+        return
+    fi
+    
+    echo -e "${BOLD}${RED}Containers com problemas:${NC}\n"
+    
+    cd "$PROJECT_ROOT"
+    
+    # Lista todos os containers e seus status
+    docker compose ps --format "table {{.Service}}\t{{.State}}\t{{.Health}}" | while read -r line; do
+        if [[ "$line" =~ unhealthy ]]; then
+            local service=$(echo "$line" | awk '{print $1}')
+            echo -e "${RED}${CROSS} ${BOLD}$service${NC}"
+            echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+            
+            # Últimas 10 linhas de log com erro
+            echo -e "${YELLOW}Últimos logs:${NC}"
+            docker compose logs --tail=10 "$service" 2>&1 | grep -iE "error|exception|failed|fatal" | tail -5 || echo -e "${DIM}  (nenhum erro explícito nos logs recentes)${NC}"
+            echo ""
+        fi
+    done
+    
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${BOLD}${MAGENTA}${HEART} Penélope:${NC} 'Veja os detalhes completos com: ${CYAN}maximus logs [service]${NC}'\n"
+    
+    echo -ne "${CYAN}Pressione ENTER para voltar ao menu...${NC}"
+    read -r
+    
+    show_status
 }
 
 show_logs() {

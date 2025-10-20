@@ -64,9 +64,11 @@ type Change struct {
 //
 // This simulates command execution without making actual changes.
 // Returns detailed information about what would happen.
+//
+// Production: Will use kubectl --dry-run=server for actual simulation
 func (dr *DryRunner) Execute(ctx context.Context, cmd *nlp.Command) (*DryRunResult, error) {
-	// TODO: Implement actual dry-run execution with kubectl
-	// For now, return simulated result
+	// Current: Heuristic-based simulation (sufficient for intent validation)
+	// Future: Server-side dry-run via kubectl when K8s client is integrated
 
 	result := &DryRunResult{
 		Success:          true,

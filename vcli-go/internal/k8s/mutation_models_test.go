@@ -89,19 +89,19 @@ func TestDeleteOptions_PropagationPolicies(t *testing.T) {
 // ========================================================================
 
 func TestNewScaleOptions(t *testing.T) {
-	replicas := int32(5)
-	opts := NewScaleOptions(replicas)
+	opts := NewScaleOptions()
 
 	assert.NotNil(t, opts)
-	assert.Equal(t, replicas, opts.Replicas)
+	assert.Equal(t, int32(0), opts.Replicas)
 	assert.Equal(t, 5*time.Minute, opts.Timeout)
 	assert.False(t, opts.Wait)
 	assert.Equal(t, DryRunNone, opts.DryRun)
 }
 
 func TestScaleOptions_WithWait(t *testing.T) {
-	opts := NewScaleOptions(3)
+	opts := NewScaleOptions()
 	opts.Wait = true
+opts.Replicas = 3
 
 	assert.True(t, opts.Wait)
 	assert.Equal(t, int32(3), opts.Replicas)

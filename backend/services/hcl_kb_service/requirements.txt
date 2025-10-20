@@ -51,6 +51,10 @@ typing-inspection==0.4.2
 uvicorn==0.37.0
 psycopg2-binary==2.9.9
     # via hcl-kb-service (PostgreSQL driver)
+asyncpg==0.29.0
+    # via hcl-kb-service (async PostgreSQL)
+greenlet==3.0.3
+    # via sqlalchemy async support
 sqlalchemy==2.0.23
     # via hcl-kb-service (database.py)
     # via hcl-kb-service (pyproject.toml)

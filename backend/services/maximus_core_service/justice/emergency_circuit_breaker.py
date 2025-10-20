@@ -24,7 +24,7 @@ INTEGRATION:
 import logging
 from typing import Dict, Any, List
 from datetime import datetime
-from justice.constitutional_validator import ViolationReport
+from .constitutional_validator import ViolationReport
 
 logger = logging.getLogger(__name__)
 

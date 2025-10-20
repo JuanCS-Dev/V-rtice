@@ -114,7 +114,7 @@ func main() {
 				if len(suggestions) > 0 {
 					fmt.Printf("\n%sSuggestions:%s\n", colorCyan, colorReset)
 					for i, sug := range suggestions {
-						fmt.Printf("  %d. %s\n", i+1, sug)
+						fmt.Printf("  %d. %s (confidence: %.2f)\n", i+1, sug.Text, sug.Confidence)
 					}
 				} else {
 					fmt.Printf("%sNo suggestions found%s\n", colorYellow, colorReset)

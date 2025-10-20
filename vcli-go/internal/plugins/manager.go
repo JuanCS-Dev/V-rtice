@@ -8,6 +8,24 @@ import (
 	"strings"
 )
 
+// Dependency represents a plugin dependency
+type Dependency struct {
+	Name    string
+	Version string
+}
+
+// Metadata contains plugin metadata information
+type Metadata struct {
+	Name         string
+	Version      string
+	Description  string
+	Author       string
+	License      string
+	Homepage     string
+	Tags         []string
+	Dependencies []Dependency
+}
+
 // Plugin represents a vCLI plugin
 type Plugin interface {
 	Name() string
@@ -15,6 +33,22 @@ type Plugin interface {
 	Description() string
 	Init() error
 	Execute(args []string) error
+}
+
+// PluginManager is an alias for Manager (for compatibility)
+type PluginManager = Manager
+
+// View represents a plugin view (placeholder for future TUI integration)
+type View struct {
+	Name    string
+	Content string
+}
+
+// HealthStatus represents plugin health status
+type HealthStatus struct {
+	Healthy bool
+	Message string
+	Details map[string]interface{}
 }
 
 // Manager manages plugin loading and execution

@@ -1,0 +1,178 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-19T14:34:40.672452",
+    "versao_doutrina": "2.7",
+    "formato": "EFICIENTE_ANTI_VERBOSIDADE"
+  },
+  "status_geral": {
+    "estado": "PARCIALMENTE_OPERACIONAL",
+    "percentual_completude": 64.9,
+    "nivel_saude": "EXCELENTE"
+  },
+  "metricas_containers": {
+    "servicos_definidos_total": 124,
+    "servicos_reais": 94,
+    "volumes_networks_support": 30,
+    "containers_rodando": 61,
+    "containers_faltando": 64,
+    "health_status": {
+      "total_rodando": 73,
+      "healthy": 70,
+      "unhealthy": [],
+      "sem_healthcheck": 3,
+      "percentual_healthy": 95.9
+    }
+  },
+  "servicos_criticos": {
+    "maximus_eureka": {
+      "descricao": "CRÍTICO - Oráculo de Auto-Remediação",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "api_gateway": {
+      "descricao": "CRÍTICO - Ponto de entrada principal",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "postgres": {
+      "descricao": "CRÍTICO - Banco de dados",
+      "status": "✅ RODANDO",
+      "containers": 2
+    },
+    "redis": {
+      "descricao": "CRÍTICO - Cache/Session",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "qdrant": {
+      "descricao": "CRÍTICO - Vector DB",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "adaptive_immune": {
+      "descricao": "ALTO - Sistema Imune Adaptativo",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "threat_intel": {
+      "descricao": "ALTO - Threat Intelligence",
+      "status": "✅ RODANDO",
+      "containers": 1
+    },
+    "osint": {
+      "descricao": "ALTO - OSINT Core",
+      "status": "✅ RODANDO",
+      "containers": 3
+    }
+  },
+  "servicos_faltantes": {
+    "total": 64,
+    "classificacao": {
+      "criticos": [
+        "auth_service",
+        "maximus_orchestrator_service"
+      ],
+      "importantes": [
+        "adaptive_immune_system",
+        "ai_immune_system",
+        "google_osint_service",
+        "malware_analysis_service",
+        "osint-service",
+        "threat_intel_service",
+        "vuln_intel_service",
+        "vuln_scanner_service"
+      ],
+      "opcionais": [
+        "adr_core_service",
+        "atlas_service",
+        "atomic_red_team",
+        "auditory_cortex_service",
+        "chemical_sensing_service",
+        "cloud_coordinator_service",
+        "cyber_service",
+        "digital_thalamus_service",
+        "domain_service",
+        "ethical_audit_service",
+        "grafana",
+        "hcl_analyzer_service",
+        "hcl_executor_service",
+        "hcl_monitor_service",
+        "hcl_planner_service",
+        "hitl-patch-service",
+        "hpc_service",
+        "immunis_api_service",
+        "immunis_bcell_service",
+        "immunis_cytotoxic_t_service",
+        "immunis_dendritic_service",
+        "immunis_helper_t_service",
+        "immunis_macrophage_service",
+        "immunis_neutrophil_service",
+        "immunis_nk_cell_service",
+        "ip_intelligence_service",
+        "kafka-immunity",
+        "kafka-ui-immunity",
+        "maximus_core_service",
+        "maximus-immunity-network",
+        "maximus_integration_service",
+        "maximus-oraculo",
+        "narrative_manipulation_filter",
+        "network_monitor_service",
+        "network_recon_service",
+        "neuromodulation_service",
+        "nmap_service",
+        "offensive_gateway",
+        "offensive_tools_service",
+        "postgres-immunity",
+        "prefrontal_cortex_service",
+        "prometheus",
+        "rte_quarantine",
+        "sinesp_service",
+        "social_eng_service",
+        "somatosensory_service",
+        "ssl_monitor_service",
+        "strategic_planning_service",
+        "tataca_ingestion",
+        "vestibular_service",
+        "visual_cortex_service",
+        "wargaming-crisol",
+        "web_attack_service",
+        "zookeeper-immunity"
+      ]
+    },
+    "nota": "Maioria são serviços opcionais ou experimentais"
+  },
+  "backend_estrutura": {
+    "servicos_em_services_dir": 107,
+    "arquivos_teste_total": 13983,
+    "cobertura_estimada": "~92%"
+  },
+  "problemas_identificados": [
+    {
+      "id": "PROB001",
+      "tipo": "TEST_COLLECTION_ERROR",
+      "severidade": "MEDIO",
+      "descricao": "==================================== ERRORS ====================================",
+      "impacto": "Impede execução de ~14k testes pytest",
+      "afeta_runtime": false,
+      "fix_sugerido": "Corrigir import em social_eng_service/database.py: linha 35"
+    },
+    {
+      "id": "PROB003",
+      "tipo": "SERVICOS_CRITICOS_AUSENTES",
+      "severidade": "CRITICO",
+      "servicos": [
+        "auth_service",
+        "maximus_orchestrator_service"
+      ],
+      "impacto": "Funcionalidades core podem estar comprometidas",
+      "afeta_runtime": true
+    }
+  ],
+  "diagnostico_testes": {
+    "status": "FALHA",
+    "erro": "==================================== ERRORS ====================================",
+    "impacto": "Impede execução de ~14k testes pytest",
+    "afeta_runtime": false,
+    "severidade": "MEDIO"
+  }
+}

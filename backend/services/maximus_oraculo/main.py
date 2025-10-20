@@ -1,4 +1,4 @@
-"""Main entry point - imports app from api module."""
-from api import app
+"""Main entry point - imports app from api.py."""
+from api import app  # api.py in the same directory
 
 __all__ = ["app"]

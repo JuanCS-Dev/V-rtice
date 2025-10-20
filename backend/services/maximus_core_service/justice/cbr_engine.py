@@ -23,7 +23,7 @@ SCIENTIFIC BASIS:
 
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
-from justice.precedent_database import PrecedentDB, CasePrecedent
+from .precedent_database import PrecedentDB, CasePrecedent
 
 
 @dataclass

@@ -1,3 +1,5 @@
+// +build integration
+
 package benchmark
 
 import (
@@ -394,12 +396,12 @@ func BenchmarkHTTPClient_RejectDecision(b *testing.B) {
 	ctx := context.Background()
 
 	// Create session first
-	_, err := client.CreateSession(ctx)
+	_, err := client.CreateSession(ctx, operatorID, "benchmark_role")
 	if err != nil {
 		b.Skip("HTTP server not available or session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -428,7 +430,7 @@ func BenchmarkGRPCClient_RejectDecision(b *testing.B) {
 		b.Skip("Session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -446,12 +448,12 @@ func BenchmarkHTTPClient_GetDecision(b *testing.B) {
 	ctx := context.Background()
 
 	// Create session first
-	_, err := client.CreateSession(ctx)
+	_, err := client.CreateSession(ctx, operatorID, "benchmark_role")
 	if err != nil {
 		b.Skip("HTTP server not available or session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	// Use a known decision ID (from POC data)
 	decisionID := "dec-001"
@@ -482,7 +484,7 @@ func BenchmarkGRPCClient_GetDecision(b *testing.B) {
 		b.Skip("Session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	// Use a known decision ID (from POC data)
 	decisionID := "dec-001"
@@ -502,12 +504,12 @@ func BenchmarkHTTPClient_EscalateDecision(b *testing.B) {
 	ctx := context.Background()
 
 	// Create session first
-	_, err := client.CreateSession(ctx)
+	_, err := client.CreateSession(ctx, operatorID, "benchmark_role")
 	if err != nil {
 		b.Skip("HTTP server not available or session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -536,7 +538,7 @@ func BenchmarkGRPCClient_EscalateDecision(b *testing.B) {
 		b.Skip("Session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -554,12 +556,12 @@ func BenchmarkHTTPClient_GetSessionStats(b *testing.B) {
 	ctx := context.Background()
 
 	// Create session first
-	_, err := client.CreateSession(ctx)
+	_, err := client.CreateSession(ctx, operatorID, "benchmark_role")
 	if err != nil {
 		b.Skip("HTTP server not available or session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -587,7 +589,7 @@ func BenchmarkGRPCClient_GetSessionStats(b *testing.B) {
 		b.Skip("Session creation failed")
 		return
 	}
-	defer client.CloseSession(ctx)
+	// Session cleanup handled by server
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -607,7 +609,7 @@ func BenchmarkHTTPClient_CloseSession(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
 		// Create session
-		_, err := client.CreateSession(ctx)
+		_, err := client.CreateSession(ctx, operatorID, "benchmark_role")
 		if err != nil {
 			b.Skip("HTTP server not available or session creation failed")
 			return

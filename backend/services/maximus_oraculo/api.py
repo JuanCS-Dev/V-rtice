@@ -16,6 +16,7 @@ decision-making and long-term planning for the Maximus AI system.
 """
 
 from datetime import datetime
+import os
 from typing import Any, Dict, Optional
 
 import uvicorn
@@ -28,7 +29,7 @@ from oraculo import OraculoEngine
 from suggestion_generator import SuggestionGenerator
 
 # WebSocket support for Adaptive Immunity
-from api import websocket_router, initialize_stream_manager
+from api_endpoints import websocket_router, initialize_stream_manager
 from websocket import APVStreamManager
 
 app = FastAPI(title="Maximus Oraculo Service", version="1.0.0")
@@ -96,15 +97,16 @@ async def startup_event():
     print("🔮 Starting Maximus Oraculo Service...")
     
     # Initialize WebSocket APV Stream Manager
+    kafka_brokers = os.getenv("KAFKA_BROKERS", "localhost:9092")
     stream_manager = APVStreamManager(
-        kafka_bootstrap_servers="localhost:9092",
+        kafka_bootstrap_servers=kafka_brokers,
         kafka_topic="maximus.adaptive-immunity.apv",
     )
     await stream_manager.start()
     initialize_stream_manager(stream_manager)
     
     print("✅ Maximus Oraculo Service started successfully.")
-    print("🌐 WebSocket endpoint: ws://localhost:8001/ws/adaptive-immunity")
+    print(f"🌐 WebSocket endpoint available (Kafka: {kafka_brokers})")
 
 
 @app.on_event("shutdown")

@@ -20,7 +20,7 @@ import { AIInsightsPanel } from './AIInsightsPanel';
 import { MaximusAI3Panel } from './MaximusAI3Panel';
 import { MaximusCore } from './MaximusCore';
 import { WorkflowsPanel } from './WorkflowsPanel';
-import MaximusTerminal from './MaximusTerminal';
+import MaximusChat from './MaximusChat/MaximusChat';
 import { ConsciousnessPanel } from './ConsciousnessPanel';
 import { AdaptiveImmunityPanel } from './AdaptiveImmunityPanel';
 import { ADWPanel } from './ADWPanel';
@@ -85,7 +85,7 @@ export const MaximusDashboard = ({ setCurrentView }) => {
       case 'workflows':
         return <WorkflowsPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'terminal':
-        return <MaximusTerminal />;
+        return <MaximusChat />;
       case 'consciousness':
         return <ConsciousnessPanel aiStatus={aiStatus} setAiStatus={setAiStatus} />;
       case 'adaptive-immunity':

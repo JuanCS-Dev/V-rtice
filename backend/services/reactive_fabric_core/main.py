@@ -19,12 +19,12 @@ from docker.errors import DockerException
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
 
-from .models import (
+from models import (
     HoneypotListResponse, HoneypotStatus,
     AttackListResponse, AttackCreate, TTPListResponse, HealthResponse
 )
-from .database import Database
-from .kafka_producer import (
+from database import Database
+from kafka_producer import (
     KafkaProducer,
     create_threat_detected_message
 )

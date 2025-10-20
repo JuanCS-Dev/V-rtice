@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
+import os
 
 from sqlalchemy import Column, DateTime, Integer, JSON, String, Text, create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -23,7 +24,11 @@ class HCLDataEntry(Base):
 
 
 # Database connection
-DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/vertice_hcl_kb"
+DATABASE_URL = os.environ["DATABASE_URL"]
+
+# Use psycopg2 (sync) instead of asyncpg
+if DATABASE_URL.startswith("postgresql+asyncpg://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

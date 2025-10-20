@@ -64,9 +64,4 @@ EXPOSE 8200
 LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
 LABEL org.opencontainers.image.description="Active Immune Core with uv"
 
-CMD ["python", "-m", "uvicorn", "api.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8200", \
-     "--workers", "4", \
-     "--proxy-headers", \
-     "--forwarded-allow-ips", "*"]
+CMD ["python", "run.py"]

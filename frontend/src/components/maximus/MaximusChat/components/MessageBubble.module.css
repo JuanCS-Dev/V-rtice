@@ -1,0 +1,201 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * MESSAGE BUBBLE - Individual Chat Message Component
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Styles for user and assistant messages with markdown support
+ */
+
+.messageBubble {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.messageBubble.user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+
+.avatar.user {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(249, 115, 22, 0.2));
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.avatar.assistant {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(249, 115, 22, 0.2));
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.messageContent {
+  flex: 1;
+  max-width: 75%;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.messageBubble.user .messageHeader {
+  flex-direction: row-reverse;
+}
+
+.senderName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fafafa;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.messageText {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.messageBubble.user .messageText {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fafafa;
+}
+
+.messageBubble.assistant .messageText {
+  background: rgba(28, 28, 28, 0.6);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  color: #e2e8f0;
+}
+
+/* Markdown content styling */
+.messageText :global(p) {
+  margin-bottom: 0.75rem;
+}
+
+.messageText :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+.messageText :global(code) {
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.messageText :global(pre) {
+  background: rgba(15, 23, 42, 0.9);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.messageText :global(pre code) {
+  background: transparent;
+  padding: 0;
+  border: none;
+  color: #10b981;
+}
+
+.messageText :global(ul),
+.messageText :global(ol) {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.messageText :global(li) {
+  margin-bottom: 0.25rem;
+}
+
+.messageText :global(strong) {
+  color: #fafafa;
+  font-weight: 600;
+}
+
+.messageText :global(em) {
+  color: #f97316;
+}
+
+.messageText :global(a) {
+  color: #f97316;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.messageText :global(a:hover) {
+  color: #ef4444;
+}
+
+/* Error state */
+.messageBubble.error .messageText {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.errorIcon {
+  color: #ef4444;
+  margin-right: 0.5rem;
+}
+
+/* Message actions */
+.messageActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.messageBubble:hover .messageActions {
+  opacity: 1;
+}
+
+.actionButton {
+  padding: 0.25rem 0.5rem;
+  background: rgba(28, 28, 28, 0.6);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fafafa;
+}

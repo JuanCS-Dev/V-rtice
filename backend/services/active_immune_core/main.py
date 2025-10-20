@@ -6,6 +6,7 @@ PRODUCTION-READY service with:
 - Agent management endpoints
 - Graceful shutdown
 - Structured logging
+- Kafka integration with Reactive Fabric Bridge
 
 NO MOCKS, NO PLACEHOLDERS, NO TODOs.
 
@@ -13,6 +14,7 @@ Authors: Juan & Claude
 Version: 1.0.0
 """
 
+import asyncio
 import logging
 import sys
 from contextlib import asynccontextmanager
@@ -25,7 +27,8 @@ from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Gauge, Histogram, make_asgi_app
 from pydantic import BaseModel, Field
 
-from .config import settings
+from config import settings
+from communication.kafka_consumers import KafkaEventConsumer, ExternalTopic
 
 # Configure logging
 settings.configure_logging()
@@ -118,7 +121,58 @@ global_state: Dict[str, Any] = {
     "lymphnodes": {},  # lymphnode_id -> lymphnode instance
     "started_at": None,
     "version": "1.0.0",
+    "kafka_consumer": None,  # Kafka consumer instance
 }
+
+
+# ==================== THREAT HANDLER ====================
+
+
+async def handle_reactive_threat(event: Dict[str, Any]) -> None:
+    """
+    Handle threat detected events from Reactive Fabric Bridge.
+    
+    Processes threat intelligence from honeypots and integrates with
+    Active Immune Core defense mechanisms.
+    
+    Args:
+        event: Threat event from Reactive Fabric
+            - event_id: Unique event identifier
+            - source_ip: Attacker IP address
+            - attack_type: Type of attack detected
+            - severity: Threat severity level
+            - honeypot_id: Source honeypot identifier
+            - timestamp: Event timestamp
+            - metadata: Additional context
+    """
+    try:
+        logger.info(
+            "reactive_threat_received",
+            event_id=event.get("event_id"),
+            source_ip=event.get("source_ip"),
+            attack_type=event.get("attack_type"),
+            severity=event.get("severity"),
+        )
+        
+        # Update metrics
+        threats_detected_total.labels(agent_type="reactive_fabric").inc()
+        
+        # TODO: Integrate with NK Cells for automated response
+        # TODO: Update threat intelligence memory
+        # TODO: Trigger homeostatic state adjustment if severity=critical
+        
+        logger.info(
+            "reactive_threat_processed",
+            event_id=event.get("event_id"),
+        )
+        
+    except Exception as e:
+        logger.error(
+            "reactive_threat_handler_failed",
+            error=str(e),
+            event=event,
+        )
+
 
 # ==================== REQUEST/RESPONSE MODELS ====================
 
@@ -213,6 +267,33 @@ async def lifespan(app: FastAPI):
 
     global_state["started_at"] = datetime.now()
 
+    # Initialize Kafka consumer for Reactive Fabric threats
+    try:
+        logger.info("Initializing Kafka consumer for Reactive Fabric integration...")
+        kafka_consumer = KafkaEventConsumer(
+            bootstrap_servers=settings.kafka_bootstrap_servers,
+            group_id="active_immune_core_reactive_fabric",
+            enable_degraded_mode=True,
+        )
+        
+        # Register handler for reactive threats
+        kafka_consumer.register_handler(
+            ExternalTopic.REACTIVE_THREATS,
+            handle_reactive_threat,
+        )
+        
+        # Start consumer
+        await kafka_consumer.start()
+        global_state["kafka_consumer"] = kafka_consumer
+        logger.info("Kafka consumer started successfully - listening for Reactive Fabric threats")
+        
+    except Exception as e:
+        logger.warning(
+            f"Kafka consumer initialization failed (degraded mode): {e}",
+            exc_info=True,
+        )
+        # Continue without Kafka (graceful degradation)
+
     # Initialize lymphnodes (will be implemented in Fase 3)
     logger.info("Lymphnodes: Will be initialized in Fase 3")
 
@@ -227,6 +308,16 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 80)
     logger.info("Stopping Active Immune Core Service")
     logger.info("=" * 80)
+
+    # Stop Kafka consumer
+    kafka_consumer = global_state.get("kafka_consumer")
+    if kafka_consumer:
+        try:
+            logger.info("Stopping Kafka consumer...")
+            await kafka_consumer.stop()
+            logger.info("Kafka consumer stopped")
+        except Exception as e:
+            logger.error(f"Error stopping Kafka consumer: {e}")
 
     # Stop all agents
     for agent_id, agent in global_state["agents"].items():

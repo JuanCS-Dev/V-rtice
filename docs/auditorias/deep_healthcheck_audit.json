@@ -1,0 +1,612 @@
+[
+  {
+    "service": "hcl-kb-service",
+    "container": null,
+    "dockerfile_port": 8019,
+    "compose_config": {
+      "port": {
+        "mapping": "8421:8000",
+        "internal": 8000
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "narrative_analysis_service",
+    "container": null,
+    "dockerfile_port": 8042,
+    "compose_config": {
+      "port": {
+        "mapping": "8015:8042",
+        "internal": 8042
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8015/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "predictive_threat_hunting_service",
+    "container": null,
+    "dockerfile_port": 8050,
+    "compose_config": {
+      "port": {
+        "mapping": "8016:8050",
+        "internal": 8050
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8016/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "rte-service",
+    "container": null,
+    "dockerfile_port": 8053,
+    "compose_config": {
+      "port": {
+        "mapping": "8606:8005",
+        "internal": 8005
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8005/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "30s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "domain_service",
+    "container": null,
+    "dockerfile_port": 8014,
+    "compose_config": {
+      "port": {
+        "mapping": "8104:80",
+        "internal": 80
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:80/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "edge_agent_service",
+    "container": null,
+    "dockerfile_port": 8015,
+    "compose_config": {
+      "port": {
+        "mapping": "9100:8021",
+        "internal": 8021
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8021/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "google_osint_service",
+    "container": null,
+    "dockerfile_port": 8016,
+    "compose_config": {
+      "port": {
+        "mapping": "8101:8031",
+        "internal": 8031
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8031/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hcl_analyzer_service",
+    "container": null,
+    "dockerfile_port": 8017,
+    "compose_config": {
+      "port": {
+        "mapping": "8426:8020",
+        "internal": 8020
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8020/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hcl_executor_service",
+    "container": null,
+    "dockerfile_port": 8018,
+    "compose_config": {
+      "port": {
+        "mapping": "8432:8021",
+        "internal": 8021
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8021/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hcl_kb_service",
+    "container": null,
+    "dockerfile_port": 8019,
+    "compose_config": {
+      "port": {
+        "mapping": "8420:8022",
+        "internal": 8022
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8022/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hcl_monitor_service",
+    "container": null,
+    "dockerfile_port": 8020,
+    "compose_config": {
+      "port": {
+        "mapping": "8423:8023",
+        "internal": 8023
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8023/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hcl_planner_service",
+    "container": null,
+    "dockerfile_port": 8021,
+    "compose_config": {
+      "port": {
+        "mapping": "8429:8024",
+        "internal": 8024
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8024/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "10s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "hsas_service",
+    "container": null,
+    "dockerfile_port": 8024,
+    "compose_config": {
+      "port": {
+        "mapping": "9099:8003",
+        "internal": 8003
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8003/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "malware_analysis_service",
+    "container": null,
+    "dockerfile_port": 8035,
+    "compose_config": {
+      "port": {
+        "mapping": "8114:8014",
+        "internal": 8014
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8014/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "nmap_service",
+    "container": null,
+    "dockerfile_port": 8047,
+    "compose_config": {
+      "port": {
+        "mapping": "8106:80",
+        "internal": 80
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:80/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "osint-service",
+    "container": null,
+    "dockerfile_port": 8049,
+    "compose_config": {
+      "port": {
+        "mapping": "8036:8007",
+        "internal": 8007
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8007/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "reflex_triage_engine",
+    "container": null,
+    "dockerfile_port": 8052,
+    "compose_config": {
+      "port": {
+        "mapping": "9107:8012",
+        "internal": 8012
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8012/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "seriema_graph",
+    "container": null,
+    "dockerfile_port": 8300,
+    "compose_config": {
+      "port": {
+        "mapping": "8611:8029",
+        "internal": 8029
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8029/health')"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "40s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "ssl_monitor_service",
+    "container": null,
+    "dockerfile_port": 8057,
+    "compose_config": {
+      "port": {
+        "mapping": "8115:8015",
+        "internal": 8015
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8015/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "threat_intel_service",
+    "container": null,
+    "dockerfile_port": 8059,
+    "compose_config": {
+      "port": {
+        "mapping": "8113:8013",
+        "internal": 8013
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8013/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "vuln_intel_service",
+    "container": null,
+    "dockerfile_port": 8062,
+    "compose_config": {
+      "port": {
+        "mapping": "8533:8033",
+        "internal": 8033
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8033/health"
+        ],
+        "interval": "30s",
+        "timeout": "10s",
+        "retries": 3,
+        "start_period": "40s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "vuln_scanner_service",
+    "container": null,
+    "dockerfile_port": 8063,
+    "compose_config": {
+      "port": {
+        "mapping": "8111:80",
+        "internal": 80
+      },
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:80/health"
+        ],
+        "interval": "45s",
+        "timeout": "15s",
+        "retries": 5,
+        "start_period": "60s"
+      }
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  },
+  {
+    "service": "cloud_coordinator_service",
+    "container": null,
+    "dockerfile_port": 8011,
+    "compose_config": {
+      "port": {
+        "mapping": "9095:8051",
+        "internal": 8051
+      },
+      "healthcheck": null
+    },
+    "healthcheck_logs": null,
+    "issues": [
+      "NO_CONTAINER"
+    ]
+  }
+]

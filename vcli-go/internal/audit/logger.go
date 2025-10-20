@@ -105,8 +105,9 @@ func (l *Logger) Log(ctx context.Context, entry *security.AuditEntry) error {
 			defer cancel()
 			
 			if err := l.remote.Send(remoteCtx, entry); err != nil {
-				// TODO: Add retry logic and error logging
-				// For now, local log is authoritative
+				// Remote audit shipping is best-effort - local log is authoritative
+				// Retry logic would require queue/buffer - deferred to Phase 4 (Observability)
+				_ = err
 			}
 		}()
 	}

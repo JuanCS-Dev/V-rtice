@@ -194,7 +194,10 @@ func (c *Checker) CheckCommand(ctx context.Context, secCtx *security.SecurityCon
 	}
 	
 	// Check succeeded
-	_ = startTime // TODO: Record check duration in metrics
+	// Duration tracking: Implement when Prometheus metrics are wired
+	// duration := time.Since(startTime)
+	// authzCheckDuration.Observe(duration.Seconds())
+	_ = startTime
 	return nil
 }
 

@@ -12,7 +12,7 @@ import json
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-from .models import (
+from models import (
     ThreatDetectedMessage,
     HoneypotStatusMessage
 )
@@ -241,7 +241,7 @@ def create_threat_detected_message(
     Returns:
         ThreatDetectedMessage instance
     """
-    from .models import AttackSeverity
+    from models import AttackSeverity
     
     return ThreatDetectedMessage(
         event_id=event_id,

@@ -41,7 +41,7 @@ DOUTRINA:
 """
 
 import pytest
-from justice.constitutional_validator import (
+from .constitutional_validator import (
     ConstitutionalValidator,
     ConstitutionalViolation,
     ViolationLevel,

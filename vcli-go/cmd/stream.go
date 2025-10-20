@@ -151,7 +151,7 @@ func runStreamKafka(cmd *cobra.Command, args []string) error {
 	if streamSeverityMin > 0 {
 		fmt.Printf("   Min Severity: %d\n", streamSeverityMin)
 	}
-	fmt.Println("   Press Ctrl+C to stop\n")
+	fmt.Println("   Press Ctrl+C to stop")
 
 	// Message handler
 	messageCount := 0
@@ -298,7 +298,7 @@ func runStreamSSE(cmd *cobra.Command, args []string) error {
 	if len(streamEventTypes) > 0 {
 		fmt.Printf("   Event Types: %s\n", strings.Join(streamEventTypes, ", "))
 	}
-	fmt.Println("   Press Ctrl+C to stop\n")
+	fmt.Println("   Press Ctrl+C to stop")
 
 	// Process events
 	messageCount := 0

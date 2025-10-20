@@ -36,6 +36,8 @@ class ExternalTopic(str, Enum):
     THREATS_INTEL = "vertice.threats.intel"
     NETWORK_EVENTS = "vertice.network.events"
     ENDPOINT_EVENTS = "vertice.endpoint.events"
+    # Reactive Fabric Bridge integration
+    REACTIVE_THREATS = "immunis.cytokines.threat_detected"
 
 
 EventHandler = Callable[[Dict[str, Any]], None]

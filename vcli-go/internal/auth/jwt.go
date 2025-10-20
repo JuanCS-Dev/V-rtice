@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"crypto/rsa"
 	"errors"
 	"fmt"
@@ -40,17 +41,23 @@ type JWTManager struct {
 	accessTokenTTL   time.Duration
 	refreshTokenTTL  time.Duration
 	signingMethod    jwt.SigningMethod
+	tokenStore       TokenStore // Token revocation store
 }
 
 // NewJWTManager creates a new JWT manager
 func NewJWTManager(privateKey *rsa.PrivateKey, publicKey *rsa.PublicKey, issuer string) *JWTManager {
+	// Initialize with in-memory store (5 minute cleanup interval)
+	// For production, pass RedisTokenStore instead
+	store := NewInMemoryTokenStore(5 * time.Minute)
+	
 	return &JWTManager{
 		privateKey:      privateKey,
 		publicKey:       publicKey,
 		issuer:          issuer,
-		accessTokenTTL:  15 * time.Minute, // Short-lived access tokens
-		refreshTokenTTL: 7 * 24 * time.Hour, // 7-day refresh tokens
+		accessTokenTTL:  15 * time.Minute,
+		refreshTokenTTL: 7 * 24 * time.Hour,
 		signingMethod:   jwt.SigningMethodRS256,
+		tokenStore:      store,
 	}
 }
 
@@ -235,30 +242,26 @@ func (m *JWTManager) validateClaims(claims *TokenClaims) error {
 	return nil
 }
 
-// RevokeToken marks a token as revoked (requires backing store)
-// In production, this would add the token ID to a revocation list
+// RevokeToken marks a token as revoked
 func (m *JWTManager) RevokeToken(tokenID string) error {
-	// TODO: Implement token revocation with Redis/backing store
-	// For now, just validate input
 	if tokenID == "" {
 		return errors.New("token ID cannot be empty")
 	}
 	
-	// In production: store revoked token ID with expiry
-	// Example: redis.Set(fmt.Sprintf("revoked:%s", tokenID), true, tokenTTL)
+	// Store revocation with expiry matching token TTL
+	// This prevents the revocation list from growing indefinitely
+	expiresAt := time.Now().Add(m.accessTokenTTL)
 	
-	return nil
+	return m.tokenStore.RevokeToken(context.Background(), tokenID, expiresAt)
 }
 
 // IsTokenRevoked checks if a token has been revoked
 func (m *JWTManager) IsTokenRevoked(tokenID string) (bool, error) {
-	// TODO: Implement revocation check with Redis/backing store
-	// For now, assume no tokens are revoked
+	if tokenID == "" {
+		return false, errors.New("token ID cannot be empty")
+	}
 	
-	// In production: check redis for revocation
-	// Example: redis.Get(fmt.Sprintf("revoked:%s", tokenID))
-	
-	return false, nil
+	return m.tokenStore.IsRevoked(context.Background(), tokenID)
 }
 
 // generateTokenID generates a unique token identifier

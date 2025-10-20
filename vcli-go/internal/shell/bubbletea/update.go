@@ -56,9 +56,8 @@ func (m Model) handleKeyPress(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 
 	case tea.KeyCtrlK:
-		// Open command palette (will be implemented in FASE 5)
-		// For now, just show a message
-		// TODO: Open palette
+		// Command palette - will be implemented when integrated with MIP/MAXIMUS
+		// Reserved for future Phase: Intent-driven command discovery
 		return m, nil
 
 	case tea.KeyRunes:

@@ -7,11 +7,12 @@ Sprint 1: Real implementation
 
 import asyncpg
 import structlog
+import json
 from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 
-from .models import (
+from models import (
     Honeypot, HoneypotCreate, HoneypotStats, HoneypotStatus,
     Attack, AttackCreate, AttackSummary,
     TTP, TTPCreate, TTPFrequency,
@@ -175,7 +176,7 @@ class Database:
             INSERT INTO reactive_fabric.attacks
             (honeypot_id, attacker_ip, attack_type, severity, confidence, 
              ttps, iocs, payload, captured_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9)
             RETURNING id, honeypot_id, attacker_ip, attack_type, severity,
                       confidence, ttps, iocs, payload, captured_at, processed_at, metadata
         """
@@ -184,17 +185,23 @@ class Database:
             row = await conn.fetchrow(
                 query,
                 attack.honeypot_id,
-                attack.attacker_ip,
+                str(attack.attacker_ip),  # Convert IP to string
                 attack.attack_type,
                 attack.severity.value,
                 attack.confidence,
-                attack.ttps,
-                attack.iocs,
+                json.dumps(attack.ttps),  # asyncpg will handle the ::jsonb cast
+                json.dumps(attack.iocs),  # asyncpg will handle the ::jsonb cast
                 attack.payload,
                 attack.captured_at
             )
             if row:
-                return Attack(**dict(row))
+                # Parse JSON fields back
+                row_dict = dict(row)
+                row_dict['attacker_ip'] = str(row_dict['attacker_ip'])
+                row_dict['ttps'] = json.loads(row_dict['ttps']) if isinstance(row_dict['ttps'], str) else row_dict['ttps']
+                row_dict['iocs'] = json.loads(row_dict['iocs']) if isinstance(row_dict['iocs'], str) else row_dict['iocs']
+                row_dict['metadata'] = json.loads(row_dict['metadata']) if isinstance(row_dict['metadata'], str) else row_dict['metadata']
+                return Attack(**row_dict)
             return None
     
     async def get_recent_attacks(self, limit: int = 50, offset: int = 0) -> List[AttackSummary]:

@@ -54,5 +54,7 @@ redis>=5.0.0
 pydantic-settings>=2.0.0
 aiokafka>=0.8.0
 sqlalchemy>=2.0.0
+asyncpg==0.29.0
+    # via narrative_manipulation_filter (async PostgreSQL)
 async-timeout>=4.0.0
 packaging>=23.0

@@ -67,10 +67,15 @@ func (c *VulnClient) QueryVulnerability(cve, product, version string, context ma
 
 func (c *VulnClient) Health() (map[string]string, error) {
 	httpReq, _ := http.NewRequest("GET", fmt.Sprintf("%s/health", c.baseURL), nil)
-	resp, _ := c.httpClient.Do(httpReq)
+	resp, err := c.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	var result map[string]string
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
