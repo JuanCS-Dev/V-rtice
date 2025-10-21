@@ -1819,13 +1819,13 @@ services:
     - MEMORY_DECAY_RATE=0.05
     - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9096
     - KAFKA_CONSCIOUSNESS_TOPIC=consciousness-events
-    depends_on:
-    - kafka-immunity
     - MIN_PATTERN_SIZE=3
     - TEMPORAL_WINDOW_MINUTES=60
     - ENABLE_ATTACK_CHAIN_DETECTION=true
     - ENABLE_AUTO_CONSOLIDATION=true
     - CONSOLIDATION_BATCH_SIZE=1000
+    depends_on:
+    - kafka-immunity
     networks:
     - maximus-network
     restart: unless-stopped
