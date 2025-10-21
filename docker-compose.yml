@@ -2583,6 +2583,160 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # =============================================================================
+  # COAGULATION CASCADE - Bio-inspired Breach Containment System
+  # =============================================================================
+
+  # NATS JetStream Cluster (Event Bus for Coagulation Services)
+  nats-jetstream:
+    image: nats:2.10-alpine
+    container_name: vertice-nats-jetstream
+    ports:
+      - "4222:4222"  # Client connections
+      - "8222:8222"  # HTTP monitoring
+      - "6222:6222"  # Cluster routing
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+      - "--max_payload=8MB"
+      - "--max_memory_store=1GB"
+      - "--max_file_store=10GB"
+    volumes:
+      - nats-jetstream-data:/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Factor Xa Service - Quarantine Activator (Cascade Amplification)
+  factor_xa_service:
+    build:
+      context: ./backend/coagulation
+      dockerfile: cascade/factor_xa/Dockerfile
+    container_name: vertice-factor-xa
+    ports:
+      - "8050:8050"
+    environment:
+      - PORT=8050
+      - NATS_URL=nats://nats-jetstream:4222
+      - LOG_LEVEL=INFO
+    depends_on:
+      - nats-jetstream
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Factor VIIa Service - Breach Detection Trigger (Extrinsic Pathway)
+  factor_viia_service:
+    build:
+      context: ./backend/coagulation
+      dockerfile: cascade/factor_viia/Dockerfile
+    container_name: vertice-factor-viia
+    ports:
+      - "8051:8051"
+    environment:
+      - PORT=8051
+      - NATS_URL=nats://nats-jetstream:4222
+      - LOG_LEVEL=INFO
+    depends_on:
+      - nats-jetstream
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8051/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Antithrombin Service - Global Circuit Breaker (Emergency Dampening)
+  antithrombin_service:
+    build:
+      context: ./backend/coagulation
+      dockerfile: regulation/antithrombin/Dockerfile
+    container_name: vertice-antithrombin
+    ports:
+      - "8052:8052"
+    environment:
+      - PORT=8052
+      - NATS_URL=nats://nats-jetstream:4222
+      - LOG_LEVEL=INFO
+      - IMPACT_THRESHOLD=0.7
+    depends_on:
+      - nats-jetstream
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8052/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Protein C Service - Context-Aware Regulation (Spatial Dampening)
+  protein_c_service:
+    build:
+      context: ./backend/coagulation
+      dockerfile: regulation/protein_c/Dockerfile
+    container_name: vertice-protein-c
+    ports:
+      - "8053:8053"
+    environment:
+      - PORT=8053
+      - NATS_URL=nats://nats-jetstream:4222
+      - LOG_LEVEL=INFO
+      - MAXIMUS_CORE_URL=http://maximus_core_service:8100
+    depends_on:
+      - nats-jetstream
+      - maximus_core_service
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8053/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # TFPI Service - Tissue Factor Pathway Inhibitor (Early Regulation)
+  tfpi_service:
+    build:
+      context: ./backend/coagulation
+      dockerfile: regulation/tfpi/Dockerfile
+    container_name: vertice-tfpi
+    ports:
+      - "8054:8054"
+    environment:
+      - PORT=8054
+      - NATS_URL=nats://nats-jetstream:4222
+      - LOG_LEVEL=INFO
+    depends_on:
+      - nats-jetstream
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8054/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
 networks:
   maximus-network:
     name: maximus-ai-network
@@ -2669,4 +2823,6 @@ volumes:
   cuckoo_data:
     driver: local
   cuckoo_tmp:
+    driver: local
+  nats-jetstream-data:
     driver: local
