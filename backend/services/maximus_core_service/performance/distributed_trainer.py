@@ -14,11 +14,13 @@ Author: Claude Code + JuanCS-Dev
 Date: 2025-10-06
 """
 
+from __future__ import annotations
+
 import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # Try to import PyTorch
 try:
@@ -31,6 +33,8 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
+    if TYPE_CHECKING:
+        import torch.nn as nn
 
 logger = logging.getLogger(__name__)
 

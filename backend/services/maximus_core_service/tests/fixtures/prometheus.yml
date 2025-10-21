@@ -1,0 +1,36 @@
+# Prometheus configuration for test environment
+# Author: Claude Code + JuanCS-Dev
+# Date: 2025-10-20
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # Self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # MAXIMUS services (when running in test mode)
+  - job_name: 'maximus_core'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+    metrics_path: '/metrics'
+
+  # Consciousness services
+  - job_name: 'consciousness_metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+    metrics_path: '/consciousness/metrics'
+
+  # Kafka exporter (if available)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+    metrics_path: '/metrics'
+
+  # Redis exporter (if available)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
