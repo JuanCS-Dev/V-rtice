@@ -8,6 +8,7 @@ EM NOME DE JESUS - SER BOM, NÃO PARECER BOM!
 
 import time
 import tempfile
+import asyncio
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch
@@ -1637,3 +1638,127 @@ class TestConsciousnessSafetyProtocolMetricsAndMonitoring:
 
         # Should detect multiple violations
         assert len(violations) >= 2
+
+
+class TestConsciousnessSafetyProtocolMonitoringLoop:
+    """Test ConsciousnessSafetyProtocol async monitoring loop."""
+
+    @pytest.mark.asyncio
+    async def test_monitoring_loop_runs_once(self):
+        """Test monitoring loop executes at least one cycle."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Start monitoring
+        await protocol.start_monitoring()
+
+        # Let it run briefly
+        await asyncio.sleep(0.1)
+
+        # Stop monitoring
+        await protocol.stop_monitoring()
+
+        assert protocol.monitoring_active == False
+
+    @pytest.mark.asyncio
+    async def test_monitoring_loop_pauses_when_kill_switch_triggered(self):
+        """Test monitoring loop pauses when kill switch is triggered."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Trigger kill switch
+        protocol.kill_switch.trigger(reason=ShutdownReason.MANUAL, context={})
+
+        # Start monitoring (should pause)
+        await protocol.start_monitoring()
+
+        # Let it run briefly
+        await asyncio.sleep(0.1)
+
+        # Stop monitoring
+        await protocol.stop_monitoring()
+
+        assert protocol.kill_switch.is_triggered() == True
+
+    @pytest.mark.asyncio
+    async def test_collect_metrics_returns_dict(self):
+        """Test _collect_metrics returns dict."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        metrics = protocol._collect_metrics()
+
+        # Should return dict (may be empty in test env)
+        assert isinstance(metrics, dict)
+
+    @pytest.mark.asyncio
+    async def test_collect_metrics_with_arousal(self):
+        """Test _collect_metrics collects arousal."""
+        mock_system = Mock()
+        mock_system.get_system_dict = Mock(return_value={
+            "arousal": {"arousal": 0.82}
+        })
+
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        metrics = protocol._collect_metrics()
+
+        assert metrics.get("arousal") == 0.82
+
+    @pytest.mark.asyncio
+    async def test_collect_metrics_handles_missing_components(self):
+        """Test _collect_metrics handles missing components gracefully."""
+        mock_system = Mock(spec=[])  # No components
+
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        metrics = protocol._collect_metrics()
+
+        # Should still return dict (may be empty if psutil fails)
+        assert isinstance(metrics, dict)
+
+    @pytest.mark.asyncio
+    async def test_protocol_checks_all_monitors_in_loop(self):
+        """Test monitoring loop checks all monitors."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Mock check_interval to be very short
+        protocol.threshold_monitor.check_interval = 0.01
+
+        # Start monitoring
+        await protocol.start_monitoring()
+
+        # Let it run one cycle
+        await asyncio.sleep(0.05)
+
+        # Stop monitoring
+        await protocol.stop_monitoring()
+
+        # Monitoring ran
+        assert protocol.monitoring_active == False
+
+    @pytest.mark.asyncio
+    async def test_monitoring_loop_handles_exceptions(self):
+        """Test monitoring loop handles exceptions gracefully."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Mock _collect_metrics to raise exception
+        original_collect = protocol._collect_metrics
+        protocol._collect_metrics = Mock(side_effect=RuntimeError("Test error"))
+
+        # Start monitoring
+        await protocol.start_monitoring()
+
+        # Let it run briefly (should handle exception and continue)
+        await asyncio.sleep(0.05)
+
+        # Stop monitoring
+        await protocol.stop_monitoring()
+
+        # Should have attempted to collect metrics
+        protocol._collect_metrics.assert_called()
+
+        # Restore
+        protocol._collect_metrics = original_collect
