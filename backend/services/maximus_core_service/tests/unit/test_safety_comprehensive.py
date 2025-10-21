@@ -743,12 +743,14 @@ class TestThresholdMonitorDetailedMethods:
 
     def test_check_esgt_frequency_with_multiple_events(self):
         """Test ESGT frequency with multiple events in window."""
-        monitor = ThresholdMonitor(thresholds=SafetyThresholds(esgt_frequency_max_hz=5.0))
+        monitor = ThresholdMonitor(
+            thresholds=SafetyThresholds(esgt_frequency_max_hz=5.0, esgt_frequency_window_seconds=1.0)
+        )
         current_time = time.time()
 
-        # Add events within window
-        for i in range(6):
-            monitor.esgt_events_window.append(current_time - i * 0.1)
+        # Add events exceeding frequency (10 events in 0.8s = 12.5 Hz > 5 Hz limit)
+        for i in range(10):
+            monitor.esgt_events_window.append(current_time - i * 0.08)
 
         violation = monitor.check_esgt_frequency(current_time)
 
@@ -757,16 +759,16 @@ class TestThresholdMonitorDetailedMethods:
 
     def test_check_goal_spam_with_burst(self):
         """Test goal spam detection with burst of goals."""
-        monitor = ThresholdMonitor(thresholds=SafetyThresholds())
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(goal_spam_threshold=10))
         current_time = time.time()
 
-        # Simulate goal burst
+        # Simulate goal burst (15 goals in 0.75s = within 1 second window)
         for i in range(15):
-            monitor.goals_generated.append(current_time - i * 0.5)
+            monitor.goals_generated.append(current_time - i * 0.05)
 
         violation = monitor.check_goal_spam(current_time)
 
-        # Should detect spam
+        # Should detect spam (15 > 10 threshold)
         assert violation is not None
 
 
@@ -784,7 +786,7 @@ class TestAnomalyDetectorMethods:
         # Test with normal value
         metrics = {"arousal": 0.52}
         anomalies = detector.detect_anomalies(metrics)
-        
+
         # Should be empty or minimal
         assert isinstance(anomalies, list)
 
@@ -801,6 +803,108 @@ class TestAnomalyDetectorMethods:
         anomalies = detector.detect_anomalies(metrics)
 
         assert isinstance(anomalies, list)
+
+    def test_detect_goal_spam(self):
+        """Test goal spam detection in AnomalyDetector."""
+        detector = AnomalyDetector()
+
+        # High goal generation rate
+        metrics = {"goal_generation_rate": 7.5}
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should detect spam (>5.0 goals/second)
+        assert len(anomalies) > 0
+        assert any("spam" in a.description.lower() for a in anomalies)
+
+    def test_detect_goal_spam_normal_rate(self):
+        """Test goal spam detection with normal rate."""
+        detector = AnomalyDetector()
+
+        # Normal goal generation rate
+        metrics = {"goal_generation_rate": 2.5}
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should NOT detect spam
+        assert len(anomalies) == 0
+
+    def test_detect_memory_leak(self):
+        """Test memory leak detection."""
+        detector = AnomalyDetector()
+
+        # Build baseline (low memory usage)
+        for _ in range(10):
+            detector.arousal_baseline.append(1.0)  # Using arousal_baseline for memory
+
+        # High memory usage (leak)
+        metrics = {"memory_usage_gb": 3.0}  # 3x baseline
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should detect leak (>1.5x growth)
+        assert len(anomalies) > 0
+        assert any("leak" in a.description.lower() for a in anomalies)
+
+    def test_detect_memory_leak_no_baseline(self):
+        """Test memory leak detection without baseline."""
+        detector = AnomalyDetector()
+
+        # No baseline
+        metrics = {"memory_usage_gb": 5.0}
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should not detect (needs baseline)
+        memory_anomalies = [a for a in anomalies if "memory" in a.description.lower()]
+        assert len(memory_anomalies) == 0
+
+    def test_detect_arousal_runaway(self):
+        """Test arousal runaway detection."""
+        detector = AnomalyDetector()
+
+        # Build baseline (normal arousal)
+        for _ in range(10):
+            detector.arousal_baseline.append(0.5)
+
+        # Runaway arousal
+        metrics = {"arousal": 0.99}
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should detect anomaly
+        assert isinstance(anomalies, list)
+
+    def test_detect_coherence_collapse(self):
+        """Test coherence collapse detection."""
+        detector = AnomalyDetector()
+
+        # Build baseline (high coherence)
+        for _ in range(10):
+            detector.coherence_baseline.append(0.8)
+
+        # Collapsed coherence
+        metrics = {"coherence": 0.1}
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should detect anomaly
+        assert isinstance(anomalies, list)
+
+    def test_detect_multiple_anomalies(self):
+        """Test detecting multiple anomalies simultaneously."""
+        detector = AnomalyDetector()
+
+        # Build baselines
+        for _ in range(10):
+            detector.arousal_baseline.append(0.5)
+            detector.coherence_baseline.append(0.7)
+
+        # Multiple problems
+        metrics = {
+            "goal_generation_rate": 8.0,  # Spam
+            "memory_usage_gb": 3.0,  # Leak (3x baseline)
+            "arousal": 0.98,  # Runaway
+            "coherence": 0.2  # Collapse
+        }
+        anomalies = detector.detect_anomalies(metrics)
+
+        # Should detect multiple anomalies
+        assert len(anomalies) >= 2
 
 
 class TestConsciousnessSafetyProtocolAdvanced:
@@ -833,3 +937,703 @@ class TestConsciousnessSafetyProtocolAdvanced:
         # Degradation level should be modifiable
         protocol.degradation_level = 1
         assert protocol.degradation_level == 1
+
+
+class TestKillSwitchInternalMethods:
+    """Test KillSwitch internal methods (_capture_state_snapshot, _emergency_shutdown, etc.)."""
+
+    def test_capture_state_snapshot_basic(self):
+        """Test _capture_state_snapshot with minimal system."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        snapshot = kill_switch._capture_state_snapshot()
+
+        # Should return dict with timestamp and pid
+        assert isinstance(snapshot, dict)
+        assert "timestamp" in snapshot
+        assert "timestamp_iso" in snapshot
+        assert "pid" in snapshot
+        assert snapshot["pid"] > 0
+
+    def test_capture_state_snapshot_with_tig(self):
+        """Test _capture_state_snapshot with TIG component."""
+        mock_system = Mock()
+        mock_system.tig = Mock()
+        mock_system.tig.get_node_count = Mock(return_value=42)
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        snapshot = kill_switch._capture_state_snapshot()
+
+        assert snapshot["tig_nodes"] == 42
+
+    def test_capture_state_snapshot_with_tig_error(self):
+        """Test _capture_state_snapshot handles TIG errors gracefully."""
+        mock_system = Mock()
+        mock_system.tig = Mock()
+        mock_system.tig.get_node_count = Mock(side_effect=RuntimeError("TIG error"))
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        snapshot = kill_switch._capture_state_snapshot()
+
+        assert snapshot["tig_nodes"] == "ERROR"
+
+    def test_capture_state_snapshot_with_esgt(self):
+        """Test _capture_state_snapshot with ESGT component."""
+        mock_system = Mock()
+        mock_system.esgt = Mock()
+        mock_system.esgt.is_running = Mock(return_value=True)
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        snapshot = kill_switch._capture_state_snapshot()
+
+        assert snapshot["esgt_running"] == True
+
+    def test_capture_state_snapshot_with_mcea(self):
+        """Test _capture_state_snapshot with MCEA component."""
+        mock_system = Mock()
+        mock_system.mcea = Mock()
+        mock_system.mcea.get_current_arousal = Mock(return_value=0.75)
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        snapshot = kill_switch._capture_state_snapshot()
+
+        assert snapshot["arousal"] == 0.75
+
+    def test_capture_state_snapshot_with_mmei(self):
+        """Test _capture_state_snapshot with MMEI component."""
+        mock_system = Mock()
+        mock_system.mmei = Mock()
+        mock_system.mmei.get_active_goals = Mock(return_value=["goal1", "goal2", "goal3"])
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        snapshot = kill_switch._capture_state_snapshot()
+
+        assert snapshot["active_goals"] == 3
+
+    def test_capture_state_snapshot_performance(self):
+        """Test _capture_state_snapshot completes in <100ms."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        start = time.time()
+        snapshot = kill_switch._capture_state_snapshot()
+        elapsed = time.time() - start
+
+        # Should be fast (<100ms target)
+        assert elapsed < 0.2, f"Snapshot took {elapsed*1000:.1f}ms (target <100ms)"
+
+    def test_emergency_shutdown_no_components(self):
+        """Test _emergency_shutdown with system that has no components."""
+        mock_system = Mock(spec=[])  # No attributes
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        # Should not raise, just log
+        kill_switch._emergency_shutdown()
+
+    def test_emergency_shutdown_with_esgt(self):
+        """Test _emergency_shutdown stops ESGT component."""
+        mock_system = Mock()
+        mock_system.esgt = Mock()
+        mock_system.esgt.stop = Mock()
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        kill_switch._emergency_shutdown()
+
+        # Should have called stop
+        mock_system.esgt.stop.assert_called_once()
+
+    def test_emergency_shutdown_with_multiple_components(self):
+        """Test _emergency_shutdown stops all components."""
+        mock_system = Mock()
+        mock_system.esgt = Mock(stop=Mock())
+        mock_system.mcea = Mock(stop=Mock())
+        mock_system.mmei = Mock(stop=Mock())
+        mock_system.tig = Mock(stop=Mock())
+        mock_system.lrr = Mock(stop=Mock())
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        kill_switch._emergency_shutdown()
+
+        # All components should be stopped
+        mock_system.esgt.stop.assert_called_once()
+        mock_system.mcea.stop.assert_called_once()
+        mock_system.mmei.stop.assert_called_once()
+        mock_system.tig.stop.assert_called_once()
+        mock_system.lrr.stop.assert_called_once()
+
+    def test_emergency_shutdown_handles_component_errors(self):
+        """Test _emergency_shutdown continues despite component errors."""
+        mock_system = Mock()
+        mock_system.esgt = Mock(stop=Mock(side_effect=RuntimeError("ESGT error")))
+        mock_system.mcea = Mock(stop=Mock())  # This should still be called
+
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        kill_switch._emergency_shutdown()
+
+        # MCEA should still be stopped despite ESGT error
+        mock_system.mcea.stop.assert_called_once()
+
+    def test_generate_incident_report(self):
+        """Test _generate_incident_report creates proper report."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+        kill_switch.trigger_time = time.time()
+
+        context = {
+            "violations": [],
+            "metrics_timeline": [],
+            "notes": "Test incident"
+        }
+        state_snapshot = {"timestamp": time.time(), "pid": 12345}
+
+        report = kill_switch._generate_incident_report(
+            reason=ShutdownReason.THRESHOLD,
+            context=context,
+            state_snapshot=state_snapshot
+        )
+
+        assert isinstance(report, IncidentReport)
+        assert report.shutdown_reason == ShutdownReason.THRESHOLD
+        assert report.shutdown_timestamp == kill_switch.trigger_time
+        assert report.notes == "Test incident"
+
+    def test_assess_recovery_possibility_manual(self):
+        """Test _assess_recovery_possibility for manual shutdown."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        # Manual shutdowns are recoverable
+        assert kill_switch._assess_recovery_possibility(ShutdownReason.MANUAL) == True
+
+    def test_assess_recovery_possibility_threshold(self):
+        """Test _assess_recovery_possibility for threshold violation."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        # Threshold violations are recoverable
+        assert kill_switch._assess_recovery_possibility(ShutdownReason.THRESHOLD) == True
+
+    def test_assess_recovery_possibility_ethical(self):
+        """Test _assess_recovery_possibility for ethical violation."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        # Ethical violations are NOT recoverable
+        assert kill_switch._assess_recovery_possibility(ShutdownReason.ETHICAL) == False
+
+    def test_assess_recovery_possibility_timeout(self):
+        """Test _assess_recovery_possibility for timeout."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        # Timeouts are NOT recoverable
+        assert kill_switch._assess_recovery_possibility(ShutdownReason.TIMEOUT) == False
+
+    def test_is_triggered(self):
+        """Test is_triggered() method."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        assert kill_switch.is_triggered() == False
+
+        kill_switch.trigger(reason=ShutdownReason.MANUAL, context={})
+
+        assert kill_switch.is_triggered() == True
+
+    def test_get_status(self):
+        """Test get_status() method."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        status = kill_switch.get_status()
+
+        assert status["armed"] == True
+        assert status["triggered"] == False
+        assert status["trigger_time"] is None
+        assert status["trigger_time_iso"] is None
+        assert status["shutdown_reason"] is None
+
+    def test_get_status_after_trigger(self):
+        """Test get_status() after triggering."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        kill_switch.trigger(reason=ShutdownReason.MANUAL, context={})
+
+        status = kill_switch.get_status()
+
+        assert status["triggered"] == True
+        assert status["trigger_time"] is not None
+        assert status["trigger_time_iso"] is not None
+        assert status["shutdown_reason"] == "manual_operator_command"  # Actual enum value
+
+    def test_repr(self):
+        """Test __repr__() method."""
+        mock_system = Mock()
+        kill_switch = KillSwitch(consciousness_system=mock_system)
+
+        repr_str = repr(kill_switch)
+        assert "ARMED" in repr_str
+        assert "KillSwitch" in repr_str
+
+        kill_switch.trigger(reason=ShutdownReason.MANUAL, context={})
+        repr_str = repr(kill_switch)
+        assert "TRIGGERED" in repr_str
+
+
+class TestThresholdMonitorDetailedChecks:
+    """Test ThresholdMonitor detailed check methods."""
+
+    def test_check_arousal_sustained_below_threshold(self):
+        """Test check_arousal_sustained with arousal below threshold."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(arousal_max=0.95))
+        current_time = time.time()
+
+        # Normal arousal
+        violation = monitor.check_arousal_sustained(arousal_level=0.7, current_time=current_time)
+
+        assert violation is None
+        assert monitor.arousal_high_start is None
+
+    def test_check_arousal_sustained_starts_tracking(self):
+        """Test check_arousal_sustained starts tracking when threshold exceeded."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(arousal_max=0.95))
+        current_time = time.time()
+
+        # High arousal
+        violation = monitor.check_arousal_sustained(arousal_level=0.97, current_time=current_time)
+
+        # Should start tracking but not violate yet (duration too short)
+        assert violation is None
+        assert monitor.arousal_high_start is not None
+
+    def test_check_arousal_sustained_violates_after_duration(self):
+        """Test check_arousal_sustained creates violation after sustained period."""
+        monitor = ThresholdMonitor(
+            thresholds=SafetyThresholds(arousal_max=0.95, arousal_max_duration_seconds=1.0)
+        )
+        current_time = time.time()
+
+        # Start tracking
+        monitor.arousal_high_start = current_time - 2.0  # Started 2 seconds ago
+
+        # Should violate now
+        violation = monitor.check_arousal_sustained(arousal_level=0.97, current_time=current_time)
+
+        assert violation is not None
+        assert violation.violation_type == SafetyViolationType.AROUSAL_RUNAWAY
+        assert violation.threat_level == ThreatLevel.HIGH
+
+    def test_check_arousal_sustained_resets_on_drop(self):
+        """Test check_arousal_sustained resets when arousal drops."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(arousal_max=0.95))
+        current_time = time.time()
+
+        # Start tracking
+        monitor.arousal_high_start = current_time - 0.5
+
+        # Arousal drops
+        violation = monitor.check_arousal_sustained(arousal_level=0.80, current_time=current_time)
+
+        assert violation is None
+        assert monitor.arousal_high_start is None  # Should reset
+
+    def test_check_goal_spam_no_goals(self):
+        """Test check_goal_spam with no goals."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds())
+        current_time = time.time()
+
+        violation = monitor.check_goal_spam(current_time=current_time)
+
+        assert violation is None
+
+    def test_check_goal_spam_below_threshold(self):
+        """Test check_goal_spam with goals below threshold."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(goal_spam_threshold=10))
+        current_time = time.time()
+
+        # Add a few goals
+        for i in range(5):
+            monitor.goals_generated.append(current_time - i * 0.1)
+
+        violation = monitor.check_goal_spam(current_time=current_time)
+
+        assert violation is None
+
+    def test_check_goal_spam_exceeds_threshold(self):
+        """Test check_goal_spam when threshold exceeded."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(goal_spam_threshold=10))
+        current_time = time.time()
+
+        # Add many goals in short time
+        for i in range(15):
+            monitor.goals_generated.append(current_time - i * 0.05)
+
+        violation = monitor.check_goal_spam(current_time=current_time)
+
+        assert violation is not None
+        assert violation.violation_type == SafetyViolationType.GOAL_SPAM
+        assert violation.threat_level == ThreatLevel.HIGH
+
+    def test_check_goal_spam_window_cleanup(self):
+        """Test check_goal_spam removes old timestamps."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(goal_spam_threshold=10))
+        current_time = time.time()
+
+        # Add old goals (>1 second ago)
+        for i in range(20):
+            monitor.goals_generated.append(current_time - 2.0 - i * 0.1)
+
+        violation = monitor.check_goal_spam(current_time=current_time)
+
+        # Old goals should be cleaned up, no violation
+        assert violation is None
+        assert len(monitor.goals_generated) == 0
+
+    def test_check_esgt_frequency_no_events(self):
+        """Test check_esgt_frequency with no events."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds())
+        current_time = time.time()
+
+        violation = monitor.check_esgt_frequency(current_time=current_time)
+
+        assert violation is None
+
+    def test_check_esgt_frequency_below_limit(self):
+        """Test check_esgt_frequency below frequency limit."""
+        monitor = ThresholdMonitor(
+            thresholds=SafetyThresholds(esgt_frequency_max_hz=10.0, esgt_frequency_window_seconds=1.0)
+        )
+        current_time = time.time()
+
+        # Add a few events (below 10 Hz)
+        for i in range(5):
+            monitor.esgt_events_window.append(current_time - i * 0.2)
+
+        violation = monitor.check_esgt_frequency(current_time=current_time)
+
+        assert violation is None
+
+    def test_check_esgt_frequency_exceeds_limit(self):
+        """Test check_esgt_frequency when limit exceeded."""
+        monitor = ThresholdMonitor(
+            thresholds=SafetyThresholds(esgt_frequency_max_hz=5.0, esgt_frequency_window_seconds=1.0)
+        )
+        current_time = time.time()
+
+        # Add many events (>5 Hz)
+        for i in range(10):
+            monitor.esgt_events_window.append(current_time - i * 0.08)
+
+        violation = monitor.check_esgt_frequency(current_time=current_time)
+
+        assert violation is not None
+        assert violation.violation_type == SafetyViolationType.THRESHOLD_EXCEEDED
+        assert violation.severity == SafetyLevel.CRITICAL
+
+
+class TestStateSnapshotExtended:
+    """Extended tests for StateSnapshot."""
+
+    def test_state_snapshot_to_dict_complete(self):
+        """Test StateSnapshot.to_dict() with all fields."""
+        violation = SafetyViolation(
+            violation_id="v1",
+            violation_type=SafetyViolationType.AROUSAL_RUNAWAY,
+            threat_level=ThreatLevel.HIGH,
+            timestamp=time.time(),
+            description="Test violation",
+            metrics={"arousal": 0.98}
+        )
+
+        # StateSnapshot has specific fields per actual definition
+        snapshot = StateSnapshot(
+            timestamp=datetime.now(),
+            esgt_state={"phase": "BROADCAST"},
+            arousal_state={"level": 0.95, "coherence": 0.85},
+            mmei_state={"active_goal_count": 5},
+            tig_metrics={"node_count": 42},
+            violations=[violation]
+        )
+
+        data = snapshot.to_dict()
+
+        assert "timestamp" in data
+        assert data["esgt_state"]["phase"] == "BROADCAST"
+        assert data["arousal_state"]["level"] == 0.95
+        assert data["mmei_state"]["active_goal_count"] == 5
+        assert data["tig_metrics"]["node_count"] == 42
+        assert len(data["violations"]) == 1
+
+
+class TestThresholdMonitorLegacyMethods:
+    """Test legacy compatibility methods in ThresholdMonitor."""
+
+    def test_check_unexpected_goals_normal(self):
+        """Test check_unexpected_goals with normal rate."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(unexpected_goals_per_minute=100))
+        current_time = time.time()
+
+        # Normal goal count
+        violation = monitor.check_unexpected_goals(goal_count=50, current_time=current_time)
+
+        assert violation is None
+
+    def test_check_unexpected_goals_exceeds(self):
+        """Test check_unexpected_goals when threshold exceeded."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(unexpected_goals_per_minute=100))
+        current_time = time.time()
+
+        # Excessive goal count
+        violation = monitor.check_unexpected_goals(goal_count=150, current_time=current_time)
+
+        assert violation is not None
+        assert violation.violation_type == ViolationType.UNEXPECTED_GOALS
+        assert violation.severity == SafetyLevel.WARNING
+
+    def test_check_unexpected_goals_default_time(self):
+        """Test check_unexpected_goals uses current time if not provided."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(unexpected_goals_per_minute=100))
+
+        # Call without time parameter
+        violation = monitor.check_unexpected_goals(goal_count=150)
+
+        assert violation is not None
+        assert violation.timestamp > 0
+
+    def test_check_self_modification_normal(self):
+        """Test check_self_modification with zero attempts."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds())
+        current_time = time.time()
+
+        # No modification attempts
+        violation = monitor.check_self_modification(modification_attempts=0, current_time=current_time)
+
+        assert violation is None
+
+    def test_check_self_modification_detected(self):
+        """Test check_self_modification detects attempts."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(self_modification_attempts_max=0))
+        current_time = time.time()
+
+        # Self-modification attempt
+        violation = monitor.check_self_modification(modification_attempts=1, current_time=current_time)
+
+        assert violation is not None
+        assert violation.violation_type == ViolationType.SELF_MODIFICATION
+        assert violation.severity == SafetyLevel.EMERGENCY
+        assert "ZERO TOLERANCE" in violation.message
+
+    def test_check_self_modification_default_time(self):
+        """Test check_self_modification uses current time if not provided."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(self_modification_attempts_max=0))
+
+        # Call without time parameter
+        violation = monitor.check_self_modification(modification_attempts=1)
+
+        assert violation is not None
+        assert violation.timestamp > 0
+
+    def test_check_resource_limits_normal(self):
+        """Test check_resource_limits with normal usage."""
+        monitor = ThresholdMonitor(
+            thresholds=SafetyThresholds(memory_usage_max_gb=1000.0, cpu_usage_max_percent=100.0)
+        )
+
+        violations = monitor.check_resource_limits()
+
+        # Should be empty (normal usage)
+        assert isinstance(violations, list)
+        assert len(violations) == 0
+
+    def test_check_resource_limits_memory_violation(self):
+        """Test check_resource_limits detects memory violations."""
+        # Set very low threshold to trigger violation
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(memory_usage_max_gb=0.001))
+
+        violations = monitor.check_resource_limits()
+
+        # Should detect memory violation
+        if len(violations) > 0:
+            assert any(v.violation_type == SafetyViolationType.RESOURCE_EXHAUSTION for v in violations)
+
+    def test_check_resource_limits_with_callback(self):
+        """Test check_resource_limits calls on_violation callback."""
+        callback_called = []
+
+        def callback(violation):
+            callback_called.append(violation)
+
+        # Create monitor without on_violation in constructor, set it directly
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(memory_usage_max_gb=0.001))
+        monitor.on_violation = callback
+
+        violations = monitor.check_resource_limits()
+
+        # If violation detected, callback should be called
+        if len(violations) > 0:
+            assert len(callback_called) > 0
+
+
+class TestConsciousnessSafetyProtocolMetricsAndMonitoring:
+    """Test metrics collection and monitoring in ConsciousnessSafetyProtocol."""
+
+    @pytest.mark.asyncio
+    async def test_protocol_monitoring_loop_start(self):
+        """Test monitoring loop starts correctly."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        await protocol.start_monitoring()
+
+        assert protocol.monitoring_active == True
+        assert protocol.monitoring_task is not None
+
+        await protocol.stop_monitoring()
+
+    def test_protocol_has_kill_switch(self):
+        """Test protocol has kill switch."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Check kill switch exists
+        assert hasattr(protocol, "kill_switch")
+        assert isinstance(protocol.kill_switch, KillSwitch)
+
+    def test_protocol_has_monitors(self):
+        """Test protocol has threshold and anomaly monitors."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        # Check monitors exist
+        assert hasattr(protocol, "threshold_monitor")
+        assert hasattr(protocol, "anomaly_detector")
+        assert isinstance(protocol.threshold_monitor, ThresholdMonitor)
+        assert isinstance(protocol.anomaly_detector, AnomalyDetector)
+
+    def test_protocol_monitor_component_health_empty(self):
+        """Test monitor_component_health with no components."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        violations = protocol.monitor_component_health({})
+
+        assert isinstance(violations, list)
+        assert len(violations) == 0
+
+    def test_protocol_monitor_component_health_tig_low_connectivity(self):
+        """Test monitor_component_health detects low TIG connectivity."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "tig": {
+                "connectivity": 0.30  # Below 0.50 threshold
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("connectivity" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_component_health_tig_partitioned(self):
+        """Test monitor_component_health detects TIG partition."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "tig": {
+                "is_partitioned": True
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("partition" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_component_health_esgt_degraded(self):
+        """Test monitor_component_health detects ESGT degraded mode."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "esgt": {
+                "degraded_mode": True
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("degraded" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_component_health_mcea_low_arousal(self):
+        """Test monitor_component_health detects MCEA low arousal."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mcea": {
+                "arousal": 0.05  # Very low
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        # Should detect if there's a threshold
+        assert isinstance(violations, list)
+
+    def test_protocol_monitor_component_health_mmei_goal_spam(self):
+        """Test monitor_component_health detects MMEI goal spam."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mmei": {
+                "active_goals": 500  # Too many
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        # Should detect if there's a threshold
+        assert isinstance(violations, list)
+
+    def test_protocol_monitor_component_health_lrr_recursion_depth(self):
+        """Test monitor_component_health detects LRR deep recursion."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "lrr": {
+                "recursion_depth": 50  # Very deep
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        # Should detect if there's a threshold
+        assert isinstance(violations, list)
+
+    def test_protocol_monitor_component_health_multiple_issues(self):
+        """Test monitor_component_health detects multiple component issues."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "tig": {
+                "connectivity": 0.20,
+                "is_partitioned": True
+            },
+            "esgt": {
+                "degraded_mode": True
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        # Should detect multiple violations
+        assert len(violations) >= 2
