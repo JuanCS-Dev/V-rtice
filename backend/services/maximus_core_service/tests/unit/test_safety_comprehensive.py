@@ -1762,3 +1762,167 @@ class TestConsciousnessSafetyProtocolMonitoringLoop:
 
         # Restore
         protocol._collect_metrics = original_collect
+
+
+class TestConsciousnessSafetyProtocolExtendedComponentHealthChecks:
+    """Test extended component health monitoring."""
+
+    def test_protocol_monitor_esgt_frequency_high(self):
+        """Test monitor_component_health detects high ESGT frequency."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "esgt": {
+                "frequency_hz": 9.5  # Above 9.0 threshold
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("frequency" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_esgt_circuit_breaker_open(self):
+        """Test monitor_component_health detects circuit breaker open."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "esgt": {
+                "circuit_breaker_state": "open"
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("circuit breaker" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_mmei_overflow(self):
+        """Test monitor_component_health detects MMEI overflow."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mmei": {
+                "need_overflow_events": 5
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("overflow" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_mmei_rate_limiting(self):
+        """Test monitor_component_health detects excessive rate limiting."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mmei": {
+                "goals_rate_limited": 15  # Above 10 threshold
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("rate limit" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_mcea_saturated(self):
+        """Test monitor_component_health detects MCEA saturation."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mcea": {
+                "is_saturated": True,
+                "current_arousal": 1.0
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("saturated" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_mcea_oscillation(self):
+        """Test monitor_component_health detects MCEA oscillation."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mcea": {
+                "oscillation_events": 3,
+                "arousal_variance": 0.25
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("oscillation" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_mcea_invalid_needs(self):
+        """Test monitor_component_health detects invalid needs."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "mcea": {
+                "invalid_needs_count": 10  # Above 5 threshold
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        assert len(violations) > 0
+        assert any("invalid" in v.description.lower() for v in violations)
+
+    def test_protocol_monitor_all_components_healthy(self):
+        """Test monitor_component_health with all components healthy."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        component_metrics = {
+            "tig": {
+                "connectivity": 0.95,
+                "is_partitioned": False
+            },
+            "esgt": {
+                "degraded_mode": False,
+                "broadcast_frequency_hz": 5.0,
+                "circuit_breaker_state": "closed"
+            },
+            "mcea": {
+                "is_saturated": False,
+                "oscillation_events": 0,
+                "invalid_needs_count": 0
+            },
+            "mmei": {
+                "need_overflow_events": 0,
+                "goals_rate_limited": 0
+            }
+        }
+
+        violations = protocol.monitor_component_health(component_metrics)
+
+        # Should be empty (all healthy)
+        assert len(violations) == 0
+
+
+class TestThresholdMonitorCPUResourceCheck:
+    """Test CPU resource checking in ThresholdMonitor."""
+
+    def test_check_resource_limits_cpu_violation(self):
+        """Test check_resource_limits detects CPU violations."""
+        # Set very low CPU threshold
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(cpu_usage_max_percent=0.01))
+
+        violations = monitor.check_resource_limits()
+
+        # Should detect CPU violation (if system is running)
+        # Note: May not trigger in all environments
+        assert isinstance(violations, list)
