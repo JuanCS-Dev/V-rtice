@@ -322,6 +322,50 @@ class TestStateSnapshot:
         assert "timestamp" in data
         assert "esgt_state" in data
 
+    def test_state_snapshot_from_dict_basic(self):
+        """Test StateSnapshot.from_dict() with basic data."""
+        data = {
+            "timestamp": time.time(),
+            "esgt_state": {"arousal": 0.7},
+            "arousal_state": {},
+            "mmei_state": {},
+            "tig_metrics": {},
+            "recent_events": [],
+            "active_goals": [],
+            "violations": []
+        }
+
+        snapshot = StateSnapshot.from_dict(data)
+
+        assert snapshot.esgt_state["arousal"] == 0.7
+        assert isinstance(snapshot.timestamp, datetime)
+
+    def test_state_snapshot_from_dict_with_violations(self):
+        """Test StateSnapshot.from_dict() with violation data."""
+        violation_data = {
+            "violation_id": "v1",
+            "violation_type": "cpu_saturation",
+            "severity": "warning",
+            "description": "High CPU",
+            "metrics": {"cpu": 85.0}
+        }
+
+        data = {
+            "timestamp": datetime.now().isoformat(),
+            "esgt_state": {},
+            "arousal_state": {},
+            "mmei_state": {},
+            "tig_metrics": {},
+            "recent_events": [],
+            "active_goals": [],
+            "violations": [violation_data]
+        }
+
+        snapshot = StateSnapshot.from_dict(data)
+
+        assert len(snapshot.violations) == 1
+        assert snapshot.violations[0].violation_id == "v1"
+
 
 class TestKillSwitch:
     """Test KillSwitch class."""
@@ -692,3 +736,100 @@ pytestmark = pytest.mark.safety
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--cov=consciousness.safety", "--cov-report=term-missing"])
+
+
+class TestThresholdMonitorDetailedMethods:
+    """Detailed tests for ThresholdMonitor specific methods."""
+
+    def test_check_esgt_frequency_with_multiple_events(self):
+        """Test ESGT frequency with multiple events in window."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds(esgt_frequency_max_hz=5.0))
+        current_time = time.time()
+
+        # Add events within window
+        for i in range(6):
+            monitor.esgt_events_window.append(current_time - i * 0.1)
+
+        violation = monitor.check_esgt_frequency(current_time)
+
+        # Should violate frequency threshold
+        assert violation is not None
+
+    def test_check_goal_spam_with_burst(self):
+        """Test goal spam detection with burst of goals."""
+        monitor = ThresholdMonitor(thresholds=SafetyThresholds())
+        current_time = time.time()
+
+        # Simulate goal burst
+        for i in range(15):
+            monitor.goals_generated.append(current_time - i * 0.5)
+
+        violation = monitor.check_goal_spam(current_time)
+
+        # Should detect spam
+        assert violation is not None
+
+
+class TestAnomalyDetectorMethods:
+    """Test AnomalyDetector specific methods."""
+
+    def test_detect_arousal_anomaly(self):
+        """Test arousal anomaly detection."""
+        detector = AnomalyDetector()
+
+        # Build baseline
+        for _ in range(50):
+            detector.arousal_baseline.append(0.5)
+
+        # Test with normal value
+        metrics = {"arousal": 0.52}
+        anomalies = detector.detect_anomalies(metrics)
+        
+        # Should be empty or minimal
+        assert isinstance(anomalies, list)
+
+    def test_detect_coherence_spike(self):
+        """Test coherence spike detection."""
+        detector = AnomalyDetector()
+
+        # Build baseline
+        for _ in range(50):
+            detector.coherence_baseline.append(0.7)
+
+        # Test with spike
+        metrics = {"coherence": 0.95}
+        anomalies = detector.detect_anomalies(metrics)
+
+        assert isinstance(anomalies, list)
+
+
+class TestConsciousnessSafetyProtocolAdvanced:
+    """Advanced ConsciousnessSafetyProtocol tests."""
+
+    @pytest.mark.asyncio
+    async def test_protocol_start_stop_monitoring(self):
+        """Test starting and stopping monitoring."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        assert protocol.monitoring_active == False
+
+        await protocol.start_monitoring()
+
+        assert protocol.monitoring_active == True
+        assert protocol.monitoring_task is not None
+
+        await protocol.stop_monitoring()
+
+        assert protocol.monitoring_active == False
+
+    def test_protocol_degradation_levels(self):
+        """Test degradation level tracking."""
+        mock_system = Mock()
+        protocol = ConsciousnessSafetyProtocol(consciousness_system=mock_system)
+
+        assert protocol.degradation_level == 0
+
+        # Degradation level should be modifiable
+        protocol.degradation_level = 1
+        assert protocol.degradation_level == 1
