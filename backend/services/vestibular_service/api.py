@@ -9,12 +9,17 @@ Endpoints are provided for:
 - Querying the AI's current orientation and velocity.
 - Retrieving information about detected changes in motion or balance.
 
+FASE 3 Enhancement: Integrates with Digital Thalamus for Global Workspace
+broadcasting of salient vestibular perceptions.
+
 This API allows other Maximus AI services or external systems to leverage the
 Vestibular Service's capabilities, enabling Maximus to navigate, interact
 physically, and maintain stability with a robust sense of its own motion and
 spatial position.
 """
 
+import os
+import sys
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -22,14 +27,26 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+# Add shared directory to path for Thalamus client
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../shared"))
+
 from otolith_organs import OtolithOrgans
 from semicircular_canals import SemicircularCanals
+from thalamus_client import ThalamusClient
 
-app = FastAPI(title="Maximus Vestibular Service", version="1.0.0")
+app = FastAPI(title="Maximus Vestibular Service", version="2.0.0")
 
 # Initialize vestibular components
 otolith_organs = OtolithOrgans()
 semicircular_canals = SemicircularCanals()
+
+# Initialize Thalamus client for Global Workspace integration
+thalamus_url = os.getenv("DIGITAL_THALAMUS_URL", "http://digital_thalamus_service:8012")
+thalamus_client = ThalamusClient(
+    thalamus_url=thalamus_url,
+    sensor_id="vestibular_system_primary",
+    sensor_type="vestibular"
+)
 
 
 class MotionDataIngest(BaseModel):
@@ -40,18 +57,21 @@ class MotionDataIngest(BaseModel):
         accelerometer_data (List[float]): [x, y, z] acceleration values.
         gyroscope_data (List[float]): [x, y, z] angular velocity values.
         timestamp (str): ISO formatted timestamp of data collection.
+        priority (int): The priority of the motion data (1-10, 10 being highest).
     """
 
     sensor_id: str
     accelerometer_data: List[float]
     gyroscope_data: List[float]
     timestamp: str = Field(default_factory=lambda: datetime.now().isoformat())
+    priority: int = 5
 
 
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Vestibular Service."""
-    print("🤸 Starting Maximus Vestibular Service...")
+    print("⚖️  Starting Maximus Vestibular Service v2.0...")
+    print(f"   Thalamus URL: {thalamus_url}")
     print("✅ Maximus Vestibular Service started successfully.")
 
 
@@ -59,6 +79,7 @@ async def startup_event():
 async def shutdown_event():
     """Performs shutdown tasks for the Vestibular Service."""
     print("👋 Shutting down Maximus Vestibular Service...")
+    await thalamus_client.close()
     print("🛑 Maximus Vestibular Service shut down.")
 
 
@@ -95,7 +116,7 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
         "linear_acceleration": linear_motion.get("linear_acceleration", [0, 0, 0]),
     }
 
-    return {
+    results = {
         "status": "processed",
         "timestamp": datetime.now().isoformat(),
         "sensor_id": request.sensor_id,
@@ -103,6 +124,28 @@ async def ingest_motion_data(request: MotionDataIngest) -> Dict[str, Any]:
         "angular_motion_perception": angular_motion,
         "current_orientation": current_orientation,
     }
+
+    # FASE 3: Submit perception to Digital Thalamus for Global Workspace broadcasting
+    try:
+        thalamus_response = await thalamus_client.submit_perception(
+            data=results,
+            priority=request.priority,
+            timestamp=results["timestamp"]
+        )
+        results["thalamus_broadcast"] = {
+            "submitted": True,
+            "broadcasted_to_global_workspace": thalamus_response.get("broadcasted_to_global_workspace", False),
+            "salience": thalamus_response.get("salience", 0.0)
+        }
+        print(f"   📡 Vestibular perception submitted to Thalamus (salience: {thalamus_response.get('salience', 0.0):.2f})")
+    except Exception as e:
+        print(f"   ⚠️  Failed to submit to Thalamus: {e}")
+        results["thalamus_broadcast"] = {
+            "submitted": False,
+            "error": str(e)
+        }
+
+    return results
 
 
 @app.get("/orientation")

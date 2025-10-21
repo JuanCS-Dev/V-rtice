@@ -1,0 +1,32 @@
+
+sequenceDiagram
+    participant User
+    participant CLI_Typer as Vértice CLI (Typer)
+    participant Cmd_Auth as auth.py Command
+    participant AuthManager as auth.py AuthManager
+    participant Keyring as System Keyring
+    participant Filesystem as Filesystem (~/.vertice/auth)
+
+    User->>+CLI_Typer: vcli auth login --email test@user.com
+    CLI_Typer->>+Cmd_Auth: login("test@user.com")
+
+    Cmd_Auth->>User: styled_confirm("Authenticate as test@user.com?")
+    User-->>Cmd_Auth: Yes
+
+    Note over Cmd_Auth: Simulates OAuth2 Flow
+    Cmd_Auth->>Cmd_Auth: user_info = {email: "...", name: "..."}
+    Cmd_Auth->>Cmd_Auth: access_token = "ya29.mock_token_for_..."
+
+    Cmd_Auth->>+AuthManager: save_auth_data(user_info, access_token)
+    AuthManager->>+Keyring: set_password("vertice-cli", access_token)
+    Keyring-->>-AuthManager: OK
+
+    AuthManager->>+Filesystem: write("token.json", {expires_at: ...})
+    Filesystem-->>-AuthManager: OK
+
+    AuthManager->>+Filesystem: write("user.json", {email:..., name:...})
+    Filesystem-->>-AuthManager: OK
+
+    AuthManager-->>-Cmd_Auth: OK
+    Cmd_Auth->>CLI_Typer: (Exibe mensagem de boas-vindas)
+    CLI_Typer-->>-User: "Authentication Successful!"

@@ -10,6 +10,9 @@ Endpoints are provided for:
 - Requesting optimal decisions based on current context and goals.
 - Querying the AI's current emotional state or impulse control levels.
 
+FASE 3 Enhancement: Consumes Global Workspace consciousness events from Kafka
+for higher-order cognitive processing and decision-making.
+
 This API allows other Maximus AI services or human operators to leverage the
 Prefrontal Cortex Service's advanced cognitive capabilities, enabling Maximus
 to formulate long-term goals, evaluate potential actions, and maintain coherent,
@@ -17,10 +20,14 @@ goal-oriented behavior across the entire AI system.
 """
 
 import asyncio
+import json
+import logging
+import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import uvicorn
+from aiokafka import AIOKafkaConsumer
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -28,7 +35,15 @@ from emotional_state_monitor import EmotionalStateMonitor
 from impulse_inhibition import ImpulseInhibition
 from rational_decision_validator import RationalDecisionValidator
 
-app = FastAPI(title="Maximus Prefrontal Cortex Service", version="1.0.0")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="Maximus Prefrontal Cortex Service", version="2.0.0")
+
+# Global variables for Kafka consumer
+kafka_consumer: Optional[AIOKafkaConsumer] = None
+consumer_task: Optional[asyncio.Task] = None
+consciousness_events_buffer: List[Dict[str, Any]] = []
 
 # Initialize PFC components
 emotional_state_monitor = EmotionalStateMonitor()
@@ -64,17 +79,78 @@ class DecisionRequest(BaseModel):
     context: Optional[Dict[str, Any]] = None
 
 
+async def consume_consciousness_events():
+    """Background task to consume Global Workspace consciousness events from Kafka.
+
+    Processes events for higher-order decision making and strategic planning.
+    """
+    global kafka_consumer, consciousness_events_buffer
+
+    kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka-immunity:9096")
+    kafka_topic = os.getenv("KAFKA_CONSCIOUSNESS_TOPIC", "consciousness-events")
+
+    kafka_consumer = AIOKafkaConsumer(
+        kafka_topic,
+        bootstrap_servers=kafka_servers,
+        group_id="prefrontal-processors",
+        value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+        auto_offset_reset="latest"
+    )
+
+    logger.info(f"🧠 Connecting to Kafka: {kafka_servers}, topic: {kafka_topic}")
+
+    await kafka_consumer.start()
+    logger.info("✅ Kafka consumer started for Global Workspace events")
+
+    try:
+        async for msg in kafka_consumer:
+            event = msg.value
+            logger.info(f"   🔔 Consciousness event received: {event.get('sensor_type')} (salience: {event.get('salience', 0.0):.2f})")
+
+            # Process event for strategic planning
+            consciousness_events_buffer.append(event)
+
+            # Keep buffer size manageable (last 100 events)
+            if len(consciousness_events_buffer) > 100:
+                consciousness_events_buffer.pop(0)
+
+    except asyncio.CancelledError:
+        logger.info("Kafka consumer task cancelled")
+    except Exception as e:
+        logger.error(f"Error in Kafka consumer: {e}")
+    finally:
+        await kafka_consumer.stop()
+        logger.info("Kafka consumer stopped")
+
+
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Prefrontal Cortex Service."""
-    print("🧠 Starting Maximus Prefrontal Cortex Service...")  # pragma: no cover
+    global consumer_task
+
+    print("🧠 Starting Maximus Prefrontal Cortex Service v2.0...")  # pragma: no cover
+
+    # Start Kafka consumer in background
+    consumer_task = asyncio.create_task(consume_consciousness_events())
+
     print("✅ Maximus Prefrontal Cortex Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Prefrontal Cortex Service."""
+    global consumer_task
+
     print("👋 Shutting down Maximus Prefrontal Cortex Service...")  # pragma: no cover
+
+    # Stop Kafka consumer
+    if consumer_task:
+        consumer_task.cancel()
+        try:
+            await consumer_task
+        except asyncio.CancelledError:
+            pass
+
     print("🛑 Maximus Prefrontal Cortex Service shut down.")  # pragma: no cover
 
 
@@ -86,6 +162,20 @@ async def health_check() -> Dict[str, str]:
         Dict[str, str]: A dictionary indicating the service status.
     """
     return {"status": "healthy", "message": "Prefrontal Cortex Service is operational."}
+
+
+@app.get("/consciousness_events")
+async def get_consciousness_events() -> Dict[str, Any]:
+    """Retrieves recent consciousness events from Global Workspace.
+
+    Returns:
+        Dict[str, Any]: Recent consciousness events processed by Prefrontal Cortex.
+    """
+    return {
+        "total_events": len(consciousness_events_buffer),
+        "recent_events": consciousness_events_buffer[-10:] if consciousness_events_buffer else [],
+        "kafka_consumer_active": kafka_consumer is not None
+    }
 
 
 @app.post("/strategic_plan")

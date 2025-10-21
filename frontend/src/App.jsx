@@ -2,7 +2,6 @@
 
 import React, { useState, lazy, Suspense } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
 import { queryClient } from './config/queryClient';
@@ -97,7 +96,6 @@ function App() {
             )}
           </main>
         </ErrorBoundary>
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
       </ToastProvider>
     </QueryClientProvider>
   );

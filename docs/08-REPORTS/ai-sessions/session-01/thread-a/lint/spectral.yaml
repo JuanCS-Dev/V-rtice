@@ -1,0 +1,244 @@
+extends:
+  - spectral:oas
+
+formats:
+  - oas3_1
+  - oas3_0
+
+rules:
+  # ============================================================================
+  # REGRAS BÁSICAS DE QUALIDADE
+  # ============================================================================
+  
+  info-contact:
+    description: "Toda API deve mencionar canal de contato responsável."
+    message: "O campo 'contact' é obrigatório no objeto 'info'."
+    given: "$.info"
+    severity: error
+    then:
+      field: contact
+      function: truthy
+
+  info-contact-name:
+    description: "Contato deve ter nome do responsável."
+    message: "O campo 'contact.name' é obrigatório."
+    given: "$.info.contact"
+    severity: error
+    then:
+      field: name
+      function: truthy
+
+  info-contact-email:
+    description: "Contato deve ter email do responsável."
+    message: "O campo 'contact.email' é obrigatório."
+    given: "$.info.contact"
+    severity: error
+    then:
+      field: email
+      function: truthy
+
+  info-description:
+    description: "API deve ter descrição completa."
+    message: "O campo 'description' é obrigatório e deve ter pelo menos 50 caracteres."
+    given: "$.info"
+    severity: error
+    then:
+      field: description
+      function: length
+      functionOptions:
+        min: 50
+
+  # ============================================================================
+  # REGRAS DE VERSIONAMENTO
+  # ============================================================================
+  
+  info-version-semantic:
+    description: "Versão deve seguir semantic versioning (x.y.z)."
+    message: "A versão deve estar no formato semântico: major.minor.patch"
+    given: "$.info.version"
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+  # ============================================================================
+  # REGRAS DE TAGS E ORGANIZAÇÃO
+  # ============================================================================
+  
+  tags-defined:
+    description: "Tags devem ser declaradas no array global."
+    message: "Tag '{{value}}' deve ser declarada no array global 'tags'."
+    given: "$.paths[*][*].tags[*]"
+    severity: error
+    then:
+      function: enumeration
+      functionOptions:
+        values:
+          - MAXIMUS-AI
+          - MAXIMUS-Consciousness
+          - MAXIMUS-Governance
+          - Immune-Core
+          - Immune-Metrics
+          - vcli-Commands
+          - vcli-Telemetry
+          - vcli-Workspaces
+          - Frontend-Gateway
+          - Auth
+          - Satellites
+
+  operation-tags:
+    description: "Toda operação deve ter pelo menos uma tag."
+    message: "Operação deve ter pelo menos uma tag definida."
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: tags
+      function: truthy
+
+  # ============================================================================
+  # REGRAS DE OPERAÇÕES
+  # ============================================================================
+  
+  operation-operationId:
+    description: "Toda operação deve ter operationId único."
+    message: "O campo 'operationId' é obrigatório."
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: operationId
+      function: truthy
+
+  operation-description:
+    description: "Toda operação deve ter descrição."
+    message: "O campo 'description' é obrigatório e deve ter pelo menos 20 caracteres."
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: description
+      function: length
+      functionOptions:
+        min: 20
+
+  operation-summary:
+    description: "Toda operação deve ter resumo."
+    message: "O campo 'summary' é obrigatório."
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: summary
+      function: truthy
+
+  # ============================================================================
+  # REGRAS DE SEGURANÇA (DOUTRINA VÉRTICE)
+  # ============================================================================
+  
+  operation-security:
+    description: "Operações críticas devem especificar segurança."
+    message: "Operação deve ter esquema de segurança definido (exceto health checks)."
+    given: "$.paths[*][*]"
+    severity: warn
+    then:
+      field: security
+      function: truthy
+
+  # ============================================================================
+  # REGRAS DE RESPONSES
+  # ============================================================================
+  
+  operation-success-response:
+    description: "Operações devem ter resposta de sucesso (2xx)."
+    message: "Operação deve definir pelo menos uma resposta de sucesso (200, 201, 202, 204)."
+    given: "$.paths[*][*].responses"
+    severity: error
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          anyOf:
+            - required: ["200"]
+            - required: ["201"]
+            - required: ["202"]
+            - required: ["204"]
+
+  response-description:
+    description: "Todas as respostas devem ter descrição."
+    message: "Resposta deve ter descrição."
+    given: "$.paths[*][*].responses[*]"
+    severity: error
+    then:
+      field: description
+      function: truthy
+
+  # ============================================================================
+  # REGRAS DE SCHEMAS E MODELOS
+  # ============================================================================
+  
+  component-schema-description:
+    description: "Schemas de componentes devem ter descrição."
+    message: "Schema deve ter descrição."
+    given: "$.components.schemas[*]"
+    severity: warn
+    then:
+      field: description
+      function: truthy
+
+  # ============================================================================
+  # REGRAS ESPECÍFICAS DOUTRINA VÉRTICE
+  # ============================================================================
+  
+  doutrina-vertice-marker:
+    description: "Charter deve ter marcador Doutrina Vértice."
+    message: "Campo 'x-doutrina-vertice' é obrigatório na raiz do documento."
+    given: "$"
+    severity: warn
+    then:
+      field: x-doutrina-vertice
+      function: truthy
+
+  consciousness-project-marker:
+    description: "Charter deve identificar projeto de consciência."
+    message: "Campo 'x-consciousness-project' é obrigatório no info."
+    given: "$.info"
+    severity: warn
+    then:
+      field: x-consciousness-project
+      function: truthy
+
+  # ============================================================================
+  # REGRAS DE TRACING E OBSERVABILIDADE
+  # ============================================================================
+  
+  x-trace-id-documented:
+    description: "Endpoints críticos devem documentar X-Trace-Id."
+    message: "Considere documentar o header X-Trace-Id para tracing distribuído."
+    given: "$.paths[*][*]"
+    severity: hint
+    then:
+      field: parameters
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            properties:
+              name:
+                const: X-Trace-Id
+
+  # ============================================================================
+  # REGRAS DE EXEMPLOS E DOCUMENTAÇÃO
+  # ============================================================================
+  
+  schema-examples:
+    description: "Schemas devem ter exemplos quando possível."
+    message: "Considere adicionar 'example' ou 'examples' ao schema para melhor documentação."
+    given: "$.components.schemas[*]"
+    severity: hint
+    then:
+      function: xor
+      functionOptions:
+        properties:
+          - example
+          - examples

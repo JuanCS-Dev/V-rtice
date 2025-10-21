@@ -50,3 +50,5 @@ typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.37.0
     # via prefrontal-cortex-service (pyproject.toml)
+aiokafka==0.8.1
+    # FASE 3: Global Workspace Kafka consumer
