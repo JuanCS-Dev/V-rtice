@@ -1175,12 +1175,16 @@ services:
     - SOMATOSENSORY_URL=http://somatosensory_service:8208
     - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8209
     - VESTIBULAR_URL=http://vestibular_service:8210
+    - KAFKA_BOOTSTRAP_SERVERS=kafka-immunity:9096
+    - REDIS_URL=redis://redis:6379
     depends_on:
     - visual_cortex_service
     - auditory_cortex_service
     - somatosensory_service
     - chemical_sensing_service
     - vestibular_service
+    - kafka-immunity
+    - redis
     networks:
     - maximus-network
     restart: unless-stopped
