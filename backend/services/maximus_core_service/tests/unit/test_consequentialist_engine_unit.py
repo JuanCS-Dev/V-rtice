@@ -135,12 +135,12 @@ class TestEvaluateAction:
         engine = ConsequentialistEngine()
         context = ActionContext(
             action_type="block_malicious_ip",
-            action_action_description="Block confirmed malware C2 server",
+            action_description="Block confirmed malware C2 server",
             system_component="threat_detection",
             target_info={"ip": "192.168.1.100"},
             threat_data={
                 "threat_type": "malware_c2",
-                "severity": "critical",
+                "severity": 0.95,  # High severity (0.0-1.0)
                 "confidence": 0.95,
                 "affected_systems": 10,
                 "detection_confidence": 0.95,
@@ -154,9 +154,9 @@ class TestEvaluateAction:
 
         # Assert
         assert result is not None
-        assert result.verdict in [EthicalVerdict.APPROVED, EthicalVerdict.CONDITIONAL_APPROVAL]
-        assert result.framework_name == "Consequentialist"
-        assert "utility" in result.reasoning.lower() or "benefit" in result.reasoning.lower()
+        assert result.verdict in [EthicalVerdict.APPROVED, EthicalVerdict.CONDITIONAL]
+        assert result.framework_name == "consequentialism"
+        assert "utility" in result.explanation.lower() or "benefit" in result.explanation.lower()
 
     @pytest.mark.asyncio
     async def test_evaluate_low_benefit_action(self):
@@ -183,7 +183,7 @@ class TestEvaluateAction:
 
         # Assert
         assert result is not None
-        assert result.verdict in [EthicalVerdict.REJECTED, EthicalVerdict.REQUIRES_REVIEW]
+        assert result.verdict in [EthicalVerdict.REJECTED, EthicalVerdict.CONDITIONAL]
 
     @pytest.mark.asyncio
     async def test_evaluate_borderline_action(self):
@@ -210,7 +210,7 @@ class TestEvaluateAction:
 
         # Assert
         assert result is not None
-        assert result.framework_name == "Consequentialist"
+        assert result.framework_name == "consequentialism"
 
     @pytest.mark.asyncio
     async def test_evaluate_includes_calculation_details(self):
@@ -259,7 +259,7 @@ class TestCalculateBenefits:
 
         # Assert
         assert isinstance(benefits, dict)
-        assert "total_benefit" in benefits or "intensity" in benefits
+        assert "total_score" in benefits or "threat_mitigation" in benefits
 
     def test_calculate_benefits_low_confidence(self):
         """Test benefit calculation with low confidence."""
@@ -325,7 +325,7 @@ class TestCalculateCosts:
 
         # Assert
         assert isinstance(costs, dict)
-        assert "total_cost" in costs or "extent" in costs
+        assert "total_score" in costs or "disruption" in costs
 
     def test_calculate_costs_low_impact(self):
         """Test cost calculation for low-impact action."""
@@ -597,10 +597,10 @@ class TestConsequentialistIntegration:
 
         # Assert - Comprehensive checks
         assert result is not None
-        assert result.framework_name == "Consequentialist"
+        assert result.framework_name == "consequentialism"
         assert result.verdict is not None
-        assert isinstance(result.reasoning, str)
-        assert len(result.reasoning) > 0
+        assert isinstance(result.explanation, str)
+        assert len(result.explanation) > 0
         assert result.metadata is not None
         assert result.confidence >= 0.0
         assert result.confidence <= 1.0
