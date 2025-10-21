@@ -8,7 +8,7 @@
 ## 📊 Executive Summary
 
 **Total Files Analyzed:** 9
-**Total Lines of Code:** 2,997
+**Total Lines of Code:** 3,144
 **Compliant Files:** 9/9 (100.0%)
 **Total Violations:** 0
 **Average Quality Score:** 92.2%
@@ -44,15 +44,15 @@ Zero violations found. All code adheres to NO MOCK, NO PLACEHOLDER, NO TODO prin
 
 | File | LOC | Violations | Quality | Status |
 |------|-----|------------|---------|--------|
-| governance_sse/standalone_server.py | 158 | 0 | 100% | ✅ |
-| governance_sse/api_routes.py | 610 | 0 | 100% | ✅ |
+| governance_sse/standalone_server.py | 157 | 0 | 100% | ✅ |
+| governance_sse/api_routes.py | 617 | 0 | 100% | ✅ |
 | governance_sse/__init__.py | 37 | 0 | 100% | ✅ |
-| governance_sse/event_broadcaster.py | 388 | 0 | 100% | ✅ |
-| governance_sse/sse_server.py | 554 | 0 | 100% | ✅ |
-| test_edge_cases.py | 408 | 0 | 100% | ✅ |
-| test_maximus_integration.py | 157 | 0 | 100% | ✅ |
-| governance_sse/test_integration.py | 517 | 0 | 30% | ✅ |
-| main.py | 168 | 0 | 100% | ✅ |
+| governance_sse/event_broadcaster.py | 381 | 0 | 100% | ✅ |
+| governance_sse/sse_server.py | 538 | 0 | 100% | ✅ |
+| test_edge_cases.py | 398 | 0 | 100% | ✅ |
+| test_maximus_integration.py | 156 | 0 | 100% | ✅ |
+| governance_sse/test_integration.py | 516 | 0 | 30% | ✅ |
+| main.py | 344 | 0 | 100% | ✅ |
 
 ---
 
