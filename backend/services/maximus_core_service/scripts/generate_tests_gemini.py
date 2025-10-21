@@ -46,8 +46,8 @@ class GeminiTestGenerator:
 
         genai.configure(api_key=self.api_key)
 
-        # Use Gemini 1.5 Pro for best code generation
-        self.model = genai.GenerativeModel('gemini-1.5-pro')
+        # Use Gemini 2.5 Flash for best code generation (2025 model)
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def analyze_module(self, module_path: Path) -> Dict[str, Any]:
         """
@@ -228,10 +228,11 @@ Generate the complete test file now:
         print(f"   Classes: {len(module_info['classes'])}")
         print(f"   Functions: {len(module_info['functions'])}")
 
-        print(f"🤖 Generating {test_type} tests with Gemini 1.5 Pro...")
+        print(f"🤖 Generating {test_type} tests with Gemini 2.5 Flash...")
         prompt = self.generate_test_prompt(module_info, test_type, coverage_target)
 
         try:
+            # Generate with Gemini 2.5 Flash
             response = self.model.generate_content(
                 prompt,
                 generation_config=genai.types.GenerationConfig(
