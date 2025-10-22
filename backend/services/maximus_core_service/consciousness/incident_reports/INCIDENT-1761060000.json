@@ -1,0 +1,26 @@
+{
+  "incident_id": "INCIDENT-1761060000",
+  "shutdown_reason": "threshold_violation",
+  "shutdown_timestamp": 1761060000.7103498,
+  "shutdown_timestamp_iso": "2025-10-21T12:20:00.710350",
+  "violations": [
+    {
+      "violation_id": "test-critical",
+      "violation_type": "ethical_violation",
+      "legacy_violation_type": "ethical_violation",
+      "threat_level": "critical",
+      "severity": "emergency",
+      "timestamp": 1761060000.710001,
+      "timestamp_iso": "2025-10-21T12:20:00.710001",
+      "description": "Critical ethical violation",
+      "metrics": {},
+      "source_component": "consciousness-safety",
+      "automatic_action_taken": null,
+      "message": "Critical ethical violation"
+    }
+  ],
+  "system_state_snapshot": {
+    "timestamp": 1761060000.7107,
+    "timestamp_iso": "2025-10-21T12:20:00.710701",
+    "pid": 73254,
+    "tig_nodes": 

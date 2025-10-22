@@ -1,0 +1,21 @@
+{
+  "incident_id": "INCIDENT-1761127935",
+  "shutdown_reason": "manual_operator_command",
+  "shutdown_timestamp": 1761127935.9814472,
+  "shutdown_timestamp_iso": "2025-10-22T07:12:15.981447",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761127935.9816146,
+    "timestamp_iso": "2025-10-22T07:12:15.981615",
+    "pid": 8376,
+    "tig_nodes": "ERROR",
+    "esgt_running": "ERROR",
+    "arousal": "ERROR",
+    "active_goals": "ERROR",
+    "memory_mb": 84.19140625,
+    "cpu_percent": 7.7
+  },
+  "metrics_timeline": [],
+  "recovery_possible": true,
+  "notes": "Automatic emergency shutdown triggered by safety protocol"
+}

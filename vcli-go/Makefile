@@ -14,7 +14,7 @@ COVERAGE_FILE=coverage.out
 build:
 	@echo "🔨 Building $(BINARY_NAME)..."
 	@mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/$(BINARY_NAME) -ldflags="-X main.Version=$(VERSION)" ./cmd/root.go
+	go build -o $(BUILD_DIR)/$(BINARY_NAME) -ldflags="-X main.Version=$(VERSION)" ./cmd
 	@echo "✅ Built: $(BUILD_DIR)/$(BINARY_NAME)"
 
 ## install: Install the binary to $GOPATH/bin

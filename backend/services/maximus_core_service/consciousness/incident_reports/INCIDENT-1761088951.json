@@ -1,0 +1,13 @@
+{
+  "incident_id": "INCIDENT-1761088951",
+  "shutdown_reason": "resource_exhaustion",
+  "shutdown_timestamp": 1761088951.0601692,
+  "shutdown_timestamp_iso": "2025-10-21T20:22:31.060169",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761088951.0603368,
+    "timestamp_iso": "2025-10-21T20:22:31.060339",
+    "pid": 109611,
+    "tig_nodes": 100,
+    "esgt_running": "ERROR",
+    "arousal": 

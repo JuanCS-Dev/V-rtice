@@ -1,0 +1,11 @@
+{
+  "incident_id": "INCIDENT-1761088960",
+  "shutdown_reason": "ethical_violation",
+  "shutdown_timestamp": 1761088960.1184342,
+  "shutdown_timestamp_iso": "2025-10-21T20:22:40.118434",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761088960.1186373,
+    "timestamp_iso": "2025-10-21T20:22:40.118639",
+    "pid": 109611,
+    "tig_nodes": 

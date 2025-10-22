@@ -1,0 +1,19 @@
+{
+  "n_runs": 100,
+  "n_successful": 100,
+  "success_rate": 1.0,
+  "coherence_mean": 0.9957060980176987,
+  "coherence_std": 0.00046635248320189143,
+  "coherence_95ci_lower": 0.995613563567444,
+  "coherence_95ci_upper": 0.9957986324679534,
+  "coherence_min": 0.9937729760773694,
+  "coherence_max": 0.9960536299888256,
+  "coherence_normality_p_value": 8.073308696280202e-13,
+  "time_to_sync_mean": 0.0,
+  "time_to_sync_std": 0.0,
+  "time_to_sync_95ci_lower": 0.0,
+  "time_to_sync_95ci_upper": 0.0,
+  "time_to_sync_min": 0.0,
+  "time_to_sync_max": 0.0,
+  "gwt_100_300ms_compliance": 0.0
+}

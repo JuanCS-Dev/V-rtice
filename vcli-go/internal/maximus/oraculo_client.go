@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -60,6 +61,20 @@ type ImplementationResponse struct {
 
 // NewOraculoClient creates a new Oraculo service client
 func NewOraculoClient(endpoint, authToken string) *OraculoClient {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if endpoint == "" {
+		endpoint = os.Getenv("VCLI_ORACULO_ENDPOINT")
+		if endpoint == "" {
+			endpoint = "http://localhost:8026" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Oraculo client initialized with endpoint: %s\n", endpoint)
+	}
+
 	return &OraculoClient{
 		baseURL: endpoint,
 		httpClient: &http.Client{

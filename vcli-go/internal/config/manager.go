@@ -47,11 +47,17 @@ type GlobalConfig struct {
 
 // EndpointsConfig contains service endpoints
 type EndpointsConfig struct {
-	MAXIMUS    string `yaml:"maximus"`
-	Immune     string `yaml:"immune"`
-	Gateway    string `yaml:"gateway"`
-	Prometheus string `yaml:"prometheus"`
-	KafkaProxy string `yaml:"kafka_proxy"`
+	MAXIMUS       string `yaml:"maximus"`
+	Immune        string `yaml:"immune"`
+	Gateway       string `yaml:"gateway"`
+	Prometheus    string `yaml:"prometheus"`
+	KafkaProxy    string `yaml:"kafka_proxy"`
+	HITL          string `yaml:"hitl"`
+	Consciousness string `yaml:"consciousness"`
+	Eureka        string `yaml:"eureka"`
+	Oraculo       string `yaml:"oraculo"`
+	Predict       string `yaml:"predict"`
+	Governance    string `yaml:"governance"`
 }
 
 // AuthConfig contains authentication settings
@@ -217,6 +223,24 @@ func (m *Manager) applyEnvOverrides() {
 	if val := os.Getenv("VCLI_KAFKA_PROXY_ENDPOINT"); val != "" {
 		m.config.Endpoints.KafkaProxy = val
 	}
+	if val := os.Getenv("VCLI_HITL_ENDPOINT"); val != "" {
+		m.config.Endpoints.HITL = val
+	}
+	if val := os.Getenv("VCLI_CONSCIOUSNESS_ENDPOINT"); val != "" {
+		m.config.Endpoints.Consciousness = val
+	}
+	if val := os.Getenv("VCLI_EUREKA_ENDPOINT"); val != "" {
+		m.config.Endpoints.Eureka = val
+	}
+	if val := os.Getenv("VCLI_ORACULO_ENDPOINT"); val != "" {
+		m.config.Endpoints.Oraculo = val
+	}
+	if val := os.Getenv("VCLI_PREDICT_ENDPOINT"); val != "" {
+		m.config.Endpoints.Predict = val
+	}
+	if val := os.Getenv("VCLI_GOVERNANCE_ENDPOINT"); val != "" {
+		m.config.Endpoints.Governance = val
+	}
 
 	// Auth
 	if val := os.Getenv("VCLI_TOKEN_FILE"); val != "" {
@@ -264,6 +288,30 @@ func (m *Manager) GetEndpoint(service string) (string, error) {
 			if profile.Endpoints.KafkaProxy != "" {
 				return profile.Endpoints.KafkaProxy, nil
 			}
+		case "hitl":
+			if profile.Endpoints.HITL != "" {
+				return profile.Endpoints.HITL, nil
+			}
+		case "consciousness":
+			if profile.Endpoints.Consciousness != "" {
+				return profile.Endpoints.Consciousness, nil
+			}
+		case "eureka":
+			if profile.Endpoints.Eureka != "" {
+				return profile.Endpoints.Eureka, nil
+			}
+		case "oraculo":
+			if profile.Endpoints.Oraculo != "" {
+				return profile.Endpoints.Oraculo, nil
+			}
+		case "predict":
+			if profile.Endpoints.Predict != "" {
+				return profile.Endpoints.Predict, nil
+			}
+		case "governance":
+			if profile.Endpoints.Governance != "" {
+				return profile.Endpoints.Governance, nil
+			}
 		}
 	}
 
@@ -279,6 +327,18 @@ func (m *Manager) GetEndpoint(service string) (string, error) {
 		return m.config.Endpoints.Prometheus, nil
 	case "kafka_proxy", "kafka-proxy":
 		return m.config.Endpoints.KafkaProxy, nil
+	case "hitl":
+		return m.config.Endpoints.HITL, nil
+	case "consciousness":
+		return m.config.Endpoints.Consciousness, nil
+	case "eureka":
+		return m.config.Endpoints.Eureka, nil
+	case "oraculo":
+		return m.config.Endpoints.Oraculo, nil
+	case "predict":
+		return m.config.Endpoints.Predict, nil
+	case "governance":
+		return m.config.Endpoints.Governance, nil
 	default:
 		return "", fmt.Errorf("unknown service: %s", service)
 	}
@@ -295,11 +355,17 @@ func getDefaultConfig() *Config {
 				Name:        "default",
 				Description: "Default profile",
 				Endpoints: EndpointsConfig{
-					MAXIMUS:    "localhost:50051",
-					Immune:     "localhost:50052",
-					Gateway:    "http://localhost:8080",
-					Prometheus: "http://localhost:9090",
-					KafkaProxy: "localhost:50053",
+					MAXIMUS:       "localhost:50051",
+					Immune:        "localhost:50052",
+					Gateway:       "http://localhost:8080",
+					Prometheus:    "http://localhost:9090",
+					KafkaProxy:    "localhost:50053",
+					HITL:          "http://localhost:8000/api",
+					Consciousness: "http://localhost:8022",
+					Eureka:        "http://localhost:8024",
+					Oraculo:       "http://localhost:8026",
+					Predict:       "http://localhost:8028",
+					Governance:    "localhost:50053",
 				},
 				Auth: AuthConfig{
 					Method:    "jwt",
@@ -315,11 +381,17 @@ func getDefaultConfig() *Config {
 			ColorOutput:  true,
 		},
 		Endpoints: EndpointsConfig{
-			MAXIMUS:    "localhost:50051",
-			Immune:     "localhost:50052",
-			Gateway:    "http://localhost:8080",
-			Prometheus: "http://localhost:9090",
-			KafkaProxy: "localhost:50053",
+			MAXIMUS:       "localhost:50051",
+			Immune:        "localhost:50052",
+			Gateway:       "http://localhost:8080",
+			Prometheus:    "http://localhost:9090",
+			KafkaProxy:    "localhost:50053",
+			HITL:          "http://localhost:8000/api",
+			Consciousness: "http://localhost:8022",
+			Eureka:        "http://localhost:8024",
+			Oraculo:       "http://localhost:8026",
+			Predict:       "http://localhost:8028",
+			Governance:    "localhost:50053",
 		},
 		Cache: CacheConfig{
 			Enabled:    true,

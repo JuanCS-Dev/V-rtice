@@ -92,6 +92,110 @@ vcli tui
 vcli workspace launch governance
 ```
 
+---
+
+## 🚧 Current Limitations & Status (as of 2025-01-22)
+
+vCLI-Go is **~60% operacional**. The following features are **fully functional**:
+
+### ✅ WORKING (Production Ready):
+- **Kubernetes Integration** (32 commands, 12,549 LOC, 100% kubectl parity)
+  - All resource management, observability, and metrics commands
+  - Context management and auth commands
+  - Tested on real clusters
+- **Interactive TUI** (3 workspaces: Situational, Investigation, Governance*)
+  - Real-time cluster monitoring
+  - Log viewer with filtering
+  - Resource tree navigation
+- **Interactive Shell** (REPL with autocomplete, ~920 LOC)
+  - Command palette (fuzzy search)
+  - History navigation and suggestions
+  - Gradient prompt
+- **NLP Parser** (93.4% test coverage)
+
+### ⚠️ PARTIALLY WORKING (Requires Configuration):
+- **MAXIMUS Integration** (client exists, requires endpoint configuration)
+  - Use env var: `export VCLI_MAXIMUS_ENDPOINT=your-server:50051`
+  - Or CLI flag: `vcli maximus list --server your-server:50051`
+- **Consciousness API** (client exists, requires endpoint configuration)
+  - Use env var: `export VCLI_CONSCIOUSNESS_ENDPOINT=http://your-server:8022`
+- **HITL Console** (auth works, token persistence missing)
+  - Login works but requires re-auth on each command
+  - Fix in progress (AG-009)
+- **Active Immune Core** (client fully implemented, requires backend connection)
+  - Use env var: `export VCLI_IMMUNE_ENDPOINT=your-server:50052`
+
+### ❌ NOT IMPLEMENTED YET:
+- **Offline Mode** (BadgerDB cache not integrated)
+  - Structure exists but not connected
+  - Planned for Phase 2 (Q1 2026)
+- **Plugin System** (structure exists, loading not implemented)
+  - Interface defined but dynamic loading missing
+  - Planned for Phase 2 (Q1 2026)
+- **Zero Trust Security** (SPIFFE/SPIRE not integrated)
+  - Planned for Phase 3 (Q3 2026)
+- **Configuration Management** (no config file support yet)
+  - Endpoints currently use env vars or CLI flags
+  - Config file system (AG-001) in development
+
+**For full diagnostic and implementation status**, see:
+- [Diagnostic Report](VCLI_GO_DIAGNOSTIC_ABSOLUTE_20250122.md)
+- [AIR GAPS Matrix](AIR_GAPS_MATRIX_20250122.md)
+- [Implementation Roadmap](IMPLEMENTATION_ROADMAP_20250122.md)
+- [Quick Fixes Guide](QUICK_FIXES_20250122.md)
+
+*Note: Governance workspace is placeholder pending MAXIMUS backend integration.
+
+### Quick Start (Standalone Mode)
+
+If backend services are not available, vCLI-Go still works as a **powerful Kubernetes CLI**:
+
+```bash
+# Works 100% without any backend:
+vcli k8s get pods --all-namespaces
+vcli k8s logs <pod-name> --follow
+vcli shell  # Interactive REPL
+vcli tui    # Terminal UI workspaces
+```
+
+### Connecting to Backend Services
+
+To enable full backend integration, set endpoints via environment variables:
+
+```bash
+# MAXIMUS Orchestrator (gRPC)
+export VCLI_MAXIMUS_ENDPOINT=your-server:50051
+
+# Consciousness API (HTTP)
+export VCLI_CONSCIOUSNESS_ENDPOINT=http://your-server:8022
+
+# HITL Console (HTTP)
+export VCLI_HITL_ENDPOINT=https://your-server/api
+
+# AI Services (HTTP)
+export VCLI_EUREKA_ENDPOINT=http://your-server:8024
+export VCLI_ORACULO_ENDPOINT=http://your-server:8026
+export VCLI_PREDICT_ENDPOINT=http://your-server:8028
+
+# Active Immune Core (gRPC)
+export VCLI_IMMUNE_ENDPOINT=your-server:50052
+
+# Governance Service (gRPC)
+export VCLI_GOVERNANCE_ENDPOINT=your-server:50053
+
+# Enable debug logging
+export VCLI_DEBUG=true
+```
+
+Or use CLI flags for individual commands:
+
+```bash
+vcli maximus list --server your-server:50051
+vcli hitl status --endpoint https://your-server/api
+```
+
+---
+
 ### 🎹 Interactive Shell Mode
 
 **Status:** ✅ **COMPLETE - PRODUCTION READY** (FASE 2 - ~920 LOC)

@@ -687,7 +687,7 @@ func init() {
 	hitlCmd.AddCommand(hitlWatchCmd)
 
 	// Global flags
-	hitlCmd.PersistentFlags().StringVar(&hitlEndpoint, "endpoint", "http://localhost:8000/api", "HITL API endpoint")
+	hitlCmd.PersistentFlags().StringVar(&hitlEndpoint, "endpoint", "", "HITL API endpoint (default: env VCLI_HITL_ENDPOINT or http://localhost:8000/api)")
 	hitlCmd.PersistentFlags().StringVar(&hitlUsername, "username", "", "Username for authentication")
 	hitlCmd.PersistentFlags().StringVar(&hitlPassword, "password", "", "Password for authentication")
 	hitlCmd.PersistentFlags().StringVar(&hitlToken, "token", "", "Access token (alternative to username/password)")

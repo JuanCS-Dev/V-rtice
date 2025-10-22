@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -113,6 +114,20 @@ type HealthResponse struct {
 
 // NewClient creates a new HITL API client
 func NewClient(baseURL string) *Client {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if baseURL == "" {
+		baseURL = os.Getenv("VCLI_HITL_ENDPOINT")
+		if baseURL == "" {
+			baseURL = "http://localhost:8000/api" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] HITL client initialized with endpoint: %s\n", baseURL)
+	}
+
 	return &Client{
 		baseURL: baseURL,
 		httpClient: &http.Client{

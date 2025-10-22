@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -32,6 +33,20 @@ type PredictResponse struct {
 
 // NewPredictClient creates a new Predict service client
 func NewPredictClient(endpoint, authToken string) *PredictClient {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if endpoint == "" {
+		endpoint = os.Getenv("VCLI_PREDICT_ENDPOINT")
+		if endpoint == "" {
+			endpoint = "http://localhost:8028" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Predict client initialized with endpoint: %s\n", endpoint)
+	}
+
 	return &PredictClient{
 		baseURL: endpoint,
 		httpClient: &http.Client{
