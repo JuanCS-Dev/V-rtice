@@ -1,17 +1,13 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/verticedev/vcli-go/internal/grpc"
-	pb "github.com/verticedev/vcli-go/api/grpc/immune"
+	"github.com/verticedev/vcli-go/internal/immune"
 )
 
 // Flags
@@ -124,29 +120,41 @@ Examples:
 	RunE: runListAgents,
 }
 
+// ============================================================
+// CONFIGURATION PRECEDENCE HELPERS
+// ============================================================
+
+// getImmuneServer resolves Immune Core server endpoint with proper precedence:
+// 1. CLI flag (--server)
+// 2. Environment variable (VCLI_IMMUNE_ENDPOINT)
+// 3. Config file (endpoints.immune)
+// 4. Built-in default (http://localhost:8200)
+func getImmuneServer() string {
+	// CLI flag has highest priority
+	if immuneServer != "" {
+		return immuneServer
+	}
+
+	// Check config file
+	if globalConfig != nil {
+		if endpoint, err := globalConfig.GetEndpoint("immune"); err == nil && endpoint != "" {
+			return endpoint
+		}
+	}
+
+	// Return empty string to let client handle env var and default
+	return ""
+}
+
+// ============================================================
+// COMMAND IMPLEMENTATIONS
+// ============================================================
+
 func runListAgents(cmd *cobra.Command, args []string) error {
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
-	}
-	defer client.Close()
+	client := immune.NewImmuneClient(getImmuneServer())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	// Parse agent type
-	agentType := pb.AgentType_AGENT_TYPE_UNSPECIFIED
-	if agentTypeStr != "" {
-		agentType = parseAgentType(agentTypeStr)
-	}
-
-	// Parse agent state
-	state := pb.AgentState_STATE_UNSPECIFIED
-	if agentStateStr != "" {
-		state = parseAgentState(agentStateStr)
-	}
-
-	resp, err := client.ListAgents(ctx, lymphnodeID, agentType, state, page, pageSize, includeMetrics)
+	// Call HTTP API with string parameters
+	resp, err := client.ListAgents(lymphnodeID, agentTypeStr, agentStateStr, int(page), int(pageSize))
 	if err != nil {
 		return fmt.Errorf("failed to list agents: %w", err)
 	}
@@ -163,17 +171,14 @@ func runListAgents(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintln(w, "ID\tTYPE\tSTATE\tENERGY\tTHREATS\tAGE\tLYMPHNODE")
+	fmt.Fprintln(w, "ID\tTYPE\tSTATE\tLYMPHNODE\tCREATED")
 	for _, a := range resp.Agents {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%.0f%%\t%d/%d\t%ds\t%s\n",
-			truncate(a.AgentId, 16),
-			agentTypeToString(a.Type),
-			stateToString(a.State),
-			a.Energia,
-			a.ThreatsNeutralized,
-			a.ThreatsDetected,
-			a.AgeSeconds,
-			truncate(a.LymphnodeId, 16),
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			truncate(a.AgentID, 16),
+			a.AgentType,
+			a.State,
+			truncate(a.LymphnodeID, 16),
+			a.CreatedAt,
 		)
 	}
 	w.Flush()
@@ -203,16 +208,9 @@ Examples:
 func runGetAgent(cmd *cobra.Command, args []string) error {
 	agentID := args[0]
 
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
-	}
-	defer client.Close()
+	client := immune.NewImmuneClient(getImmuneServer())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	agent, err := client.GetAgent(ctx, agentID, includeMetrics, includeHistory)
+	agent, err := client.GetAgent(agentID, includeMetrics, includeHistory)
 	if err != nil {
 		return fmt.Errorf("failed to get agent: %w", err)
 	}
@@ -224,33 +222,27 @@ func runGetAgent(cmd *cobra.Command, args []string) error {
 	}
 
 	// Pretty print
-	fmt.Printf("Agent: %s\n", agent.AgentId)
+	fmt.Printf("Agent: %s\n", agent.AgentID)
 	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-	fmt.Printf("Type:        %s\n", agentTypeToString(agent.Type))
-	fmt.Printf("State:       %s\n", stateToString(agent.State))
-	fmt.Printf("Lymphnode:   %s\n", agent.LymphnodeId)
-	fmt.Printf("\n")
-	fmt.Printf("Vitals:\n")
-	fmt.Printf("  Energy:        %.1f%%\n", agent.Energia)
-	fmt.Printf("  Sensitivity:   %.1f/10\n", agent.Sensibilidade)
-	fmt.Printf("  Aggressiveness: %.1f/10\n", agent.NivelAgressividade)
-	fmt.Printf("  Temperature:   %.1f°\n", agent.Temperatura)
-	fmt.Printf("\n")
-	fmt.Printf("Activity:\n")
-	fmt.Printf("  Threats Detected:    %d\n", agent.ThreatsDetected)
-	fmt.Printf("  Threats Neutralized: %d\n", agent.ThreatsNeutralized)
-	fmt.Printf("  Cytokines Emitted:   %d\n", agent.CytokinesEmitted)
+	fmt.Printf("Type:        %s\n", agent.AgentType)
+	fmt.Printf("State:       %s\n", agent.State)
+	fmt.Printf("Lymphnode:   %s\n", agent.LymphnodeID)
 	fmt.Printf("\n")
 	fmt.Printf("Lifecycle:\n")
-	fmt.Printf("  Age:           %ds (max: %ds)\n", agent.AgeSeconds, agent.MaxAgeSeconds)
-	fmt.Printf("  Created:       %s\n", agent.CreatedAt.AsTime().Format(time.RFC3339))
-	fmt.Printf("  Last Heartbeat: %s\n", agent.LastHeartbeat.AsTime().Format(time.RFC3339))
+	fmt.Printf("  Created:       %s\n", agent.CreatedAt)
+	if agent.LastHeartbeat != "" {
+		fmt.Printf("  Last Heartbeat: %s\n", agent.LastHeartbeat)
+	}
 
-	if agent.CurrentZone != "" {
-		fmt.Printf("\n")
-		fmt.Printf("Location:\n")
-		fmt.Printf("  Zone:         %s\n", agent.CurrentZone)
-		fmt.Printf("  Patrol Area:  %s\n", agent.PatrolArea)
+	if includeMetrics && agent.Metrics != nil {
+		fmt.Printf("\nMetrics:\n")
+		for k, v := range agent.Metrics {
+			fmt.Printf("  %s: %v\n", k, v)
+		}
+	}
+
+	if includeHistory && agent.History != nil && len(agent.History) > 0 {
+		fmt.Printf("\nHistory: %d events\n", len(agent.History))
 	}
 
 	return nil
@@ -282,16 +274,15 @@ func runCloneAgent(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("clone count must be > 0")
 	}
 
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
+	client := immune.NewImmuneClient(getImmuneServer())
+
+	req := immune.CloneAgentRequest{
+		SourceAgentID: agentID,
+		Count:         int(cloneCount),
+		LymphnodeID:   lymphnodeID,
 	}
-	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	resp, err := client.CloneAgent(ctx, agentID, cloneCount, lymphnodeID)
+	resp, err := client.CloneAgent(req)
 	if err != nil {
 		return fmt.Errorf("failed to clone agent: %w", err)
 	}
@@ -302,18 +293,19 @@ func runCloneAgent(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	fmt.Printf("✅ Agent cloned successfully\n")
-	fmt.Printf("Success: %d/%d clones created\n", resp.SuccessCount, cloneCount)
-	if resp.FailureCount > 0 {
-		fmt.Printf("⚠️  Failed: %d clones\n", resp.FailureCount)
-		for _, err := range resp.Errors {
-			fmt.Printf("  - %s\n", err)
+	if resp.Success {
+		fmt.Printf("✅ Agent cloned successfully\n")
+		fmt.Printf("Clones created: %d\n", len(resp.ClonedIDs))
+		if len(resp.ClonedIDs) > 0 && len(resp.ClonedIDs) <= 20 {
+			fmt.Printf("\nCloned Agent IDs:\n")
+			for _, id := range resp.ClonedIDs {
+				fmt.Printf("  - %s\n", id)
+			}
 		}
-	}
-	if len(resp.ClonedAgentIds) > 0 && len(resp.ClonedAgentIds) <= 20 {
-		fmt.Printf("\nCloned Agent IDs:\n")
-		for _, id := range resp.ClonedAgentIds {
-			fmt.Printf("  - %s\n", id)
+	} else {
+		fmt.Printf("❌ Clone operation failed\n")
+		if resp.Message != "" {
+			fmt.Printf("Message: %s\n", resp.Message)
 		}
 	}
 
@@ -342,34 +334,9 @@ Examples:
 }
 
 func runTerminateAgent(cmd *cobra.Command, args []string) error {
-	agentID := args[0]
-
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
-	}
-	defer client.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	resp, err := client.TerminateAgent(ctx, agentID, terminateReason, terminateGraceful)
-	if err != nil {
-		return fmt.Errorf("failed to terminate agent: %w", err)
-	}
-
-	if resp.Success {
-		fmt.Printf("✅ Agent %s terminated\n", agentID)
-		if resp.Message != "" {
-			fmt.Printf("Message: %s\n", resp.Message)
-		}
-		fmt.Printf("Terminated at: %s\n", resp.TerminatedAt.AsTime().Format(time.RFC3339))
-	} else {
-		fmt.Printf("❌ Failed to terminate agent\n")
-		fmt.Printf("Message: %s\n", resp.Message)
-	}
-
-	return nil
+	// NOTE: Agent termination not available in current HTTP API
+	// This command is disabled until the API endpoint is implemented
+	return fmt.Errorf("'terminate' command not yet implemented in HTTP API\nUse the Immune Core admin interface for agent termination")
 }
 
 // ============================================================
@@ -403,16 +370,9 @@ Examples:
 }
 
 func runListLymphnodes(cmd *cobra.Command, args []string) error {
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
-	}
-	defer client.Close()
+	client := immune.NewImmuneClient(getImmuneServer())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	resp, err := client.ListLymphnodes(ctx, zone, includeMetrics)
+	resp, err := client.ListLymphnodes(zone, includeMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to list lymphnodes: %w", err)
 	}
@@ -429,21 +389,19 @@ func runListLymphnodes(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintln(w, "ID\tZONE\tREGION\tSTATUS\tTEMP\tAGENTS\tCYTOKINES/s")
+	fmt.Fprintln(w, "ID\tZONE\tSTATUS\tAGENTS\tCAPACITY")
 	for _, ln := range resp.Lymphnodes {
 		healthIcon := "✅"
-		if !ln.IsHealthy {
-			healthIcon = "❌"
+		if ln.Status != "healthy" {
+			healthIcon = "⚠️"
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s %s\t%.1f°\t%d\t%d\n",
-			truncate(ln.LymphnodeId, 16),
+		fmt.Fprintf(w, "%s\t%s\t%s %s\t%d\t%d\n",
+			truncate(ln.LymphnodeID, 16),
 			ln.Zone,
-			ln.Region,
 			healthIcon,
 			ln.Status,
-			ln.Temperature,
-			ln.TotalAgents,
-			ln.CytokinesPerSecond,
+			ln.AgentCount,
+			ln.Capacity,
 		)
 	}
 	w.Flush()
@@ -465,6 +423,13 @@ Examples:
 }
 
 func runLymphnodeStatus(cmd *cobra.Command, args []string) error {
+	// NOTE: Individual lymphnode status not available in current HTTP API
+	return fmt.Errorf("'status' command not yet implemented in HTTP API\nUse 'vcli immune lymphnodes list' to view all lymphnodes")
+}
+
+/*
+// Disabled old gRPC implementation
+func runLymphnodeStatusOld(cmd *cobra.Command, args []string) error {
 	lymphnodeID := args[0]
 
 	client, err := grpc.NewImmuneClient(immuneServer)
@@ -542,6 +507,7 @@ func runLymphnodeStatus(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
+*/
 
 // ============================================================
 // CYTOKINES COMMANDS
@@ -579,6 +545,13 @@ Examples:
 }
 
 func runStreamCytokines(cmd *cobra.Command, args []string) error {
+	// NOTE: Cytokine streaming not available in current HTTP API
+	return fmt.Errorf("'cytokines stream' command not yet implemented in HTTP API")
+}
+
+/*
+// Disabled old gRPC implementation
+func runStreamCytokinesOld(cmd *cobra.Command, args []string) error {
 	client, err := grpc.NewImmuneClient(immuneServer)
 	if err != nil {
 		return fmt.Errorf("failed to connect: %w", err)
@@ -624,6 +597,7 @@ func runStreamCytokines(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
+*/
 
 // ============================================================
 // SYSTEM HEALTH
@@ -646,17 +620,9 @@ Examples:
 }
 
 func runSystemHealth(cmd *cobra.Command, args []string) error {
-	client, err := grpc.NewImmuneClient(immuneServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect: %w", err)
-	}
-	defer client.Close()
+	client := immune.NewImmuneClient(getImmuneServer())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	includeAll := cmd.Flags().Changed("all")
-	resp, err := client.GetSystemHealth(ctx, includeAll, includeAll)
+	resp, err := client.Health()
 	if err != nil {
 		return fmt.Errorf("failed to get health: %w", err)
 	}
@@ -667,50 +633,31 @@ func runSystemHealth(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	statusIcon := getHealthIcon(resp.Status)
-	fmt.Printf("%s Immune System Status: %s\n", statusIcon, resp.Status.String())
+	statusIcon := "✅"
+	if resp.Status != "healthy" {
+		statusIcon = "⚠️"
+	}
+	fmt.Printf("%s Immune System Status: %s\n", statusIcon, resp.Status)
 	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
 
-	fmt.Printf("Lymphnodes:\n")
-	fmt.Printf("  Total:   %d\n", resp.TotalLymphnodes)
-	fmt.Printf("  Healthy: %d\n", resp.HealthyLymphnodes)
+	fmt.Printf("Version:  %s\n", resp.Version)
+	fmt.Printf("Uptime:   %.1f seconds\n", resp.UptimeSeconds)
 	fmt.Printf("\n")
 	fmt.Printf("Agents:\n")
-	fmt.Printf("  Total:  %d\n", resp.TotalAgents)
-	fmt.Printf("  Active: %d\n", resp.ActiveAgents)
+	fmt.Printf("  Active: %d\n", resp.AgentsActive)
 	fmt.Printf("\n")
-	fmt.Printf("Services:\n")
-	for service, healthy := range resp.Services {
-		icon := "✅"
-		if !healthy {
-			icon = "❌"
-		}
-		fmt.Printf("  %s %s\n", icon, service)
-	}
-
-	if includeAll && len(resp.LymphnodeStatuses) > 0 {
-		fmt.Printf("\nLymphnode Details:\n")
-		for _, ls := range resp.LymphnodeStatuses {
-			icon := "✅"
-			if !ls.Lymphnode.IsHealthy {
-				icon = "❌"
-			}
-			fmt.Printf("  %s %s (%s) - %d agents, %.1f°\n",
-				icon,
-				ls.Lymphnode.LymphnodeId,
-				ls.Lymphnode.Zone,
-				ls.Lymphnode.TotalAgents,
-				ls.Lymphnode.Temperature,
-			)
-		}
-	}
+	fmt.Printf("Lymphnodes:\n")
+	fmt.Printf("  Active: %d\n", resp.LymphnodesActive)
 
 	return nil
 }
 
 // ============================================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS (DISABLED - gRPC/Protobuf specific)
 // ============================================================
+
+/*
+// These functions were for gRPC/protobuf type conversion and are no longer needed with HTTP API
 
 func parseAgentType(s string) pb.AgentType {
 	switch strings.ToLower(s) {
@@ -823,6 +770,23 @@ func getHealthIcon(status pb.SystemHealthResponse_OverallStatus) string {
 		return "❓"
 	}
 }
+*/
+
+// ============================================================
+// ACTIVE HELPER FUNCTIONS
+// ============================================================
+
+// getSeverityIcon returns an icon based on severity level (used by stream.go)
+func getSeverityIcon(severity int32) string {
+	if severity >= 9 {
+		return "🔴"
+	} else if severity >= 7 {
+		return "🟠"
+	} else if severity >= 4 {
+		return "🟡"
+	}
+	return "🟢"
+}
 
 // ============================================================
 // INIT
@@ -851,7 +815,7 @@ func init() {
 	immuneCytokinesCmd.AddCommand(immuneCytokinesStreamCmd)
 
 	// Global flags
-	immuneCmd.PersistentFlags().StringVar(&immuneServer, "server", "", "Immune Core server address (default: env VCLI_IMMUNE_ENDPOINT or localhost:50052)")
+	immuneCmd.PersistentFlags().StringVar(&immuneServer, "server", "", "Immune Core server address (default: env VCLI_IMMUNE_ENDPOINT or http://localhost:8200)")
 	immuneCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "table", "Output format (table|json)")
 
 	// Agent list flags

@@ -8,7 +8,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/verticedev/vcli-go/internal/debug"
+	vcli_errors "github.com/verticedev/vcli-go/internal/errors"
 )
 
 // Client provides access to HITL Console API
@@ -114,22 +118,31 @@ type HealthResponse struct {
 
 // NewClient creates a new HITL API client
 func NewClient(baseURL string) *Client {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	source := "flag"
 	if baseURL == "" {
 		baseURL = os.Getenv("VCLI_HITL_ENDPOINT")
-		if baseURL == "" {
-			baseURL = "http://localhost:8000/api" // default
+		if baseURL != "" {
+			source = "env:VCLI_HITL_ENDPOINT"
+		} else {
+			baseURL = "http://localhost:8000/api"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] HITL client initialized with endpoint: %s\n", baseURL)
+	// Ensure URL has protocol - HTTPS auto-detection
+	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+		// If no protocol specified, use https for non-localhost, http for localhost
+		if strings.HasPrefix(baseURL, "localhost") || strings.HasPrefix(baseURL, "127.0.0.1") {
+			baseURL = "http://" + baseURL
+		} else {
+			baseURL = "https://" + baseURL
+		}
 	}
 
+	debug.LogConnection("HITL Console", baseURL, source)
+
 	return &Client{
-		baseURL: baseURL,
+		baseURL: strings.TrimSuffix(baseURL, "/"),
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -152,11 +165,25 @@ func (c *Client) Login(username, password string) error {
 
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
+		return vcli_errors.NewConnectionErrorBuilder("HITL Console", c.baseURL).
+			WithOperation("login").
+			WithCause(err).
+			Build()
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		baseErr := vcli_errors.NewAuthError("HITL Console", "Invalid credentials")
+		baseErr = baseErr.WithDetails(string(bodyBytes))
+		ctx := vcli_errors.ErrorContext{
+			Endpoint:    c.baseURL,
+			Operation:   "login",
+			Suggestions: vcli_errors.GetSuggestionsFor(vcli_errors.ErrorTypeAuth, "HITL Console", c.baseURL),
+			HelpCommand: "vcli troubleshoot hitl",
+		}
+		return vcli_errors.NewContextualError(baseErr, ctx)
+	} else if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("login failed with status %d: %s", resp.StatusCode, string(bodyBytes))
 	}

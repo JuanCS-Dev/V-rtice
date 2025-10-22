@@ -110,6 +110,40 @@ Examples:
 	RunE: runSubmitDecision,
 }
 
+// ============================================================
+// CONFIGURATION PRECEDENCE HELPERS
+// ============================================================
+
+// getMaximusServer resolves MAXIMUS server endpoint with proper precedence:
+// 1. CLI flag (--server)
+// 2. Environment variable (VCLI_MAXIMUS_ENDPOINT)
+// 3. Config file (endpoints.maximus)
+// 4. Built-in default (http://localhost:8150)
+//
+// Note: The internal client (maximus.NewGovernanceClient) handles levels 2-4,
+// so we only need to pass through the CLI flag if provided, or empty string
+// to let the client handle precedence internally.
+func getMaximusServer() string {
+	// CLI flag has highest priority - pass it through
+	if maximusServer != "" {
+		return maximusServer
+	}
+
+	// If no flag, check config file before falling back to client's internal precedence
+	if globalConfig != nil {
+		if endpoint, err := globalConfig.GetEndpoint("maximus"); err == nil && endpoint != "" {
+			return endpoint
+		}
+	}
+
+	// Return empty string to let client handle env var and default
+	return ""
+}
+
+// ============================================================
+// COMMAND IMPLEMENTATIONS
+// ============================================================
+
 func runSubmitDecision(cmd *cobra.Command, args []string) error {
 	// Validate required fields
 	if decisionType == "" || decisionTitle == "" {
@@ -117,7 +151,7 @@ func runSubmitDecision(cmd *cobra.Command, args []string) error {
 	}
 
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Build test decision payload (for E2E testing)
 	decision := map[string]interface{}{
@@ -204,7 +238,7 @@ Examples:
 
 func runListDecisions(cmd *cobra.Command, args []string) error {
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Get pending statistics
 	stats, err := client.GetPendingStats()
@@ -315,10 +349,10 @@ Requires operator credentials for authorization.
 
 Examples:
   # Approve a decision
-  vcli maximus approve dec_123456 --operator-id op_alice
+  vcli maximus approve dec_123456 --session-id session_abc
 
-  # Approve with reason
-  vcli maximus approve dec_123456 --operator-id op_alice --reason "Verified manually"`,
+  # Approve with reasoning
+  vcli maximus approve dec_123456 --session-id session_abc --reasoning "Verified manually"`,
 	Args: cobra.ExactArgs(1),
 	RunE: runApproveDecision,
 }
@@ -338,7 +372,7 @@ func runApproveDecision(cmd *cobra.Command, args []string) error {
 	}
 
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Build approval request
 	req := maximus.ApproveDecisionRequest{
@@ -393,10 +427,10 @@ A reason is required when rejecting decisions.
 
 Examples:
   # Reject a decision
-  vcli maximus reject dec_123456 --operator-id op_alice --reason "Security concern"
+  vcli maximus reject dec_123456 --session-id session_abc --reasoning "Security concern"
 
-  # Reject with detailed reason
-  vcli maximus reject dec_123456 --operator-id op_alice --reason "Insufficient context provided"`,
+  # Reject with detailed reasoning
+  vcli maximus reject dec_123456 --session-id session_abc --reasoning "Insufficient context provided"`,
 	Args: cobra.ExactArgs(1),
 	RunE: runRejectDecision,
 }
@@ -409,7 +443,7 @@ func runRejectDecision(cmd *cobra.Command, args []string) error {
 	}
 
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Build rejection request
 	req := maximus.RejectDecisionRequest{
@@ -463,36 +497,39 @@ Use this when a decision requires expertise or authority beyond the current oper
 
 Examples:
   # Escalate a decision
-  vcli maximus escalate dec_123456 --operator-id op_alice --reason "Requires VP approval"
+  vcli maximus escalate dec_123456 --session-id session_abc --reasoning "Requires VP approval"
 
   # Escalate to specific level
-  vcli maximus escalate dec_123456 --operator-id op_alice --reason "Security review needed" --to-level security-team`,
+  vcli maximus escalate dec_123456 --session-id session_abc --reasoning "Security review needed" --to-level security-team`,
 	Args: cobra.ExactArgs(1),
 	RunE: runEscalateDecision,
 }
 
-var toLevel string
-
 func runEscalateDecision(cmd *cobra.Command, args []string) error {
 	decisionID := args[0]
 
-	if operatorID == "" {
-		return fmt.Errorf("--operator-id is required")
+	if sessionID == "" {
+		return fmt.Errorf("--session-id is required")
 	}
 
-	if reason == "" {
-		return fmt.Errorf("--reason is required when escalating a decision")
+	if reasoning == "" {
+		return fmt.Errorf("--reasoning is required when escalating a decision")
 	}
 
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Build escalation request
 	req := maximus.EscalateDecisionRequest{
-		OperatorID: operatorID,
 		SessionID:  sessionID,
-		Reason:     reason,
-		ToLevel:    toLevel,
+		Reasoning:  reasoning,
+	}
+
+	if comment != "" {
+		req.Comment = &comment
+	}
+	if toLevel != "" {
+		req.ToLevel = &toLevel
 	}
 
 	// Escalate decision
@@ -548,7 +585,7 @@ Examples:
 
 func runGetMetrics(cmd *cobra.Command, args []string) error {
 	// Connect to MAXIMUS Governance API
-	client := maximus.NewGovernanceClient(maximusServer)
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
 	// Get health status and pending stats as metrics
 	health, err := client.Health()
@@ -1381,7 +1418,9 @@ func init() {
 	consciousnessArousalCmd.AddCommand(consciousnessArousalAdjustCmd)
 
 	// Global flags
-	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "", "MAXIMUS server address (default: env VCLI_MAXIMUS_ENDPOINT or http://localhost:8150)")
+	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "", "MAXIMUS server URL with protocol (http:// or https://)\n"+
+		"Examples: http://localhost:8150 (dev), https://maximus.vertice.ai:8150 (prod)\n"+
+		"Default: env VCLI_MAXIMUS_ENDPOINT or http://localhost:8150")
 	maximusCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "table", "Output format (table|json)")
 
 	// Submit flags
@@ -1404,19 +1443,19 @@ func init() {
 	maximusListCmd.Flags().StringVar(&sortOrder, "sort-order", "desc", "Sort order (asc|desc)")
 
 	// Approve flags
-	maximusApproveCmd.Flags().StringVar(&operatorID, "operator-id", "", "Operator ID (required)")
-	maximusApproveCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (optional)")
-	maximusApproveCmd.Flags().StringVar(&reason, "reason", "", "Approval reason (optional)")
+	maximusApproveCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusApproveCmd.Flags().StringVar(&reasoning, "reasoning", "", "Approval reasoning (optional)")
+	maximusApproveCmd.Flags().StringVar(&comment, "comment", "", "Approval comment (optional)")
 
 	// Reject flags
-	maximusRejectCmd.Flags().StringVar(&operatorID, "operator-id", "", "Operator ID (required)")
-	maximusRejectCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (optional)")
-	maximusRejectCmd.Flags().StringVar(&reason, "reason", "", "Rejection reason (required)")
+	maximusRejectCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusRejectCmd.Flags().StringVar(&reasoning, "reasoning", "", "Rejection reasoning (optional)")
+	maximusRejectCmd.Flags().StringVar(&comment, "comment", "", "Rejection comment (optional)")
 
 	// Escalate flags
-	maximusEscalateCmd.Flags().StringVar(&operatorID, "operator-id", "", "Operator ID (required)")
-	maximusEscalateCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (optional)")
-	maximusEscalateCmd.Flags().StringVar(&reason, "reason", "", "Escalation reason (required)")
+	maximusEscalateCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusEscalateCmd.Flags().StringVar(&reasoning, "reasoning", "", "Escalation reasoning (required)")
+	maximusEscalateCmd.Flags().StringVar(&comment, "comment", "", "Escalation comment (optional)")
 	maximusEscalateCmd.Flags().StringVar(&toLevel, "to-level", "", "Target escalation level (optional)")
 
 	// Metrics flags

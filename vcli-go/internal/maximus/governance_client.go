@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/verticedev/vcli-go/internal/debug"
+	vcli_errors "github.com/verticedev/vcli-go/internal/errors"
 )
 
 // GovernanceClient handles communication with MAXIMUS Core Governance API
@@ -20,6 +21,13 @@ type GovernanceClient struct {
 }
 
 // NewGovernanceClient creates a new governance API client
+//
+// The baseURL should include the protocol (http:// or https://).
+// For production environments, HTTPS is strongly recommended.
+//
+// Examples:
+//   - Development: http://localhost:8150
+//   - Production:  https://maximus.vertice.ai:8150
 func NewGovernanceClient(baseURL string) *GovernanceClient {
 	source := "flag"
 	if baseURL == "" {
@@ -29,6 +37,16 @@ func NewGovernanceClient(baseURL string) *GovernanceClient {
 		} else {
 			baseURL = "http://localhost:8150"
 			source = "default"
+		}
+	}
+
+	// Ensure URL has protocol
+	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+		// If no protocol specified, use https for non-localhost, http for localhost
+		if strings.HasPrefix(baseURL, "localhost") || strings.HasPrefix(baseURL, "127.0.0.1") {
+			baseURL = "http://" + baseURL
+		} else {
+			baseURL = "https://" + baseURL
 		}
 	}
 
@@ -138,13 +156,28 @@ func (c *GovernanceClient) Health() (*GovernanceHealthResponse, error) {
 
 	resp, err := c.httpClient.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to governance API: %w", err)
+		// Return contextual connection error with suggestions
+		return nil, vcli_errors.NewConnectionErrorBuilder("MAXIMUS Governance", c.baseURL).
+			WithOperation("health check").
+			WithCause(err).
+			Build()
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+
+		// Return contextual server error
+		baseErr := vcli_errors.NewServerError("MAXIMUS Governance", fmt.Sprintf("HTTP %d", resp.StatusCode))
+		baseErr = baseErr.WithDetails(string(body))
+
+		ctx := vcli_errors.ErrorContext{
+			Endpoint:    c.baseURL,
+			Operation:   "health check",
+			HelpCommand: "vcli troubleshoot maximus",
+		}
+
+		return nil, vcli_errors.NewContextualError(baseErr, ctx)
 	}
 
 	var health GovernanceHealthResponse

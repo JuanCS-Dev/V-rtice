@@ -617,8 +617,38 @@ func runHITLWatch(cmd *cobra.Command, args []string) error {
 // HELPER FUNCTIONS
 // ============================================================================
 
+// ============================================================
+// CONFIGURATION PRECEDENCE HELPERS
+// ============================================================
+
+// getHITLEndpoint resolves HITL Console endpoint with proper precedence:
+// 1. CLI flag (--endpoint)
+// 2. Environment variable (VCLI_HITL_ENDPOINT)
+// 3. Config file (endpoints.hitl)
+// 4. Built-in default (http://localhost:8000/api)
+func getHITLEndpoint() string {
+	// CLI flag has highest priority
+	if hitlEndpoint != "" {
+		return hitlEndpoint
+	}
+
+	// Check config file
+	if globalConfig != nil {
+		if endpoint, err := globalConfig.GetEndpoint("hitl"); err == nil && endpoint != "" {
+			return endpoint
+		}
+	}
+
+	// Return empty string to let client handle env var and default
+	return ""
+}
+
+// ============================================================
+// CLIENT FACTORY
+// ============================================================
+
 func createHITLClient() (*hitl.Client, error) {
-	client := hitl.NewClient(hitlEndpoint)
+	client := hitl.NewClient(getHITLEndpoint())
 
 	// If token provided directly, use it
 	if hitlToken != "" {

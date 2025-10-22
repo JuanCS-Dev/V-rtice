@@ -90,7 +90,29 @@ vcli tui
 
 # Launch specific workspace
 vcli workspace launch governance
+
+# Launch interactive shell (with banner + REPL)
+vcli shell
 ```
+
+### 🧠 NeuroShell Alias (Recommended)
+
+For a premium UX experience, add this alias to your shell:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+alias neuroshell='/path/to/vcli-go/bin/vcli shell'
+
+# Usage
+neuroshell  # Opens vCLI with gradient banner + interactive REPL
+```
+
+**Features:**
+- 🎨 Beautiful gradient banner (Green → Cyan → Blue)
+- 💬 Interactive REPL with autocomplete
+- 🔍 Command palette (Ctrl+P)
+- 📜 History navigation (↑↓)
+- ✨ Command suggestions
 
 ---
 
@@ -682,8 +704,18 @@ See [Plugin Development Guide](docs/plugins.md) for details.
 
 - **SPIFFE/SPIRE** for identity
 - **Mutual TLS** for all connections
+- **HTTPS Enforcement** in production (HTTP only for local development)
 - **Continuous verification** of all operations
 - **Audit logging** for compliance
+
+> **⚠️ Production Deployment**: Always use HTTPS endpoints for backend services:
+> ```bash
+> # ❌ Development only
+> export VCLI_MAXIMUS_ENDPOINT="http://localhost:8150"
+>
+> # ✅ Production
+> export VCLI_MAXIMUS_ENDPOINT="https://maximus.vertice.ai:8150"
+> ```
 
 ### Plugin Sandbox
 
