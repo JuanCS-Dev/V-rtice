@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERTICE Coverage Status - Sistema de Tracking Persistente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f23;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #00d9ff;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00d9ff;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #00d9ff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+
+        .stat-unit {
+            font-size: 0.5em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .alert {
+            background: #2d1b1b;
+            border-left: 4px solid #ff4444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .alert h3 {
+            color: #ff4444;
+            margin-bottom: 10px;
+        }
+
+        .alert-item {
+            background: #1a1212;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            color: #00d9ff;
+        }
+
+        .modules-table {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #0f0f23;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #00d9ff;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        th:hover {
+            background: #16213e;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        tr:hover {
+            background: #16213e;
+        }
+
+        .coverage-bar {
+            width: 100%;
+            height: 20px;
+            background: #0f0f23;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .coverage-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .coverage-critical { background: linear-gradient(90deg, #ff4444, #cc0000); }
+        .coverage-low { background: linear-gradient(90deg, #ff8844, #ff6644); }
+        .coverage-medium { background: linear-gradient(90deg, #ffcc44, #ff9944); }
+        .coverage-good { background: linear-gradient(90deg, #88ff44, #44cc00); }
+        .coverage-excellent { background: linear-gradient(90deg, #00ff88, #00cc44); }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-critical { background: #ff4444; color: white; }
+        .badge-low { background: #ff8844; color: white; }
+        .badge-medium { background: #ffcc44; color: #1a1a2e; }
+        .badge-good { background: #88ff44; color: #1a1a2e; }
+        .badge-excellent { background: #00ff88; color: #1a1a2e; }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #2a2a3e;
+        }
+
+        .last-update {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #999;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+
+        .no-data h2 {
+            color: #ff8844;
+            margin-bottom: 15px;
+        }
+
+        .command {
+            background: #0f0f23;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #00d9ff;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .sort-icon {
+            margin-left: 5px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 VERTICE Coverage Status</h1>
+            <p class="subtitle">Sistema de Tracking Persistente - Conforme Doutrina Vértice</p>
+        </header>
+
+        <div id="app">
+            <div v-if="!hasData" class="no-data">
+                <h2>📊 Nenhum dado de coverage disponível</h2>
+                <p>Execute o comando abaixo para gerar o primeiro snapshot:</p>
+                <div class="command">pytest --cov=. --cov-report=xml --cov-report=html</div>
+                <div class="command">python scripts/coverage_tracker.py</div>
+            </div>
+
+            <div v-else>
+                <!-- Last Update -->
+                <div class="last-update">
+                    Última atualização: <strong>{{ lastUpdate }}</strong>
+                    | Histórico: <strong>{{ historyCount }}</strong> snapshots
+                </div>
+
+                <!-- Overall Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Coverage Total</div>
+                        <div class="stat-value">
+                            {{ currentCoverage.toFixed(2) }}<span class="stat-unit">%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Linhas Cobertas</div>
+                        <div class="stat-value">
+                            {{ coveredLines.toLocaleString() }}<span class="stat-unit">lines</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Linhas Missing</div>
+                        <div class="stat-value">
+                            {{ missingLines.toLocaleString() }}<span class="stat-unit">lines</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Meta 95%</div>
+                        <div class="stat-value">
+                            {{ (95 - currentCoverage).toFixed(1) }}<span class="stat-unit">% restante</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regressions Alert -->
+                <div v-if="regressions.length > 0" class="alert">
+                    <h3>⚠️ ALERT: {{ regressions.length }} Regressões Detectadas</h3>
+                    <div v-for="reg in regressions" :key="reg.module" class="alert-item">
+                        <strong>{{ reg.module }}</strong>:
+                        {{ reg.previous_pct.toFixed(1) }}% → {{ reg.current_pct.toFixed(1) }}%
+                        ({{ reg.drop_pct.toFixed(1) }}% drop)
+                    </div>
+                </div>
+
+                <!-- Coverage Trend Chart -->
+                <div class="chart-container">
+                    <h2 class="chart-title">📈 Tendência de Coverage ao Longo do Tempo</h2>
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <!-- Modules Table -->
+                <div class="modules-table">
+                    <h2 class="chart-title">📂 Coverage por Módulo</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th @click="sortBy('name')">
+                                    Módulo <span class="sort-icon">{{ getSortIcon('name') }}</span>
+                                </th>
+                                <th @click="sortBy('coverage_pct')">
+                                    Coverage <span class="sort-icon">{{ getSortIcon('coverage_pct') }}</span>
+                                </th>
+                                <th @click="sortBy('total_lines')">
+                                    Total Lines <span class="sort-icon">{{ getSortIcon('total_lines') }}</span>
+                                </th>
+                                <th @click="sortBy('covered_lines')">
+                                    Covered <span class="sort-icon">{{ getSortIcon('covered_lines') }}</span>
+                                </th>
+                                <th @click="sortBy('missing_lines')">
+                                    Missing <span class="sort-icon">{{ getSortIcon('missing_lines') }}</span>
+                                </th>
+                                <th>Visualização</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="module in sortedModules" :key="module.name">
+                                <td><strong>{{ module.name }}</strong></td>
+                                <td>
+                                    <span :class="getCoverageBadge(module.coverage_pct)">
+                                        {{ module.coverage_pct.toFixed(1) }}%
+                                    </span>
+                                </td>
+                                <td>{{ module.total_lines.toLocaleString() }}</td>
+                                <td>{{ module.covered_lines.toLocaleString() }}</td>
+                                <td>{{ module.missing_lines.toLocaleString() }}</td>
+                                <td>
+                                    <div class="coverage-bar">
+                                        <div
+                                            :class="getCoverageClass(module.coverage_pct)"
+                                            :style="{ width: module.coverage_pct + '%' }"
+                                        ></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Sistema de Tracking Persistente - Conforme Doutrina Vértice</p>
+            <p>Artigo II (Padrão Pagani) | Artigo V (Legislação Prévia) | Anexo D (Execução Constitucional)</p>
+            <p style="margin-top: 10px; color: #00d9ff;">Gerado por Claude Code + JuanCS-Dev</p>
+        </footer>
+    </div>
+
+    <script>
+        // Load data from coverage_history.json
+        let dashboardData = {
+            hasData: false,
+            currentCoverage: 0,
+            coveredLines: 0,
+            missingLines: 0,
+            totalLines: 0,
+            lastUpdate: '',
+            historyCount: 0,
+            regressions: [],
+            trendData: { timestamps: [], coverage_pct: [] },
+            modules: [],
+            sortColumn: 'coverage_pct',
+            sortDirection: 'asc'
+        };
+
+        // Try to load data
+        fetch('coverage_history.json')
+            .then(response => response.json())
+            .then(history => {
+                if (history.length === 0) {
+                    renderNoData();
+                    return;
+                }
+
+                const current = history[history.length - 1];
+
+                dashboardData = {
+                    hasData: true,
+                    currentCoverage: current.total_coverage_pct,
+                    coveredLines: current.covered_lines,
+                    missingLines: current.missing_lines,
+                    totalLines: current.total_lines,
+                    lastUpdate: new Date(current.timestamp).toLocaleString('pt-BR'),
+                    historyCount: history.length,
+                    regressions: detectRegressions(history),
+                    trendData: {
+                        timestamps: history.map(s => new Date(s.timestamp).toLocaleDateString('pt-BR')),
+                        coverage_pct: history.map(s => s.total_coverage_pct)
+                    },
+                    modules: current.modules,
+                    sortColumn: 'coverage_pct',
+                    sortDirection: 'asc'
+                };
+
+                renderDashboard();
+                renderChart();
+            })
+            .catch(error => {
+                console.error('Failed to load coverage data:', error);
+                renderNoData();
+            });
+
+        function detectRegressions(history) {
+            if (history.length < 2) return [];
+
+            const previous = history[history.length - 2];
+            const current = history[history.length - 1];
+            const regressions = [];
+            const threshold = 10.0;
+
+            // Check overall
+            const overallDrop = previous.total_coverage_pct - current.total_coverage_pct;
+            if (overallDrop >= threshold) {
+                regressions.push({
+                    module: 'TOTAL',
+                    previous_pct: previous.total_coverage_pct,
+                    current_pct: current.total_coverage_pct,
+                    drop_pct: overallDrop
+                });
+            }
+
+            // Check per module
+            const prevModules = {};
+            previous.modules.forEach(m => prevModules[m.name] = m);
+
+            current.modules.forEach(currentMod => {
+                if (prevModules[currentMod.name]) {
+                    const prevMod = prevModules[currentMod.name];
+                    const drop = prevMod.coverage_pct - currentMod.coverage_pct;
+                    if (drop >= threshold) {
+                        regressions.push({
+                            module: currentMod.name,
+                            previous_pct: prevMod.coverage_pct,
+                            current_pct: currentMod.coverage_pct,
+                            drop_pct: drop
+                        });
+                    }
+                }
+            });
+
+            return regressions;
+        }
+
+        function renderNoData() {
+            document.getElementById('app').innerHTML = `
+                <div class="no-data">
+                    <h2>📊 Nenhum dado de coverage disponível</h2>
+                    <p>Execute o comando abaixo para gerar o primeiro snapshot:</p>
+                    <div class="command">pytest --cov=. --cov-report=xml --cov-report=html</div>
+                    <div class="command">python scripts/coverage_tracker.py</div>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            // Update stats
+            document.querySelector('.last-update').innerHTML = `
+                Última atualização: <strong>${dashboardData.lastUpdate}</strong>
+                | Histórico: <strong>${dashboardData.historyCount}</strong> snapshots
+            `;
+
+            // Update stat cards
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues[0].innerHTML = `${dashboardData.currentCoverage.toFixed(2)}<span class="stat-unit">%</span>`;
+            statValues[1].innerHTML = `${dashboardData.coveredLines.toLocaleString()}<span class="stat-unit">lines</span>`;
+            statValues[2].innerHTML = `${dashboardData.missingLines.toLocaleString()}<span class="stat-unit">lines</span>`;
+            statValues[3].innerHTML = `${(95 - dashboardData.currentCoverage).toFixed(1)}<span class="stat-unit">% restante</span>`;
+
+            // Render regressions if any
+            if (dashboardData.regressions.length > 0) {
+                const alertHtml = `
+                    <div class="alert">
+                        <h3>⚠️ ALERT: ${dashboardData.regressions.length} Regressões Detectadas</h3>
+                        ${dashboardData.regressions.map(reg => `
+                            <div class="alert-item">
+                                <strong>${reg.module}</strong>:
+                                ${reg.previous_pct.toFixed(1)}% → ${reg.current_pct.toFixed(1)}%
+                                (-${reg.drop_pct.toFixed(1)}%)
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.querySelector('.stats-grid').insertAdjacentHTML('afterend', alertHtml);
+            }
+
+            // Render modules table
+            renderModulesTable();
+        }
+
+        function renderModulesTable() {
+            const tbody = document.querySelector('tbody');
+            const sorted = sortModules();
+
+            tbody.innerHTML = sorted.map(module => `
+                <tr>
+                    <td><strong>${module.name}</strong></td>
+                    <td><span class="${getCoverageBadge(module.coverage_pct)}">${module.coverage_pct.toFixed(1)}%</span></td>
+                    <td>${module.total_lines.toLocaleString()}</td>
+                    <td>${module.covered_lines.toLocaleString()}</td>
+                    <td>${module.missing_lines.toLocaleString()}</td>
+                    <td>
+                        <div class="coverage-bar">
+                            <div class="${getCoverageClass(module.coverage_pct)}" style="width: ${module.coverage_pct}%"></div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function sortModules() {
+            const modules = [...dashboardData.modules];
+            modules.sort((a, b) => {
+                let aVal = a[dashboardData.sortColumn];
+                let bVal = b[dashboardData.sortColumn];
+
+                if (dashboardData.sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            return modules;
+        }
+
+        function sortBy(column) {
+            if (dashboardData.sortColumn === column) {
+                dashboardData.sortDirection = dashboardData.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                dashboardData.sortColumn = column;
+                dashboardData.sortDirection = 'asc';
+            }
+            renderModulesTable();
+        }
+
+        function getCoverageBadge(pct) {
+            if (pct === 0) return 'badge badge-critical';
+            if (pct < 25) return 'badge badge-low';
+            if (pct < 50) return 'badge badge-medium';
+            if (pct < 75) return 'badge badge-good';
+            return 'badge badge-excellent';
+        }
+
+        function getCoverageClass(pct) {
+            if (pct === 0) return 'coverage-fill coverage-critical';
+            if (pct < 25) return 'coverage-fill coverage-low';
+            if (pct < 50) return 'coverage-fill coverage-medium';
+            if (pct < 75) return 'coverage-fill coverage-good';
+            return 'coverage-fill coverage-excellent';
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dashboardData.trendData.timestamps,
+                    datasets: [{
+                        label: 'Coverage %',
+                        data: dashboardData.trendData.coverage_pct,
+                        borderColor: '#00d9ff',
+                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e0e0e0' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: '#2a2a3e' }
+                        },
+                        x: {
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: '#2a2a3e' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add click handlers for table sorting
+        document.querySelectorAll('th').forEach(th => {
+            th.addEventListener('click', function() {
+                const column = this.textContent.trim().split(' ')[0].toLowerCase().replace(' ', '_');
+                sortBy(column);
+            });
+        });
+    </script>
+</body>
+</html>
