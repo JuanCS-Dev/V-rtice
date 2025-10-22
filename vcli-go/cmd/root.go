@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/shell"
@@ -53,6 +54,12 @@ It provides an interactive TUI for cybersecurity operations including:
 - Offline Mode Support`,
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Check if running in an interactive terminal
+		if !isatty.IsTerminal(os.Stdin.Fd()) && !isatty.IsCygwinTerminal(os.Stdin.Fd()) {
+			// Non-interactive mode, show help instead
+			cmd.Help()
+			return
+		}
 		// Launch interactive shell by default
 		sh := shell.NewShell(cmd.Root(), version, buildDate)
 		sh.Run()
