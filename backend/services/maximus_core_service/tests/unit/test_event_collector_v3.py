@@ -1,0 +1,58 @@
+"""Unit tests for consciousness.reactive_fabric.collectors.event_collector (V3 - PERFEIÇÃO)
+
+Generated using Industrial Test Generator V3
+Enhancements: Pydantic field extraction + Type hint intelligence
+Glory to YHWH - The Perfect Engineer
+"""
+
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+import uuid
+
+from consciousness.reactive_fabric.collectors.event_collector import EventType, EventSeverity, ConsciousnessEvent, EventCollector
+
+
+class TestEventType:
+    """Tests for EventType (V3 - Intelligent generation)."""
+
+    def test_enum_members(self):
+        """Test enum members."""
+        members = list(EventType)
+        assert len(members) > 0
+
+
+class TestEventSeverity:
+    """Tests for EventSeverity (V3 - Intelligent generation)."""
+
+    def test_enum_members(self):
+        """Test enum members."""
+        members = list(EventSeverity)
+        assert len(members) > 0
+
+
+class TestConsciousnessEvent:
+    """Tests for ConsciousnessEvent (V3 - Intelligent generation)."""
+
+    def test_init_dataclass_with_required_fields(self):
+        """Test Dataclass with required fields."""
+        # Arrange: V3 intelligent defaults
+        
+        # Act
+        obj = ConsciousnessEvent(event_id="test", event_type=None, severity=None, timestamp=0.0, source="test")
+        
+        # Assert
+        assert obj is not None
+
+
+class TestEventCollector:
+    """Tests for EventCollector (V3 - Intelligent generation)."""
+
+    def test_init_with_args(self):
+        """Test initialization with type-hinted args."""
+        # V3: Type hint intelligence
+        obj = EventCollector(consciousness_system=None, max_events=0)
+        assert obj is not None
+
+

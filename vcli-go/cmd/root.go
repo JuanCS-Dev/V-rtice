@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/shell"
 	"github.com/verticedev/vcli-go/internal/visual/banner"
 	"github.com/verticedev/vcli-go/internal/workspace"
@@ -26,6 +28,9 @@ var (
 	offline     bool
 	noTelemetry bool
 	backend     string // Backend type: http or grpc
+
+	// Global config manager
+	globalConfig *config.Manager
 )
 
 // showBanner displays the epic V12 turbo banner with gradient colors
@@ -146,7 +151,47 @@ var offlineClearCmd = &cobra.Command{
 	},
 }
 
+// initConfig initializes the config manager
+func initConfig() {
+	// Determine config path
+	configPath := configFile
+	if configPath == "" {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			configPath = filepath.Join(home, ".vcli", "config.yaml")
+		}
+	}
+
+	// Initialize config manager
+	var err error
+	globalConfig, err = config.NewManager(configPath)
+	if err != nil {
+		// Config file not found is OK - will use defaults
+		if !os.IsNotExist(err) {
+			if debug || os.Getenv("VCLI_DEBUG") == "true" {
+				fmt.Fprintf(os.Stderr, "[DEBUG] Config load warning: %v (using defaults)\n", err)
+			}
+		}
+	} else if debug || os.Getenv("VCLI_DEBUG") == "true" {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Config loaded from: %s\n", configPath)
+	}
+
+	// Apply flag overrides to global config
+	if debug {
+		// Sync debug flag to config
+		cfg := globalConfig.Get()
+		cfg.Global.Debug = true
+	}
+	if offline {
+		cfg := globalConfig.Get()
+		cfg.Global.Offline = true
+	}
+}
+
 func init() {
+	// Initialize config before command execution
+	cobra.OnInitialize(initConfig)
+
 	// Global flags
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Enable debug mode")
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file (default: ~/.vcli/config.yaml)")
@@ -197,6 +242,12 @@ func launchTUI() {
 // GetRootCommand returns the root command for testing
 func GetRootCommand() *cobra.Command {
 	return rootCmd
+}
+
+// GetConfig returns the global config manager
+// This is used by other command files to access configuration
+func GetConfig() *config.Manager {
+	return globalConfig
 }
 
 func main() {

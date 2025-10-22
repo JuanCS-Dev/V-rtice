@@ -851,7 +851,7 @@ func init() {
 	immuneCytokinesCmd.AddCommand(immuneCytokinesStreamCmd)
 
 	// Global flags
-	immuneCmd.PersistentFlags().StringVar(&immuneServer, "server", "localhost:50052", "Immune Core server address")
+	immuneCmd.PersistentFlags().StringVar(&immuneServer, "server", "", "Immune Core server address (default: env VCLI_IMMUNE_ENDPOINT or localhost:50052)")
 	immuneCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "table", "Output format (table|json)")
 
 	// Agent list flags

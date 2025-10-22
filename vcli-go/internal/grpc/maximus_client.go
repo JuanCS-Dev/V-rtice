@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -23,12 +24,30 @@ type MaximusClient struct {
 
 // NewMaximusClient creates a new MAXIMUS gRPC client
 func NewMaximusClient(serverAddress string) (*MaximusClient, error) {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if serverAddress == "" {
+		serverAddress = os.Getenv("VCLI_MAXIMUS_ENDPOINT")
+		if serverAddress == "" {
+			serverAddress = "localhost:50051" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] MAXIMUS gRPC client connecting to %s\n", serverAddress)
+	}
+
 	conn, err := grpc.NewClient(
 		serverAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to MAXIMUS server: %w", err)
+		return nil, fmt.Errorf("failed to connect to MAXIMUS at %s: %w", serverAddress, err)
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] MAXIMUS gRPC connection established\n")
 	}
 
 	client := pb.NewMaximusOrchestratorClient(conn)

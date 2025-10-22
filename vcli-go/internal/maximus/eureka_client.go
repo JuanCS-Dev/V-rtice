@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -58,6 +59,20 @@ type HealthResponse struct {
 
 // NewEurekaClient creates a new Eureka service client
 func NewEurekaClient(endpoint, authToken string) *EurekaClient {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if endpoint == "" {
+		endpoint = os.Getenv("VCLI_EUREKA_ENDPOINT")
+		if endpoint == "" {
+			endpoint = "http://localhost:8024" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Eureka client initialized with endpoint: %s\n", endpoint)
+	}
+
 	return &EurekaClient{
 		baseURL: endpoint,
 		httpClient: &http.Client{
@@ -69,6 +84,11 @@ func NewEurekaClient(endpoint, authToken string) *EurekaClient {
 
 // GenerateInsight generates novel insights from provided data
 func (c *EurekaClient) GenerateInsight(data map[string]interface{}, dataType string, context map[string]interface{}) (*InsightResponse, error) {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Eureka GenerateInsight: connecting to %s\n", c.baseURL)
+	}
+
 	req := InsightRequest{
 		Data:     data,
 		DataType: dataType,
@@ -92,9 +112,13 @@ func (c *EurekaClient) GenerateInsight(data map[string]interface{}, dataType str
 
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute request: %w", err)
+		return nil, fmt.Errorf("failed to connect to Eureka at %s: %w", c.baseURL, err)
 	}
 	defer resp.Body.Close()
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Eureka responded with status: %d\n", resp.StatusCode)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(resp.Body)

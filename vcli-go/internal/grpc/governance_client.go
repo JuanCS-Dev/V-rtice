@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,12 +24,30 @@ type GovernanceClient struct {
 
 // NewGovernanceClient creates a new Governance gRPC client
 func NewGovernanceClient(serverAddress string) (*GovernanceClient, error) {
+	debug := os.Getenv("VCLI_DEBUG") == "true"
+
+	// Check env var if endpoint not provided
+	if serverAddress == "" {
+		serverAddress = os.Getenv("VCLI_GOVERNANCE_ENDPOINT")
+		if serverAddress == "" {
+			serverAddress = "localhost:50053" // default
+		}
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Governance gRPC client connecting to %s\n", serverAddress)
+	}
+
 	conn, err := grpc.NewClient(
 		serverAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to governance server: %w", err)
+		return nil, fmt.Errorf("failed to connect to Governance at %s: %w", serverAddress, err)
+	}
+
+	if debug {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Governance gRPC connection established\n")
 	}
 
 	client := pb.NewGovernanceServiceClient(conn)

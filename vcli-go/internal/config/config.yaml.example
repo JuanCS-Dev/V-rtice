@@ -1,0 +1,75 @@
+# vCLI 2.0 Configuration File
+# Location: ~/.vcli/config.yaml
+# This is an example configuration - copy to ~/.vcli/config.yaml and customize
+
+version: "2.0"
+
+# Backend Service Endpoints
+backends:
+  # MAXIMUS Orchestrator (gRPC)
+  maximus:
+    endpoint: "localhost:50051"
+    insecure: true  # Use insecure credentials (dev only)
+    timeout: 30s
+
+  # Consciousness API (HTTP/WebSocket)
+  consciousness:
+    endpoint: "http://localhost:8022"
+    stream_url: "ws://localhost:8022/stream"
+    timeout: 60s
+
+  # HITL Console (HTTP)
+  hitl:
+    endpoint: "http://localhost:8000/api"
+    token_file: "~/.vcli/tokens/hitl.json"
+    timeout: 30s
+
+  # Active Immune Core (gRPC)
+  immune:
+    endpoint: "localhost:50052"
+    insecure: true
+    timeout: 30s
+
+  # Governance Service (gRPC)
+  governance:
+    endpoint: "localhost:50053"
+    insecure: true
+    timeout: 30s
+
+  # AI Services (HTTP)
+  ai_services:
+    eureka:
+      endpoint: "http://localhost:8024"
+      timeout: 60s
+    oraculo:
+      endpoint: "http://localhost:8026"
+      timeout: 90s
+    predict:
+      endpoint: "http://localhost:8028"
+      timeout: 60s
+
+# Redis Configuration
+redis:
+  addr: "localhost:6379"
+  password: ""  # Empty for no auth
+  db: 0
+  pool_size: 10
+
+# Kubernetes Configuration
+kubernetes:
+  default_context: "minikube"
+  default_namespace: "default"
+  kubeconfig: "~/.kube/config"
+
+# Default Settings
+defaults:
+  output_format: "table"  # table, json, yaml
+  offline_mode: false
+  debug: false
+  telemetry: true
+
+# TUI Settings
+tui:
+  default_workspace: "situational"  # situational, investigation, governance
+  refresh_interval: 5s
+  color_scheme: "gradient"  # gradient, mono, classic

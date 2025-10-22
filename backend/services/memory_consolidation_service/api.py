@@ -2,16 +2,22 @@
 
 REST API for long-term memory consolidation with circadian rhythm.
 
+FASE 3 Enhancement: Consumes Global Workspace consciousness events from Kafka
+for persistent memory consolidation.
+
 NO MOCKS - Production-ready memory consolidation interface.
 """
 
 import asyncio
+import json
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import uvicorn
+from aiokafka import AIOKafkaConsumer
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -27,12 +33,14 @@ logger = logging.getLogger(__name__)
 # Global service instance
 consolidator: Optional[MemoryConsolidator] = None
 consolidation_task: Optional[asyncio.Task] = None
+kafka_consumer: Optional[AIOKafkaConsumer] = None
+kafka_consumer_task: Optional[asyncio.Task] = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle manager for FastAPI application."""
-    global consolidator, consolidation_task
+    global consolidator, consolidation_task, kafka_consumer_task
 
     logger.info("Initializing Memory Consolidation Service...")
 
@@ -42,11 +50,21 @@ async def lifespan(app: FastAPI):
     # Start background consolidation task (circadian rhythm)
     consolidation_task = asyncio.create_task(run_consolidation_loop())
 
-    logger.info("Memory consolidation service initialized with circadian rhythm")
+    # FASE 3: Start Kafka consumer for Global Workspace events
+    kafka_consumer_task = asyncio.create_task(consume_consciousness_events())
+
+    logger.info("Memory consolidation service initialized with circadian rhythm + Kafka consumer")
 
     yield
 
-    # Stop background task
+    # Stop background tasks
+    if kafka_consumer_task:
+        kafka_consumer_task.cancel()
+        try:
+            await kafka_consumer_task
+        except asyncio.CancelledError:
+            pass
+
     if consolidation_task:
         consolidation_task.cancel()
         try:
@@ -92,10 +110,68 @@ async def run_consolidation_loop():
             await asyncio.sleep(60)
 
 
+async def consume_consciousness_events():
+    """Background task to consume Global Workspace consciousness events from Kafka.
+
+    FASE 3: Ingests consciousness events for long-term memory consolidation.
+    """
+    global kafka_consumer, consolidator
+
+    kafka_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka-immunity:9096")
+    kafka_topic = os.getenv("KAFKA_CONSCIOUSNESS_TOPIC", "consciousness-events")
+
+    kafka_consumer = AIOKafkaConsumer(
+        kafka_topic,
+        bootstrap_servers=kafka_servers,
+        group_id="memory-consolidators",
+        value_deserializer=lambda m: json.loads(m.decode("utf-8")),
+        auto_offset_reset="earliest"  # Process all events from beginning
+    )
+
+    logger.info(f"🧠 Connecting to Kafka: {kafka_servers}, topic: {kafka_topic}")
+
+    await kafka_consumer.start()
+    logger.info("✅ Kafka consumer started for Global Workspace events")
+
+    try:
+        async for msg in kafka_consumer:
+            event = msg.value
+            logger.info(f"   💾 Consciousness event received for consolidation: {event.get('sensor_type')} (salience: {event.get('salience', 0.0):.2f})")
+
+            # Convert consciousness event to SecurityEvent for consolidation
+            if consolidator:
+                try:
+                    consciousness_event = SecurityEvent(
+                        event_id=event.get("event_id", f"consciousness-{msg.offset}"),
+                        timestamp=datetime.fromisoformat(event.get("timestamp", datetime.now().isoformat())),
+                        event_type=f"consciousness_{event.get('sensor_type', 'unknown')}",
+                        severity=event.get("salience", 0.5),
+                        source=event.get("sensor_id", "unknown_sensor"),
+                        target="global_workspace",
+                        indicators=[event.get("sensor_type", "unknown")],
+                        outcome="broadcasted",
+                        metadata=event.get("data", {})
+                    )
+
+                    consolidator.ingest_event(consciousness_event)
+                    logger.debug(f"   ✅ Event ingested into consolidation pipeline")
+
+                except Exception as e:
+                    logger.error(f"   ❌ Failed to ingest consciousness event: {e}")
+
+    except asyncio.CancelledError:
+        logger.info("Kafka consumer task cancelled")
+    except Exception as e:
+        logger.error(f"Error in Kafka consumer: {e}")
+    finally:
+        await kafka_consumer.stop()
+        logger.info("Kafka consumer stopped")
+
+
 app = FastAPI(
     title="VÉRTICE Memory Consolidation Service",
-    description="Long-term memory consolidation with circadian rhythm",
-    version="1.0.0",
+    description="Long-term memory consolidation with circadian rhythm + Global Workspace integration",
+    version="2.0.0",
     lifespan=lifespan,
 )
 

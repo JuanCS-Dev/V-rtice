@@ -24,6 +24,7 @@ INTEGRATION:
 import logging
 from typing import Dict, Any, List
 from datetime import datetime
+from pathlib import Path
 from .constitutional_validator import ViolationReport
 
 logger = logging.getLogger(__name__)
@@ -78,15 +79,11 @@ class EmergencyCircuitBreaker:
         logger.critical("║     EMERGENCY CIRCUIT BREAKER TRIGGERED                   ║")
         logger.critical("╚═══════════════════════════════════════════════════════════╝")
         logger.critical(f"Timestamp: {datetime.utcnow().isoformat()}")
-        logger.critical(f"Violation: {violation.violated_law}")
+        logger.critical(f"Violation: {violation.violated_law.value if violation.violated_law else 'Unknown'}")
         logger.critical(f"Level: {violation.level.name}")
-        logger.critical(f"Type: {violation.violation_type.value if violation.violation_type else 'Unknown'}")
+        logger.critical(f"Blocking: {violation.is_blocking}")
         logger.critical(f"Description: {violation.description}")
-        logger.critical("Evidence:")
-        for i, evidence_item in enumerate(violation.evidence, 1):
-            logger.critical(f"  {i}. {evidence_item}")
-        logger.critical(f"Action Details: {violation.action}")
-        logger.critical(f"Context: {violation.context}")
+        logger.critical(f"Evidence: {violation.evidence if hasattr(violation, 'evidence') else 'N/A'}")
         logger.critical("=" * 80)
 
         # Enter safe mode
@@ -183,12 +180,11 @@ class EmergencyCircuitBreaker:
         escalation = {
             "type": "constitutional_violation",
             "severity": "CRITICAL",
-            "violation": violation.violated_law,
-            "violation_type": violation.violation_type.value if violation.violation_type else None,
+            "violation": violation.violated_law.value if violation.violated_law else "UNKNOWN",
+            "level": violation.level.name,
+            "is_blocking": violation.is_blocking,
             "description": violation.description,
-            "evidence": violation.evidence,
-            "action": violation.action,
-            "context": violation.context,
+            "evidence": violation.evidence if hasattr(violation, 'evidence') else {},
             "requires_immediate_attention": True,
             "timestamp": datetime.utcnow().isoformat(),
             "breach_count": self.trigger_count
@@ -233,13 +229,10 @@ class EmergencyCircuitBreaker:
             "timestamp": datetime.utcnow().isoformat(),
             "incident_id": f"CONST_VIOLATION_{self.trigger_count:04d}",
             "violation_level": violation.level.name,
-            "violation_type": violation.violation_type.value if violation.violation_type else None,
-            "violated_law": violation.violated_law,
+            "violated_law": violation.violated_law.value if violation.violated_law else "UNKNOWN",
+            "is_blocking": violation.is_blocking,
             "description": violation.description,
-            "evidence": violation.evidence,
-            "action": violation.action,
-            "context": violation.context,
-            "recommendation": violation.recommendation,
+            "evidence": violation.evidence if hasattr(violation, 'evidence') else {},
             "safe_mode_triggered": self.safe_mode,
             "total_incidents": len(self.incidents)
         }
@@ -287,9 +280,9 @@ class EmergencyCircuitBreaker:
         if self.incidents:
             last = self.incidents[-1]
             status["last_incident"] = {
-                "violated_law": last.violated_law,
+                "violated_law": last.violated_law.value if last.violated_law else "UNKNOWN",
                 "level": last.level.name,
-                "type": last.violation_type.value if last.violation_type else None,
+                "is_blocking": last.is_blocking,
                 "description": last.description
             }
 
@@ -308,11 +301,11 @@ class EmergencyCircuitBreaker:
 
         return [
             {
-                "violated_law": incident.violated_law,
+                "violated_law": incident.violated_law.value if incident.violated_law else "UNKNOWN",
                 "level": incident.level.name,
-                "type": incident.violation_type.value if incident.violation_type else None,
+                "is_blocking": incident.is_blocking,
                 "description": incident.description,
-                "evidence_count": len(incident.evidence)
+                "evidence_count": len(incident.evidence) if hasattr(incident, 'evidence') and isinstance(incident.evidence, (list, dict)) else 0
             }
             for incident in recent_incidents
         ]

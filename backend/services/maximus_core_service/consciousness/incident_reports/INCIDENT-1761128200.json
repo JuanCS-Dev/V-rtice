@@ -1,0 +1,11 @@
+{
+  "incident_id": "INCIDENT-1761128200",
+  "shutdown_reason": "threshold_violation",
+  "shutdown_timestamp": 1761128200.9175956,
+  "shutdown_timestamp_iso": "2025-10-22T07:16:40.917596",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761128200.917872,
+    "timestamp_iso": "2025-10-22T07:16:40.917873",
+    "pid": 9312,
+    "tig_nodes": 

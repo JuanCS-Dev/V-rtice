@@ -1281,7 +1281,7 @@ func init() {
 	consciousnessArousalCmd.AddCommand(consciousnessArousalAdjustCmd)
 
 	// Global flags
-	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "localhost:50051", "MAXIMUS server address")
+	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "", "MAXIMUS server address (default: env VCLI_MAXIMUS_ENDPOINT or localhost:50051)")
 	maximusCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "table", "Output format (table|json)")
 
 	// Submit flags

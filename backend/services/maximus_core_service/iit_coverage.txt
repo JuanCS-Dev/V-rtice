@@ -1,0 +1,416 @@
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.11.13, pytest-7.4.3, pluggy-1.6.0 -- /home/juan/.pyenv/versions/3.11.13/bin/python
+cachedir: .pytest_cache
+rootdir: /home/juan/vertice-dev/backend/services/maximus_core_service
+configfile: pytest.ini
+plugins: asyncio-0.21.1, locust-2.41.6, mock-3.12.0, cov-4.1.0, anyio-3.7.1, forked-1.6.0, respx-0.22.0, httpx-0.35.0
+asyncio: mode=Mode.STRICT
+[1mcollecting ... [0mcollected 27 items
+
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_44_attention_state_none [32mPASSED[0m[33m [  3%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_46_self_summary_none [32mPASSED[0m[33m [  7%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_52_self_alignment_zero_when_no_attention_or_summary [32mPASSED[0m[33m [ 11%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_60_narrative_coherence_issue_when_no_summary [32mPASSED[0m[33m [ 14%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_69_meta_report_none [32mPASSED[0m[33m [ 18%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_79_introspection_quality_issue_when_no_summary [32mPASSED[0m[33m [ 22%][0m
+consciousness/validation/test_validation_100pct.py::TestMetacognitionMissingLines::test_line_94_token_overlap_empty_tokens [32mPASSED[0m[33m [ 25%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_gwd_compliance_get_summary_with_violations [32mPASSED[0m[33m [ 29%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_coherence_validator_init [32mPASSED[0m[33m [ 33%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_compute_metrics_lines_222_263 [32mPASSED[0m[33m [ 37%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_compute_metrics_empty_coherence_history_lines_240_242 [32mPASSED[0m[33m [ 40%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_validate_gwd_lines_275_340 [32mPASSED[0m[33m [ 44%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_validate_gwd_duration_warning_lines_307_310 [32mPASSED[0m[33m [ 48%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_classify_quality_lines_344_350 [32mPASSED[0m[33m [ 51%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_check_gwd_criteria_lines_354_362 [32mPASSED[0m[33m [ 55%][0m
+consciousness/validation/test_validation_100pct.py::TestCoherenceMissingLines::test_compute_compliance_score_lines_370_405 [32mPASSED[0m[33m [ 59%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_structural_compliance_get_summary_lines_134_159 [32mPASSED[0m[33m [ 62%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_phi_proxy_validator_init_lines_211_214 [32mPASSED[0m[33m [ 66%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_validate_fabric_lines_227_235 [32mPASSED[0m[33m [ 70%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_compute_phi_proxies_lines_244_281 [32mPASSED[0m[33m [ 74%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_compute_small_world_sigma_lines_292_310 [32mPASSED[0m[33m [ 77%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_estimate_phi_lines_327_353 [32mPASSED[0m[33m [ 81%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_compute_compliance_score_lines_361_399 [32mPASSED[0m[33m [ 85%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_assess_compliance_lines_408_477 [32mPASSED[0m[33m [ 88%][0m
+consciousness/validation/test_validation_100pct.py::TestPhiProxiesMissingLines::test_get_phi_estimate_lines_486_488 [32mPASSED[0m[33m [ 92%][0m
+consciousness/validation/test_validation_100pct.py::test_validation_module_integration [32mPASSED[0m[33m [ 96%][0m
+consciousness/validation/test_validation_100pct.py::test_validation_100pct_all_covered [32mPASSED[0m[33m [100%][0m
+
+[33m=============================== warnings summary ===============================[0m
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_date_format=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] console_output_style=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_level=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] filterwarnings=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli_format=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] log_cli=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] markers=' in config file pyproject.toml
+    warn(
+
+../../../../.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346
+  /home/juan/.pyenv/versions/3.11.13/lib/python3.11/site-packages/coverage/config.py:346: CoverageWarning: Unrecognized option '[tool.coverage.html] timeout=' in config file pyproject.toml
+    warn(
+
+consciousness/validation/coherence.py:50
+  /home/juan/vertice-dev/backend/services/maximus_core_service/consciousness/validation/coherence.py:50: UserWarning: The NumPy module was reloaded (imported a second time). This can in some cases result in small but subtle issues and is discouraged.
+    import numpy as np
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform linux, python 3.11.13-final-0 ----------
+Name                                                               Stmts   Miss   Cover   Missing
+-------------------------------------------------------------------------------------------------
+__init__.py                                                            0      0 100.00%
+_demonstration/__init__.py                                             0      0 100.00%
+_demonstration/all_services_tools.py                                  34     34   0.00%   14-129
+_demonstration/apply_maximus.py                                       45     45   0.00%   13-122
+_demonstration/chain_of_thought.py                                    64     64   0.00%   13-180
+_demonstration/demo_ethical_ai_complete.py                           189    189   0.00%   12-409
+_demonstration/enqueue_test_decision.py                               79     79   0.00%   16-160
+_demonstration/example_neuromodulation.py                            160    160   0.00%   17-256
+_demonstration/example_neuromodulation_standalone.py                 155    155   0.00%   17-249
+_demonstration/example_predictive_coding_usage.py                    162    162   0.00%   18-345
+_demonstration/maximus_integrated.py                                 213    213   0.00%   14-831
+_demonstration/rag_system.py                                          19     19   0.00%   13-82
+_demonstration/reasoning_engine.py                                   144    144   0.00%   14-337
+_demonstration/tools_world_class.py                                   27     27   0.00%   13-125
+_demonstration/vector_db_client.py                                    34     34   0.00%   14-116
+advanced_tools.py                                                     42     42   0.00%   14-151
+adw_router.py                                                        173    173   0.00%   18-936
+agent_templates.py                                                    20     20   0.00%   13-107
+attention_system/__init__.py                                           3      3   0.00%   18-27
+attention_system/attention_core.py                                   255    255   0.00%   11-652
+attention_system/salience_scorer.py                                  143    143   0.00%   7-338
+autonomic_core/__init__.py                                             2      2   0.00%   17-19
+autonomic_core/analyze/__init__.py                                     5      5   0.00%   11-16
+autonomic_core/analyze/anomaly_detector.py                            28     28   0.00%   3-61
+autonomic_core/analyze/degradation_detector.py                        25     25   0.00%   3-62
+autonomic_core/analyze/demand_forecaster.py                           63     63   0.00%   12-216
+autonomic_core/analyze/failure_predictor.py                           22     22   0.00%   3-52
+autonomic_core/execute/__init__.py                                     7      7   0.00%   14-21
+autonomic_core/execute/cache_actuator.py                             127    127   0.00%   3-325
+autonomic_core/execute/database_actuator.py                          116    116   0.00%   3-368
+autonomic_core/execute/docker_actuator.py                            113    113   0.00%   3-274
+autonomic_core/execute/kubernetes_actuator.py                         29     29   0.00%   3-55
+autonomic_core/execute/loadbalancer_actuator.py                      155    155   0.00%   3-389
+autonomic_core/execute/safety_manager.py                              32     32   0.00%   3-49
+autonomic_core/hcl_orchestrator.py                                   236    236   0.00%   7-508
+autonomic_core/homeostatic_control.py                                 38     38   0.00%   12-103
+autonomic_core/knowledge_base/__init__.py                              3      3   0.00%   8-11
+autonomic_core/knowledge_base/database_schema.py                      10     10   0.00%   3-58
+autonomic_core/knowledge_base/decision_api.py                         27     27   0.00%   3-62
+autonomic_core/monitor/__init__.py                                     4      4   0.00%   8-18
+autonomic_core/monitor/kafka_streamer.py                              62     62   0.00%   7-124
+autonomic_core/monitor/sensor_definitions.py                         174    174   0.00%   12-370
+autonomic_core/monitor/system_monitor.py                             109    109   0.00%   8-254
+autonomic_core/plan/__init__.py                                        4      4   0.00%   9-13
+autonomic_core/plan/fuzzy_controller.py                               52     52   0.00%   3-98
+autonomic_core/plan/mode_definitions.py                                3      3   0.00%   3-61
+autonomic_core/plan/rl_agent.py                                       25     25   0.00%   3-62
+autonomic_core/resource_analyzer.py                                   35     35   0.00%   12-113
+autonomic_core/resource_executor.py                                   45     45   0.00%   13-105
+autonomic_core/resource_planner.py                                    22     22   0.00%   13-79
+autonomic_core/system_monitor.py                                      27     27   0.00%   12-75
+compassion/__init__.py                                                 3      3   0.00%   16-19
+compassion/confidence_tracker.py                                      55     55   0.00%   19-179
+compassion/contradiction_detector.py                                  53     53   0.00%   16-182
+compassion/sally_anne_dataset.py                                      16     16   0.00%   16-252
+compassion/social_memory.py                                          141    141   0.00%   22-469
+compassion/social_memory_sqlite.py                                   155    155   0.00%   16-362
+compassion/tom_benchmark.py                                           52     52   0.00%   15-171
+compassion/tom_engine.py                                             134    134   0.00%   18-383
+compliance/__init__.py                                                10     10   0.00%   62-124
+compliance/base.py                                                   322    322   0.00%   19-524
+compliance/certifications.py                                         199    199   0.00%   17-554
+compliance/compliance_engine.py                                      196    196   0.00%   21-654
+compliance/evidence_collector.py                                     220    220   0.00%   21-662
+compliance/example_usage.py                                          199    199   0.00%   17-386
+compliance/gap_analyzer.py                                           151    151   0.00%   21-535
+compliance/monitoring.py                                             229    229   0.00%   21-586
+compliance/regulations.py                                             15     15   0.00%   22-961
+confidence_scoring.py                                                 24     24   0.00%   13-69
+consciousness/__init__.py                                              4      0 100.00%
+consciousness/api.py                                                 244    244   0.00%   19-800
+consciousness/autobiographical_narrative.py                           32     32   0.00%   9-56
+consciousness/biomimetic_safety_bridge.py                            164    164   0.00%   36-488
+consciousness/episodic_memory/__init__.py                              4      4   0.00%   6-12
+consciousness/episodic_memory/core.py                                 57     57   0.00%   10-164
+consciousness/episodic_memory/event.py                                57     57   0.00%   5-131
+consciousness/episodic_memory/memory_buffer.py                        97     97   0.00%   5-245
+consciousness/esgt/__init__.py                                         4      0 100.00%
+consciousness/esgt/arousal_integration.py                             82     56  31.71%   137-151, 155-161, 169-178, 186-230, 248-261, 266, 274-286, 290, 298-300, 309
+consciousness/esgt/coordinator.py                                    376    276  26.60%   105-108, 117-130, 180, 189-198, 228, 232, 243-251, 255, 302-304, 308-313, 317-319, 323, 382-425, 429-438, 442-444, 475-662, 673-706, 716-734, 754-815, 820-849, 860-868, 872-885, 893-906, 911-922, 926-928, 932-937, 946-949, 958-961, 979-990
+consciousness/esgt/coordinator_old.py                                247    247   0.00%   73-640
+consciousness/esgt/kuramoto.py                                       159    108  32.08%   105, 116-120, 140-144, 156-161, 209-219, 236-278, 282, 286, 290-292, 336-340, 344-345, 349-350, 354-357, 374-399, 403-441, 445-448, 452-454, 478-498, 502
+consciousness/esgt/spm/__init__.py                                     5      5   0.00%   36-60
+consciousness/esgt/spm/base.py                                       121    121   0.00%   34-401
+consciousness/esgt/spm/metrics_monitor.py                            191    191   0.00%   51-499
+consciousness/esgt/spm/salience_detector.py                          187    187   0.00%   51-524
+consciousness/esgt/spm/simple.py                                     133    133   0.00%   28-396
+consciousness/integration/__init__.py                                  5      5   0.00%   8-13
+consciousness/integration/esgt_subscriber.py                          36     36   0.00%   7-91
+consciousness/integration/mcea_client.py                              38     38   0.00%   7-103
+consciousness/integration/mea_bridge.py                               40     40   0.00%   8-117
+consciousness/integration/mmei_client.py                              38     38   0.00%   7-107
+consciousness/integration/sensory_esgt_bridge.py                      86     86   0.00%   47-426
+consciousness/integration_example.py                                 314    314   0.00%   66-689
+consciousness/lrr/__init__.py                                          6      0 100.00%
+consciousness/lrr/contradiction_detector.py                          132     92  30.30%   61-77, 112-114, 126-135, 139, 152-189, 192-193, 196-224, 233, 241-277, 284-298, 303-311, 319-321, 324-326, 329-331, 334-336, 339-341, 344-346
+consciousness/lrr/introspection_engine.py                             64     39  39.06%   43-55, 62-72, 79-80, 85-102, 111-126
+consciousness/lrr/meta_monitor.py                                     96     58  39.58%   54-65, 76-99, 102-106, 109, 116-130, 133-145, 151-160, 167-169, 175-180, 196-222
+consciousness/lrr/recursive_reasoner.py                              395    270  31.65%   125, 127, 133, 137-139, 149-173, 178, 183-186, 213-214, 329-332, 344-355, 364-379, 383-410, 419-456, 460-493, 502-529, 539-576, 589-603, 622-640, 664-734, 751-772, 778-787, 797-806, 812-816, 820, 828-832, 836-932, 945-958, 970-973, 983-996
+consciousness/mcea/__init__.py                                         3      0 100.00%
+consciousness/mcea/controller.py                                     295    204  30.85%   125-127, 140-170, 183, 233, 246-254, 266, 275-276, 302-304, 308-317, 424-467, 471, 475-481, 485-491, 495-505, 515-575, 580-596, 600-613, 617-623, 636-644, 648-655, 661, 665, 677-680, 692-703, 711-712, 716, 720, 724, 753-772, 785-802, 812-821, 834-842
+consciousness/mcea/controller_old.py                                 215    215   0.00%   93-607
+consciousness/mcea/run_controller_coverage.py                         18     18   0.00%   10-56
+consciousness/mcea/stress.py                                         233    156  33.05%   187-211, 215, 320-349, 355, 359-368, 372-378, 382-408, 412-435, 439-447, 455-462, 485-595, 599-621, 629-636, 642, 646-650, 654, 658-662, 666-668
+consciousness/mea/__init__.py                                          5      0 100.00%
+consciousness/mea/attention_schema.py                                103     63  38.83%   54-55, 100-102, 116-138, 144-153, 159-163, 169-187, 193-197, 204-208, 211-216, 219-220, 223-225, 230-237
+consciousness/mea/boundary_detector.py                                50     31  38.00%   43-45, 52-64, 74-82, 85-86, 94-95, 98-108
+consciousness/mea/prediction_validator.py                             38     23  39.47%   43-53, 65-68, 75-89, 92-100
+consciousness/mea/run_mea_coverage.py                                 20     20   0.00%   10-60
+consciousness/mea/self_model.py                                       57     30  47.37%   45-48, 60-64, 67-69, 72-74, 77-79, 83-94, 104, 110-118
+consciousness/metacognition/__init__.py                                2      2   0.00%   3-5
+consciousness/metacognition/monitor.py                                45     45   0.00%   18-159
+consciousness/mmei/__init__.py                                         3      0 100.00%
+consciousness/mmei/goals.py                                          198    117  40.91%   163-165, 169, 173-174, 178-179, 183, 192-196, 286-305, 317, 332-392, 396-400, 404-426, 430, 434-444, 448-456, 462-464, 483-485, 502-504, 521-523, 540, 557, 574-578, 592-594, 598, 602, 606-610
+consciousness/mmei/monitor.py                                        303    210  30.69%   133, 185-198, 202-209, 213-221, 274-276, 285-297, 301-303, 325-326, 400-440, 452, 462, 466-475, 479-487, 496-536, 540-558, 575-636, 649-669, 673, 677, 690-695, 708-716, 720-726, 762-803, 812-821, 825-836, 845-869, 881-886, 901-907, 919-921
+consciousness/mmei/monitor_old.py                                    202    202   0.00%   77-626
+consciousness/neuromodulation/__init__.py                              0      0 100.00%
+consciousness/neuromodulation/acetylcholine_hardened.py                9      9   0.00%   35-84
+consciousness/neuromodulation/coordinator_hardened.py                122    122   0.00%   32-405
+consciousness/neuromodulation/dopamine_hardened.py                   108    108   0.00%   32-376
+consciousness/neuromodulation/modulator_base.py                      114    114   0.00%   31-368
+consciousness/neuromodulation/norepinephrine_hardened.py               9      9   0.00%   35-84
+consciousness/neuromodulation/serotonin_hardened.py                    9      9   0.00%   35-84
+consciousness/predictive_coding/__init__.py                            0      0 100.00%
+consciousness/predictive_coding/hierarchy_hardened.py                180    180   0.00%   38-457
+consciousness/predictive_coding/layer1_sensory_hardened.py            28     28   0.00%   28-159
+consciousness/predictive_coding/layer2_behavioral_hardened.py         30     30   0.00%   28-165
+consciousness/predictive_coding/layer3_operational_hardened.py        40     40   0.00%   28-176
+consciousness/predictive_coding/layer4_tactical_hardened.py           53     53   0.00%   28-223
+consciousness/predictive_coding/layer5_strategic_hardened.py          69     69   0.00%   28-306
+consciousness/predictive_coding/layer_base_hardened.py               131    131   0.00%   36-353
+consciousness/prefrontal_cortex.py                                   104    104   0.00%   22-387
+consciousness/prometheus_metrics.py                                   78     78   0.00%   27-278
+consciousness/reactive_fabric/__init__.py                              4      4   0.00%   14-18
+consciousness/reactive_fabric/collectors/__init__.py                   3      3   0.00%   9-12
+consciousness/reactive_fabric/collectors/event_collector.py          152    152   0.00%   20-404
+consciousness/reactive_fabric/collectors/metrics_collector.py        146    146   0.00%   21-305
+consciousness/reactive_fabric/orchestration/__init__.py                2      2   0.00%   9-11
+consciousness/reactive_fabric/orchestration/data_orchestrator.py     180    180   0.00%   24-555
+consciousness/run_api_coverage.py                                     18     18   0.00%   5-44
+consciousness/run_biomimetic_coverage.py                              18     18   0.00%   10-56
+consciousness/run_prefrontal_coverage.py                              18     18   0.00%   5-44
+consciousness/run_prometheus_coverage.py                              18     18   0.00%   5-44
+consciousness/run_safety_combined_coverage.py                         18     18   0.00%   5-45
+consciousness/run_safety_coverage.py                                  18     18   0.00%   5-44
+consciousness/run_safety_missing_coverage.py                          18     18   0.00%   5-44
+consciousness/run_system_coverage.py                                  18     18   0.00%   5-49
+consciousness/safety.py                                              785    785   0.00%   58-2117
+consciousness/sandboxing/__init__.py                                  92     92   0.00%   5-238
+consciousness/sandboxing/kill_switch.py                               85     85   0.00%   5-254
+consciousness/sandboxing/resource_limiter.py                          34     34   0.00%   5-103
+consciousness/system.py                                              177    177   0.00%   22-428
+consciousness/temporal_binding.py                                     27     27   0.00%   9-68
+consciousness/tig/__init__.py                                          3      0 100.00%
+consciousness/tig/fabric.py                                          507    385  24.06%   73-82, 105, 122-127, 136-142, 146-149, 153-157, 161, 221, 225, 236-252, 269-280, 286-296, 343-360, 400, 405, 410-413, 422-442, 481-497, 506-557, 577-589, 593-649, 657, 665, 677-684, 695-696, 716-778, 782-784, 788-805, 814-856, 881-889, 898-927, 944-954, 958, 962, 971-989, 998-1007, 1016-1025, 1034-1067, 1085-1120, 1129-1140, 1152-1171, 1189-1203, 1220-1229, 1238-1243, 1247-1252
+consciousness/tig/fabric_old.py                                      258    258   0.00%   30-675
+consciousness/tig/sync.py                                            227    174  23.35%   107-114, 185-225, 234-251, 255-262, 281-404, 416-430, 434-436, 445-448, 457-460, 475-476, 489-497, 528-530, 534-543, 547-552, 556-566, 570-578, 582-596, 610-611
+consciousness/validate_tig_metrics.py                                 38     38   0.00%   6-55
+consciousness/validation/__init__.py                                   4      0 100.00%
+consciousness/validation/coherence.py                                147      0 100.00%
+consciousness/validation/metacognition.py                             56      0 100.00%
+consciousness/validation/phi_proxies.py                              152      0 100.00%
+distributed_organism_tools.py                                         55     55   0.00%   9-156
+enhanced_cognition_tools.py                                           67     67   0.00%   9-244
+ethical_guardian.py                                                  455    455   0.00%   17-1236
+ethical_tool_wrapper.py                                              109    109   0.00%   19-332
+ethics/__init__.py                                                     8      8   0.00%   28-62
+ethics/base.py                                                       108    108   0.00%   7-294
+ethics/config.py                                                      19     19   0.00%   7-220
+ethics/consequentialist_engine.py                                    128    128   0.00%   12-392
+ethics/example_usage.py                                               98     98   0.00%   7-216
+ethics/integration_engine.py                                         156    156   0.00%   15-447
+ethics/kantian_checker.py                                            135    135   0.00%   12-423
+ethics/principialism.py                                              147    147   0.00%   13-376
+ethics/quick_test.py                                                 113    113   0.00%   8-224
+ethics/virtue_ethics.py                                              142    142   0.00%   13-391
+fairness/__init__.py                                                   8      8   0.00%   23-32
+fairness/base.py                                                      89     89   0.00%   7-192
+fairness/bias_detector.py                                            193    193   0.00%   14-580
+fairness/constraints.py                                              144    144   0.00%   7-454
+fairness/example_usage.py                                            200    200   0.00%   7-375
+fairness/mitigation.py                                               225    225   0.00%   13-692
+fairness/monitor.py                                                  195    195   0.00%   14-577
+federated_learning/__init__.py                                         9      9   0.00%   46-121
+federated_learning/aggregation.py                                    152    152   0.00%   14-441
+federated_learning/base.py                                           152    152   0.00%   11-363
+federated_learning/communication.py                                   90     90   0.00%   14-380
+federated_learning/example_usage.py                                  148    148   0.00%   18-356
+federated_learning/fl_client.py                                      108    108   0.00%   15-382
+federated_learning/fl_coordinator.py                                 173    173   0.00%   15-499
+federated_learning/model_adapters.py                                  91     91   0.00%   19-429
+federated_learning/storage.py                                        180    180   0.00%   14-549
+gemini_client.py                                                     103    103   0.00%   15-361
+generate_validation_report.py                                        164    164   0.00%   13-273
+governance/__init__.py                                                 8      8   0.00%   17-64
+governance/audit_infrastructure.py                                   104    104   0.00%   13-537
+governance/base.py                                                   272    272   0.00%   13-561
+governance/ethics_review_board.py                                    148    148   0.00%   14-602
+governance/example_usage.py                                           86     86   0.00%   15-228
+governance/governance_engine.py                                      109    109   0.00%   12-276
+governance/guardian/__init__.py                                        7      7   0.00%   15-31
+governance/guardian/article_ii_guardian.py                           170    170   0.00%   16-560
+governance/guardian/article_iii_guardian.py                          184    184   0.00%   15-600
+governance/guardian/article_iv_guardian.py                           192    192   0.00%   15-651
+governance/guardian/article_v_guardian.py                            206    206   0.00%   15-695
+governance/guardian/base.py                                          210    210   0.00%   17-612
+governance/guardian/coordinator.py                                   214    214   0.00%   14-659
+governance/hitl_interface.py                                          65     65   0.00%   12-241
+governance/policies.py                                                64     64   0.00%   17-418
+governance/policy_engine.py                                          173    173   0.00%   17-465
+governance_production_server.py                                       63     63   0.00%   13-171
+governance_sse/__init__.py                                             4      4   0.00%   25-29
+governance_sse/api_routes.py                                         185    185   0.00%   21-616
+governance_sse/event_broadcaster.py                                  102    102   0.00%   15-380
+governance_sse/sse_server.py                                         168    168   0.00%   23-537
+governance_sse/standalone_server.py                                   37     37   0.00%   12-137
+hitl/__init__.py                                                      10     10   0.00%   74-123
+hitl/audit_trail.py                                                  184    184   0.00%   24-569
+hitl/base.py                                                         226    226   0.00%   11-513
+hitl/decision_framework.py                                           173    173   0.00%   20-555
+hitl/decision_queue.py                                               211    211   0.00%   20-550
+hitl/escalation_manager.py                                           180    180   0.00%   22-503
+hitl/example_usage.py                                                191    191   0.00%   17-427
+hitl/operator_interface.py                                           202    202   0.00%   22-585
+hitl/risk_assessor.py                                                234    234   0.00%   22-565
+immune_enhancement_tools.py                                           78     78   0.00%   9-236
+justice/__init__.py                                                    5      5   0.00%   3-14
+justice/cbr_engine.py                                                 44     44   0.00%   24-184
+justice/constitutional_validator.py                                   81     81   0.00%   32-205
+justice/embeddings.py                                                 16     16   0.00%   21-95
+justice/emergency_circuit_breaker.py                                 111    111   0.00%   24-329
+justice/precedent_database.py                                         65     65   0.00%   26-216
+justice/validators.py                                                 66     66   0.00%   23-214
+main.py                                                              114    114   0.00%   12-330
+memory_system.py                                                      31     31   0.00%   14-120
+mip_client/__init__.py                                                 3      3   0.00%   10-13
+mip_client/client.py                                                 118    118   0.00%   10-319
+monitoring/__init__.py                                                 5      5   0.00%   20-28
+monitoring/prometheus_exporter.py                                     76     76   0.00%   17-368
+motor_integridade_processual/__init__.py                               4      4   0.00%   26-30
+motor_integridade_processual/api.py                                  287    287   0.00%   28-787
+motor_integridade_processual/arbiter/__init__.py                       3      3   0.00%   3-6
+motor_integridade_processual/arbiter/alternatives.py                  80     80   0.00%   8-209
+motor_integridade_processual/arbiter/decision.py                      24     24   0.00%   8-139
+motor_integridade_processual/config.py                                33     33   0.00%   10-107
+motor_integridade_processual/frameworks/__init__.py                    6      6   0.00%   13-23
+motor_integridade_processual/frameworks/base.py                       18     18   0.00%   10-115
+motor_integridade_processual/frameworks/kantian.py                    65     65   0.00%   15-272
+motor_integridade_processual/frameworks/principialism.py              86     86   0.00%   16-292
+motor_integridade_processual/frameworks/utilitarian.py                45     45   0.00%   15-186
+motor_integridade_processual/frameworks/virtue.py                     57     57   0.00%   17-216
+motor_integridade_processual/infrastructure/__init__.py                5      5   0.00%   3-8
+motor_integridade_processual/infrastructure/audit_trail.py            11     11   0.00%   3-26
+motor_integridade_processual/infrastructure/hitl_queue.py             12     12   0.00%   3-23
+motor_integridade_processual/infrastructure/knowledge_base.py         14     14   0.00%   3-26
+motor_integridade_processual/infrastructure/metrics.py                 9      9   0.00%   3-24
+motor_integridade_processual/models/__init__.py                        2      2   0.00%   12-14
+motor_integridade_processual/models/action_plan.py                   186    186   0.00%   18-422
+motor_integridade_processual/models/audit.py                           0      0 100.00%
+motor_integridade_processual/models/hitl.py                            0      0 100.00%
+motor_integridade_processual/models/knowledge.py                       0      0 100.00%
+motor_integridade_processual/models/verdict.py                       122    122   0.00%   16-292
+motor_integridade_processual/resolution/__init__.py                    3      3   0.00%   3-6
+motor_integridade_processual/resolution/conflict_resolver.py          80     80   0.00%   10-298
+motor_integridade_processual/resolution/rules.py                      44     44   0.00%   9-123
+neuromodulation/__init__.py                                            7      7   0.00%   15-29
+neuromodulation/acetylcholine_system.py                               49     49   0.00%   12-168
+neuromodulation/dopamine_system.py                                    60     60   0.00%   12-197
+neuromodulation/neuromodulation_controller.py                         73     73   0.00%   9-272
+neuromodulation/norepinephrine_system.py                              49     49   0.00%   12-158
+neuromodulation/serotonin_system.py                                   49     49   0.00%   12-164
+observability/__init__.py                                              3      3   0.00%   3-6
+observability/logger.py                                               37     37   0.00%   18-125
+observability/metrics.py                                              35     35   0.00%   17-138
+offensive_arsenal_tools.py                                            36     36   0.00%   14-153
+osint_router.py                                                      149    149   0.00%   24-453
+osint_standalone.py                                                   11     11   0.00%   6-32
+performance/__init__.py                                               13     13   0.00%   18-65
+performance/batch_predictor.py                                       245    245   0.00%   17-550
+performance/benchmark_suite.py                                       223    223   0.00%   17-608
+performance/distributed_trainer.py                                   172    172   0.00%   17-496
+performance/gpu_trainer.py                                           196    196   0.00%   17-489
+performance/inference_engine.py                                      241    241   0.00%   18-616
+performance/onnx_exporter.py                                         224    224   0.00%   17-553
+performance/profiler.py                                              200    200   0.00%   17-491
+performance/pruner.py                                                199    199   0.00%   17-564
+performance/quantizer.py                                             148    148   0.00%   15-436
+predictive_coding/__init__.py                                          7      7   0.00%   79-86
+predictive_coding/hpc_network.py                                     103    103   0.00%   16-268
+predictive_coding/layer1_sensory.py                                   95     95   0.00%   12-343
+predictive_coding/layer2_behavioral.py                               130    130   0.00%   12-356
+predictive_coding/layer3_operational.py                              143    143   0.00%   12-491
+predictive_coding/layer4_tactical.py                                  80     80   0.00%   12-310
+predictive_coding/layer5_strategic.py                                104    104   0.00%   12-419
+privacy/__init__.py                                                    7      7   0.00%   34-77
+privacy/base.py                                                      143    143   0.00%   18-445
+privacy/dp_aggregator.py                                             144    144   0.00%   15-496
+privacy/dp_mechanisms.py                                              92     92   0.00%   16-410
+privacy/example_usage.py                                             140    140   0.00%   20-308
+privacy/privacy_accountant.py                                        118    118   0.00%   22-493
+self_reflection.py                                                    18     18   0.00%   14-73
+skill_learning/__init__.py                                             3      3   0.00%   21-31
+skill_learning/skill_learning_controller.py                           94     94   0.00%   9-296
+tool_orchestrator.py                                                  43     43   0.00%   13-163
+training/__init__.py                                                   8      8   0.00%   17-47
+training/continuous_training.py                                      109    109   0.00%   16-311
+training/data_collection.py                                          232    232   0.00%   15-547
+training/data_preprocessor.py                                        239    239   0.00%   16-680
+training/data_validator.py                                           210    210   0.00%   17-580
+training/dataset_builder.py                                          179    179   0.00%   15-537
+training/evaluator.py                                                209    209   0.00%   17-508
+training/hyperparameter_tuner.py                                     148    148   0.00%   18-414
+training/layer_trainer.py                                            226    226   0.00%   18-546
+training/model_registry.py                                           170    170   0.00%   16-417
+training/train_layer1_vae.py                                         123    123   0.00%   20-399
+validate_regra_de_ouro.py                                            253    253   0.00%   16-476
+version.py                                                            11     11   0.00%   8-26
+workflows/__init__.py                                                  1      1   0.00%   10
+workflows/ai_analyzer.py                                              97     97   0.00%   17-423
+workflows/attack_surface_adw.py                                      215    215   0.00%   27-587
+workflows/credential_intel_adw.py                                    254    254   0.00%   22-678
+workflows/target_profiling_adw.py                                    267    267   0.00%   22-755
+xai/__init__.py                                                        9      9   0.00%   22-38
+xai/base.py                                                          115    115   0.00%   7-342
+xai/counterfactual.py                                                240    240   0.00%   14-785
+xai/engine.py                                                        167    167   0.00%   14-468
+xai/example_usage.py                                                 198    198   0.00%   7-410
+xai/feature_tracker.py                                               135    135   0.00%   13-372
+xai/lime_cybersec.py                                                 225    225   0.00%   14-684
+xai/shap_cybersec.py                                                 222    222   0.00%   15-652
+-------------------------------------------------------------------------------------------------
+TOTAL                                                              33946  32536   4.15%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+
+[31m[1mFAIL Required test coverage of 70% not reached. Total coverage: 4.15%
+[0m[33m======================= [32m27 passed[0m, [33m[1m9 warnings[0m[33m in 18.58s[0m[33m ========================[0m

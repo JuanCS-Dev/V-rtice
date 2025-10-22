@@ -1,0 +1,12 @@
+service_name,compose_external,compose_internal,dockerfile_expose,dockerfile_cmd_port,mismatch,status
+adaptive_immunity_service,8010,8010,8000,N/A,YES,❌
+memory_consolidation_service,8010,8010,8041,N/A,YES,❌
+immunis_treg_service,8010,8010,8033,N/A,YES,❌
+immunis_macrophage_service,8312,8012,8030,N/A,YES,❌
+immunis_neutrophil_service,8312,8012,8031,N/A,YES,❌
+immunis_bcell_service,8312,8012,8026,N/A,YES,❌
+immunis_dendritic_service,8312,8012,8028,N/A,YES,❌
+immunis_nk_cell_service,8319,8019,8032,N/A,YES,❌
+immunis_helper_t_service,8317,8017,8029,N/A,YES,❌
+immunis_cytotoxic_t_service,8318,8018,8027,N/A,YES,❌
+active_immune_core,8200,8200,8200,8200,NO,✅

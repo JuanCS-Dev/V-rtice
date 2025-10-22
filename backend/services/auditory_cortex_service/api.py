@@ -9,11 +9,16 @@ Endpoints are provided for:
 - Retrieving speech-to-text transcripts.
 - Accessing sound event detection and localization results.
 
+FASE 3 Enhancement: Integrates with Digital Thalamus for Global Workspace
+broadcasting of salient auditory perceptions.
+
 This API allows other Maximus AI services or external applications to interact
 with the auditory perception capabilities in a standardized and efficient manner.
 """
 
 import base64
+import os
+import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -21,18 +26,30 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+# Add shared directory to path for Thalamus client
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../shared"))
+
 from binaural_correlation import BinauralCorrelation
 from c2_beacon_detector import C2BeaconDetector
 from cocktail_party_triage import CocktailPartyTriage
+from thalamus_client import ThalamusClient
 from ttp_signature_recognition import TTPSignatureRecognition
 
-app = FastAPI(title="Maximus Auditory Cortex Service", version="1.0.0")
+app = FastAPI(title="Maximus Auditory Cortex Service", version="2.0.0")
 
 # Initialize auditory processing cores
 binaural_correlation = BinauralCorrelation()
 cocktail_party_triage = CocktailPartyTriage()
 ttp_recognition = TTPSignatureRecognition()
 c2_detector = C2BeaconDetector()
+
+# Initialize Thalamus client for Global Workspace integration
+thalamus_url = os.getenv("DIGITAL_THALAMUS_URL", "http://digital_thalamus_service:8012")
+thalamus_client = ThalamusClient(
+    thalamus_url=thalamus_url,
+    sensor_id="auditory_cortex_primary",
+    sensor_type="auditory"
+)
 
 
 class AudioAnalysisRequest(BaseModel):
@@ -42,17 +59,20 @@ class AudioAnalysisRequest(BaseModel):
         audio_base64 (str): The audio content encoded in base64.
         analysis_type (str): The type of analysis to perform (e.g., 'speech_to_text', 'sound_event_detection').
         language (Optional[str]): The language of the audio (e.g., 'en-US').
+        priority (int): The priority of the analysis (1-10, 10 being highest).
     """
 
     audio_base64: str
     analysis_type: str
     language: Optional[str] = "en-US"
+    priority: int = 5
 
 
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Auditory Cortex Service."""
-    print("👂 Starting Maximus Auditory Cortex Service...")  # pragma: no cover
+    print("👂 Starting Maximus Auditory Cortex Service v2.0...")  # pragma: no cover
+    print(f"   Thalamus URL: {thalamus_url}")
     print("✅ Maximus Auditory Cortex Service started successfully.")  # pragma: no cover
 
 
@@ -60,6 +80,7 @@ async def startup_event():
 async def shutdown_event():
     """Performs shutdown tasks for the Auditory Cortex Service."""
     print("👋 Shutting down Maximus Auditory Cortex Service...")  # pragma: no cover
+    await thalamus_client.close()
     print("🛑 Maximus Auditory Cortex Service shut down.")  # pragma: no cover
 
 
@@ -86,7 +107,7 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
     Raises:
         HTTPException: If the audio processing fails or an invalid analysis type is provided.
     """
-    print(f"[API] Received audio analysis request (type: {request.analysis_type}, language: {request.language})")
+    print(f"[API] Received audio analysis request (type: {request.analysis_type}, priority: {request.priority})")
     try:
         # Decode base64 audio (simplified, actual audio processing would happen here)
         audio_data = base64.b64decode(request.audio_base64)
@@ -113,6 +134,26 @@ async def analyze_audio_endpoint(request: AudioAnalysisRequest) -> Dict[str, Any
                 status_code=400,
                 detail=f"Invalid analysis type: {request.analysis_type}",
             )
+
+        # FASE 3: Submit perception to Digital Thalamus for Global Workspace broadcasting
+        try:
+            thalamus_response = await thalamus_client.submit_perception(
+                data=results,
+                priority=request.priority,
+                timestamp=results["timestamp"]
+            )
+            results["thalamus_broadcast"] = {
+                "submitted": True,
+                "broadcasted_to_global_workspace": thalamus_response.get("broadcasted_to_global_workspace", False),
+                "salience": thalamus_response.get("salience", 0.0)
+            }
+            print(f"   📡 Auditory perception submitted to Thalamus (salience: {thalamus_response.get('salience', 0.0):.2f})")
+        except Exception as e:
+            print(f"   ⚠️  Failed to submit to Thalamus: {e}")
+            results["thalamus_broadcast"] = {
+                "submitted": False,
+                "error": str(e)
+            }
 
         return results
     except HTTPException:

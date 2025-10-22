@@ -75,9 +75,11 @@ class OscillatorConfig:
     """Configuration for a Kuramoto oscillator."""
 
     natural_frequency: float = 40.0  # Hz (gamma-band analog)
-    coupling_strength: float = 14.0  # K parameter (high value compensates for k_i normalization)
-    phase_noise: float = 0.01  # Additive phase noise
-    damping: float = 0.1  # Damping coefficient
+    coupling_strength: float = 20.0  # K parameter (increased for sparse topology, was 14.0)
+    phase_noise: float = 0.001  # Additive phase noise (reduced from 0.01 for faster sync)
+    integration_method: str = "rk4"  # Numerical integrator: "euler" or "rk4" (PPBPR Section 5.2)
+    # NOTE: damping removed - not part of canonical Kuramoto model
+    # The phase-dependent damping was preventing synchronization by anchoring oscillators to θ=0
 
 
 @dataclass
@@ -218,57 +220,106 @@ class KuramotoOscillator:
         self.phase_history: list[float] = [self.phase]
         self.frequency_history: list[float] = [self.frequency]
 
-    def update(self, neighbor_phases: dict[str, float], coupling_weights: dict[str, float], dt: float = 0.005) -> float:
+    def _compute_phase_velocity(self, current_phase: float, neighbor_phases: dict[str, float], coupling_weights: dict[str, float], N: int) -> float:
+        """
+        Compute phase velocity (derivative) for Kuramoto model.
+
+        This is the core differential equation:
+            dθᵢ/dt = ωᵢ + (K/N)Σⱼ wⱼ sin(θⱼ - θᵢ)
+
+        Args:
+            current_phase: Current phase of this oscillator (radians)
+            neighbor_phases: Dict mapping neighbor IDs to their phases (radians)
+            coupling_weights: Dict mapping neighbor IDs to coupling strengths
+            N: Total number of oscillators in network (for canonical normalization)
+
+        Returns:
+            Phase velocity (radians/second)
+        """
+        # Natural frequency contribution: ωᵢ
+        phase_velocity = 2 * np.pi * self.frequency
+
+        # Coupling contribution: (K/N)Σⱼ wⱼ sin(θⱼ - θᵢ)
+        if neighbor_phases:
+            coupling_sum = 0.0
+
+            for neighbor_id, neighbor_phase in neighbor_phases.items():
+                weight = coupling_weights.get(neighbor_id, 1.0)
+                phase_diff = neighbor_phase - current_phase
+                coupling_sum += weight * np.sin(phase_diff)
+
+            # Coupling term: CANONICAL Kuramoto uses K/N normalization
+            coupling_term = self.config.coupling_strength * (coupling_sum / N)
+            phase_velocity += coupling_term
+
+        return phase_velocity
+
+    def update(self, neighbor_phases: dict[str, float], coupling_weights: dict[str, float], dt: float = 0.005, N: int | None = None) -> float:
         """
         Update oscillator phase based on Kuramoto dynamics.
 
-        Implements discrete-time Kuramoto equation:
-            θᵢ(t+dt) = θᵢ(t) + [ωᵢ + (K/N)Σⱼ wⱼ sin(θⱼ - θᵢ)] dt + noise
+        Implements discrete-time Kuramoto equation using either Euler or RK4 integration:
+            θᵢ(t+dt) = θᵢ(t) + ∫[ωᵢ + (K/N)Σⱼ wⱼ sin(θⱼ - θᵢ)] dt + noise
+
+        Integration methods (PPBPR Section 5.2):
+        - Euler: O(dt) accuracy, requires small dt
+        - RK4: O(dt⁴) accuracy, allows larger dt
 
         Args:
             neighbor_phases: Dict mapping neighbor IDs to their phases (radians)
             coupling_weights: Dict mapping neighbor IDs to coupling strengths
             dt: Time step (seconds)
+            N: Total number of oscillators in network (for canonical normalization)
 
         Returns:
             Updated phase (radians)
         """
         self.state = OscillatorState.COUPLING
 
-        # Natural frequency contribution
-        phase_velocity = 2 * np.pi * self.frequency
+        # Fallback for backward compatibility
+        if N is None:
+            N = len(neighbor_phases) if neighbor_phases else 1
 
-        # Coupling contribution (Kuramoto interaction)
-        if neighbor_phases:
-            coupling_sum = 0.0
-            total_weight = sum(coupling_weights.values())
-
-            for neighbor_id, neighbor_phase in neighbor_phases.items():
-                weight = coupling_weights.get(neighbor_id, 1.0)
-                phase_diff = neighbor_phase - self.phase
-                coupling_sum += weight * np.sin(phase_diff)
-
-            # Coupling term (K times average influence from neighbors)
-            if total_weight > 0:
-                # Remove /N normalization - K is per-neighbor coupling strength
-                coupling_term = self.config.coupling_strength * (coupling_sum / len(neighbor_phases))
-                phase_velocity += coupling_term
-
-        # Damping (prevents unbounded growth)
-        phase_velocity -= self.config.damping * (self.phase % (2 * np.pi))
-
-        # Add phase noise (stochastic component)
+        # Add phase noise (stochastic component) - applied once per timestep
         noise = np.random.normal(0, self.config.phase_noise)
 
-        # Euler integration (simple but stable for small dt)
-        self.phase += (phase_velocity + noise) * dt
+        # Choose integration method
+        if self.config.integration_method == "rk4":
+            # Runge-Kutta 4th order (PPBPR Table 1)
+            # More accurate (O(dt⁴)) and stable than Euler
+
+            # k1 = dt * f(θ)
+            k1 = dt * self._compute_phase_velocity(self.phase, neighbor_phases, coupling_weights, N)
+
+            # k2 = dt * f(θ + k1/2)
+            phase_k2 = self.phase + 0.5 * k1
+            k2 = dt * self._compute_phase_velocity(phase_k2, neighbor_phases, coupling_weights, N)
+
+            # k3 = dt * f(θ + k2/2)
+            phase_k3 = self.phase + 0.5 * k2
+            k3 = dt * self._compute_phase_velocity(phase_k3, neighbor_phases, coupling_weights, N)
+
+            # k4 = dt * f(θ + k3)
+            phase_k4 = self.phase + k3
+            k4 = dt * self._compute_phase_velocity(phase_k4, neighbor_phases, coupling_weights, N)
+
+            # Weighted average: θ(t+dt) = θ(t) + (k1 + 2k2 + 2k3 + k4)/6
+            self.phase += (k1 + 2*k2 + 2*k3 + k4) / 6.0 + noise * dt
+
+        else:
+            # Euler integration (default for backward compatibility)
+            # Simple but requires small dt for accuracy
+            phase_velocity = self._compute_phase_velocity(self.phase, neighbor_phases, coupling_weights, N)
+            self.phase += (phase_velocity + noise) * dt
 
         # Wrap phase to [0, 2π]
         self.phase = self.phase % (2 * np.pi)
 
         # Record history
         self.phase_history.append(self.phase)
-        self.frequency_history.append(phase_velocity / (2 * np.pi))
+        # Update frequency based on current phase velocity (for monitoring)
+        current_velocity = self._compute_phase_velocity(self.phase, neighbor_phases, coupling_weights, N)
+        self.frequency_history.append(current_velocity / (2 * np.pi))
 
         # Trim history (keep last 1000 samples)
         if len(self.phase_history) > 1000:
@@ -356,31 +407,32 @@ class KuramotoNetwork:
         self.dynamics = SynchronizationDynamics()
         self._coherence_cache = None
 
-    def update_network(
+    def _compute_network_derivatives(
         self,
+        phases: dict[str, float],
         topology: dict[str, list[str]],
-        coupling_weights: dict[tuple[str, str], float] | None = None,
-        dt: float = 0.005,
-    ) -> None:
+        coupling_weights: dict[tuple[str, str], float] | None,
+    ) -> dict[str, float]:
         """
-        Update all oscillators in parallel based on network topology.
+        Compute phase velocities for all oscillators given current phases.
+
+        This implements the core Kuramoto derivative for the entire network:
+            dθᵢ/dt = ωᵢ + (K/N)Σⱼ wⱼ sin(θⱼ - θᵢ)
 
         Args:
+            phases: Dict mapping node_id to current phase (radians)
             topology: Dict mapping node_id to list of neighbor_ids
             coupling_weights: Optional custom coupling strengths
-            dt: Time step (seconds, default 5ms)
-        """
-        # Collect current phases
-        current_phases = {node_id: osc.get_phase() for node_id, osc in self.oscillators.items()}
 
-        # Update all oscillators simultaneously
-        new_phases = {}
+        Returns:
+            Dict mapping node_id to phase velocity (radians/second)
+        """
+        N = len(self.oscillators)
+        velocities = {}
 
         for node_id, osc in self.oscillators.items():
             neighbors = topology.get(node_id, [])
-
-            # Get neighbor phases
-            neighbor_phases = {n: current_phases[n] for n in neighbors if n in current_phases}
+            neighbor_phases = {n: phases[n] for n in neighbors if n in phases}
 
             # Get coupling weights
             weights = {}
@@ -391,9 +443,91 @@ class KuramotoNetwork:
             else:
                 weights = {n: 1.0 for n in neighbors}
 
-            # Update oscillator
-            new_phase = osc.update(neighbor_phases, weights, dt)
-            new_phases[node_id] = new_phase
+            # Compute velocity using the extracted method
+            velocities[node_id] = osc._compute_phase_velocity(phases[node_id], neighbor_phases, weights, N)
+
+        return velocities
+
+    def update_network(
+        self,
+        topology: dict[str, list[str]],
+        coupling_weights: dict[tuple[str, str], float] | None = None,
+        dt: float = 0.005,
+    ) -> None:
+        """
+        Update all oscillators in parallel based on network topology.
+
+        Uses either Euler or RK4 integration (configured in OscillatorConfig).
+        For RK4, the entire network must be integrated simultaneously to maintain
+        coupling consistency across k1, k2, k3, k4 evaluations (PPBPR Section 5.2).
+
+        Args:
+            topology: Dict mapping node_id to list of neighbor_ids
+            coupling_weights: Optional custom coupling strengths
+            dt: Time step (seconds, default 5ms)
+        """
+        # Collect current phases
+        current_phases = {node_id: osc.get_phase() for node_id, osc in self.oscillators.items()}
+        N = len(self.oscillators)
+
+        # Check integration method (use first oscillator's config as reference)
+        integration_method = next(iter(self.oscillators.values())).config.integration_method
+
+        if integration_method == "rk4":
+            # Runge-Kutta 4th order - network-wide integration (PPBPR Table 1)
+            # Must compute k1, k2, k3, k4 for ALL oscillators before updating phases
+
+            # k1 = dt * f(θ)
+            velocities_k1 = self._compute_network_derivatives(current_phases, topology, coupling_weights)
+            k1 = {node_id: dt * vel for node_id, vel in velocities_k1.items()}
+
+            # k2 = dt * f(θ + k1/2)
+            phases_k2 = {node_id: current_phases[node_id] + 0.5 * k1[node_id] for node_id in current_phases}
+            velocities_k2 = self._compute_network_derivatives(phases_k2, topology, coupling_weights)
+            k2 = {node_id: dt * vel for node_id, vel in velocities_k2.items()}
+
+            # k3 = dt * f(θ + k2/2)
+            phases_k3 = {node_id: current_phases[node_id] + 0.5 * k2[node_id] for node_id in current_phases}
+            velocities_k3 = self._compute_network_derivatives(phases_k3, topology, coupling_weights)
+            k3 = {node_id: dt * vel for node_id, vel in velocities_k3.items()}
+
+            # k4 = dt * f(θ + k3)
+            phases_k4 = {node_id: current_phases[node_id] + k3[node_id] for node_id in current_phases}
+            velocities_k4 = self._compute_network_derivatives(phases_k4, topology, coupling_weights)
+            k4 = {node_id: dt * vel for node_id, vel in velocities_k4.items()}
+
+            # Update phases: θ(t+dt) = θ(t) + (k1 + 2k2 + 2k3 + k4)/6 + noise*dt
+            for node_id, osc in self.oscillators.items():
+                noise = np.random.normal(0, osc.config.phase_noise)
+                new_phase = current_phases[node_id] + (k1[node_id] + 2*k2[node_id] + 2*k3[node_id] + k4[node_id]) / 6.0 + noise * dt
+
+                # Wrap and set phase directly
+                osc.phase = new_phase % (2 * np.pi)
+                osc.phase_history.append(osc.phase)
+
+                # Update frequency history (using current velocity)
+                osc.frequency_history.append(velocities_k1[node_id] / (2 * np.pi))
+
+        else:
+            # Euler integration - original per-oscillator update
+            new_phases = {}
+
+            for node_id, osc in self.oscillators.items():
+                neighbors = topology.get(node_id, [])
+                neighbor_phases = {n: current_phases[n] for n in neighbors if n in current_phases}
+
+                # Get coupling weights
+                weights = {}
+                if coupling_weights:
+                    for n in neighbors:
+                        key = (node_id, n)
+                        weights[n] = coupling_weights.get(key, 1.0)
+                else:
+                    weights = {n: 1.0 for n in neighbors}
+
+                # Update oscillator with total network size N for canonical normalization
+                new_phase = osc.update(neighbor_phases, weights, dt, N)
+                new_phases[node_id] = new_phase
 
         # All oscillators updated - compute coherence
         self._update_coherence(time.time())

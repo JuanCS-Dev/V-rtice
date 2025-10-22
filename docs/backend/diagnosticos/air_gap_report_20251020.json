@@ -1,0 +1,1632 @@
+{
+  "timestamp": "2025-10-20T12:00:00Z",
+  "summary": {
+    "compose_services": 96,
+    "filesystem_services": 87,
+    "total_gaps": 54
+  },
+  "gaps": {
+    "not_in_compose": [
+      "adaptive_immunity_db",
+      "agent_communication",
+      "command_bus_service",
+      "hitl_patch_service",
+      "maximus_oraculo",
+      "maximus_oraculo_v2",
+      "mock_vulnerable_apps",
+      "narrative_filter_service",
+      "offensive_orchestrator_service",
+      "purple_team",
+      "tegumentar_service",
+      "verdict_engine_service",
+      "wargaming_crisol"
+    ],
+    "not_in_filesystem": [
+      "hcl-analyzer",
+      "hcl-executor",
+      "hcl-kb-service",
+      "hcl-monitor",
+      "hcl-planner",
+      "hitl-patch-service",
+      "maximus-oraculo",
+      "osint-service",
+      "rte-service",
+      "wargaming-crisol"
+    ],
+    "broken_dependencies": {
+      "api_gateway": [
+        "maximus_oraculo"
+      ],
+      "immunis_macrophage_service": [
+        "cuckoo"
+      ],
+      "web_attack_service": [
+        "localhost"
+      ],
+      "adaptive_immune_system": [
+        "localhost"
+      ]
+    },
+    "orphans": [
+      "adaptive_immune_system",
+      "cloud_coordinator_service",
+      "edge_agent_service",
+      "hcl-executor",
+      "hcl-monitor",
+      "hitl-patch-service",
+      "hpc_service",
+      "hsas_service",
+      "immunis_cytotoxic_t_service",
+      "immunis_helper_t_service",
+      "immunis_nk_cell_service",
+      "maximus-oraculo",
+      "maximus_integration_service",
+      "neuromodulation_service",
+      "offensive_tools_service",
+      "osint_service",
+      "reactive_fabric_analysis",
+      "reflex_triage_engine",
+      "rte-service",
+      "rte_service",
+      "strategic_planning_service",
+      "tataca_ingestion",
+      "threat_intel_bridge",
+      "wargaming-crisol"
+    ],
+    "duplicates": [
+      [
+        "hcl",
+        [
+          "hcl-analyzer",
+          "hcl_analyzer_service"
+        ]
+      ],
+      [
+        "rte",
+        [
+          "rte_service",
+          "rte-service"
+        ]
+      ],
+      [
+        "osint",
+        [
+          "google_osint_service",
+          "osint_service",
+          "osint-service"
+        ]
+      ]
+    ],
+    "infrastructure": [
+      "grafana",
+      "hcl-kafka",
+      "hcl-postgres",
+      "kafka-immunity",
+      "kafka-ui-immunity",
+      "postgres",
+      "postgres-immunity",
+      "prometheus",
+      "qdrant",
+      "rabbitmq",
+      "redis",
+      "zookeeper-immunity"
+    ]
+  },
+  "health_status": {
+    "api_gateway": "missing",
+    "offensive_tools_service": "missing",
+    "redis": "missing",
+    "postgres": "missing",
+    "qdrant": "missing",
+    "sinesp_service": "missing",
+    "cyber_service": "missing",
+    "domain_service": "missing",
+    "ip_intelligence_service": "missing",
+    "network_monitor_service": "missing",
+    "nmap_service": "missing",
+    "osint-service": "missing",
+    "maximus_predict": "missing",
+    "atlas_service": "missing",
+    "auth_service": "missing",
+    "vuln_scanner_service": "missing",
+    "social_eng_service": "missing",
+    "prometheus": "missing",
+    "grafana": "missing",
+    "threat_intel_service": "missing",
+    "malware_analysis_service": "missing",
+    "ssl_monitor_service": "missing",
+    "adr_core_service": "missing",
+    "maximus_integration_service": "missing",
+    "maximus_orchestrator_service": "missing",
+    "maximus_core_service": "missing",
+    "ethical_audit_service": "missing",
+    "hcl-postgres": "configured",
+    "hcl-kafka": "configured",
+    "hcl-kb-service": "missing",
+    "hcl-monitor": "missing",
+    "hcl-analyzer": "missing",
+    "hcl-planner": "missing",
+    "hcl-executor": "missing",
+    "rte-service": "missing",
+    "maximus-oraculo": "missing",
+    "google_osint_service": "missing",
+    "immunis_api_service": "missing",
+    "immunis_macrophage_service": "missing",
+    "immunis_neutrophil_service": "missing",
+    "immunis_dendritic_service": "missing",
+    "immunis_bcell_service": "missing",
+    "immunis_helper_t_service": "missing",
+    "immunis_cytotoxic_t_service": "missing",
+    "immunis_nk_cell_service": "missing",
+    "hcl_analyzer_service": "missing",
+    "hcl_executor_service": "missing",
+    "hcl_kb_service": "missing",
+    "hcl_monitor_service": "missing",
+    "hcl_planner_service": "missing",
+    "auditory_cortex_service": "missing",
+    "visual_cortex_service": "missing",
+    "somatosensory_service": "missing",
+    "chemical_sensing_service": "missing",
+    "vestibular_service": "missing",
+    "prefrontal_cortex_service": "missing",
+    "digital_thalamus_service": "missing",
+    "narrative_manipulation_filter": "missing",
+    "ai_immune_system": "missing",
+    "homeostatic_regulation": "missing",
+    "rte_service": "missing",
+    "hpc_service": "missing",
+    "tataca_ingestion": "missing",
+    "seriema_graph": "missing",
+    "network_recon_service": "missing",
+    "vuln_intel_service": "missing",
+    "web_attack_service": "missing",
+    "c2_orchestration_service": "missing",
+    "bas_service": "missing",
+    "offensive_gateway": "missing",
+    "narrative_analysis_service": "missing",
+    "predictive_threat_hunting_service": "missing",
+    "autonomous_investigation_service": "missing",
+    "immunis_treg_service": "missing",
+    "memory_consolidation_service": "missing",
+    "adaptive_immunity_service": "missing",
+    "neuromodulation_service": "missing",
+    "strategic_planning_service": "missing",
+    "cloud_coordinator_service": "missing",
+    "hsas_service": "missing",
+    "edge_agent_service": "missing",
+    "maximus_eureka": "missing",
+    "osint_service": "missing",
+    "reflex_triage_engine": "missing",
+    "zookeeper-immunity": "missing",
+    "kafka-immunity": "missing",
+    "postgres-immunity": "missing",
+    "wargaming-crisol": "missing",
+    "hitl-patch-service": "missing",
+    "kafka-ui-immunity": "missing",
+    "adaptive_immune_system": "missing",
+    "reactive_fabric_core": "configured",
+    "reactive_fabric_analysis": "configured",
+    "active_immune_core": "configured",
+    "rabbitmq": "configured",
+    "threat_intel_bridge": "configured"
+  },
+  "connectivity_graph": {
+    "nodes": [
+      "api_gateway",
+      "offensive_tools_service",
+      "redis",
+      "postgres",
+      "qdrant",
+      "sinesp_service",
+      "cyber_service",
+      "domain_service",
+      "ip_intelligence_service",
+      "network_monitor_service",
+      "nmap_service",
+      "osint-service",
+      "maximus_predict",
+      "atlas_service",
+      "auth_service",
+      "vuln_scanner_service",
+      "social_eng_service",
+      "prometheus",
+      "grafana",
+      "threat_intel_service",
+      "malware_analysis_service",
+      "ssl_monitor_service",
+      "adr_core_service",
+      "maximus_integration_service",
+      "maximus_orchestrator_service",
+      "maximus_core_service",
+      "ethical_audit_service",
+      "hcl-postgres",
+      "hcl-kafka",
+      "hcl-kb-service",
+      "hcl-monitor",
+      "hcl-analyzer",
+      "hcl-planner",
+      "hcl-executor",
+      "rte-service",
+      "maximus-oraculo",
+      "google_osint_service",
+      "immunis_api_service",
+      "immunis_macrophage_service",
+      "immunis_neutrophil_service",
+      "immunis_dendritic_service",
+      "immunis_bcell_service",
+      "immunis_helper_t_service",
+      "immunis_cytotoxic_t_service",
+      "immunis_nk_cell_service",
+      "hcl_analyzer_service",
+      "hcl_executor_service",
+      "hcl_kb_service",
+      "hcl_monitor_service",
+      "hcl_planner_service",
+      "auditory_cortex_service",
+      "visual_cortex_service",
+      "somatosensory_service",
+      "chemical_sensing_service",
+      "vestibular_service",
+      "prefrontal_cortex_service",
+      "digital_thalamus_service",
+      "narrative_manipulation_filter",
+      "ai_immune_system",
+      "homeostatic_regulation",
+      "rte_service",
+      "hpc_service",
+      "tataca_ingestion",
+      "seriema_graph",
+      "network_recon_service",
+      "vuln_intel_service",
+      "web_attack_service",
+      "c2_orchestration_service",
+      "bas_service",
+      "offensive_gateway",
+      "narrative_analysis_service",
+      "predictive_threat_hunting_service",
+      "autonomous_investigation_service",
+      "immunis_treg_service",
+      "memory_consolidation_service",
+      "adaptive_immunity_service",
+      "neuromodulation_service",
+      "strategic_planning_service",
+      "cloud_coordinator_service",
+      "hsas_service",
+      "edge_agent_service",
+      "maximus_eureka",
+      "osint_service",
+      "reflex_triage_engine",
+      "zookeeper-immunity",
+      "kafka-immunity",
+      "postgres-immunity",
+      "wargaming-crisol",
+      "hitl-patch-service",
+      "kafka-ui-immunity",
+      "adaptive_immune_system",
+      "reactive_fabric_core",
+      "reactive_fabric_analysis",
+      "active_immune_core",
+      "rabbitmq",
+      "threat_intel_bridge"
+    ],
+    "edges": [
+      {
+        "from": "api_gateway",
+        "to": "ip_intelligence_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_predict",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "auth_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "threat_intel_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "sinesp_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "vuln_scanner_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "nmap_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "atlas_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "domain_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "malware_analysis_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "social_eng_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "cyber_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "osint-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "ssl_monitor_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_orchestrator_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "network_monitor_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_predict",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "adaptive_immunity_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "atlas_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_oraculo",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "digital_thalamus_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "ethical_audit_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "hcl_analyzer_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "ip_intelligence_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "ai_immune_system",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "vuln_intel_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "auth_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "hcl_executor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "network_recon_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "c2_orchestration_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "vuln_scanner_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "cyber_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "google_osint_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "narrative_analysis_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "network_monitor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "predictive_threat_hunting_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_core_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "threat_intel_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "autonomous_investigation_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "sinesp_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "nmap_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "hcl_monitor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "hcl_kb_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "ssl_monitor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "osint-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "immunis_treg_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "hcl_planner_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "memory_consolidation_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "narrative_manipulation_filter",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "offensive_gateway",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "domain_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "malware_analysis_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "social_eng_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_orchestrator_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "homeostatic_regulation",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "web_attack_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "bas_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "immunis_api_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "api_gateway",
+        "to": "maximus_eureka",
+        "type": "env_ref"
+      },
+      {
+        "from": "osint-service",
+        "to": "maximus_predict",
+        "type": "depends_on"
+      },
+      {
+        "from": "osint-service",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "auth_service",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_integration_service",
+        "to": "maximus_core_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_integration_service",
+        "to": "adr_core_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_integration_service",
+        "to": "maximus_core_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_integration_service",
+        "to": "adr_core_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "ip_intelligence_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "threat_intel_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "nmap_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "malware_analysis_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "ssl_monitor_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "ip_intelligence_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "threat_intel_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "vuln_scanner_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "nmap_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "malware_analysis_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "domain_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "social_eng_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_orchestrator_service",
+        "to": "ssl_monitor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "ip_intelligence_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "maximus_predict",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "threat_intel_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "vuln_scanner_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "nmap_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "malware_analysis_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "domain_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "ssl_monitor_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "osint-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "ip_intelligence_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "maximus_predict",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "threat_intel_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "vuln_scanner_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "nmap_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "malware_analysis_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "domain_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "ssl_monitor_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "maximus_core_service",
+        "to": "osint-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ethical_audit_service",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-kb-service",
+        "to": "hcl-postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-monitor",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-monitor",
+        "to": "hcl-kb-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-monitor",
+        "to": "hcl-kb-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "hcl-analyzer",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-analyzer",
+        "to": "hcl-kb-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-analyzer",
+        "to": "hcl-kb-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "hcl-planner",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-planner",
+        "to": "hcl-kb-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-planner",
+        "to": "hcl-analyzer",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-planner",
+        "to": "hcl-kb-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "hcl-executor",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-executor",
+        "to": "hcl-kb-service",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-executor",
+        "to": "hcl-planner",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl-executor",
+        "to": "hcl-kb-service",
+        "type": "env_ref"
+      },
+      {
+        "from": "google_osint_service",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_dendritic_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_macrophage_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_bcell_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_neutrophil_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_dendritic_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_macrophage_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_bcell_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "immunis_api_service",
+        "to": "immunis_neutrophil_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "immunis_macrophage_service",
+        "to": "cuckoo",
+        "type": "env_ref"
+      },
+      {
+        "from": "hcl_analyzer_service",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl_kb_service",
+        "to": "qdrant",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl_kb_service",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "hcl_kb_service",
+        "to": "qdrant",
+        "type": "env_ref"
+      },
+      {
+        "from": "hcl_monitor_service",
+        "to": "prometheus",
+        "type": "env_ref"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "chemical_sensing_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "visual_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "auditory_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "vestibular_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "prefrontal_cortex_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "chemical_sensing_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "visual_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "auditory_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "vestibular_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "digital_thalamus_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "narrative_manipulation_filter",
+        "type": "depends_on"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "digital_thalamus_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "narrative_manipulation_filter",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "digital_thalamus_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "ai_immune_system",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "chemical_sensing_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "narrative_manipulation_filter",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "ai_immune_system",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "visual_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "auditory_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "digital_thalamus_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "vestibular_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "narrative_manipulation_filter",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "ai_immune_system",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "digital_thalamus_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "homeostatic_regulation",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "tataca_ingestion",
+        "to": "seriema_graph",
+        "type": "depends_on"
+      },
+      {
+        "from": "tataca_ingestion",
+        "to": "sinesp_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "tataca_ingestion",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "tataca_ingestion",
+        "to": "seriema_graph",
+        "type": "env_ref"
+      },
+      {
+        "from": "tataca_ingestion",
+        "to": "sinesp_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "visual_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "homeostatic_regulation",
+        "type": "depends_on"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "digital_thalamus_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "narrative_manipulation_filter",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "ai_immune_system",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "visual_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "homeostatic_regulation",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "digital_thalamus_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "vestibular_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "network_recon_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "vuln_intel_service",
+        "to": "ai_immune_system",
+        "type": "depends_on"
+      },
+      {
+        "from": "vuln_intel_service",
+        "to": "chemical_sensing_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "vuln_intel_service",
+        "to": "ai_immune_system",
+        "type": "env_ref"
+      },
+      {
+        "from": "vuln_intel_service",
+        "to": "chemical_sensing_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "vuln_intel_service",
+        "to": "homeostatic_regulation",
+        "type": "env_ref"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "auditory_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "localhost",
+        "type": "env_ref"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "web_attack_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "auditory_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "auditory_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "c2_orchestration_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "bas_service",
+        "to": "ai_immune_system",
+        "type": "depends_on"
+      },
+      {
+        "from": "bas_service",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "bas_service",
+        "to": "somatosensory_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "bas_service",
+        "to": "ai_immune_system",
+        "type": "env_ref"
+      },
+      {
+        "from": "bas_service",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "bas_service",
+        "to": "somatosensory_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "vuln_intel_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "prefrontal_cortex_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "c2_orchestration_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "network_recon_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "web_attack_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "bas_service",
+        "type": "depends_on"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "vuln_intel_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "prefrontal_cortex_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "c2_orchestration_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "network_recon_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "web_attack_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "offensive_gateway",
+        "to": "bas_service",
+        "type": "env_ref"
+      },
+      {
+        "from": "kafka-immunity",
+        "to": "zookeeper-immunity",
+        "type": "depends_on"
+      },
+      {
+        "from": "wargaming-crisol",
+        "to": "postgres-immunity",
+        "type": "depends_on"
+      },
+      {
+        "from": "hitl-patch-service",
+        "to": "postgres-immunity",
+        "type": "depends_on"
+      },
+      {
+        "from": "kafka-ui-immunity",
+        "to": "kafka-immunity",
+        "type": "depends_on"
+      },
+      {
+        "from": "adaptive_immune_system",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "adaptive_immune_system",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "adaptive_immune_system",
+        "to": "localhost",
+        "type": "env_ref"
+      },
+      {
+        "from": "reactive_fabric_core",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_core",
+        "to": "rabbitmq",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_core",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_core",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_analysis",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_analysis",
+        "to": "rabbitmq",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_analysis",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "reactive_fabric_analysis",
+        "to": "reactive_fabric_core",
+        "type": "depends_on"
+      },
+      {
+        "from": "active_immune_core",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "active_immune_core",
+        "to": "postgres",
+        "type": "depends_on"
+      },
+      {
+        "from": "active_immune_core",
+        "to": "redis",
+        "type": "depends_on"
+      },
+      {
+        "from": "threat_intel_bridge",
+        "to": "hcl-kafka",
+        "type": "depends_on"
+      },
+      {
+        "from": "threat_intel_bridge",
+        "to": "active_immune_core",
+        "type": "depends_on"
+      },
+      {
+        "from": "threat_intel_bridge",
+        "to": "reactive_fabric_core",
+        "type": "depends_on"
+      }
+    ]
+  },
+  "top_connected": {
+    "api_gateway": 66,
+    "maximus_core_service": 20,
+    "homeostatic_regulation": 18,
+    "maximus_orchestrator_service": 13,
+    "network_recon_service": 13,
+    "offensive_gateway": 12,
+    "ai_immune_system": 11,
+    "prefrontal_cortex_service": 10,
+    "digital_thalamus_service": 10,
+    "immunis_api_service": 8
+  }
+}
