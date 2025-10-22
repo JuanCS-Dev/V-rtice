@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/verticedev/vcli-go/internal/debug"
 )
 
 // PredictClient provides access to Maximus Predict Service for ML predictions
@@ -33,19 +35,18 @@ type PredictResponse struct {
 
 // NewPredictClient creates a new Predict service client
 func NewPredictClient(endpoint, authToken string) *PredictClient {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	source := "flag"
 	if endpoint == "" {
 		endpoint = os.Getenv("VCLI_PREDICT_ENDPOINT")
-		if endpoint == "" {
-			endpoint = "http://localhost:8028" // default
+		if endpoint != "" {
+			source = "env:VCLI_PREDICT_ENDPOINT"
+		} else {
+			endpoint = "http://localhost:8028"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Predict client initialized with endpoint: %s\n", endpoint)
-	}
+	debug.LogConnection("Predict", endpoint, source)
 
 	return &PredictClient{
 		baseURL: endpoint,

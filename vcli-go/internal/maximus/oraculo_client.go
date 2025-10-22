@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/verticedev/vcli-go/internal/debug"
 )
 
 // OraculoClient provides access to Maximus Oraculo Service for predictions and code analysis
@@ -61,19 +63,18 @@ type ImplementationResponse struct {
 
 // NewOraculoClient creates a new Oraculo service client
 func NewOraculoClient(endpoint, authToken string) *OraculoClient {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	source := "flag"
 	if endpoint == "" {
 		endpoint = os.Getenv("VCLI_ORACULO_ENDPOINT")
-		if endpoint == "" {
-			endpoint = "http://localhost:8026" // default
+		if endpoint != "" {
+			source = "env:VCLI_ORACULO_ENDPOINT"
+		} else {
+			endpoint = "http://localhost:8026"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Oraculo client initialized with endpoint: %s\n", endpoint)
-	}
+	debug.LogConnection("Oraculo", endpoint, source)
 
 	return &OraculoClient{
 		baseURL: endpoint,

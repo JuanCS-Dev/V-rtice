@@ -90,13 +90,35 @@ vcli tui
 
 # Launch specific workspace
 vcli workspace launch governance
+
+# Launch interactive shell (with banner + REPL)
+vcli shell
 ```
+
+### 🧠 NeuroShell Alias (Recommended)
+
+For a premium UX experience, add this alias to your shell:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+alias neuroshell='/path/to/vcli-go/bin/vcli shell'
+
+# Usage
+neuroshell  # Opens vCLI with gradient banner + interactive REPL
+```
+
+**Features:**
+- 🎨 Beautiful gradient banner (Green → Cyan → Blue)
+- 💬 Interactive REPL with autocomplete
+- 🔍 Command palette (Ctrl+P)
+- 📜 History navigation (↑↓)
+- ✨ Command suggestions
 
 ---
 
-## 🚧 Current Limitations & Status (as of 2025-01-22)
+## 🚧 Current Limitations & Status (as of 2025-10-22)
 
-vCLI-Go is **~60% operacional**. The following features are **fully functional**:
+vCLI-Go is **~90% operacional** (+30% from FASE 3-4H-C). The following features are **fully functional**:
 
 ### ✅ WORKING (Production Ready):
 - **Kubernetes Integration** (32 commands, 12,549 LOC, 100% kubectl parity)
@@ -112,9 +134,24 @@ vCLI-Go is **~60% operacional**. The following features are **fully functional**
   - History navigation and suggestions
   - Gradient prompt
 - **NLP Parser** (93.4% test coverage)
+- **Configuration Management System** ✨ NEW!
+  - YAML-based config files with profiles
+  - Complete precedence hierarchy (CLI flags > ENV > config file > defaults)
+  - Interactive configuration wizard (`vcli configure`)
+  - 7 backend services with consistent config integration
+- **Performance Optimizations** ✨ NEW!
+  - Lazy config loading (~12ms startup maintained)
+  - gRPC keepalive (10s/3s) on 3 clients
+  - In-memory response cache infrastructure
+- **Error Handling & Recovery** ✨ NEW!
+  - Structured error types (10+ categories)
+  - Retry with exponential backoff (3 strategies)
+  - Circuit breaker pattern (CLOSED/OPEN/HALF_OPEN)
+  - Resilient client wrapper (retry + circuit breaker)
+  - gRPC error mapping and classification
 
-### ⚠️ PARTIALLY WORKING (Requires Configuration):
-- **MAXIMUS Integration** (client exists, requires endpoint configuration)
+### ⚠️ PARTIALLY WORKING (Requires Backend):
+- **MAXIMUS Integration** (client ready, precedence config working, needs backend testing)
   - Use env var: `export VCLI_MAXIMUS_ENDPOINT=your-server:50051`
   - Or CLI flag: `vcli maximus list --server your-server:50051`
 - **Consciousness API** (client exists, requires endpoint configuration)
@@ -134,9 +171,6 @@ vCLI-Go is **~60% operacional**. The following features are **fully functional**
   - Planned for Phase 2 (Q1 2026)
 - **Zero Trust Security** (SPIFFE/SPIRE not integrated)
   - Planned for Phase 3 (Q3 2026)
-- **Configuration Management** (no config file support yet)
-  - Endpoints currently use env vars or CLI flags
-  - Config file system (AG-001) in development
 
 **For full diagnostic and implementation status**, see:
 - [Diagnostic Report](VCLI_GO_DIAGNOSTIC_ABSOLUTE_20250122.md)
@@ -193,6 +227,44 @@ Or use CLI flags for individual commands:
 vcli maximus list --server your-server:50051
 vcli hitl status --endpoint https://your-server/api
 ```
+
+### 🔍 Troubleshooting
+
+**Connection Refused Errors:**
+```bash
+# Enable debug mode to see connection details
+export VCLI_DEBUG=true
+vcli maximus list
+
+# Check if backend service is running
+docker ps | grep maximus
+
+# Verify endpoint configuration
+vcli configure show
+
+# Test with explicit endpoint
+vcli maximus list --server your-actual-server:50051
+```
+
+**Configuration Issues:**
+```bash
+# Create default config interactively
+vcli configure
+
+# Show current configuration
+vcli configure show
+
+# Validate config file
+cat ~/.vcli/config.yaml
+```
+
+**Timeout Errors:**
+```bash
+# Increase timeout for slow networks
+vcli maximus list --timeout 60s
+```
+
+For detailed troubleshooting, see [Quick Fixes Guide](QUICK_FIXES_20250122.md).
 
 ---
 
@@ -632,8 +704,18 @@ See [Plugin Development Guide](docs/plugins.md) for details.
 
 - **SPIFFE/SPIRE** for identity
 - **Mutual TLS** for all connections
+- **HTTPS Enforcement** in production (HTTP only for local development)
 - **Continuous verification** of all operations
 - **Audit logging** for compliance
+
+> **⚠️ Production Deployment**: Always use HTTPS endpoints for backend services:
+> ```bash
+> # ❌ Development only
+> export VCLI_MAXIMUS_ENDPOINT="http://localhost:8150"
+>
+> # ✅ Production
+> export VCLI_MAXIMUS_ENDPOINT="https://maximus.vertice.ai:8150"
+> ```
 
 ### Plugin Sandbox
 

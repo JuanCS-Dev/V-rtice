@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/verticedev/vcli-go/api/grpc/immune"
+	"github.com/verticedev/vcli-go/internal/debug"
 )
 
 // ImmuneClient wraps the gRPC client for Active Immune Core service
@@ -22,31 +23,30 @@ type ImmuneClient struct {
 
 // NewImmuneClient creates a new Active Immune Core gRPC client
 func NewImmuneClient(serverAddress string) (*ImmuneClient, error) {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	// Determine endpoint source
+	source := "flag"
 	if serverAddress == "" {
 		serverAddress = os.Getenv("VCLI_IMMUNE_ENDPOINT")
-		if serverAddress == "" {
-			serverAddress = "localhost:50052" // default
+		if serverAddress != "" {
+			source = "env:VCLI_IMMUNE_ENDPOINT"
+		} else {
+			serverAddress = "localhost:50052"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Immune Core gRPC client connecting to %s\n", serverAddress)
-	}
+	debug.LogConnection("ImmuneCore", serverAddress, source)
 
 	conn, err := grpc.NewClient(
 		serverAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
+		debug.LogError("ImmuneCore", serverAddress, err)
 		return nil, fmt.Errorf("failed to connect to Immune Core at %s: %w", serverAddress, err)
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Immune Core gRPC connection established\n")
-	}
+	debug.LogSuccess("ImmuneCore", serverAddress)
 
 	client := pb.NewActiveImmuneCoreClient(conn)
 

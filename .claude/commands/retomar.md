@@ -2,51 +2,76 @@
 description: Check coverage status and review master plan
 ---
 
-# Coverage Status Check - Sistema Persistente de Tracking
+# Coverage Status Check - Sistema Auto-Rastreável
 
-Vou executar uma verificação completa do status de coverage e plano 95%.
+Vou executar verificação automática usando o **Coverage Commander**.
 
-## Passo 1: Ler Status Atual
+## Sistema Novo (2025-10-22)
 
-Vou abrir e analisar o dashboard de coverage:
+Este comando agora usa:
+- **MASTER_COVERAGE_PLAN.md**: 249 módulos com checkboxes auto-atualizáveis
+- **coverage_commander.py**: Orquestrador automático de testes incrementais
+- **coverage_history.json**: Histórico persistente (append-only)
 
-- Read `docs/COVERAGE_STATUS.html`
-- Read `docs/coverage_history.json`
-- Read `docs/PLANO_95PCT_MASTER.md`
+## Passo 1: Executar Coverage Commander
 
-## Passo 2: Analisar Situação
+```bash
+cd backend/services/maximus_core_service
+python scripts/coverage_commander.py --status
+```
+
+Isso mostra:
+- ✅ Progresso global (X/249 módulos = Y%)
+- ✅ Status por prioridade (P0, P1, P2, P3)
+- ✅ Próximos 5 alvos prioritários
+- ⚠️ Regressões detectadas (se houver)
+
+## Passo 2: Mostrar Progresso Visual
 
 Vou apresentar:
 
-1. **Coverage atual**: % total e por módulo
-2. **Tendência**: Comparação com snapshots anteriores
-3. **Regressões detectadas**: Se houver drops ≥10%
-4. **Fase atual do plano**: Qual módulo devemos testar hoje
-5. **Próximos passos**: Ações específicas recomendadas
+1. **Progresso**: Barra visual `█████░░░░░ 45/249 (18.07%)`
+2. **Por Prioridade**:
+   - 🔴 P0 Safety: X/12 (Y%)
+   - 🟠 P1 Consciousness: X/71 (Y%)
+   - 🟡 P2 System Services: X/28 (Y%)
+   - 🟢 P3 Supporting: X/138 (Y%)
+3. **Próximos Alvos**: Lista de 5 módulos para testar hoje
+4. **Regressões**: Alertas se coverage caiu >5%
 
-## Passo 3: Verificar Conformidade Constitucional
+## Passo 3: Validar Conformidade Constitucional
 
-Vou validar conformidade com Doutrina Vértice:
-
-- ✅ Artigo II (Padrão Pagani): Zero mocks nos testes
-- ✅ Artigo V (Legislação Prévia): Tracking persistente ativo
-- ✅ Anexo D (Execução Constitucional): Agente Guardião funcionando
+- ✅ Artigo II (Padrão Pagani): Coverage_commander previne mocks
+- ✅ Artigo V (Legislação Prévia): MASTER_COVERAGE_PLAN.md governa
+- ✅ Anexo D (Execução Constitucional): Auto-update de checkboxes
 
 ## Passo 4: Recomendar Ação Imediata
 
-Com base no PLANO_95PCT_MASTER.md e coverage atual, vou recomendar:
+Com base no MASTER_COVERAGE_PLAN.md:
 
-- Módulo a testar hoje
-- Missing lines específicas (via htmlcov)
-- Testes a criar (targeted)
-- Tempo estimado
+**Para testar próximo batch (10 módulos):**
+```bash
+python scripts/coverage_commander.py --batch 10
+```
+
+**Para testar FASE A completa (60 módulos parciais):**
+```bash
+python scripts/coverage_commander.py --phase A
+```
+
+**Para verificar se há regressões:**
+```bash
+python scripts/coverage_commander.py --check-regressions
+```
 
 ---
 
-**Filosofia:**
+## Filosofia
 
-> "Ao abrir Claude Code, SEMPRE execute /retomar para saber onde estamos e para onde vamos."
+> "Coverage Commander elimina o problema: 'TODO DIA O QUE TAVA 100% VAI PRA 20%'"
 
-> "Tracking persistente elimina o problema: 'TODO DIA O QUE TAVA 100% VAI PRA 20%'"
+> "MASTER_COVERAGE_PLAN.md é a fonte da verdade. Sempre atualizado. Sempre persistente."
 
-— PLANO 95% MASTER, Padrão Pagani Absoluto
+> "249 módulos. 1 objetivo. 95%+ em TUDO."
+
+— PLANO DEFINITIVO 2025-10-22

@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/k8s"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // k8sDeleteCmd represents the 'k8s delete' command
@@ -47,7 +50,17 @@ Examples:
   vcli k8s delete -f deployment.yaml --dry-run=client
 
   # Delete with wait
-  vcli k8s delete deployment nginx --wait`,
+  vcli k8s delete deployment nginx --wait
+
+  # Delete with label selector (batch operation)
+  vcli k8s delete pods --selector app=nginx
+  vcli k8s delete deployments --selector tier=frontend,env=prod
+
+  # Delete with field selector
+  vcli k8s delete pods --field-selector status.phase=Failed
+
+  # Combine selectors
+  vcli k8s delete pods --selector app=nginx --field-selector status.phase=Running`,
 	RunE: handleK8sDelete,
 }
 
@@ -99,9 +112,26 @@ func handleK8sDelete(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to get timeout flag: %w", err)
 	}
 
+	// Get selector flags
+	labelSelector, err := cmd.Flags().GetString("selector")
+	if err != nil {
+		return fmt.Errorf("failed to get selector flag: %w", err)
+	}
+
+	fieldSelector, err := cmd.Flags().GetString("field-selector")
+	if err != nil {
+		return fmt.Errorf("failed to get field-selector flag: %w", err)
+	}
+
 	// Validate inputs
-	if len(files) == 0 && len(args) < 2 {
-		return fmt.Errorf("either file (-f) or resource type and name must be specified")
+	hasSelector := labelSelector != "" || fieldSelector != ""
+	if len(files) == 0 && len(args) < 1 && !hasSelector {
+		return fmt.Errorf("either file (-f), resource type and name, or selector must be specified")
+	}
+
+	// When selector is used, only resource type is required (not name)
+	if hasSelector && len(args) < 1 {
+		return fmt.Errorf("resource type is required when using selector")
 	}
 
 	// Get kubeconfig path
@@ -163,9 +193,15 @@ func handleK8sDelete(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid dry-run value: %s (must be 'none', 'client', or 'server')", dryRunStr)
 	}
 
-	// Handle delete by file or by name
+	// Handle delete by file, selector, or name
 	if len(files) > 0 {
 		return handleDeleteByFile(manager, files, recursive, namespace, deleteOpts)
+	}
+
+	// Handle delete by selector (batch operation)
+	if hasSelector {
+		kind := args[0]
+		return handleDeleteBySelector(manager, kind, labelSelector, fieldSelector, namespace, deleteOpts)
 	}
 
 	return handleDeleteByName(manager, args, namespace, deleteOpts)
@@ -257,6 +293,106 @@ func handleDeleteByFile(manager *k8s.ClusterManager, files []string, recursive b
 }
 
 // handleDeleteByName handles deletion by resource type and name
+// handleDeleteBySelector handles batch deletion with label/field selectors
+func handleDeleteBySelector(manager *k8s.ClusterManager, kind, labelSelector, fieldSelector, namespace string, opts *k8s.DeleteOptions) error {
+	// Use namespace from flag if specified, otherwise use default
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	// List resources matching selector
+	listOpts := metav1.ListOptions{}
+	if labelSelector != "" {
+		listOpts.LabelSelector = labelSelector
+	}
+	if fieldSelector != "" {
+		listOpts.FieldSelector = fieldSelector
+	}
+
+	fmt.Printf("Deleting %ss in namespace %s with selector: ", kind, namespace)
+	if labelSelector != "" {
+		fmt.Printf("labels=%s ", labelSelector)
+	}
+	if fieldSelector != "" {
+		fmt.Printf("fields=%s ", fieldSelector)
+	}
+	fmt.Println()
+
+	// Get matching resources
+	var resourceNames []string
+
+	switch strings.ToLower(kind) {
+	case "pod", "pods", "po":
+		pods, listErr := manager.Clientset().CoreV1().Pods(namespace).List(context.Background(), listOpts)
+		if listErr != nil {
+			return fmt.Errorf("failed to list pods: %w", listErr)
+		}
+		for _, pod := range pods.Items {
+			resourceNames = append(resourceNames, pod.Name)
+		}
+	case "deployment", "deployments", "deploy":
+		deployments, listErr := manager.Clientset().AppsV1().Deployments(namespace).List(context.Background(), listOpts)
+		if listErr != nil {
+			return fmt.Errorf("failed to list deployments: %w", listErr)
+		}
+		for _, deploy := range deployments.Items {
+			resourceNames = append(resourceNames, deploy.Name)
+		}
+	case "service", "services", "svc":
+		services, listErr := manager.Clientset().CoreV1().Services(namespace).List(context.Background(), listOpts)
+		if listErr != nil {
+			return fmt.Errorf("failed to list services: %w", listErr)
+		}
+		for _, svc := range services.Items {
+			resourceNames = append(resourceNames, svc.Name)
+		}
+	case "configmap", "configmaps", "cm":
+		configmaps, listErr := manager.Clientset().CoreV1().ConfigMaps(namespace).List(context.Background(), listOpts)
+		if listErr != nil {
+			return fmt.Errorf("failed to list configmaps: %w", listErr)
+		}
+		for _, cm := range configmaps.Items {
+			resourceNames = append(resourceNames, cm.Name)
+		}
+	default:
+		return fmt.Errorf("batch delete not yet supported for resource type: %s", kind)
+	}
+
+	if len(resourceNames) == 0 {
+		fmt.Println("No resources found matching selector")
+		return nil
+	}
+
+	fmt.Printf("Found %d resources to delete\n", len(resourceNames))
+
+	// Batch delete
+	succeeded := 0
+	failed := 0
+
+	for _, name := range resourceNames {
+		result, deleteErr := manager.DeleteByName(kind, name, namespace, opts)
+		if deleteErr != nil || result.Status == k8s.DeleteStatusFailed {
+			fmt.Printf("✗ %s/%s: %v\n", kind, name, deleteErr)
+			failed++
+		} else {
+			if result.DryRun {
+				fmt.Printf("✓ %s/%s (dry run)\n", kind, name)
+			} else {
+				fmt.Printf("✓ %s/%s\n", kind, name)
+			}
+			succeeded++
+		}
+	}
+
+	fmt.Printf("\nBatch delete complete: %d succeeded, %d failed\n", succeeded, failed)
+
+	if failed > 0 {
+		return fmt.Errorf("some deletions failed")
+	}
+
+	return nil
+}
+
 func handleDeleteByName(manager *k8s.ClusterManager, args []string, namespace string, opts *k8s.DeleteOptions) error {
 	if len(args) < 2 {
 		return fmt.Errorf("resource type and name are required")
@@ -312,4 +448,11 @@ func init() {
 	k8sDeleteCmd.Flags().String("cascade", "background", "Cascade deletion policy: background, foreground, or orphan")
 	k8sDeleteCmd.Flags().Bool("wait", false, "Wait for deletion to complete")
 	k8sDeleteCmd.Flags().Duration("timeout", 30*time.Second, "Timeout for delete operation")
+
+	// Namespace flag
+	k8sDeleteCmd.Flags().StringP("namespace", "n", "", "Kubernetes namespace (default: default)")
+
+	// Batch operation flags
+	k8sDeleteCmd.Flags().StringP("selector", "l", "", "Label selector for batch deletion (e.g., app=nginx,tier=frontend)")
+	k8sDeleteCmd.Flags().String("field-selector", "", "Field selector for batch deletion (e.g., status.phase=Failed)")
 }

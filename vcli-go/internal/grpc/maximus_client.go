@@ -8,10 +8,16 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/verticedev/vcli-go/api/grpc/maximus"
+	"github.com/verticedev/vcli-go/internal/debug"
+	"github.com/verticedev/vcli-go/internal/errors"
+	"github.com/verticedev/vcli-go/internal/resilience"
 )
 
 // MaximusClient wraps the gRPC client for MAXIMUS Orchestrator service
@@ -19,43 +25,52 @@ type MaximusClient struct {
 	conn   *grpc.ClientConn
 	client pb.MaximusOrchestratorClient
 
-	serverAddress string
+	serverAddress    string
+	resilientClient *resilience.Client
 }
 
 // NewMaximusClient creates a new MAXIMUS gRPC client
 func NewMaximusClient(serverAddress string) (*MaximusClient, error) {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	// Determine endpoint source
+	source := "flag"
 	if serverAddress == "" {
 		serverAddress = os.Getenv("VCLI_MAXIMUS_ENDPOINT")
-		if serverAddress == "" {
-			serverAddress = "localhost:50051" // default
+		if serverAddress != "" {
+			source = "env:VCLI_MAXIMUS_ENDPOINT"
+		} else {
+			serverAddress = "localhost:50051"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] MAXIMUS gRPC client connecting to %s\n", serverAddress)
-	}
+	debug.LogConnection("MAXIMUS", serverAddress, source)
 
 	conn, err := grpc.NewClient(
 		serverAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                10 * time.Second,
+			Timeout:             3 * time.Second,
+			PermitWithoutStream: true,
+		}),
 	)
 	if err != nil {
+		debug.LogError("MAXIMUS", serverAddress, err)
 		return nil, fmt.Errorf("failed to connect to MAXIMUS at %s: %w", serverAddress, err)
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] MAXIMUS gRPC connection established\n")
-	}
+	debug.LogSuccess("MAXIMUS", serverAddress)
 
 	client := pb.NewMaximusOrchestratorClient(conn)
 
+	// Create resilient client wrapper
+	resilientClient := resilience.NewClient(resilience.DefaultConfig("MAXIMUS"))
+
 	return &MaximusClient{
-		conn:          conn,
-		client:        client,
-		serverAddress: serverAddress,
+		conn:            conn,
+		client:          client,
+		serverAddress:   serverAddress,
+		resilientClient: resilientClient,
 	}, nil
 }
 
@@ -65,6 +80,11 @@ func (c *MaximusClient) Close() error {
 		return c.conn.Close()
 	}
 	return nil
+}
+
+// ServerAddress returns the server address being used
+func (c *MaximusClient) ServerAddress() string {
+	return c.serverAddress
 }
 
 // ============================================================
@@ -89,9 +109,17 @@ func (c *MaximusClient) SubmitDecision(
 		RequesterId:  requesterID,
 	}
 
-	resp, err := c.client.SubmitDecision(ctx, req)
+	// Execute with resilience (retry + circuit breaker)
+	resp, err := resilience.ExecuteWithResult(ctx, c.resilientClient, func() (*pb.SubmitDecisionResponse, error) {
+		response, rpcErr := c.client.SubmitDecision(ctx, req)
+		if rpcErr != nil {
+			return nil, c.wrapGRPCError("SubmitDecision", rpcErr)
+		}
+		return response, nil
+	})
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to submit decision: %w", err)
+		return nil, err
 	}
 
 	return resp, nil
@@ -322,11 +350,6 @@ func (c *MaximusClient) BatchSubmitDecisions(
 // Utility Methods
 // ============================================================
 
-// ServerAddress returns the server address
-func (c *MaximusClient) ServerAddress() string {
-	return c.serverAddress
-}
-
 // IsHealthy performs a simple health check and returns true if healthy
 func (c *MaximusClient) IsHealthy(ctx context.Context) bool {
 	resp, err := c.GetServiceHealth(ctx, "")
@@ -334,4 +357,41 @@ func (c *MaximusClient) IsHealthy(ctx context.Context) bool {
 		return false
 	}
 	return resp.Status == pb.HealthCheckResponse_SERVING
+}
+
+// ============================================================
+// Error Handling Helpers
+// ============================================================
+
+// wrapGRPCError wraps a gRPC error into a VCLIError
+func (c *MaximusClient) wrapGRPCError(operation string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	// Extract gRPC status
+	st, ok := status.FromError(err)
+	if !ok {
+		return errors.Wrap(err, errors.ErrorTypeInternal, fmt.Sprintf("%s failed", operation))
+	}
+
+	// Map gRPC codes to VCLIError types
+	switch st.Code() {
+	case codes.DeadlineExceeded:
+		return errors.NewTimeoutError("MAXIMUS", fmt.Sprintf("%s: %s", operation, st.Message()))
+	case codes.Unavailable:
+		return errors.NewUnavailableError("MAXIMUS").WithDetails(st.Message())
+	case codes.Unauthenticated:
+		return errors.NewAuthError("MAXIMUS", fmt.Sprintf("%s: %s", operation, st.Message()))
+	case codes.PermissionDenied:
+		return errors.New(errors.ErrorTypePermission, fmt.Sprintf("%s: %s", operation, st.Message()))
+	case codes.NotFound:
+		return errors.NewNotFoundError(operation).WithDetails(st.Message())
+	case codes.AlreadyExists:
+		return errors.New(errors.ErrorTypeConflict, fmt.Sprintf("%s: %s", operation, st.Message()))
+	case codes.InvalidArgument:
+		return errors.NewValidationError(fmt.Sprintf("%s: %s", operation, st.Message()))
+	default:
+		return errors.NewServerError("MAXIMUS", fmt.Sprintf("%s: %s", operation, st.Message()))
+	}
 }

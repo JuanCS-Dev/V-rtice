@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,10 +9,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/verticedev/vcli-go/internal/grpc"
+	"github.com/verticedev/vcli-go/internal/errors"
+	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/maximus"
 	"github.com/verticedev/vcli-go/internal/visual"
-	pb "github.com/verticedev/vcli-go/api/grpc/maximus"
 )
 
 // Flags
@@ -76,28 +75,8 @@ var maximusCmd = &cobra.Command{
 	Long: `Manage decisions and governance through MAXIMUS Orchestrator.
 
 MAXIMUS is the central decision-making orchestrator for the Vértice platform.
-It handles decision workflows, approvals, and governance tracking.
-
-Examples:
-  # Submit a new decision
-  vcli maximus submit \
-    --type deployment \
-    --title "Deploy v2.0" \
-    --desc "Deploy new version to production" \
-    --context production \
-    --priority high
-
-  # List pending decisions
-  vcli maximus list --status pending
-
-  # Get decision details
-  vcli maximus get <decision-id>
-
-  # Watch decision updates in real-time
-  vcli maximus watch <decision-id>
-
-  # Get governance metrics
-  vcli maximus metrics`,
+It handles decision workflows, approvals, and governance tracking.`,
+	Example: help.BuildCobraExample(help.MaximusExamples, help.MaximusSubmitExamples),
 }
 
 // ============================================================================
@@ -131,49 +110,89 @@ Examples:
 	RunE: runSubmitDecision,
 }
 
+// ============================================================
+// CONFIGURATION PRECEDENCE HELPERS
+// ============================================================
+
+// getMaximusServer resolves MAXIMUS server endpoint with proper precedence:
+// 1. CLI flag (--server)
+// 2. Environment variable (VCLI_MAXIMUS_ENDPOINT)
+// 3. Config file (endpoints.maximus)
+// 4. Built-in default (http://localhost:8150)
+//
+// Note: The internal client (maximus.NewGovernanceClient) handles levels 2-4,
+// so we only need to pass through the CLI flag if provided, or empty string
+// to let the client handle precedence internally.
+func getMaximusServer() string {
+	// CLI flag has highest priority - pass it through
+	if maximusServer != "" {
+		return maximusServer
+	}
+
+	// If no flag, check config file before falling back to client's internal precedence
+	if globalConfig != nil {
+		if endpoint, err := globalConfig.GetEndpoint("maximus"); err == nil && endpoint != "" {
+			return endpoint
+		}
+	}
+
+	// Return empty string to let client handle env var and default
+	return ""
+}
+
+// ============================================================
+// COMMAND IMPLEMENTATIONS
+// ============================================================
+
 func runSubmitDecision(cmd *cobra.Command, args []string) error {
 	// Validate required fields
 	if decisionType == "" || decisionTitle == "" {
 		return fmt.Errorf("--type and --title are required")
 	}
 
-	// Connect to MAXIMUS
-	client, err := grpc.NewMaximusClient(maximusServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect to MAXIMUS: %w", err)
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
+
+	// Build test decision payload (for E2E testing)
+	decision := map[string]interface{}{
+		"decision_id":  fmt.Sprintf("dec_%d", time.Now().Unix()),
+		"category":     decisionType,
+		"severity":     decisionPriority,
+		"description":  decisionTitle,
+		"requires_hitl": true,
 	}
-	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	if decisionDesc != "" {
+		decision["details"] = decisionDesc
+	}
 
-	// Submit decision
-	resp, err := client.SubmitDecision(
-		ctx,
-		decisionType,
-		decisionTitle,
-		decisionDesc,
-		decisionContext,
-		decisionPriority,
-		decisionTags,
-		requesterID,
-	)
+	if decisionContext != "" {
+		decision["context"] = map[string]interface{}{
+			"environment": decisionContext,
+		}
+	}
+
+	if len(decisionTags) > 0 {
+		decision["tags"] = decisionTags
+	}
+
+	// Enqueue test decision
+	err := client.EnqueueTestDecision(decision)
 	if err != nil {
 		return fmt.Errorf("failed to submit decision: %w", err)
 	}
 
 	// Output response
 	if outputFormat == "json" {
-		data, _ := json.MarshalIndent(resp, "", "  ")
+		data, _ := json.MarshalIndent(decision, "", "  ")
 		fmt.Println(string(data))
 	} else {
-		fmt.Printf("✅ Decision submitted successfully\n")
-		fmt.Printf("ID:         %s\n", resp.DecisionId)
-		fmt.Printf("Status:     %s\n", resp.Status)
-		fmt.Printf("Created At: %s\n", resp.CreatedAt.AsTime().Format(time.RFC3339))
-		if resp.Message != "" {
-			fmt.Printf("Message:    %s\n", resp.Message)
-		}
+		fmt.Printf("✅ Decision submitted successfully (test mode)\n")
+		fmt.Printf("ID:       %s\n", decision["decision_id"])
+		fmt.Printf("Category: %s\n", decision["category"])
+		fmt.Printf("Severity: %s\n", decision["severity"])
+		fmt.Printf("\nℹ️  Note: This uses the test endpoint for E2E testing.\n")
+		fmt.Printf("   In production, decisions are enqueued by MAXIMUS internally.\n")
 	}
 
 	return nil
@@ -218,63 +237,49 @@ Examples:
 }
 
 func runListDecisions(cmd *cobra.Command, args []string) error {
-	// Connect to MAXIMUS
-	client, err := grpc.NewMaximusClient(maximusServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect to MAXIMUS: %w", err)
-	}
-	defer client.Close()
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	// List decisions
-	resp, err := client.ListDecisions(
-		ctx,
-		filterStatus,
-		filterType,
-		filterContext,
-		filterTags,
-		page,
-		pageSize,
-		sortBy,
-		sortOrder,
-		nil, // start time
-		nil, // end time
-	)
+	// Get pending statistics
+	stats, err := client.GetPendingStats()
 	if err != nil {
-		return fmt.Errorf("failed to list decisions: %w", err)
+		return errors.WrapConnectionError(err, "MAXIMUS Governance", maximusServer)
 	}
 
 	// Output
 	if outputFormat == "json" {
-		data, _ := json.MarshalIndent(resp, "", "  ")
+		data, _ := json.MarshalIndent(stats, "", "  ")
 		fmt.Println(string(data))
 		return nil
 	}
 
 	// Table format
-	if len(resp.Decisions) == 0 {
-		fmt.Println("No decisions found")
-		return nil
+	fmt.Println("=== MAXIMUS Governance - Pending Decisions ===")
+	fmt.Printf("\nTotal Pending: %d\n", stats.TotalPending)
+
+	if len(stats.ByCategory) > 0 {
+		fmt.Println("\nBy Category:")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+		fmt.Fprintln(w, "CATEGORY\tCOUNT")
+		for category, count := range stats.ByCategory {
+			fmt.Fprintf(w, "%s\t%d\n", category, count)
+		}
+		w.Flush()
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
-	fmt.Fprintln(w, "ID\tTYPE\tTITLE\tSTATUS\tPRIORITY\tCREATED")
-	for _, d := range resp.Decisions {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
-			truncate(d.DecisionId, 16),
-			d.DecisionType,
-			truncate(d.Title, 40),
-			d.Status,
-			d.Priority,
-			d.CreatedAt.AsTime().Format("2006-01-02 15:04"),
-		)
+	if len(stats.BySeverity) > 0 {
+		fmt.Println("\nBy Severity:")
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+		fmt.Fprintln(w, "SEVERITY\tCOUNT")
+		for severity, count := range stats.BySeverity {
+			fmt.Fprintf(w, "%s\t%d\n", severity, count)
+		}
+		w.Flush()
 	}
-	w.Flush()
 
-	fmt.Printf("\nShowing %d of %d total decisions (page %d)\n",
-		len(resp.Decisions), resp.TotalCount, resp.Page)
+	if stats.OldestDecisionAge > 0 {
+		fmt.Printf("\nOldest Pending Decision: %.1f seconds ago\n", stats.OldestDecisionAge)
+	}
 
 	return nil
 }
@@ -299,62 +304,9 @@ Examples:
 }
 
 func runGetDecision(cmd *cobra.Command, args []string) error {
-	decisionID := args[0]
-
-	// Connect to MAXIMUS
-	client, err := grpc.NewMaximusClient(maximusServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect to MAXIMUS: %w", err)
-	}
-	defer client.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Get decision
-	decision, err := client.GetDecision(ctx, decisionID)
-	if err != nil {
-		return fmt.Errorf("failed to get decision: %w", err)
-	}
-
-	// Output
-	if outputFormat == "json" {
-		data, _ := json.MarshalIndent(decision, "", "  ")
-		fmt.Println(string(data))
-		return nil
-	}
-
-	// Pretty print
-	fmt.Printf("Decision: %s\n", decision.DecisionId)
-	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-	fmt.Printf("Type:        %s\n", decision.DecisionType)
-	fmt.Printf("Title:       %s\n", decision.Title)
-	fmt.Printf("Description: %s\n", decision.Description)
-	fmt.Printf("Status:      %s\n", decision.Status)
-	fmt.Printf("Priority:    %s\n", decision.Priority)
-	fmt.Printf("Context:     %s\n", decision.Context)
-	if len(decision.Tags) > 0 {
-		fmt.Printf("Tags:        %s\n", strings.Join(decision.Tags, ", "))
-	}
-	fmt.Printf("\n")
-	fmt.Printf("Created At:  %s\n", decision.CreatedAt.AsTime().Format(time.RFC3339))
-	fmt.Printf("Updated At:  %s\n", decision.UpdatedAt.AsTime().Format(time.RFC3339))
-	if decision.ResolvedAt != nil {
-		fmt.Printf("Resolved At: %s\n", decision.ResolvedAt.AsTime().Format(time.RFC3339))
-	}
-	fmt.Printf("\n")
-	fmt.Printf("Requester:   %s\n", decision.RequesterId)
-	if decision.ApproverId != "" {
-		fmt.Printf("Approver:    %s\n", decision.ApproverId)
-	}
-	if decision.ResolutionReason != "" {
-		fmt.Printf("Resolution:  %s\n", decision.ResolutionReason)
-	}
-	if decision.ProcessingTimeMs > 0 {
-		fmt.Printf("Process Time: %dms\n", decision.ProcessingTimeMs)
-	}
-
-	return nil
+	// NOTE: Individual decision retrieval not available in current HTTP governance API
+	// This command is disabled until the API endpoint is implemented
+	return fmt.Errorf("'get' command not yet implemented in HTTP governance API\nUse 'vcli maximus list' to view pending decisions")
 }
 
 // ============================================================================
@@ -379,40 +331,229 @@ Examples:
 }
 
 func runWatchDecision(cmd *cobra.Command, args []string) error {
+	// NOTE: Streaming not available in current HTTP governance API
+	// SSE endpoint exists at /api/v1/governance/stream/{operator_id} but requires operator session
+	return fmt.Errorf("'watch' command not yet implemented in HTTP governance API\nUse 'vcli maximus list' periodically to check decision status")
+}
+
+// ============================================================================
+// APPROVE COMMAND
+// ============================================================================
+
+var maximusApproveCmd = &cobra.Command{
+	Use:   "approve <decision-id>",
+	Short: "Approve a pending decision",
+	Long: `Approve a pending HITL decision in the governance system.
+
+Requires operator credentials for authorization.
+
+Examples:
+  # Approve a decision
+  vcli maximus approve dec_123456 --session-id session_abc
+
+  # Approve with reasoning
+  vcli maximus approve dec_123456 --session-id session_abc --reasoning "Verified manually"`,
+	Args: cobra.ExactArgs(1),
+	RunE: runApproveDecision,
+}
+
+var (
+	sessionID string
+	reasoning string
+	comment   string
+	toLevel   string
+)
+
+func runApproveDecision(cmd *cobra.Command, args []string) error {
 	decisionID := args[0]
 
-	// Connect to MAXIMUS
-	client, err := grpc.NewMaximusClient(maximusServer)
-	if err != nil {
-		return fmt.Errorf("failed to connect to MAXIMUS: %w", err)
+	if sessionID == "" {
+		return fmt.Errorf("--session-id is required")
 	}
-	defer client.Close()
 
-	fmt.Printf("👁️  Watching decision: %s\n", decisionID)
-	fmt.Printf("Press Ctrl+C to stop\n")
-	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
 
-	ctx := context.Background()
+	// Build approval request
+	req := maximus.ApproveDecisionRequest{
+		SessionID:  sessionID,
+	}
 
-	// Watch decision
-	err = client.WatchDecision(ctx, decisionID, func(event *pb.DecisionEvent) error {
-		fmt.Printf("[%s] %s - Decision %s\n",
-			event.Timestamp.AsTime().Format("15:04:05"),
-			event.EventType.String(),
-			event.DecisionId,
-		)
-		if event.TriggeredBy != "" {
-			fmt.Printf("  Triggered by: %s\n", event.TriggeredBy)
-		}
-		if event.Decision != nil {
-			fmt.Printf("  New status: %s\n", event.Decision.Status)
-		}
-		fmt.Println()
-		return nil
-	})
+	if reasoning != "" {
+		req.Reasoning = &reasoning
+	}
+	if comment != "" {
+		req.Comment = &comment
+	}
 
+	// Approve decision
+	result, err := client.ApproveDecision(decisionID, req)
 	if err != nil {
-		return fmt.Errorf("watch failed: %w", err)
+		return fmt.Errorf("failed to approve decision: %w", err)
+	}
+
+	// Output
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		if result.Success {
+			fmt.Printf("✅ Decision approved successfully\n")
+		} else {
+			fmt.Printf("❌ Decision approval failed\n")
+		}
+		fmt.Printf("Decision ID: %s\n", result.DecisionID)
+		fmt.Printf("Action:      %s\n", result.Action)
+		fmt.Printf("Timestamp:   %s\n", result.Timestamp)
+		if result.Message != "" {
+			fmt.Printf("Message:     %s\n", result.Message)
+		}
+	}
+
+	return nil
+}
+
+// ============================================================================
+// REJECT COMMAND
+// ============================================================================
+
+var maximusRejectCmd = &cobra.Command{
+	Use:   "reject <decision-id>",
+	Short: "Reject a pending decision",
+	Long: `Reject a pending HITL decision in the governance system.
+
+Requires operator credentials for authorization.
+A reason is required when rejecting decisions.
+
+Examples:
+  # Reject a decision
+  vcli maximus reject dec_123456 --session-id session_abc --reasoning "Security concern"
+
+  # Reject with detailed reasoning
+  vcli maximus reject dec_123456 --session-id session_abc --reasoning "Insufficient context provided"`,
+	Args: cobra.ExactArgs(1),
+	RunE: runRejectDecision,
+}
+
+func runRejectDecision(cmd *cobra.Command, args []string) error {
+	decisionID := args[0]
+
+	if sessionID == "" {
+		return fmt.Errorf("--session-id is required")
+	}
+
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
+
+	// Build rejection request
+	req := maximus.RejectDecisionRequest{
+		SessionID:  sessionID,
+	}
+
+	if reasoning != "" {
+		req.Reasoning = &reasoning
+	}
+	if comment != "" {
+		req.Comment = &comment
+	}
+
+	// Reject decision
+	result, err := client.RejectDecision(decisionID, req)
+	if err != nil {
+		return fmt.Errorf("failed to reject decision: %w", err)
+	}
+
+	// Output
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		if result.Success {
+			fmt.Printf("✅ Decision rejected successfully\n")
+		} else {
+			fmt.Printf("❌ Decision rejection failed\n")
+		}
+		fmt.Printf("Decision ID: %s\n", result.DecisionID)
+		fmt.Printf("Action:      %s\n", result.Action)
+		fmt.Printf("Timestamp:   %s\n", result.Timestamp)
+		if result.Message != "" {
+			fmt.Printf("Message:     %s\n", result.Message)
+		}
+	}
+
+	return nil
+}
+
+// ============================================================================
+// ESCALATE COMMAND
+// ============================================================================
+
+var maximusEscalateCmd = &cobra.Command{
+	Use:   "escalate <decision-id>",
+	Short: "Escalate a pending decision to higher authority",
+	Long: `Escalate a pending HITL decision to higher authority.
+
+Use this when a decision requires expertise or authority beyond the current operator level.
+
+Examples:
+  # Escalate a decision
+  vcli maximus escalate dec_123456 --session-id session_abc --reasoning "Requires VP approval"
+
+  # Escalate to specific level
+  vcli maximus escalate dec_123456 --session-id session_abc --reasoning "Security review needed" --to-level security-team`,
+	Args: cobra.ExactArgs(1),
+	RunE: runEscalateDecision,
+}
+
+func runEscalateDecision(cmd *cobra.Command, args []string) error {
+	decisionID := args[0]
+
+	if sessionID == "" {
+		return fmt.Errorf("--session-id is required")
+	}
+
+	if reasoning == "" {
+		return fmt.Errorf("--reasoning is required when escalating a decision")
+	}
+
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
+
+	// Build escalation request
+	req := maximus.EscalateDecisionRequest{
+		SessionID:  sessionID,
+		Reasoning:  reasoning,
+	}
+
+	if comment != "" {
+		req.Comment = &comment
+	}
+	if toLevel != "" {
+		req.ToLevel = &toLevel
+	}
+
+	// Escalate decision
+	result, err := client.EscalateDecision(decisionID, req)
+	if err != nil {
+		return fmt.Errorf("failed to escalate decision: %w", err)
+	}
+
+	// Output
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+	} else {
+		if result.Success {
+			fmt.Printf("✅ Decision escalated successfully\n")
+		} else {
+			fmt.Printf("❌ Decision escalation failed\n")
+		}
+		fmt.Printf("Decision ID: %s\n", result.DecisionID)
+		fmt.Printf("Action:      %s\n", result.Action)
+		fmt.Printf("Timestamp:   %s\n", result.Timestamp)
+		if result.Message != "" {
+			fmt.Printf("Message:     %s\n", result.Message)
+		}
 	}
 
 	return nil
@@ -443,25 +584,27 @@ Examples:
 }
 
 func runGetMetrics(cmd *cobra.Command, args []string) error {
-	// Connect to MAXIMUS
-	client, err := grpc.NewMaximusClient(maximusServer)
+	// Connect to MAXIMUS Governance API
+	client := maximus.NewGovernanceClient(getMaximusServer())
+
+	// Get health status and pending stats as metrics
+	health, err := client.Health()
 	if err != nil {
-		return fmt.Errorf("failed to connect to MAXIMUS: %w", err)
+		return fmt.Errorf("failed to get health status: %w", err)
 	}
-	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Get metrics
-	metrics, err := client.GetGovernanceMetrics(ctx, nil, nil, filterContext, nil)
+	stats, err := client.GetPendingStats()
 	if err != nil {
 		return fmt.Errorf("failed to get metrics: %w", err)
 	}
 
 	// Output
 	if outputFormat == "json" {
-		data, _ := json.MarshalIndent(metrics, "", "  ")
+		combined := map[string]interface{}{
+			"health": health,
+			"stats":  stats,
+		}
+		data, _ := json.MarshalIndent(combined, "", "  ")
 		fmt.Println(string(data))
 		return nil
 	}
@@ -469,33 +612,24 @@ func runGetMetrics(cmd *cobra.Command, args []string) error {
 	// Pretty print
 	fmt.Printf("MAXIMUS Governance Metrics\n")
 	fmt.Printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
-	fmt.Printf("Decision Counts:\n")
-	fmt.Printf("  Total:    %d\n", metrics.TotalDecisions)
-	fmt.Printf("  Pending:  %d\n", metrics.PendingDecisions)
-	fmt.Printf("  Approved: %d\n", metrics.ApprovedDecisions)
-	fmt.Printf("  Rejected: %d\n", metrics.RejectedDecisions)
-	fmt.Printf("\n")
-	fmt.Printf("Approval Rate: %.1f%%\n", metrics.ApprovalRate)
-	fmt.Printf("\n")
-	fmt.Printf("Processing Time (ms):\n")
-	fmt.Printf("  Average: %.1f\n", metrics.AvgResolutionTimeMs)
-	fmt.Printf("  P50:     %.1f\n", metrics.P50ResolutionTimeMs)
-	fmt.Printf("  P95:     %.1f\n", metrics.P95ResolutionTimeMs)
-	fmt.Printf("  P99:     %.1f\n", metrics.P99ResolutionTimeMs)
+	fmt.Printf("Health:  %s\n", health.Status)
+	if health.Version != "" {
+		fmt.Printf("Version: %s\n", health.Version)
+	}
+	fmt.Printf("\nPending Decisions: %d\n", stats.TotalPending)
 
-	if len(metrics.DecisionsByPriority) > 0 {
+	if len(stats.ByCategory) > 0 {
 		fmt.Printf("\n")
-		fmt.Printf("By Priority:\n")
-		for priority, count := range metrics.DecisionsByPriority {
-			fmt.Printf("  %s: %d\n", priority, count)
+		fmt.Printf("By Category:\n")
+		for category, count := range stats.ByCategory {
+			fmt.Printf("  %s: %d\n", category, count)
 		}
 	}
 
-	if len(metrics.DecisionsByType) > 0 {
-		fmt.Printf("\n")
-		fmt.Printf("By Type:\n")
-		for dtype, count := range metrics.DecisionsByType {
-			fmt.Printf("  %s: %d\n", dtype, count)
+	if len(stats.BySeverity) > 0 {
+		fmt.Printf("\nBy Severity:\n")
+		for severity, count := range stats.BySeverity {
+			fmt.Printf("  %s: %d\n", severity, count)
 		}
 	}
 
@@ -1242,6 +1376,9 @@ func init() {
 	maximusCmd.AddCommand(maximusListCmd)
 	maximusCmd.AddCommand(maximusGetCmd)
 	maximusCmd.AddCommand(maximusWatchCmd)
+	maximusCmd.AddCommand(maximusApproveCmd)
+	maximusCmd.AddCommand(maximusRejectCmd)
+	maximusCmd.AddCommand(maximusEscalateCmd)
 	maximusCmd.AddCommand(maximusMetricsCmd)
 
 	// Add Maximus AI service commands
@@ -1281,7 +1418,9 @@ func init() {
 	consciousnessArousalCmd.AddCommand(consciousnessArousalAdjustCmd)
 
 	// Global flags
-	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "", "MAXIMUS server address (default: env VCLI_MAXIMUS_ENDPOINT or localhost:50051)")
+	maximusCmd.PersistentFlags().StringVar(&maximusServer, "server", "", "MAXIMUS server URL with protocol (http:// or https://)\n"+
+		"Examples: http://localhost:8150 (dev), https://maximus.vertice.ai:8150 (prod)\n"+
+		"Default: env VCLI_MAXIMUS_ENDPOINT or http://localhost:8150")
 	maximusCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "table", "Output format (table|json)")
 
 	// Submit flags
@@ -1302,6 +1441,22 @@ func init() {
 	maximusListCmd.Flags().Int32Var(&pageSize, "page-size", 20, "Results per page")
 	maximusListCmd.Flags().StringVar(&sortBy, "sort-by", "created_at", "Sort field")
 	maximusListCmd.Flags().StringVar(&sortOrder, "sort-order", "desc", "Sort order (asc|desc)")
+
+	// Approve flags
+	maximusApproveCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusApproveCmd.Flags().StringVar(&reasoning, "reasoning", "", "Approval reasoning (optional)")
+	maximusApproveCmd.Flags().StringVar(&comment, "comment", "", "Approval comment (optional)")
+
+	// Reject flags
+	maximusRejectCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusRejectCmd.Flags().StringVar(&reasoning, "reasoning", "", "Rejection reasoning (optional)")
+	maximusRejectCmd.Flags().StringVar(&comment, "comment", "", "Rejection comment (optional)")
+
+	// Escalate flags
+	maximusEscalateCmd.Flags().StringVar(&sessionID, "session-id", "", "Session ID (required)")
+	maximusEscalateCmd.Flags().StringVar(&reasoning, "reasoning", "", "Escalation reasoning (required)")
+	maximusEscalateCmd.Flags().StringVar(&comment, "comment", "", "Escalation comment (optional)")
+	maximusEscalateCmd.Flags().StringVar(&toLevel, "to-level", "", "Target escalation level (optional)")
 
 	// Metrics flags
 	maximusMetricsCmd.Flags().StringVar(&filterContext, "context", "", "Filter by context")

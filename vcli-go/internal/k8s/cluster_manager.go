@@ -198,3 +198,8 @@ func (cm *ClusterManager) IsConnected() bool {
 
 	return cm.connected
 }
+
+// Clientset returns the underlying Kubernetes clientset (for advanced operations)
+func (cm *ClusterManager) Clientset() *kubernetes.Clientset {
+	return cm.clientset
+}

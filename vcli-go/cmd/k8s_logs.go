@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/k8s"
 )
 
@@ -16,36 +17,9 @@ var k8sLogsCmd = &cobra.Command{
 	Long: `Get logs from pods in the cluster.
 
 The logs command retrieves container logs from pods. It supports following logs
-in real-time, getting logs from previous container instances, and filtering by time.
-
-Examples:
-  # Get logs from a pod
-  vcli k8s logs nginx-7848d4b86f-9xvzk
-
-  # Get logs from a specific container
-  vcli k8s logs nginx-7848d4b86f-9xvzk -c nginx
-
-  # Follow logs in real-time
-  vcli k8s logs nginx-7848d4b86f-9xvzk --follow
-
-  # Get logs from previous container instance
-  vcli k8s logs nginx-7848d4b86f-9xvzk --previous
-
-  # Get logs with timestamps
-  vcli k8s logs nginx-7848d4b86f-9xvzk --timestamps
-
-  # Get last 100 lines
-  vcli k8s logs nginx-7848d4b86f-9xvzk --tail=100
-
-  # Get logs from last 1 hour
-  vcli k8s logs nginx-7848d4b86f-9xvzk --since=1h
-
-  # Get logs since specific time
-  vcli k8s logs nginx-7848d4b86f-9xvzk --since-time=2025-01-01T00:00:00Z
-
-  # Get logs from all containers
-  vcli k8s logs nginx-7848d4b86f-9xvzk --all-containers`,
-	RunE: handleK8sLogs,
+in real-time, getting logs from previous container instances, and filtering by time.`,
+	Example: help.BuildCobraExample(help.K8sLogsExamples),
+	RunE:    handleK8sLogs,
 }
 
 // handleK8sLogs handles the logs command execution

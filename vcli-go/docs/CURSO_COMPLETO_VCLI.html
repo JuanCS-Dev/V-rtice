@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vCLI - Curso Completo de Operação v2.0</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --bg-color: #ecf0f1;
+            --code-bg: #2c3e50;
+            --code-color: #f8f8f2;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: var(--bg-color);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        header .badges {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge.success { background: var(--success-color); }
+        .badge.warning { background: var(--warning-color); }
+
+        /* Layout */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* Sidebar */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            position: sticky;
+            top: 150px;
+            height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        aside h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        aside nav ul {
+            list-style: none;
+        }
+
+        aside nav ul li {
+            margin: 0.5rem 0;
+        }
+
+        aside nav ul li a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        aside nav ul li a:hover,
+        aside nav ul li a.active {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        aside nav ul ul {
+            margin-left: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        aside nav ul ul li a {
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 170px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        pre::before {
+            content: "Terminal";
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+
+        p code, li code {
+            background: rgba(44, 62, 80, 0.1);
+            color: var(--danger-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .info-box.success {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: var(--success-color);
+        }
+
+        .info-box.warning {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: var(--warning-color);
+        }
+
+        .info-box.danger {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: var(--danger-color);
+        }
+
+        .info-box.info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--secondary-color);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Command Examples */
+        .command-example {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .command-example h5 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn.btn-success { background: var(--success-color); }
+        .btn.btn-danger { background: var(--danger-color); }
+
+        /* Search Box */
+        .search-box {
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 150px;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 50;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        /* Copy Button for Code Blocks */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 5rem;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        pre:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            aside {
+                width: 100%;
+                position: static;
+                height: auto;
+            }
+
+            main {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            background: var(--secondary-color);
+        }
+
+        /* Print Styles */
+        @media print {
+            aside {
+                display: none;
+            }
+
+            header {
+                position: static;
+            }
+
+            .search-box,
+            .dark-mode-toggle,
+            .copy-btn {
+                display: none;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            pre {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Highlight.js override for better code colors */
+        .hljs-comment { color: #75715e; }
+        .hljs-string { color: #a6e22e; }
+        .hljs-keyword { color: #f92672; }
+        .hljs-number { color: #ae81ff; }
+        .hljs-built_in { color: #66d9ef; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚀 vCLI - Curso Completo de Operação</h1>
+        <p class="subtitle">Versão 2.0 | Production Ready | Doutrina Vértice 100%</p>
+        <div class="badges">
+            <span class="badge success">✅ 100% Conformidade</span>
+            <span class="badge success">✅ Zero Air Gaps</span>
+            <span class="badge">📅 2025-10-22</span>
+            <span class="badge">👨‍💻 MAXIMUS AI Team</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside>
+            <h2>📑 Índice</h2>
+            <nav>
+                <ul>
+                    <li><a href="#introducao">1. Introdução</a>
+                        <ul>
+                            <li><a href="#oque-e">1.1 O que é vCLI?</a></li>
+                            <li><a href="#filosofia">1.2 Filosofia de Design</a></li>
+                            <li><a href="#caracteristicas">1.3 Características</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#instalacao">2. Instalação e Configuração</a>
+                        <ul>
+                            <li><a href="#requisitos">2.1 Requisitos</a></li>
+                            <li><a href="#instalacao-metodos">2.2 Instalação</a></li>
+                            <li><a href="#configuracao">2.3 Configuração</a></li>
+                            <li><a href="#verificacao">2.4 Verificação</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#arquitetura">3. Arquitetura e Conceitos</a></li>
+                    <li><a href="#modos">4. Modos de Operação</a>
+                        <ul>
+                            <li><a href="#modo-cli">4.1 Modo CLI</a></li>
+                            <li><a href="#modo-shell">4.2 Modo Shell</a></li>
+                            <li><a href="#modo-tui">4.3 Modo TUI</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#comandos">5. Comandos CLI</a>
+                        <ul>
+                            <li><a href="#maximus">5.1 MAXIMUS</a></li>
+                            <li><a href="#immune">5.2 Immune Core</a></li>
+                            <li><a href="#hitl">5.3 HITL Console</a></li>
+                            <li><a href="#k8s">5.4 Kubernetes</a></li>
+                            <li><a href="#consciousness">5.5 Consciousness</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#tui-workspaces">6. TUI Workspaces</a>
+                        <ul>
+                            <li><a href="#governance-ws">6.1 Governance</a></li>
+                            <li><a href="#performance-ws">6.2 Performance</a></li>
+                            <li><a href="#investigation-ws">6.3 Investigation</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#offline">7. Operação Offline</a></li>
+                    <li><a href="#erros">8. Sistema de Erros</a></li>
+                    <li><a href="#avancado">9. Operações Avançadas</a></li>
+                    <li><a href="#casos-uso">10. Casos de Uso</a></li>
+                    <li><a href="#referencia">11. Referência Rápida</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar no curso... (ex: 'batch', 'offline', 'kubernetes')">
+            </div>
+
+            <section id="introducao">
+                <h2>1. Introdução</h2>
+
+                <h3 id="oque-e">1.1 O que é vCLI?</h3>
+                <p><strong>vCLI</strong> (Vertice Command Line Interface) é uma ferramenta unificada de linha de comando para interagir com todo o ecossistema Vertice.</p>
+
+                <div class="info-box info">
+                    <strong>💡 Funcionalidades Principais</strong>
+                    <ul>
+                        <li><strong>MAXIMUS Governance</strong> - Sistema de governança e decisões HITL</li>
+                        <li><strong>Immune Core</strong> - Detecção de anomalias e segurança</li>
+                        <li><strong>Consciousness Services</strong> - Eureka, Oraculo, Predict</li>
+                        <li><strong>Kubernetes</strong> - Gerenciamento completo de clusters K8s</li>
+                        <li><strong>TUI Workspaces</strong> - Interfaces interativas para monitoramento</li>
+                    </ul>
+                </div>
+
+                <h3 id="filosofia">1.2 Filosofia de Design - Doutrina Vértice</h3>
+                <div class="info-box success">
+                    <strong>✅ Princípios Fundamentais</strong>
+                    <ul>
+                        <li>✅ <strong>Zero Compromises</strong> - Production-ready sempre</li>
+                        <li>✅ <strong>NO MOCK, NO PLACEHOLDER</strong> - Apenas código real</li>
+                        <li>✅ <strong>Production Quality</strong> - Error handling completo</li>
+                        <li>✅ <strong>User Experience First</strong> - Mensagens claras e acionáveis</li>
+                    </ul>
+                </div>
+
+                <h3 id="caracteristicas">1.3 Características Principais</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Multi-Backend</strong></td>
+                            <td>Integração com 7+ serviços backend</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Offline Mode</strong></td>
+                            <td>Queue de comandos e sync automático</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Enhanced Errors</strong></td>
+                            <td>Mensagens contextuais com sugestões</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TUI Workspaces</strong></td>
+                            <td>3 dashboards interativos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Batch Operations</strong></td>
+                            <td>Processamento paralelo em massa</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Auto-Diagnostics</strong></td>
+                            <td>Comando troubleshoot automático</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="instalacao">
+                <h2>2. Instalação e Configuração</h2>
+
+                <h3 id="requisitos">2.1 Requisitos</h3>
+                <div class="command-example">
+                    <h5>Mínimo:</h5>
+                    <ul>
+                        <li>Go 1.21+ (para compilar do source)</li>
+                        <li>Acesso aos backends Vertice (HTTP/HTTPS)</li>
+                        <li>Kubernetes cluster (opcional)</li>
+                    </ul>
+                </div>
+
+                <h3 id="instalacao-metodos">2.2 Instalação</h3>
+
+                <h4>Opção 1: Build do Source</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Clone o repositório
+git clone https://github.com/verticedev/vcli-go.git
+cd vcli-go
+
+# Build
+go build -o bin/vcli ./cmd
+
+# Instalar globalmente (opcional)
+sudo cp bin/vcli /usr/local/bin/</code></pre>
+
+                <h4>Opção 2: Download do Release</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Linux
+wget https://github.com/verticedev/vcli-go/releases/latest/download/vcli-linux-amd64
+chmod +x vcli-linux-amd64
+sudo mv vcli-linux-amd64 /usr/local/bin/vcli
+
+# macOS
+wget https://github.com/verticedev/vcli-go/releases/latest/download/vcli-darwin-amd64
+chmod +x vcli-darwin-amd64
+sudo mv vcli-darwin-amd64 /usr/local/bin/vcli</code></pre>
+
+                <h4>Opção 3: Homebrew (macOS/Linux)</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code>brew tap verticedev/tap
+brew install vcli</code></pre>
+
+                <h3 id="configuracao">2.3 Configuração Inicial</h3>
+                <p>Criar arquivo <code>~/.vcli/config.yaml</code>:</p>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Backend Endpoints
+maximus:
+  endpoint: http://localhost:8100
+  timeout: 30s
+
+immune:
+  endpoint: http://localhost:8200
+  timeout: 30s
+
+hitl:
+  endpoint: http://localhost:8000/api
+  redis_url: localhost:6379
+
+# Kubernetes
+kubernetes:
+  kubeconfig: ~/.kube/config
+  context: default
+
+# Offline Mode
+offline:
+  enabled: true
+  sync_interval: 5m
+  cache_dir: ~/.vcli/cache</code></pre>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Precedência de Configuração</strong>
+                    <ol>
+                        <li><strong>Flags de comando</strong> (mais alta prioridade)</li>
+                        <li>Variáveis de ambiente</li>
+                        <li>Arquivo de configuração</li>
+                        <li>Defaults (mais baixa)</li>
+                    </ol>
+                </div>
+
+                <h3 id="verificacao">2.4 Verificação da Instalação</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Verificar versão
+vcli version
+
+# Testar conectividade
+vcli troubleshoot all</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Output Esperado</strong>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem 0;"><code>✓ MAXIMUS Governance: OK
+✓ Immune Core: OK
+✓ HITL Console: OK
+✓ Kubernetes: OK</code></pre>
+                </div>
+            </section>
+
+            <section id="modos">
+                <h2>4. Modos de Operação</h2>
+
+                <h3 id="modo-cli">4.1 Modo CLI (Command Line Interface)</h3>
+                <div class="command-example">
+                    <h5>Estrutura de Comando:</h5>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>vcli [SERVICE] [RESOURCE] [ACTION] [FLAGS]</code></pre>
+                </div>
+
+                <p><strong>Exemplos:</strong></p>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># MAXIMUS
+vcli maximus decision list
+vcli maximus decision approve dec-123 --reason "Approved"
+
+# Kubernetes
+vcli k8s get pods -n production
+vcli k8s logs nginx-abc -f --tail 100</code></pre>
+
+                <div class="info-box info">
+                    <strong>📌 Quando usar Modo CLI</strong>
+                    <p>Scripts, CI/CD, automação, comandos únicos</p>
+                </div>
+
+                <h3 id="modo-shell">4.2 Modo Shell (REPL interativo)</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code>vcli shell
+
+vcli> maximus decision list
+vcli> k8s describe pod nginx-abc123
+vcli> exit</code></pre>
+
+                <div class="info-box info">
+                    <strong>📌 Quando usar Modo Shell</strong>
+                    <p>Exploração interativa, múltiplos comandos sequenciais</p>
+                </div>
+
+                <h3 id="modo-tui">4.3 Modo TUI (Terminal UI)</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code>vcli tui
+
+# Ou workspace específico
+vcli tui --workspace governance
+vcli tui --workspace performance
+vcli tui --workspace investigation</code></pre>
+
+                <div class="info-box info">
+                    <strong>📌 Quando usar Modo TUI</strong>
+                    <p>Monitoramento contínuo, dashboards, análise visual</p>
+                </div>
+            </section>
+
+            <section id="comandos">
+                <h2>5. Comandos CLI - Referência Completa</h2>
+
+                <h3 id="maximus">5.1 MAXIMUS Governance</h3>
+
+                <h4>Health Check</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code>vcli maximus health</code></pre>
+
+                <h4>Listar Decisões</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Todas as decisões
+vcli maximus decision list
+
+# Com filtros
+vcli maximus decision list --status pending
+vcli maximus decision list --priority high --limit 50</code></pre>
+
+                <div class="command-example">
+                    <h5>Output:</h5>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>ID              STATUS    PRIORITY  CREATED              DESCRIPTION
+dec-abc123      pending   high      2025-10-22 10:30     Approve deployment
+dec-def456      approved  medium    2025-10-22 09:15     Update config</code></pre>
+                </div>
+
+                <h4>Aprovar/Rejeitar Decisão</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Aprovar
+vcli maximus decision approve dec-abc123 \
+  --reason "Passed all tests" \
+  --reviewer "juan@vertice.dev"
+
+# Rejeitar
+vcli maximus decision reject dec-abc123 \
+  --reason "Failed security scan"</code></pre>
+
+                <h3 id="k8s">5.4 Kubernetes Operations</h3>
+
+                <h4>Get Resources</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Pods
+vcli k8s get pods
+vcli k8s get pods -n production
+vcli k8s get pods -l app=nginx
+
+# Deployments
+vcli k8s get deployments -n production
+
+# Services
+vcli k8s get services</code></pre>
+
+                <h4>Logs</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Básico
+vcli k8s logs nginx-abc123
+
+# Streaming (follow)
+vcli k8s logs nginx-abc123 -f
+
+# Últimas N linhas
+vcli k8s logs nginx-abc123 --tail 100</code></pre>
+
+                <h4>Delete Resources</h4>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Delete pod
+vcli k8s delete pod nginx-abc123 -n default
+
+# Delete com selector (batch)
+vcli k8s delete pods --selector app=old -n default --confirm</code></pre>
+            </section>
+
+            <section id="tui-workspaces">
+                <h2>6. TUI Workspaces</h2>
+
+                <h3 id="governance-ws">6.1 Governance Workspace</h3>
+                <div class="command-example">
+                    <h5>Iniciar:</h5>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>vcli tui --workspace governance</code></pre>
+                </div>
+
+                <div class="info-box info">
+                    <strong>📋 Features</strong>
+                    <ul>
+                        <li>Lista de decisões pendentes em tempo real</li>
+                        <li>Detalhes completos de cada decisão</li>
+                        <li>Aprovação/rejeição interativa</li>
+                        <li>Filtros por prioridade e status</li>
+                    </ul>
+                </div>
+
+                <h4>Atalhos de Teclado:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tecla</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>↑/↓</td><td>Navegar decisões</td></tr>
+                        <tr><td>Enter</td><td>Revisar decisão</td></tr>
+                        <tr><td>a</td><td>Aprovar</td></tr>
+                        <tr><td>r</td><td>Rejeitar</td></tr>
+                        <tr><td>f</td><td>Filtrar</td></tr>
+                        <tr><td>q</td><td>Sair</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 id="performance-ws">6.2 Performance Workspace</h3>
+                <div class="command-example">
+                    <h5>Iniciar:</h5>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>vcli tui --workspace performance</code></pre>
+                </div>
+
+                <div class="info-box success">
+                    <strong>⚡ Métricas em Tempo Real</strong>
+                    <ul>
+                        <li><strong>System Throughput</strong> - Req/s com sparklines ▁▃▅▆▇█</li>
+                        <li><strong>Queue Status</strong> - Todas as filas visualizadas</li>
+                        <li><strong>SLA Compliance</strong> - Response time, error rate, availability</li>
+                        <li><strong>Service Health</strong> - Status de todos os serviços</li>
+                    </ul>
+                </div>
+
+                <h3 id="investigation-ws">6.3 Investigation Workspace</h3>
+                <div class="command-example">
+                    <h5>Iniciar:</h5>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>vcli tui --workspace investigation</code></pre>
+                </div>
+
+                <div class="info-box info">
+                    <strong>🔍 Forensic Investigation Tools</strong>
+                    <ul>
+                        <li>Resource inspector (Pods, Deployments, Services, Nodes)</li>
+                        <li>Live log viewer</li>
+                        <li>Event timeline</li>
+                        <li>4-panel layout para análise completa</li>
+                    </ul>
+                </div>
+
+                <h4>Atalhos:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tecla</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>↑/↓</td><td>Navegar recursos</td></tr>
+                        <tr><td>Enter</td><td>Inspect detalhado</td></tr>
+                        <tr><td>l</td><td>Abrir log viewer</td></tr>
+                        <tr><td>e</td><td>Abrir event timeline</td></tr>
+                        <tr><td>n</td><td>Change namespace</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="offline">
+                <h2>7. Operação Offline</h2>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Como Funciona</strong>
+                    <p>vCLI possui <strong>3 camadas</strong> de offline support:</p>
+                    <ol>
+                        <li><strong>Response Cache</strong> - Armazena respostas de leitura (GET)</li>
+                        <li><strong>Command Queue</strong> - Queue de operações write (POST/PUT/DELETE)</li>
+                        <li><strong>Sync Manager</strong> - Sincronização automática a cada 5 minutos</li>
+                    </ol>
+                </div>
+
+                <h3>Operação Offline Automática</h3>
+                <p>vCLI detecta automaticamente quando está offline:</p>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Executar comando normalmente
+vcli maximus decision approve dec-abc123
+
+# Se offline, automaticamente vai para queue:
+# ⚠️  Offline Mode Detected
+#
+# Command queued for sync:
+#   Operation: approve_decision
+#   Decision ID: dec-abc123
+#
+# ✓ Operation will be executed when online</code></pre>
+
+                <h3>Gerenciar Queue Offline</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Ver status da queue
+vcli offline status
+
+# Sincronizar manualmente
+vcli offline sync
+
+# Limpar queue
+vcli offline clear</code></pre>
+
+                <h3>Cache Management</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Ver status do cache
+vcli cache status
+
+# Limpar cache
+vcli cache clear
+
+# Limpar apenas cache expirado
+vcli cache clear --expired</code></pre>
+            </section>
+
+            <section id="erros">
+                <h2>8. Sistema de Erros e Troubleshooting</h2>
+
+                <h3>Tipos de Erros</h3>
+
+                <div class="info-box danger">
+                    <strong>❌ CONNECTION Error</strong>
+                    <p>Ocorre quando não consegue conectar com o backend</p>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>❌ CONNECTION Error: MAXIMUS Governance
+
+Failed to connect
+Endpoint: http://localhost:8100
+Operation: health check
+
+💡 Suggestions:
+  1. Verify service is running
+  2. Check endpoint configuration
+  3. Test connectivity: curl http://localhost:8100/health
+
+Need help? Run: vcli troubleshoot maximus</code></pre>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>🔐 AUTH Error</strong>
+                    <p>Credenciais inválidas ou token expirado</p>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>❌ AUTH Error: HITL Console
+
+Invalid credentials
+Endpoint: http://localhost:8000/api
+
+💡 Suggestions:
+  1. Verify your credentials are correct
+  2. Login again: vcli hitl login
+  3. Check account permissions
+
+Need help? Run: vcli troubleshoot hitl</code></pre>
+                </div>
+
+                <h3>Troubleshooting Automático</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Troubleshoot serviço específico
+vcli troubleshoot maximus
+vcli troubleshoot immune
+vcli troubleshoot k8s
+
+# Troubleshoot todos os serviços
+vcli troubleshoot all
+
+# Modo verbose para mais detalhes
+vcli troubleshoot maximus --verbose</code></pre>
+
+                <div class="info-box success">
+                    <strong>✅ Output de Troubleshoot Bem-Sucedido</strong>
+                    <pre style="background: transparent; box-shadow: none; padding: 0.5rem;"><code>[1/5] Checking endpoint reachability... ✓
+[2/5] Testing API health endpoint... ✓
+[3/5] Verifying authentication... ✓
+[4/5] Testing decision API... ✓
+[5/5] Checking dependencies... ✓
+
+Summary: ✓ MAXIMUS is healthy</code></pre>
+                </div>
+            </section>
+
+            <section id="avancado">
+                <h2>9. Operações Avançadas</h2>
+
+                <h3>9.1 Batch Operations</h3>
+                <p>Processar múltiplos recursos em paralelo:</p>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Aprovar múltiplas decisões
+vcli maximus batch approve \
+  --selector "priority=low,status=pending" \
+  --max 50
+
+# Delete múltiplos pods
+vcli k8s batch delete pods \
+  --selector app=old-version \
+  --namespace production \
+  --max-concurrent 5</code></pre>
+
+                <h3>9.2 Custom Output Formats</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># JSON
+vcli maximus decision list --format json
+
+# YAML
+vcli k8s get pods --format yaml
+
+# CSV
+vcli maximus decision list --format csv > decisions.csv
+
+# Processar com jq
+vcli maximus decision list --format json | jq '.[] | select(.priority == "high")'</code></pre>
+
+                <h3>9.3 Watch Mode</h3>
+                <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># Watch decisões (atualiza a cada 5s)
+vcli maximus decision list --watch
+
+# Watch pods
+vcli k8s get pods --watch -n production</code></pre>
+            </section>
+
+            <section id="casos-uso">
+                <h2>10. Casos de Uso Práticos</h2>
+
+                <h3>Caso 1: Deployment com Aprovação HITL</h3>
+                <div class="command-example">
+                    <h5>Cenário: Deploy de nova versão com aprovação humana</h5>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># 1. Health check
+vcli troubleshoot all
+
+# 2. Aplicar deployment
+kubectl apply -f deploy-v2.yaml
+
+# 3. Criar decisão HITL
+decision_id=$(vcli maximus decision create \
+  --description "Approve deployment v2.3.1" \
+  --priority high \
+  --format json | jq -r '.id')
+
+# 4. Aguardar aprovação
+vcli maximus decision get "$decision_id" --watch
+
+# 5. Verificar deployment
+vcli k8s get pods -l app=payment-api --watch</code></pre>
+                </div>
+
+                <h3>Caso 2: Incident Response</h3>
+                <div class="command-example">
+                    <h5>Resposta rápida a anomalia detectada</h5>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># 1. Detectar anomalia
+vcli immune anomaly detect --threshold 0.8
+
+# 2. Investigar no TUI
+vcli tui --workspace investigation
+
+# 3. Ação corretiva (se necessário)
+vcli k8s scale deployment payment-api --replicas 5</code></pre>
+                </div>
+
+                <h3>Caso 3: Operação Offline</h3>
+                <div class="command-example">
+                    <h5>Trabalhar durante conectividade intermitente</h5>
+                    <pre><button class="copy-btn" onclick="copyCode(this)">📋 Copiar</button><code># 1. Trabalhar normalmente (mesmo offline)
+vcli maximus decision list  # Usa cache automático
+
+# 2. Executar operações write
+vcli maximus decision approve dec-abc123  # Vai para queue
+
+# 3. Verificar queue
+vcli offline status
+
+# 4. Sync quando voltar online
+vcli offline sync</code></pre>
+                </div>
+            </section>
+
+            <section id="referencia">
+                <h2>11. Referência Rápida</h2>
+
+                <h3>Comandos Essenciais</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Comando</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>vcli maximus health</code></td><td>Health check MAXIMUS</td></tr>
+                        <tr><td><code>vcli maximus decision list</code></td><td>Listar decisões</td></tr>
+                        <tr><td><code>vcli k8s get pods</code></td><td>Listar pods</td></tr>
+                        <tr><td><code>vcli k8s logs &lt;pod&gt;</code></td><td>Ver logs</td></tr>
+                        <tr><td><code>vcli tui</code></td><td>Abrir TUI</td></tr>
+                        <tr><td><code>vcli troubleshoot all</code></td><td>Diagnosticar todos os serviços</td></tr>
+                        <tr><td><code>vcli offline status</code></td><td>Status da queue offline</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Flags Comuns</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Flag</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>--format json|yaml|table</code></td><td>Formato de output</td></tr>
+                        <tr><td><code>-n, --namespace</code></td><td>Namespace K8s</td></tr>
+                        <tr><td><code>-l, --selector</code></td><td>Label selector</td></tr>
+                        <tr><td><code>-f, --follow</code></td><td>Follow logs</td></tr>
+                        <tr><td><code>-w, --watch</code></td><td>Watch mode</td></tr>
+                        <tr><td><code>-v, --verbose</code></td><td>Verbose output</td></tr>
+                        <tr><td><code>--debug</code></td><td>Debug logging</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Atalhos TUI</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tecla</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>Tab</code></td><td>Próximo workspace</td></tr>
+                        <tr><td><code>1, 2, 3</code></td><td>Ir para workspace 1, 2, 3</td></tr>
+                        <tr><td><code>r</code></td><td>Refresh</td></tr>
+                        <tr><td><code>q</code></td><td>Quit</td></tr>
+                        <tr><td><code>?</code></td><td>Help</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box success">
+                    <strong>🎓 Parabéns!</strong>
+                    <p>Você completou o Curso Completo de vCLI v2.0. Agora você está pronto para:</p>
+                    <ul>
+                        <li>✅ Operar vCLI em todos os modos (CLI, Shell, TUI)</li>
+                        <li>✅ Gerenciar decisões HITL via MAXIMUS</li>
+                        <li>✅ Administrar clusters Kubernetes</li>
+                        <li>✅ Trabalhar offline com queue e sync</li>
+                        <li>✅ Troubleshoot problemas automaticamente</li>
+                        <li>✅ Executar operações batch avançadas</li>
+                    </ul>
+                </div>
+
+                <div class="info-box info">
+                    <strong>📚 Recursos Adicionais</strong>
+                    <ul>
+                        <li>Docs oficiais: <a href="https://docs.vertice.dev/vcli">docs.vertice.dev/vcli</a></li>
+                        <li>GitHub: <a href="https://github.com/verticedev/vcli-go">github.com/verticedev/vcli-go</a></li>
+                        <li>Discord: <a href="https://discord.gg/vertice">discord.gg/vertice</a></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p><strong>vCLI - Curso Completo v2.0</strong></p>
+        <p>Documento gerado em: 2025-10-22 | Versão: 1.0 | Status: Production Ready</p>
+        <p>Conformidade: 100% Doutrina Vértice | Zero Air Gaps ✅</p>
+        <p>© 2025 Vertice.dev | <a href="https://vertice.dev">vertice.dev</a></p>
+    </footer>
+
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('main section');
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(searchTerm) || searchTerm === '') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('aside a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    // Update active link
+                    document.querySelectorAll('aside a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Copy code functionality
+        function copyCode(button) {
+            const pre = button.parentElement;
+            const code = pre.querySelector('code');
+            const text = code.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = '✅ Copiado!';
+                setTimeout(() => {
+                    button.textContent = '📋 Copiar';
+                }, 2000);
+            });
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+
+            if (isDark) {
+                document.querySelector('.dark-mode-toggle').textContent = '☀️';
+                applyDarkMode();
+            } else {
+                document.querySelector('.dark-mode-toggle').textContent = '🌙';
+                removeDarkMode();
+            }
+        }
+
+        function applyDarkMode() {
+            const style = document.createElement('style');
+            style.id = 'dark-mode-styles';
+            style.textContent = `
+                :root {
+                    --bg-color: #1a1a1a;
+                    --primary-color: #4a5568;
+                    --secondary-color: #63b3ed;
+                }
+                body { background: #1a1a1a; color: #e2e8f0; }
+                .container { background: #2d3748; }
+                main { background: #2d3748; }
+                aside { background: #1a202c; }
+                table { background: #2d3748; }
+                th { background: #4a5568; }
+                tr:hover { background: rgba(99, 179, 237, 0.1); }
+                .info-box { background: rgba(99, 179, 237, 0.1); }
+                .command-example { background: #1a202c; }
+                .search-box { background: #2d3748; }
+                .search-box input { background: #1a202c; color: #e2e8f0; border-color: #4a5568; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function removeDarkMode() {
+            const style = document.getElementById('dark-mode-styles');
+            if (style) style.remove();
+        }
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.dark-mode-toggle').textContent = '☀️';
+            applyDarkMode();
+        }
+
+        // Highlight current section in navigation
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('aside a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Print preparation
+        window.addEventListener('beforeprint', () => {
+            document.querySelectorAll('section').forEach(section => {
+                section.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

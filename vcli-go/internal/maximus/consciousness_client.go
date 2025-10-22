@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/verticedev/vcli-go/internal/debug"
 )
 
 // ConsciousnessClient handles communication with MAXIMUS Consciousness API
@@ -23,8 +24,15 @@ type ConsciousnessClient struct {
 
 // NewConsciousnessClient creates a new consciousness API client
 func NewConsciousnessClient(baseURL string) *ConsciousnessClient {
+	source := "flag"
 	if baseURL == "" {
-		baseURL = "http://localhost:8022"
+		baseURL = os.Getenv("VCLI_CONSCIOUSNESS_ENDPOINT")
+		if baseURL != "" {
+			source = "env:VCLI_CONSCIOUSNESS_ENDPOINT"
+		} else {
+			baseURL = "http://localhost:8022"
+			source = "default"
+		}
 	}
 
 	streamURL := os.Getenv("MAXIMUS_CONSCIOUSNESS_STREAM_URL")
@@ -32,6 +40,8 @@ func NewConsciousnessClient(baseURL string) *ConsciousnessClient {
 		streamURL = os.Getenv("MAXIMUS_STREAM_URL")
 	}
 	streamURL = strings.TrimSuffix(streamURL, "/")
+
+	debug.LogConnection("Consciousness", baseURL, source)
 
 	return &ConsciousnessClient{
 		baseURL:   strings.TrimSuffix(baseURL, "/"),
