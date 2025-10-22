@@ -1,0 +1,13 @@
+{
+  "incident_id": "INCIDENT-1761136915",
+  "shutdown_reason": "manual_operator_command",
+  "shutdown_timestamp": 1761136915.2114382,
+  "shutdown_timestamp_iso": "2025-10-22T09:41:55.211438",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761136915.2114234
+  },
+  "metrics_timeline": [],
+  "recovery_possible": true,
+  "notes": "Automatic emergency shutdown triggered by safety protocol"
+}

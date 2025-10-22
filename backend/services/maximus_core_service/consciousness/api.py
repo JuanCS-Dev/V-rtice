@@ -183,7 +183,9 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
                 raise HTTPException(status_code=503, detail="Consciousness system not fully initialized")
 
             # Get metrics
-            tig_metrics = tig.get_metrics() if hasattr(tig, "get_metrics") else {}
+            tig_metrics_raw = tig.get_metrics() if hasattr(tig, "get_metrics") else {}
+            # Convert FabricMetrics dataclass to dict if needed
+            tig_metrics = asdict(tig_metrics_raw) if hasattr(tig_metrics_raw, "__dataclass_fields__") else tig_metrics_raw
             arousal_state = arousal.get_current_arousal() if hasattr(arousal, "get_current_arousal") else None
 
             return ConsciousnessStateResponse(
@@ -296,9 +298,10 @@ def create_consciousness_api(consciousness_system: dict[str, Any]) -> APIRouter:
             return {
                 "success": event.success,
                 "event_id": event.event_id,
-                "coherence": event.coherence_achieved,
-                "duration_ms": event.duration_ms,
-                "reason": event.reason,
+                "coherence": event.achieved_coherence,
+                "duration_ms": event.time_to_sync_ms,
+                "reason": getattr(event, "reason", None),
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error triggering ESGT: {str(e)}")

@@ -1,0 +1,28 @@
+{
+  "incident_id": "INCIDENT-1761135840",
+  "shutdown_reason": "threshold_violation",
+  "shutdown_timestamp": 1761135840.1959758,
+  "shutdown_timestamp_iso": "2025-10-22T09:24:00.195976",
+  "violations": [
+    {
+      "violation_id": "test-1",
+      "violation_type": "threshold_exceeded",
+      "legacy_violation_type": "esgt_frequency_exceeded",
+      "threat_level": "critical",
+      "severity": "emergency",
+      "timestamp": 1761135840.1959295,
+      "timestamp_iso": "2025-10-22T09:24:00.195930",
+      "description": "Test violation",
+      "metrics": {
+        "test": 123
+      },
+      "source_component": "test",
+      "automatic_action_taken": null,
+      "message": "Test violation"
+    }
+  ],
+  "system_state_snapshot": {
+    "timestamp": 1761135840.1961737,
+    "timestamp_iso": "2025-10-22T09:24:00.196174",
+    "pid": 28891,
+    "tig_nodes": 

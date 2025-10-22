@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/verticedev/vcli-go/internal/debug"
 )
 
 // EurekaClient provides access to Maximus Eureka Service for insight generation
@@ -59,19 +61,18 @@ type HealthResponse struct {
 
 // NewEurekaClient creates a new Eureka service client
 func NewEurekaClient(endpoint, authToken string) *EurekaClient {
-	debug := os.Getenv("VCLI_DEBUG") == "true"
-
-	// Check env var if endpoint not provided
+	source := "flag"
 	if endpoint == "" {
 		endpoint = os.Getenv("VCLI_EUREKA_ENDPOINT")
-		if endpoint == "" {
-			endpoint = "http://localhost:8024" // default
+		if endpoint != "" {
+			source = "env:VCLI_EUREKA_ENDPOINT"
+		} else {
+			endpoint = "http://localhost:8024"
+			source = "default"
 		}
 	}
 
-	if debug {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Eureka client initialized with endpoint: %s\n", endpoint)
-	}
+	debug.LogConnection("Eureka", endpoint, source)
 
 	return &EurekaClient{
 		baseURL: endpoint,

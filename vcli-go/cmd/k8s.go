@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/k8s"
 )
 
@@ -14,32 +15,8 @@ var k8sCmd = &cobra.Command{
 	Long: `Manage Kubernetes clusters and resources.
 
 The k8s command provides kubectl-style operations for managing Kubernetes
-resources including pods, deployments, services, nodes, and namespaces.
-
-Examples:
-  # List pods in default namespace
-  vcli k8s get pods
-
-  # List pods in specific namespace
-  vcli k8s get pods --namespace kube-system
-
-  # List pods across all namespaces
-  vcli k8s get pods --all-namespaces
-
-  # Get pods in JSON format
-  vcli k8s get pods --output json
-
-  # Get single pod details
-  vcli k8s get pod nginx-7848d4b86f-9xvzk
-
-  # List all nodes
-  vcli k8s get nodes
-
-  # Get current context
-  vcli k8s config get-context
-
-  # Switch context
-  vcli k8s config use-context production`,
+resources including pods, deployments, services, nodes, and namespaces.`,
+	Example: help.BuildCobraExample(help.K8sGetExamples, help.K8sLogsExamples),
 }
 
 // ============================================================================
@@ -59,16 +36,8 @@ Supported resources:
   - deployments (deploy)
   - services (svc)
   - configmaps (cm)
-  - secrets
-
-Examples:
-  vcli k8s get pods
-  vcli k8s get namespaces
-  vcli k8s get nodes
-  vcli k8s get deployments
-  vcli k8s get services
-  vcli k8s get configmaps
-  vcli k8s get secrets`,
+  - secrets`,
+	Example: help.BuildCobraExample(help.K8sGetExamples),
 }
 
 // ============================================================================
@@ -80,24 +49,9 @@ var getPodsCmd = &cobra.Command{
 	Use:     "pods",
 	Aliases: []string{"po"},
 	Short:   "Get pods",
-	Long: `Get all pods in a namespace or across all namespaces.
-
-Examples:
-  # List all pods in default namespace
-  vcli k8s get pods
-
-  # List all pods in kube-system namespace
-  vcli k8s get pods --namespace kube-system
-
-  # List all pods across all namespaces
-  vcli k8s get pods --all-namespaces
-
-  # Output in JSON format
-  vcli k8s get pods --output json
-
-  # Output in YAML format
-  vcli k8s get pods --output yaml`,
-	RunE: k8s.HandleGetPods,
+	Long:    `Get all pods in a namespace or across all namespaces.`,
+	Example: help.BuildCobraExample(help.K8sGetExamples),
+	RunE:    k8s.HandleGetPods,
 }
 
 // getPodCmd gets a single pod or lists all pods if no name provided

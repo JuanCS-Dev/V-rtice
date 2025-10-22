@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/hitl"
 )
 
@@ -47,29 +48,8 @@ var hitlCmd = &cobra.Command{
 
 The HITL system provides human oversight for high-stakes decisions identified
 by the CANDI threat analysis engine. Security analysts can review, approve,
-reject, or escalate decisions via this command-line interface.
-
-Examples:
-  # List pending critical decisions
-  vcli hitl list --priority critical
-
-  # View decision details
-  vcli hitl show CANDI-abc123
-
-  # Approve decision with specific actions
-  vcli hitl approve CANDI-abc123 --actions block_ip,quarantine_system
-
-  # Reject decision
-  vcli hitl reject CANDI-abc123 --notes "False positive - benign behavior"
-
-  # Escalate to higher authority
-  vcli hitl escalate CANDI-abc123 --reason "Requires SOC manager approval"
-
-  # View system statistics
-  vcli hitl stats
-
-  # Watch for new decisions in real-time
-  vcli hitl watch --priority critical`,
+reject, or escalate decisions via this command-line interface.`,
+	Example: help.BuildCobraExample(help.HITLExamples, help.HITLDecisionExamples),
 }
 
 // ============================================================================

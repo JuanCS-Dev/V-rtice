@@ -175,6 +175,11 @@ func (c *Client) SetToken(token string) {
 	c.accessToken = token
 }
 
+// BaseURL returns the base URL
+func (c *Client) BaseURL() string {
+	return c.baseURL
+}
+
 // GetStatus retrieves HITL system status
 func (c *Client) GetStatus() (*SystemStatus, error) {
 	httpReq, err := http.NewRequest("GET", fmt.Sprintf("%s/status", c.baseURL), nil)
