@@ -20344,5 +20344,2254 @@
         "coverage_pct": 100.0
       }
     ]
+  },
+  {
+    "timestamp": "2025-10-22T12:50:28.400598",
+    "total_coverage_pct": 0.8363779099610495,
+    "total_lines": 33119,
+    "covered_lines": 277,
+    "missing_lines": 32842,
+    "modules": [
+      {
+        "name": "advanced_tools",
+        "total_lines": 42,
+        "covered_lines": 0,
+        "missing_lines": 42,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "adw_router",
+        "total_lines": 173,
+        "covered_lines": 0,
+        "missing_lines": 173,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "agent_templates",
+        "total_lines": 20,
+        "covered_lines": 0,
+        "missing_lines": 20,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "confidence_scoring",
+        "total_lines": 24,
+        "covered_lines": 0,
+        "missing_lines": 24,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "distributed_organism_tools",
+        "total_lines": 55,
+        "covered_lines": 0,
+        "missing_lines": 55,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "enhanced_cognition_tools",
+        "total_lines": 67,
+        "covered_lines": 0,
+        "missing_lines": 67,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethical_guardian",
+        "total_lines": 455,
+        "covered_lines": 0,
+        "missing_lines": 455,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethical_tool_wrapper",
+        "total_lines": 109,
+        "covered_lines": 0,
+        "missing_lines": 109,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "gemini_client",
+        "total_lines": 103,
+        "covered_lines": 0,
+        "missing_lines": 103,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "generate_validation_report",
+        "total_lines": 164,
+        "covered_lines": 0,
+        "missing_lines": 164,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_production_server",
+        "total_lines": 63,
+        "covered_lines": 0,
+        "missing_lines": 63,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "immune_enhancement_tools",
+        "total_lines": 78,
+        "covered_lines": 0,
+        "missing_lines": 78,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "main",
+        "total_lines": 114,
+        "covered_lines": 0,
+        "missing_lines": 114,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "memory_system",
+        "total_lines": 31,
+        "covered_lines": 0,
+        "missing_lines": 31,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "offensive_arsenal_tools",
+        "total_lines": 36,
+        "covered_lines": 0,
+        "missing_lines": 36,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "osint_router",
+        "total_lines": 149,
+        "covered_lines": 0,
+        "missing_lines": 149,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "osint_standalone",
+        "total_lines": 11,
+        "covered_lines": 0,
+        "missing_lines": 11,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "self_reflection",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "tool_orchestrator",
+        "total_lines": 43,
+        "covered_lines": 0,
+        "missing_lines": 43,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "validate_regra_de_ouro",
+        "total_lines": 253,
+        "covered_lines": 0,
+        "missing_lines": 253,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "version",
+        "total_lines": 11,
+        "covered_lines": 0,
+        "missing_lines": 11,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.all_services_tools",
+        "total_lines": 34,
+        "covered_lines": 0,
+        "missing_lines": 34,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.apply_maximus",
+        "total_lines": 45,
+        "covered_lines": 0,
+        "missing_lines": 45,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.chain_of_thought",
+        "total_lines": 64,
+        "covered_lines": 0,
+        "missing_lines": 64,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.demo_ethical_ai_complete",
+        "total_lines": 189,
+        "covered_lines": 0,
+        "missing_lines": 189,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.example_neuromodulation",
+        "total_lines": 160,
+        "covered_lines": 0,
+        "missing_lines": 160,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.example_neuromodulation_standalone",
+        "total_lines": 155,
+        "covered_lines": 0,
+        "missing_lines": 155,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.example_predictive_coding_usage",
+        "total_lines": 162,
+        "covered_lines": 0,
+        "missing_lines": 162,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.maximus_integrated",
+        "total_lines": 213,
+        "covered_lines": 0,
+        "missing_lines": 213,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.rag_system",
+        "total_lines": 19,
+        "covered_lines": 0,
+        "missing_lines": 19,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.reasoning_engine",
+        "total_lines": 144,
+        "covered_lines": 0,
+        "missing_lines": 144,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.tools_world_class",
+        "total_lines": 27,
+        "covered_lines": 0,
+        "missing_lines": 27,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "_demonstration.vector_db_client",
+        "total_lines": 34,
+        "covered_lines": 0,
+        "missing_lines": 34,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "attention_system.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "attention_system.attention_core",
+        "total_lines": 255,
+        "covered_lines": 0,
+        "missing_lines": 255,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "attention_system.salience_scorer",
+        "total_lines": 143,
+        "covered_lines": 0,
+        "missing_lines": 143,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.__init__",
+        "total_lines": 2,
+        "covered_lines": 0,
+        "missing_lines": 2,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.hcl_orchestrator",
+        "total_lines": 236,
+        "covered_lines": 0,
+        "missing_lines": 236,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.homeostatic_control",
+        "total_lines": 38,
+        "covered_lines": 0,
+        "missing_lines": 38,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.resource_analyzer",
+        "total_lines": 35,
+        "covered_lines": 0,
+        "missing_lines": 35,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.resource_executor",
+        "total_lines": 45,
+        "covered_lines": 0,
+        "missing_lines": 45,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.resource_planner",
+        "total_lines": 22,
+        "covered_lines": 0,
+        "missing_lines": 22,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.system_monitor",
+        "total_lines": 27,
+        "covered_lines": 0,
+        "missing_lines": 27,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.analyze.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.analyze.anomaly_detector",
+        "total_lines": 28,
+        "covered_lines": 0,
+        "missing_lines": 28,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.analyze.degradation_detector",
+        "total_lines": 25,
+        "covered_lines": 0,
+        "missing_lines": 25,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.analyze.demand_forecaster",
+        "total_lines": 63,
+        "covered_lines": 0,
+        "missing_lines": 63,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.analyze.failure_predictor",
+        "total_lines": 22,
+        "covered_lines": 0,
+        "missing_lines": 22,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.__init__",
+        "total_lines": 7,
+        "covered_lines": 0,
+        "missing_lines": 7,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.cache_actuator",
+        "total_lines": 127,
+        "covered_lines": 0,
+        "missing_lines": 127,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.database_actuator",
+        "total_lines": 116,
+        "covered_lines": 0,
+        "missing_lines": 116,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.docker_actuator",
+        "total_lines": 113,
+        "covered_lines": 0,
+        "missing_lines": 113,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.kubernetes_actuator",
+        "total_lines": 29,
+        "covered_lines": 0,
+        "missing_lines": 29,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.loadbalancer_actuator",
+        "total_lines": 155,
+        "covered_lines": 0,
+        "missing_lines": 155,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.execute.safety_manager",
+        "total_lines": 32,
+        "covered_lines": 0,
+        "missing_lines": 32,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.knowledge_base.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.knowledge_base.database_schema",
+        "total_lines": 10,
+        "covered_lines": 0,
+        "missing_lines": 10,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.knowledge_base.decision_api",
+        "total_lines": 27,
+        "covered_lines": 0,
+        "missing_lines": 27,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.monitor.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.monitor.kafka_streamer",
+        "total_lines": 62,
+        "covered_lines": 0,
+        "missing_lines": 62,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.monitor.sensor_definitions",
+        "total_lines": 174,
+        "covered_lines": 0,
+        "missing_lines": 174,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.monitor.system_monitor",
+        "total_lines": 109,
+        "covered_lines": 0,
+        "missing_lines": 109,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.plan.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.plan.fuzzy_controller",
+        "total_lines": 52,
+        "covered_lines": 0,
+        "missing_lines": 52,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.plan.mode_definitions",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "autonomic_core.plan.rl_agent",
+        "total_lines": 25,
+        "covered_lines": 0,
+        "missing_lines": 25,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.confidence_tracker",
+        "total_lines": 55,
+        "covered_lines": 0,
+        "missing_lines": 55,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.contradiction_detector",
+        "total_lines": 53,
+        "covered_lines": 0,
+        "missing_lines": 53,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.sally_anne_dataset",
+        "total_lines": 16,
+        "covered_lines": 0,
+        "missing_lines": 16,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.social_memory",
+        "total_lines": 141,
+        "covered_lines": 0,
+        "missing_lines": 141,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.social_memory_sqlite",
+        "total_lines": 155,
+        "covered_lines": 0,
+        "missing_lines": 155,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.tom_benchmark",
+        "total_lines": 52,
+        "covered_lines": 0,
+        "missing_lines": 52,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compassion.tom_engine",
+        "total_lines": 134,
+        "covered_lines": 0,
+        "missing_lines": 134,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.__init__",
+        "total_lines": 10,
+        "covered_lines": 0,
+        "missing_lines": 10,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.base",
+        "total_lines": 322,
+        "covered_lines": 0,
+        "missing_lines": 322,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.certifications",
+        "total_lines": 199,
+        "covered_lines": 0,
+        "missing_lines": 199,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.compliance_engine",
+        "total_lines": 196,
+        "covered_lines": 0,
+        "missing_lines": 196,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.evidence_collector",
+        "total_lines": 220,
+        "covered_lines": 0,
+        "missing_lines": 220,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.example_usage",
+        "total_lines": 199,
+        "covered_lines": 0,
+        "missing_lines": 199,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.gap_analyzer",
+        "total_lines": 151,
+        "covered_lines": 0,
+        "missing_lines": 151,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.monitoring",
+        "total_lines": 229,
+        "covered_lines": 0,
+        "missing_lines": 229,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "compliance.regulations",
+        "total_lines": 15,
+        "covered_lines": 0,
+        "missing_lines": 15,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.api",
+        "total_lines": 245,
+        "covered_lines": 0,
+        "missing_lines": 245,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.biomimetic_safety_bridge",
+        "total_lines": 164,
+        "covered_lines": 0,
+        "missing_lines": 164,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_example",
+        "total_lines": 314,
+        "covered_lines": 0,
+        "missing_lines": 314,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.prefrontal_cortex",
+        "total_lines": 104,
+        "covered_lines": 0,
+        "missing_lines": 104,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.prometheus_metrics",
+        "total_lines": 78,
+        "covered_lines": 0,
+        "missing_lines": 78,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_api_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_biomimetic_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_prefrontal_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_prometheus_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_safety_combined_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_safety_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_safety_missing_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.run_system_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.safety",
+        "total_lines": 785,
+        "covered_lines": 0,
+        "missing_lines": 785,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.system",
+        "total_lines": 177,
+        "covered_lines": 0,
+        "missing_lines": 177,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.validate_tig_metrics",
+        "total_lines": 38,
+        "covered_lines": 0,
+        "missing_lines": 38,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.coagulation.__init__",
+        "total_lines": 2,
+        "covered_lines": 0,
+        "missing_lines": 2,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.coagulation.cascade",
+        "total_lines": 125,
+        "covered_lines": 0,
+        "missing_lines": 125,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.arousal_integration",
+        "total_lines": 82,
+        "covered_lines": 0,
+        "missing_lines": 82,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.coordinator",
+        "total_lines": 376,
+        "covered_lines": 0,
+        "missing_lines": 376,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.kuramoto",
+        "total_lines": 205,
+        "covered_lines": 0,
+        "missing_lines": 205,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.spm.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.spm.base",
+        "total_lines": 121,
+        "covered_lines": 0,
+        "missing_lines": 121,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.spm.metrics_monitor",
+        "total_lines": 191,
+        "covered_lines": 0,
+        "missing_lines": 191,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.spm.salience_detector",
+        "total_lines": 187,
+        "covered_lines": 0,
+        "missing_lines": 187,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.esgt.spm.simple",
+        "total_lines": 133,
+        "covered_lines": 0,
+        "missing_lines": 133,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.esgt_subscriber",
+        "total_lines": 36,
+        "covered_lines": 0,
+        "missing_lines": 36,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.mcea_client",
+        "total_lines": 38,
+        "covered_lines": 0,
+        "missing_lines": 38,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.mea_bridge",
+        "total_lines": 40,
+        "covered_lines": 0,
+        "missing_lines": 40,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.mmei_client",
+        "total_lines": 38,
+        "covered_lines": 0,
+        "missing_lines": 38,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.integration_archive_dead_code.sensory_esgt_bridge",
+        "total_lines": 86,
+        "covered_lines": 0,
+        "missing_lines": 86,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.lrr.__init__",
+        "total_lines": 6,
+        "covered_lines": 0,
+        "missing_lines": 6,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.lrr.contradiction_detector",
+        "total_lines": 132,
+        "covered_lines": 0,
+        "missing_lines": 132,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.lrr.introspection_engine",
+        "total_lines": 64,
+        "covered_lines": 0,
+        "missing_lines": 64,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.lrr.meta_monitor",
+        "total_lines": 96,
+        "covered_lines": 0,
+        "missing_lines": 96,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.lrr.recursive_reasoner",
+        "total_lines": 395,
+        "covered_lines": 0,
+        "missing_lines": 395,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mcea.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mcea.controller",
+        "total_lines": 295,
+        "covered_lines": 0,
+        "missing_lines": 295,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mcea.run_controller_coverage",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mcea.stress",
+        "total_lines": 233,
+        "covered_lines": 0,
+        "missing_lines": 233,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mea.run_mea_coverage",
+        "total_lines": 20,
+        "covered_lines": 0,
+        "missing_lines": 20,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.metacognition.__init__",
+        "total_lines": 2,
+        "covered_lines": 0,
+        "missing_lines": 2,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.metacognition.monitor",
+        "total_lines": 45,
+        "covered_lines": 0,
+        "missing_lines": 45,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mmei.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mmei.goals",
+        "total_lines": 198,
+        "covered_lines": 0,
+        "missing_lines": 198,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.mmei.monitor",
+        "total_lines": 303,
+        "covered_lines": 0,
+        "missing_lines": 303,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.acetylcholine_hardened",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.coordinator_hardened",
+        "total_lines": 122,
+        "covered_lines": 0,
+        "missing_lines": 122,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.dopamine_hardened",
+        "total_lines": 108,
+        "covered_lines": 0,
+        "missing_lines": 108,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.modulator_base",
+        "total_lines": 114,
+        "covered_lines": 0,
+        "missing_lines": 114,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.norepinephrine_hardened",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.neuromodulation.serotonin_hardened",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.hierarchy_hardened",
+        "total_lines": 180,
+        "covered_lines": 0,
+        "missing_lines": 180,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer1_sensory_hardened",
+        "total_lines": 28,
+        "covered_lines": 0,
+        "missing_lines": 28,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer2_behavioral_hardened",
+        "total_lines": 30,
+        "covered_lines": 0,
+        "missing_lines": 30,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer3_operational_hardened",
+        "total_lines": 40,
+        "covered_lines": 0,
+        "missing_lines": 40,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer4_tactical_hardened",
+        "total_lines": 53,
+        "covered_lines": 0,
+        "missing_lines": 53,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer5_strategic_hardened",
+        "total_lines": 69,
+        "covered_lines": 0,
+        "missing_lines": 69,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.predictive_coding.layer_base_hardened",
+        "total_lines": 131,
+        "covered_lines": 0,
+        "missing_lines": 131,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.collectors.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.collectors.event_collector",
+        "total_lines": 152,
+        "covered_lines": 0,
+        "missing_lines": 152,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.collectors.metrics_collector",
+        "total_lines": 146,
+        "covered_lines": 0,
+        "missing_lines": 146,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.orchestration.__init__",
+        "total_lines": 2,
+        "covered_lines": 0,
+        "missing_lines": 2,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.reactive_fabric.orchestration.data_orchestrator",
+        "total_lines": 180,
+        "covered_lines": 0,
+        "missing_lines": 180,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.sandboxing.__init__",
+        "total_lines": 92,
+        "covered_lines": 0,
+        "missing_lines": 92,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.sandboxing.kill_switch",
+        "total_lines": 85,
+        "covered_lines": 0,
+        "missing_lines": 85,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.sandboxing.resource_limiter",
+        "total_lines": 34,
+        "covered_lines": 0,
+        "missing_lines": 34,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.tig.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.tig.fabric",
+        "total_lines": 507,
+        "covered_lines": 0,
+        "missing_lines": 507,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.tig.sync",
+        "total_lines": 227,
+        "covered_lines": 0,
+        "missing_lines": 227,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.validation.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.validation.coherence",
+        "total_lines": 147,
+        "covered_lines": 0,
+        "missing_lines": 147,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.validation.metacognition",
+        "total_lines": 56,
+        "covered_lines": 0,
+        "missing_lines": 56,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.validation.phi_proxies",
+        "total_lines": 152,
+        "covered_lines": 0,
+        "missing_lines": 152,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.__init__",
+        "total_lines": 8,
+        "covered_lines": 0,
+        "missing_lines": 8,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.base",
+        "total_lines": 108,
+        "covered_lines": 0,
+        "missing_lines": 108,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.config",
+        "total_lines": 19,
+        "covered_lines": 0,
+        "missing_lines": 19,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.consequentialist_engine",
+        "total_lines": 128,
+        "covered_lines": 0,
+        "missing_lines": 128,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.example_usage",
+        "total_lines": 98,
+        "covered_lines": 0,
+        "missing_lines": 98,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.integration_engine",
+        "total_lines": 156,
+        "covered_lines": 0,
+        "missing_lines": 156,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.kantian_checker",
+        "total_lines": 135,
+        "covered_lines": 0,
+        "missing_lines": 135,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.principialism",
+        "total_lines": 147,
+        "covered_lines": 0,
+        "missing_lines": 147,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.quick_test",
+        "total_lines": 113,
+        "covered_lines": 0,
+        "missing_lines": 113,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "ethics.virtue_ethics",
+        "total_lines": 142,
+        "covered_lines": 0,
+        "missing_lines": 142,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.__init__",
+        "total_lines": 8,
+        "covered_lines": 0,
+        "missing_lines": 8,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.base",
+        "total_lines": 89,
+        "covered_lines": 0,
+        "missing_lines": 89,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.bias_detector",
+        "total_lines": 193,
+        "covered_lines": 0,
+        "missing_lines": 193,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.constraints",
+        "total_lines": 144,
+        "covered_lines": 0,
+        "missing_lines": 144,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.example_usage",
+        "total_lines": 200,
+        "covered_lines": 0,
+        "missing_lines": 200,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.mitigation",
+        "total_lines": 225,
+        "covered_lines": 0,
+        "missing_lines": 225,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "fairness.monitor",
+        "total_lines": 195,
+        "covered_lines": 0,
+        "missing_lines": 195,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.__init__",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.aggregation",
+        "total_lines": 152,
+        "covered_lines": 0,
+        "missing_lines": 152,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.base",
+        "total_lines": 152,
+        "covered_lines": 0,
+        "missing_lines": 152,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.communication",
+        "total_lines": 90,
+        "covered_lines": 0,
+        "missing_lines": 90,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.example_usage",
+        "total_lines": 148,
+        "covered_lines": 0,
+        "missing_lines": 148,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.fl_client",
+        "total_lines": 108,
+        "covered_lines": 0,
+        "missing_lines": 108,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.fl_coordinator",
+        "total_lines": 173,
+        "covered_lines": 0,
+        "missing_lines": 173,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.model_adapters",
+        "total_lines": 91,
+        "covered_lines": 0,
+        "missing_lines": 91,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "federated_learning.storage",
+        "total_lines": 180,
+        "covered_lines": 0,
+        "missing_lines": 180,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.__init__",
+        "total_lines": 8,
+        "covered_lines": 0,
+        "missing_lines": 8,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.audit_infrastructure",
+        "total_lines": 104,
+        "covered_lines": 0,
+        "missing_lines": 104,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.base",
+        "total_lines": 272,
+        "covered_lines": 0,
+        "missing_lines": 272,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.ethics_review_board",
+        "total_lines": 148,
+        "covered_lines": 0,
+        "missing_lines": 148,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.example_usage",
+        "total_lines": 86,
+        "covered_lines": 0,
+        "missing_lines": 86,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.governance_engine",
+        "total_lines": 109,
+        "covered_lines": 0,
+        "missing_lines": 109,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.hitl_interface",
+        "total_lines": 65,
+        "covered_lines": 0,
+        "missing_lines": 65,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.policies",
+        "total_lines": 64,
+        "covered_lines": 0,
+        "missing_lines": 64,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.policy_engine",
+        "total_lines": 173,
+        "covered_lines": 0,
+        "missing_lines": 173,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.__init__",
+        "total_lines": 7,
+        "covered_lines": 0,
+        "missing_lines": 7,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.article_ii_guardian",
+        "total_lines": 170,
+        "covered_lines": 0,
+        "missing_lines": 170,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.article_iii_guardian",
+        "total_lines": 184,
+        "covered_lines": 0,
+        "missing_lines": 184,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.article_iv_guardian",
+        "total_lines": 192,
+        "covered_lines": 0,
+        "missing_lines": 192,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.article_v_guardian",
+        "total_lines": 206,
+        "covered_lines": 0,
+        "missing_lines": 206,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.base",
+        "total_lines": 210,
+        "covered_lines": 0,
+        "missing_lines": 210,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance.guardian.coordinator",
+        "total_lines": 214,
+        "covered_lines": 0,
+        "missing_lines": 214,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_sse.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_sse.api_routes",
+        "total_lines": 185,
+        "covered_lines": 0,
+        "missing_lines": 185,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_sse.event_broadcaster",
+        "total_lines": 102,
+        "covered_lines": 0,
+        "missing_lines": 102,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_sse.sse_server",
+        "total_lines": 168,
+        "covered_lines": 0,
+        "missing_lines": 168,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "governance_sse.standalone_server",
+        "total_lines": 37,
+        "covered_lines": 0,
+        "missing_lines": 37,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.__init__",
+        "total_lines": 10,
+        "covered_lines": 0,
+        "missing_lines": 10,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.audit_trail",
+        "total_lines": 184,
+        "covered_lines": 0,
+        "missing_lines": 184,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.base",
+        "total_lines": 226,
+        "covered_lines": 0,
+        "missing_lines": 226,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.decision_framework",
+        "total_lines": 173,
+        "covered_lines": 0,
+        "missing_lines": 173,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.decision_queue",
+        "total_lines": 211,
+        "covered_lines": 0,
+        "missing_lines": 211,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.escalation_manager",
+        "total_lines": 180,
+        "covered_lines": 0,
+        "missing_lines": 180,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.example_usage",
+        "total_lines": 191,
+        "covered_lines": 0,
+        "missing_lines": 191,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.operator_interface",
+        "total_lines": 202,
+        "covered_lines": 0,
+        "missing_lines": 202,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "hitl.risk_assessor",
+        "total_lines": 234,
+        "covered_lines": 0,
+        "missing_lines": 234,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.cbr_engine",
+        "total_lines": 44,
+        "covered_lines": 0,
+        "missing_lines": 44,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.constitutional_validator",
+        "total_lines": 81,
+        "covered_lines": 0,
+        "missing_lines": 81,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.embeddings",
+        "total_lines": 16,
+        "covered_lines": 0,
+        "missing_lines": 16,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.emergency_circuit_breaker",
+        "total_lines": 111,
+        "covered_lines": 0,
+        "missing_lines": 111,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.precedent_database",
+        "total_lines": 65,
+        "covered_lines": 0,
+        "missing_lines": 65,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "justice.validators",
+        "total_lines": 66,
+        "covered_lines": 0,
+        "missing_lines": 66,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "mip_client.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "mip_client.client",
+        "total_lines": 118,
+        "covered_lines": 0,
+        "missing_lines": 118,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "monitoring.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "monitoring.prometheus_exporter",
+        "total_lines": 76,
+        "covered_lines": 0,
+        "missing_lines": 76,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.__init__",
+        "total_lines": 4,
+        "covered_lines": 0,
+        "missing_lines": 4,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.api",
+        "total_lines": 287,
+        "covered_lines": 0,
+        "missing_lines": 287,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.config",
+        "total_lines": 33,
+        "covered_lines": 0,
+        "missing_lines": 33,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.arbiter.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.arbiter.alternatives",
+        "total_lines": 80,
+        "covered_lines": 0,
+        "missing_lines": 80,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.arbiter.decision",
+        "total_lines": 24,
+        "covered_lines": 0,
+        "missing_lines": 24,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.__init__",
+        "total_lines": 6,
+        "covered_lines": 0,
+        "missing_lines": 6,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.base",
+        "total_lines": 18,
+        "covered_lines": 0,
+        "missing_lines": 18,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.kantian",
+        "total_lines": 65,
+        "covered_lines": 0,
+        "missing_lines": 65,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.principialism",
+        "total_lines": 86,
+        "covered_lines": 0,
+        "missing_lines": 86,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.utilitarian",
+        "total_lines": 45,
+        "covered_lines": 0,
+        "missing_lines": 45,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.frameworks.virtue",
+        "total_lines": 57,
+        "covered_lines": 0,
+        "missing_lines": 57,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.infrastructure.__init__",
+        "total_lines": 5,
+        "covered_lines": 0,
+        "missing_lines": 5,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.infrastructure.audit_trail",
+        "total_lines": 11,
+        "covered_lines": 0,
+        "missing_lines": 11,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.infrastructure.hitl_queue",
+        "total_lines": 12,
+        "covered_lines": 0,
+        "missing_lines": 12,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.infrastructure.knowledge_base",
+        "total_lines": 14,
+        "covered_lines": 0,
+        "missing_lines": 14,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.infrastructure.metrics",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.models.__init__",
+        "total_lines": 2,
+        "covered_lines": 0,
+        "missing_lines": 2,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.models.action_plan",
+        "total_lines": 186,
+        "covered_lines": 0,
+        "missing_lines": 186,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.models.verdict",
+        "total_lines": 122,
+        "covered_lines": 0,
+        "missing_lines": 122,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.resolution.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.resolution.conflict_resolver",
+        "total_lines": 80,
+        "covered_lines": 0,
+        "missing_lines": 80,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "motor_integridade_processual.resolution.rules",
+        "total_lines": 44,
+        "covered_lines": 0,
+        "missing_lines": 44,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.__init__",
+        "total_lines": 7,
+        "covered_lines": 0,
+        "missing_lines": 7,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.acetylcholine_system",
+        "total_lines": 49,
+        "covered_lines": 0,
+        "missing_lines": 49,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.dopamine_system",
+        "total_lines": 60,
+        "covered_lines": 0,
+        "missing_lines": 60,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.neuromodulation_controller",
+        "total_lines": 73,
+        "covered_lines": 0,
+        "missing_lines": 73,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.norepinephrine_system",
+        "total_lines": 49,
+        "covered_lines": 0,
+        "missing_lines": 49,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "neuromodulation.serotonin_system",
+        "total_lines": 49,
+        "covered_lines": 0,
+        "missing_lines": 49,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "observability.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "observability.logger",
+        "total_lines": 37,
+        "covered_lines": 0,
+        "missing_lines": 37,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "observability.metrics",
+        "total_lines": 35,
+        "covered_lines": 0,
+        "missing_lines": 35,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.__init__",
+        "total_lines": 13,
+        "covered_lines": 0,
+        "missing_lines": 13,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.batch_predictor",
+        "total_lines": 245,
+        "covered_lines": 0,
+        "missing_lines": 245,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.benchmark_suite",
+        "total_lines": 223,
+        "covered_lines": 0,
+        "missing_lines": 223,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.distributed_trainer",
+        "total_lines": 172,
+        "covered_lines": 0,
+        "missing_lines": 172,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.gpu_trainer",
+        "total_lines": 196,
+        "covered_lines": 0,
+        "missing_lines": 196,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.inference_engine",
+        "total_lines": 241,
+        "covered_lines": 0,
+        "missing_lines": 241,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.onnx_exporter",
+        "total_lines": 224,
+        "covered_lines": 0,
+        "missing_lines": 224,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.profiler",
+        "total_lines": 200,
+        "covered_lines": 0,
+        "missing_lines": 200,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.pruner",
+        "total_lines": 199,
+        "covered_lines": 0,
+        "missing_lines": 199,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "performance.quantizer",
+        "total_lines": 148,
+        "covered_lines": 0,
+        "missing_lines": 148,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.__init__",
+        "total_lines": 7,
+        "covered_lines": 0,
+        "missing_lines": 7,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.hpc_network",
+        "total_lines": 103,
+        "covered_lines": 0,
+        "missing_lines": 103,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.layer1_sensory",
+        "total_lines": 95,
+        "covered_lines": 0,
+        "missing_lines": 95,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.layer2_behavioral",
+        "total_lines": 130,
+        "covered_lines": 0,
+        "missing_lines": 130,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.layer3_operational",
+        "total_lines": 143,
+        "covered_lines": 0,
+        "missing_lines": 143,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.layer4_tactical",
+        "total_lines": 80,
+        "covered_lines": 0,
+        "missing_lines": 80,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "predictive_coding.layer5_strategic",
+        "total_lines": 104,
+        "covered_lines": 0,
+        "missing_lines": 104,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.__init__",
+        "total_lines": 7,
+        "covered_lines": 0,
+        "missing_lines": 7,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.base",
+        "total_lines": 143,
+        "covered_lines": 0,
+        "missing_lines": 143,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.dp_aggregator",
+        "total_lines": 144,
+        "covered_lines": 0,
+        "missing_lines": 144,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.dp_mechanisms",
+        "total_lines": 92,
+        "covered_lines": 0,
+        "missing_lines": 92,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.example_usage",
+        "total_lines": 140,
+        "covered_lines": 0,
+        "missing_lines": 140,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "privacy.privacy_accountant",
+        "total_lines": 118,
+        "covered_lines": 0,
+        "missing_lines": 118,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "skill_learning.__init__",
+        "total_lines": 3,
+        "covered_lines": 0,
+        "missing_lines": 3,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "skill_learning.skill_learning_controller",
+        "total_lines": 94,
+        "covered_lines": 0,
+        "missing_lines": 94,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.__init__",
+        "total_lines": 8,
+        "covered_lines": 0,
+        "missing_lines": 8,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.continuous_training",
+        "total_lines": 109,
+        "covered_lines": 0,
+        "missing_lines": 109,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.data_collection",
+        "total_lines": 232,
+        "covered_lines": 0,
+        "missing_lines": 232,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.data_preprocessor",
+        "total_lines": 239,
+        "covered_lines": 0,
+        "missing_lines": 239,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.data_validator",
+        "total_lines": 210,
+        "covered_lines": 0,
+        "missing_lines": 210,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.dataset_builder",
+        "total_lines": 179,
+        "covered_lines": 0,
+        "missing_lines": 179,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.evaluator",
+        "total_lines": 209,
+        "covered_lines": 0,
+        "missing_lines": 209,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.hyperparameter_tuner",
+        "total_lines": 148,
+        "covered_lines": 0,
+        "missing_lines": 148,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.layer_trainer",
+        "total_lines": 226,
+        "covered_lines": 0,
+        "missing_lines": 226,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.model_registry",
+        "total_lines": 170,
+        "covered_lines": 0,
+        "missing_lines": 170,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "training.train_layer1_vae",
+        "total_lines": 123,
+        "covered_lines": 0,
+        "missing_lines": 123,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "workflows.__init__",
+        "total_lines": 1,
+        "covered_lines": 0,
+        "missing_lines": 1,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "workflows.ai_analyzer",
+        "total_lines": 97,
+        "covered_lines": 0,
+        "missing_lines": 97,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "workflows.attack_surface_adw",
+        "total_lines": 215,
+        "covered_lines": 0,
+        "missing_lines": 215,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "workflows.credential_intel_adw",
+        "total_lines": 254,
+        "covered_lines": 0,
+        "missing_lines": 254,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "workflows.target_profiling_adw",
+        "total_lines": 267,
+        "covered_lines": 0,
+        "missing_lines": 267,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.__init__",
+        "total_lines": 9,
+        "covered_lines": 0,
+        "missing_lines": 9,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.base",
+        "total_lines": 115,
+        "covered_lines": 0,
+        "missing_lines": 115,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.counterfactual",
+        "total_lines": 240,
+        "covered_lines": 0,
+        "missing_lines": 240,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.engine",
+        "total_lines": 167,
+        "covered_lines": 0,
+        "missing_lines": 167,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.example_usage",
+        "total_lines": 198,
+        "covered_lines": 0,
+        "missing_lines": 198,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.feature_tracker",
+        "total_lines": 135,
+        "covered_lines": 0,
+        "missing_lines": 135,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.lime_cybersec",
+        "total_lines": 225,
+        "covered_lines": 0,
+        "missing_lines": 225,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "xai.shap_cybersec",
+        "total_lines": 222,
+        "covered_lines": 0,
+        "missing_lines": 222,
+        "coverage_pct": 0.0
+      },
+      {
+        "name": "consciousness.episodic_memory.memory_buffer",
+        "total_lines": 97,
+        "covered_lines": 16,
+        "missing_lines": 81,
+        "coverage_pct": 16.49484536082474
+      },
+      {
+        "name": "consciousness.mea.boundary_detector",
+        "total_lines": 50,
+        "covered_lines": 19,
+        "missing_lines": 31,
+        "coverage_pct": 38.0
+      },
+      {
+        "name": "consciousness.mea.attention_schema",
+        "total_lines": 103,
+        "covered_lines": 40,
+        "missing_lines": 63,
+        "coverage_pct": 38.83495145631068
+      },
+      {
+        "name": "consciousness.mea.prediction_validator",
+        "total_lines": 38,
+        "covered_lines": 15,
+        "missing_lines": 23,
+        "coverage_pct": 39.473684210526315
+      },
+      {
+        "name": "consciousness.mea.self_model",
+        "total_lines": 57,
+        "covered_lines": 27,
+        "missing_lines": 30,
+        "coverage_pct": 47.368421052631575
+      },
+      {
+        "name": "consciousness.episodic_memory.core",
+        "total_lines": 57,
+        "covered_lines": 31,
+        "missing_lines": 26,
+        "coverage_pct": 54.385964912280706
+      },
+      {
+        "name": "consciousness.__init__",
+        "total_lines": 4,
+        "covered_lines": 4,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      },
+      {
+        "name": "consciousness.autobiographical_narrative",
+        "total_lines": 32,
+        "covered_lines": 32,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      },
+      {
+        "name": "consciousness.temporal_binding",
+        "total_lines": 27,
+        "covered_lines": 27,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      },
+      {
+        "name": "consciousness.episodic_memory.__init__",
+        "total_lines": 4,
+        "covered_lines": 4,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      },
+      {
+        "name": "consciousness.episodic_memory.event",
+        "total_lines": 57,
+        "covered_lines": 57,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      },
+      {
+        "name": "consciousness.mea.__init__",
+        "total_lines": 5,
+        "covered_lines": 5,
+        "missing_lines": 0,
+        "coverage_pct": 100.0
+      }
+    ]
   }
 ]
