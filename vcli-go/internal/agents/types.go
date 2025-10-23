@@ -99,6 +99,11 @@ type AgentOutput struct {
 
 	// Additional metadata
 	Metadata map[string]interface{}
+
+	// Claude Code Integration: Structured prompt for Sonnet 4.5 processing
+	// When running in Claude Code, agents return a formatted prompt here
+	// for Claude to process instead of using Oráculo HTTP API
+	ClaudePrompt string
 }
 
 // AgentConfig holds configuration for agent behavior

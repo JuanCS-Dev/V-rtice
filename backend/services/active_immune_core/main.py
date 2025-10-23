@@ -29,6 +29,7 @@ from pydantic import BaseModel, Field
 
 from config import settings
 from communication.kafka_consumers import KafkaEventConsumer, ExternalTopic
+from honeypot_consumer import start_honeypot_consumer, stop_honeypot_consumer  # AG-KAFKA-004
 
 # Configure logging
 settings.configure_logging()
@@ -300,6 +301,15 @@ async def lifespan(app: FastAPI):
     # Initialize baseline agents (will be implemented in Fase 2)
     logger.info("Baseline agents: Will be initialized in Fase 2")
 
+    # AG-KAFKA-004: Initialize honeypot status consumer
+    try:
+        logger.info("Initializing Honeypot Status Consumer...")
+        honeypot_task = asyncio.create_task(start_honeypot_consumer())
+        global_state["honeypot_consumer_task"] = honeypot_task
+        logger.info("✅ Honeypot Status Consumer started - listening for Reactive Fabric honeypot events")
+    except Exception as e:
+        logger.warning(f"⚠️  Honeypot consumer initialization failed (non-critical): {e}")
+
     logger.info("Active Immune Core Service started successfully")
 
     yield
@@ -318,6 +328,21 @@ async def lifespan(app: FastAPI):
             logger.info("Kafka consumer stopped")
         except Exception as e:
             logger.error(f"Error stopping Kafka consumer: {e}")
+
+    # AG-KAFKA-004: Stop honeypot consumer
+    honeypot_task = global_state.get("honeypot_consumer_task")
+    if honeypot_task:
+        try:
+            logger.info("Stopping Honeypot Status Consumer...")
+            await stop_honeypot_consumer()
+            honeypot_task.cancel()
+            try:
+                await honeypot_task
+            except asyncio.CancelledError:
+                pass
+            logger.info("✅ Honeypot consumer stopped")
+        except Exception as e:
+            logger.error(f"Error stopping honeypot consumer: {e}")
 
     # Stop all agents
     for agent_id, agent in global_state["agents"].items():

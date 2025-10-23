@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/verticedev/vcli-go/internal/agents"
+	"github.com/verticedev/vcli-go/internal/agents/runtime"
 	"github.com/verticedev/vcli-go/internal/maximus"
 )
 
@@ -104,6 +105,25 @@ func (a *ArquitetoAgent) Execute(ctx context.Context, input agents.AgentInput) (
 	// Step 1: Analyze diagnostic results (if available)
 	a.logger.Println("Step 1/6: Analyzing diagnostic context")
 	diagnosticContext := a.extractDiagnosticContext(input.Context)
+
+	// CLAUDE CODE INTEGRATION: If running in Claude Code, generate prompt for Sonnet 4.5
+	if runtime.IsClaudeCode() {
+		a.logger.Println("🤖 Claude Code detected - generating prompt for Sonnet 4.5 processing")
+		claudePrompt := a.buildClaudePrompt(input, diagnosticContext)
+
+		// Return output with Claude prompt for processing
+		output.ClaudePrompt = claudePrompt
+		output.Status = agents.StatusWaitingHITL // Wait for Claude to process
+		output.CompletedAt = time.Now()
+		output.Duration = output.CompletedAt.Sub(output.StartedAt)
+		a.status = agents.StatusCompleted
+
+		a.logger.Println("✅ Prompt generated - waiting for Claude Code processing")
+		return output, nil
+	}
+
+	// VCLI-GO PATH: Use template-based or Oráculo API planning
+	a.logger.Println("📡 vcli-go detected - using template-based planning (TODO: Oráculo API)")
 
 	// Step 2: Generate Architecture Decision Records
 	a.logger.Println("Step 2/6: Generating Architecture Decision Records")
@@ -488,4 +508,147 @@ func (a *ArquitetoAgent) generateSummary(plan *agents.ArchitecturePlan) string {
 	summary += fmt.Sprintf("Estimated Effort: %.1f hours\n", plan.EstimatedHours)
 
 	return summary
+}
+
+// buildClaudePrompt builds a structured prompt for Claude Sonnet 4.5 processing
+func (a *ArquitetoAgent) buildClaudePrompt(input agents.AgentInput, diagnosticContext map[string]interface{}) string {
+	prompt := fmt.Sprintf(`You are ARQUITETO, a world-class software architect agent specialized in creating detailed architecture plans, ADRs (Architecture Decision Records), and implementation roadmaps.
+
+**Task:** %s
+
+**Target Paths:** %v
+
+**Diagnostic Context:**
+`, input.Task, input.Targets)
+
+	// Add diagnostic findings if available
+	if securityFindings, ok := diagnosticContext["security_findings"]; ok {
+		if findings, ok := securityFindings.([]agents.SecurityFinding); ok && len(findings) > 0 {
+			prompt += fmt.Sprintf("- Security Findings: %d issues identified\n", len(findings))
+			for i, f := range findings {
+				if i < 5 { // Show first 5
+					prompt += fmt.Sprintf("  • [%s] %s: %s\n", f.Severity, f.Category, f.Title)
+				}
+			}
+			if len(findings) > 5 {
+				prompt += fmt.Sprintf("  ... and %d more\n", len(findings)-5)
+			}
+		}
+	}
+
+	if perfIssues, ok := diagnosticContext["performance_issues"]; ok {
+		if issues, ok := perfIssues.([]agents.PerformanceIssue); ok && len(issues) > 0 {
+			prompt += fmt.Sprintf("- Performance Issues: %d issues identified\n", len(issues))
+		}
+	}
+
+	if coverage, ok := diagnosticContext["test_coverage"]; ok {
+		prompt += fmt.Sprintf("- Current Test Coverage: %.1f%%\n", coverage)
+	}
+
+	if deps, ok := diagnosticContext["dependencies"]; ok {
+		prompt += fmt.Sprintf("- Total Dependencies: %v\n", deps)
+	}
+
+	prompt += `
+
+**Your Mission:**
+
+Generate a comprehensive architecture plan following **Padrão Pagani** (zero compromises) and **VÉRTICE architectural patterns**. The plan MUST include:
+
+1. **Architecture Decision Records (ADRs)** - At least 3 ADRs covering:
+   - Main architectural approach for the task
+   - Integration strategy with existing VÉRTICE ecosystem (MAXIMUS, Immunis, etc.)
+   - Testing strategy and quality gates
+
+2. **Risk Assessment** - Identify and analyze:
+   - Security risks (based on diagnostic findings)
+   - Technical risks (complexity, integration, dependencies)
+   - Operational risks (deployment, maintenance)
+   - For each risk: severity, impact, mitigation strategy, probability
+
+3. **Implementation Steps** - Detailed step-by-step roadmap:
+   - Each step with clear description
+   - Estimated time per step
+   - Required agent (DEV SENIOR, TESTER, etc.)
+   - HITL checkpoints where human approval is required
+   - Input/output artifacts for each step
+
+4. **Integration Test Scenarios** - At least 3 test scenarios:
+   - Basic functionality test
+   - MAXIMUS/Immunis integration test
+   - End-to-end workflow test
+   - Each with preconditions, steps, and expected outcomes
+
+5. **Effort Estimate** - Calculate total estimated hours (include 30% buffer)
+
+6. **Complexity Score** - Rate 1-10 with justification
+
+**Output Format:**
+
+Return your analysis in the following JSON structure:
+
+` + "```json" + `
+{
+  "plan_id": "PLAN-XXXXXXXX",
+  "title": "Architecture for [task]",
+  "description": "Brief description",
+  "adrs": [
+    {
+      "id": "ADR-001",
+      "title": "...",
+      "context": "Why this decision is needed",
+      "decision": "What we decided",
+      "consequences": ["Pro 1", "Pro 2", "Con 1"],
+      "status": "proposed"
+    }
+  ],
+  "risks": [
+    {
+      "severity": "high|medium|low",
+      "category": "security|technical|operational",
+      "description": "...",
+      "impact": "...",
+      "mitigation": "...",
+      "probability": 0.0-1.0
+    }
+  ],
+  "implementation_steps": [
+    {
+      "step_number": 1,
+      "description": "...",
+      "agent_type": "dev_senior|tester|diagnosticador",
+      "estimated_hours": 2.5,
+      "hitl_required": true,
+      "inputs": ["..."],
+      "outputs": ["..."]
+    }
+  ],
+  "integration_tests": [
+    {
+      "name": "...",
+      "description": "...",
+      "type": "integration|e2e|unit",
+      "preconditions": ["..."],
+      "steps": ["..."],
+      "expected": "..."
+    }
+  ],
+  "estimated_hours": 8.5,
+  "complexity": 7,
+  "complexity_justification": "..."
+}
+` + "```" + `
+
+**Important Guidelines:**
+- Follow VÉRTICE patterns: service clients, OrchestrationEngine model, Padrão Pagani quality
+- Be specific and actionable - no placeholders or TODOs
+- Consider existing codebase structure and dependencies
+- Prioritize security and reliability
+- Include HITL checkpoints for critical decisions
+- Estimate realistically (humans tend to underestimate by 2-3x)
+
+Generate the architecture plan now.`
+
+	return prompt
 }

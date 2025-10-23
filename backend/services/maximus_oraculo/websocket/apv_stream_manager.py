@@ -9,6 +9,10 @@ Architectural Role:
 - Maintains connection pool of active WebSocket clients
 - Broadcasts APVs to all connected clients in real-time
 - Handles connection lifecycle (connect, disconnect, errors)
+- GRACEFUL DEGRADATION: Falls back to in-memory queue when Kafka unavailable
+
+Air Gap Fix: AG-RUNTIME-001 (Oráculo Kafka Hard Dependency)
+Priority: CRITICAL
 
 Biological Metaphor:
 Like sensory neurons broadcasting threat signals to consciousness centers,
@@ -18,16 +22,19 @@ this system streams threat intelligence to monitoring dashboards.
 import asyncio
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, Optional, Set
 from uuid import uuid4
 
 from aiokafka import AIOKafkaConsumer
+from aiokafka.errors import KafkaError
 from fastapi import WebSocket
 from pydantic import ValidationError
 
 from models.apv import APV
+from queue.memory_queue import InMemoryAPVQueue
 
 
 logger = logging.getLogger(__name__)
@@ -106,66 +113,114 @@ class APVStreamManager:
         self._kafka_bootstrap_servers = kafka_bootstrap_servers
         self._kafka_topic = kafka_topic
         self._kafka_group_id = kafka_group_id
-        
+
         # Connection pool: connection_id -> WebSocketConnection
         self._connections: Dict[str, WebSocketConnection] = {}
-        
+
         # Kafka consumer
         self._kafka_consumer: Optional[AIOKafkaConsumer] = None
-        
+
+        # AG-RUNTIME-001: Graceful degradation support
+        self._degraded_mode: bool = False
+        self._memory_queue: Optional[InMemoryAPVQueue] = None
+        self._kafka_enabled: bool = os.getenv("ENABLE_KAFKA", "true").lower() == "true"
+
         # Background tasks
         self._consumer_task: Optional[asyncio.Task] = None
         self._heartbeat_task: Optional[asyncio.Task] = None
-        
+
         # Metrics
         self._total_messages_broadcast: int = 0
         self._started_at: Optional[datetime] = None
         self._is_running: bool = False
-        
+
         logger.info(
             f"APVStreamManager initialized - "
-            f"Kafka: {kafka_bootstrap_servers}, Topic: {kafka_topic}"
+            f"Kafka: {kafka_bootstrap_servers}, Topic: {kafka_topic}, "
+            f"Kafka Enabled: {self._kafka_enabled}"
         )
     
     async def start(self) -> None:
         """
-        Start the stream manager.
-        
+        Start the stream manager with GRACEFUL DEGRADATION.
+
         Initializes:
-        - Kafka consumer connection
+        - Kafka consumer connection (with fallback to memory queue)
         - Background consumer task
         - Heartbeat task for keep-alive
-        
+
+        Degradation Strategy (AG-RUNTIME-001):
+        1. If ENABLE_KAFKA=false → use memory queue
+        2. If Kafka connection fails → use memory queue
+        3. Service NEVER crashes due to Kafka unavailability
+
         Raises:
             RuntimeError: If already running
         """
         if self._is_running:
             logger.warning("APVStreamManager already running")
             return
-        
+
         logger.info("Starting APVStreamManager...")
-        
-        # Initialize Kafka consumer
-        self._kafka_consumer = AIOKafkaConsumer(
-            self._kafka_topic,
-            bootstrap_servers=self._kafka_bootstrap_servers,
-            group_id=self._kafka_group_id,
-            value_deserializer=lambda m: m.decode('utf-8'),
-            auto_offset_reset='latest',  # Only new messages
-            enable_auto_commit=True,
-        )
-        
-        await self._kafka_consumer.start()
-        logger.info(f"Kafka consumer started - subscribed to {self._kafka_topic}")
-        
-        # Start background tasks
-        self._consumer_task = asyncio.create_task(self._consume_kafka_messages())
-        self._heartbeat_task = asyncio.create_task(self._send_heartbeats())
-        
-        self._started_at = datetime.utcnow()
-        self._is_running = True
-        
-        logger.info("APVStreamManager started successfully")
+
+        # Check if Kafka is disabled by config
+        if not self._kafka_enabled:
+            logger.info("Kafka disabled by ENABLE_KAFKA environment variable")
+            self._memory_queue = InMemoryAPVQueue(maxlen=1000)
+            self._degraded_mode = True
+            self._started_at = datetime.utcnow()
+            self._is_running = True
+            self._heartbeat_task = asyncio.create_task(self._send_heartbeats())
+            logger.warning("⚠️  APVStreamManager started in DEGRADED MODE (Kafka disabled)")
+            return
+
+        # Try to connect to Kafka with timeout
+        try:
+            self._kafka_consumer = AIOKafkaConsumer(
+                self._kafka_topic,
+                bootstrap_servers=self._kafka_bootstrap_servers,
+                group_id=self._kafka_group_id,
+                value_deserializer=lambda m: m.decode('utf-8'),
+                auto_offset_reset='latest',  # Only new messages
+                enable_auto_commit=True,
+                request_timeout_ms=10000,  # 10 second timeout
+            )
+
+            await asyncio.wait_for(self._kafka_consumer.start(), timeout=15.0)
+            logger.info(f"✅ Kafka consumer started - subscribed to {self._kafka_topic}")
+
+            # Start background tasks
+            self._consumer_task = asyncio.create_task(self._consume_kafka_messages())
+            self._heartbeat_task = asyncio.create_task(self._send_heartbeats())
+
+            self._started_at = datetime.utcnow()
+            self._is_running = True
+
+            logger.info("APVStreamManager started successfully (Kafka mode)")
+
+        except (KafkaError, asyncio.TimeoutError, Exception) as e:
+            logger.error(f"Kafka connection failed: {e}")
+            logger.warning("⚠️  DEGRADED MODE: Falling back to in-memory APV queue")
+
+            # Fallback to in-memory queue
+            self._memory_queue = InMemoryAPVQueue(maxlen=1000)
+            self._degraded_mode = True
+
+            # Close failed Kafka consumer if partially initialized
+            if self._kafka_consumer:
+                try:
+                    await self._kafka_consumer.stop()
+                except:
+                    pass
+                self._kafka_consumer = None
+
+            # Start heartbeat task
+            self._heartbeat_task = asyncio.create_task(self._send_heartbeats())
+
+            self._started_at = datetime.utcnow()
+            self._is_running = True
+
+            logger.info("APVStreamManager started in DEGRADED MODE (Kafka unavailable)")
     
     async def stop(self) -> None:
         """
@@ -427,23 +482,34 @@ class APVStreamManager:
     
     def get_metrics(self) -> Dict:
         """
-        Get current streaming metrics.
-        
+        Get current streaming metrics (includes degraded mode status).
+
         Returns:
             Dict with metrics:
             - active_connections: Number of connected clients
             - total_messages_broadcast: Total APVs broadcast
             - uptime_seconds: Time since start
             - is_running: Service status
+            - degraded_mode: Whether running without Kafka
+            - mode: "kafka" or "in_memory"
+            - memory_queue_stats: If in degraded mode
         """
         uptime_seconds = 0.0
         if self._started_at:
             uptime_seconds = (datetime.utcnow() - self._started_at).total_seconds()
-        
-        return {
+
+        metrics = {
             "active_connections": len(self._connections),
             "total_messages_broadcast": self._total_messages_broadcast,
             "uptime_seconds": uptime_seconds,
             "is_running": self._is_running,
             "kafka_topic": self._kafka_topic,
+            "degraded_mode": self._degraded_mode,
+            "mode": "in_memory" if self._degraded_mode else "kafka",
         }
+
+        # Add memory queue stats if in degraded mode
+        if self._degraded_mode and self._memory_queue:
+            metrics["memory_queue_stats"] = self._memory_queue.get_stats()
+
+        return metrics

@@ -2,6 +2,8 @@
 
 Provides async RabbitMQ abstraction for reliable message passing between agents.
 Handles connection management, queue declaration, and message delivery.
+
+Air Gap Fix: AG-KAFKA-009 - Integrated Kafka publishing for Narrative Filter
 """
 import logging
 from typing import Callable, Dict, Optional
@@ -11,6 +13,7 @@ from aio_pika import DeliveryMode, ExchangeType, Message
 from aio_pika.abc import AbstractChannel, AbstractConnection, AbstractQueue
 
 from .message import ACPMessage, AgentType
+from .kafka_publisher import get_kafka_publisher
 
 logger = logging.getLogger(__name__)
 
@@ -165,6 +168,14 @@ class MessageBroker:
             f"Sent {message.message_type.value} from {message.sender.value} "
             f"to {message.recipient.value}"
         )
+
+        # AG-KAFKA-009: Publish to Kafka for Narrative Filter consumption
+        try:
+            kafka_publisher = get_kafka_publisher()
+            kafka_publisher.publish_agent_message(message)
+        except Exception as e:
+            # Don't fail RabbitMQ send if Kafka publish fails
+            logger.warning(f"Kafka publish failed (non-fatal): {e}")
 
     async def consume_messages(
         self,

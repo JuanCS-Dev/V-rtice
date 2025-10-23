@@ -150,10 +150,19 @@ async def shutdown_event():
 async def health_check() -> Dict[str, Any]:
     """Performs a health check of the Oraculo Service.
 
+    Includes APVStreamManager status for degraded mode visibility.
+    AG-RUNTIME-001: Exposes Kafka connection status.
+
     Returns:
         Dict[str, Any]: A dictionary indicating the service status and capabilities.
     """
-    return config.get_health_status()
+    health_status = config.get_health_status()
+
+    # Add APV Stream Manager status if available
+    if stream_manager:
+        health_status["apv_stream_manager"] = stream_manager.get_metrics()
+
+    return health_status
 
 
 @app.get("/capabilities")
