@@ -2085,71 +2085,73 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-  wargaming-crisol:
-    build:
-      context: ./backend
-      dockerfile: services/wargaming_crisol/Dockerfile
-    container_name: maximus-wargaming-crisol
-    ports:
-    - 8026:8026
-    depends_on:
-    - postgres-immunity
-    environment:
-    - POSTGRES_HOST=postgres-immunity
-    - POSTGRES_PORT=5432
-    - POSTGRES_DB=adaptive_immunity
-    - POSTGRES_USER=maximus
-    - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
-    - REDIS_HOST=redis-immunity
-    - REDIS_PORT=6379
-    - REDIS_DB=2
-    - REDIS_PASSWORD=${REDIS_PASSWORD:-maximus_immunity_redis}
-    - DOCKER_HOST=unix:///var/run/docker.sock
-    - LOG_LEVEL=INFO
-    volumes:
-    - ./backend/services/wargaming_crisol:/app
-    - /var/run/docker.sock:/var/run/docker.sock
-    - wargaming_logs:/app/logs
-    networks:
-    - maximus-network
-    - maximus-immunity-network
-    restart: unless-stopped
-    privileged: true
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8026/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-  hitl-patch-service:
-    build:
-      context: ./backend/services
-      dockerfile: hitl_patch_service/Dockerfile
-    container_name: maximus-hitl-patch
-    ports:
-    - 8027:8027
-    depends_on:
-    - postgres-immunity
-    environment:
-    - POSTGRES_HOST=postgres-immunity
-    - POSTGRES_PORT=5432
-    - POSTGRES_DB=adaptive_immunity
-    - POSTGRES_USER=maximus
-    - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
-    - PORT=8027
-    - LOG_LEVEL=INFO
-    volumes:
-    - ./backend/services/hitl_patch_service:/app
-    networks:
-    - maximus-network
-    - maximus-immunity-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8027/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+  # DEPRECATED (FASE 1.2): Consolidated into wargaming_crisol
+  # wargaming-crisol:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: services/wargaming_crisol/Dockerfile
+  #   container_name: maximus-wargaming-crisol
+  #   ports:
+  #   - 8026:8026
+  #   depends_on:
+  #   - postgres-immunity
+  #   environment:
+  #   - POSTGRES_HOST=postgres-immunity
+  #   - POSTGRES_PORT=5432
+  #   - POSTGRES_DB=adaptive_immunity
+  #   - POSTGRES_USER=maximus
+  #   - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+  #   - REDIS_HOST=redis-immunity
+  #   - REDIS_PORT=6379
+  #   - REDIS_DB=2
+  #   - REDIS_PASSWORD=${REDIS_PASSWORD:-maximus_immunity_redis}
+  #   - DOCKER_HOST=unix:///var/run/docker.sock
+  #   - LOG_LEVEL=INFO
+  #   volumes:
+  #   - ./backend/services/wargaming_crisol:/app
+  #   - /var/run/docker.sock:/var/run/docker.sock
+  #   - wargaming_logs:/app/logs
+  #   networks:
+  #   - maximus-network
+  #   - maximus-immunity-network
+  #   restart: unless-stopped
+  #   privileged: true
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8026/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+  # DEPRECATED (FASE 1.2): Consolidated into hitl_patch_service
+  # hitl-patch-service:
+  #   build:
+  #     context: ./backend/services
+  #     dockerfile: hitl_patch_service/Dockerfile
+  #   container_name: maximus-hitl-patch
+  #   ports:
+  #   - 8027:8027
+  #   depends_on:
+  #   - postgres-immunity
+  #   environment:
+  #   - POSTGRES_HOST=postgres-immunity
+  #   - POSTGRES_PORT=5432
+  #   - POSTGRES_DB=adaptive_immunity
+  #   - POSTGRES_USER=maximus
+  #   - POSTGRES_PASSWORD=${POSTGRES_IMMUNITY_PASSWORD:-maximus_immunity_2024}
+  #   - PORT=8027
+  #   - LOG_LEVEL=INFO
+  #   volumes:
+  #   - ./backend/services/hitl_patch_service:/app
+  #   networks:
+  #   - maximus-network
+  #   - maximus-immunity-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8027/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
   kafka-ui-immunity:
     image: provectuslabs/kafka-ui:latest
     container_name: maximus-kafka-ui-immunity
@@ -2549,9 +2551,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-  hitl_patch_service_new:
+  hitl_patch_service:
     build: ./backend/services/hitl_patch_service
-    container_name: vertice-hitl-patch-new
+    container_name: vertice-hitl-patch
     ports:
     - "8811:8000"
     environment:
@@ -2570,18 +2572,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-  wargaming_crisol_new:
+  wargaming_crisol:
     build: ./backend/services/wargaming_crisol
-    container_name: vertice-wargaming-crisol-new
+    container_name: vertice-wargaming-crisol
     ports:
     - "8812:8000"
     environment:
     - SERVICE_NAME=wargaming_crisol
     - LOG_LEVEL=INFO
     - POSTGRES_URL=postgresql://postgres:postgres@postgres-immunity:5432/adaptive_immunity
+    - REDIS_URL=redis://:${REDIS_PASSWORD:-maximus_immunity_redis}@redis-immunity:6379/2
     - DOCKER_HOST=unix:///var/run/docker.sock
     depends_on:
     - postgres-immunity
+    - redis-immunity
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - wargaming_logs:/app/logs
