@@ -129,6 +129,7 @@ class DLQMonitor:
 
     async def _process_dlq_message(self, message: Dict[str, Any]):
         """Process a single DLQ message."""
+        global dlq_message_count
         try:
             # Extract metadata
             error_type = message.get("error", {}).get("type", "unknown")
@@ -166,14 +167,14 @@ class DLQMonitor:
                 await self._send_alert(message)
 
             # Check alert threshold
-            if dlq_message_count >= ALERT_THRESHOLD:
+            if dlq_message_count >= DLQ_ALERT_THRESHOLD:
                 logger.critical(
-                    f"🚨 CRITICAL: DLQ size ({dlq_message_count}) exceeds threshold ({ALERT_THRESHOLD})"
+                    f"🚨 CRITICAL: DLQ size ({dlq_message_count}) exceeds threshold ({DLQ_ALERT_THRESHOLD})"
                 )
                 await self._send_alert({
                     "type": "dlq_threshold_exceeded",
                     "queue_size": dlq_message_count,
-                    "threshold": ALERT_THRESHOLD
+                    "threshold": DLQ_ALERT_THRESHOLD
                 })
 
         except Exception as e:
@@ -307,7 +308,7 @@ async def health_check():
         "service": "maximus-dlq-monitor",
         "kafka_connected": dlq_monitor.consumer is not None,
         "dlq_queue_size": dlq_message_count,
-        "alert_threshold": ALERT_THRESHOLD
+        "alert_threshold": DLQ_ALERT_THRESHOLD
     }
 
 
@@ -322,8 +323,8 @@ async def get_status():
         "retry_topic": RETRY_TOPIC,
         "max_retries": MAX_RETRIES,
         "current_queue_size": dlq_message_count,
-        "alert_threshold": ALERT_THRESHOLD,
-        "alert_status": "critical" if dlq_message_count >= ALERT_THRESHOLD else "normal"
+        "alert_threshold": DLQ_ALERT_THRESHOLD,
+        "alert_status": "critical" if dlq_message_count >= DLQ_ALERT_THRESHOLD else "normal"
     }
 
 
