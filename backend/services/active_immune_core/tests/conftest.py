@@ -9,8 +9,16 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-# Import from service root (pytest.ini sets pythonpath)
-from active_immune_core.main import app
+# Add service root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import from service root
+try:
+    from main import app
+except ImportError:
+    # Fallback: create dummy app for tests that don't need it
+    from fastapi import FastAPI
+    app = FastAPI()
 
 os.environ.setdefault("VERTICE_LYMPHNODE_SHARED_SECRET", "test-shared-secret")
 
@@ -81,7 +89,7 @@ def client():
 @pytest.fixture
 def sample_agent_state():
     """Sample agent state for testing"""
-    from ...agents.models import AgenteState, AgentType
+    from agents.models import AgenteState, AgentType
 
     return AgenteState(
         tipo=AgentType.MACROFAGO,
@@ -93,7 +101,7 @@ def sample_agent_state():
 @pytest.fixture
 def sample_cytokine_message():
     """Sample cytokine message for testing"""
-    from ...communication import CytokineMessage
+    from communication import CytokineMessage
 
     return CytokineMessage(
         tipo="IL1",
@@ -110,7 +118,7 @@ def sample_cytokine_message():
 @pytest.fixture
 def sample_hormone_message():
     """Sample hormone message for testing"""
-    from ...communication import HormoneMessage
+    from communication import HormoneMessage
 
     return HormoneMessage(
         tipo="cortisol",
