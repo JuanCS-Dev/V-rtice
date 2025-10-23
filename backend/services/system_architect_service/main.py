@@ -76,7 +76,7 @@ async def startup_event():
     logger.info("🔮 Starting System Architect Service...")
 
     # Initialize all analyzers
-    docker_compose_path = "/home/juan/vertice-dev/backend/services/../docker-compose.yml"
+    docker_compose_path = "/home/juan/vertice-dev/docker-compose.yml"
     services_path = "/home/juan/vertice-dev/backend/services"
 
     _scanner = ArchitectureScanner(

@@ -24,38 +24,95 @@ logger = logging.getLogger(__name__)
 class ArchitectureScanner:
     """Scans VÉRTICE architecture and builds comprehensive service inventory."""
 
-    # Subsystem categorization patterns
+    # Subsystem categorization patterns (FASE 1 - 100% COMPLETE)
     SUBSYSTEM_PATTERNS = {
         "consciousness": [
+            # Core consciousness services
             "maximus_core", "digital_thalamus", "prefrontal_cortex",
-            "memory_consolidation", "neuromodulation", "visual_cortex",
-            "auditory_cortex", "somatosensory", "chemical_sensing", "vestibular"
+            "memory_consolidation", "neuromodulation",
+            # Sensory cortex services
+            "visual_cortex", "auditory_cortex", "somatosensory",
+            "chemical_sensing", "vestibular",
+            # Additional consciousness components
+            "adr_core", "hpc_"
         ],
         "immune": [
-            "immunis_", "active_immune", "adaptive_immune", "ai_immune"
+            # Immunis cells (prefix match for all cell types)
+            "immunis_", "active_immune", "ai_immune",
+            # Adaptive immunity (complete system)
+            "adaptive_immunity", "adaptive_immune",
+            # Infrastructure immunity (Kafka, Postgres, Zookeeper protection)
+            "kafka-immunity", "kafka-ui-immunity",
+            "postgres-immunity", "zookeeper-immunity",
+            # Edge and autonomous investigation
+            "edge_agent", "autonomous_investigation"
         ],
         "homeostatic": [
-            "hcl_", "homeostatic"
+            # HCL MAPE-K loop (all variants)
+            "hcl_", "hcl-",
+            # Homeostatic regulation services
+            "homeostatic", "cloud_coordinator",
+            "ethical_audit", "hsas_"
         ],
         "maximus_ai": [
-            "maximus_orchestrator", "maximus_eureka", "maximus_oraculo",
-            "maximus_predict", "maximus_integration"
+            # Core Maximus AI services
+            "maximus_orchestrator", "maximus_eureka",
+            "maximus_predict", "maximus_integration",
+            # Maximus Oraculo (all variants)
+            "maximus_oraculo", "maximus-oraculo",
+            # AI decision and strategy services
+            "verdict_engine", "strategic_planning",
+            "rte_", "tataca_"
         ],
         "reactive_fabric": [
-            "reactive_fabric", "reflex_triage", "antithrombin",
-            "protein_c", "tfpi"
+            # Reactive fabric core
+            "reactive_fabric", "reflex_triage",
+            # Coagulation cascade factors
+            "antithrombin", "protein_c", "tfpi",
+            "factor_viia", "factor_xa",
+            # Tegumentar (skin barrier) and C2 orchestration
+            "tegumentar", "c2_orchestration"
         ],
         "offensive": [
-            "purple_team", "network_recon", "web_attack", "vuln_intel",
-            "offensive_", "bas_service"
+            # Purple team and reconnaissance
+            "purple_team", "network_recon", "web_attack",
+            "vuln_intel", "offensive_", "bas_",
+            # Malware analysis and sandbox
+            "malware_analysis", "cuckoo",
+            # Scanning and exploitation tools
+            "nmap", "vuln_scanner",
+            # Social engineering and SSL monitoring
+            "social_eng", "ssl_monitor",
+            # Mock vulnerable apps for testing
+            "mock_vulnerable"
         ],
         "intelligence": [
-            "osint", "google_osint", "sinesp", "ip_intelligence",
-            "threat_intel", "narrative_"
+            # OSINT and threat intelligence
+            "osint", "google_osint", "sinesp",
+            "ip_intelligence", "threat_intel",
+            # Narrative intelligence
+            "narrative_",
+            # Predictive and network monitoring
+            "predictive_threat_hunting", "network_monitor",
+            # Cyber and domain intelligence
+            "cyber_", "domain_"
         ],
         "infrastructure": [
+            # API and communication infrastructure
             "api_gateway", "auth_service", "atlas_service",
-            "command_bus", "agent_communication", "seriema_graph"
+            "command_bus", "agent_communication", "seriema_graph",
+            # Data stores
+            "postgres", "redis", "qdrant",
+            # Message brokers
+            "kafka", "rabbitmq", "nats",
+            # Monitoring and observability
+            "grafana", "prometheus",
+            # Orchestration (Zookeeper is Kafka dependency)
+            "zookeeper"
+        ],
+        "security_operations": [
+            # Human-in-the-loop and wargaming
+            "hitl", "wargaming"
         ]
     }
 
