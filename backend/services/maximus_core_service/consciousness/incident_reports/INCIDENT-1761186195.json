@@ -1,0 +1,26 @@
+{
+  "incident_id": "INCIDENT-1761186195",
+  "shutdown_reason": "threshold_violation",
+  "shutdown_timestamp": 1761186195.5029955,
+  "shutdown_timestamp_iso": "2025-10-22T23:23:15.502995",
+  "violations": [
+    {
+      "violation_id": "critical",
+      "violation_type": "arousal_runaway",
+      "legacy_violation_type": "arousal_sustained_high",
+      "threat_level": "critical",
+      "severity": "emergency",
+      "timestamp": 1761186195.5025377,
+      "timestamp_iso": "2025-10-22T23:23:15.502538",
+      "description": "Safety violation recorded",
+      "metrics": {},
+      "source_component": "consciousness-safety",
+      "automatic_action_taken": null,
+      "message": "Safety violation recorded"
+    }
+  ],
+  "system_state_snapshot": {
+    "timestamp": 1761186195.5033152,
+    "timestamp_iso": "2025-10-22T23:23:15.503317",
+    "pid": 103360,
+    "tig_nodes": 

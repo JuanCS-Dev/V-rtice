@@ -1,0 +1,11 @@
+{
+  "incident_id": "INCIDENT-1761176837",
+  "shutdown_reason": "manual_operator_command",
+  "shutdown_timestamp": 1761176837.6702547,
+  "shutdown_timestamp_iso": "2025-10-22T20:47:17.670255",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761176837.6704235,
+    "timestamp_iso": "2025-10-22T20:47:17.670425",
+    "pid": 66216,
+    "tig_nodes": 

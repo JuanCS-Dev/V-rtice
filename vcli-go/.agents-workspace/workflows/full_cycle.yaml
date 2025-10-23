@@ -1,0 +1,110 @@
+# Full Development Cycle Workflow
+# Autonomous end-to-end development with Agent Smith
+
+name: "Full Development Cycle"
+description: "Complete autonomous development from analysis through deployment"
+version: "1.0"
+
+# Workflow Steps
+steps:
+  # Step 1: DIAGNOSTICADOR - Code Analysis
+  - agent_type: "diagnosticador"
+    name: "analyze_codebase"
+    description: "Analyze codebase for issues, security vulnerabilities, and code quality"
+    task: "Perform comprehensive code analysis"
+    targets:
+      - "./internal"
+      - "./cmd"
+      - "./pkg"
+    config:
+      enable_security_scan: true
+      enable_performance_analysis: true
+      enable_dependency_check: true
+    hitl_required: false
+    continue_on_error: false
+    context:
+      scan_type: "comprehensive"
+      include_tests: true
+
+  # Step 2: ARQUITETO - Architecture Planning
+  - agent_type: "arquiteto"
+    name: "generate_architecture_plan"
+    description: "Generate architecture plan and ADRs based on analysis results"
+    task: "Design architecture improvements and implementation plan"
+    targets: []
+    config:
+      generate_adrs: true
+      assess_risks: true
+      design_integration_tests: true
+    hitl_required: true  # Require human approval for architecture decisions
+    continue_on_error: false
+    context:
+      planning_horizon: "short_term"
+      consider_scalability: true
+      consider_security: true
+      reference_previous_step: "diagnosticador_output"
+
+  # Step 3: DEV SENIOR - Implementation
+  - agent_type: "dev_senior"
+    name: "implement_changes"
+    description: "Implement code changes based on approved architecture plan"
+    task: "Autonomously implement planned changes"
+    targets: []
+    config:
+      create_git_branch: true
+      branch_name_prefix: "agent-smith/"
+      auto_format: true
+      run_imports: true
+      validate_compilation: true
+    hitl_required: true  # Require human approval before code changes
+    continue_on_error: false
+    context:
+      reference_plan: "arquiteto_output"
+      implementation_style: "production_ready"
+      add_tests: true
+      add_documentation: true
+
+  # Step 4: TESTER - Validation
+  - agent_type: "tester"
+    name: "validate_implementation"
+    description: "Run comprehensive tests and validate quality gates"
+    task: "Execute all tests and validate implementation quality"
+    targets:
+      - "./..."
+    config:
+      run_unit_tests: true
+      run_integration_tests: true
+      run_benchmarks: true
+      generate_coverage_report: true
+      enforce_quality_gates: true
+    hitl_required: true  # Require human approval before merge
+    continue_on_error: false
+    context:
+      baseline_coverage: "diagnosticador_output.test_coverage"
+      allow_coverage_regression: false
+      max_performance_regression_percent: 5.0
+
+# Workflow Configuration
+config:
+  timeout_seconds: 3600  # 1 hour total
+  abort_on_quality_gate_failure: true
+  notify_on_hitl_required: true
+  save_artifacts: true
+  report_to_consciousness: true
+  immune_system_validation: true
+
+# Success Criteria
+success_criteria:
+  all_tests_pass: true
+  coverage_maintained: true
+  security_findings_addressed: true
+  quality_gates_pass: true
+  hitl_approvals_received: true
+
+# Rollback Strategy
+rollback:
+  enabled: true
+  on_test_failure: true
+  on_compilation_error: true
+  preserve_branch: true
+  notify_user: true

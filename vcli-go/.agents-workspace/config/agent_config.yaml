@@ -1,0 +1,166 @@
+# Agent Smith Configuration
+# VÉRTICE Autonomous Development Framework
+
+workspace_path: ".agents-workspace"
+
+# MAXIMUS Service Endpoints
+maximus:
+  eureka_endpoint: "http://localhost:8024"      # Insight generation
+  oraculo_endpoint: "http://localhost:8026"     # Predictions & code analysis
+  predict_endpoint: "http://localhost:8028"      # ML predictions
+  consciousness_endpoint: "http://localhost:8022" # Consciousness system
+  governance_endpoint: "http://localhost:8150"   # HITL governance
+
+# Immunis System Endpoints (Security Validation)
+immunis:
+  lymphnode_endpoint: "http://localhost:9001"
+  macrophage_endpoint: "http://localhost:9002"
+  bcell_endpoint: "http://localhost:9003"
+  helper_t_endpoint: "http://localhost:9004"
+  cytotoxic_t_endpoint: "http://localhost:9005"
+
+# Quality Gates
+quality_gates:
+  min_coverage_percent: 80.0
+  allow_lint_warnings: false
+  require_security_scan: true
+  require_test_pass: true
+  max_security_critical: 0
+  max_security_high: 2
+
+# HITL (Human-in-the-Loop) Triggers
+hitl_triggers:
+  on_file_delete: true
+  on_schema_change: true
+  on_security_change: true
+  on_deployment: true
+  on_destructive_operations: true
+  on_external_api_changes: true
+
+# Agent Capabilities
+agents:
+  diagnosticador:
+    enabled: true
+    capabilities:
+      - static_analysis
+      - security_scanning
+      - code_quality_metrics
+      - dependency_analysis
+      - performance_profiling
+      - test_coverage_analysis
+    tools:
+      - go_vet
+      - golangci-lint
+      - gosec
+      - go_test_coverage
+    timeout_seconds: 300
+
+  arquiteto:
+    enabled: true
+    capabilities:
+      - architecture_planning
+      - adr_generation
+      - risk_assessment
+      - integration_testing_design
+      - pattern_detection
+    tools:
+      - maximus_oraculo
+      - pattern_matcher
+    timeout_seconds: 600
+    hitl_required: true  # Always require approval for architecture changes
+
+  dev_senior:
+    enabled: true
+    capabilities:
+      - code_generation
+      - file_operations
+      - git_operations
+      - refactoring
+      - implementation
+    tools:
+      - maximus_oraculo_auto_implement
+      - go_format
+      - goimports
+      - git
+    timeout_seconds: 900
+    hitl_required: true  # Always require approval for code changes
+    safety_features:
+      - branch_isolation
+      - automated_rollback
+      - immune_validation
+
+  tester:
+    enabled: true
+    capabilities:
+      - test_execution
+      - coverage_analysis
+      - regression_detection
+      - performance_benchmarking
+      - quality_gate_validation
+    tools:
+      - go_test
+      - go_bench
+      - coverage_tool
+    timeout_seconds: 600
+    quality_gates_enforced: true
+
+# Workflow Definitions
+workflows:
+  full_cycle:
+    name: "Full Development Cycle"
+    description: "Complete autonomous development from analysis to deployment"
+    steps:
+      - diagnosticador
+      - arquiteto
+      - dev_senior
+      - tester
+
+  bug_fix:
+    name: "Bug Fix Workflow"
+    description: "Rapid bug fix with focused testing"
+    steps:
+      - diagnosticador
+      - dev_senior
+      - tester
+
+  refactor:
+    name: "Code Refactoring"
+    description: "Refactor code while maintaining functionality"
+    steps:
+      - diagnosticador
+      - arquiteto
+      - dev_senior
+      - tester
+
+  security_audit:
+    name: "Security Audit"
+    description: "Comprehensive security analysis and remediation"
+    steps:
+      - diagnosticador  # Deep security scan
+      - dev_senior      # Implement fixes
+      - tester          # Validate security fixes
+
+# Timeouts and Retries
+execution:
+  default_timeout_seconds: 1800  # 30 minutes
+  max_retries: 3
+  retry_backoff_seconds: 5
+
+# Logging
+logging:
+  level: "info"  # debug, info, warn, error
+  output: "stdout"
+  include_timestamps: true
+  include_agent_name: true
+
+# Security
+security:
+  auth_token_env: "VCLI_AGENT_TOKEN"
+  tls_enabled: false
+  validate_certificates: true
+
+# Artifacts
+artifacts:
+  retention_days: 30
+  compress_old_artifacts: true
+  max_size_mb: 1000

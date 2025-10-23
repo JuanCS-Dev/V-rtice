@@ -1,0 +1,12 @@
+{
+  "incident_id": "INCIDENT-1761183266",
+  "shutdown_reason": "watchdog_timeout",
+  "shutdown_timestamp": 1761183266.6677997,
+  "shutdown_timestamp_iso": "2025-10-22T22:34:26.667800",
+  "violations": [],
+  "system_state_snapshot": {
+    "timestamp": 1761183266.6679573,
+    "timestamp_iso": "2025-10-22T22:34:26.667959",
+    "pid": 103360,
+    "tig_nodes": "ERROR",
+    "esgt_running": 
