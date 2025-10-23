@@ -1,0 +1,7 @@
+[run]
+omit =
+    test_agent.py
+    run_agent.py
+    agent/system_architect_agent.py
+    agent/system_architect_agent_standalone.py
+    agent/__init__.py

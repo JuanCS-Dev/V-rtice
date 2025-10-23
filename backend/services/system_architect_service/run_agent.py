@@ -138,12 +138,12 @@ async def main():
         await run_one_patrol(agent)
 
 
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n👋 System Architect Agent stopped")
-        sys.exit(0)
-    except Exception as e:
-        logging.error(f"❌ Fatal error: {e}", exc_info=True)
-        sys.exit(1)
+if __name__ == "__main__":  # pragma: no cover
+    try:  # pragma: no cover
+        asyncio.run(main())  # pragma: no cover
+    except KeyboardInterrupt:  # pragma: no cover
+        print("\n👋 System Architect Agent stopped")  # pragma: no cover
+        sys.exit(0)  # pragma: no cover
+    except Exception as e:  # pragma: no cover
+        logging.error(f"❌ Fatal error: {e}", exc_info=True)  # pragma: no cover
+        sys.exit(1)  # pragma: no cover

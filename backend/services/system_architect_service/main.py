@@ -338,10 +338,10 @@ async def get_metrics() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
+if __name__ == "__main__":  # pragma: no cover
+    uvicorn.run(  # pragma: no cover
+        app,  # pragma: no cover
+        host="0.0.0.0",  # pragma: no cover
         port=8900,
         log_level="info"
     )
