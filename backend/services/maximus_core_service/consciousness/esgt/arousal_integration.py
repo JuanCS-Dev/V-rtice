@@ -278,9 +278,8 @@ class ESGTArousalBridge:
 
         modulation = ArousalModulation(
             source="esgt_refractory",
-            magnitude=-self.config.refractory_arousal_drop,
+            delta=-self.config.refractory_arousal_drop,
             duration_seconds=1.0,  # 1 second drop
-            decay_rate=self.config.refractory_recovery_rate,
         )
 
         self.arousal_controller.request_arousal_modulation(modulation)
