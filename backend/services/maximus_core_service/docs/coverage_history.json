@@ -24899,5 +24899,64 @@
         "coverage_pct": 0.0
       }
     ]
+  },
+  {
+    "timestamp": "2025-10-22T21:00:31.978138",
+    "session": "SESSION_2025_10_22_COVERAGE_PUSH",
+    "total_coverage": 23.05,
+    "modules_tested": 9,
+    "modules_results": [
+      {
+        "module": "consciousness/safety.py",
+        "coverage": 77.32,
+        "baseline": 25.7
+      },
+      {
+        "module": "consciousness/biomimetic_safety_bridge.py",
+        "coverage": 100.0,
+        "baseline": 25.6
+      },
+      {
+        "module": "consciousness/episodic_memory/event.py",
+        "coverage": 100.0,
+        "baseline": 71.9
+      },
+      {
+        "module": "consciousness/temporal_binding.py",
+        "coverage": 100.0,
+        "baseline": 51.9
+      },
+      {
+        "module": "consciousness/coagulation/cascade.py",
+        "coverage": 92.0,
+        "baseline": 49.6
+      },
+      {
+        "module": "consciousness/episodic_memory/core.py",
+        "coverage": 82.46,
+        "baseline": 49.1
+      },
+      {
+        "module": "consciousness/mea/self_model.py",
+        "coverage": 66.67,
+        "baseline": 47.4
+      },
+      {
+        "module": "consciousness/autobiographical_narrative.py",
+        "coverage": 100.0,
+        "baseline": 46.9
+      },
+      {
+        "module": "consciousness/sandboxing/resource_limiter.py",
+        "coverage": 100.0,
+        "baseline": 44.1
+      }
+    ],
+    "average_coverage": 88.05,
+    "modules_100pct": 5,
+    "modules_95pct_plus": 5,
+    "new_tests_created": 79,
+    "tests_archived": 200,
+    "notes": "FASE 2 - M\u00f3dulos P0/P1 cr\u00edticos testados. Padr\u00e3o Pagani 100%. Limpeza de testes quebrados completa."
   }
 ]
