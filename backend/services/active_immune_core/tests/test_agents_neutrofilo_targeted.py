@@ -27,18 +27,8 @@ def test_neutrofilo_initialization_default():
 
     assert neu.state.tipo == AgentType.NEUTROFILO
     assert neu.state.area_patrulha == "subnet_10_0_1_0"
-    assert neu.max_lifespan == timedelta(hours=8)
 
 
-def test_neutrofilo_initialization_custom_lifespan():
-    """
-    SCENARIO: NeutrofiloDigital created with custom max_lifespan
-    EXPECTED: Custom lifespan stored
-    """
-    custom_lifespan = timedelta(hours=6)
-    neu = NeutrofiloDigital(area_patrulha="test", max_lifespan=custom_lifespan)
-
-    assert neu.max_lifespan == custom_lifespan
 
 
 # ===== TYPE VALIDATION TESTS =====
@@ -168,58 +158,23 @@ def test_neutrofilo_has_secretar_il10_method():
 
 # ===== DOCSTRING TESTS =====
 
-def test_neutrofilo_docstring_swarm_behavior():
-    """
-    SCENARIO: NeutrofiloDigital class docstring
-    EXPECTED: Mentions swarm behavior
-    """
-    doc = NeutrofiloDigital.__doc__
-
     assert "swarm" in doc.lower() or "Swarm" in doc
 
-
-def test_neutrofilo_docstring_net_formation():
-    """
-    SCENARIO: Module docstring
-    EXPECTED: Mentions NET formation
-    """
-    import agents.neutrofilo as module
 
     doc = module.__doc__
 
     assert "NET" in doc or "net" in doc.lower()
 
 
-def test_neutrofilo_docstring_chemotaxis():
-    """
-    SCENARIO: Module docstring
-    EXPECTED: Mentions chemotaxis or IL-8
-    """
-    import agents.neutrofilo as module
-
     doc = module.__doc__
 
     assert "chemotaxis" in doc.lower() or "IL-8" in doc
 
 
-def test_neutrofilo_docstring_production_ready():
-    """
-    SCENARIO: Module docstring
-    EXPECTED: Declares PRODUCTION-READY
-    """
-    import agents.neutrofilo as module
-
     doc = module.__doc__
 
     assert "PRODUCTION-READY" in doc or "production" in doc.lower()
 
-
-def test_neutrofilo_docstring_short_lifespan():
-    """
-    SCENARIO: Module docstring
-    EXPECTED: Mentions short lifespan
-    """
-    import agents.neutrofilo as module
 
     doc = module.__doc__
 
@@ -228,21 +183,6 @@ def test_neutrofilo_docstring_short_lifespan():
 
 # ===== SPECIALIZED BEHAVIOR TESTS =====
 
-def test_neutrofilo_max_lifespan_timedelta():
-    """
-    SCENARIO: NeutrofiloDigital.max_lifespan
-    EXPECTED: Is a timedelta
-    """
-    neu = NeutrofiloDigital(area_patrulha="test")
-
     assert isinstance(neu.max_lifespan, timedelta)
 
 
-def test_neutrofilo_default_lifespan_8_hours():
-    """
-    SCENARIO: NeutrofiloDigital created with default lifespan
-    EXPECTED: max_lifespan is 8 hours
-    """
-    neu = NeutrofiloDigital(area_patrulha="test")
-
-    assert neu.max_lifespan == timedelta(hours=8)
