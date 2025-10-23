@@ -145,13 +145,6 @@ def test_neutrofilo_has_formar_net_method():
     assert callable(neu._formar_net)
 
 
-def test_neutrofilo_has_secretar_il10_method():
-    """
-    SCENARIO: NeutrofiloDigital instance
-    EXPECTED: Has _secretar_il10 method (anti-inflammatory)
-    """
-    neu = NeutrofiloDigital(area_patrulha="test_area")
-
     assert hasattr(neu, "_secretar_il10")
     assert callable(neu._secretar_il10)
 

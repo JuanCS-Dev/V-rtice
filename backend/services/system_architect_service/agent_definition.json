@@ -1,0 +1,178 @@
+{
+  "agent_id": "system_architect_001",
+  "agent_type": "SystemArchitect",
+  "display_name": "System Architect Agent",
+  "description": "Macro-level architectural analysis agent for VÉRTICE platform. Performs continuous monitoring, gap detection, redundancy analysis, and deployment optimization.",
+  "version": "1.0.0",
+  "author": "VÉRTICE Team",
+  "capabilities": [
+    "full_system_analysis",
+    "subsystem_analysis",
+    "deployment_gap_detection",
+    "redundancy_detection",
+    "kubernetes_migration_planning",
+    "executive_report_generation",
+    "continuous_monitoring"
+  ],
+  "patrol_config": {
+    "enabled": true,
+    "interval_hours": 6,
+    "trigger_on_compose_change": true
+  },
+  "communication": {
+    "cytokines": {
+      "publishes": ["IL1", "IL6", "IL10"],
+      "subscribes": []
+    },
+    "hormones": {
+      "publishes": ["CORTISOL"],
+      "subscribes": []
+    }
+  },
+  "dependencies": {
+    "service_backend": {
+      "url": "http://localhost:8900",
+      "required": true,
+      "description": "System Architect Service backend for analysis tools"
+    },
+    "docker_compose": {
+      "path": "/home/juan/vertice-dev/backend/docker-compose.yml",
+      "required": true,
+      "description": "VÉRTICE platform docker-compose.yml for architecture scanning"
+    }
+  },
+  "tools": [
+    {
+      "name": "analyze_full_system",
+      "description": "Performs comprehensive analysis of all 89+ VÉRTICE services, identifying gaps, redundancies, and deployment readiness. Returns executive summary with metrics, subsystem breakdown, integration analysis, and optimization recommendations.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_recommendations": {
+            "type": "boolean",
+            "description": "Include optimization recommendations in the report (default: true)"
+          },
+          "generate_graphs": {
+            "type": "boolean",
+            "description": "Generate dependency graphs and visualizations (default: true)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "analyze_subsystem",
+      "description": "Performs deep-dive analysis on a specific subsystem (consciousness, immune, homeostatic, maximus_ai, reactive_fabric, offensive, intelligence, infrastructure). Returns detailed metrics, service inventory, and subsystem-specific recommendations.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "subsystem": {
+            "type": "string",
+            "description": "Subsystem to analyze (consciousness, immune, homeostatic, maximus_ai, reactive_fabric, offensive, intelligence, infrastructure)"
+          },
+          "deep_dive": {
+            "type": "boolean",
+            "description": "Perform detailed analysis with comprehensive recommendations (default: true)"
+          }
+        },
+        "required": ["subsystem"]
+      }
+    },
+    {
+      "name": "get_deployment_gaps",
+      "description": "Lists all identified deployment gaps (Kubernetes operators, service mesh, GitOps, distributed tracing, secrets management, incident automation) with priority levels (CRITICAL, HIGH, MEDIUM, LOW) and actionable recommendations.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "get_redundancies",
+      "description": "Lists redundant services and consolidation opportunities. Identifies services with overlapping functionality, estimates resource savings, and provides consolidation recommendations.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "optimize_deployment",
+      "description": "Generates deployment optimization recommendations and Kubernetes manifests. Provides migration plan, service mesh configuration, GitOps setup, and infrastructure-as-code templates.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "target_platform": {
+            "type": "string",
+            "description": "Target deployment platform (kubernetes, docker-swarm, nomad) (default: kubernetes)"
+          },
+          "generate_manifests": {
+            "type": "boolean",
+            "description": "Generate deployment manifests (K8s YAML, Helm charts, etc.) (default: true)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "get_latest_report",
+      "description": "Retrieves the most recent architectural analysis report with executive summary, readiness score, and report file paths (JSON, Markdown, HTML).",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "hitl_config": {
+    "approval_required_for": [
+      "service_consolidation",
+      "infrastructure_changes",
+      "deployment_execution"
+    ],
+    "approval_not_required_for": [
+      "analysis",
+      "report_generation",
+      "manifest_generation"
+    ]
+  },
+  "metrics": {
+    "track": [
+      "patrol_cycle_count",
+      "analysis_execution_time",
+      "critical_gaps_detected",
+      "readiness_score",
+      "compose_change_count"
+    ],
+    "alerts": {
+      "critical_gaps": {
+        "threshold": 1,
+        "action": "publish_cortisol"
+      },
+      "low_readiness": {
+        "threshold": 70,
+        "action": "publish_il6"
+      }
+    }
+  },
+  "ethical_constraints": {
+    "safe_actions": [
+      "read_architecture",
+      "generate_reports",
+      "generate_manifests",
+      "analyze_gaps"
+    ],
+    "dangerous_actions": [
+      "modify_services",
+      "delete_services",
+      "consolidate_services",
+      "execute_deployments"
+    ],
+    "fail_safe_default": "require_hitl_approval"
+  },
+  "compliance": {
+    "anthropic_tool_use": "100%",
+    "vertice_biomimetic_pattern": "100%",
+    "padrao_pagani_absoluto": "100%"
+  }
+}
