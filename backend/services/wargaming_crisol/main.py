@@ -1221,18 +1221,19 @@ async def startup_event():
     # Phase 5.6: Initialize A/B Test Store and Runner
     try:
         # Build database URL from environment variables
-        pg_host = os.getenv("POSTGRES_HOST", "localhost")
-        pg_port = os.getenv("POSTGRES_PORT", "5432")
-        pg_db = os.getenv("POSTGRES_DB", "aurora")
-        pg_user = os.getenv("POSTGRES_USER", "postgres")
-        pg_password = os.getenv("POSTGRES_PASSWORD", "postgres")
-        
-        db_url = os.getenv(
-            "DATABASE_URL",
-            f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
-        )
-        
-        logger.info(f"Connecting to PostgreSQL at {pg_host}:{pg_port}/{pg_db}")
+        # Try POSTGRES_URL first (standard), then DATABASE_URL, then individual components
+        db_url = os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
+
+        if db_url is None:
+            pg_host = os.getenv("POSTGRES_HOST", "localhost")
+            pg_port = os.getenv("POSTGRES_PORT", "5432")
+            pg_db = os.getenv("POSTGRES_DB", "aurora")
+            pg_user = os.getenv("POSTGRES_USER", "postgres")
+            pg_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+            db_url = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_db}"
+            logger.info(f"Connecting to PostgreSQL at {pg_host}:{pg_port}/{pg_db}")
+        else:
+            logger.info(f"Connecting to PostgreSQL using connection string")
         
         # Initialize store
         ab_store = ABTestStore(db_url)

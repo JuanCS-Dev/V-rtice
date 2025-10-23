@@ -49,15 +49,18 @@ class WarGamingCache:
                       If None, reads from REDIS_URL env var or defaults to redis-immunity:6379/2
         """
         if redis_url is None:
-            redis_host = os.getenv("REDIS_HOST", "redis-immunity")
-            redis_port = os.getenv("REDIS_PORT", "6379")
-            redis_db = os.getenv("REDIS_DB", "2")
-            redis_password = os.getenv("REDIS_PASSWORD", "")
-            
-            if redis_password:
-                redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/{redis_db}"
-            else:
-                redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
+            # Try REDIS_URL first (full URL), then fall back to individual components
+            redis_url = os.getenv("REDIS_URL")
+            if redis_url is None:
+                redis_host = os.getenv("REDIS_HOST", "redis")
+                redis_port = os.getenv("REDIS_PORT", "6379")
+                redis_db = os.getenv("REDIS_DB", "2")
+                redis_password = os.getenv("REDIS_PASSWORD", "")
+
+                if redis_password:
+                    redis_url = f"redis://:{redis_password}@{redis_host}:{redis_port}/{redis_db}"
+                else:
+                    redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
         
         self.redis_url = redis_url
         self.client: Optional[redis.Redis] = None

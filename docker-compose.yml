@@ -1063,8 +1063,8 @@ services:
     - ./backend/services/auditory_cortex_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    depends_on:
-    - digital_thalamus_service
+    # depends_on removed to break circular dependency with digital_thalamus_service
+    # Service will connect via DIGITAL_THALAMUS_URL when thalamus is available
     networks:
     - maximus-network
     restart: unless-stopped
@@ -1083,8 +1083,7 @@ services:
     - ./backend/services/visual_cortex_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    depends_on:
-    - digital_thalamus_service
+    # depends_on removed to break circular dependency with digital_thalamus_service
     networks:
     - maximus-network
     restart: unless-stopped
@@ -1103,8 +1102,7 @@ services:
     - ./backend/services/somatosensory_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    depends_on:
-    - digital_thalamus_service
+    # depends_on removed to break circular dependency with digital_thalamus_service
     networks:
     - maximus-network
     restart: unless-stopped
@@ -1123,8 +1121,7 @@ services:
     - ./backend/services/chemical_sensing_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    depends_on:
-    - digital_thalamus_service
+    # depends_on removed to break circular dependency with digital_thalamus_service
     networks:
     - maximus-network
     restart: unless-stopped
@@ -1143,8 +1140,7 @@ services:
     - ./backend/services/vestibular_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    depends_on:
-    - digital_thalamus_service
+    # depends_on removed to break circular dependency with digital_thalamus_service
     networks:
     - maximus-network
     restart: unless-stopped
@@ -2559,6 +2555,7 @@ services:
     environment:
     - SERVICE_NAME=hitl_patch
     - LOG_LEVEL=INFO
+    - PORT=8000
     - POSTGRES_URL=postgresql://postgres:postgres@postgres-immunity:5432/adaptive_immunity
     depends_on:
     - postgres-immunity
@@ -2580,12 +2577,13 @@ services:
     environment:
     - SERVICE_NAME=wargaming_crisol
     - LOG_LEVEL=INFO
+    - PORT=8000
     - POSTGRES_URL=postgresql://postgres:postgres@postgres-immunity:5432/adaptive_immunity
-    - REDIS_URL=redis://:${REDIS_PASSWORD:-maximus_immunity_redis}@redis-immunity:6379/2
+    - REDIS_URL=redis://:${REDIS_PASSWORD:-maximus_immunity_redis}@redis:6379/2
     - DOCKER_HOST=unix:///var/run/docker.sock
     depends_on:
     - postgres-immunity
-    - redis-immunity
+    - redis
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - wargaming_logs:/app/logs

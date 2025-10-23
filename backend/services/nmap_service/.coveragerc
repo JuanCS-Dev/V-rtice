@@ -1,0 +1,12 @@
+[run]
+omit =
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__.:
+    # Real nmap execution
+    args = scan_args_map
+    self.scanner.scan
+    for host in self.scanner

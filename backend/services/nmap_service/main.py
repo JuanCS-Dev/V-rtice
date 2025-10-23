@@ -139,5 +139,5 @@ async def perform_nmap_scan(scan_id: str, target: str, scan_type: str, options: 
     print(f"[NmapService] Scan {scan_id} completed")
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8034)
+if __name__ == "__main__":  # pragma: no cover
+    uvicorn.run(app, host="0.0.0.0", port=8034)  # pragma: no cover

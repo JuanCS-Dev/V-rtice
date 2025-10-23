@@ -24,7 +24,11 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
-from backend.services.hitl_patch_service.models import (
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from models import (
     HITLDecisionRecord,
     PatchDecision,
     PatchPriority,

@@ -26,6 +26,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket, Header
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response, JSONResponse
@@ -33,7 +34,7 @@ from fastapi.responses import Response, JSONResponse
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from backend.services.hitl_patch_service.models import (
+from models import (
     HITLDecisionRecord,
     PatchDecision,
     PatchPriority,
