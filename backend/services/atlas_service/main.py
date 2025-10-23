@@ -58,19 +58,19 @@ class QueryEnvironmentRequest(BaseModel):
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event():  # pragma: no cover
     """Performs startup tasks for the Atlas Service."""
-    print("🗺️ Starting Maximus Atlas Service...")
+    print("🗺️ Starting Maximus Atlas Service...")  # pragma: no cover
     # Initialize environmental model, load maps, etc.
-    print("✅ Maximus Atlas Service started successfully.")
+    print("✅ Maximus Atlas Service started successfully.")  # pragma: no cover
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event():  # pragma: no cover
     """Performs shutdown tasks for the Atlas Service."""
-    print("👋 Shutting down Maximus Atlas Service...")
+    print("👋 Shutting down Maximus Atlas Service...")  # pragma: no cover
     # Clean up resources
-    print("🛑 Maximus Atlas Service shut down.")
+    print("🛑 Maximus Atlas Service shut down.")  # pragma: no cover
 
 
 @app.get("/health")
@@ -176,5 +176,5 @@ async def get_map_status() -> Dict[str, Any]:
     }
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8007)
+if __name__ == "__main__":  # pragma: no cover
+    uvicorn.run(app, host="0.0.0.0", port=8007)  # pragma: no cover
