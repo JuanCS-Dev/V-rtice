@@ -5,17 +5,14 @@ from typing import Generator, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from backend.services.command_bus_service.main import app, lifespan
-from backend.services.command_bus_service.models import (
+from main import app, lifespan
+from models import (
     C2LCommand,
     C2LCommandType,
     CommandStatus,
     KillSwitchLayer,
     KillSwitchResult,
 )
-from fastapi.testclient import TestClient
-
-client = TestClient(app, raise_server_exceptions=False)
 
 
 @pytest.fixture
@@ -32,10 +29,14 @@ def mock_nats_components() -> Generator[Tuple[AsyncMock, AsyncMock], None, None]
         yield mock_publisher, mock_subscriber
 
 
-def test_health_check(mock_nats_components: Tuple[AsyncMock, AsyncMock]) -> None:
+@pytest.mark.asyncio
+async def test_health_check(mock_nats_components: Tuple[AsyncMock, AsyncMock]) -> None:
     """Test health check endpoint."""
-    with TestClient(app) as client:
-        response = client.get("/health/")
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/health/")
         assert response.status_code == 200
 
         data = response.json()
