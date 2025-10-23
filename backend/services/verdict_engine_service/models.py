@@ -98,7 +98,7 @@ class WebSocketMessage(BaseModel):
     """WebSocket message format for real-time streaming."""
 
     type: Literal["verdict", "stats", "ping", "error"]
-    data: Verdict | VerdictStats | dict[str, Any] | None = None
+    data: Verdict | VerdictStats | dict[str, Any] | None = Field(default=None, union_mode='left_to_right')
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 

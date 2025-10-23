@@ -7,11 +7,18 @@ from uuid import uuid4
 import pytest
 import pytest_asyncio
 
-from backend.services.verdict_engine_service.cache import VerdictCache
-from backend.services.verdict_engine_service.config import Settings
-from backend.services.verdict_engine_service.models import Verdict, VerdictStats
-from backend.services.verdict_engine_service.verdict_repository import VerdictRepository
-from backend.services.verdict_engine_service.websocket_manager import ConnectionManager
+import sys
+from pathlib import Path
+
+# Fix import path
+service_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(service_dir))
+
+from cache import VerdictCache
+from config import Settings
+from models import Verdict, VerdictStats
+from verdict_repository import VerdictRepository
+from websocket_manager import ConnectionManager
 
 
 @pytest.fixture
