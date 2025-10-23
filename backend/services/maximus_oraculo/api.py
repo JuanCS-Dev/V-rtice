@@ -27,15 +27,23 @@ from auto_implementer import AutoImplementer
 from code_scanner import CodeScanner
 from oraculo import OraculoEngine
 from suggestion_generator import SuggestionGenerator
+from config import config
 
-# WebSocket support for Adaptive Immunity
-from api_endpoints import websocket_router, initialize_stream_manager
-from websocket import APVStreamManager
+# WebSocket support for Adaptive Immunity (conditionally imported)
+try:
+    from api_endpoints import websocket_router, initialize_stream_manager
+    from websocket import APVStreamManager
+    WEBSOCKET_AVAILABLE = True
+except ImportError:
+    WEBSOCKET_AVAILABLE = False
+    print("[API] WebSocket support not available")
 
-app = FastAPI(title="Maximus Oraculo Service", version="1.0.0")
+app = FastAPI(title="Maximus Oraculo Service", version="2.0.0")
 
-# Include WebSocket router
-app.include_router(websocket_router)
+# Include WebSocket router only if enabled and available
+if config.enable_websocket and WEBSOCKET_AVAILABLE:
+    app.include_router(websocket_router)
+    print("[API] WebSocket router enabled")
 
 # Initialize Oraculo components
 oraculo_engine = OraculoEngine()
@@ -93,20 +101,35 @@ class ImplementationRequest(BaseModel):
 async def startup_event():
     """Performs startup tasks for the Oraculo Service."""
     global stream_manager
-    
-    print("🔮 Starting Maximus Oraculo Service...")
-    
-    # Initialize WebSocket APV Stream Manager
-    kafka_brokers = os.getenv("KAFKA_BROKERS", "localhost:9092")
-    stream_manager = APVStreamManager(
-        kafka_bootstrap_servers=kafka_brokers,
-        kafka_topic="maximus.adaptive-immunity.apv",
-    )
-    await stream_manager.start()
-    initialize_stream_manager(stream_manager)
-    
-    print("✅ Maximus Oraculo Service started successfully.")
-    print(f"🌐 WebSocket endpoint available (Kafka: {kafka_brokers})")
+
+    print(f"🔮 Starting Maximus Oraculo Service v{config.service_version}...")
+
+    # Initialize WebSocket APV Stream Manager (optional)
+    if config.enable_kafka and WEBSOCKET_AVAILABLE:
+        try:
+            print("[Startup] Initializing Kafka/WebSocket integration...")
+            stream_manager = APVStreamManager(
+                kafka_bootstrap_servers=config.kafka_brokers,
+                kafka_topic=config.kafka_topic,
+            )
+            await stream_manager.start()
+            initialize_stream_manager(stream_manager)
+            print(f"✅ WebSocket endpoint available (Kafka: {config.kafka_brokers})")
+        except Exception as e:
+            print(f"⚠️  Kafka/WebSocket initialization failed: {e}")
+            print("⚠️  Service will continue without WebSocket features")
+            config.add_degradation("kafka_unavailable")
+            stream_manager = None
+    else:
+        print("[Startup] Kafka/WebSocket disabled (ENABLE_KAFKA=false or not available)")
+        stream_manager = None
+
+    # Display capabilities
+    capabilities = config.get_capabilities()
+    print(f"✅ Maximus Oraculo Service started successfully")
+    print(f"📋 Capabilities: {capabilities}")
+    if config.degradations:
+        print(f"⚠️  Degradations: {config.degradations}")
 
 
 @app.on_event("shutdown")
@@ -124,13 +147,30 @@ async def shutdown_event():
 
 
 @app.get("/health")
-async def health_check() -> Dict[str, str]:
+async def health_check() -> Dict[str, Any]:
     """Performs a health check of the Oraculo Service.
 
     Returns:
-        Dict[str, str]: A dictionary indicating the service status.
+        Dict[str, Any]: A dictionary indicating the service status and capabilities.
     """
-    return {"status": "healthy", "message": "Oraculo Service is operational."}
+    return config.get_health_status()
+
+
+@app.get("/capabilities")
+async def get_capabilities() -> Dict[str, Any]:
+    """Get service capabilities and feature flags.
+
+    Returns:
+        Dict[str, Any]: Current capabilities and configuration.
+    """
+    return {
+        "capabilities": config.get_capabilities(),
+        "configuration": {
+            "llm_model": config.openai_model if config.check_llm_availability() else None,
+            "kafka_enabled": config.enable_kafka,
+            "websocket_enabled": config.enable_websocket,
+        },
+    }
 
 
 @app.post("/predict")
