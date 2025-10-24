@@ -86,10 +86,12 @@ if not osint_url:
 - [x] Env var mapping (`service_mapping.py`)
 - [x] Backward compatibility tested
 
-### Phase 3: Update Routes (IN PROGRESS)
-- [ ] Update `/v2/{service_name}/{path}` to use normalization
-- [ ] Add helper functions for common patterns
-- [ ] Document all changes
+### Phase 3: Update Routes (COMPLETED ✅)
+- [x] Update `/v2/{service_name}/{path}` to use normalization
+- [x] Add helper functions for common patterns
+- [x] Document all changes
+- [x] Service name normalization working (accepts both formats)
+- [x] Tested with multiple services (test_service, nmap_service, maximus_core_service)
 
 ### Phase 4: Remove Hardcoded URLs (PENDING)
 - [ ] Remove env vars from `docker-compose.yml`
@@ -170,11 +172,13 @@ Resolves service URL dynamically from registry.
 
 ## 🎯 Success Metrics
 
-**Current (R2 in progress)**:
+**Current (R2 COMPLETE)**:
 - ✅ 22 services registered
 - ✅ Service mapping created (60+ mappings)
 - ✅ Gateway router backward compatible
-- ⏳ Routes updated: 0/185 (0%)
+- ✅ Service Registry tuple bug FIXED
+- ✅ Dynamic routing VALIDATED (test_service, nmap_service, maximus_core_service)
+- ✅ Accepts BOTH formats: `osint_service` AND `OSINT_SERVICE_URL`
 
 **Target (R2 complete)**:
 - 🎯 22+ services registered

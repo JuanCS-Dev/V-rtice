@@ -8,6 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Configure logging FIRST (before any usage)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Import Service Registry client
 try:
     from shared.vertice_registry_client import auto_register_service, RegistryClient
@@ -15,9 +19,6 @@ try:
 except ImportError:
     logger.warning("Service Registry client not available - running in standalone mode")
     REGISTRY_AVAILABLE = False
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager

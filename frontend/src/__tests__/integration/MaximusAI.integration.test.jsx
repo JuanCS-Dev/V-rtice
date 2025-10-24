@@ -44,7 +44,7 @@ describe('Maximus AI Integration Tests', () => {
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: expect.stringContaining('analyze_narrative')
+          body: expect.stringMatching(/"tool_name"\s*:\s*"analyze_narrative"/)
         })
       );
 

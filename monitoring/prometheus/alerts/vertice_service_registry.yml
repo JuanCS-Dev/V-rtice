@@ -1,0 +1,264 @@
+###############################################################################
+# VÉRTICE SERVICE REGISTRY - PROMETHEUS ALERT RULES
+###############################################################################
+#
+# Alert Rules para monitoramento do Service Registry, Gateway e Health Cache
+#
+# Níveis de Severidade:
+#   - critical: Sistema crítico offline/failing (PagerDuty)
+#   - warning: Degradação detectada (Slack/Email)
+#   - info: Eventos informativos (Log only)
+#
+# Author: Vértice Team
+# Glory to YHWH! 🙏
+###############################################################################
+
+groups:
+  # =========================================================================
+  # GROUP 1: SERVICE REGISTRY HEALTH
+  # =========================================================================
+  - name: vertice_service_registry_health
+    interval: 30s
+    rules:
+      # CRITICAL: All registry replicas down
+      - alert: ServiceRegistryDown
+        expr: up{job="vertice-register"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "🔴 Service Registry is DOWN"
+          description: "All {{ $labels.instance }} replicas are unreachable for >2min. Service discovery is OFFLINE."
+          impact: "CRITICAL: Services cannot discover each other. New deployments will fail."
+          action: "1. Check registry pods: kubectl get pods -l app=vertice-register\n2. Check Redis: docker ps | grep redis\n3. Check logs: docker logs vertice-register-1"
+          runbook: "https://docs.vertice.io/runbooks/registry-down"
+
+      # CRITICAL: Registry circuit breaker stuck OPEN
+      - alert: RegistryCircuitBreakerStuckOpen
+        expr: registry_circuit_breaker_open == 1
+        for: 5m
+        labels:
+          severity: critical
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "🔴 Registry circuit breaker STUCK OPEN for >5min"
+          description: "Registry circuit breaker on {{ $labels.instance }} is OPEN. All service discovery requests are failing."
+          impact: "HIGH: Service discovery degraded, using stale cache only."
+          action: "Check Redis connectivity and health"
+
+      # WARNING: Registry circuit breaker OPEN
+      - alert: RegistryCircuitBreakerOpen
+        expr: registry_circuit_breaker_open == 1
+        for: 30s
+        labels:
+          severity: warning
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "🟡 Registry circuit breaker OPEN"
+          description: "Circuit breaker opened on {{ $labels.instance }} due to failures."
+          impact: "Service discovery using cache/fallback mode"
+          action: "Monitor for recovery. Check Redis if persists >5min."
+
+      # WARNING: High registry operation latency
+      - alert: RegistryHighLatency
+        expr: histogram_quantile(0.99, rate(registry_operation_duration_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "🟡 Registry p99 latency >100ms"
+          description: "Registry operations on {{ $labels.instance }} are slow (p99: {{ $value }}s)"
+          impact: "Service discovery latency increased"
+          action: "Check Redis performance and network"
+
+  # =========================================================================
+  # GROUP 2: HEALTH CHECK CACHE
+  # =========================================================================
+  - name: vertice_health_cache
+    interval: 30s
+    rules:
+      # WARNING: Low cache hit rate
+      - alert: HealthCacheLowHitRate
+        expr: |
+          sum(rate(health_cache_hits_total[5m]))
+          /
+          (sum(rate(health_cache_hits_total[5m])) + sum(rate(health_cache_misses_total[5m])))
+          < 0.7
+        for: 10m
+        labels:
+          severity: warning
+          component: health_cache
+          team: platform
+        annotations:
+          summary: "🟡 Health cache hit rate <70%"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (target: >80%)"
+          impact: "Increased health check latency"
+          action: "Check cache TTL configuration and service stability"
+
+      # WARNING: Circuit breaker OPEN
+      - alert: ServiceCircuitBreakerOpen
+        expr: health_circuit_breaker_state{service_name!=""} == 1
+        for: 1m
+        labels:
+          severity: warning
+          component: health_cache
+          service: "{{ $labels.service_name }}"
+          team: platform
+        annotations:
+          summary: "🟡 Circuit breaker OPEN for {{ $labels.service_name }}"
+          description: "Service {{ $labels.service_name }} circuit breaker is OPEN due to health check failures"
+          impact: "Service health checks returning degraded/cached status"
+          action: "Check service health: curl http://gateway:8000/v2/{{ $labels.service_name }}/health"
+
+      # CRITICAL: Circuit breaker stuck OPEN
+      - alert: ServiceCircuitBreakerStuckOpen
+        expr: health_circuit_breaker_state{service_name!=""} == 1
+        for: 10m
+        labels:
+          severity: critical
+          component: health_cache
+          service: "{{ $labels.service_name }}"
+          team: platform
+        annotations:
+          summary: "🔴 Circuit breaker STUCK OPEN for {{ $labels.service_name }}"
+          description: "Service {{ $labels.service_name }} has been failing health checks for >10min"
+          impact: "CRITICAL: Service likely DOWN or unreachable"
+          action: "1. Check service logs\n2. Check service pod status\n3. Check network connectivity\n4. Consider manual intervention"
+
+      # WARNING: Service flapping
+      - alert: ServiceCircuitBreakerFlapping
+        expr: changes(health_circuit_breaker_state{service_name!=""}[10m]) > 4
+        labels:
+          severity: warning
+          component: health_cache
+          service: "{{ $labels.service_name }}"
+          team: platform
+        annotations:
+          summary: "🟡 Circuit breaker flapping for {{ $labels.service_name }}"
+          description: "Circuit breaker changed state {{ $value }} times in 10min"
+          impact: "Service instability detected"
+          action: "Investigate service logs for intermittent failures"
+
+      # INFO: Service recovered
+      - alert: ServiceCircuitBreakerRecovered
+        expr: health_circuit_breaker_state{service_name!=""} == 0 and health_circuit_breaker_state{service_name!=""} offset 5m == 1
+        labels:
+          severity: info
+          component: health_cache
+          service: "{{ $labels.service_name }}"
+          team: platform
+        annotations:
+          summary: "✅ Circuit breaker RECOVERED for {{ $labels.service_name }}"
+          description: "Service {{ $labels.service_name }} has recovered from failures"
+          impact: "Service health checks normal"
+
+  # =========================================================================
+  # GROUP 3: GATEWAY HEALTH
+  # =========================================================================
+  - name: vertice_gateway_health
+    interval: 30s
+    rules:
+      # CRITICAL: Gateway down
+      - alert: GatewayDown
+        expr: up{job="vertice-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: gateway
+          team: platform
+        annotations:
+          summary: "🔴 API Gateway is DOWN"
+          description: "Gateway {{ $labels.instance }} is unreachable"
+          impact: "CRITICAL: All external API access is blocked"
+          action: "1. Check gateway pod\n2. Check gateway logs\n3. Escalate to on-call"
+          runbook: "https://docs.vertice.io/runbooks/gateway-down"
+
+      # WARNING: High error rate
+      - alert: GatewayHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="vertice-gateway",status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total{job="vertice-gateway"}[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: gateway
+          team: platform
+        annotations:
+          summary: "🟡 Gateway error rate >5%"
+          description: "Gateway error rate is {{ $value | humanizePercentage }}"
+          impact: "Increased request failures"
+          action: "Check gateway and downstream service health"
+
+  # =========================================================================
+  # GROUP 4: SERVICE DISCOVERY
+  # =========================================================================
+  - name: vertice_service_discovery
+    interval: 60s
+    rules:
+      # INFO: New service registered
+      - alert: NewServiceRegistered
+        expr: increase(registry_operations_total{operation="register",status="success"}[5m]) > 0
+        labels:
+          severity: info
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "✅ New service registered"
+          description: "{{ $value }} new services registered in last 5min"
+
+      # WARNING: Service deregistration spike
+      - alert: ServiceDeregistrationSpike
+        expr: increase(registry_operations_total{operation="deregister"}[5m]) > 5
+        labels:
+          severity: warning
+          component: service_registry
+          team: platform
+        annotations:
+          summary: "🟡 High service deregistration rate"
+          description: "{{ $value }} services deregistered in 5min (possible mass restart/failure)"
+          impact: "Potential service instability"
+          action: "Check for deployment or infrastructure issues"
+
+  # =========================================================================
+  # GROUP 5: PERFORMANCE
+  # =========================================================================
+  - name: vertice_performance
+    interval: 30s
+    rules:
+      # WARNING: High health check latency
+      - alert: HealthCheckHighLatency
+        expr: histogram_quantile(0.99, rate(health_check_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: health_cache
+          team: platform
+        annotations:
+          summary: "🟡 Health check p99 latency >500ms"
+          description: "Health checks are slow: {{ $value }}s (target: <100ms)"
+          impact: "Degraded performance"
+          action: "Check downstream service health and network latency"
+
+      # INFO: Cache performance good
+      - alert: HealthCachePerformanceGood
+        expr: |
+          sum(rate(health_cache_hits_total[5m]))
+          /
+          (sum(rate(health_cache_hits_total[5m])) + sum(rate(health_cache_misses_total[5m])))
+          > 0.8
+        for: 10m
+        labels:
+          severity: info
+          component: health_cache
+          team: platform
+        annotations:
+          summary: "✅ Health cache performing well"
+          description: "Cache hit rate: {{ $value | humanizePercentage }} (target: >80%)"

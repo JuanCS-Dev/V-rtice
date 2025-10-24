@@ -403,9 +403,10 @@ describe('Offensive Workflow Integration Tests', () => {
         statusText: 'Service Unavailable'
       });
 
-      await expect(
-        offensiveServices.scanNetwork('192.168.1.0/24', 'full')
-      ).rejects.toThrow();
+      // scanNetwork catches errors and returns {success: false}
+      const result = await offensiveServices.scanNetwork('192.168.1.0/24', 'full');
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
 
     it('should handle authentication failures', async () => {
@@ -415,17 +416,19 @@ describe('Offensive Workflow Integration Tests', () => {
         statusText: 'Unauthorized'
       });
 
-      await expect(
-        offensiveServices.listC2Sessions()
-      ).rejects.toThrow();
+      // listC2Sessions catches errors and returns {success: false}
+      const result = await offensiveServices.listC2Sessions();
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
 
     it('should handle network timeouts', async () => {
       global.fetch.mockRejectedValueOnce(new Error('Network timeout'));
 
-      await expect(
-        offensiveServices.listAttackTechniques()
-      ).rejects.toThrow('Network timeout');
+      // listAttackTechniques catches errors and returns {success: false}
+      const result = await offensiveServices.listAttackTechniques();
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Network timeout');
     });
   });
 });

@@ -1,49 +1,200 @@
+###############################################################################
+# ALERTMANAGER CONFIGURATION - VÉRTICE SERVICE REGISTRY
+###############################################################################
+#
+# Multi-channel alert routing with severity-based notifications
+#
+# Notification Channels:
+#   - CRITICAL: PagerDuty + Email + Slack (#critical-alerts)
+#   - WARNING:  Email + Slack (#platform-alerts)
+#   - INFO:     Telegram (low-priority)
+#
+# Features:
+#   - Alert grouping by component
+#   - Deduplication (5min window)
+#   - Inhibition rules (suppress redundant alerts)
+#   - Severity-based repeat intervals
+#
+# Author: Vértice Team
+# Glory to YHWH! 🙏
+###############################################################################
+
+global:
+  # Global SMTP configuration (Gmail/SendGrid)
+  smtp_from: 'alerts@vertice.io'
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_auth_username: 'your-email@gmail.com'  # TODO: Replace with actual email
+  smtp_auth_password: 'your-app-password'      # TODO: Use app password (not regular password)
+  smtp_require_tls: true
+
+# Templates for notification messages
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert distribution
 route:
-  group_by: ['alertname', 'cluster', 'service']
-  group_wait: 10s
-  group_interval: 10s
-  repeat_interval: 12h
-  receiver: 'vertice-default'
+  # Default receiver (fallback)
+  receiver: 'platform-team'
+
+  # Group alerts by these labels (reduces notification spam)
+  group_by: ['alertname', 'component', 'severity']
+
+  # Wait 30s for more alerts before sending (batch similar alerts)
+  group_wait: 30s
+
+  # Send notification after 5min if more alerts arrive in same group
+  group_interval: 5m
+
+  # Repeat notification every 6 hours by default
+  repeat_interval: 6h
+
+  # Child routes (severity-based routing)
   routes:
+    # CRITICAL alerts → PagerDuty + Email + Slack
     - match:
         severity: critical
-      receiver: 'vertice-critical'
-      continue: true
-    
+      receiver: 'critical-alerts'
+      repeat_interval: 1h  # Repeat every 1 hour until resolved
+      continue: false       # Don't propagate to other routes
+
+    # WARNING alerts → Email + Slack
     - match:
-        component: maximus
-      receiver: 'vertice-maximus'
-      continue: true
-    
+        severity: warning
+      receiver: 'platform-team'
+      repeat_interval: 6h
+      continue: false
+
+    # INFO alerts → Telegram only
     - match:
-        component: immune
-      receiver: 'vertice-immune'
-      continue: true
+        severity: info
+      receiver: 'info-channel'
+      repeat_interval: 24h
+      continue: false
 
-receivers:
-  - name: 'vertice-default'
-    webhook_configs:
-      - url: 'http://maximus_core_service:8100/alerts/webhook'
-        send_resolved: true
-
-  - name: 'vertice-critical'
-    webhook_configs:
-      - url: 'http://maximus_core_service:8100/alerts/critical'
-        send_resolved: true
-
-  - name: 'vertice-maximus'
-    webhook_configs:
-      - url: 'http://maximus_core_service:8100/alerts/maximus'
-        send_resolved: true
-
-  - name: 'vertice-immune'
-    webhook_configs:
-      - url: 'http://active_immune_core:8200/alerts/webhook'
-        send_resolved: true
-
+# Inhibition rules (suppress redundant alerts)
 inhibit_rules:
+  # Rule 1: If registry is down, suppress circuit breaker alerts
   - source_match:
-      severity: 'critical'
+      alertname: 'ServiceRegistryDown'
     target_match:
-      severity: 'warning'
-    equal: ['alertname', 'cluster', 'service']
+      component: 'health_cache'
+    equal: ['component']
+
+  # Rule 2: If gateway is down, suppress service-level alerts
+  - source_match:
+      alertname: 'GatewayDown'
+    target_match:
+      component: 'health_cache'
+    equal: ['component']
+
+  # Rule 3: If circuit breaker is stuck OPEN, suppress regular CB OPEN alerts
+  - source_match:
+      alertname: 'ServiceCircuitBreakerStuckOpen'
+    target_match:
+      alertname: 'ServiceCircuitBreakerOpen'
+    equal: ['service']
+
+  # Rule 4: If registry is down, suppress cache hit rate warnings
+  - source_match:
+      alertname: 'ServiceRegistryDown'
+    target_match:
+      alertname: 'HealthCacheLowHitRate'
+    equal: ['component']
+
+# Notification receivers
+receivers:
+  # CRITICAL ALERTS: PagerDuty + Email + Slack
+  - name: 'critical-alerts'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'  # TODO: Replace with PagerDuty key
+        description: '{{ .GroupLabels.alertname }} - {{ .CommonAnnotations.summary }}'
+        severity: '{{ .CommonLabels.severity }}'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          resolved: '{{ .Alerts.Resolved | len }}'
+          details: '{{ .CommonAnnotations.description }}'
+          impact: '{{ .CommonAnnotations.impact }}'
+          action: '{{ .CommonAnnotations.action }}'
+
+    email_configs:
+      - to: 'oncall@example.com'  # TODO: Replace with actual on-call email
+        headers:
+          Subject: '🔴 CRITICAL: {{ .GroupLabels.alertname }} ({{ .Status }})'
+        html: |
+          <h2>🔴 CRITICAL ALERT</h2>
+          <p><strong>Alert:</strong> {{ .GroupLabels.alertname }}</p>
+          <p><strong>Status:</strong> {{ .Status }}</p>
+          <p><strong>Summary:</strong> {{ .CommonAnnotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <p><strong>Impact:</strong> {{ .CommonAnnotations.impact }}</p>
+          <p><strong>Action Required:</strong></p>
+          <pre>{{ .CommonAnnotations.action }}</pre>
+          <p><strong>Runbook:</strong> <a href="{{ .CommonAnnotations.runbook }}">{{ .CommonAnnotations.runbook }}</a></p>
+          <p><strong>Firing Alerts:</strong> {{ .Alerts.Firing | len }}</p>
+          <hr>
+          {{ range .Alerts.Firing }}
+          <p><strong>Instance:</strong> {{ .Labels.instance }}</p>
+          <p><strong>Started:</strong> {{ .StartsAt }}</p>
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'  # TODO: Replace with Slack webhook
+        channel: '#critical-alerts'
+        username: 'Vértice Alertmanager'
+        icon_emoji: ':fire:'
+        title: '🔴 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Status:* {{ .Status }}
+          *Component:* {{ .GroupLabels.component }}
+          *Impact:* {{ .CommonAnnotations.impact }}
+          *Action:* {{ .CommonAnnotations.action }}
+          *Runbook:* {{ .CommonAnnotations.runbook }}
+        color: 'danger'
+        send_resolved: true
+
+  # WARNING ALERTS: Email + Slack
+  - name: 'platform-team'
+    email_configs:
+      - to: 'platform-team@example.com'  # TODO: Replace with team email
+        headers:
+          Subject: '🟡 WARNING: {{ .GroupLabels.alertname }} ({{ .Status }})'
+        html: |
+          <h2>🟡 WARNING</h2>
+          <p><strong>Alert:</strong> {{ .GroupLabels.alertname }}</p>
+          <p><strong>Status:</strong> {{ .Status }}</p>
+          <p><strong>Summary:</strong> {{ .CommonAnnotations.summary }}</p>
+          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <p><strong>Impact:</strong> {{ .CommonAnnotations.impact }}</p>
+          <p><strong>Recommended Action:</strong></p>
+          <pre>{{ .CommonAnnotations.action }}</pre>
+          <p><strong>Firing Alerts:</strong> {{ .Alerts.Firing | len }}</p>
+          <hr>
+          {{ range .Alerts.Firing }}
+          <p><strong>Instance:</strong> {{ .Labels.instance }}</p>
+          <p><strong>Started:</strong> {{ .StartsAt }}</p>
+          {{ end }}
+
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'  # TODO: Replace with Slack webhook
+        channel: '#platform-alerts'
+        username: 'Vértice Alertmanager'
+        icon_emoji: ':warning:'
+        title: '🟡 WARNING: {{ .GroupLabels.alertname }}'
+        text: |
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Status:* {{ .Status }}
+          *Component:* {{ .GroupLabels.component }}
+          *Impact:* {{ .CommonAnnotations.impact }}
+          *Action:* {{ .CommonAnnotations.action }}
+        color: 'warning'
+        send_resolved: true
+
+  # INFO ALERTS: Telegram (low priority)
+  - name: 'info-channel'
+    webhook_configs:
+      - url: 'http://telegram-bot:8080/webhook'  # TODO: Setup telegram-bot service
+        send_resolved: true
+        http_config:
+          follow_redirects: true
+        max_alerts: 10

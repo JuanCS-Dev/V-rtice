@@ -28,7 +28,13 @@ from starlette.websockets import WebSocketDisconnect
 # Import dynamic router
 from gateway_router import get_service_url, ServiceNotFoundError, get_circuit_breaker_status, get_cache_stats
 
+# Import health cache
+from health_cache import HealthCheckCache
+
 logger = logging.getLogger(__name__)
+
+# Global health cache instance
+health_cache: HealthCheckCache = None
 
 app = FastAPI(
     title="Maximus API Gateway (Dynamic Routing)",
@@ -71,14 +77,28 @@ async def verify_api_key(api_key: str = Depends(api_key_header)):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the API Gateway."""
+    global health_cache
+
     print("🚀 Starting Maximus API Gateway...")
+
+    # Initialize health check cache (3-layer architecture)
+    health_cache = HealthCheckCache(redis_client=None)  # TODO: Add Redis client
+    logger.info("✅ Health Check Cache initialized")
+
     print("✅ Maximus API Gateway started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the API Gateway."""
+    global health_cache
+
     print("👋 Shutting down Maximus API Gateway...")
+
+    # Close health cache
+    if health_cache:
+        await health_cache.close()
+
     print("🛑 Maximus API Gateway shut down.")
 
 
@@ -95,12 +115,66 @@ async def health_check() -> Dict[str, str]:
 @app.get("/gateway/status")
 async def gateway_status() -> Dict:
     """Get gateway status including circuit breaker and cache info."""
-    return {
+    status = {
         "gateway": "operational",
         "version": "2.0.0",
         "circuit_breaker": get_circuit_breaker_status(),
-        "cache": get_cache_stats()
+        "service_discovery_cache": get_cache_stats()
     }
+
+    # Add health cache stats if available
+    if health_cache:
+        status["health_cache"] = health_cache.get_cache_stats()
+
+    return status
+
+
+@app.get("/gateway/health-check/{service_name}")
+async def check_service_health(service_name: str) -> Dict:
+    """
+    Check health of a service with 3-layer caching.
+
+    This endpoint uses intelligent caching:
+    - Layer 1: Local cache (5s TTL) - <1ms
+    - Layer 2: Redis cache (30s TTL) - <5ms
+    - Layer 3: Direct check + Circuit breaker
+
+    Args:
+        service_name: Service to check (e.g., "nmap_service", "osint_service")
+
+    Returns:
+        Health status with caching metadata
+    """
+    if not health_cache:
+        raise HTTPException(status_code=503, detail="Health cache not initialized")
+
+    try:
+        # Get service URL from registry
+        service_url = await get_service_url(service_name)
+
+        # Perform cached health check
+        health_status = await health_cache.get_health(
+            service_name=service_name,
+            service_url=service_url,
+            health_endpoint="/health"
+        )
+
+        return {
+            "service_name": service_name,
+            "service_url": service_url,
+            "healthy": health_status.healthy,
+            "status_code": health_status.status_code,
+            "response_time_ms": round(health_status.response_time_ms, 2),
+            "cached": health_status.cached,
+            "cache_layer": health_status.cache_layer,
+            "timestamp": health_status.timestamp
+        }
+
+    except ServiceNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Health check failed for {service_name}: {e}")
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
 
 
 # ============================================================================

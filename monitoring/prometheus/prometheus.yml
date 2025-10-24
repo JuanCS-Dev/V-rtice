@@ -14,6 +14,7 @@ alerting:
 rule_files:
   - "/etc/prometheus/alerts.yml"
   - "/etc/prometheus/rules/*.yml"
+  - "/etc/prometheus/alerts/*.yml"  # R4: Service Registry alert rules
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -23,14 +24,16 @@ scrape_configs:
           service: 'prometheus'
           category: 'monitoring'
 
-  - job_name: 'vertice-core'
+  - job_name: 'vertice-gateway'
     static_configs:
       - targets: ['api_gateway:8000']
         labels:
-          service: 'api_gateway'
+          component: 'gateway'
+          team: 'platform'
           category: 'core'
     metrics_path: '/metrics'
-    scrape_interval: 10s
+    scrape_interval: 15s
+    scrape_timeout: 10s
 
   - job_name: 'vertice-maximus'
     static_configs:
@@ -223,19 +226,20 @@ scrape_configs:
           category: 'infrastructure'
 
   # =========================================================================
-  # SERVICE REGISTRY - Mission Critical Service Discovery
+  # SERVICE REGISTRY - Mission Critical Service Discovery (R4)
   # =========================================================================
-  - job_name: 'vertice-service-registry'
+  - job_name: 'vertice-register'
     static_configs:
       - targets:
-          - 'vertice-register-1:80'
-          - 'vertice-register-2:80'
-          - 'vertice-register-3:80'
-          - 'vertice-register-4:80'
-          - 'vertice-register-5:80'
+          - 'vertice-register-1:8888'
+          - 'vertice-register-2:8888'
+          - 'vertice-register-3:8888'
+          - 'vertice-register-4:8888'
+          - 'vertice-register-5:8888'
         labels:
-          service: 'service_registry'
-          category: 'infrastructure'
+          component: 'service_registry'
+          team: 'platform'
           layer: 'mission_critical'
     metrics_path: '/metrics'
-    scrape_interval: 10s  # Frequent scraping for registry health
+    scrape_interval: 15s
+    scrape_timeout: 10s
