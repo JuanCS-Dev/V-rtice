@@ -108,6 +108,38 @@ vi.mock('../../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer', () =
   default: () => <div data-testid="traffic-analyzer">Traffic Analyzer</div>,
 }));
 
+// Mock dashboard child components
+vi.mock('../components/DefensiveHeader', () => ({
+  default: ({ modules, setActiveModule }) => (
+    <div data-testid="defensive-header">
+      Defensive Header
+      {modules?.map(m => (
+        <button key={m.id} onClick={() => setActiveModule?.(m.id)}>
+          {m.name}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
+vi.mock('../components/DefensiveSidebar', () => ({
+  default: ({ alerts }) => (
+    <div data-testid="defensive-sidebar">
+      Defensive Sidebar ({alerts?.length || 0} alerts)
+    </div>
+  ),
+}));
+
+vi.mock('../components/ModuleContainer', () => ({
+  default: ({ children }) => (
+    <div data-testid="module-container">{children}</div>
+  ),
+}));
+
+vi.mock('../../../shared/DashboardFooter', () => ({
+  DashboardFooter: () => <div data-testid="dashboard-footer">Footer</div>,
+}));
+
 // Helper to create test wrapper
 const createTestWrapper = () => {
   const queryClient = new QueryClient({
