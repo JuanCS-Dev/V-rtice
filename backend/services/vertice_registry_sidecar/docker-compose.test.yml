@@ -1,0 +1,30 @@
+# Test Docker Compose for Sidecar Agent
+# This tests the sidecar with the OSINT service (already running)
+
+version: '3.8'
+
+networks:
+  maximus-network:
+    external: true
+
+services:
+  # Sidecar agent for existing OSINT service
+  osint-sidecar-test:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-osint-sidecar-test
+    environment:
+      - SERVICE_NAME=osint_service
+      - SERVICE_HOST=vertice-osint
+      - SERVICE_PORT=8049
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:8888
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+    restart: "no"  # For testing only
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vértice - Serviços Standalone (IP Intel, NMAP, OSINT, etc)</title>
+    <style>
+        @media print {
+            body { margin: 1cm; font-family: monospace; font-size: 9pt; }
+            h1 { font-size: 14pt; margin-bottom: 5px; border-bottom: 2px solid black; }
+            h2 { font-size: 11pt; margin-top: 8px; margin-bottom: 3px; background: #ddd; padding: 3px; }
+            h3 { font-size: 10pt; margin: 5px 0 2px 0; }
+            pre { background: #f5f5f5; padding: 4px; margin: 2px 0; border: 1px solid #ccc; font-size: 8pt; }
+            code { background: #f5f5f5; padding: 1px 2px; font-size: 8pt; }
+            table { width: 100%; border-collapse: collapse; margin: 3px 0; font-size: 8pt; }
+            td, th { border: 1px solid black; padding: 2px; text-align: left; }
+            th { background: #ddd; font-weight: bold; }
+            .box { border: 2px solid black; padding: 4px; margin: 4px 0; background: #f9f9f9; }
+            .status-running { color: green; font-weight: bold; }
+            .status-stopped { color: red; font-weight: bold; }
+        }
+        @media screen {
+            body { margin: 20px; font-family: monospace; max-width: 900px; }
+            h1 { border-bottom: 2px solid black; }
+            h2 { background: #ddd; padding: 5px; }
+            pre { background: #f5f5f5; padding: 8px; border: 1px solid #ccc; }
+            table { border-collapse: collapse; margin: 8px 0; }
+            td, th { border: 1px solid black; padding: 4px; }
+            th { background: #ddd; }
+            .box { border: 2px solid black; padding: 8px; margin: 8px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>🛡️ Vértice - Guia de Serviços Standalone</h1>
+
+<div class="box">
+<strong>Nota:</strong> Os serviços standalone (IP Intel, NMAP, OSINT) estão <span class="status-stopped">PARADOS</span>.<br>
+Para iniciá-los: <code>docker start vertice-ip-intel vertice-nmap vertice-osint</code>
+</div>
+
+<h2>📊 STATUS DOS SERVIÇOS</h2>
+<table>
+<tr><th>Serviço</th><th>Container</th><th>Porta</th><th>Status</th></tr>
+<tr><td>IP Intelligence</td><td>vertice-ip-intel</td><td>8033</td><td class="status-stopped">⏸️ Stopped</td></tr>
+<tr><td>NMAP Scanner</td><td>vertice-nmap</td><td>8034</td><td class="status-stopped">⏸️ Stopped</td></tr>
+<tr><td>OSINT</td><td>vertice-osint</td><td>8035</td><td class="status-stopped">⏸️ Stopped</td></tr>
+<tr><td>Active Immune Core</td><td>active-immune-core</td><td>8200</td><td class="status-running">✅ Running</td></tr>
+<tr><td>HITL Patch</td><td>vertice-hitl-patch</td><td>8811</td><td class="status-running">✅ Running</td></tr>
+<tr><td>Wargaming Crisol</td><td>vertice-wargaming-crisol</td><td>8812</td><td class="status-running">✅ Running</td></tr>
+<tr><td>Vault</td><td>vertice-vault</td><td>8201</td><td class="status-running">✅ Running</td></tr>
+<tr><td>Redis Master</td><td>vertice-redis-master</td><td>6379</td><td class="status-running">✅ Running</td></tr>
+</table>
+
+<h2>🚀 INICIAR SERVIÇOS</h2>
+
+<h3>Iniciar Serviços Específicos</h3>
+<pre>
+# Iniciar IP Intelligence
+docker start vertice-ip-intel
+curl http://localhost:8033/health
+
+# Iniciar NMAP Service
+docker start vertice-nmap
+curl http://localhost:8034/health
+
+# Iniciar OSINT Service
+docker start vertice-osint
+curl http://localhost:8035/health
+
+# Iniciar TODOS os serviços standalone
+docker start vertice-ip-intel vertice-nmap vertice-osint
+</pre>
+
+<h2>1. IP INTELLIGENCE SERVICE</h2>
+
+<h3>Informações</h3>
+<table>
+<tr><th>Propriedade</th><th>Valor</th></tr>
+<tr><td>Endpoint</td><td><code>http://localhost:8033</code></td></tr>
+<tr><td>Container</td><td><code>vertice-ip-intel</code></td></tr>
+<tr><td>Função</td><td>Lookup de IPs, threat intel, geolocalização</td></tr>
+</table>
+
+<h3>Comandos via vcli (quando integrado)</h3>
+<pre>
+# Atualmente não há comando direto no vcli
+# Use curl diretamente:
+
+# Health check
+curl http://localhost:8033/health
+
+# Query IP
+curl -X POST http://localhost:8033/api/v1/query \
+  -H "Content-Type: application/json" \
+  -d '{"ip": "8.8.8.8"}'
+
+# Lookup com detalhes
+curl -X POST http://localhost:8033/api/v1/lookup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ip": "192.168.1.1",
+    "include_threat_intel": true,
+    "include_geolocation": true
+  }'
+</pre>
+
+<h3>Exemplo de Response</h3>
+<pre>
+{
+  "ip": "8.8.8.8",
+  "reputation": "clean",
+  "country": "US",
+  "city": "Mountain View",
+  "organization": "Google LLC",
+  "is_vpn": false,
+  "is_proxy": false,
+  "threat_level": "low",
+  "blacklists": []
+}
+</pre>
+
+<h2>2. NMAP SERVICE (Network Scanner)</h2>
+
+<h3>Informações</h3>
+<table>
+<tr><th>Propriedade</th><th>Valor</th></tr>
+<tr><td>Endpoint</td><td><code>http://localhost:8034</code></td></tr>
+<tr><td>Container</td><td><code>vertice-nmap</code></td></tr>
+<tr><td>Função</td><td>Network scanning, port discovery, OS detection</td></tr>
+</table>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli investigate recon health --recon-endpoint http://localhost:8034
+
+# Iniciar scan rápido
+vcli investigate recon start \
+  --recon-endpoint http://localhost:8034 \
+  --target 192.168.1.0/24 \
+  --scan-type quick
+
+# Iniciar scan completo
+vcli investigate recon start \
+  --recon-endpoint http://localhost:8034 \
+  --target 192.168.1.100 \
+  --scan-type full
+
+# Ver status do scan
+vcli investigate recon status \
+  --recon-endpoint http://localhost:8034 \
+  --task-id <task-id>
+
+# Ver resultados
+vcli investigate recon results \
+  --recon-endpoint http://localhost:8034 \
+  --task-id <task-id>
+
+# Métricas
+vcli investigate recon metrics \
+  --recon-endpoint http://localhost:8034
+</pre>
+
+<h3>Comandos diretos (curl)</h3>
+<pre>
+# Health check
+curl http://localhost:8034/health
+
+# Iniciar scan
+curl -X POST http://localhost:8034/api/v1/scan \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target": "192.168.1.100",
+    "scan_type": "quick",
+    "options": ["-sV", "-O"]
+  }'
+
+# Response: {"scan_id": "uuid-123", "status": "started"}
+
+# Ver resultados
+curl http://localhost:8034/api/v1/scan/uuid-123
+</pre>
+
+<h3>Tipos de Scan</h3>
+<table>
+<tr><th>Tipo</th><th>Descrição</th><th>Opções Nmap</th></tr>
+<tr><td>quick</td><td>Scan rápido (top 100 ports)</td><td>-F -T4</td></tr>
+<tr><td>full</td><td>Scan completo (todas as portas)</td><td>-p- -sV -O</td></tr>
+<tr><td>port_scan</td><td>Scan de portas específicas</td><td>-p 80,443,22</td></tr>
+<tr><td>stealth</td><td>SYN scan furtivo</td><td>-sS -T2</td></tr>
+<tr><td>aggressive</td><td>Scan agressivo</td><td>-A -T4</td></tr>
+</table>
+
+<h2>3. OSINT SERVICE (Intelligence Gathering)</h2>
+
+<h3>Informações</h3>
+<table>
+<tr><th>Propriedade</th><th>Valor</th></tr>
+<tr><td>Endpoint</td><td><code>http://localhost:8035</code></td></tr>
+<tr><td>Container</td><td><code>vertice-osint</code></td></tr>
+<tr><td>Função</td><td>OSINT gathering, domain intel, social media</td></tr>
+</table>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli investigate osint health --osint-endpoint http://localhost:8035
+
+# Gather domain intelligence
+vcli investigate osint gather \
+  --osint-endpoint http://localhost:8035 \
+  --target example.com \
+  --type domain
+
+# Search social media
+vcli investigate osint search \
+  --osint-endpoint http://localhost:8035 \
+  --query "target username" \
+  --source twitter,linkedin
+
+# Get results
+vcli investigate osint results \
+  --osint-endpoint http://localhost:8035 \
+  --task-id <task-id>
+</pre>
+
+<h3>Comandos diretos (curl)</h3>
+<pre>
+# Health check
+curl http://localhost:8035/health
+
+# Gather intel
+curl -X POST http://localhost:8035/api/v1/gather \
+  -H "Content-Type: application/json" \
+  -d '{
+    "target": "example.com",
+    "sources": ["whois", "dns", "subdomain"],
+    "depth": "deep"
+  }'
+
+# Search pessoas
+curl -X POST http://localhost:8035/api/v1/person-search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "location": "Brazil",
+    "sources": ["linkedin", "twitter"]
+  }'
+</pre>
+
+<h2>4. THREAT INTELLIGENCE SERVICE</h2>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli threat intel health --intel-endpoint http://localhost:8037
+
+# Query threat intel
+vcli threat intel query \
+  --intel-endpoint http://localhost:8037 \
+  --indicator 8.8.8.8 \
+  --type ip
+
+# Query hash
+vcli threat intel query \
+  --intel-endpoint http://localhost:8037 \
+  --indicator <md5-hash> \
+  --type hash
+
+# Status geral
+vcli threat intel status --intel-endpoint http://localhost:8037
+</pre>
+
+<h2>5. VULNERABILITY INTELLIGENCE</h2>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli threat vuln health --vuln-endpoint http://localhost:8038
+
+# Query CVE
+vcli threat vuln query \
+  --vuln-endpoint http://localhost:8038 \
+  --cve CVE-2024-1234
+
+# Search vulnerabilities
+vcli threat vuln search \
+  --vuln-endpoint http://localhost:8038 \
+  --product "Apache" \
+  --version "2.4.50"
+
+# Get CVSS score
+vcli threat vuln score \
+  --vuln-endpoint http://localhost:8038 \
+  --cve CVE-2024-1234
+</pre>
+
+<h2>6. WEB ATTACK SERVICE</h2>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli threat attack health --attack-endpoint http://localhost:8039
+
+# SQL Injection test
+vcli threat attack test \
+  --attack-endpoint http://localhost:8039 \
+  --target http://target.com/page?id=1 \
+  --attack-type sqli
+
+# XSS test
+vcli threat attack test \
+  --attack-endpoint http://localhost:8039 \
+  --target http://target.com/search \
+  --attack-type xss
+
+# Directory traversal
+vcli threat attack test \
+  --attack-endpoint http://localhost:8039 \
+  --target http://target.com/file \
+  --attack-type path_traversal
+
+# Ver resultados
+vcli threat attack results \
+  --attack-endpoint http://localhost:8039 \
+  --task-id <task-id>
+</pre>
+
+<h2>7. ACTIVE IMMUNE CORE (Running ✅)</h2>
+
+<h3>Comandos via vcli</h3>
+<pre>
+# Health check
+vcli immune health --endpoint http://localhost:8200
+
+# List agents
+vcli immune agents list --endpoint http://localhost:8200
+
+# Deploy agent
+vcli immune agents deploy \
+  --endpoint http://localhost:8200 \
+  --type defensive \
+  --target production
+
+# Get metrics
+vcli immune metrics --endpoint http://localhost:8200
+
+# Check lymph nodes
+vcli immune lymphnodes status --endpoint http://localhost:8200
+</pre>
+
+<h2>📝 WORKFLOW COMPLETO: Reconhecimento de Rede</h2>
+
+<h3>Passo 1: Recon com NMAP</h3>
+<pre>
+# Iniciar scan
+vcli investigate recon start \
+  --recon-endpoint http://localhost:8034 \
+  --target 192.168.1.0/24 \
+  --scan-type full
+
+# Output: scan_id = abc-123
+</pre>
+
+<h3>Passo 2: Aguardar e Ver Resultados</h3>
+<pre>
+# Ver status
+vcli investigate recon status \
+  --recon-endpoint http://localhost:8034 \
+  --task-id abc-123
+
+# Ver resultados quando completo
+vcli investigate recon results \
+  --recon-endpoint http://localhost:8034 \
+  --task-id abc-123
+</pre>
+
+<h3>Passo 3: Enriquecer com IP Intelligence</h3>
+<pre>
+# Para cada IP encontrado, query threat intel
+curl -X POST http://localhost:8033/api/v1/query \
+  -H "Content-Type: application/json" \
+  -d '{"ip": "192.168.1.100"}'
+</pre>
+
+<h3>Passo 4: OSINT Gathering</h3>
+<pre>
+# Se encontrou domínios, fazer OSINT
+vcli investigate osint gather \
+  --osint-endpoint http://localhost:8035 \
+  --target example.com \
+  --type domain
+</pre>
+
+<h2>🔧 TROUBLESHOOTING</h2>
+
+<h3>Serviço não responde</h3>
+<pre>
+# Verificar se está rodando
+docker ps | grep vertice-ip-intel
+
+# Iniciar se estiver parado
+docker start vertice-ip-intel
+
+# Ver logs
+docker logs vertice-ip-intel --tail 50
+
+# Reiniciar
+docker restart vertice-ip-intel
+</pre>
+
+<h3>Erro "connection refused"</h3>
+<pre>
+# Verificar porta correta
+docker port vertice-ip-intel
+
+# Testar com curl
+curl http://localhost:8033/health
+
+# Se não funcionar, checar se o serviço subiu
+docker logs vertice-ip-intel
+</pre>
+
+<h2>🎯 ALIASES ÚTEIS</h2>
+
+<p>Adicione ao <code>~/.bashrc</code>:</p>
+<pre>
+# Serviços Standalone
+alias vip="vcli investigate recon --recon-endpoint http://localhost:8034"
+alias vosint="vcli investigate osint --osint-endpoint http://localhost:8035"
+alias vthreat="vcli threat intel --intel-endpoint http://localhost:8037"
+alias vimmune="vcli immune --endpoint http://localhost:8200"
+
+# Docker shortcuts
+alias start-recon="docker start vertice-ip-intel vertice-nmap vertice-osint"
+alias stop-recon="docker stop vertice-ip-intel vertice-nmap vertice-osint"
+alias logs-nmap="docker logs vertice-nmap --tail 50 -f"
+
+# Quick scans
+alias quick-scan='vcli investigate recon start --recon-endpoint http://localhost:8034 --scan-type quick --target'
+alias full-scan='vcli investigate recon start --recon-endpoint http://localhost:8034 --scan-type full --target'
+</pre>
+
+<hr>
+<p style="text-align: center; font-size: 8pt;">
+<strong>Vértice Services v1.0</strong> | IP Intel, NMAP, OSINT, Threat Intel | 2025-10-24
+</p>
+
+</body>
+</html>

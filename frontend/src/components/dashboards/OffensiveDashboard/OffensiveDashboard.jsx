@@ -21,7 +21,7 @@ import { OffensiveHeader } from './components/OffensiveHeader';
 import { OffensiveSidebar } from './components/OffensiveSidebar';
 import { DashboardFooter } from '../../shared/DashboardFooter';
 import { ModuleContainer } from './components/ModuleContainer';
-import { useOffensiveMetrics } from './hooks/useOffensiveMetrics';
+import { useOffensiveMetrics } from '@/hooks/services/useOffensiveService';
 import { useRealTimeExecutions } from './hooks/useRealTimeExecutions';
 import SkipLink from '../../shared/SkipLink';
 import QueryErrorBoundary from '../../shared/QueryErrorBoundary';
@@ -51,9 +51,17 @@ const LoadingFallback = () => {
 
 export const OffensiveDashboard = ({ setCurrentView }) => {
   const { t } = useTranslation();
-  const { metrics, loading: metricsLoading } = useOffensiveMetrics();
+  const { data: metricsData, isLoading: metricsLoading } = useOffensiveMetrics();
   const { executions } = useRealTimeExecutions();
   const [activeModule, setActiveModule] = React.useState('network-recon');
+
+  // Provide default metrics if loading or undefined
+  const metrics = metricsData || {
+    activeScans: 0,
+    exploitsFound: 0,
+    targets: 0,
+    c2Sessions: 0,
+  };
 
   const handleBack = () => {
     if (setCurrentView) {

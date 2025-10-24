@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vértice Frontend - Quick Tips (Anti-Burro)</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #000;
+            background: white;
+            padding: 0;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 24pt;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #000;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 9pt;
+            margin-top: 5px;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+
+        h2 {
+            font-size: 14pt;
+            background: #000;
+            color: white;
+            padding: 5px 10px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+            border-left: 4px solid #000;
+            padding-left: 8px;
+        }
+
+        .tip-box {
+            border: 2px solid #000;
+            padding: 8px;
+            margin: 8px 0;
+            background: #f9f9f9;
+        }
+
+        .tip-box strong {
+            display: block;
+            font-size: 11pt;
+            margin-bottom: 4px;
+        }
+
+        .code {
+            font-family: 'Courier New', monospace;
+            background: #e8e8e8;
+            padding: 6px 8px;
+            border-left: 3px solid #000;
+            margin: 5px 0;
+            font-size: 9pt;
+            white-space: pre-wrap;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 8px;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 4px 0 4px 25px;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            font-size: 14pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 9pt;
+        }
+
+        th {
+            background: #000;
+            color: white;
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 5px 6px;
+        }
+
+        .icon {
+            font-size: 16pt;
+            margin-right: 5px;
+        }
+
+        footer {
+            border-top: 2px solid #000;
+            padding-top: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+            }
+        }
+
+        @media screen {
+            body {
+                background: #ccc;
+                padding: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>🚀 VÉRTICE FRONTEND</h1>
+            <p>Quick Tips - Guia Anti-Burro</p>
+            <span class="badge">v2.0.0 | Imprima e Cole na Parede</span>
+        </header>
+
+        <!-- SECTION 1: COMEÇANDO -->
+        <div class="section">
+            <h2>🎯 1. COMEÇANDO (5 MINUTOS)</h2>
+
+            <div class="tip-box">
+                <strong>✅ Checklist de Instalação</strong>
+                <ul class="checklist">
+                    <li>Clonar repo e entrar no diretório</li>
+                    <li>Rodar <code>npm install</code></li>
+                    <li>Copiar <code>.env.example</code> para <code>.env</code></li>
+                    <li>Configurar <code>VITE_API_GATEWAY_URL</code></li>
+                    <li>Rodar <code>npm test</code> (110 tests devem passar)</li>
+                    <li>Rodar <code>npm run dev</code></li>
+                </ul>
+            </div>
+
+            <div class="code">npm install
+npm test -- src/services --run
+npm run dev</div>
+
+            <div class="warning">
+                ⚠️ <strong>NUNCA</strong> commite arquivos .env com credenciais!
+            </div>
+        </div>
+
+        <!-- SECTION 2: IMPORTS CORRETOS -->
+        <div class="section">
+            <h2>📦 2. IMPORTS CORRETOS</h2>
+
+            <h3>❌ ERRADO (vai quebrar)</h3>
+            <div class="code">import { useOffensiveMetrics } from './hooks/useOffensiveMetrics';</div>
+
+            <h3>✅ CERTO (sempre use @/)</h3>
+            <div class="code">import { useOffensiveMetrics } from '@/hooks/services/useOffensiveService';</div>
+
+            <div class="tip-box">
+                <strong>📌 Regra de Ouro:</strong>
+                SEMPRE use <code>@/</code> para imports. NUNCA use caminhos relativos (<code>./</code> ou <code>../</code>)
+            </div>
+        </div>
+
+        <!-- SECTION 3: USANDO HOOKS -->
+        <div class="section">
+            <h2>🪝 3. USANDO HOOKS (REACT QUERY)</h2>
+
+            <h3>Padrão Básico (Copie e Cole)</h3>
+            <div class="code">import { useOffensiveMetrics } from '@/hooks/services/useOffensiveService';
+
+function MeuComponente() {
+  const { data, isLoading, isError, error } = useOffensiveMetrics();
+
+  // ⚠️ SEMPRE forneça defaults!
+  const metrics = data || { activeScans: 0, exploitsFound: 0 };
+
+  if (isLoading) return &lt;div&gt;Carregando...&lt;/div&gt;;
+  if (isError) return &lt;div&gt;Erro: {error.message}&lt;/div&gt;;
+
+  return &lt;div&gt;Scans: {metrics.activeScans}&lt;/div&gt;;
+}</div>
+
+            <div class="error">
+                🚫 <strong>NUNCA</strong> use <code>data.activeScans</code> sem verificar se <code>data</code> existe!
+            </div>
+        </div>
+
+        <!-- SECTION 4: MUTAÇÕES -->
+        <div class="section">
+            <h2>🔄 4. MUTAÇÕES (CREATE/UPDATE/DELETE)</h2>
+
+            <div class="code">import { useScanNetwork } from '@/hooks/services/useOffensiveService';
+
+function BotaoScan() {
+  const scan = useScanNetwork();
+
+  const handleClick = () => {
+    scan.mutate({
+      target: '192.168.1.0/24',
+      scanType: 'quick',
+      ports: '1-1000'
+    });
+  };
+
+  return (
+    &lt;button onClick={handleClick} disabled={scan.isLoading}&gt;
+      {scan.isLoading ? 'Escaneando...' : 'Iniciar Scan'}
+    &lt;/button&gt;
+  );
+}</div>
+        </div>
+
+        <!-- SECTION 5: WEBSOCKETS -->
+        <div class="section">
+            <h2>🔌 5. WEBSOCKETS</h2>
+
+            <h3>Padrão WebSocket Manager</h3>
+            <div class="code">import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+
+function Alertas() {
+  const { data, isConnected } = useWebSocketManager('defensive.alerts', {
+    enabled: true,
+    onMessage: (msg) => console.log('Nova mensagem:', msg)
+  });
+
+  return &lt;div&gt;{isConnected ? '🟢' : '🔴'} Status&lt;/div&gt;;
+}</div>
+
+            <div class="success">
+                ✅ <strong>Automático:</strong> Reconnection, heartbeat e fallback SSE/polling já incluídos!
+            </div>
+        </div>
+
+        <!-- SECTION 6: ERROS COMUNS -->
+        <div class="section">
+            <h2>❌ 6. ERROS COMUNS</h2>
+
+            <table>
+                <tr>
+                    <th style="width: 50%">Erro</th>
+                    <th>Solução</th>
+                </tr>
+                <tr>
+                    <td>"data is undefined"</td>
+                    <td>Adicione default: <code>data || {}</code></td>
+                </tr>
+                <tr>
+                    <td>"hook is not a function"</td>
+                    <td>Verifique import path (<code>@/</code>)</td>
+                </tr>
+                <tr>
+                    <td>"query keeps refetching"</td>
+                    <td>Aumente <code>staleTime</code></td>
+                </tr>
+                <tr>
+                    <td>"WebSocket not connecting"</td>
+                    <td>Verifique <code>config/endpoints.ts</code></td>
+                </tr>
+                <tr>
+                    <td>Tests failing</td>
+                    <td>Rode <code>npm test -- src/services</code></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SECTION 7: BOAS PRÁTICAS -->
+        <div class="section">
+            <h2>✨ 7. BOAS PRÁTICAS</h2>
+
+            <h3>✅ SEMPRE FAÇA:</h3>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>✓ Use <code>@/</code> para imports</li>
+                <li>✓ Forneça valores default (<code>data || {}</code>)</li>
+                <li>✓ Handle loading/error states</li>
+                <li>✓ Use hooks, NUNCA services diretamente</li>
+                <li>✓ Rode testes antes de commit</li>
+            </ul>
+
+            <h3>🚫 NUNCA FAÇA:</h3>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>✗ Hardcode URLs (use <code>config/endpoints.ts</code>)</li>
+                <li>✗ console.log em produção (use <code>logger</code>)</li>
+                <li>✗ Commit .env files</li>
+                <li>✗ Import services diretamente</li>
+                <li>✗ Skip error handling</li>
+            </ul>
+        </div>
+
+        <!-- SECTION 8: CHEAT SHEET -->
+        <div class="section">
+            <h2>📋 8. CHEAT SHEET</h2>
+
+            <table>
+                <tr>
+                    <th>Tarefa</th>
+                    <th>Comando/Código</th>
+                </tr>
+                <tr>
+                    <td>Rodar testes</td>
+                    <td><code>npm test -- src/services --run</code></td>
+                </tr>
+                <tr>
+                    <td>Build produção</td>
+                    <td><code>npm run build</code></td>
+                </tr>
+                <tr>
+                    <td>Dev server</td>
+                    <td><code>npm run dev</code></td>
+                </tr>
+                <tr>
+                    <td>Ver coverage</td>
+                    <td><code>npm test -- --coverage</code></td>
+                </tr>
+                <tr>
+                    <td>Limpar cache</td>
+                    <td><code>npm run clean</code></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SECTION 9: MÉTRICAS -->
+        <div class="section">
+            <h2>📊 9. MÉTRICAS DE SUCESSO</h2>
+
+            <div class="success">
+                <strong>✅ Tudo OK se:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li>110/110 testes passando</li>
+                    <li>Build completa sem erros</li>
+                    <li>Zero warnings no console</li>
+                    <li>Cache hit rate &gt; 80%</li>
+                    <li>Initial load &lt; 2s</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION 10: HELP -->
+        <div class="section">
+            <h2>🆘 10. PRECISA DE AJUDA?</h2>
+
+            <div class="tip-box">
+                <strong>📚 Documentação:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                    <li><code>docs/USER_GUIDE.html</code> - Guia completo</li>
+                    <li><code>SERVICE_LAYER_MIGRATION.md</code> - Migração</li>
+                    <li><code>PERFORMANCE_OPTIMIZATIONS.md</code> - Performance</li>
+                    <li><code>FASE_3_COMPLETE.md</code> - Features avançadas</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚡ Lembre-se:</strong> Antes de perguntar, leia os docs!
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Vértice Frontend v2.0.0</strong> | Service Layer Refactor</p>
+            <p>110/110 Tests Passing | Production Ready ✅</p>
+            <p style="margin-top: 5px; font-style: italic;">
+                Glory to YHWH - Architect of Excellence 🙏
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

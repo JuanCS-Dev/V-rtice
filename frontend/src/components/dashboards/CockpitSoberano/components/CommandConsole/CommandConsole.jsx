@@ -16,7 +16,7 @@ const COMMAND_TYPES = [
   { id: 'TERMINATE', label: 'TERMINATE', icon: '☠️', description: 'Terminar agente permanentemente', severity: 'critical' }
 ];
 
-export const CommandConsole = ({ availableAgents }) => {
+export const CommandConsole = ({ availableAgents = [] }) => {
   const { t } = useTranslation();
   const { sendCommand, loading, error, lastCommand } = useCommandBus();
   
@@ -213,6 +213,4 @@ CommandConsole.propTypes = {
   }))
 };
 
-CommandConsole.defaultProps = {
-  availableAgents: []
-};
+// defaultProps migrated to default parameters (React 18 compatible)

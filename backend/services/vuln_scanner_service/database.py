@@ -46,6 +46,7 @@ class ScanTask(Base):
     id = Column(Integer, primary_key=True, index=True)
     target = Column(String, index=True)
     scan_type = Column(String)
+    parameters = Column(Text, nullable=True)  # JSON string of parameters
     status = Column(String, default="pending")  # pending, running, completed, failed
     start_time = Column(DateTime, default=datetime.now)
     end_time = Column(DateTime, nullable=True)

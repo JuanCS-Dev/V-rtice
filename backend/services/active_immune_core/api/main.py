@@ -23,6 +23,14 @@ from ..monitoring.health_checker import HealthChecker, HealthStatus
 from ..monitoring.metrics_collector import MetricsCollector
 from ..monitoring.prometheus_exporter import PrometheusExporter
 
+# Import Service Registry client
+try:
+    from shared.vertice_registry_client import auto_register_service, RegistryClient
+    REGISTRY_AVAILABLE = True
+except ImportError:
+    REGISTRY_AVAILABLE = False
+    logger.warning("Service Registry client not available - running in standalone mode")
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +38,7 @@ logger = logging.getLogger(__name__)
 prometheus_exporter: Optional[PrometheusExporter] = None
 health_checker: Optional[HealthChecker] = None
 metrics_collector: Optional[MetricsCollector] = None
+_heartbeat_task = None
 
 
 @asynccontextmanager
@@ -42,7 +51,7 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Active Immune Core API...")
 
-    global prometheus_exporter, health_checker, metrics_collector
+    global prometheus_exporter, health_checker, metrics_collector, _heartbeat_task
 
     # Initialize monitoring components
     prometheus_exporter = PrometheusExporter(namespace="immune_core_api")
@@ -76,12 +85,34 @@ async def lifespan(app: FastAPI):
     await event_bridge.start()
     logger.info("✓ EventBridge started")
 
+    # Auto-register with Service Registry
+    if REGISTRY_AVAILABLE:
+        try:
+            _heartbeat_task = await auto_register_service(
+                service_name="active_immune_core",
+                port=8200,  # Internal container port
+                health_endpoint="/health",
+                metadata={"category": "immune_system", "version": "1.0.0"}
+            )
+            logger.info("✓ Registered with Vértice Service Registry")
+        except Exception as e:
+            logger.warning(f"Failed to register with service registry: {e}")
+
     logger.info("Active Immune Core API started successfully")
 
     yield
 
     # Shutdown
     logger.info("Shutting down Active Immune Core API...")
+
+    # Deregister from Service Registry
+    if _heartbeat_task:
+        _heartbeat_task.cancel()
+    if REGISTRY_AVAILABLE:
+        try:
+            await RegistryClient.deregister("active_immune_core")
+        except:
+            pass
 
     # Stop EventBridge
     event_bridge = get_event_bridge()

@@ -10,10 +10,11 @@ designed for data validation and serialization, providing a clean separation
 between database models and API models.
 """
 
+import json
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class ScanTaskBase(BaseModel):
@@ -50,6 +51,15 @@ class ScanTask(ScanTaskBase):
     start_time: datetime
     end_time: Optional[datetime]
     report_path: Optional[str]
+    raw_results: Optional[str]
+
+    @field_validator('parameters', mode='before')
+    @classmethod
+    def parse_parameters(cls, v):
+        """Parse JSON string from database to dict."""
+        if isinstance(v, str):
+            return json.loads(v) if v else {}
+        return v if v is not None else {}
 
     class Config:
         """Configuração para habilitar o modo ORM."""

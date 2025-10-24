@@ -12,11 +12,19 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import styles from './SovereignHeader.module.css';
 
-export const SovereignHeader = ({ 
-  metrics, 
-  loading, 
-  onBack, 
-  systemHealth
+export const SovereignHeader = ({
+  metrics = {
+    totalAgents: 0,
+    activeAgents: 0,
+    totalVerdicts: 0,
+    criticalVerdicts: 0,
+    alliancesDetected: 0,
+    deceptionMarkers: 0,
+    avgProcessingLatency: 0
+  },
+  loading = false,
+  onBack,
+  systemHealth = 'UNKNOWN'
 }) => {
   const { t } = useTranslation();
 
@@ -160,16 +168,4 @@ SovereignHeader.propTypes = {
   systemHealth: PropTypes.string
 };
 
-SovereignHeader.defaultProps = {
-  metrics: {
-    totalAgents: 0,
-    activeAgents: 0,
-    totalVerdicts: 0,
-    criticalVerdicts: 0,
-    alliancesDetected: 0,
-    deceptionMarkers: 0,
-    avgProcessingLatency: 0
-  },
-  loading: false,
-  systemHealth: 'UNKNOWN'
-};
+// defaultProps migrated to default parameters (React 18 compatible)

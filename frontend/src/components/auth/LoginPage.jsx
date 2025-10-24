@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
 import { useAuth } from '../../contexts/AuthContext';
+import { AuthConfig } from '../../config/endpoints';
 
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,8 +36,16 @@ const LoginPage = () => {
 
     script.onload = () => {
       if (window.google) {
+        const clientId = AuthConfig.google.clientId;
+
+        if (!clientId) {
+          setError('Google OAuth not configured. Please contact administrator.');
+          logger.error('VITE_GOOGLE_CLIENT_ID not set in environment variables');
+          return;
+        }
+
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '742659550291-l5sik6vhh0p4k8c8n3klup0b9o1vvs8m.apps.googleusercontent.com',
+          client_id: clientId,
           callback: handleGoogleResponse
         });
 

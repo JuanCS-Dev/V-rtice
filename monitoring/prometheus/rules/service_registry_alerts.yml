@@ -1,0 +1,129 @@
+groups:
+  - name: service_registry_critical
+    interval: 10s
+    rules:
+      # =====================================================================
+      # CRITICAL - Circuit Breaker Open
+      # =====================================================================
+      - alert: ServiceRegistryCircuitBreakerOpen
+        expr: registry_circuit_breaker_open == 1
+        for: 30s
+        labels:
+          severity: critical
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "🔴 Service Registry Circuit Breaker OPEN"
+          description: "Service Registry circuit breaker has been open for 30s. Redis backend is likely down. System is in degraded mode."
+
+      # =====================================================================
+      # CRITICAL - No Active Services
+      # =====================================================================
+      - alert: ServiceRegistryNoServices
+        expr: registry_active_services == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "🔴 NO SERVICES REGISTERED"
+          description: "Service Registry has ZERO active services. This is catastrophic - all service discovery is broken."
+
+      # =====================================================================
+      # WARNING - Low Service Count
+      # =====================================================================
+      - alert: ServiceRegistryLowServiceCount
+        expr: registry_active_services < 5
+        for: 2m
+        labels:
+          severity: warning
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "⚠️ Low Service Count in Registry"
+          description: "Only {{ $value }} services registered. Expected minimum 10+. Services may be failing to register."
+
+      # =====================================================================
+      # WARNING - High Error Rate
+      # =====================================================================
+      - alert: ServiceRegistryHighErrorRate
+        expr: rate(registry_operations_total{status="error"}[1m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "⚠️ High Error Rate in Service Registry"
+          description: "Error rate: {{ $value | humanize }}req/s. Operation: {{ $labels.operation }}"
+
+      # =====================================================================
+      # WARNING - High Latency (p99 > 100ms)
+      # =====================================================================
+      - alert: ServiceRegistryHighLatency
+        expr: histogram_quantile(0.99, rate(registry_operation_duration_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "⚠️ High Latency in Service Registry"
+          description: "p99 latency: {{ $value | humanize }}s for {{ $labels.operation }}. SLA target is <10ms."
+
+      # =====================================================================
+      # CRITICAL - Registry Instance Down
+      # =====================================================================
+      - alert: ServiceRegistryInstanceDown
+        expr: up{service="service_registry"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "🔴 Service Registry Instance DOWN"
+          description: "Registry instance {{ $labels.instance }} is unreachable. HA cluster degraded."
+
+      # =====================================================================
+      # WARNING - High Memory Usage
+      # =====================================================================
+      - alert: ServiceRegistryHighMemory
+        expr: process_resident_memory_bytes{service="service_registry"} > 200000000
+        for: 5m
+        labels:
+          severity: warning
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "⚠️ High Memory Usage in Service Registry"
+          description: "Memory usage: {{ $value | humanize }}B. Expected <100MB. Possible memory leak."
+
+      # =====================================================================
+      # INFO - Heartbeat Rate Anomaly
+      # =====================================================================
+      - alert: ServiceRegistryHeartbeatAnomaly
+        expr: rate(registry_operations_total{operation="heartbeat"}[5m]) < 0.5
+        for: 3m
+        labels:
+          severity: info
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "ℹ️ Low Heartbeat Rate"
+          description: "Heartbeat rate: {{ $value | humanize }}req/s. Expected >1req/s. Services may not be sending heartbeats."
+
+      # =====================================================================
+      # CRITICAL - Redis Backend Down (via circuit breaker)
+      # =====================================================================
+      - alert: ServiceRegistryRedisBackendDown
+        expr: redis_circuit_breaker_state > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: service_registry
+          layer: infrastructure
+        annotations:
+          summary: "🔴 Redis Backend Connection Issues"
+          description: "Redis circuit breaker state: {{ $value }} (0=CLOSED, 1=OPEN, 2=HALF_OPEN). Backend connectivity degraded."

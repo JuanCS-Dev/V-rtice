@@ -1,0 +1,205 @@
+name: Service Layer Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/services/**'
+      - 'src/hooks/services/**'
+      - 'src/hooks/useWebSocketManager.js'
+      - 'src/config/endpoints.ts'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/services/**'
+      - 'src/hooks/services/**'
+      - 'src/hooks/useWebSocketManager.js'
+      - 'src/config/endpoints.ts'
+
+jobs:
+  test:
+    name: Run Service Layer Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run BaseService tests
+        run: npm test -- src/services/base --run --reporter=verbose
+
+      - name: Run OffensiveService tests
+        run: npm test -- src/services/offensive --run --reporter=verbose
+
+      - name: Run DefensiveService tests
+        run: npm test -- src/services/defensive --run --reporter=verbose
+
+      - name: Run WebSocketManager tests
+        run: npm test -- src/services/websocket --run --reporter=verbose
+
+      - name: Generate coverage report
+        run: npm test -- src/services --coverage --run
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          flags: service-layer
+          name: service-layer-coverage
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(npm test -- src/services --coverage --run --reporter=json | jq '.coverageMap.total.lines.pct')
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below 80% threshold"
+            exit 1
+          fi
+          echo "✅ Coverage $COVERAGE% meets 80% threshold"
+
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for TODOs in production code
+        run: |
+          if grep -r "TODO\|FIXME\|XXX\|HACK" src/services src/hooks/services --include="*.js" --include="*.ts" --exclude="*.test.*"; then
+            echo "❌ Found TODOs/FIXMEs in production code"
+            exit 1
+          fi
+          echo "✅ No TODOs/FIXMEs found"
+
+      - name: Check for hardcoded URLs
+        run: |
+          if grep -rE "http://|https://" src/services --include="*.js" --include="*.ts" --exclude="*.test.*" | grep -v "// " | grep -v "/\* "; then
+            echo "❌ Found hardcoded URLs (except comments)"
+            exit 1
+          fi
+          echo "✅ No hardcoded URLs found"
+
+      - name: Check for console.log in production code
+        run: |
+          if grep -r "console\\.log" src/services src/hooks/services --include="*.js" --include="*.ts" --exclude="*.test.*"; then
+            echo "❌ Found console.log in production code (use logger instead)"
+            exit 1
+          fi
+          echo "✅ No console.log found"
+
+      - name: Verify all services have tests
+        run: |
+          for service in src/services/*/; do
+            if [ ! -d "$service/__tests__" ]; then
+              echo "❌ Missing tests for $service"
+              exit 1
+            fi
+          done
+          echo "✅ All services have test directories"
+
+      - name: Check test count threshold
+        run: |
+          TEST_COUNT=$(npm test -- src/services --run --reporter=json | jq '.numTotalTests')
+          if [ "$TEST_COUNT" -lt 100 ]; then
+            echo "❌ Only $TEST_COUNT tests (minimum: 100)"
+            exit 1
+          fi
+          echo "✅ $TEST_COUNT tests found (threshold: 100)"
+
+  bundle-size:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Check bundle size
+        run: |
+          BUNDLE_SIZE=$(du -sb dist | cut -f1)
+          MAX_SIZE=3000000  # 3MB
+          if [ "$BUNDLE_SIZE" -gt "$MAX_SIZE" ]; then
+            echo "❌ Bundle size ${BUNDLE_SIZE} exceeds ${MAX_SIZE}"
+            exit 1
+          fi
+          echo "✅ Bundle size ${BUNDLE_SIZE} is within limits"
+
+      - name: Upload bundle size report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: dist/stats.html
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Check for unsafe dependencies
+        run: |
+          if grep -r "eval(" src/services src/hooks/services --include="*.js" --include="*.ts"; then
+            echo "❌ Found unsafe eval() usage"
+            exit 1
+          fi
+          echo "✅ No unsafe patterns found"
+
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [test, quality-gates, bundle-size, security]
+    if: failure()
+
+    steps:
+      - name: Send notification
+        run: |
+          echo "🚨 Service Layer Tests Failed!"
+          echo "Please check the CI logs for details."

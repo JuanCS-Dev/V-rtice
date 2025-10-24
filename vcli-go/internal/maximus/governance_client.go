@@ -1,6 +1,7 @@
 package maximus
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -114,6 +115,35 @@ type DecisionActionResponse struct {
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
 
+// DecisionResponse represents individual decision details
+type DecisionResponse struct {
+	DecisionID       string                 `json:"decision_id"`
+	Status           string                 `json:"status"`
+	RiskLevel        string                 `json:"risk_level"`
+	AutomationLevel  string                 `json:"automation_level"`
+	CreatedAt        string                 `json:"created_at"`
+	SLADeadline      *string                `json:"sla_deadline"`
+	Context          map[string]interface{} `json:"context"`
+	Resolution       *DecisionResolution    `json:"resolution"`
+}
+
+// DecisionResolution represents decision resolution details
+type DecisionResolution struct {
+	Status     string  `json:"status"`
+	ResolvedAt *string `json:"resolved_at"`
+	ResolvedBy *string `json:"resolved_by"`
+}
+
+// SSEEvent represents a Server-Sent Event
+type SSEEvent struct {
+	Type string                 `json:"type"`
+	ID   string                 `json:"id"`
+	Data map[string]interface{} `json:"data"`
+}
+
+// DecisionWatchCallback is called for each SSE event
+type DecisionWatchCallback func(event *SSEEvent) error
+
 // ==================== REQUEST TYPES ====================
 
 // ApproveDecisionRequest represents decision approval request
@@ -209,6 +239,113 @@ func (c *GovernanceClient) GetPendingStats() (*PendingStatsResponse, error) {
 	}
 
 	return &stats, nil
+}
+
+// GetDecision retrieves a specific decision by ID
+func (c *GovernanceClient) GetDecision(decisionID string) (*DecisionResponse, error) {
+	url := fmt.Sprintf("%s/api/v1/governance/decision/%s", c.baseURL, decisionID)
+
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to governance API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("decision '%s' not found", decisionID)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var decision DecisionResponse
+	if err := json.NewDecoder(resp.Body).Decode(&decision); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &decision, nil
+}
+
+// WatchDecision watches a decision for real-time updates via SSE
+func (c *GovernanceClient) WatchDecision(decisionID string, callback DecisionWatchCallback) error {
+	url := fmt.Sprintf("%s/api/v1/governance/decision/%s/watch", c.baseURL, decisionID)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set headers for SSE
+	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Connection", "keep-alive")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to connect to governance API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	// Parse SSE stream
+	scanner := bufio.NewScanner(resp.Body)
+	var eventType, eventID, eventData string
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Empty line signals end of event
+		if line == "" {
+			if eventData != "" {
+				// Parse event data as JSON
+				var data map[string]interface{}
+				if err := json.Unmarshal([]byte(eventData), &data); err != nil {
+					return fmt.Errorf("failed to parse event data: %w", err)
+				}
+
+				event := &SSEEvent{
+					Type: eventType,
+					ID:   eventID,
+					Data: data,
+				}
+
+				// Call callback
+				if err := callback(event); err != nil {
+					return err
+				}
+
+				// Check if decision is resolved
+				if eventType == "decision_resolved" {
+					return nil // Stream complete
+				}
+			}
+
+			// Reset for next event
+			eventType, eventID, eventData = "", "", ""
+			continue
+		}
+
+		// Parse SSE fields
+		if strings.HasPrefix(line, "event: ") {
+			eventType = strings.TrimPrefix(line, "event: ")
+		} else if strings.HasPrefix(line, "id: ") {
+			eventID = strings.TrimPrefix(line, "id: ")
+		} else if strings.HasPrefix(line, "data: ") {
+			eventData = strings.TrimPrefix(line, "data: ")
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("stream error: %w", err)
+	}
+
+	return nil
 }
 
 // CreateSession creates a new operator session

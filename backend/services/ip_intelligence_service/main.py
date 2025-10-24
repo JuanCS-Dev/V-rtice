@@ -23,23 +23,62 @@ from config import get_settings
 from database import get_ip_data, update_ip_data
 from models import IPInfo, IPQuery
 
+# Import Service Registry client
+try:
+    from shared.vertice_registry_client import auto_register_service, RegistryClient
+    REGISTRY_AVAILABLE = True
+except ImportError:
+    REGISTRY_AVAILABLE = False
+    print("⚠️  Service Registry client not available - running standalone")
+
 app = FastAPI(title="Maximus IP Intelligence Service", version="1.0.0")
 
 settings = get_settings()
+
+# Global heartbeat task
+_heartbeat_task = None
 
 
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the IP Intelligence Service."""
+    global _heartbeat_task
+
     print("🌐 Starting Maximus IP Intelligence Service...")
     # In a real scenario, connect to external IP intelligence providers
+
+    # Auto-register with Service Registry
+    if REGISTRY_AVAILABLE:
+        try:
+            _heartbeat_task = await auto_register_service(
+                service_name="ip_intelligence_service",
+                port=8034,  # Internal container port
+                health_endpoint="/health",
+                metadata={"category": "investigation", "version": "1.0.0"}
+            )
+            print("✅ Registered with Vértice Service Registry")
+        except Exception as e:
+            print(f"⚠️  Failed to register with service registry: {e}")
+
     print("✅ Maximus IP Intelligence Service started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the IP Intelligence Service."""
+    global _heartbeat_task
+
     print("👋 Shutting down Maximus IP Intelligence Service...")
+
+    # Deregister from Service Registry
+    if _heartbeat_task:
+        _heartbeat_task.cancel()
+    if REGISTRY_AVAILABLE:
+        try:
+            await RegistryClient.deregister("ip_intelligence_service")
+        except:
+            pass
+
     print("🛑 Maximus IP Intelligence Service shut down.")
 
 

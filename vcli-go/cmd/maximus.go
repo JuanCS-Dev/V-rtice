@@ -304,9 +304,74 @@ Examples:
 }
 
 func runGetDecision(cmd *cobra.Command, args []string) error {
-	// NOTE: Individual decision retrieval not available in current HTTP governance API
-	// This command is disabled until the API endpoint is implemented
-	return fmt.Errorf("'get' command not yet implemented in HTTP governance API\nUse 'vcli maximus list' to view pending decisions")
+	decisionID := args[0]
+
+	// Create governance client
+	client := maximus.NewGovernanceClient(maximusServer)
+
+	// Get decision details
+	decision, err := client.GetDecision(decisionID)
+	if err != nil {
+		return fmt.Errorf("failed to get decision: %w", err)
+	}
+
+	// Output based on format
+	if outputFormat == "json" {
+		data, err := json.MarshalIndent(decision, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal JSON: %w", err)
+		}
+		fmt.Println(string(data))
+		return nil
+	}
+
+	// Table format (default)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	defer w.Flush()
+
+	fmt.Println("\n📋 Decision Details\n" + strings.Repeat("─", 60))
+	fmt.Fprintf(w, "Decision ID:\t%s\n", decision.DecisionID)
+	fmt.Fprintf(w, "Status:\t%s\n", decision.Status)
+	fmt.Fprintf(w, "Risk Level:\t%s\n", decision.RiskLevel)
+	fmt.Fprintf(w, "Automation:\t%s\n", decision.AutomationLevel)
+	fmt.Fprintf(w, "Created:\t%s\n", decision.CreatedAt)
+
+	if decision.SLADeadline != nil {
+		fmt.Fprintf(w, "SLA Deadline:\t%s\n", *decision.SLADeadline)
+	} else {
+		fmt.Fprintf(w, "SLA Deadline:\t-\n")
+	}
+
+	// Context details
+	if len(decision.Context) > 0 {
+		fmt.Fprintln(w, "\nContext:")
+		if actionType, ok := decision.Context["action_type"].(string); ok {
+			fmt.Fprintf(w, "  Action:\t%s\n", actionType)
+		}
+		if confidence, ok := decision.Context["confidence"].(float64); ok {
+			fmt.Fprintf(w, "  Confidence:\t%.2f%%\n", confidence*100)
+		}
+		if threatScore, ok := decision.Context["threat_score"].(float64); ok {
+			fmt.Fprintf(w, "  Threat Score:\t%.2f\n", threatScore)
+		}
+		if reasoning, ok := decision.Context["ai_reasoning"].(string); ok && reasoning != "" {
+			fmt.Fprintf(w, "  AI Reasoning:\t%s\n", reasoning)
+		}
+	}
+
+	// Resolution details
+	if decision.Resolution != nil {
+		fmt.Fprintln(w, "\nResolution:")
+		fmt.Fprintf(w, "  Status:\t%s\n", decision.Resolution.Status)
+		if decision.Resolution.ResolvedAt != nil {
+			fmt.Fprintf(w, "  Resolved At:\t%s\n", *decision.Resolution.ResolvedAt)
+		}
+		if decision.Resolution.ResolvedBy != nil {
+			fmt.Fprintf(w, "  Resolved By:\t%s\n", *decision.Resolution.ResolvedBy)
+		}
+	}
+
+	return nil
 }
 
 // ============================================================================
@@ -331,9 +396,65 @@ Examples:
 }
 
 func runWatchDecision(cmd *cobra.Command, args []string) error {
-	// NOTE: Streaming not available in current HTTP governance API
-	// SSE endpoint exists at /api/v1/governance/stream/{operator_id} but requires operator session
-	return fmt.Errorf("'watch' command not yet implemented in HTTP governance API\nUse 'vcli maximus list' periodically to check decision status")
+	decisionID := args[0]
+
+	// Create governance client
+	client := maximus.NewGovernanceClient(maximusServer)
+
+	fmt.Printf("\n👀 Watching Decision: %s\n", decisionID)
+	fmt.Println(strings.Repeat("─", 60))
+	fmt.Println("Press Ctrl+C to stop watching...\n")
+
+	// Watch decision with callback
+	err := client.WatchDecision(decisionID, func(event *maximus.SSEEvent) error {
+		timestamp := time.Now().Format("15:04:05")
+
+		switch event.Type {
+		case "decision_status":
+			status, _ := event.Data["status"].(string)
+			prevStatus, _ := event.Data["previous_status"].(string)
+
+			if prevStatus != "" {
+				fmt.Printf("[%s] Status changed: %s → %s\n",
+					timestamp,
+					prevStatus,
+					status)
+			} else {
+				fmt.Printf("[%s] Current status: %s\n",
+					timestamp,
+					status)
+			}
+
+		case "decision_resolved":
+			status, _ := event.Data["status"].(string)
+			resolvedBy, _ := event.Data["resolved_by"].(string)
+
+			fmt.Printf("\n[%s] ✓ Decision RESOLVED\n", timestamp)
+			fmt.Printf("  Final Status: %s\n", status)
+			if resolvedBy != "" {
+				fmt.Printf("  Resolved By: %s\n", resolvedBy)
+			}
+
+		case "heartbeat":
+			// Silent heartbeat (connection alive)
+
+		case "error":
+			errorMsg, _ := event.Data["error"].(string)
+			return fmt.Errorf("stream error: %s", errorMsg)
+
+		default:
+			fmt.Printf("[%s] Event: %s\n", timestamp, event.Type)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("watch failed: %w", err)
+	}
+
+	fmt.Println("\n✓ Watch completed")
+	return nil
 }
 
 // ============================================================================

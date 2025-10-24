@@ -1,7 +1,7 @@
 /**
  * OffensiveHeader - Red Team Ops Header
  * Displays offensive metrics, module navigation, and control buttons
- * Memoized for performance optimization
+ * Memoized for performance optimization with MemoizedMetricCard
  * i18n: Fully internationalized with pt-BR and en-US support
  */
 
@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import useKeyboardNavigation from '../../../../hooks/useKeyboardNavigation';
+import { MemoizedMetricCard } from '../../../optimized/MemoizedMetricCard';
 import styles from './OffensiveHeader.module.css';
 
 export const OffensiveHeader = React.memo(({
@@ -49,30 +50,30 @@ export const OffensiveHeader = React.memo(({
         </div>
 
         <div className={styles.metrics}>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.offensive.metrics.activeScans')}</span>
-            <span className={styles.metricValue}>
-              {loading ? t('common.loading') : metrics.activeScans || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.offensive.metrics.exploitsFound')}</span>
-            <span className={styles.metricValue}>
-              {loading ? t('common.loading') : metrics.exploitsFound || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.offensive.metrics.targets')}</span>
-            <span className={styles.metricValue}>
-              {loading ? t('common.loading') : metrics.targets || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.offensive.metrics.sessions')}</span>
-            <span className={styles.metricValue}>
-              {loading ? t('common.loading') : metrics.c2Sessions || 0}
-            </span>
-          </div>
+          <MemoizedMetricCard
+            label={t('dashboard.offensive.metrics.activeScans')}
+            value={metrics.activeScans || 0}
+            icon="📡"
+            loading={loading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.offensive.metrics.exploitsFound')}
+            value={metrics.exploitsFound || 0}
+            icon="🎯"
+            loading={loading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.offensive.metrics.targets')}
+            value={metrics.targets || 0}
+            icon="🔍"
+            loading={loading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.offensive.metrics.sessions')}
+            value={metrics.c2Sessions || 0}
+            icon="⚡"
+            loading={loading}
+          />
         </div>
       </div>
 

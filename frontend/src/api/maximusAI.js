@@ -1,4 +1,6 @@
 import logger from '@/utils/logger';
+import { ServiceEndpoints, getWebSocketEndpoint, httpToWs } from '../config/endpoints';
+
 /**
  * Maximus AI Core - API Client
  * =============================
@@ -14,9 +16,10 @@ import logger from '@/utils/logger';
  * - Real-time Streaming
  *
  * Port: 8001 (maximus_core_service)
+ * Governed by: Constituição Vértice v2.5, ADR-001
  */
 
-const MAXIMUS_BASE_URL = 'http://localhost:8001';
+const MAXIMUS_BASE_URL = ServiceEndpoints.maximus.core;
 
 /**
  * ============================================================================
@@ -301,7 +304,8 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
  * WebSocket connection para streaming real-time
  */
 export const connectMaximusStream = (onMessage, onError = null) => {
-  const ws = new WebSocket(`ws://localhost:8001/ws/stream`);
+  const wsUrl = getWebSocketEndpoint('maximus.stream');
+  const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
     logger.debug('🤖 Maximus AI Stream connected');

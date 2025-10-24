@@ -1,0 +1,177 @@
+# =============================================================================
+# Vértice Registry Sidecar - Docker Compose Template
+# =============================================================================
+#
+# This template demonstrates how to add the Vértice Registry Sidecar to any
+# existing service. The sidecar handles auto-registration and heartbeat with
+# ZERO modifications to your main service code.
+#
+# HOW TO USE THIS TEMPLATE:
+# -------------------------
+# 1. Copy the sidecar section below into your existing docker-compose.yml
+# 2. Replace the placeholders:
+#    - {SERVICE_NAME}: Lowercase name (e.g., "osint_service", "nmap_service")
+#    - {SERVICE_CONTAINER}: Container name (e.g., "vertice-osint")
+#    - {SERVICE_PORT}: Internal port (e.g., 8049, 8050)
+#    - {HEALTH_ENDPOINT}: Health check path (default: /health)
+# 3. Add depends_on to ensure sidecar starts after your service is healthy
+# 4. Deploy: docker compose up -d
+#
+# EXAMPLE INTEGRATION:
+# --------------------
+# services:
+#   my-service:
+#     build: .
+#     container_name: vertice-my-service
+#     hostname: vertice-my-service
+#     ports:
+#       - "8080:8080"
+#     networks:
+#       - maximus-network
+#     healthcheck:
+#       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+#       interval: 10s
+#       timeout: 3s
+#       retries: 3
+#
+#   my-service-sidecar:
+#     image: vertice-registry-sidecar:latest
+#     container_name: vertice-my-service-sidecar
+#     environment:
+#       - SERVICE_NAME=my_service
+#       - SERVICE_HOST=vertice-my-service
+#       - SERVICE_PORT=8080
+#       - SERVICE_HEALTH_ENDPOINT=/health
+#       - REGISTRY_URL=http://vertice-register-lb:80
+#       - HEARTBEAT_INTERVAL=30
+#       - INITIAL_WAIT_TIMEOUT=60
+#     depends_on:
+#       my-service:
+#         condition: service_healthy
+#     networks:
+#       - maximus-network
+#     restart: unless-stopped
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.1'
+#           memory: 64M
+#
+# =============================================================================
+# TEMPLATE SECTION (COPY THIS INTO YOUR SERVICE'S DOCKER-COMPOSE.YML)
+# =============================================================================
+
+version: '3.8'
+
+networks:
+  maximus-network:
+    external: true
+
+services:
+  # ---------------------------------------------------------------------------
+  # SIDECAR AGENT (Copy this section into your service's docker-compose.yml)
+  # ---------------------------------------------------------------------------
+  {SERVICE_NAME}-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-{SERVICE_NAME}-sidecar
+
+    # Environment variables - CUSTOMIZE THESE:
+    environment:
+      # Service identification (REQUIRED)
+      - SERVICE_NAME={SERVICE_NAME}              # Example: osint_service, nmap_service
+      - SERVICE_HOST={SERVICE_CONTAINER}         # Example: vertice-osint, vertice-nmap
+      - SERVICE_PORT={SERVICE_PORT}              # Example: 8049, 8050, 8080
+
+      # Health check configuration (OPTIONAL)
+      - SERVICE_HEALTH_ENDPOINT={HEALTH_ENDPOINT}  # Default: /health
+
+      # Registry configuration (DO NOT CHANGE - unless using custom registry)
+      - REGISTRY_URL=http://vertice-register-lb:80  # Internal Docker network port
+
+      # Timing configuration (OPTIONAL - defaults are production-ready)
+      - HEARTBEAT_INTERVAL=30        # Seconds between heartbeats (default: 30)
+      - INITIAL_WAIT_TIMEOUT=60      # Max wait for service to be ready (default: 60)
+
+    # Ensure sidecar starts AFTER your service is healthy
+    depends_on:
+      {SERVICE_NAME}:
+        condition: service_healthy
+
+    # Network (REQUIRED - must be same network as your service)
+    networks:
+      - maximus-network
+
+    # Restart policy (RECOMMENDED)
+    restart: unless-stopped
+
+    # Resource limits (RECOMMENDED - sidecar is lightweight)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'      # 10% of one CPU core
+          memory: 64M      # 64MB RAM (plenty for Python + httpx + tenacity)
+
+# =============================================================================
+# INTEGRATION CHECKLIST
+# =============================================================================
+#
+# Before deploying, verify:
+# ✅ Main service has a healthcheck defined
+# ✅ Main service and sidecar are on the same network (maximus-network)
+# ✅ SERVICE_HOST matches the main service's hostname/container_name
+# ✅ SERVICE_PORT matches the main service's internal port (not host port)
+# ✅ vertice-registry-sidecar:latest image is built and available
+# ✅ Service Registry (vertice-register-lb) is running
+#
+# To build the sidecar image:
+#   cd /home/juan/vertice-dev/backend/services/vertice_registry_sidecar
+#   docker build -t vertice-registry-sidecar:latest .
+#
+# To verify registration:
+#   curl http://localhost:8888/services
+#   curl http://localhost:8888/services/{SERVICE_NAME}
+#
+# =============================================================================
+# TROUBLESHOOTING
+# =============================================================================
+#
+# If sidecar keeps retrying registration:
+# 1. Check if Service Registry is running:
+#    docker ps | grep vertice-register
+#
+# 2. Check sidecar logs:
+#    docker logs vertice-{SERVICE_NAME}-sidecar
+#
+# 3. Test DNS resolution from sidecar:
+#    docker exec vertice-{SERVICE_NAME}-sidecar ping -c 2 vertice-register-lb
+#
+# 4. Test HTTP connection from sidecar:
+#    docker exec vertice-{SERVICE_NAME}-sidecar wget -O- http://vertice-register-lb:80/health
+#
+# 5. Verify main service health:
+#    docker exec vertice-{SERVICE_NAME}-sidecar wget -O- http://{SERVICE_CONTAINER}:{SERVICE_PORT}/health
+#
+# If service not appearing in registry:
+# 1. Check SERVICE_NAME matches exactly (lowercase, underscores not hyphens)
+# 2. Verify REGISTRY_URL uses port 80 (not 8888) for internal Docker network
+# 3. Check network connectivity: both containers must be on maximus-network
+#
+# =============================================================================
+# ADVANCED CONFIGURATION
+# =============================================================================
+#
+# Custom health check path:
+#   - SERVICE_HEALTH_ENDPOINT=/api/health
+#   - SERVICE_HEALTH_ENDPOINT=/status
+#   - SERVICE_HEALTH_ENDPOINT=/ping
+#
+# Faster heartbeat (for critical services):
+#   - HEARTBEAT_INTERVAL=15  # Every 15 seconds
+#
+# Longer startup wait (for slow-starting services):
+#   - INITIAL_WAIT_TIMEOUT=120  # Wait up to 2 minutes
+#
+# Service metadata (custom version, tags):
+#   Currently not supported - coming in future versions
+#
+# =============================================================================

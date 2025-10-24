@@ -230,7 +230,7 @@ func launchTUI() {
 	// Add workspaces
 	manager.AddWorkspace(situational.New())
 	manager.AddWorkspace(investigation.New())
-	manager.AddWorkspace(governance.NewPlaceholder())
+	manager.AddWorkspace(governance.NewWorkspace(maximusServer))
 
 	// Create Bubble Tea program with workspace manager
 	p := tea.NewProgram(

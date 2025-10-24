@@ -244,6 +244,33 @@ func (c *ImmuneClient) GetAgent(agentID string, includeMetrics, includeHistory b
 	return &agent, nil
 }
 
+// DeleteAgent terminates and deletes an agent
+func (c *ImmuneClient) DeleteAgent(agentID string) error {
+	url := fmt.Sprintf("%s/agents/%s", c.baseURL, agentID)
+
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to connect to Immune Core API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("agent '%s' not found", agentID)
+	}
+
+	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(respBody))
+	}
+
+	return nil
+}
+
 // CloneAgent clones an existing agent
 func (c *ImmuneClient) CloneAgent(req CloneAgentRequest) (*CloneAgentResponse, error) {
 	url := fmt.Sprintf("%s/agents/clone", c.baseURL)

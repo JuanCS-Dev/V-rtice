@@ -1,133 +1,56 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import logger from '@/utils/logger';
+/**
+ * useConsciousnessStream Hook
+ * ============================
+ *
+ * Refactored to use WebSocketManager
+ * Connects to consciousness stream endpoint
+ *
+ * Governed by: Constituição Vértice v2.5 - ADR-002
+ */
 
-const getGatewayBase = () => {
-  const env = import.meta?.env;
-  const base = (env?.VITE_API_GATEWAY_URL || env?.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
-  return base;
-};
-
-const getApiKey = () => {
-  const env = import.meta?.env;
-  return env?.VITE_API_KEY || localStorage.getItem('MAXIMUS_API_KEY') || '';
-};
+import { useCallback } from 'react';
+import { useWebSocketManager } from './useWebSocketManager';
 
 export function useConsciousnessStream({ enabled = true, onMessage, onError } = {}) {
-  const [connectionType, setConnectionType] = useState('idle');
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastEvent, setLastEvent] = useState(null);
-
-  const wsRef = useRef(null);
-  const sseRef = useRef(null);
-  const reconnectTimer = useRef(null);
-
-  const clearConnections = useCallback(() => {
-    if (sseRef.current) {
-      sseRef.current.close();
-      sseRef.current = null;
-    }
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    if (reconnectTimer.current) {
-      clearTimeout(reconnectTimer.current);
-      reconnectTimer.current = null;
-    }
-  }, []);
-
-  const handleMessage = useCallback(
-    (message) => {
-      setLastEvent(message);
-      if (onMessage) {
-        onMessage(message);
-      }
-    },
-    [onMessage]
-  );
-
-  const startWebSocket = useCallback(() => {
-    const gateway = getGatewayBase();
-    const apiKey = getApiKey();
-    const wsUrl = `${gateway.replace(/^http/, 'ws')}/stream/consciousness/ws${apiKey ? `?api_key=${apiKey}` : ''}`;
-
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-    setConnectionType('websocket');
-
-    ws.onopen = () => {
-      setIsConnected(true);
-    };
-
-    ws.onclose = () => {
-      setIsConnected(false);
-      reconnectTimer.current = setTimeout(() => {
-        // Will call startEventSource inside effect
-      }, 1000);
-    };
-
-    ws.onerror = (error) => {
-      if (onError) onError(error);
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        handleMessage(message);
-      } catch (err) {
-        logger.error('Error parsing WebSocket message:', err);
-      }
-    };
-  }, [handleMessage, onError]);
-
-  const startEventSource = useCallback(() => {
-    const gateway = getGatewayBase();
-    const apiKey = getApiKey();
-    const sseUrl = `${gateway}/stream/consciousness/sse${apiKey ? `?api_key=${apiKey}` : ''}`;
-
-    try {
-      const eventSource = new EventSource(sseUrl, { withCredentials: false });
-      sseRef.current = eventSource;
-      setConnectionType('sse');
-
-      eventSource.onopen = () => {
-        setIsConnected(true);
-      };
-
-      eventSource.onerror = (error) => {
-        setIsConnected(false);
-        eventSource.close();
-        sseRef.current = null;
-        if (onError) onError(error);
-        reconnectTimer.current = setTimeout(() => {
-          startWebSocket();
-        }, 1000);
-      };
-
-      eventSource.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          handleMessage(message);
-        } catch (err) {
-          logger.error('Error parsing SSE message:', err);
+  // Use centralized WebSocketManager
+  const {
+    data: lastEvent,
+    isConnected,
+    isFallback,
+    status,
+  } = useWebSocketManager('consciousness.stream', {
+    enabled,
+    onMessage: useCallback(
+      (message) => {
+        if (onMessage) {
+          onMessage(message);
         }
-      };
-    } catch (error) {
-      if (onError) onError(error);
-      startWebSocket();
-    }
-  }, [handleMessage, onError, startWebSocket]);
+      },
+      [onMessage]
+    ),
+    onError: useCallback(
+      (error) => {
+        if (onError) {
+          onError(error);
+        }
+      },
+      [onError]
+    ),
+    connectionOptions: {
+      fallbackToSSE: true,
+      fallbackToPolling: false,
+      debug: false,
+    },
+  });
 
-  useEffect(() => {
-    if (!enabled) return;
-    startEventSource();
-    return () => clearConnections();
-  }, [enabled, startEventSource, clearConnections]);
+  // Determine connection type
+  const connectionType = isFallback ? 'sse' : isConnected ? 'websocket' : 'idle';
 
   return {
     connectionType,
     isConnected,
     lastEvent,
+    status,
   };
 }
 

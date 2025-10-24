@@ -1,13 +1,14 @@
 /**
  * DefensiveHeader - Blue Team Ops Header
  * Displays defensive metrics, module navigation, and control buttons
- * Memoized for performance optimization
+ * Memoized for performance optimization with MemoizedMetricCard
  * SOURCE OF TRUTH: Landing Page Pattern (Purple + Cyan)
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { MemoizedMetricCard } from '../../../optimized/MemoizedMetricCard';
 import styles from './DefensiveHeader.module.css';
 
 const DefensiveHeader = React.memo(({
@@ -44,30 +45,30 @@ const DefensiveHeader = React.memo(({
         </div>
 
         <div className={styles.metrics}>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.defensive.metrics.threats', 'THREATS')}</span>
-            <span className={styles.metricValue}>
-              {metricsLoading ? '...' : metrics.threats || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.defensive.metrics.suspiciousIPs', 'SUSPICIOUS IPs')}</span>
-            <span className={styles.metricValue}>
-              {metricsLoading ? '...' : metrics.suspiciousIPs || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.defensive.metrics.domains', 'DOMAINS')}</span>
-            <span className={styles.metricValue}>
-              {metricsLoading ? '...' : metrics.domains || 0}
-            </span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricLabel}>{t('dashboard.defensive.metrics.monitored', 'MONITORED')}</span>
-            <span className={styles.metricValue}>
-              {metricsLoading ? '...' : metrics.monitored || 0}
-            </span>
-          </div>
+          <MemoizedMetricCard
+            label={t('dashboard.defensive.metrics.threats', 'THREATS')}
+            value={metrics.threats || 0}
+            icon="🚨"
+            loading={metricsLoading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.defensive.metrics.suspiciousIPs', 'SUSPICIOUS IPs')}
+            value={metrics.suspiciousIPs || 0}
+            icon="🎯"
+            loading={metricsLoading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.defensive.metrics.domains', 'DOMAINS')}
+            value={metrics.domains || 0}
+            icon="🌐"
+            loading={metricsLoading}
+          />
+          <MemoizedMetricCard
+            label={t('dashboard.defensive.metrics.monitored', 'MONITORED')}
+            value={metrics.monitored || 0}
+            icon="🛡️"
+            loading={metricsLoading}
+          />
         </div>
       </div>
 

@@ -9,7 +9,7 @@ import DefensiveHeader from './components/DefensiveHeader';
 import DefensiveSidebar from './components/DefensiveSidebar';
 import { DashboardFooter } from '../../shared/DashboardFooter';
 import ModuleContainer from './components/ModuleContainer';
-import { useDefensiveMetrics } from './hooks/useDefensiveMetrics';
+import { useDefensiveMetrics } from '@/hooks/services/useDefensiveService';
 import { useRealTimeAlerts } from './hooks/useRealTimeAlerts';
 
 // Import defensive modules (already exist)
@@ -47,8 +47,16 @@ const DefensiveDashboard = ({ setCurrentView }) => {
   const [activeModule, setActiveModule] = useState('threats');
 
   // Real data hooks (NO MOCKS)
-  const { metrics, loading: metricsLoading } = useDefensiveMetrics();
+  const { data: metricsData, isLoading: metricsLoading } = useDefensiveMetrics();
   const { alerts, addAlert: _addAlert } = useRealTimeAlerts();
+
+  // Provide default metrics if loading or undefined
+  const metrics = metricsData || {
+    threats: 0,
+    suspiciousIPs: 0,
+    domains: 0,
+    monitored: 0,
+  };
 
   // Update clock
   useEffect(() => {

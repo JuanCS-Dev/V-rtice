@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NeuroShell - Guia de Comandos Rápido</title>
+    <style>
+        @media print {
+            body { margin: 1cm; font-family: monospace; font-size: 10pt; }
+            h1 { font-size: 16pt; margin-bottom: 5px; border-bottom: 2px solid black; }
+            h2 { font-size: 12pt; margin-top: 10px; margin-bottom: 5px; background: #ddd; padding: 3px; }
+            h3 { font-size: 11pt; margin: 5px 0 3px 0; }
+            pre { background: #f5f5f5; padding: 5px; margin: 3px 0; border: 1px solid #ccc; font-size: 9pt; }
+            code { background: #f5f5f5; padding: 1px 3px; }
+            table { width: 100%; border-collapse: collapse; margin: 5px 0; font-size: 9pt; }
+            td, th { border: 1px solid black; padding: 3px; text-align: left; }
+            th { background: #ddd; font-weight: bold; }
+            .box { border: 2px solid black; padding: 5px; margin: 5px 0; background: #f9f9f9; }
+            .warn { border-left: 3px solid red; padding-left: 5px; margin: 3px 0; }
+        }
+        @media screen {
+            body { margin: 20px; font-family: monospace; max-width: 800px; }
+            h1 { border-bottom: 2px solid black; }
+            h2 { background: #ddd; padding: 5px; }
+            pre { background: #f5f5f5; padding: 10px; border: 1px solid #ccc; }
+            code { background: #f5f5f5; padding: 2px 5px; }
+            table { border-collapse: collapse; margin: 10px 0; }
+            td, th { border: 1px solid black; padding: 5px; }
+            th { background: #ddd; }
+            .box { border: 2px solid black; padding: 10px; margin: 10px 0; }
+            .warn { border-left: 3px solid red; padding-left: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>🧠 NeuroShell (vcli-go) - Guia Anti-Burro</h1>
+
+<div class="box">
+<strong>Superuser:</strong> juan@vertice.ai | <strong>Senha:</strong> vertice2025<br>
+<strong>Alias:</strong> <code>neuroshell</code> = <code>/home/juan/vertice-dev/vcli-go/bin/vcli shell</code><br>
+<strong>Config:</strong> <code>~/.vcli/config.yaml</code>
+</div>
+
+<h2>🚨 COMANDOS QUE NÃO EXISTEM (NÃO USE!)</h2>
+<div class="warn">
+<pre>
+❌ vcli maximus ask "oi"           # NÃO EXISTE!
+❌ vcli maximus chat               # NÃO EXISTE!
+❌ vcli maximus query              # NÃO EXISTE!
+</pre>
+</div>
+
+<h2>✅ PORTAS DOS SERVIÇOS</h2>
+<table>
+<tr><th>Serviço</th><th>Endpoint</th></tr>
+<tr><td>MAXIMUS Core (Governance)</td><td><code>http://localhost:8150</code></td></tr>
+<tr><td>MAXIMUS Orchestrator</td><td><code>http://localhost:8125</code></td></tr>
+<tr><td>MAXIMUS Eureka (AI)</td><td><code>http://localhost:9103</code></td></tr>
+<tr><td>MAXIMUS Predict/Oraculo</td><td><code>http://localhost:8126</code></td></tr>
+<tr><td>PostgreSQL</td><td><code>localhost:5434</code></td></tr>
+</table>
+
+<h2>1. MAXIMUS GOVERNANCE (Decisões)</h2>
+
+<h3>Listar Decisões</h3>
+<pre>vcli maximus list --server http://localhost:8150</pre>
+
+<h3>Submeter Decisão</h3>
+<pre>vcli maximus submit --server http://localhost:8150 \
+  --title "Deploy to Prod" \
+  --type deployment \
+  --priority high</pre>
+
+<h3>Ver Detalhes</h3>
+<pre>vcli maximus get --server http://localhost:8150 --id dec-12345</pre>
+
+<h3>Aprovar/Rejeitar</h3>
+<pre>vcli maximus approve --server http://localhost:8150 --id dec-12345
+vcli maximus reject --server http://localhost:8150 --id dec-12345</pre>
+
+<h3>Métricas</h3>
+<pre>vcli maximus metrics --server http://localhost:8150</pre>
+
+<h2>2. MAXIMUS EUREKA (AI - Insights)</h2>
+
+<h3>Health Check</h3>
+<pre>vcli maximus eureka health --eureka-endpoint http://localhost:9103</pre>
+
+<h3>Gerar Insights</h3>
+<pre>vcli maximus eureka generate-insight \
+  --eureka-endpoint http://localhost:9103 \
+  --data-file data.json \
+  --data-type logs</pre>
+
+<h3>Extrair IoCs</h3>
+<pre>vcli maximus eureka extract-iocs \
+  --eureka-endpoint http://localhost:9103 \
+  --data-file threat.json</pre>
+
+<h2>3. MAXIMUS CONSCIOUSNESS (Consciência)</h2>
+
+<h3>Estado Atual</h3>
+<pre>vcli maximus consciousness state \
+  --consciousness-endpoint http://localhost:8150</pre>
+
+<h3>Eventos ESGT</h3>
+<pre>vcli maximus consciousness esgt events \
+  --consciousness-endpoint http://localhost:8150</pre>
+
+<h3>Arousal State</h3>
+<pre>vcli maximus consciousness arousal \
+  --consciousness-endpoint http://localhost:8150</pre>
+
+<h3>Watch (Tempo Real)</h3>
+<pre>vcli maximus consciousness watch \
+  --consciousness-endpoint http://localhost:8150</pre>
+
+<h2>4. MAXIMUS ORACULO (AI - Predictions)</h2>
+
+<h3>Health Check</h3>
+<pre>vcli maximus oraculo health --oraculo-endpoint http://localhost:8126</pre>
+
+<h3>Analisar Código</h3>
+<pre>vcli maximus oraculo analyze-code \
+  --oraculo-endpoint http://localhost:8126 \
+  --code-file app.go \
+  --language go \
+  --analysis-type vulnerability</pre>
+
+<h3>Gerar Predição</h3>
+<pre>vcli maximus oraculo predict \
+  --oraculo-endpoint http://localhost:8126 \
+  --data-file data.json \
+  --prediction-type threat_level</pre>
+
+<h2>5. KUBERNETES (32 Comandos)</h2>
+
+<h3>Listar Recursos</h3>
+<pre>vcli k8s get pods --all-namespaces
+vcli k8s get deployments
+vcli k8s get services</pre>
+
+<h3>Logs</h3>
+<pre>vcli k8s logs &lt;pod-name&gt; --follow</pre>
+
+<h3>Exec</h3>
+<pre>vcli k8s exec &lt;pod-name&gt; -- sh</pre>
+
+<h3>Port Forward</h3>
+<pre>vcli k8s port-forward &lt;pod-name&gt; 8080:80</pre>
+
+<h3>Métricas</h3>
+<pre>vcli k8s top nodes
+vcli k8s top pods</pre>
+
+<h3>Rollout</h3>
+<pre>vcli k8s rollout status deployment/nginx
+vcli k8s rollout undo deployment/nginx</pre>
+
+<h2>6. VARIÁVEIS DE AMBIENTE (Opcional)</h2>
+<p>Adicione ao <code>~/.bashrc</code> ou <code>~/.zshrc</code>:</p>
+<pre>export VCLI_MAXIMUS_ENDPOINT="http://localhost:8150"
+export VCLI_EUREKA_ENDPOINT="http://localhost:9103"
+export VCLI_ORACULO_ENDPOINT="http://localhost:8126"
+export VCLI_CONSCIOUSNESS_ENDPOINT="http://localhost:8150"
+export VCLI_DEBUG=true
+
+source ~/.bashrc  # Reload</pre>
+
+<p><strong>Depois disso, comandos simplificados funcionam:</strong></p>
+<pre>vcli maximus list               # Sem --server
+vcli maximus eureka health      # Sem --eureka-endpoint</pre>
+
+<h2>7. TROUBLESHOOTING</h2>
+
+<h3>Verificar Serviços Rodando</h3>
+<pre>docker ps | grep maximus</pre>
+
+<h3>Testar Endpoints Diretamente</h3>
+<pre>curl http://localhost:8150/health
+curl http://localhost:9103/health</pre>
+
+<h3>Debug Mode</h3>
+<pre>vcli maximus list --server http://localhost:8150 --debug</pre>
+
+<h3>Listar Comandos Disponíveis</h3>
+<pre>vcli --help
+vcli maximus --help
+vcli maximus eureka --help</pre>
+
+<h2>8. EXEMPLOS PRÁTICOS</h2>
+
+<h3>Exemplo 1: Workflow Completo de Decisão</h3>
+<pre># 1. Submeter
+vcli maximus submit --server http://localhost:8150 \
+  --title "Deploy Feature X" --type deployment
+
+# 2. Listar pendentes
+vcli maximus list --server http://localhost:8150 --status pending
+
+# 3. Aprovar (use o ID retornado)
+vcli maximus approve --server http://localhost:8150 --id dec-12345</pre>
+
+<h3>Exemplo 2: Monitorar K8s</h3>
+<pre># Ver pods
+vcli k8s get pods --all-namespaces
+
+# Ver logs
+vcli k8s logs nginx-pod --follow
+
+# Métricas
+vcli k8s top pods</pre>
+
+<h2>9. COMANDOS DO NEUROSHELL (Interactive)</h2>
+<pre># Iniciar NeuroShell
+neuroshell
+
+# Dentro do shell:
+vcli&gt; maximus list --server http://localhost:8150
+vcli&gt; k8s get pods
+vcli&gt; /help       # Ajuda
+vcli&gt; /history    # Histórico
+vcli&gt; /palette    # Busca fuzzy
+vcli&gt; exit        # Sair</pre>
+
+<div class="box">
+<strong>⚠️ IMPORTANTE:</strong> Se comandos no neuroshell não funcionam, use o vcli direto:<br>
+<code>/home/juan/vertice-dev/vcli-go/bin/vcli maximus list --server http://localhost:8150</code>
+</div>
+
+<h2>📊 STATUS DOS SERVIÇOS</h2>
+<table>
+<tr><th>Componente</th><th>Status</th></tr>
+<tr><td>NeuroShell (vcli-go)</td><td>✅ 100% Operational</td></tr>
+<tr><td>MAXIMUS Core</td><td>✅ Connected (8150)</td></tr>
+<tr><td>MAXIMUS Eureka</td><td>✅ Connected (9103)</td></tr>
+<tr><td>MAXIMUS Predict</td><td>✅ Connected (8126)</td></tr>
+<tr><td>PostgreSQL</td><td>✅ Connected (5434)</td></tr>
+<tr><td>Superuser</td><td>✅ juan@vertice.ai</td></tr>
+</table>
+
+<hr>
+<p style="text-align: center; font-size: 8pt;">
+<strong>NeuroShell v2.0.0</strong> | Made with ❤️ by Vértice Team | 2025-10-24
+</p>
+
+</body>
+</html>
+
+<div style="border: 3px solid red; padding: 15px; margin: 20px 0; background: #ffe6e6; page-break-before: always;">
+<h2 style="color: red; margin-top: 0;">🚨 PROBLEMA DO NEUROSHELL IDENTIFICADO!</h2>
+
+<h3>❌ Problema:</h3>
+<p>O modo interativo <code>neuroshell</code> (bubble-tea) não executa comandos corretamente.</p>
+
+<h3>✅ SOLUÇÃO IMEDIATA (USE ISTO!):</h3>
+
+<h4>Opção 1: Use vcli direto (SEM shell interativo)</h4>
+<pre>
+# Em vez de entrar no neuroshell, use comandos diretos:
+/home/juan/vertice-dev/vcli-go/bin/vcli maximus list --server http://localhost:8150
+/home/juan/vertice-dev/vcli-go/bin/vcli maximus eureka health --eureka-endpoint http://localhost:9103
+/home/juan/vertice-dev/vcli-go/bin/vcli k8s get pods
+</pre>
+
+<h4>Opção 2: Crie aliases para comandos comuns</h4>
+<p>Adicione ao <code>~/.bashrc</code>:</p>
+<pre>
+alias vmax="vcli maximus --server http://localhost:8150"
+alias veureka="vcli maximus eureka --eureka-endpoint http://localhost:9103"
+alias voraculo="vcli maximus oraculo --oraculo-endpoint http://localhost:8126"
+alias vcons="vcli maximus consciousness --consciousness-endpoint http://localhost:8150"
+alias vk8s="vcli k8s"
+
+# Depois use:
+vmax list
+vmax submit --title "Deploy" --type deployment
+veureka health
+vk8s get pods
+</pre>
+
+<h4>Opção 3: Use o modo legacy shell (FUNCIONA!)</h4>
+<pre>
+/home/juan/vertice-dev/vcli-go/bin/vcli shell --legacy
+</pre>
+
+<h3>✅ COMANDOS QUE FUNCIONAM 100%:</h3>
+<pre>
+# ESTES COMANDOS FUNCIONAM PERFEITAMENTE:
+vcli maximus list --server http://localhost:8150
+vcli maximus submit --server http://localhost:8150 --title "Test" --type deployment
+vcli maximus eureka health --eureka-endpoint http://localhost:9103
+vcli maximus consciousness state --consciousness-endpoint http://localhost:8150
+vcli k8s get pods
+vcli k8s top nodes
+vcli --help
+vcli examples
+</pre>
+
+<h3>🔧 Para os Desenvolvedores (Debug):</h3>
+<p>O problema está no <code>internal/shell/bubbletea/</code>. O shell legacy (<code>--legacy</code>) funciona, mas o bubble-tea shell tem um bug na execução de comandos.</p>
+</div>
+
+
+<div style="border: 3px solid orange; padding: 15px; margin: 20px 0; background: #fff3e0;">
+<h2 style="color: orange; margin-top: 0;">🐛 PROBLEMA: Terminal "Sequestrado" após /quit</h2>
+
+<h3>❌ Sintoma:</h3>
+<p>Após sair do neuroshell, o terminal mostra caracteres estranhos quando você clica (sequências de mouse tracking).</p>
+
+<h3>✅ SOLUÇÃO IMEDIATA:</h3>
+
+<h4>Opção 1: Digite (mesmo sem ver):</h4>
+<pre>reset</pre>
+
+<h4>Opção 2: Use o alias (já configurado):</h4>
+<pre>fix-terminal</pre>
+
+<h4>Opção 3: Use o script:</h4>
+<pre>source /home/juan/vertice-dev/vcli-go/fix_terminal.sh</pre>
+
+<h4>Opção 4: Manual (se nada funcionar):</h4>
+<pre>
+stty sane
+tput reset
+clear
+</pre>
+
+<h3>🔧 O que causa isso?</h3>
+<p>O bubble-tea ativa o <strong>mouse tracking mode</strong> no terminal, mas quando sai com erro ou /quit, não desativa corretamente. O terminal fica esperando comandos de mouse.</p>
+
+<h3>✅ Prevenção:</h3>
+<p><strong>Use Ctrl+C ou Ctrl+D para sair</strong> em vez de /quit (mais seguro).</p>
+<p>Ou use o <strong>modo legacy</strong> que não tem esse bug:</p>
+<pre>vcli shell --legacy</pre>
+
+</div>
+

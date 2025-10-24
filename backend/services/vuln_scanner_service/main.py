@@ -13,6 +13,7 @@ services for risk assessment, patch management, and proactive defense.
 """
 
 import asyncio
+import json
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -73,7 +74,12 @@ async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = D
     Returns:
         schemas.ScanTask: The created scan task.
     """
-    db_scan_task = models.ScanTask(**scan_request.dict())
+    # Create database model from Pydantic schema
+    db_scan_task = database.ScanTask(
+        target=scan_request.target,
+        scan_type=scan_request.scan_type,
+        parameters=json.dumps(scan_request.parameters),  # Store as JSON string
+    )
     db.add(db_scan_task)
     db.commit()
     db.refresh(db_scan_task)
@@ -84,7 +90,7 @@ async def create_scan_task(scan_request: schemas.ScanTaskCreate, db: Session = D
             db_scan_task.id,
             db_scan_task.target,
             db_scan_task.scan_type,
-            db_scan_task.parameters,
+            scan_request.parameters,  # Use original dict from request
             db,
         )
     )
@@ -104,7 +110,7 @@ async def read_scan_tasks(skip: int = 0, limit: int = 100, db: Session = Depends
     Returns:
         List[schemas.ScanTask]: A list of scan tasks.
     """
-    scan_tasks = db.query(models.ScanTask).offset(skip).limit(limit).all()
+    scan_tasks = db.query(database.ScanTask).offset(skip).limit(limit).all()
     return scan_tasks
 
 
@@ -122,7 +128,7 @@ async def read_scan_task(scan_id: int, db: Session = Depends(get_db)):
     Raises:
         HTTPException: If the scan task is not found.
     """
-    scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_id).first()
+    scan_task = db.query(database.ScanTask).filter(database.ScanTask.id == scan_id).first()
     if scan_task is None:
         raise HTTPException(status_code=404, detail="Scan task not found")
     return scan_task
@@ -139,7 +145,7 @@ async def read_scan_vulnerabilities(scan_id: int, db: Session = Depends(get_db))
     Returns:
         List[schemas.Vulnerability]: A list of vulnerabilities.
     """
-    vulnerabilities = db.query(models.Vulnerability).filter(models.Vulnerability.scan_task_id == scan_id).all()
+    vulnerabilities = db.query(database.Vulnerability).filter(database.Vulnerability.scan_task_id == scan_id).all()
     return vulnerabilities
 
 
@@ -160,7 +166,7 @@ async def run_scan(
         db (Session): The database session.
     """
     print(f"[ScannerService] Running scan {scan_task_id} ({scan_type}) on {target}")
-    scan_task = db.query(models.ScanTask).filter(models.ScanTask.id == scan_task_id).first()
+    scan_task = db.query(database.ScanTask).filter(database.ScanTask.id == scan_task_id).first()
     if not scan_task:
         return
 
@@ -180,7 +186,7 @@ async def run_scan(
 
         # Process results and store vulnerabilities
         for vuln_data in scan_results.get("vulnerabilities", []):
-            db_vulnerability = models.Vulnerability(
+            db_vulnerability = database.Vulnerability(
                 scan_task_id=scan_task_id,
                 cve_id=vuln_data.get("cve_id"),
                 name=vuln_data.get("name", "Unknown Vulnerability"),

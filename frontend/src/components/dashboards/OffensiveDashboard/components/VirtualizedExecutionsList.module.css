@@ -1,0 +1,198 @@
+/**
+ * VirtualizedExecutionsList Styles
+ * =================================
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Statistics Bar */
+.statsBar {
+  display: flex;
+  gap: 20px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.stat {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.statLabel {
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.statValue {
+  color: #f00;
+  font-weight: bold;
+}
+
+.runningStat .statValue {
+  color: #ffaa00;
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+.completedStat .statValue {
+  color: #00ff00;
+}
+
+.failedStat .statValue {
+  color: #ff4444;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Executions List */
+.executionsList {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Execution Row */
+.executionRow {
+  padding: 12px 16px;
+  margin: 4px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s ease;
+}
+
+.executionRow:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: translateX(4px);
+}
+
+/* Status Colors */
+.status-running {
+  border-left-color: #ffaa00;
+}
+
+.status-completed {
+  border-left-color: #00ff00;
+}
+
+.status-failed {
+  border-left-color: #ff4444;
+}
+
+.status-queued {
+  border-left-color: #00aaff;
+}
+
+/* Execution Header */
+.executionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.executionType {
+  color: #f00;
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.statusBadge.status-running {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+}
+
+.statusBadge.status-completed {
+  background: rgba(0, 255, 0, 0.2);
+  color: #00ff00;
+}
+
+.statusBadge.status-failed {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+}
+
+.statusBadge.status-queued {
+  background: rgba(0, 170, 255, 0.2);
+  color: #00aaff;
+}
+
+/* Execution Target */
+.executionTarget {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.targetLabel {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+.targetValue {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+/* Execution Results */
+.executionResults {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.result {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+/* Execution Footer */
+.executionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timestamp {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+.executionId {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  font-family: monospace;
+}

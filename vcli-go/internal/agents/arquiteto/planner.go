@@ -527,7 +527,7 @@ func (a *ArquitetoAgent) buildClaudePrompt(input agents.AgentInput, diagnosticCo
 			prompt += fmt.Sprintf("- Security Findings: %d issues identified\n", len(findings))
 			for i, f := range findings {
 				if i < 5 { // Show first 5
-					prompt += fmt.Sprintf("  • [%s] %s: %s\n", f.Severity, f.Category, f.Title)
+					prompt += fmt.Sprintf("  • [%s] %s: %s\n", f.Severity, f.Category, f.Description)
 				}
 			}
 			if len(findings) > 5 {

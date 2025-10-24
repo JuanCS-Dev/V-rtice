@@ -14,7 +14,7 @@ import { VerdictCard } from './VerdictCard';
 import { ProvenanceModal } from '../ProvenanceViewer/ProvenanceModal';
 import styles from './VerdictPanel.module.css';
 
-export const VerdictPanel = ({ verdicts, onDismiss, isConnected }) => {
+export const VerdictPanel = ({ verdicts = [], onDismiss, isConnected = false }) => {
   const { t } = useTranslation();
   const [selectedVerdict, setSelectedVerdict] = useState(null);
   const [filter, setFilter] = useState('ALL');
@@ -159,7 +159,4 @@ VerdictPanel.propTypes = {
   isConnected: PropTypes.bool
 };
 
-VerdictPanel.defaultProps = {
-  verdicts: [],
-  isConnected: false
-};
+// defaultProps migrated to default parameters (React 18 compatible)

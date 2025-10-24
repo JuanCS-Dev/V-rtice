@@ -23,6 +23,14 @@ from pydantic import BaseModel
 
 from scanner import NmapScanner
 
+# Import Service Registry client
+try:
+    from shared.vertice_registry_client import auto_register_service, RegistryClient
+    REGISTRY_AVAILABLE = True
+except ImportError:
+    REGISTRY_AVAILABLE = False
+    print("⚠️  Service Registry client not available - running standalone")
+
 app = FastAPI(title="Maximus Nmap Service", version="1.0.0")
 
 # Global scanner instance
@@ -30,6 +38,9 @@ nmap_scanner: Optional[NmapScanner] = None
 
 # Scan results storage (persisted scans)
 scan_results_db: Dict[str, Dict[str, Any]] = {}
+
+# Global heartbeat task
+_heartbeat_task = None
 
 
 class NmapScanRequest(BaseModel):
@@ -49,17 +60,44 @@ class NmapScanRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Nmap Service."""
-    global nmap_scanner
+    global nmap_scanner, _heartbeat_task
+
     print("📡 Starting Maximus Nmap Service...")
     nmap_scanner = NmapScanner()
     print("✅ Nmap scanner initialized")
+
+    # Auto-register with Service Registry
+    if REGISTRY_AVAILABLE:
+        try:
+            _heartbeat_task = await auto_register_service(
+                service_name="nmap_service",
+                port=8047,  # Internal container port
+                health_endpoint="/health",
+                metadata={"category": "investigation", "version": "1.0.0"}
+            )
+            print("✅ Registered with Vértice Service Registry")
+        except Exception as e:
+            print(f"⚠️  Failed to register with service registry: {e}")
+
     print("✅ Maximus Nmap Service started successfully.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Performs shutdown tasks for the Nmap Service."""
+    global _heartbeat_task
+
     print("👋 Shutting down Maximus Nmap Service...")
+
+    # Deregister from Service Registry
+    if _heartbeat_task:
+        _heartbeat_task.cancel()
+    if REGISTRY_AVAILABLE:
+        try:
+            await RegistryClient.deregister("nmap_service")
+        except:
+            pass
+
     print("🛑 Maximus Nmap Service shut down.")
 
 

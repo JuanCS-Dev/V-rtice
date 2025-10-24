@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import styles from './RelationshipGraph.module.css';
 
-export const RelationshipGraph = ({ graphData }) => {
+export const RelationshipGraph = ({ graphData = { nodes: [], edges: [] } }) => {
   const { t } = useTranslation();
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -128,6 +128,4 @@ RelationshipGraph.propTypes = {
   })
 };
 
-RelationshipGraph.defaultProps = {
-  graphData: { nodes: [], edges: [] }
-};
+// defaultProps migrated to default parameters (React 18 compatible)

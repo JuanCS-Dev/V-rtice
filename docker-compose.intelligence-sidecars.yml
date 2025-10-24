@@ -1,0 +1,157 @@
+# Intelligence Services Sidecars - OSINT, Threat Intel, Vulnerability Scanning
+# Integrates: cyber, threat-intel, ssl-monitor, malware-analysis, vuln-scanner, domain, sinesp
+#
+# Usage: docker compose -f docker-compose.intelligence-sidecars.yml up -d
+
+version: '3.8'
+
+networks:
+  maximus-network:
+    external: true
+  maximus-ai-network:
+    external: true
+
+services:
+  # ====================================================================
+  # CYBER SERVICE SIDECAR
+  # ====================================================================
+  cyber-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: cyber-sidecar
+    environment:
+      - SERVICE_NAME=cyber_service
+      - SERVICE_HOST=vertice-cyber
+      - SERVICE_PORT=8103
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # THREAT INTEL SERVICE SIDECAR
+  # ====================================================================
+  threat-intel-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: threat-intel-sidecar
+    environment:
+      - SERVICE_NAME=threat_intel_service
+      - SERVICE_HOST=vertice-threat-intel
+      - SERVICE_PORT=8113
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # SSL MONITOR SERVICE SIDECAR
+  # ====================================================================
+  ssl-monitor-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: ssl-monitor-sidecar
+    environment:
+      - SERVICE_NAME=ssl_monitor_service
+      - SERVICE_HOST=vertice-ssl-monitor
+      - SERVICE_PORT=8115
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # VULN SCANNER SERVICE SIDECAR
+  # ====================================================================
+  vuln-scanner-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vuln-scanner-sidecar
+    environment:
+      - SERVICE_NAME=vuln_scanner_service
+      - SERVICE_HOST=vertice-vuln-scanner
+      - SERVICE_PORT=8111
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # DOMAIN SERVICE SIDECAR
+  # ====================================================================
+  domain-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: domain-sidecar
+    environment:
+      - SERVICE_NAME=domain_service
+      - SERVICE_HOST=vertice-domain
+      - SERVICE_PORT=8014
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # SINESP SERVICE SIDECAR
+  # ====================================================================
+  sinesp-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: sinesp-sidecar
+    environment:
+      - SERVICE_NAME=sinesp_service
+      - SERVICE_HOST=vertice-sinesp
+      - SERVICE_PORT=8102
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M

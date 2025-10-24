@@ -12,6 +12,7 @@ alerting:
             - alertmanager:9093
 
 rule_files:
+  - "/etc/prometheus/alerts.yml"
   - "/etc/prometheus/rules/*.yml"
 
 scrape_configs:
@@ -220,3 +221,21 @@ scrape_configs:
         labels:
           service: 'cadvisor'
           category: 'infrastructure'
+
+  # =========================================================================
+  # SERVICE REGISTRY - Mission Critical Service Discovery
+  # =========================================================================
+  - job_name: 'vertice-service-registry'
+    static_configs:
+      - targets:
+          - 'vertice-register-1:80'
+          - 'vertice-register-2:80'
+          - 'vertice-register-3:80'
+          - 'vertice-register-4:80'
+          - 'vertice-register-5:80'
+        labels:
+          service: 'service_registry'
+          category: 'infrastructure'
+          layer: 'mission_critical'
+    metrics_path: '/metrics'
+    scrape_interval: 10s  # Frequent scraping for registry health

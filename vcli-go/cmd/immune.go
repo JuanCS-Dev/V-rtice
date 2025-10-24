@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
@@ -334,9 +335,37 @@ Examples:
 }
 
 func runTerminateAgent(cmd *cobra.Command, args []string) error {
-	// NOTE: Agent termination not available in current HTTP API
-	// This command is disabled until the API endpoint is implemented
-	return fmt.Errorf("'terminate' command not yet implemented in HTTP API\nUse the Immune Core admin interface for agent termination")
+	agentID := args[0]
+	reason, _ := cmd.Flags().GetString("reason")
+
+	// Create immune client
+	client := immune.NewImmuneClient(immuneServer)
+
+	// Confirm termination (destructive operation)
+	if !confirm(fmt.Sprintf("Are you sure you want to terminate agent '%s'?", agentID)) {
+		fmt.Println("Termination cancelled")
+		return nil
+	}
+
+	// Delete agent
+	if err := client.DeleteAgent(agentID); err != nil {
+		return fmt.Errorf("failed to terminate agent: %w", err)
+	}
+
+	fmt.Printf("✅ Agent '%s' terminated successfully\n", agentID)
+	if reason != "" {
+		fmt.Printf("Reason: %s\n", reason)
+	}
+
+	return nil
+}
+
+// confirm prompts user for yes/no confirmation
+func confirm(message string) bool {
+	fmt.Printf("%s (yes/no): ", message)
+	var response string
+	fmt.Scanln(&response)
+	return strings.ToLower(response) == "yes" || strings.ToLower(response) == "y"
 }
 
 // ============================================================

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/agents"
@@ -13,6 +15,7 @@ import (
 	"github.com/verticedev/vcli-go/internal/agents/dev_senior"
 	"github.com/verticedev/vcli-go/internal/agents/diagnosticador"
 	"github.com/verticedev/vcli-go/internal/agents/tester"
+	"github.com/verticedev/vcli-go/internal/agents/workflow"
 	"github.com/verticedev/vcli-go/internal/visual"
 	"gopkg.in/yaml.v3"
 )
@@ -914,19 +917,152 @@ func runAgentsWorkflow(cmd *cobra.Command, args []string) error {
 	workflowName := args[0]
 	styles := visual.DefaultStyles()
 
-	fmt.Printf("%s Running workflow: %s\n", styles.Info.Render("🚀"), workflowName)
+	// Load workflow from YAML
+	fmt.Printf("%s Loading workflow: %s\n", styles.Info.Render("📋"), workflowName)
+
+	workflowDef, err := workflow.LoadWorkflow(workflowName)
+	if err != nil {
+		return fmt.Errorf("failed to load workflow: %w", err)
+	}
+
+	// Display workflow info
+	fmt.Println()
+	fmt.Printf("%s Workflow: %s\n", styles.Bold.Render("🚀"), workflowDef.Name)
+	fmt.Printf("   Description: %s\n", workflowDef.Description)
+	fmt.Printf("   Steps: %d\n", len(workflowDef.Steps))
 	fmt.Println()
 
-	// This is a placeholder - full implementation would load workflow YAML and execute
-	fmt.Printf("%s Workflow execution not yet fully implemented\n", styles.Warning.Render("⚠️"))
+	// Display workflow steps
+	fmt.Println(styles.Bold.Render("Workflow Steps:"))
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintf(w, "  #\tAgent\tDescription\tHITL\n")
+	fmt.Fprintf(w, "  -\t-----\t-----------\t----\n")
+	for i, step := range workflowDef.Steps {
+		hitlStatus := "No"
+		if step.HITLRequired {
+			hitlStatus = styles.Warning.Render("Yes")
+		}
+		fmt.Fprintf(w, "  %d\t%s\t%s\t%s\n", i+1, step.AgentType, step.Description, hitlStatus)
+	}
+	w.Flush()
 	fmt.Println()
-	fmt.Println("Planned workflow steps:")
-	fmt.Println("  1. DIAGNOSTICADOR - Code analysis")
-	fmt.Println("  2. ARQUITETO - Architecture planning (HITL approval required)")
-	fmt.Println("  3. DEV SENIOR - Implementation (HITL approval required)")
-	fmt.Println("  4. TESTER - Validation & quality gates")
+
+	// Load agent configuration
+	config, err := loadAgentConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load agent config: %w", err)
+	}
+
+	// Override task from CLI flag if provided
+	if agentsTask != "" {
+		// Inject task into first step
+		if len(workflowDef.Steps) > 0 {
+			workflowDef.Steps[0].Task = agentsTask
+		}
+	}
+
+	// Override targets from CLI flag if provided
+	if len(agentsTargets) > 0 {
+		// Inject targets into all steps
+		for i := range workflowDef.Steps {
+			workflowDef.Steps[i].Targets = agentsTargets
+		}
+	}
+
+	// Create orchestrator
+	orchestrator, err := agents.NewAgentOrchestrator(config)
+	if err != nil {
+		return fmt.Errorf("failed to create orchestrator: %w", err)
+	}
+
+	// Register all agents
+	fmt.Println(styles.Bold.Render("Registering agents..."))
+
+	// Create agent instances
+	diagAgent := diagnosticador.NewDiagnosticadorAgent(config)
+	arquitetoAgent := arquiteto.NewArquitetoAgent(config)
+	devAgent := dev_senior.NewDevSeniorAgent(config)
+	testerAgent := tester.NewTesterAgent(config)
+
+	// Register agents with orchestrator
+	if err := orchestrator.RegisterAgent(diagAgent); err != nil {
+		return fmt.Errorf("failed to register diagnosticador: %w", err)
+	}
+	if err := orchestrator.RegisterAgent(arquitetoAgent); err != nil {
+		return fmt.Errorf("failed to register arquiteto: %w", err)
+	}
+	if err := orchestrator.RegisterAgent(devAgent); err != nil {
+		return fmt.Errorf("failed to register dev_senior: %w", err)
+	}
+	if err := orchestrator.RegisterAgent(testerAgent); err != nil {
+		return fmt.Errorf("failed to register tester: %w", err)
+	}
+
+	fmt.Printf("%s All agents registered successfully\n", styles.Success.Render("✓"))
 	fmt.Println()
-	fmt.Printf("%s Full implementation coming soon!\n", styles.Info.Render("ℹ️"))
+
+	// Execute workflow
+	fmt.Println(styles.Bold.Render("Executing workflow..."))
+	fmt.Println()
+
+	ctx := context.Background()
+	startTime := time.Now()
+
+	execution, err := orchestrator.ExecuteWorkflow(ctx, *workflowDef)
+
+	duration := time.Since(startTime)
+
+	// Display results
+	fmt.Println()
+	fmt.Println(strings.Repeat("─", 80))
+	fmt.Println()
+
+	if err != nil {
+		fmt.Printf("%s Workflow failed: %v\n", styles.Error.Render("❌"), err)
+		fmt.Printf("   Duration: %s\n", duration.Round(time.Second))
+		fmt.Printf("   Completed Steps: %d/%d\n", execution.CurrentStep-1, execution.TotalSteps)
+
+		if len(execution.Errors) > 0 {
+			fmt.Println()
+			fmt.Println(styles.Bold.Render("Errors:"))
+			for i, execErr := range execution.Errors {
+				fmt.Printf("  %d. %v\n", i+1, execErr)
+			}
+		}
+
+		return fmt.Errorf("workflow execution failed")
+	}
+
+	// Success
+	fmt.Printf("%s Workflow completed successfully!\n", styles.Success.Render("✅"))
+	fmt.Printf("   Duration: %s\n", duration.Round(time.Second))
+	fmt.Printf("   Steps Completed: %d/%d\n", execution.CurrentStep, execution.TotalSteps)
+
+	if len(execution.HITLDecisions) > 0 {
+		fmt.Printf("   HITL Decisions: %d\n", len(execution.HITLDecisions))
+		for i, decisionID := range execution.HITLDecisions {
+			fmt.Printf("     %d. %s\n", i+1, decisionID)
+		}
+	}
+
+	// Display agent outputs summary
+	fmt.Println()
+	fmt.Println(styles.Bold.Render("Agent Outputs:"))
+	for agentType, output := range execution.AgentOutputs {
+		fmt.Printf("  • %s: %s (%.2fs)\n",
+			agentType,
+			output.Status,
+			output.Duration.Seconds())
+
+		if len(output.Artifacts) > 0 {
+			fmt.Printf("    Artifacts: %d files\n", len(output.Artifacts))
+		}
+	}
+
+	fmt.Println()
+	fmt.Printf("%s Workflow execution complete. Check artifacts in: %s\n",
+		styles.Info.Render("ℹ️"),
+		filepath.Join(config.WorkspacePath, "artifacts"))
 
 	return nil
 }

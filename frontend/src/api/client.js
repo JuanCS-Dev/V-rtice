@@ -1,21 +1,37 @@
 /**
  * Centralized API Client
  * Uses API Gateway (8000) as single entry point
- * Governed by: Constituição Vértice v2.7
+ * Governed by: Constituição Vértice v2.7, ADR-001, ADR-002
  */
 
-const API_BASE = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8000';
-const API_KEY = import.meta.env.VITE_API_KEY || '';
+import { ServiceEndpoints, AuthConfig, httpToWs } from '../config/endpoints';
+import { getCSRFToken, checkRateLimit, RateLimitError } from '../utils/security';
+import logger from '../utils/logger';
+
+const API_BASE = ServiceEndpoints.apiGateway;
+const API_KEY = AuthConfig.apiKey;
 
 const request = async (endpoint, options = {}) => {
   const url = `${API_BASE}${endpoint}`;
 
   try {
+    // Check rate limit before making request
+    try {
+      checkRateLimit(endpoint);
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        logger.warn(`Rate limit exceeded for ${endpoint}. Retry after ${error.retryAfter}s`);
+        throw error;
+      }
+      throw error;
+    }
+
     const response = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         'X-API-Key': API_KEY,
+        'X-CSRF-Token': getCSRFToken(), // Add CSRF token to all requests
         ...options.headers,
       },
     });
@@ -88,7 +104,7 @@ export const directClient = {
 };
 
 export const getWebSocketUrl = (endpoint) => {
-  const wsBase = API_BASE.replace(/^http/, 'ws');
+  const wsBase = httpToWs(API_BASE);
   return `${wsBase}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${API_KEY}`;
 };
 

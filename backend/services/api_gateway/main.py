@@ -8,6 +8,9 @@ communication.
 The API Gateway acts as a single entry point for all external interactions
 with the Maximus AI system, providing a unified interface and abstracting the
 complexity of the underlying microservices architecture.
+
+NEW: Dynamic service routing via Vértice Service Registry (RSS).
+Services are discovered in real-time instead of hardcoded URLs.
 """
 
 import os
@@ -16,12 +19,22 @@ from typing import Dict
 import asyncio
 import httpx
 import uvicorn
+import logging
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import APIKeyHeader
 from starlette.websockets import WebSocketDisconnect
 
-app = FastAPI(title="Maximus API Gateway", version="1.0.0")
+# Import dynamic router
+from gateway_router import get_service_url, ServiceNotFoundError, get_circuit_breaker_status, get_cache_stats
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="Maximus API Gateway (Dynamic Routing)",
+    version="2.0.0",
+    description="API Gateway with Service Registry integration"
+)
 
 # Configuration for backend services
 MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8100")
@@ -77,6 +90,64 @@ async def health_check() -> Dict[str, str]:
         Dict[str, str]: A dictionary indicating the service status.
     """
     return {"status": "healthy", "message": "Maximus API Gateway is operational."}
+
+
+@app.get("/gateway/status")
+async def gateway_status() -> Dict:
+    """Get gateway status including circuit breaker and cache info."""
+    return {
+        "gateway": "operational",
+        "version": "2.0.0",
+        "circuit_breaker": get_circuit_breaker_status(),
+        "cache": get_cache_stats()
+    }
+
+
+# ============================================================================
+# DYNAMIC ROUTING - New in v2.0
+# ============================================================================
+
+@app.api_route("/v2/{service_name}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def dynamic_route(service_name: str, path: str, request: Request):
+    """
+    Dynamic service routing via Service Registry.
+
+    This endpoint queries the Vértice Service Registry to find service locations
+    in real-time instead of using hardcoded URLs.
+
+    Example:
+        GET /v2/osint_service/health  → Looks up "osint_service" in registry
+        POST /v2/ip_intelligence_service/api/v1/query  → Dynamic routing
+
+    Args:
+        service_name: Service identifier (matches registry name)
+        path: Path to forward to the service
+        request: Original request
+
+    Returns:
+        Proxied response from backend service
+    """
+    try:
+        # Lookup service in registry (with cache)
+        service_url = await get_service_url(service_name)
+
+        # Proxy request to service
+        return await _proxy_request(service_url, path, request)
+
+    except ServiceNotFoundError as e:
+        logger.error(f"Service not found: {service_name} - {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Service '{service_name}' is not available. "
+                   f"It may be down or not registered in the service registry."
+        )
+
+    except Exception as e:
+        logger.error(f"Dynamic routing error for {service_name}/{path}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Gateway error routing to '{service_name}': {str(e)}"
+        )
 
 
 # ============================================================================

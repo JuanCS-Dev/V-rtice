@@ -1,0 +1,181 @@
+/**
+ * VirtualizedAlertsList Styles
+ * =============================
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Statistics Bar */
+.statsBar {
+  display: flex;
+  gap: 20px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.stat {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.statLabel {
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.statValue {
+  color: #0f0;
+  font-weight: bold;
+}
+
+.highStat .statValue {
+  color: #ff4444;
+}
+
+.mediumStat .statValue {
+  color: #ffaa00;
+}
+
+.lowStat .statValue {
+  color: #00aaff;
+}
+
+/* Alerts List */
+.alertsList {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Alert Row */
+.alertRow {
+  padding: 12px 16px;
+  margin: 4px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s ease;
+}
+
+.alertRow:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: translateX(4px);
+}
+
+/* Severity Colors */
+.severity-high {
+  border-left-color: #ff4444;
+}
+
+.severity-medium {
+  border-left-color: #ffaa00;
+}
+
+.severity-low {
+  border-left-color: #00aaff;
+}
+
+.severity-critical {
+  border-left-color: #ff0000;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+  }
+}
+
+/* Status */
+.resolved {
+  opacity: 0.5;
+}
+
+.resolved .alertMessage {
+  text-decoration: line-through;
+}
+
+/* Alert Header */
+.alertHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.alertType {
+  color: #0f0;
+  font-weight: bold;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.alertTime {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+/* Alert Message */
+.alertMessage {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+/* Alert Footer */
+.alertFooter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.severityBadge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.severityBadge.severity-high {
+  background: rgba(255, 68, 68, 0.2);
+  color: #ff4444;
+}
+
+.severityBadge.severity-medium {
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+}
+
+.severityBadge.severity-low {
+  background: rgba(0, 170, 255, 0.2);
+  color: #00aaff;
+}
+
+.severityBadge.severity-critical {
+  background: rgba(255, 0, 0, 0.3);
+  color: #ff0000;
+}
+
+.source {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}

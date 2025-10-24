@@ -199,35 +199,79 @@ restart_services() {
     echo -e "   ${BRAIN} Healthy: ${BOLD}${GREEN}$healthy${NC} | ${YELLOW}Degraded: $unhealthy${NC}\n"
 }
 
+show_all_services() {
+    echo ""
+    echo -e "${BOLD}${CYAN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
+    echo -e "${BOLD}${CYAN}┃${NC} ${PACKAGE} ${BOLD}TODOS OS SERVIÇOS${NC}"
+    echo -e "${BOLD}${CYAN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
+    echo ""
+
+    # Headers
+    printf "   ${BOLD}%-35s %-15s %-15s${NC}\n" "SERVICE" "STATUS" "HEALTH"
+    echo -e "   ${DIM}$(printf '%.0s─' {1..75})${NC}"
+
+    # Lista todos os serviços
+    docker compose ps --format "{{.Service}}|{{.State}}|{{.Health}}" 2>/dev/null | sort | while IFS='|' read -r service state health; do
+        local status_icon state_text health_text
+
+        # Status icon e text
+        if [[ "$state" == "running" ]]; then
+            status_icon="${GREEN}${ROCKET}${NC}"
+            state_text="${GREEN}running${NC}"
+        elif [[ "$state" == "exited" ]]; then
+            status_icon="${RED}${CROSS}${NC}"
+            state_text="${RED}stopped${NC}"
+        else
+            status_icon="${YELLOW}${HOURGLASS}${NC}"
+            state_text="${YELLOW}$state${NC}"
+        fi
+
+        # Health icon e text
+        if [[ "$health" == "healthy" ]]; then
+            health_text="${GREEN}${CHECK} healthy${NC}"
+        elif [[ "$health" == "unhealthy" ]]; then
+            health_text="${RED}${WARNING} unhealthy${NC}"
+        elif [[ "$health" == "starting" ]]; then
+            health_text="${CYAN}${HOURGLASS} starting${NC}"
+        else
+            health_text="${DIM}n/a${NC}"
+        fi
+
+        printf "   %b %-33s %-20b %-20b\n" "$status_icon" "$service" "$state_text" "$health_text"
+    done
+
+    echo ""
+}
+
 show_status() {
     print_header
     print_section "DASHBOARD DE STATUS" "$BRAIN"
-    
+
     cd "$PROJECT_ROOT"
-    
+
     read -r total running healthy unhealthy <<< "$(get_service_stats)"
-    
+
     echo -e "${BOLD}${CYAN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
     echo -e "${BOLD}${CYAN}┃${NC} ${SHIELD} ${BOLD}STATUS GERAL DO SISTEMA${NC}"
     echo -e "${BOLD}${CYAN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
     echo ""
-    
+
     local health_percent=0
     if [[ $((healthy + unhealthy)) -gt 0 ]]; then
         health_percent=$((healthy * 100 / (healthy + unhealthy)))
     fi
-    
+
     echo -e "   ${PACKAGE} ${BOLD}Total de Containers:${NC}    $total"
     echo -e "   ${ROCKET} ${BOLD}Rodando:${NC}                ${GREEN}$running${NC}"
     echo -e "   ${CHECK} ${BOLD}Healthy:${NC}                ${GREEN}$healthy${NC}"
     echo -e "   ${WARNING} ${BOLD}Degraded:${NC}               ${YELLOW}$unhealthy${NC}"
     echo -e "   ${BRAIN} ${BOLD}Health Score:${NC}           ${health_percent}%"
-    
+
     echo ""
     echo -ne "   ${BOLD}Sistema:${NC} ["
     local filled=$((health_percent / 5))
     local empty=$((20 - filled))
-    
+
     if [[ $health_percent -ge 80 ]]; then
         printf "${GREEN}%${filled}s${NC}" | tr ' ' '█'
     elif [[ $health_percent -ge 50 ]]; then
@@ -235,60 +279,19 @@ show_status() {
     else
         printf "${RED}%${filled}s${NC}" | tr ' ' '█'
     fi
-    
+
     printf "${DIM}%${empty}s${NC}" | tr ' ' '░'
     echo -e "] ${BOLD}$health_percent%${NC}"
-    
+
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    
-    echo ""
-    echo -e "${BOLD}${CYAN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
-    echo -e "${BOLD}${CYAN}┃${NC} ${STAR} ${BOLD}SERVIÇOS CRÍTICOS${NC}"
-    echo -e "${BOLD}${CYAN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
-    echo ""
-    
-    local critical_services=("api_gateway" "auth_service" "postgres" "redis" "maximus_core_service")
-    
-    for service in "${critical_services[@]}"; do
-        local status health
-        status=$(docker compose ps --format "{{.State}}" "$service" 2>/dev/null || echo "down")
-        health=$(docker compose ps --format "{{.Health}}" "$service" 2>/dev/null || echo "")
-        
-        if [[ "$status" == "running" ]]; then
-            if [[ "$health" == "healthy" ]]; then
-                echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC}"
-            elif [[ "$health" == "unhealthy" ]]; then
-                echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
-            elif [[ -z "$health" ]]; then
-                # Sem healthcheck = verificar manualmente se operacional
-                if [[ "$service" == "postgres" ]]; then
-                    if docker exec vertice-postgres pg_isready -U postgres &>/dev/null; then
-                        echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC} ${DIM}(no healthcheck)${NC}"
-                    else
-                        echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
-                    fi
-                elif [[ "$service" == "redis" ]]; then
-                    if docker exec vertice-redis redis-cli ping &>/dev/null; then
-                        echo -e "   ${CHECK} ${BOLD}$service${NC} ${DIM}→${NC} ${GREEN}operational${NC} ${DIM}(no healthcheck)${NC}"
-                    else
-                        echo -e "   ${WARNING} ${BOLD}$service${NC} ${DIM}→${NC} ${YELLOW}degraded${NC}"
-                    fi
-                else
-                    echo -e "   ${HOURGLASS} ${BOLD}$service${NC} ${DIM}→${NC} ${CYAN}starting${NC}"
-                fi
-            else
-                echo -e "   ${HOURGLASS} ${BOLD}$service${NC} ${DIM}→${NC} ${CYAN}starting${NC}"
-            fi
-        else
-            echo -e "   ${CROSS} ${BOLD}$service${NC} ${DIM}→${NC} ${RED}stopped${NC}"
-        fi
-    done
-    
-    echo ""
+
+    # Mostra todos os serviços
+    show_all_services
+
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    
+
     if [[ $health_percent -ge 90 ]]; then
         echo -e "${BOLD}${GREEN}${CROWN} Maximus:${NC} 'Sistema operando em capacidade máxima!' ${FIRE}${SPARKLES}"
         echo -e "${BOLD}${MAGENTA}${HEART} Penélope:${NC} 'Perfeito, meu amor!' ${SPARKLES}\n"
@@ -302,38 +305,111 @@ show_status() {
         echo -e "${BOLD}${RED}${CROSS} Maximus:${NC} 'Precisamos de ajuda aqui!' ${WARNING}"
         echo -e "${BOLD}${YELLOW}${HEART} Penélope:${NC} 'Calma, vamos resolver isso juntos!' ${SPARKLES}\n"
     fi
-    
+
     # Menu interativo
-    show_status_menu "$unhealthy"
+    show_status_menu "$unhealthy" "$running"
 }
 
 show_status_menu() {
     local unhealthy_count="$1"
-    
+    local running_count="$2"
+
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}${YELLOW}O que deseja fazer?${NC}"
     echo ""
-    echo -e "   ${BOLD}1)${NC} ${EYE} Exibir erros detalhados ${DIM}(containers degraded)${NC}"
-    echo -e "   ${BOLD}2)${NC} ${CHECK} Sair"
+
+    # Opção START - só aparece se houver containers parados
+    if [[ "$running_count" -eq 0 ]] || docker compose ps -a --format "{{.State}}" 2>/dev/null | grep -q "exited"; then
+        echo -e "   ${BOLD}1)${NC} ${ROCKET} ${GREEN}Iniciar serviços${NC}"
+        local has_start=true
+    fi
+
+    # Opção STOP - só aparece se houver containers rodando
+    if [[ "$running_count" -gt 0 ]]; then
+        if [[ "$has_start" == "true" ]]; then
+            echo -e "   ${BOLD}2)${NC} ${HOURGLASS} ${YELLOW}Parar serviços${NC}"
+            local stop_num=2
+        else
+            echo -e "   ${BOLD}1)${NC} ${HOURGLASS} ${YELLOW}Parar serviços${NC}"
+            local stop_num=1
+        fi
+        local has_stop=true
+    fi
+
+    # Opção RESTART - só aparece se houver containers rodando
+    if [[ "$running_count" -gt 0 ]]; then
+        if [[ "$has_start" == "true" && "$has_stop" == "true" ]]; then
+            echo -e "   ${BOLD}3)${NC} ${GEAR} ${BLUE}Reiniciar serviços${NC}"
+            local restart_num=3
+        elif [[ "$has_stop" == "true" ]]; then
+            echo -e "   ${BOLD}2)${NC} ${GEAR} ${BLUE}Reiniciar serviços${NC}"
+            local restart_num=2
+        else
+            echo -e "   ${BOLD}1)${NC} ${GEAR} ${BLUE}Reiniciar serviços${NC}"
+            local restart_num=1
+        fi
+        local has_restart=true
+    fi
+
+    # Opção ERRORS - só aparece se houver containers unhealthy
+    if [[ "$unhealthy_count" -gt 0 ]]; then
+        local next_num=1
+        [[ "$has_start" == "true" ]] && ((next_num++))
+        [[ "$has_stop" == "true" ]] && ((next_num++))
+        [[ "$has_restart" == "true" ]] && ((next_num++))
+        echo -e "   ${BOLD}${next_num})${NC} ${EYE} Exibir erros detalhados ${DIM}(containers degraded)${NC}"
+        local errors_num=$next_num
+        local has_errors=true
+    fi
+
+    # Opção REFRESH
+    local next_num=1
+    [[ "$has_start" == "true" ]] && ((next_num++))
+    [[ "$has_stop" == "true" ]] && ((next_num++))
+    [[ "$has_restart" == "true" ]] && ((next_num++))
+    [[ "$has_errors" == "true" ]] && ((next_num++))
+    echo -e "   ${BOLD}${next_num})${NC} ${SPARKLES} Atualizar status"
+    local refresh_num=$next_num
+
+    # Opção SAIR
+    ((next_num++))
+    echo -e "   ${BOLD}${next_num})${NC} ${CHECK} Sair"
+    local exit_num=$next_num
+
     echo ""
-    echo -ne "${CYAN}Escolha uma opção [1-2]:${NC} "
-    
+    echo -ne "${CYAN}Escolha uma opção [1-${exit_num}]:${NC} "
+
     read -r choice
-    
-    case "$choice" in
-        1)
-            show_errors "$unhealthy_count"
-            ;;
-        2)
-            echo -e "\n${GREEN}${SPARKLES} Até logo!${NC}\n"
-            exit 0
-            ;;
-        *)
-            echo -e "\n${RED}${CROSS} Opção inválida!${NC}\n"
-            show_status_menu "$unhealthy_count"
-            ;;
-    esac
+
+    # Processar escolha
+    if [[ "$choice" == "1" && "$has_start" == "true" ]]; then
+        start_services
+        echo -ne "\n${CYAN}Pressione ENTER para voltar ao status...${NC}"
+        read -r
+        show_status
+    elif [[ "$choice" == "$stop_num" && "$has_stop" == "true" ]]; then
+        stop_services
+        echo -ne "\n${CYAN}Pressione ENTER para sair...${NC}"
+        read -r
+        exit 0
+    elif [[ "$choice" == "$restart_num" && "$has_restart" == "true" ]]; then
+        restart_services
+        echo -ne "\n${CYAN}Pressione ENTER para voltar ao status...${NC}"
+        read -r
+        show_status
+    elif [[ "$choice" == "$errors_num" && "$has_errors" == "true" ]]; then
+        show_errors "$unhealthy_count"
+    elif [[ "$choice" == "$refresh_num" ]]; then
+        show_status
+    elif [[ "$choice" == "$exit_num" ]]; then
+        echo -e "\n${GREEN}${SPARKLES} Até logo!${NC}\n"
+        exit 0
+    else
+        echo -e "\n${RED}${CROSS} Opção inválida!${NC}\n"
+        sleep 1
+        show_status
+    fi
 }
 
 show_errors() {

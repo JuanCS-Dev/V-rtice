@@ -18,6 +18,7 @@ services:
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules:ro
       - prometheus_data:/prometheus
     networks:
       - maximus-network
@@ -74,8 +75,8 @@ services:
 
 networks:
   maximus-network:
-    driver: bridge
-    name: maximus-ai-network
+    external: true
+    name: maximus-network
 
 volumes:
   prometheus_data:

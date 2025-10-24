@@ -177,6 +177,17 @@ export const sanitizeFilename = (filename) => {
 };
 
 /**
+ * ============================================================================
+ * CSRF PROTECTION (Enhanced)
+ * ============================================================================
+ * Governed by: Constituição Vértice v2.5 - ADR-002 (Security Fixes)
+ */
+
+const CSRF_TOKEN_KEY = 'vrtc_csrf_token';
+const CSRF_TOKEN_EXPIRY = 'vrtc_csrf_expiry';
+const TOKEN_VALIDITY_MS = 60 * 60 * 1000; // 1 hour
+
+/**
  * Generate CSRF token
  *
  * @returns {string} CSRF token
@@ -193,16 +204,28 @@ export const generateCSRFToken = () => {
  * @param {string} token - Token to store
  */
 export const storeCSRFToken = (token) => {
-  sessionStorage.setItem('csrf_token', token);
+  const now = Date.now();
+  sessionStorage.setItem(CSRF_TOKEN_KEY, token);
+  sessionStorage.setItem(CSRF_TOKEN_EXPIRY, (now + TOKEN_VALIDITY_MS).toString());
 };
 
 /**
- * Get CSRF token
+ * Get CSRF token (auto-generates if expired or missing)
  *
- * @returns {string|null} CSRF token
+ * @returns {string} CSRF token
  */
 export const getCSRFToken = () => {
-  return sessionStorage.getItem('csrf_token');
+  const now = Date.now();
+  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || '0', 10);
+  let token = sessionStorage.getItem(CSRF_TOKEN_KEY);
+
+  // Generate new token if expired or missing
+  if (!token || now > expiry) {
+    token = generateCSRFToken();
+    storeCSRFToken(token);
+  }
+
+  return token;
 };
 
 /**
@@ -212,16 +235,106 @@ export const getCSRFToken = () => {
  * @returns {boolean} Valid or not
  */
 export const validateCSRFToken = (token) => {
-  const storedToken = getCSRFToken();
-  return storedToken !== null && storedToken === token;
+  const storedToken = sessionStorage.getItem(CSRF_TOKEN_KEY);
+  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || '0', 10);
+  const now = Date.now();
+
+  return storedToken !== null && storedToken === token && now < expiry;
 };
 
 /**
- * Rate limit key generator
- *
- * @param {string} action - Action name
- * @param {string} identifier - User/IP identifier
- * @returns {string} Rate limit key
+ * Clear CSRF token (call on logout)
+ */
+export const clearCSRFToken = () => {
+  sessionStorage.removeItem(CSRF_TOKEN_KEY);
+  sessionStorage.removeItem(CSRF_TOKEN_EXPIRY);
+};
+
+/**
+ * ============================================================================
+ * RATE LIMITING
+ * ============================================================================
+ * Governed by: Constituição Vértice v2.5 - ADR-002 (Security Fixes)
+ */
+
+const rateLimitStore = new Map();
+
+/**
+ * Rate limit configuration per endpoint pattern
+ */
+const RATE_LIMITS = {
+  // Strict limits for mutations
+  '/api/scans': { maxRequests: 5, windowMs: 60000 }, // 5 req/min
+  '/api/attacks': { maxRequests: 3, windowMs: 60000 }, // 3 req/min
+  '/offensive': { maxRequests: 10, windowMs: 60000 }, // 10 req/min
+
+  // Moderate limits for queries
+  '/api/metrics': { maxRequests: 30, windowMs: 60000 }, // 30 req/min
+  '/api/': { maxRequests: 60, windowMs: 60000 }, // 60 req/min (default)
+};
+
+/**
+ * Gets rate limit config for an endpoint
+ */
+function getRateLimitConfig(endpoint) {
+  for (const [pattern, config] of Object.entries(RATE_LIMITS)) {
+    if (endpoint.includes(pattern)) {
+      return config;
+    }
+  }
+  return { maxRequests: 60, windowMs: 60000 };
+}
+
+/**
+ * Custom error for rate limiting
+ */
+export class RateLimitError extends Error {
+  constructor(message, retryAfter) {
+    super(message);
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+  }
+}
+
+/**
+ * Checks if a request would exceed rate limit
+ * @throws {RateLimitError} If rate limit exceeded
+ */
+export function checkRateLimit(endpoint) {
+  const config = getRateLimitConfig(endpoint);
+  const now = Date.now();
+  const key = endpoint;
+
+  if (!rateLimitStore.has(key)) {
+    rateLimitStore.set(key, []);
+  }
+
+  const requests = rateLimitStore.get(key);
+  const validRequests = requests.filter(timestamp => now - timestamp < config.windowMs);
+
+  if (validRequests.length >= config.maxRequests) {
+    const oldestRequest = Math.min(...validRequests);
+    const retryAfter = Math.ceil((oldestRequest + config.windowMs - now) / 1000);
+
+    throw new RateLimitError(
+      `Rate limit exceeded for ${endpoint}. Retry after ${retryAfter}s`,
+      retryAfter
+    );
+  }
+
+  validRequests.push(now);
+  rateLimitStore.set(key, validRequests);
+}
+
+/**
+ * Clears rate limit history (useful for testing)
+ */
+export function clearRateLimits() {
+  rateLimitStore.clear();
+}
+
+/**
+ * Rate limit key generator (legacy, kept for compatibility)
  */
 export const generateRateLimitKey = (action, identifier) => {
   return `ratelimit:${action}:${identifier}`;

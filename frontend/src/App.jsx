@@ -1,6 +1,6 @@
 // /home/juan/vertice-dev/frontend/src/App.jsx
 
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
@@ -9,6 +9,8 @@ import { SkipLink } from './components/shared/SkipLink';
 import { useModuleNavigation } from './hooks/useModuleNavigation';
 import { ToastProvider } from './components/shared/Toast';
 import { DashboardLoader } from './components/shared/LoadingStates';
+import { register as registerServiceWorker } from './utils/serviceWorkerRegistration';
+import { ServiceWorkerUpdateNotification } from './components/shared/ServiceWorkerUpdateNotification';
 import './i18n/config'; // Initialize i18n
 
 // Import new animation & micro-interaction styles
@@ -32,6 +34,16 @@ function App() {
 
   // Enable keyboard navigation
   useModuleNavigation(setCurrentView);
+
+  // Register Service Worker for PWA (offline-first, caching)
+  useEffect(() => {
+    registerServiceWorker({
+      onSuccess: () => console.log('[SW] Service Worker registered successfully'),
+      onUpdate: () => console.log('[SW] New content available, reload to update'),
+      onOffline: () => console.log('[SW] App is offline'),
+      onOnline: () => console.log('[SW] App is back online'),
+    });
+  }, []);
 
   const views = {
     admin: (
@@ -86,6 +98,10 @@ function App() {
       <ToastProvider>
         <ErrorBoundary context="app-root" title="Application Error">
           <SkipLink href="#main-content" />
+
+          {/* PWA Update Notification */}
+          <ServiceWorkerUpdateNotification />
+
           <main id="main-content" role="main" className="page-enter">
             {currentView === 'main' ? (
               <LandingPage setCurrentView={setCurrentView} />

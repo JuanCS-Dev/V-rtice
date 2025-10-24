@@ -7,6 +7,8 @@ Endpoints:
 - GET  /governance/stream/{operator_id}          - SSE stream of pending decisions
 - GET  /governance/health                        - Health check
 - GET  /governance/pending                       - Get pending decisions count
+- GET  /governance/decision/{id}                 - Get specific decision by ID
+- GET  /governance/decision/{id}/watch           - SSE stream for specific decision
 - POST /governance/decision/{id}/approve         - Approve decision
 - POST /governance/decision/{id}/reject          - Reject decision
 - POST /governance/decision/{id}/escalate        - Escalate decision
@@ -14,7 +16,7 @@ Endpoints:
 - POST /governance/session/create                - Create operator session
 
 Author: Claude Code + JuanCS-Dev
-Date: 2025-10-06
+Date: 2025-10-06 (Updated: 2025-10-23 for 100/100 Integration)
 Quality: Production-ready, REGRA DE OURO compliant
 """
 
@@ -128,6 +130,19 @@ class PendingStatsResponse(BaseModel):
     by_risk_level: dict[str, int]
     oldest_pending_seconds: int | None
     sla_violations: int
+
+
+class DecisionResponse(BaseModel):
+    """Individual decision response."""
+
+    decision_id: str
+    status: str
+    risk_level: str
+    automation_level: str
+    created_at: str
+    sla_deadline: str | None
+    context: dict
+    resolution: dict | None = None
 
 
 class OperatorStatsResponse(BaseModel):
@@ -296,6 +311,213 @@ def create_governance_api(
             by_risk_level=by_risk,
             oldest_pending_seconds=oldest_pending_seconds,
             sla_violations=sla_violations,
+        )
+
+    @router.get("/decision/{decision_id}", response_model=DecisionResponse)
+    async def get_decision(decision_id: str):
+        """
+        Get a specific decision by ID.
+
+        Args:
+            decision_id: Decision ID to retrieve
+
+        Returns:
+            Decision details
+
+        Raises:
+            HTTPException: If decision not found
+        """
+        try:
+            # Try to get decision from queue (pending decisions)
+            decision = decision_queue.get_decision(decision_id)
+
+            if decision is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Decision {decision_id} not found",
+                )
+
+            # Build context dictionary
+            context_dict = {
+                "action_type": decision.context.action_type.value,
+                "action_params": decision.context.action_params,
+                "ai_reasoning": decision.context.ai_reasoning,
+                "confidence": decision.context.confidence,
+                "threat_score": decision.context.threat_score,
+                "threat_type": decision.context.threat_type,
+                "metadata": decision.context.metadata,
+            }
+
+            # Build resolution dictionary if decision is resolved
+            resolution = None
+            if decision.status != DecisionStatus.PENDING:
+                resolution = {
+                    "status": decision.status.value,
+                    "resolved_at": decision.resolved_at.isoformat() if decision.resolved_at else None,
+                    "resolved_by": decision.resolved_by,
+                }
+
+            return DecisionResponse(
+                decision_id=decision.decision_id,
+                status=decision.status.value,
+                risk_level=decision.risk_level.value,
+                automation_level=decision.automation_level.value,
+                created_at=decision.created_at.isoformat(),
+                sla_deadline=decision.sla_deadline.isoformat() if decision.sla_deadline else None,
+                context=context_dict,
+                resolution=resolution,
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get decision {decision_id}: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to retrieve decision: {str(e)}",
+            )
+
+    @router.get("/decision/{decision_id}/watch")
+    async def watch_decision(decision_id: str):
+        """
+        Watch a specific decision via SSE stream.
+
+        This endpoint provides real-time updates about a specific decision,
+        streaming status changes until the decision is resolved.
+
+        Args:
+            decision_id: Decision ID to watch
+
+        Returns:
+            StreamingResponse with SSE events for this decision
+
+        Events:
+        - decision_status: Current status of the decision
+        - decision_resolved: Final resolution of the decision
+        - error: If decision not found or stream error
+        """
+        logger.info(f"SSE watch stream started for decision {decision_id}")
+
+        async def decision_watch_generator():
+            """Generate SSE events for a specific decision."""
+            try:
+                import asyncio
+                from datetime import timedelta
+
+                # Verify decision exists
+                decision = decision_queue.get_decision(decision_id)
+                if decision is None:
+                    error_event = SSEEvent(
+                        event_type="error",
+                        event_id=f"error_{datetime.now(UTC).timestamp()}",
+                        timestamp=datetime.now(UTC).isoformat(),
+                        data={"error": "Decision not found", "decision_id": decision_id},
+                    )
+                    yield error_event.to_sse_format()
+                    return
+
+                # Send initial status
+                initial_event = SSEEvent(
+                    event_type="decision_status",
+                    event_id=f"status_{datetime.now(UTC).timestamp()}",
+                    timestamp=datetime.now(UTC).isoformat(),
+                    data={
+                        "decision_id": decision_id,
+                        "status": decision.status.value,
+                        "risk_level": decision.risk_level.value,
+                        "created_at": decision.created_at.isoformat(),
+                    },
+                )
+                yield initial_event.to_sse_format()
+
+                # Poll for status changes
+                last_status = decision.status
+                poll_count = 0
+                max_polls = 600  # 10 minutes at 1s intervals
+
+                while poll_count < max_polls:
+                    await asyncio.sleep(1.0)
+                    poll_count += 1
+
+                    # Get fresh decision state
+                    decision = decision_queue.get_decision(decision_id)
+
+                    if decision is None:
+                        # Decision was removed (likely resolved and archived)
+                        resolved_event = SSEEvent(
+                            event_type="decision_resolved",
+                            event_id=f"resolved_{datetime.now(UTC).timestamp()}",
+                            timestamp=datetime.now(UTC).isoformat(),
+                            data={
+                                "decision_id": decision_id,
+                                "status": "completed",
+                                "message": "Decision has been resolved and archived",
+                            },
+                        )
+                        yield resolved_event.to_sse_format()
+                        break
+
+                    # Check for status change
+                    if decision.status != last_status:
+                        status_event = SSEEvent(
+                            event_type="decision_status",
+                            event_id=f"status_{datetime.now(UTC).timestamp()}",
+                            timestamp=datetime.now(UTC).isoformat(),
+                            data={
+                                "decision_id": decision_id,
+                                "status": decision.status.value,
+                                "previous_status": last_status.value,
+                            },
+                        )
+                        yield status_event.to_sse_format()
+                        last_status = decision.status
+
+                        # If resolved, send final event and close
+                        if decision.status != DecisionStatus.PENDING:
+                            resolved_event = SSEEvent(
+                                event_type="decision_resolved",
+                                event_id=f"resolved_{datetime.now(UTC).timestamp()}",
+                                timestamp=datetime.now(UTC).isoformat(),
+                                data={
+                                    "decision_id": decision_id,
+                                    "status": decision.status.value,
+                                    "resolved_at": decision.resolved_at.isoformat()
+                                    if decision.resolved_at
+                                    else None,
+                                    "resolved_by": decision.resolved_by,
+                                },
+                            )
+                            yield resolved_event.to_sse_format()
+                            break
+
+                    # Send heartbeat every 30 seconds
+                    if poll_count % 30 == 0:
+                        heartbeat_event = SSEEvent(
+                            event_type="heartbeat",
+                            event_id=f"heartbeat_{datetime.now(UTC).timestamp()}",
+                            timestamp=datetime.now(UTC).isoformat(),
+                            data={"decision_id": decision_id, "watching": True},
+                        )
+                        yield heartbeat_event.to_sse_format()
+
+            except Exception as e:
+                logger.error(f"SSE watch stream error for {decision_id}: {e}", exc_info=True)
+                error_event = SSEEvent(
+                    event_type="error",
+                    event_id=f"error_{datetime.now(UTC).timestamp()}",
+                    timestamp=datetime.now(UTC).isoformat(),
+                    data={"error": str(e), "message": "Stream error occurred"},
+                )
+                yield error_event.to_sse_format()
+
+        return StreamingResponse(
+            decision_watch_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",  # Disable nginx buffering
+            },
         )
 
     # ========================================================================

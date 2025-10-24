@@ -29,6 +29,14 @@ from adw_router import router as adw_router
 # HITL imports for Governance SSE
 from hitl import DecisionQueue, HITLConfig, HITLDecisionFramework, OperatorInterface, SLAConfig
 
+# Import Service Registry client
+try:
+    from shared.vertice_registry_client import auto_register_service, RegistryClient
+    REGISTRY_AVAILABLE = True
+except ImportError:
+    REGISTRY_AVAILABLE = False
+    print("⚠️  Service Registry client not available - running standalone")
+
 app = FastAPI(title="Maximus Core Service", version="1.0.0")
 
 # CORS Configuration
@@ -53,6 +61,9 @@ decision_framework: HITLDecisionFramework | None = None
 # Consciousness System (initialized on startup)
 consciousness_system: ConsciousnessSystem | None = None
 
+# Global heartbeat task for Service Registry
+_heartbeat_task = None
+
 
 class QueryRequest(BaseModel):
     """Request model for processing a query.
@@ -69,7 +80,7 @@ class QueryRequest(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Initializes the Maximus AI system and starts its autonomic core on application startup."""
-    global maximus_ai, decision_queue, operator_interface, decision_framework, consciousness_system
+    global maximus_ai, decision_queue, operator_interface, decision_framework, consciousness_system, _heartbeat_task
 
     print("🚀 Starting Maximus Core Service...")
 
@@ -159,14 +170,36 @@ async def startup_event():
         print("   Continuing without consciousness monitoring...")
         consciousness_system = None
 
+    # Auto-register with Service Registry
+    if REGISTRY_AVAILABLE:
+        try:
+            _heartbeat_task = await auto_register_service(
+                service_name="maximus_core_service",
+                port=8150,  # Internal container port
+                health_endpoint="/health",
+                metadata={"category": "maximus_core", "version": "1.0.0"}
+            )
+            print("✅ Registered with Vértice Service Registry")
+        except Exception as e:
+            print(f"⚠️  Failed to register with service registry: {e}")
+
     print("✅ Maximus Core Service started successfully with full HITL Governance integration")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Shuts down the Maximus AI system and its autonomic core on application shutdown."""
-    global maximus_ai, decision_queue, consciousness_system
+    global maximus_ai, decision_queue, consciousness_system, _heartbeat_task
     print("👋 Shutting down Maximus Core Service...")
+
+    # Deregister from Service Registry
+    if _heartbeat_task:
+        _heartbeat_task.cancel()
+    if REGISTRY_AVAILABLE:
+        try:
+            await RegistryClient.deregister("maximus_core_service")
+        except:
+            pass
 
     # Stop Consciousness System
     if consciousness_system:
