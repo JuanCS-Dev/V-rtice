@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  hcl_kb_service:
+    build: .
+    container_name: vertice-hcl-kb-service
+    hostname: vertice-hcl-kb-service
+    ports:
+    - 8212:8212
+    environment:
+    - SERVICE_NAME=hcl_kb_service
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8212
+    - LOG_LEVEL=INFO
+    - ENVIRONMENT=development
+    - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/db
+    - REDIS_URL=redis://redis:6379
+    - MONGO_URL=mongodb://mongo:27017/db
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8212/health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on: {}
+  hcl_kb_service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-hcl-kb-service-sidecar
+    environment:
+    - SERVICE_NAME=hcl_kb_service
+    - SERVICE_HOST=vertice-hcl-kb-service
+    - SERVICE_PORT=8212
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      hcl_kb_service:
+        condition: service_started
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+networks:
+  maximus-network:
+    external: true

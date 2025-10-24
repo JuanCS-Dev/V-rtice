@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  maximus_oraculo:
+    build: .
+    container_name: vertice-maximus-oraculo
+    hostname: vertice-maximus-oraculo
+    ports:
+    - 8222:8222
+    environment:
+    - SERVICE_NAME=maximus_oraculo_service
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8222
+    - LOG_LEVEL=INFO
+    - ENVIRONMENT=development
+    - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/db
+    - REDIS_URL=redis://redis:6379
+    - MONGO_URL=mongodb://mongo:27017/db
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8222/health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on: {}
+  maximus_oraculo-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-maximus-oraculo-sidecar
+    environment:
+    - SERVICE_NAME=maximus_oraculo_service
+    - SERVICE_HOST=vertice-maximus-oraculo
+    - SERVICE_PORT=8222
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      maximus_oraculo:
+        condition: service_started
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+networks:
+  maximus-network:
+    external: true

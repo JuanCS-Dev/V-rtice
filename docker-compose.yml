@@ -173,14 +173,14 @@ services:
     build: ./backend/services/sinesp_service
     container_name: vertice-sinesp
     ports:
-    - 8102:80
+    - 8102:8054
     volumes:
     - ./backend/services/sinesp_service:/code
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8054/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -194,12 +194,12 @@ services:
     - /etc:/etc:ro
     privileged: true
     ports:
-    - 8103:80
+    - 8103:8012
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -328,12 +328,12 @@ services:
     volumes:
     - ./backend/services/atlas_service:/app
     ports:
-    - 8109:8000
+    - 8109:8004
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -389,12 +389,12 @@ services:
     volumes:
     - ./backend/services/social_eng_service:/app
     ports:
-    - 8112:80
+    - 8112:8055
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8055/health"]
       interval: 30s
       timeout: 10s
       retries: 3

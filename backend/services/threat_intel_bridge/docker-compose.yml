@@ -1,0 +1,52 @@
+version: '3.8'
+services:
+  threat_intel_bridge:
+    build: .
+    container_name: vertice-threat-intel-bridge
+    hostname: vertice-threat-intel-bridge
+    ports:
+    - 8276:8276
+    environment:
+    - SERVICE_NAME=threat_intel_bridge_service
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8276
+    - LOG_LEVEL=INFO
+    - ENVIRONMENT=development
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8276/health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  threat_intel_bridge-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-threat-intel-bridge-sidecar
+    environment:
+    - SERVICE_NAME=threat_intel_bridge_service
+    - SERVICE_HOST=vertice-threat-intel-bridge
+    - SERVICE_PORT=8276
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      threat_intel_bridge:
+        condition: service_started
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+networks:
+  maximus-network:
+    external: true

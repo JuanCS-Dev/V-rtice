@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  api_gateway:
+    build: .
+    container_name: vertice-api-gateway
+    hostname: vertice-api-gateway
+    ports:
+    - 8000:8000
+    environment:
+    - SERVICE_NAME=api_gateway_service
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8000
+    - LOG_LEVEL=INFO
+    - ENVIRONMENT=development
+    - REDIS_URL=redis://redis:6379
+    - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/db
+    - MONGO_URL=mongodb://mongo:27017/db
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8000/health
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on: {}
+  api_gateway-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-api-gateway-sidecar
+    environment:
+    - SERVICE_NAME=api_gateway_service
+    - SERVICE_HOST=vertice-api-gateway
+    - SERVICE_PORT=8000
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      api_gateway:
+        condition: service_started
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+networks:
+  maximus-network:
+    external: true

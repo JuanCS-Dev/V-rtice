@@ -12,7 +12,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DefensiveDashboard from '../DefensiveDashboard';
-import * as defensiveService from '@/hooks/services/useDefensiveService';
+import { useDefensiveMetrics } from '@/hooks/services/useDefensiveService';
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
@@ -24,8 +24,21 @@ vi.mock('react-i18next', () => ({
   withTranslation: () => (Component) => Component, // HOC mock for class components
 }));
 
-// Mock the service layer
-vi.mock('@/hooks/services/useDefensiveService');
+// Mock the service layer - use factory function to provide mock implementation
+vi.mock('@/hooks/services/useDefensiveService', () => ({
+  useDefensiveMetrics: vi.fn(() => ({
+    data: {
+      threats: 12,
+      suspiciousIPs: 8,
+      domains: 24,
+      monitored: 156,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: vi.fn(),
+  })),
+}));
 
 // Mock WebSocket hook
 vi.mock('../hooks/useRealTimeAlerts', () => ({
@@ -116,13 +129,11 @@ const createTestWrapper = () => {
 };
 
 describe('DefensiveDashboard - Service Layer Integration', () => {
-  let mockUseDefensiveMetrics;
-
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock useDefensiveMetrics hook
-    mockUseDefensiveMetrics = vi.fn(() => ({
+    // Reset mock to default implementation
+    useDefensiveMetrics.mockReturnValue({
       data: {
         threats: 12,
         suspiciousIPs: 8,
@@ -133,9 +144,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
       isError: false,
       error: null,
       refetch: vi.fn(),
-    }));
-
-    defensiveService.useDefensiveMetrics = mockUseDefensiveMetrics;
+    });
   });
 
   afterEach(() => {
@@ -155,11 +164,11 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     });
 
     // Verify useDefensiveMetrics was called
-    expect(mockUseDefensiveMetrics).toHaveBeenCalled();
+    expect(useDefensiveMetrics).toHaveBeenCalled();
   });
 
   it('should display loading state when metrics are loading', async () => {
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: true,
       isError: false,
@@ -175,7 +184,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   });
 
   it('should handle metrics error gracefully', async () => {
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: false,
       isError: true,
@@ -225,7 +234,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
       monitored: 250,
     };
 
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: customMetrics,
       isLoading: false,
       isError: false,
@@ -239,11 +248,11 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     });
 
     // Verify metrics were passed (header receives metrics prop)
-    expect(mockUseDefensiveMetrics).toHaveBeenCalled();
+    expect(useDefensiveMetrics).toHaveBeenCalled();
   });
 
   it('should provide default metrics when data is undefined', async () => {
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
@@ -260,7 +269,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   });
 
   it('should pass metricsLoading prop to header', async () => {
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: true,
       isError: false,
@@ -433,7 +442,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(mockUseDefensiveMetrics).toHaveBeenCalled();
+      expect(useDefensiveMetrics).toHaveBeenCalled();
     });
 
     // Verify correct import: @/hooks/services/useDefensiveService
@@ -441,7 +450,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
 
   it('should handle metrics refetch correctly', async () => {
     const mockRefetch = vi.fn();
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: { threats: 5, suspiciousIPs: 3, domains: 10, monitored: 50 },
       isLoading: false,
       isError: false,
@@ -468,7 +477,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     });
 
     // Update metrics
-    mockUseDefensiveMetrics.mockReturnValue({
+    useDefensiveMetrics.mockReturnValue({
       data: {
         threats: 30,
         suspiciousIPs: 20,
@@ -484,7 +493,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
 
     // Dashboard should reflect new metrics
     await waitFor(() => {
-      expect(mockUseDefensiveMetrics).toHaveBeenCalled();
+      expect(useDefensiveMetrics).toHaveBeenCalled();
     });
   });
 

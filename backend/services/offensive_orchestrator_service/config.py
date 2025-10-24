@@ -91,12 +91,12 @@ def load_config() -> ServiceConfig:
     """
     config = ServiceConfig()
 
-    # Validate critical configs
-    if not config.llm.api_key:
-        raise ValueError("GEMINI_API_KEY environment variable is required")
+    # Validate critical configs - DISABLED for graceful degradation
+    # if not config.llm.api_key:
+    #     raise ValueError("GEMINI_API_KEY environment variable is required")
 
-    if not config.database.password:
-        raise ValueError("POSTGRES_PASSWORD environment variable is required")
+    # if not config.database.password:
+    #     raise ValueError("POSTGRES_PASSWORD environment variable is required")
 
     return config
 

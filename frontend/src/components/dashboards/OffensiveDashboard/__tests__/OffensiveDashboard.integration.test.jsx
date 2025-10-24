@@ -13,6 +13,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OffensiveDashboard } from '../OffensiveDashboard';
+import { useOffensiveMetrics } from '@/hooks/services/useOffensiveService';
 
 // Mock i18n
 vi.mock('react-i18next', () => ({
@@ -26,7 +27,18 @@ vi.mock('react-i18next', () => ({
 
 // Mock the service layer hooks
 vi.mock('@/hooks/services/useOffensiveService', () => ({
-  useOffensiveMetrics: vi.fn(),
+  useOffensiveMetrics: vi.fn(() => ({
+    data: {
+      activeScans: 7,
+      exploitsFound: 23,
+      targets: 15,
+      c2Sessions: 4,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: vi.fn(),
+  })),
 }));
 
 // Mock WebSocket hook
@@ -101,12 +113,10 @@ const createTestWrapper = () => {
 };
 
 describe('OffensiveDashboard - Service Layer Integration', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
-    // Import and configure the mocked hook
-    const { useOffensiveMetrics } = await import('@/hooks/services/useOffensiveService');
-
+    // Reset mock to default implementation
     useOffensiveMetrics.mockReturnValue({
       data: {
         activeScans: 7,
@@ -138,11 +148,11 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
     });
 
     // Verify useOffensiveMetrics was called
-    expect(mockUseOffensiveMetrics).toHaveBeenCalled();
+    expect(useOffensiveMetrics).toHaveBeenCalled();
   });
 
   it('should display loading state when metrics are loading', async () => {
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: null,
       isLoading: true,
       isError: false,
@@ -158,7 +168,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
   });
 
   it('should handle metrics error gracefully', async () => {
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: null,
       isLoading: false,
       isError: true,
@@ -205,7 +215,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
       c2Sessions: 8,
     };
 
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: customMetrics,
       isLoading: false,
       isError: false,
@@ -219,11 +229,11 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
     });
 
     // Verify metrics were passed (header receives metrics prop)
-    expect(mockUseOffensiveMetrics).toHaveBeenCalled();
+    expect(useOffensiveMetrics).toHaveBeenCalled();
   });
 
   it('should provide default metrics when data is undefined', async () => {
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
@@ -434,7 +444,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
     render(<OffensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(mockUseOffensiveMetrics).toHaveBeenCalled();
+      expect(useOffensiveMetrics).toHaveBeenCalled();
     });
 
     // Verify correct import: @/hooks/services/useOffensiveService
@@ -442,7 +452,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
 
   it('should handle metrics refetch correctly', async () => {
     const mockRefetch = vi.fn();
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: { activeScans: 5, exploitsFound: 10, targets: 8, c2Sessions: 2 },
       isLoading: false,
       isError: false,
@@ -469,7 +479,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
     });
 
     // Update metrics
-    mockUseOffensiveMetrics.mockReturnValue({
+    useOffensiveMetrics.mockReturnValue({
       data: {
         activeScans: 20,
         exploitsFound: 50,
@@ -485,7 +495,7 @@ describe('OffensiveDashboard - Service Layer Integration', () => {
 
     // Dashboard should reflect new metrics
     await waitFor(() => {
-      expect(mockUseOffensiveMetrics).toHaveBeenCalled();
+      expect(useOffensiveMetrics).toHaveBeenCalled();
     });
   });
 });

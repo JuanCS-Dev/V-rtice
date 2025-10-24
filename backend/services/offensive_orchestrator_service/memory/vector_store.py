@@ -22,7 +22,7 @@ from datetime import datetime
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qdrant_models
 
-from ..config import VectorDBConfig, get_config
+from config import VectorDBConfig, get_config
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ class VectorStore:
         Args:
             config: Vector DB configuration (defaults to global config)
         """
-        self.config = config or get_config().vector_db
+        self.config = config or get_config().vectordb
 
         # Initialize Qdrant client
         self.client = QdrantClient(

@@ -7,8 +7,10 @@
 # - Layer 3: Sensorial/Intelligence (9 services)
 # - Layer 4: Utilities/Support (5 services)
 # - Offensive Services (2 services)
+# - API Gateway (1 service)
+# - Additional Services (4 services)
 #
-# Total: 21 sidecars
+# Total: 26 sidecars (24 application services + api_gateway + test_service)
 #
 # Usage: docker compose -f docker-compose.ALL-SIDECARS-MASTER.yml up -d
 
@@ -499,6 +501,91 @@ services:
       - INITIAL_WAIT_TIMEOUT=60
     networks:
       - maximus-network
+      - maximus-ai-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  # ====================================================================
+  # MISSING SIDECARS - Added to complete integration
+  # ====================================================================
+
+  api-gateway-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-api-gateway-sidecar
+    environment:
+      - SERVICE_NAME=api_gateway
+      - SERVICE_HOST=vertice-api-gateway
+      - SERVICE_PORT=8000
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-ai-network
+      - maximus-network  # Required to reach vertice-register-lb
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  ip-intelligence-service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-ip-intelligence-service-sidecar
+    environment:
+      - SERVICE_NAME=ip_intelligence_service
+      - SERVICE_HOST=vertice-ip-intelligence-service
+      - SERVICE_PORT=8034
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  malware-analysis-service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-malware-analysis-service-sidecar
+    environment:
+      - SERVICE_NAME=malware_analysis_service
+      - SERVICE_HOST=vertice-malware-analysis-service
+      - SERVICE_PORT=8035
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+  maximus-eureka-service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-maximus-eureka-service-sidecar
+    environment:
+      - SERVICE_NAME=maximus_eureka_service
+      - SERVICE_HOST=vertice-maximus_eureka
+      - SERVICE_PORT=8200
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    networks:
       - maximus-ai-network
     restart: unless-stopped
     deploy:

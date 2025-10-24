@@ -23,8 +23,8 @@ import google.generativeai as genai
 from google.api_core import retry
 from google.api_core import exceptions as google_exceptions
 
-from ..config import LLMConfig, get_config
-from ..models import CampaignPlan, CampaignObjective
+from config import LLMConfig, get_config
+from models import CampaignPlan, CampaignObjective
 
 
 logger = logging.getLogger(__name__)

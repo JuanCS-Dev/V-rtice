@@ -1,89 +1,88 @@
-# ============================================================================
-# VULNERABILITY INTELLIGENCE SERVICE - Docker Compose Configuration
-# Template-Driven Scanning with CVE Correlation
-# ============================================================================
-
 version: '3.8'
-
 services:
   vuln_intel_service:
     build: .
     container_name: vuln_intel_service
     ports:
-      - "8033:8033"  # Service API
-      - "9033:9033"  # Prometheus metrics
-
+    - 8033:8033
+    - 9033:9033
     environment:
-      - SERVICE_NAME=vulnerability_intelligence
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=8033
-      - LOG_LEVEL=INFO
-
-      # Nuclei Configuration
-      - NUCLEI_BINARY=/usr/bin/nuclei
-      - NUCLEI_TEMPLATES_DIR=/app/nuclei-templates
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - AUTO_SYNC_TEMPLATES=true
-      - TEMPLATE_SYNC_INTERVAL=3600
-
-      # Scanning Configuration
-      - DEFAULT_NUCLEI_CONCURRENCY=25
-      - DEFAULT_NUCLEI_RATE_LIMIT=150
-      - DEFAULT_NUCLEI_TIMEOUT=5
-
-      # CVE Correlation
-      - NVD_API_BASE=https://services.nvd.nist.gov/rest/json/cves/2.0
-      - EPSS_API_BASE=https://api.first.org/data/v1/epss
-      - CVE_CACHE_TTL=3600
-
-      # ASA Integration
-      - ENABLE_ASA_INTEGRATION=true
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_URL=http://somatosensory_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_URL=http://vestibular_service:8010
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
-      - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
-
-      # Timeouts
-      - ASA_REQUEST_TIMEOUT=10.0
-      - NVD_API_TIMEOUT=30.0
-      - EPSS_API_TIMEOUT=10.0
-
-      # Metrics
-      - METRICS_ENABLED=true
-      - METRICS_PORT=9033
-
+    - SERVICE_NAME=vulnerability_intelligence
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8033
+    - LOG_LEVEL=INFO
+    - NUCLEI_BINARY=/usr/bin/nuclei
+    - NUCLEI_TEMPLATES_DIR=/app/nuclei-templates
+    - GITHUB_TOKEN=${GITHUB_TOKEN}
+    - AUTO_SYNC_TEMPLATES=true
+    - TEMPLATE_SYNC_INTERVAL=3600
+    - DEFAULT_NUCLEI_CONCURRENCY=25
+    - DEFAULT_NUCLEI_RATE_LIMIT=150
+    - DEFAULT_NUCLEI_TIMEOUT=5
+    - NVD_API_BASE=https://services.nvd.nist.gov/rest/json/cves/2.0
+    - EPSS_API_BASE=https://api.first.org/data/v1/epss
+    - CVE_CACHE_TTL=3600
+    - ENABLE_ASA_INTEGRATION=true
+    - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+    - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+    - SOMATOSENSORY_URL=http://somatosensory_service:8008
+    - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+    - VESTIBULAR_URL=http://vestibular_service:8010
+    - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+    - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+    - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+    - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+    - HOMEOSTATIC_REGULATION_URL=http://homeostatic_regulation:8015
+    - ASA_REQUEST_TIMEOUT=10.0
+    - NVD_API_TIMEOUT=30.0
+    - EPSS_API_TIMEOUT=10.0
+    - METRICS_ENABLED=true
+    - METRICS_PORT=9033
     volumes:
-      - ./logs:/var/log/vuln_intel
-      - nuclei_templates:/app/nuclei-templates
-      - ./data:/app/data
-
+    - ./logs:/var/log/vuln_intel
+    - nuclei_templates:/app/nuclei-templates
+    - ./data:/app/data
     networks:
-      - maximus_network
-
+    - maximus_network
     restart: unless-stopped
-
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8033/health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
     depends_on:
-      - chemical_sensing_service
-      - ai_immune_system
-
+    - chemical_sensing_service
+    - ai_immune_system
+  vuln_intel_service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-vuln-intel-service-sidecar
+    environment:
+    - SERVICE_NAME=vuln_intel_service
+    - SERVICE_HOST=vuln_intel_service
+    - SERVICE_PORT=8033
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
 volumes:
   nuclei_templates:
     driver: local
-
 networks:
   maximus_network:
     external: true
     name: maximus_network
+  maximus-network:
+    external: true

@@ -1,129 +1,120 @@
-# ============================================================================
-# HOMEOSTATIC REGULATION - Docker Compose Configuration
-# Global system health monitoring and safety boundaries
-# ============================================================================
-
 version: '3.8'
-
 services:
   homeostatic_regulation:
     build: .
     container_name: homeostatic_regulation
     ports:
-      - "8015:8015"  # Service API
-      - "9015:9015"  # Prometheus metrics
+    - 8015:8015
+    - 9015:9015
     environment:
-      - SERVICE_NAME=homeostatic_regulation
-      - SERVICE_HOST=0.0.0.0
-      - SERVICE_PORT=8015
-      - LOG_LEVEL=INFO
-
-      # Homeostatic Regulation
-      - REGULATION_INTERVAL=10.0
-      - ENABLE_AUTO_START=true
-
-      # Homeostatic Setpoints
-      - SETPOINT_ACTIVITY_RATE=100.0
-      - SETPOINT_ERROR_RATE=0.01
-      - SETPOINT_CPU_USAGE=50.0
-      - SETPOINT_MEMORY_USAGE=60.0
-      - SETPOINT_RESPONSE_TIME=0.5
-      - SETPOINT_PAIN_EVENTS=2.0
-      - SETPOINT_BITTER_RATE=0.1
-      - SETPOINT_MANIPULATION_ALERTS=1.0
-      - SETPOINT_CIRCUIT_BREAKERS=0.0
-
-      # Deviation Thresholds
-      - DEVIATION_WARNING_THRESHOLD=0.2
-      - DEVIATION_ELEVATED_THRESHOLD=0.4
-      - DEVIATION_STRESSED_THRESHOLD=0.6
-      - DEVIATION_CRITICAL_THRESHOLD=0.8
-      - DEVIATION_EMERGENCY_THRESHOLD=1.0
-
-      # Red Line Triggers
-      - REDLINE_PAIN_CASCADE_THRESHOLD=5.0
-      - REDLINE_PAIN_CASCADE_WINDOW=60.0
-      - REDLINE_BITTER_PAYLOAD_THRESHOLD=0.5
-      - REDLINE_BITTER_PAYLOAD_WINDOW=300.0
-      - REDLINE_SPIN_OUT_THRESHOLD=0.9
-      - REDLINE_SPIN_OUT_WINDOW=10.0
-      - REDLINE_MANIPULATION_THRESHOLD=10.0
-      - REDLINE_MANIPULATION_WINDOW=60.0
-      - REDLINE_CONSENSUS_FAILURE_THRESHOLD=0.3
-      - REDLINE_CONSENSUS_FAILURE_WINDOW=600.0
-      - REDLINE_RESOURCE_EXHAUSTION_THRESHOLD=95.0
-      - REDLINE_RESOURCE_EXHAUSTION_WINDOW=30.0
-      - REDLINE_CASCADE_FAILURE_THRESHOLD=3.0
-      - REDLINE_CASCADE_FAILURE_WINDOW=60.0
-
-      # Emergency Shutdown
-      - EMERGENCY_SHUTDOWN_VIOLATION_COUNT=3
-
-      # Regulatory Actions
-      - ACTION_THROTTLE_THRESHOLD=0.6
-      - ACTION_VALIDATION_THRESHOLD=0.7
-      - ACTION_CIRCUIT_THRESHOLD=0.8
-      - ACTION_HUMAN_THRESHOLD=0.9
-
-      # Service Integration
-      - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
-      - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
-      - SOMATOSENSORY_CORTEX_URL=http://somatosensory_cortex_service:8008
-      - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
-      - VESTIBULAR_SYSTEM_URL=http://vestibular_service:8010
-      - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
-      - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-      - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
-      - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
-
-      # Metrics
-      - METRICS_ENABLED=true
-      - METRICS_PORT=9015
-      - HEALTH_CHECK_INTERVAL=30.0
-      - METRICS_COLLECTION_TIMEOUT=5.0
-      - MAX_RETRIES=3
-
-      # Historical Data
-      - MAX_DEVIATION_HISTORY=1000
-      - MAX_VIOLATION_HISTORY=500
-      - HISTORY_CLEANUP_INTERVAL=3600.0
-
-      # Alerts
-      - ENABLE_CRITICAL_ALERTS=true
-      - ALERT_COOLDOWN_SECONDS=300.0
-
-      # Emergency Override
-      - REQUIRE_HUMAN_AUTHORIZATION=true
-      - OVERRIDE_TIMEOUT_SECONDS=300.0
-
+    - SERVICE_NAME=homeostatic_regulation
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8015
+    - LOG_LEVEL=INFO
+    - REGULATION_INTERVAL=10.0
+    - ENABLE_AUTO_START=true
+    - SETPOINT_ACTIVITY_RATE=100.0
+    - SETPOINT_ERROR_RATE=0.01
+    - SETPOINT_CPU_USAGE=50.0
+    - SETPOINT_MEMORY_USAGE=60.0
+    - SETPOINT_RESPONSE_TIME=0.5
+    - SETPOINT_PAIN_EVENTS=2.0
+    - SETPOINT_BITTER_RATE=0.1
+    - SETPOINT_MANIPULATION_ALERTS=1.0
+    - SETPOINT_CIRCUIT_BREAKERS=0.0
+    - DEVIATION_WARNING_THRESHOLD=0.2
+    - DEVIATION_ELEVATED_THRESHOLD=0.4
+    - DEVIATION_STRESSED_THRESHOLD=0.6
+    - DEVIATION_CRITICAL_THRESHOLD=0.8
+    - DEVIATION_EMERGENCY_THRESHOLD=1.0
+    - REDLINE_PAIN_CASCADE_THRESHOLD=5.0
+    - REDLINE_PAIN_CASCADE_WINDOW=60.0
+    - REDLINE_BITTER_PAYLOAD_THRESHOLD=0.5
+    - REDLINE_BITTER_PAYLOAD_WINDOW=300.0
+    - REDLINE_SPIN_OUT_THRESHOLD=0.9
+    - REDLINE_SPIN_OUT_WINDOW=10.0
+    - REDLINE_MANIPULATION_THRESHOLD=10.0
+    - REDLINE_MANIPULATION_WINDOW=60.0
+    - REDLINE_CONSENSUS_FAILURE_THRESHOLD=0.3
+    - REDLINE_CONSENSUS_FAILURE_WINDOW=600.0
+    - REDLINE_RESOURCE_EXHAUSTION_THRESHOLD=95.0
+    - REDLINE_RESOURCE_EXHAUSTION_WINDOW=30.0
+    - REDLINE_CASCADE_FAILURE_THRESHOLD=3.0
+    - REDLINE_CASCADE_FAILURE_WINDOW=60.0
+    - EMERGENCY_SHUTDOWN_VIOLATION_COUNT=3
+    - ACTION_THROTTLE_THRESHOLD=0.6
+    - ACTION_VALIDATION_THRESHOLD=0.7
+    - ACTION_CIRCUIT_THRESHOLD=0.8
+    - ACTION_HUMAN_THRESHOLD=0.9
+    - VISUAL_CORTEX_URL=http://visual_cortex_service:8006
+    - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8007
+    - SOMATOSENSORY_CORTEX_URL=http://somatosensory_cortex_service:8008
+    - CHEMICAL_SENSING_URL=http://chemical_sensing_service:8009
+    - VESTIBULAR_SYSTEM_URL=http://vestibular_service:8010
+    - PREFRONTAL_CORTEX_URL=http://prefrontal_cortex_service:8011
+    - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+    - NARRATIVE_FILTER_URL=http://narrative_manipulation_filter:8013
+    - AI_IMMUNE_SYSTEM_URL=http://ai_immune_system:8014
+    - METRICS_ENABLED=true
+    - METRICS_PORT=9015
+    - HEALTH_CHECK_INTERVAL=30.0
+    - METRICS_COLLECTION_TIMEOUT=5.0
+    - MAX_RETRIES=3
+    - MAX_DEVIATION_HISTORY=1000
+    - MAX_VIOLATION_HISTORY=500
+    - HISTORY_CLEANUP_INTERVAL=3600.0
+    - ENABLE_CRITICAL_ALERTS=true
+    - ALERT_COOLDOWN_SECONDS=300.0
+    - REQUIRE_HUMAN_AUTHORIZATION=true
+    - OVERRIDE_TIMEOUT_SECONDS=300.0
     volumes:
-      - ./logs:/var/log/homeostatic_regulation
-      - ./data:/app/data
-
+    - ./logs:/var/log/homeostatic_regulation
+    - ./data:/app/data
     networks:
-      - maximus_network
-
+    - maximus_network
     restart: unless-stopped
-
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8015/health
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
     depends_on:
-      - visual_cortex_service
-      - auditory_cortex_service
-      - somatosensory_cortex_service
-      - chemical_sensing_service
-      - vestibular_service
-      - prefrontal_cortex_service
-      - digital_thalamus_service
-      - narrative_manipulation_filter
-      - ai_immune_system
-
+    - visual_cortex_service
+    - auditory_cortex_service
+    - somatosensory_cortex_service
+    - chemical_sensing_service
+    - vestibular_service
+    - prefrontal_cortex_service
+    - digital_thalamus_service
+    - narrative_manipulation_filter
+    - ai_immune_system
+  homeostatic_regulation-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-homeostatic-regulation-sidecar
+    environment:
+    - SERVICE_NAME=homeostatic_regulation_service
+    - SERVICE_HOST=homeostatic_regulation
+    - SERVICE_PORT=8015
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
 networks:
   maximus_network:
     external: true
     name: maximus_network
+  maximus-network:
+    external: true

@@ -9,7 +9,6 @@ from typing import List, Optional, Dict, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-import anthropic
 import json
 import logging
 

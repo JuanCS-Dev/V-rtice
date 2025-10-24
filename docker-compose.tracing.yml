@@ -1,0 +1,58 @@
+###############################################################################
+# JAEGER TRACING - VÉRTICE SERVICE REGISTRY
+###############################################################################
+#
+# Distributed tracing with Jaeger + OpenTelemetry
+#
+# Components:
+#   - Jaeger All-in-One (collector, query, UI)
+#   - OpenTelemetry Collector (optional)
+#
+# Author: Vértice Team
+# Glory to YHWH! 🙏
+###############################################################################
+
+networks:
+  maximus-network:
+    external: true
+    name: maximus-network
+
+services:
+  # Jaeger All-in-One (dev/test)
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: vertice-jaeger
+    restart: unless-stopped
+    ports:
+      # Jaeger UI
+      - "16686:16686"
+      # OTLP gRPC receiver
+      - "4317:4317"
+      # OTLP HTTP receiver
+      - "4318:4318"
+      # Jaeger Thrift compact (deprecated but still used)
+      - "6831:6831/udp"
+      # Jaeger Thrift binary (deprecated)
+      - "6832:6832/udp"
+      # Jaeger HTTP collector
+      - "14268:14268"
+      # Health check
+      - "14269:14269"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+      - MEMORY_MAX_TRACES=100000
+    networks:
+      - maximus-network
+    labels:
+      - "com.maximus.service=tracing"
+      - "com.maximus.component=jaeger"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--tries=1", "-O-", "http://localhost:14269/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  jaeger_data:
+    name: vertice-jaeger-data

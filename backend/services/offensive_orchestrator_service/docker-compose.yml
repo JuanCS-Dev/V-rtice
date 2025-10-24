@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  offensive_orchestrator_service:
+    build: .
+    container_name: vertice-offensive-orchestrator-service
+    hostname: vertice-offensive-orchestrator-service
+    ports:
+    - 8253:8253
+    environment:
+    - SERVICE_NAME=offensive_orchestrator_service
+    - SERVICE_HOST=0.0.0.0
+    - SERVICE_PORT=8090
+    - LOG_LEVEL=INFO
+    - ENVIRONMENT=development
+    - POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/db
+    - REDIS_URL=redis://redis:6379
+    - MONGO_URL=mongodb://mongo:27017/db
+    - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    depends_on: {}
+  offensive_orchestrator_service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-offensive-orchestrator-service-sidecar
+    environment:
+    - SERVICE_NAME=offensive_orchestrator_service
+    - SERVICE_HOST=vertice-offensive-orchestrator-service
+    - SERVICE_PORT=8090
+    - SERVICE_HEALTH_ENDPOINT=/health
+    - REGISTRY_URL=http://vertice-register-lb:80
+    - HEARTBEAT_INTERVAL=30
+    - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      offensive_orchestrator_service:
+        condition: service_started
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+networks:
+  maximus-network:
+    external: true

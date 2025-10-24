@@ -24,7 +24,7 @@ from typing import Optional, List, Dict, Any, Tuple
 from uuid import UUID
 from datetime import datetime
 
-from ..models import CampaignPlan, CampaignObjective, CampaignDB, CampaignStatus
+from models import CampaignPlan, CampaignObjective, CampaignDB, CampaignStatus
 from .database import DatabaseManager
 from .vector_store import VectorStore
 from .embeddings import EmbeddingGenerator
