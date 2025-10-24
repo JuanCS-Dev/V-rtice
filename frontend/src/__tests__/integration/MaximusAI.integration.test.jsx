@@ -38,12 +38,13 @@ describe('Maximus AI Integration Tests', () => {
 
       const result = await maximusAI.analyzeNarrative('Test narrative content');
 
+      // analyzeNarrative calls callTool which uses /api/tool-call
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8001/api/maximus/narrative-analysis',
+        'http://localhost:8001/api/tool-call',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: expect.stringContaining('Test narrative content')
+          body: expect.stringContaining('analyze_narrative')
         })
       );
 
@@ -400,17 +401,19 @@ describe('Maximus AI Integration Tests', () => {
         statusText: 'Service Unavailable'
       });
 
-      await expect(
-        maximusAI.predictThreats({}, {})
-      ).rejects.toThrow('Maximus API Error: 503');
+      // predictThreats calls callTool which catches errors and returns { success: false }
+      const result = await maximusAI.predictThreats({}, {});
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
 
     it('should handle network timeouts', async () => {
       global.fetch.mockRejectedValueOnce(new Error('Network timeout'));
 
-      await expect(
-        maximusAI.getTopology()
-      ).rejects.toThrow('Network timeout');
+      // getTopology calls callTool which catches errors and returns { success: false }
+      const result = await maximusAI.getTopology();
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Network timeout');
     });
 
     it('should handle malformed responses', async () => {
@@ -419,9 +422,10 @@ describe('Maximus AI Integration Tests', () => {
         json: async () => { throw new Error('Invalid JSON'); }
       });
 
-      await expect(
-        maximusAI.analyzeNarrative('test')
-      ).rejects.toThrow();
+      // analyzeNarrative calls callTool which catches errors and returns { success: false }
+      const result = await maximusAI.analyzeNarrative('test');
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
     });
   });
 
