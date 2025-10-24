@@ -12,18 +12,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ImmuneEnhancementWidget } from '../ImmuneEnhancementWidget';
-import * as maximusAI from '../../../../api/maximusAI';
+import { suppressFalsePositives, consolidateMemory, queryLongTermMemory } from '../../../../api/maximusAI';
 
-// Mock API functions
+// Mock API functions with factory function
 vi.mock('../../../../api/maximusAI', () => ({
-  suppressFalsePositives: vi.fn(),
-  consolidateMemory: vi.fn(),
-  queryLongTermMemory: vi.fn()
+  suppressFalsePositives: vi.fn(() => Promise.resolve({ total_alerts: 0, suppressed_count: 0 })),
+  consolidateMemory: vi.fn(() => Promise.resolve({ patterns_count: 0, ltm_entries_created: 0 })),
+  queryLongTermMemory: vi.fn(() => Promise.resolve({ memories: [] }))
 }));
 
 describe('ImmuneEnhancementWidget Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset mocks to default implementations
+    suppressFalsePositives.mockResolvedValue({ total_alerts: 0, suppressed_count: 0 });
+    consolidateMemory.mockResolvedValue({ patterns_count: 0, ltm_entries_created: 0 });
+    queryLongTermMemory.mockResolvedValue({ memories: [] });
   });
 
   it('should render with default FP Suppression tab active', () => {
@@ -116,7 +121,7 @@ describe('ImmuneEnhancementWidget Component', () => {
         suppressed_count: 1,
         avg_tolerance_score: 0.85
       };
-      maximusAI.suppressFalsePositives.mockResolvedValue(mockResult);
+      suppressFalsePositives.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -133,7 +138,7 @@ describe('ImmuneEnhancementWidget Component', () => {
       await user.click(suppressBtn);
 
       await waitFor(() => {
-        expect(maximusAI.suppressFalsePositives).toHaveBeenCalledWith(
+        expect(suppressFalsePositives).toHaveBeenCalledWith(
           expect.any(Array),
           0.7
         );
@@ -147,7 +152,7 @@ describe('ImmuneEnhancementWidget Component', () => {
         suppressed_count: 2,
         avg_tolerance_score: 0.78
       };
-      maximusAI.suppressFalsePositives.mockResolvedValue(mockResult);
+      suppressFalsePositives.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -168,7 +173,7 @@ describe('ImmuneEnhancementWidget Component', () => {
 
     it('should disable button when loading', async () => {
       const user = userEvent.setup();
-      maximusAI.suppressFalsePositives.mockImplementation(() =>
+      suppressFalsePositives.mockImplementation(() =>
         new Promise(resolve => setTimeout(resolve, 1000))
       );
 
@@ -195,7 +200,7 @@ describe('ImmuneEnhancementWidget Component', () => {
         ltm_entries_created: 8,
         duration_ms: 245
       };
-      maximusAI.consolidateMemory.mockResolvedValue(mockResult);
+      consolidateMemory.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -203,7 +208,7 @@ describe('ImmuneEnhancementWidget Component', () => {
       await user.click(screen.getByText('💾 Run Consolidation'));
 
       await waitFor(() => {
-        expect(maximusAI.consolidateMemory).toHaveBeenCalledWith({
+        expect(consolidateMemory).toHaveBeenCalledWith({
           manual: true,
           threshold: 0.7
         });
@@ -217,7 +222,7 @@ describe('ImmuneEnhancementWidget Component', () => {
         ltm_entries_created: 10,
         duration_ms: 380
       };
-      maximusAI.consolidateMemory.mockResolvedValue(mockResult);
+      consolidateMemory.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -233,7 +238,7 @@ describe('ImmuneEnhancementWidget Component', () => {
 
     it('should show loading state during consolidation', async () => {
       const user = userEvent.setup();
-      maximusAI.consolidateMemory.mockImplementation(() =>
+      consolidateMemory.mockImplementation(() =>
         new Promise(resolve => setTimeout(resolve, 1000))
       );
 
@@ -279,7 +284,7 @@ describe('ImmuneEnhancementWidget Component', () => {
           { pattern_type: 'Attack Chain', importance: 0.92, description: 'Advanced APT pattern' }
         ]
       };
-      maximusAI.queryLongTermMemory.mockResolvedValue(mockResult);
+      queryLongTermMemory.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -287,7 +292,7 @@ describe('ImmuneEnhancementWidget Component', () => {
       await user.click(screen.getByText('🔍 Search LTM'));
 
       await waitFor(() => {
-        expect(maximusAI.queryLongTermMemory).toHaveBeenCalledWith(
+        expect(queryLongTermMemory).toHaveBeenCalledWith(
           'ransomware campaigns',
           { limit: 5, minImportance: 0.7 }
         );
@@ -302,7 +307,7 @@ describe('ImmuneEnhancementWidget Component', () => {
           { pattern_type: 'Lateral Movement', importance: 0.85, description: 'SMB enumeration' }
         ]
       };
-      maximusAI.queryLongTermMemory.mockResolvedValue(mockResult);
+      queryLongTermMemory.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -320,7 +325,7 @@ describe('ImmuneEnhancementWidget Component', () => {
     it('should show "no memories" when results are empty', async () => {
       const user = userEvent.setup();
       const mockResult = { memories: [] };
-      maximusAI.queryLongTermMemory.mockResolvedValue(mockResult);
+      queryLongTermMemory.mockResolvedValue(mockResult);
 
       render(<ImmuneEnhancementWidget />);
 
@@ -349,7 +354,7 @@ describe('ImmuneEnhancementWidget Component', () => {
   it('should handle API errors gracefully', async () => {
     const user = userEvent.setup();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    maximusAI.suppressFalsePositives.mockRejectedValue(new Error('API Error'));
+    suppressFalsePositives.mockRejectedValue(new Error('API Error'));
 
     render(<ImmuneEnhancementWidget />);
 

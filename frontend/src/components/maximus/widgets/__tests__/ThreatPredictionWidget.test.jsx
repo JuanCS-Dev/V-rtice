@@ -12,16 +12,27 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThreatPredictionWidget } from '../ThreatPredictionWidget';
-import * as maximusAI from '../../../../api/maximusAI';
+import { predictThreats } from '../../../../api/maximusAI';
 
-// Mock API
+// Mock API with factory function
 vi.mock('../../../../api/maximusAI', () => ({
-  predictThreats: vi.fn()
+  predictThreats: vi.fn(() => Promise.resolve({
+    predicted_attacks: [],
+    vuln_forecast: [],
+    hunting_recommendations: []
+  }))
 }));
 
 describe('ThreatPredictionWidget Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset mock to default implementation
+    predictThreats.mockResolvedValue({
+      predicted_attacks: [],
+      vuln_forecast: [],
+      hunting_recommendations: []
+    });
   });
 
   it('should render widget with header', () => {
@@ -76,7 +87,7 @@ describe('ThreatPredictionWidget Component', () => {
       vuln_forecast: [],
       hunting_recommendations: []
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -84,7 +95,7 @@ describe('ThreatPredictionWidget Component', () => {
     await user.click(predictBtn);
 
     await waitFor(() => {
-      expect(maximusAI.predictThreats).toHaveBeenCalledWith(
+      expect(predictThreats).toHaveBeenCalledWith(
         {
           recent_alerts: [],
           historical_events: [],
@@ -101,7 +112,7 @@ describe('ThreatPredictionWidget Component', () => {
 
   it('should show loading state during prediction', async () => {
     const user = userEvent.setup();
-    maximusAI.predictThreats.mockImplementation(() =>
+    predictThreats.mockImplementation(() =>
       new Promise(resolve => setTimeout(resolve, 1000))
     );
 
@@ -124,7 +135,7 @@ describe('ThreatPredictionWidget Component', () => {
       vuln_forecast: [],
       hunting_recommendations: []
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -149,7 +160,7 @@ describe('ThreatPredictionWidget Component', () => {
       ],
       hunting_recommendations: []
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -174,7 +185,7 @@ describe('ThreatPredictionWidget Component', () => {
         'Check for lateral movement indicators'
       ]
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -194,7 +205,7 @@ describe('ThreatPredictionWidget Component', () => {
       vuln_forecast: [],
       hunting_recommendations: []
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -220,7 +231,7 @@ describe('ThreatPredictionWidget Component', () => {
       vuln_forecast: [],
       hunting_recommendations: []
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -234,7 +245,7 @@ describe('ThreatPredictionWidget Component', () => {
   it('should handle prediction with custom parameters', async () => {
     const user = userEvent.setup();
     const mockResult = { predicted_attacks: [], vuln_forecast: [], hunting_recommendations: [] };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -245,7 +256,7 @@ describe('ThreatPredictionWidget Component', () => {
     await user.click(screen.getByText('🎯 Run Prediction'));
 
     await waitFor(() => {
-      expect(maximusAI.predictThreats).toHaveBeenCalledWith(
+      expect(predictThreats).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({
           timeHorizon: 72,
@@ -262,7 +273,7 @@ describe('ThreatPredictionWidget Component', () => {
       vuln_forecast: null,
       hunting_recommendations: null
     };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 
@@ -276,7 +287,7 @@ describe('ThreatPredictionWidget Component', () => {
   it('should handle API errors gracefully', async () => {
     const user = userEvent.setup();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    maximusAI.predictThreats.mockRejectedValue(new Error('Prediction failed'));
+    predictThreats.mockRejectedValue(new Error('Prediction failed'));
 
     render(<ThreatPredictionWidget />);
 
@@ -292,7 +303,7 @@ describe('ThreatPredictionWidget Component', () => {
   it('should not display results on API failure', async () => {
     const user = userEvent.setup();
     const mockResult = { success: false };
-    maximusAI.predictThreats.mockResolvedValue(mockResult);
+    predictThreats.mockResolvedValue(mockResult);
 
     render(<ThreatPredictionWidget />);
 

@@ -13,19 +13,24 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DistributedTopologyWidget } from '../DistributedTopologyWidget';
-import * as maximusAI from '../../../../api/maximusAI';
+import { getEdgeStatus, getGlobalMetrics, getTopology } from '../../../../api/maximusAI';
 
-// Mock API functions
+// Mock API functions with factory function
 vi.mock('../../../../api/maximusAI', () => ({
-  getEdgeStatus: vi.fn(),
-  getGlobalMetrics: vi.fn(),
-  getTopology: vi.fn()
+  getEdgeStatus: vi.fn(() => Promise.resolve({ agents: [], regions: [] })),
+  getGlobalMetrics: vi.fn(() => Promise.resolve({ events_per_second: 0 })),
+  getTopology: vi.fn(() => Promise.resolve({ agents: [], regions: [] }))
 }));
 
 describe('DistributedTopologyWidget Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+
+    // Reset mocks to default implementations
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getGlobalMetrics.mockResolvedValue({ events_per_second: 0 });
+    getEdgeStatus.mockResolvedValue({ agents: [], regions: [] });
   });
 
   afterEach(() => {
@@ -33,7 +38,7 @@ describe('DistributedTopologyWidget Component', () => {
   });
 
   it('should render widget with header', () => {
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
     render(<DistributedTopologyWidget />);
 
     expect(screen.getByText('🌐 Distributed Organism')).toBeInTheDocument();
@@ -49,7 +54,7 @@ describe('DistributedTopologyWidget Component', () => {
   });
 
   it('should have auto-refresh toggle enabled by default', () => {
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
     render(<DistributedTopologyWidget />);
 
     const checkbox = screen.getByRole('checkbox');
@@ -63,19 +68,19 @@ describe('DistributedTopologyWidget Component', () => {
       regions: ['us-east', 'eu-west'],
       agents: []
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalled();
+      expect(getTopology).toHaveBeenCalled();
     });
   });
 
   it('should switch to metrics view', async () => {
     const user = userEvent.setup({ delay: null });
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
-    maximusAI.getGlobalMetrics.mockResolvedValue({
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getGlobalMetrics.mockResolvedValue({
       events_per_second: 1500,
       avg_compression_ratio: 0.65,
       p95_latency_ms: 42,
@@ -89,7 +94,7 @@ describe('DistributedTopologyWidget Component', () => {
     await user.click(metricsBtn);
 
     await waitFor(() => {
-      expect(maximusAI.getGlobalMetrics).toHaveBeenCalledWith(60);
+      expect(getGlobalMetrics).toHaveBeenCalledWith(60);
     });
   });
 
@@ -100,7 +105,7 @@ describe('DistributedTopologyWidget Component', () => {
       regions: ['us-east', 'eu-west', 'ap-south'],
       agents: []
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     render(<DistributedTopologyWidget />);
 
@@ -133,7 +138,7 @@ describe('DistributedTopologyWidget Component', () => {
         }
       ]
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     render(<DistributedTopologyWidget />);
 
@@ -147,8 +152,8 @@ describe('DistributedTopologyWidget Component', () => {
 
   it('should display global metrics', async () => {
     const user = userEvent.setup({ delay: null });
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
-    maximusAI.getGlobalMetrics.mockResolvedValue({
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getGlobalMetrics.mockResolvedValue({
       events_per_second: 2500,
       avg_compression_ratio: 0.72,
       p95_latency_ms: 38,
@@ -169,7 +174,7 @@ describe('DistributedTopologyWidget Component', () => {
   });
 
   it('should show loading state while fetching', async () => {
-    maximusAI.getTopology.mockImplementation(() =>
+    getTopology.mockImplementation(() =>
       new Promise(resolve => setTimeout(() => resolve({ agents: [], regions: [] }), 1000))
     );
 
@@ -179,30 +184,30 @@ describe('DistributedTopologyWidget Component', () => {
   });
 
   it('should auto-refresh topology every 10 seconds', async () => {
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
 
     render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+      expect(getTopology).toHaveBeenCalledTimes(1);
     });
 
     // Advance timer by 10 seconds
     vi.advanceTimersByTime(10000);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(2);
+      expect(getTopology).toHaveBeenCalledTimes(2);
     });
   });
 
   it('should disable auto-refresh when toggled off', async () => {
     const user = userEvent.setup({ delay: null });
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
 
     render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+      expect(getTopology).toHaveBeenCalledTimes(1);
     });
 
     // Disable auto-refresh
@@ -212,17 +217,17 @@ describe('DistributedTopologyWidget Component', () => {
     vi.advanceTimersByTime(20000);
 
     // Should not fetch again
-    expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+    expect(getTopology).toHaveBeenCalledTimes(1);
   });
 
   it('should re-enable auto-refresh when toggled back on', async () => {
     const user = userEvent.setup({ delay: null });
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
 
     render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+      expect(getTopology).toHaveBeenCalledTimes(1);
     });
 
     // Disable
@@ -235,7 +240,7 @@ describe('DistributedTopologyWidget Component', () => {
     vi.advanceTimersByTime(10000);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalled();
+      expect(getTopology).toHaveBeenCalled();
     });
   });
 
@@ -248,7 +253,7 @@ describe('DistributedTopologyWidget Component', () => {
         { id: 'edge-001', health: 'healthy', location: 'us-east-1a', buffer_utilization: 30, events_per_second: 100 }
       ]
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     const { container } = render(<DistributedTopologyWidget />);
 
@@ -267,7 +272,7 @@ describe('DistributedTopologyWidget Component', () => {
         { id: 'edge-001', health: 'degraded', location: 'us-east-1a', buffer_utilization: 85, events_per_second: 50 }
       ]
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     const { container } = render(<DistributedTopologyWidget />);
 
@@ -284,7 +289,7 @@ describe('DistributedTopologyWidget Component', () => {
       regions: [],
       agents: null
     };
-    maximusAI.getTopology.mockResolvedValue(mockTopology);
+    getTopology.mockResolvedValue(mockTopology);
 
     render(<DistributedTopologyWidget />);
 
@@ -295,7 +300,7 @@ describe('DistributedTopologyWidget Component', () => {
 
   it('should handle API errors gracefully', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    maximusAI.getTopology.mockRejectedValue(new Error('Network error'));
+    getTopology.mockRejectedValue(new Error('Network error'));
 
     render(<DistributedTopologyWidget />);
 
@@ -307,12 +312,12 @@ describe('DistributedTopologyWidget Component', () => {
   });
 
   it('should cleanup interval on unmount', async () => {
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
 
     const { unmount } = render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+      expect(getTopology).toHaveBeenCalledTimes(1);
     });
 
     unmount();
@@ -320,32 +325,32 @@ describe('DistributedTopologyWidget Component', () => {
     vi.advanceTimersByTime(20000);
 
     // Should not call again after unmount
-    expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+    expect(getTopology).toHaveBeenCalledTimes(1);
   });
 
   it('should refetch when switching between views', async () => {
     const user = userEvent.setup({ delay: null });
-    maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] });
-    maximusAI.getGlobalMetrics.mockResolvedValue({ events_per_second: 1000 });
+    getTopology.mockResolvedValue({ agents: [], regions: [] });
+    getGlobalMetrics.mockResolvedValue({ events_per_second: 1000 });
 
     render(<DistributedTopologyWidget />);
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(1);
+      expect(getTopology).toHaveBeenCalledTimes(1);
     });
 
     // Switch to metrics
     await user.click(screen.getByText('📈 Global Metrics'));
 
     await waitFor(() => {
-      expect(maximusAI.getGlobalMetrics).toHaveBeenCalled();
+      expect(getGlobalMetrics).toHaveBeenCalled();
     });
 
     // Switch back to topology
     await user.click(screen.getByText('📊 Topology'));
 
     await waitFor(() => {
-      expect(maximusAI.getTopology).toHaveBeenCalledTimes(2);
+      expect(getTopology).toHaveBeenCalledTimes(2);
     });
   });
 });
