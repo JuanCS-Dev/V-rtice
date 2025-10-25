@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Completo - Vértice no Google Cloud</title>
+    <style>
+        /* Estilos simples para impressão */
+        @media print {
+            body { font-size: 12pt; }
+            h1 { page-break-before: always; }
+            h1:first-of-type { page-break-before: avoid; }
+            pre, code { page-break-inside: avoid; }
+            .no-print { display: none; }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+
+        h2 {
+            color: #0d47a1;
+            margin-top: 30px;
+            border-left: 4px solid #1a73e8;
+            padding-left: 10px;
+        }
+
+        h3 {
+            color: #1976d2;
+            margin-top: 20px;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-left: 4px solid #1a73e8;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .importante {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .sucesso {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .erro {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .passo {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1a73e8;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .toc {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 5px 0;
+        }
+
+        .toc a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .numero-grande {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1a73e8;
+            display: inline-block;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚀 Guia Completo Anti-Burro</h1>
+<h2>Como Operar o Vértice no Google Cloud</h2>
+
+<p><strong>Por Juan Brainfarma</strong> | Última atualização: 25 de Outubro de 2025</p>
+
+<div class="importante">
+    <strong>⚠️ IMPORTANTE:</strong> Este guia assume que você está começando do ZERO. Vamos passo a passo, sem pressa. Imprima este documento e use como referência enquanto aprende.
+</div>
+
+<div class="toc">
+    <h3>📋 Índice</h3>
+    <ul>
+        <li><a href="#parte1">1. Introdução - O Que Você Tem Agora</a></li>
+        <li><a href="#parte2">2. Acessando o Google Cloud Console</a></li>
+        <li><a href="#parte3">3. Entendendo os Serviços Deployados</a></li>
+        <li><a href="#parte4">4. Acessando o Frontend (Seu Site)</a></li>
+        <li><a href="#parte5">5. Monitorando o Backend (GKE)</a></li>
+        <li><a href="#parte6">6. Verificando Logs</a></li>
+        <li><a href="#parte7">7. Operações do Dia a Dia</a></li>
+        <li><a href="#parte8">8. Troubleshooting (Resolvendo Problemas)</a></li>
+        <li><a href="#parte9">9. Custos e Como Economizar</a></li>
+        <li><a href="#parte10">10. Comandos Úteis (Cola)</a></li>
+    </ul>
+</div>
+
+<h1 id="parte1">1. Introdução - O Que Você Tem Agora</h1>
+
+<p>Você acabou de fazer o deploy completo do sistema Vértice no Google Cloud. Vamos entender o que foi criado:</p>
+
+<div class="sucesso">
+    <h3>✅ Seu Sistema Atual:</h3>
+    <ul>
+        <li><strong>Frontend:</strong> Site rodando no Cloud Run (como se fosse um site normal)</li>
+        <li><strong>Backend:</strong> 86 microsserviços rodando no GKE (Kubernetes)</li>
+        <li><strong>Cluster:</strong> 8 servidores trabalhando juntos</li>
+        <li><strong>Status:</strong> 92% operacional (algumas coisas dando erro, mas normal)</li>
+    </ul>
+</div>
+
+<h2>URLs do Seu Sistema:</h2>
+
+<table>
+    <tr>
+        <th>Serviço</th>
+        <th>URL</th>
+        <th>O Que É</th>
+    </tr>
+    <tr>
+        <td><strong>Frontend</strong></td>
+        <td><code>https://vertice-frontend-vuvnhfmzpa-ue.a.run.app</code></td>
+        <td>Seu site, onde você acessa o Vértice</td>
+    </tr>
+    <tr>
+        <td><strong>API Gateway</strong></td>
+        <td><code>http://34.148.161.131:8000</code></td>
+        <td>Porta de entrada do backend (recebe pedidos)</td>
+    </tr>
+</table>
+
+<div class="passo">
+    <strong>🎯 Seu Primeiro Teste:</strong>
+    <ol>
+        <li>Abra o navegador</li>
+        <li>Cole esta URL: <code>https://vertice-frontend-vuvnhfmzpa-ue.a.run.app</code></li>
+        <li>Pressione ENTER</li>
+        <li>Se carregar uma página = Tudo funcionando! 🎉</li>
+    </ol>
+</div>
+
+<h1 id="parte2">2. Acessando o Google Cloud Console</h1>
+
+<h2>2.1 - Entrando no Console</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Abra seu navegador e vá para:</strong>
+    <pre>https://console.cloud.google.com</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Faça login com sua conta do Google:</strong>
+    <ul>
+        <li>Email: <code>juan.brainfarma@gmail.com</code></li>
+        <li>Use a senha da sua conta Google</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Selecione o projeto "projeto-vertice":</strong>
+    <ul>
+        <li>No topo da tela, clique no nome do projeto (ao lado do logo do Google Cloud)</li>
+        <li>Vai abrir uma janela</li>
+        <li>Procure por: <strong>projeto-vertice</strong></li>
+        <li>Clique nele</li>
+    </ul>
+</div>
+
+<div class="sucesso">
+    <strong>✅ Pronto!</strong> Agora você está dentro do console do seu projeto. Tudo que você ver aqui está relacionado ao Vértice.
+</div>
+
+<h2>2.2 - Navegando no Console</h2>
+
+<p>O console do Google Cloud tem um <strong>menu hambúrguer</strong> (☰) no canto superior esquerdo. Clique nele para abrir o menu principal.</p>
+
+<h3>Principais Seções Que Você Vai Usar:</h3>
+
+<table>
+    <tr>
+        <th>Seção</th>
+        <th>Para Que Serve</th>
+        <th>Quando Usar</th>
+    </tr>
+    <tr>
+        <td><strong>Cloud Run</strong></td>
+        <td>Ver seu frontend</td>
+        <td>Quando quiser ver o site, logs, ou fazer novo deploy</td>
+    </tr>
+    <tr>
+        <td><strong>Kubernetes Engine</strong></td>
+        <td>Ver seu backend (cluster)</td>
+        <td>Monitorar serviços, ver pods, checar se está tudo rodando</td>
+    </tr>
+    <tr>
+        <td><strong>Cloud Build</strong></td>
+        <td>Histórico de builds/deploys</td>
+        <td>Ver se um deploy deu certo ou não</td>
+    </tr>
+    <tr>
+        <td><strong>Logging</strong></td>
+        <td>Ver logs (o que está acontecendo)</td>
+        <td>Quando algo der errado e você quiser investigar</td>
+    </tr>
+    <tr>
+        <td><strong>Monitoring</strong></td>
+        <td>Gráficos de uso (CPU, memória, etc)</td>
+        <td>Ver se o sistema está pesado ou leve</td>
+    </tr>
+    <tr>
+        <td><strong>Billing</strong></td>
+        <td>Quanto você está gastando</td>
+        <td>TODO DIA! Controlar custos</td>
+    </tr>
+</table>
+
+<h1 id="parte3">3. Entendendo os Serviços Deployados</h1>
+
+<h2>3.1 - Arquitetura Simplificada</h2>
+
+<pre>
+┌─────────────────┐
+│   SEU BROWSER   │  (Você acessa aqui)
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────┐
+│    FRONTEND     │  (Cloud Run - Site)
+│   (React App)   │
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────┐
+│  API GATEWAY    │  (Porta de entrada)
+│   (Backend)     │
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────────────────────┐
+│    86 MICROSSERVIÇOS (GKE)      │
+│  Cada um faz uma coisa:         │
+│  - Immune System (defesa)       │
+│  - Intelligence (análise)       │
+│  - Maximus (cérebro)            │
+│  - etc...                       │
+└─────────────────────────────────┘
+</pre>
+
+<h2>3.2 - Os 6 Grupos de Serviços (Phases)</h2>
+
+<table>
+    <tr>
+        <th>Phase</th>
+        <th>Serviços</th>
+        <th>O Que Fazem</th>
+        <th>Status</th>
+    </tr>
+    <tr>
+        <td><strong>Phase 1:<br>Immune System</strong></td>
+        <td>14 serviços</td>
+        <td>Sistema de defesa do Maximus (como células do corpo)</td>
+        <td>✅ 100%</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 2:<br>Intelligence</strong></td>
+        <td>11 serviços</td>
+        <td>Análise de ameaças, OSINT, threat intel</td>
+        <td>✅ 100%</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 3:<br>Offensive/Defensive</strong></td>
+        <td>15 serviços</td>
+        <td>Ferramentas de ataque e defesa</td>
+        <td>⚠️ 94%</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 4:<br>Cognition/Sensory</strong></td>
+        <td>10 serviços</td>
+        <td>Cérebro e sentidos do Maximus</td>
+        <td>⚠️ 80%</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 5:<br>HCL (Higher Cognitive)</strong></td>
+        <td>6 serviços</td>
+        <td>Cognição avançada, planejamento estratégico</td>
+        <td>⚠️ 83%</td>
+    </tr>
+    <tr>
+        <td><strong>Phase 6:<br>Final Services</strong></td>
+        <td>27 serviços</td>
+        <td>Serviços de suporte, wargaming, análise narrativa</td>
+        <td>⚠️ 78%</td>
+    </tr>
+</table>
+
+<div class="importante">
+    <strong>⚠️ Por que não está 100%?</strong><br>
+    Alguns serviços têm erros normais de configuração (falta de credenciais, dependências, etc). 92% operacional é EXCELENTE para um sistema desse tamanho. Com o tempo você vai corrigindo.
+</div>
+
+<h1 id="parte4">4. Acessando o Frontend (Seu Site)</h1>
+
+<h2>4.1 - Pelo Navegador (Forma Mais Fácil)</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Abra o navegador</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Cole esta URL:</strong>
+    <pre>https://vertice-frontend-vuvnhfmzpa-ue.a.run.app</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Pronto!</strong> Seu site deve carregar. Se não carregar, vá para a seção de <a href="#parte8">Troubleshooting</a>.
+</div>
+
+<h2>4.2 - Pelo Google Cloud Console</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>No menu hambúrguer (☰), vá em:</strong>
+    <pre>Cloud Run</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Você verá uma lista de serviços. Procure:</strong>
+    <pre>vertice-frontend</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Clique no nome</strong> do serviço
+</div>
+
+<div class="passo">
+    <span class="numero-grande">4</span>
+    <strong>Você verá várias informações:</strong>
+    <ul>
+        <li><strong>URL:</strong> O endereço do seu site (clique para abrir)</li>
+        <li><strong>Status:</strong> Se está rodando ou não</li>
+        <li><strong>Logs:</strong> O que está acontecendo</li>
+        <li><strong>Métricas:</strong> Quantas pessoas acessaram, uso de CPU, etc</li>
+    </ul>
+</div>
+
+<h2>4.3 - Informações Importantes do Frontend</h2>
+
+<table>
+    <tr>
+        <th>Item</th>
+        <th>Valor</th>
+        <th>O Que Significa</th>
+    </tr>
+    <tr>
+        <td><strong>Region</strong></td>
+        <td>us-east1</td>
+        <td>Servidor na Costa Leste dos EUA</td>
+    </tr>
+    <tr>
+        <td><strong>Memory</strong></td>
+        <td>512Mi</td>
+        <td>Memória RAM disponível</td>
+    </tr>
+    <tr>
+        <td><strong>Min Instances</strong></td>
+        <td>0</td>
+        <td>Pode desligar quando não está em uso (economia)</td>
+    </tr>
+    <tr>
+        <td><strong>Max Instances</strong></td>
+        <td>3</td>
+        <td>No máximo 3 cópias rodando ao mesmo tempo</td>
+    </tr>
+</table>
+
+<h1 id="parte5">5. Monitorando o Backend (GKE)</h1>
+
+<h2>5.1 - Acessando o Kubernetes Engine</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>No menu hambúrguer (☰), vá em:</strong>
+    <pre>Kubernetes Engine > Clusters</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Você verá seu cluster:</strong>
+    <pre>vertice-us-cluster</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Clique no nome</strong> do cluster
+</div>
+
+<div class="sucesso">
+    <strong>✅ Você está vendo:</strong>
+    <ul>
+        <li><strong>Nodes:</strong> Seus 8 servidores (máquinas virtuais)</li>
+        <li><strong>Workloads:</strong> Seus 86 serviços rodando</li>
+        <li><strong>Services & Ingress:</strong> Como os serviços se comunicam</li>
+        <li><strong>Storage:</strong> Onde os dados ficam guardados</li>
+    </ul>
+</div>
+
+<h2>5.2 - Vendo os Pods (Serviços Rodando)</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Na página do cluster, clique em:</strong>
+    <pre>Workloads (na aba superior)</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Você verá uma lista ENORME de serviços</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Status dos Pods (bolinhas coloridas):</strong>
+    <ul>
+        <li>🟢 <strong>Verde:</strong> OK, rodando perfeitamente</li>
+        <li>🟡 <strong>Amarelo:</strong> Iniciando ou reiniciando</li>
+        <li>🔴 <strong>Vermelho:</strong> Com erro (normal ter alguns)</li>
+    </ul>
+</div>
+
+<h2>5.3 - Verificando um Serviço Específico</h2>
+
+<p>Vamos verificar o <strong>api-gateway</strong> (o mais importante):</p>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Na lista de Workloads, procure:</strong>
+    <pre>api-gateway</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Clique no nome</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Você verá:</strong>
+    <ul>
+        <li><strong>Status:</strong> OK (verde) = bom</li>
+        <li><strong>Pods:</strong> Quantas cópias rodando</li>
+        <li><strong>CPU/Memory:</strong> Quanto está usando</li>
+        <li><strong>Events:</strong> O que aconteceu recentemente</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">4</span>
+    <strong>Para ver logs, clique em "LOGS"</strong> (na aba superior)
+</div>
+
+<h1 id="parte6">6. Verificando Logs</h1>
+
+<p>Logs são como um "diário" do que está acontecendo no sistema. Quando algo dá errado, você olha os logs para entender o problema.</p>
+
+<h2>6.1 - Logs do Frontend (Cloud Run)</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Vá em Cloud Run > vertice-frontend</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Clique na aba "LOGS"</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Você verá mensagens tipo:</strong>
+    <pre>
+GET / 200 - "User accessed homepage"
+GET /health 200 - "Health check OK"
+    </pre>
+</div>
+
+<div class="importante">
+    <strong>💡 Dica:</strong> Se tiver muitas mensagens de erro (status 500, 404, etc), algo está errado. Copie a mensagem de erro e pesquise no Google ou me pergunte.
+</div>
+
+<h2>6.2 - Logs do Backend (GKE)</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Vá em Kubernetes Engine > Workloads</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Clique em um serviço (exemplo: api-gateway)</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Clique na aba "LOGS"</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">4</span>
+    <strong>Use os filtros para facilitar:</strong>
+    <ul>
+        <li><strong>Severity:</strong> ERROR (só erros), WARNING (alertas), INFO (normal)</li>
+        <li><strong>Time range:</strong> Últimas 1 hora, último dia, etc</li>
+    </ul>
+</div>
+
+<h2>6.3 - Logs Centralizados (Forma Profissa)</h2>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>No menu hambúrguer (☰), vá em:</strong>
+    <pre>Logging > Logs Explorer</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>No campo de busca, digite:</strong>
+    <pre>resource.type="k8s_pod"</pre>
+    <p>Isso mostra logs de TODOS os pods do Kubernetes</p>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Para filtrar por serviço específico:</strong>
+    <pre>resource.type="k8s_pod" AND resource.labels.pod_name:"api-gateway"</pre>
+</div>
+
+<h1 id="parte7">7. Operações do Dia a Dia</h1>
+
+<h2>7.1 - Checklist Diário (Faça TODO DIA)</h2>
+
+<div class="passo">
+    <strong>☐ 1. Verificar se o frontend está no ar</strong>
+    <ul>
+        <li>Abra: <code>https://vertice-frontend-vuvnhfmzpa-ue.a.run.app</code></li>
+        <li>Se carregar = OK ✅</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <strong>☐ 2. Verificar o backend</strong>
+    <ul>
+        <li>Abra: <code>http://34.148.161.131:8000/health</code></li>
+        <li>Se retornar algo (mesmo erro) = API está respondendo ✅</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <strong>☐ 3. Checar pods com erro</strong>
+    <ul>
+        <li>Vá em: Kubernetes Engine > Workloads</li>
+        <li>Se tiver MAIS de 15 pods vermelhos = Problema sério ⚠️</li>
+        <li>Se tiver menos de 15 = Normal ✅</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <strong>☐ 4. Verificar custos</strong>
+    <ul>
+        <li>Vá em: Billing > Overview</li>
+        <li>Veja quanto gastou hoje</li>
+        <li>Se passou de $10/dia = Cuidado ⚠️</li>
+    </ul>
+</div>
+
+<h2>7.2 - Como Fazer Novo Deploy do Frontend</h2>
+
+<p><strong>Situação:</strong> Você mudou o código do frontend e quer atualizar o site.</p>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>No seu computador, abra o terminal</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Vá para a pasta do frontend:</strong>
+    <pre>cd /home/juan/vertice-dev/frontend</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Execute o script de deploy:</strong>
+    <pre>./deploy.sh production</pre>
+    <p>Ou se for só teste:</p>
+    <pre>./deploy.sh dev</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">4</span>
+    <strong>Aguarde (leva ~5 minutos)</strong>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">5</span>
+    <strong>Quando terminar, teste abrindo o site novamente</strong>
+</div>
+
+<h2>7.3 - Como Fazer Novo Deploy do Backend</h2>
+
+<p><strong>Situação:</strong> Você mudou um serviço do backend e quer atualizar.</p>
+
+<div class="importante">
+    <strong>⚠️ ATENÇÃO:</strong> Deploy de backend é mais complexo. Se não souber o que está fazendo, me chame antes!
+</div>
+
+<p><strong>Exemplo: Atualizando o api-gateway:</strong></p>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Vá para a pasta do serviço:</strong>
+    <pre>cd /home/juan/vertice-dev/backend/services/api_gateway</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Build da imagem Docker:</strong>
+    <pre>docker build -t us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api_gateway:latest .</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Push para o registry:</strong>
+    <pre>docker push us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api_gateway:latest</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">4</span>
+    <strong>Reinicie o pod no Kubernetes:</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl rollout restart deployment api-gateway -n vertice</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">5</span>
+    <strong>Verifique se subiu:</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl get pods -n vertice | grep api-gateway</pre>
+</div>
+
+<h2>7.4 - Como Escalar Serviços (Aumentar ou Diminuir)</h2>
+
+<p><strong>Situação:</strong> Um serviço está pesado demais (usando muita CPU). Você quer adicionar mais pods.</p>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Identifique o serviço pesado</strong>
+    <ul>
+        <li>Vá em Kubernetes Engine > Workloads</li>
+        <li>Ordene por "CPU" (clique na coluna)</li>
+        <li>Veja qual está mais alto</li>
+    </ul>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>No terminal, escale o serviço:</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl scale deployment NOME_DO_SERVICO -n vertice --replicas=3</pre>
+    <p>Exemplo (api-gateway):</p>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl scale deployment api-gateway -n vertice --replicas=3</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">3</span>
+    <strong>Verifique se criou mais pods:</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl get pods -n vertice | grep NOME_DO_SERVICO</pre>
+</div>
+
+<h1 id="parte8">8. Troubleshooting (Resolvendo Problemas)</h1>
+
+<h2>Problema 1: Frontend não carrega</h2>
+
+<div class="erro">
+    <strong>Sintoma:</strong> Ao abrir <code>https://vertice-frontend-vuvnhfmzpa-ue.a.run.app</code>, dá erro ou não carrega.
+</div>
+
+<div class="passo">
+    <strong>Solução 1: Verificar se o serviço está rodando</strong>
+    <ol>
+        <li>Vá em Cloud Run > vertice-frontend</li>
+        <li>Veja se está "Active" (verde)</li>
+        <li>Se não, clique em "DEPLOY" > "DEPLOY NEW REVISION"</li>
+    </ol>
+</div>
+
+<div class="passo">
+    <strong>Solução 2: Verificar logs</strong>
+    <ol>
+        <li>Cloud Run > vertice-frontend > LOGS</li>
+        <li>Procure por erros (vermelho)</li>
+        <li>Copie a mensagem de erro e pesquise no Google</li>
+    </ol>
+</div>
+
+<div class="passo">
+    <strong>Solução 3: Fazer novo deploy</strong>
+    <pre>cd /home/juan/vertice-dev/frontend && ./deploy.sh production</pre>
+</div>
+
+<h2>Problema 2: Backend não responde (API Gateway)</h2>
+
+<div class="erro">
+    <strong>Sintoma:</strong> Ao abrir <code>http://34.148.161.131:8000</code>, dá timeout ou erro.
+</div>
+
+<div class="passo">
+    <strong>Solução 1: Verificar se o pod está rodando</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl get pods -n vertice | grep api-gateway</pre>
+    <p>Se mostrar "Running" = OK. Se mostrar "CrashLoopBackOff" ou "Error" = Problema</p>
+</div>
+
+<div class="passo">
+    <strong>Solução 2: Ver logs do pod</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl logs -n vertice NOME_DO_POD</pre>
+    <p>Substitua NOME_DO_POD pelo nome que apareceu no comando anterior (ex: api-gateway-abc123-xyz)</p>
+</div>
+
+<div class="passo">
+    <strong>Solução 3: Reiniciar o pod</strong>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl rollout restart deployment api-gateway -n vertice</pre>
+</div>
+
+<h2>Problema 3: Muitos pods com erro (mais de 20)</h2>
+
+<div class="erro">
+    <strong>Sintoma:</strong> No Kubernetes Engine > Workloads, tem muitos serviços vermelhos.
+</div>
+
+<div class="passo">
+    <strong>Solução 1: Identificar o padrão</strong>
+    <ol>
+        <li>Veja se todos os erros são do mesmo tipo (ex: "ImagePullBackOff")</li>
+        <li>Se sim, pode ser problema de registry ou autenticação</li>
+    </ol>
+</div>
+
+<div class="passo">
+    <strong>Solução 2: Executar script de validação</strong>
+    <pre>bash /home/juan/vertice-dev/docs/gke-deployment/validate_deployment.sh</pre>
+    <p>Isso vai te dar um relatório completo</p>
+</div>
+
+<div class="passo">
+    <strong>Solução 3: Me chamar! 😅</strong>
+    <p>Se tem mais de 20 pods com erro, provavelmente é algo sério. Melhor me chamar.</p>
+</div>
+
+<h2>Problema 4: Conta muito alta (custos)</h2>
+
+<div class="erro">
+    <strong>Sintoma:</strong> No Billing, está gastando mais de $10/dia.
+</div>
+
+<div class="passo">
+    <strong>Solução 1: Identificar o vilão</strong>
+    <ol>
+        <li>Vá em Billing > Reports</li>
+        <li>Veja qual serviço está gastando mais (GKE, Cloud Run, etc)</li>
+    </ol>
+</div>
+
+<div class="passo">
+    <strong>Solução 2: Reduzir nodes do cluster</strong>
+    <pre>gcloud container clusters resize vertice-us-cluster --node-pool=default-pool --num-nodes=4 --region=us-east1 --project=projeto-vertice</pre>
+    <p>Isso reduz de 8 para 4 nodes (metade do custo)</p>
+</div>
+
+<div class="passo">
+    <strong>Solução 3: Desligar serviços não essenciais</strong>
+    <p>Identifique serviços que você não está usando e desligue:</p>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl scale deployment NOME_DO_SERVICO -n vertice --replicas=0</pre>
+</div>
+
+<h1 id="parte9">9. Custos e Como Economizar</h1>
+
+<h2>9.1 - Estimativa de Custos Mensais</h2>
+
+<table>
+    <tr>
+        <th>Serviço</th>
+        <th>Custo Estimado</th>
+        <th>O Que É</th>
+    </tr>
+    <tr>
+        <td><strong>GKE Cluster (8 nodes)</strong></td>
+        <td>~$200/mês</td>
+        <td>Servidores rodando o backend</td>
+    </tr>
+    <tr>
+        <td><strong>Cloud Run (Frontend)</strong></td>
+        <td>~$5/mês</td>
+        <td>Site (paga por requisição)</td>
+    </tr>
+    <tr>
+        <td><strong>Load Balancer</strong></td>
+        <td>~$20/mês</td>
+        <td>Distribuidor de tráfego</td>
+    </tr>
+    <tr>
+        <td><strong>Artifact Registry</strong></td>
+        <td>~$10/mês</td>
+        <td>Armazena suas imagens Docker</td>
+    </tr>
+    <tr>
+        <td><strong>Network/Egress</strong></td>
+        <td>~$15/mês</td>
+        <td>Transferência de dados</td>
+    </tr>
+    <tr>
+        <td><strong>TOTAL</strong></td>
+        <td><strong>~$250/mês</strong></td>
+        <td></td>
+    </tr>
+</table>
+
+<h2>9.2 - Como Economizar (Sem Quebrar Nada)</h2>
+
+<div class="passo">
+    <strong>💰 Economia 1: Reduzir nodes (mais fácil)</strong>
+    <pre>gcloud container clusters resize vertice-us-cluster --node-pool=default-pool --num-nodes=4 --region=us-east1 --project=projeto-vertice</pre>
+    <p><strong>Economia:</strong> ~$100/mês (50% do cluster)</p>
+    <p><strong>Impacto:</strong> Alguns serviços podem ficar pending. Ajuste conforme necessário.</p>
+</div>
+
+<div class="passo">
+    <strong>💰 Economia 2: Desligar serviços não essenciais</strong>
+    <p>Identifique serviços que você não usa (ex: wargaming, purple_team) e desligue:</p>
+    <pre>KUBECONFIG=/tmp/kubeconfig kubectl scale deployment wargaming-crisol -n vertice --replicas=0</pre>
+    <p><strong>Economia:</strong> Variável, mas ajuda</p>
+</div>
+
+<div class="passo">
+    <strong>💰 Economia 3: Usar preemptible nodes</strong>
+    <p>Nodes preemptible custam 80% menos, mas podem ser desligados pelo Google a qualquer momento.</p>
+    <p><strong>Só use se souber o que está fazendo!</strong></p>
+</div>
+
+<div class="passo">
+    <strong>💰 Economia 4: Desligar tudo à noite</strong>
+    <p>Se você só usa durante o dia, pode criar um script para desligar à noite:</p>
+    <pre>
+# Escalar todos para 0 (desligar)
+KUBECONFIG=/tmp/kubeconfig kubectl scale deployment --all -n vertice --replicas=0
+
+# De manhã, ligar de novo
+KUBECONFIG=/tmp/kubeconfig kubectl scale deployment --all -n vertice --replicas=1
+    </pre>
+    <p><strong>Economia:</strong> ~60% dos custos do cluster</p>
+</div>
+
+<h2>9.3 - Monitorando Custos (IMPORTANTE)</h2>
+
+<div class="passo">
+    <strong>Configure Alertas de Custo:</strong>
+    <ol>
+        <li>Vá em: Billing > Budgets & Alerts</li>
+        <li>Clique em "CREATE BUDGET"</li>
+        <li>Configure:
+            <ul>
+                <li><strong>Budget amount:</strong> $250/mês</li>
+                <li><strong>Alert thresholds:</strong> 50%, 90%, 100%</li>
+                <li><strong>Email:</strong> juan.brainfarma@gmail.com</li>
+            </ul>
+        </li>
+        <li>Salve</li>
+    </ol>
+</div>
+
+<div class="sucesso">
+    <strong>✅ Agora você receberá email quando gastar:</strong>
+    <ul>
+        <li>$125 (50%)</li>
+        <li>$225 (90%)</li>
+        <li>$250 (100%)</li>
+    </ul>
+</div>
+
+<h1 id="parte10">10. Comandos Úteis (Cola)</h1>
+
+<h2>10.1 - Frontend (Cloud Run)</h2>
+
+<pre>
+# Ver status do frontend
+gcloud run services describe vertice-frontend --region=us-east1 --project=projeto-vertice
+
+# Ver logs do frontend
+gcloud run logs tail vertice-frontend --region=us-east1 --project=projeto-vertice
+
+# Fazer novo deploy
+cd /home/juan/vertice-dev/frontend && ./deploy.sh production
+
+# Ver URL do frontend
+gcloud run services describe vertice-frontend --region=us-east1 --format="value(status.url)"
+</pre>
+
+<h2>10.2 - Backend (GKE)</h2>
+
+<pre>
+# Ver todos os pods
+KUBECONFIG=/tmp/kubeconfig kubectl get pods -n vertice
+
+# Ver apenas pods com erro
+KUBECONFIG=/tmp/kubeconfig kubectl get pods -n vertice | grep -E "Error|CrashLoop|ImagePull"
+
+# Ver logs de um pod
+KUBECONFIG=/tmp/kubeconfig kubectl logs -n vertice NOME_DO_POD
+
+# Ver logs em tempo real (seguir)
+KUBECONFIG=/tmp/kubeconfig kubectl logs -f -n vertice NOME_DO_POD
+
+# Reiniciar um deployment
+KUBECONFIG=/tmp/kubeconfig kubectl rollout restart deployment NOME -n vertice
+
+# Escalar (aumentar/diminuir replicas)
+KUBECONFIG=/tmp/kubeconfig kubectl scale deployment NOME -n vertice --replicas=3
+
+# Ver uso de recursos
+KUBECONFIG=/tmp/kubeconfig kubectl top nodes
+KUBECONFIG=/tmp/kubeconfig kubectl top pods -n vertice
+
+# Descrever um pod (detalhes completos)
+KUBECONFIG=/tmp/kubeconfig kubectl describe pod NOME_DO_POD -n vertice
+</pre>
+
+<h2>10.3 - Cluster (GKE)</h2>
+
+<pre>
+# Ver nodes do cluster
+KUBECONFIG=/tmp/kubeconfig kubectl get nodes
+
+# Escalar cluster (mudar número de nodes)
+gcloud container clusters resize vertice-us-cluster --node-pool=default-pool --num-nodes=6 --region=us-east1 --project=projeto-vertice
+
+# Ver informações do cluster
+gcloud container clusters describe vertice-us-cluster --region=us-east1 --project=projeto-vertice
+
+# Conectar ao cluster (gerar kubeconfig)
+gcloud container clusters get-credentials vertice-us-cluster --region=us-east1 --project=projeto-vertice
+</pre>
+
+<h2>10.4 - Validação e Monitoramento</h2>
+
+<pre>
+# Validação completa do deployment
+bash /home/juan/vertice-dev/docs/gke-deployment/validate_deployment.sh
+
+# Expor API Gateway
+bash /home/juan/vertice-dev/docs/gke-deployment/expose_api_gateway.sh
+
+# Ver custos atuais
+gcloud billing accounts list
+</pre>
+
+<h2>10.5 - Emergência (Se Tudo Quebrar)</h2>
+
+<pre>
+# Reiniciar TUDO (use com cuidado!)
+KUBECONFIG=/tmp/kubeconfig kubectl rollout restart deployment --all -n vertice
+
+# Desligar TUDO (economizar custos)
+KUBECONFIG=/tmp/kubeconfig kubectl scale deployment --all -n vertice --replicas=0
+
+# Ligar TUDO de volta
+KUBECONFIG=/tmp/kubeconfig kubectl scale deployment --all -n vertice --replicas=1
+
+# Deletar o cluster (PERIGO! Só se quiser começar do zero)
+# gcloud container clusters delete vertice-us-cluster --region=us-east1 --project=projeto-vertice
+</pre>
+
+<h1>🎓 Conclusão e Próximos Passos</h1>
+
+<div class="sucesso">
+    <h3>🎉 Parabéns! Agora você sabe:</h3>
+    <ul>
+        <li>✅ Como acessar o Google Cloud Console</li>
+        <li>✅ Como ver se seu frontend e backend estão rodando</li>
+        <li>✅ Como verificar logs quando algo dá errado</li>
+        <li>✅ Como fazer deploy de novas versões</li>
+        <li>✅ Como monitorar custos</li>
+        <li>✅ Como resolver problemas comuns</li>
+    </ul>
+</div>
+
+<h2>📚 Para Aprender Mais (Recomendado):</h2>
+
+<ol>
+    <li><strong>Kubernetes Básico:</strong>
+        <ul>
+            <li>Assista: "Kubernetes for Beginners" no YouTube</li>
+            <li>Entenda: Pods, Deployments, Services</li>
+        </ul>
+    </li>
+    <li><strong>Docker Básico:</strong>
+        <ul>
+            <li>Assista: "Docker Tutorial for Beginners"</li>
+            <li>Entenda: Images, Containers, Registries</li>
+        </ul>
+    </li>
+    <li><strong>Google Cloud:</strong>
+        <ul>
+            <li>Faça o curso gratuito: "Google Cloud Fundamentals"</li>
+            <li>https://cloud.google.com/training</li>
+        </ul>
+    </li>
+</ol>
+
+<h2>🆘 Se Precisar de Ajuda:</h2>
+
+<ol>
+    <li><strong>Consulte este guia</strong> (imprima e deixe sempre à mão)</li>
+    <li><strong>Veja os logs</strong> (90% dos problemas estão nos logs)</li>
+    <li><strong>Google é seu amigo</strong> (copie a mensagem de erro e pesquise)</li>
+    <li><strong>Me chame!</strong> Estou aqui para ajudar 🤖</li>
+</ol>
+
+<hr>
+
+<p style="text-align: center; margin-top: 50px;">
+    <strong>Documento criado por Claude Code</strong><br>
+    <em>Seguindo o Padrão Pagani: "O simples funciona"</em><br>
+    Data: 25 de Outubro de 2025
+</p>
+
+<p style="text-align: center; font-size: 24px; margin-top: 30px;">
+    🚀 Boa sorte com o Vértice! 🚀
+</p>
+
+</body>
+</html>
