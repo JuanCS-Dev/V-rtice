@@ -19,12 +19,6 @@ export const useBAS = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [error, setError] = useState(null);
 
-  // Carrega técnicas ao montar
-  useEffect(() => {
-    loadTechniques();
-    loadCoverage();
-  }, [loadTechniques, loadCoverage]);
-
   /**
    * Carrega técnicas MITRE ATT&CK disponíveis
    */
@@ -170,7 +164,13 @@ export const useBAS = () => {
   const refreshTechniques = useCallback(() => {
     loadTechniques();
     loadCoverage();
-  }, [loadTechniques, loadCoverage]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Carrega técnicas ao montar
+  useEffect(() => {
+    loadTechniques();
+    loadCoverage();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     techniques,

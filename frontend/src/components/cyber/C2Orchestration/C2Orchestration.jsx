@@ -12,9 +12,9 @@ import { useC2 } from './hooks/useC2';
 export const C2Orchestration = () => {
   const [activeTab, setActiveTab] = useState('sessions'); // 'sessions' | 'chains' | 'console'
   const {
-    sessions,
-    activeSessions,
-    attackChains,
+    sessions = [],
+    activeSessions = [],
+    attackChains = [],
     isExecuting,
     createSession,
     executeCommand,
@@ -58,14 +58,14 @@ export const C2Orchestration = () => {
             <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
               <div className="text-red-400 text-xs">COBALT STRIKE</div>
               <div className="text-2xl font-bold text-red-400">
-                {sessions.filter(s => s.framework === 'cobalt_strike').length}
+                {sessions.filter(session => session?.framework === 'cobalt_strike').length}
               </div>
             </div>
 
             <div className="bg-black/50 border border-red-400/30 rounded px-4 py-2">
               <div className="text-red-400 text-xs">METASPLOIT</div>
               <div className="text-2xl font-bold text-red-400">
-                {sessions.filter(s => s.framework === 'metasploit').length}
+                {sessions.filter(session => session?.framework === 'metasploit').length}
               </div>
             </div>
 

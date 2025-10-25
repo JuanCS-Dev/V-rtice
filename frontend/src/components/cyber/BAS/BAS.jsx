@@ -12,8 +12,8 @@ import { useBAS } from './hooks/useBAS';
 export const BAS = () => {
   const [activeTab, setActiveTab] = useState('matrix'); // 'matrix' | 'purple' | 'coverage'
   const {
-    techniques,
-    simulations,
+    techniques = [],
+    simulations = [],
     coverage,
     isSimulating,
     runSimulation,
@@ -45,7 +45,7 @@ export const BAS = () => {
   ];
 
   const totalSimulations = simulations.length;
-  const detectedSimulations = simulations.filter(s => s.detected).length;
+  const detectedSimulations = simulations.filter(sim => sim?.detected).length;
   const detectionRate = totalSimulations > 0 ? ((detectedSimulations / totalSimulations) * 100).toFixed(1) : 0;
 
   return (

@@ -21,22 +21,6 @@ export const useC2 = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Carrega sessões ao montar
-  useEffect(() => {
-    loadSessions();
-  }, [loadSessions]);
-
-  // Polling para sessões ativas
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (activeSessions.length > 0) {
-        loadSessions();
-      }
-    }, 5000); // Poll a cada 5 segundos
-
-    return () => clearInterval(interval);
-  }, [activeSessions, loadSessions]);
-
   /**
    * Carrega lista de sessões
    */
@@ -49,7 +33,7 @@ export const useC2 = () => {
         setSessions(sessionList);
 
         // Separa sessões ativas
-        const active = sessionList.filter(s => s.status === 'active' || s.status === 'connected');
+        const active = sessionList.filter(session => session.status === 'active' || session.status === 'connected');
         setActiveSessions(active);
       }
     } catch (err) {
@@ -57,6 +41,22 @@ export const useC2 = () => {
       setError(err.message);
     }
   }, []);
+
+  // Carrega sessões ao montar
+  useEffect(() => {
+    loadSessions();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Polling para sessões ativas
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (activeSessions.length > 0) {
+        loadSessions();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [activeSessions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Cria nova sessão C2
@@ -147,10 +147,10 @@ export const useC2 = () => {
       if (result.success) {
         // Atualiza sessão
         setSessions(prev =>
-          prev.map(s =>
-            s.session_id === sessionId
-              ? { ...s, framework: targetFramework }
-              : s
+          prev.map(session =>
+            session.session_id === sessionId
+              ? { ...session, framework: targetFramework }
+              : session
           )
         );
 
