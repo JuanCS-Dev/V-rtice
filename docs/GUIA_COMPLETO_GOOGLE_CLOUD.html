@@ -5,13 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guia Completo - Vértice no Google Cloud</title>
     <style>
-        /* Estilos simples para impressão */
+        /* Estilos otimizados para impressão */
         @media print {
-            body { font-size: 12pt; }
-            h1 { page-break-before: always; }
+            body {
+                font-size: 11pt;
+                line-height: 1.4;
+                color: #000;
+            }
+            h1 {
+                page-break-before: always;
+                page-break-after: avoid;
+                font-size: 20pt;
+            }
             h1:first-of-type { page-break-before: avoid; }
-            pre, code { page-break-inside: avoid; }
-            .no-print { display: none; }
+            h2 {
+                page-break-after: avoid;
+                font-size: 16pt;
+                margin-top: 20pt;
+            }
+            h3 {
+                page-break-after: avoid;
+                font-size: 13pt;
+            }
+            pre, code, table, .passo, .importante, .sucesso, .erro {
+                page-break-inside: avoid;
+                page-break-before: auto;
+            }
+            .no-print, .toc a:after { display: none; }
+
+            /* Remove colors to save ink */
+            .importante { border-left-color: #666 !important; background: #f9f9f9 !important; }
+            .sucesso { border-left-color: #666 !important; background: #f9f9f9 !important; }
+            .erro { border-left-color: #666 !important; background: #f9f9f9 !important; }
+            .passo { border-left-color: #666 !important; background: #f9f9f9 !important; }
+
+            /* Adjust tables */
+            table { font-size: 10pt; }
+            th { background: #ddd !important; }
+
+            /* Page numbers */
+            @page { margin: 2cm; }
+            @page:first { margin-top: 1cm; }
+
+            /* Links */
+            a { color: #000; text-decoration: underline; }
+            a[href]:after { content: " (" attr(href) ")"; font-size: 9pt; }
+            a[href^="#"]:after { content: ""; }
         }
 
         body {
