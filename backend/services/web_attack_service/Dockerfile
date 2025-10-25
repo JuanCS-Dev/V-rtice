@@ -1,7 +1,7 @@
 FROM vertice/python311-uv:latest AS builder
 USER root
 WORKDIR /build
-COPY services/web_attack_service/pyproject.toml services/web_attack_service/requirements.txt ./
+COPY pyproject.toml requirements.txt ./
 RUN python -m venv /opt/venv && . /opt/venv/bin/activate && uv pip sync requirements.txt
 
 FROM python:3.11-slim
@@ -11,7 +11,7 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 RUN groupadd -r appuser && useradd -r -g appuser --uid 1000 appuser
 WORKDIR /app
-COPY --chown=appuser:appuser services/web_attack_service/. .
+COPY --chown=appuser:appuser . .
 USER appuser
 HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8064/health || exit 1
 EXPOSE 8064

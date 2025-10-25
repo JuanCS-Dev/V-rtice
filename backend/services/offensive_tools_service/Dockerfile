@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY services/offensive_tools_service/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend security modules (parent context)
-COPY security /app/security
-
 # Copy service files
-COPY services/offensive_tools_service/main.py .
+COPY main.py .
+
+# Copy security module from parent context (needs to be built from backend/ dir)
+# This service imports: from security.offensive.api.offensive_tools
 
 # Environment
 ENV PYTHONUNBUFFERED=1
