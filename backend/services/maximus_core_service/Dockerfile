@@ -72,8 +72,8 @@ ENV PYTHONUNBUFFERED=1 \
 # Mudar para usuário não-root
 USER maximus
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+# Health check (increased timeouts for MAXIMUS initialization)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
     CMD curl -f http://localhost:8150/health || exit 1
 
 # Expor portas
@@ -84,5 +84,5 @@ LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
 LABEL org.opencontainers.image.description="MAXIMUS Core Service with uv package manager"
 LABEL org.opencontainers.image.licenses="Proprietary"
 
-# Comando de produção
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8150", "--workers", "4"]
+# Comando de produção (1 worker para estabilidade - MAXIMUS é pesado na inicialização)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8150", "--workers", "1", "--timeout-keep-alive", "75"]
