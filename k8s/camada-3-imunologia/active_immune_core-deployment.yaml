@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: active-immune-core
+  namespace: vertice
+  labels:
+    app: active-immune-core
+    tier: imunologia
+    layer: camada-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: active-immune-core
+  template:
+    metadata:
+      labels:
+        app: active-immune-core
+        tier: imunologia
+    spec:
+      containers:
+      - name: active-immune-core
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/active_immune_core:latest
+        ports:
+        - containerPort: 8071
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "active-immune-core"
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+        - name: SERVICE_PORT
+          value: "8071"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: LOG_LEVEL
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: ENVIRONMENT
+        - name: POSTGRES_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_DB
+        - name: REDIS_URL
+          value: "redis://:$(REDIS_PASSWORD)@redis:6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: REDIS_PASSWORD
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: GEMINI_API_KEY
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8071
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8071
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: active-immune-core
+  namespace: vertice
+  labels:
+    app: active-immune-core
+    tier: imunologia
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8071
+    targetPort: 8071
+    protocol: TCP
+    name: http
+  selector:
+    app: active-immune-core

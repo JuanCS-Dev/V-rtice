@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reflex-triage-engine
+  namespace: vertice
+  labels:
+    app: reflex-triage-engine
+    tier: imunologia
+    layer: camada-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reflex-triage-engine
+  template:
+    metadata:
+      labels:
+        app: reflex-triage-engine
+        tier: imunologia
+    spec:
+      containers:
+      - name: reflex-triage-engine
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/reflex_triage_engine:latest
+        ports:
+        - containerPort: 8074
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "reflex-triage-engine"
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+        - name: SERVICE_PORT
+          value: "8074"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: LOG_LEVEL
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: ENVIRONMENT
+        - name: POSTGRES_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_DB
+        - name: REDIS_URL
+          value: "redis://:$(REDIS_PASSWORD)@redis:6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: REDIS_PASSWORD
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: GEMINI_API_KEY
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8074
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8074
+          initialDelaySeconds: 20
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: reflex-triage-engine
+  namespace: vertice
+  labels:
+    app: reflex-triage-engine
+    tier: imunologia
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8074
+    targetPort: 8074
+    protocol: TCP
+    name: http
+  selector:
+    app: reflex-triage-engine

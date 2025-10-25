@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: vertice
+  labels:
+    app: api-gateway
+    tier: fundacao
+    layer: camada-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        tier: fundacao
+    spec:
+      containers:
+      - name: api-gateway
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api_gateway:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "api_gateway_service"
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+        - name: SERVICE_PORT
+          value: "8000"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: LOG_LEVEL
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: ENVIRONMENT
+        - name: POSTGRES_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_DB
+        - name: REDIS_URL
+          value: "redis://:$(REDIS_PASSWORD)@redis:6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: REDIS_PASSWORD
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: vertice
+  labels:
+    app: api-gateway
+    tier: fundacao
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: api-gateway

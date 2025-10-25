@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vertice
+  labels:
+    name: vertice
+    organism: vertice-core
+    environment: production

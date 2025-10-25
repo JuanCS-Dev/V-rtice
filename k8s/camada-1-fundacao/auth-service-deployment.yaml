@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: vertice
+  labels:
+    app: auth-service
+    tier: fundacao
+    layer: camada-1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+        tier: fundacao
+    spec:
+      containers:
+      - name: auth-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/auth_service:latest
+        ports:
+        - containerPort: 8006
+          name: http
+        env:
+        - name: SERVICE_NAME
+          value: "auth_service"
+        - name: SERVICE_HOST
+          value: "0.0.0.0"
+        - name: SERVICE_PORT
+          value: "8006"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: LOG_LEVEL
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: vertice-global-config
+              key: ENVIRONMENT
+        - name: POSTGRES_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres:5432/$(POSTGRES_DB)"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: POSTGRES_DB
+        - name: REDIS_URL
+          value: "redis://:$(REDIS_PASSWORD)@redis:6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: REDIS_PASSWORD
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vertice-core-secrets
+              key: JWT_SECRET_KEY
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8006
+          initialDelaySeconds: 40
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8006
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: vertice
+  labels:
+    app: auth-service
+    tier: fundacao
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8006
+    targetPort: 8006
+    protocol: TCP
+    name: http
+  selector:
+    app: auth-service

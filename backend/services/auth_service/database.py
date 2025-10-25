@@ -1,5 +1,6 @@
 """Database models and connection for Auth Service."""
 
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -13,9 +14,9 @@ Base = declarative_base()
 
 class User(Base):
     """User model for authentication."""
-    
+
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
@@ -25,8 +26,16 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
 
-# Database connection
-DATABASE_URL = "postgresql://postgres:postgres@postgres:5432/vertice_auth"
+# Database connection - Build from individual env vars or use complete URL
+# Kubernetes doesn't expand $(VAR) in env values, so we build it here
+# NOTE: Can't use POSTGRES_PORT/POSTGRES_HOST as Kubernetes auto-injects these for Services
+DB_USER = os.getenv("POSTGRES_USER", "postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+DB_NAME = os.getenv("POSTGRES_DB", "vertice_auth")
+DB_HOST = os.getenv("DB_HOST", "postgres")
+DB_PORT = os.getenv("DB_PORT", "5432")
+
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

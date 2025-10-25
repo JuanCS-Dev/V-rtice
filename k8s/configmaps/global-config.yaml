@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vertice-global-config
+  namespace: vertice
+data:
+  LOG_LEVEL: "INFO"
+  ENVIRONMENT: "production"
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  KAFKA_HOST: "kafka"
+  KAFKA_PORT: "9092"
