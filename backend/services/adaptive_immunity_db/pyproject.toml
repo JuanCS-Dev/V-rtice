@@ -7,6 +7,7 @@ dependencies = [
     "fastapi>=0.118.0",
     "starlette>=0.47.2",
     "uvicorn[standard]>=0.34.0",
+    "click>=8.0.0",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.7.1",
     "httpx>=0.28.1",
