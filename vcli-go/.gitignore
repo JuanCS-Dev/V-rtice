@@ -91,3 +91,15 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 nlp-shell
+
+# Cloud
+.gcloud/
+.config/gcloud/
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+k8s/secrets/
+
+# Docker
+*.tar.gz
