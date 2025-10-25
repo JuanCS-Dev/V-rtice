@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  maximus_eureka:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-maximus-eureka
+    hostname: vertice-maximus-eureka
+    ports:
+      - "9103:8200"
+    environment:
+      - SERVICE_NAME=maximus_eureka
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8200
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://vertice-redis:6379
+    networks:
+      - maximus-ai-network
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - vertice-redis
+
+  maximus_eureka-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-maximus-eureka-sidecar
+    environment:
+      - SERVICE_NAME=maximus_eureka
+      - SERVICE_HOST=vertice-maximus-eureka
+      - SERVICE_PORT=8200
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      maximus_eureka:
+        condition: service_started
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+networks:
+  maximus-ai-network:
+    external: true
+  maximus-network:
+    external: true

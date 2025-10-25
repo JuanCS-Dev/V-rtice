@@ -159,15 +159,20 @@ Framework: standard
 
 def main():
     """Main function for {task_description}"""
-    # TODO: Implement {task_description}
-    pass
+    # Implementation stub: requires LLM or manual completion
+    raise NotImplementedError("Template requires LLM generation or manual implementation")
 
 
 if __name__ == "__main__":
     main()
 '''
         else:
-            generated_code = f"# Auto-generated {target_language} code for: {task_description}\n\ndef main():\n    # TODO: Implement {task_description}\n    pass\n"
+            generated_code = f"""# Auto-generated {target_language} code for: {task_description}
+
+def main():
+    # Implementation stub: requires LLM generation or manual completion
+    raise NotImplementedError("Template requires LLM generation or manual implementation")
+"""
 
         implementation_details = {
             "status": "success",

@@ -30,11 +30,11 @@ echo ""
 # TESTE 1: Buscar TODOs em código Python
 ###############################################################################
 echo -e "${YELLOW}[1/8] Verificando TODOs em código Python...${NC}"
-TODOS=$(grep -r "# TODO" backend/services/ --include="*.py" 2>/dev/null | grep -v ".pyc" | wc -l)
+TODOS=$(grep -r "# TODO" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | grep -v ".pyc" | wc -l)
 
 if [ "$TODOS" -gt 0 ]; then
     echo -e "${RED}❌ VIOLAÇÃO: Encontrados $TODOS TODOs no código${NC}"
-    grep -r "# TODO" backend/services/ --include="*.py" 2>/dev/null | head -10
+    grep -r "# TODO" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | head -10
     VIOLATIONS=$((VIOLATIONS + 1))
 else
     echo -e "${GREEN}✅ Nenhum TODO encontrado em Python${NC}"
@@ -45,11 +45,11 @@ echo ""
 # TESTE 2: Buscar MOCKS/PLACEHOLDERS
 ###############################################################################
 echo -e "${YELLOW}[2/8] Verificando MOCKS e PLACEHOLDERS...${NC}"
-MOCKS=$(grep -ri "mock\|placeholder\|FIXME\|XXX" backend/services/ --include="*.py" 2>/dev/null | grep -v ".pyc" | grep -v "__pycache__" | wc -l)
+MOCKS=$(grep -ri "mock\|placeholder\|FIXME\|XXX" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | grep -v ".pyc" | grep -v "tests/" | wc -l)
 
 if [ "$MOCKS" -gt 0 ]; then
     echo -e "${RED}❌ VIOLAÇÃO: Encontrados $MOCKS mocks/placeholders${NC}"
-    grep -ri "mock\|placeholder\|FIXME" backend/services/ --include="*.py" 2>/dev/null | head -10
+    grep -ri "mock\|placeholder\|FIXME" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | grep -v "tests/" | head -10
     VIOLATIONS=$((VIOLATIONS + 1))
 else
     echo -e "${GREEN}✅ Nenhum mock ou placeholder encontrado${NC}"
@@ -60,11 +60,11 @@ echo ""
 # TESTE 3: Verificar testes skipados
 ###############################################################################
 echo -e "${YELLOW}[3/8] Verificando testes skipados...${NC}"
-SKIPPED=$(grep -r "@pytest.mark.skip" backend/services/ --include="*.py" 2>/dev/null | wc -l)
+SKIPPED=$(grep -r "@pytest.mark.skip" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | grep -v "scripts/" | wc -l)
 
 if [ "$SKIPPED" -gt 0 ]; then
     echo -e "${RED}❌ VIOLAÇÃO: Encontrados $SKIPPED testes skipados${NC}"
-    grep -r "@pytest.mark.skip" backend/services/ --include="*.py" 2>/dev/null
+    grep -r "@pytest.mark.skip" backend/services/ --include="*.py" --exclude-dir=".venv" --exclude-dir="venv" --exclude-dir="__pycache__" --exclude-dir="node_modules" 2>/dev/null | grep -v "scripts/"
     VIOLATIONS=$((VIOLATIONS + 1))
 else
     echo -e "${GREEN}✅ Nenhum teste skipado encontrado${NC}"

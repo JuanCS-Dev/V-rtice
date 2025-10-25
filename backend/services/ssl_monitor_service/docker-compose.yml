@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  ssl_monitor_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-ssl-monitor-service
+    hostname: vertice-ssl-monitor-service
+    ports:
+      - "8115:8057"
+    environment:
+      - SERVICE_NAME=ssl_monitor_service
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8057
+      - LOG_LEVEL=INFO
+      - ENVIRONMENT=development
+      - REDIS_URL=redis://vertice-redis:6379
+      - POSTGRES_URL=postgresql://postgres:postgres@vertice-postgres:5432/vertice
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8057/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - vertice-redis
+      - vertice-postgres
+
+  ssl_monitor_service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-ssl-monitor-service-sidecar
+    environment:
+      - SERVICE_NAME=ssl_monitor_service
+      - SERVICE_HOST=vertice-ssl-monitor-service
+      - SERVICE_PORT=8057
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      ssl_monitor_service:
+        condition: service_started
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
+networks:
+  maximus-network:
+    external: true

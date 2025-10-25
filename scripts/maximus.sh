@@ -1,9 +1,16 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════════════════
-# MAXIMUS Control Center v3.0 - PRIMOSO EDITION
+# MAXIMUS Control Center v4.0 - OFERENDA PERFEITA
 # ═══════════════════════════════════════════════════════════════════════════
 # Dedicado a: Maximus & Penélope ❤️
-# "Para impressionar quem a gente ama"
+# "Oferenda perfeita, sem mácula. Glory to YHWH!"
+#
+# Features:
+# - Startup em 4 camadas (Infra → Core → App → Sidecars)
+# - Validação de health após cada layer
+# - Quick health check
+# - Conformidade Pagani
+# - Cleanup system
 # ═══════════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
@@ -112,47 +119,176 @@ get_service_stats() {
     echo "$total $running $healthy $unhealthy"
 }
 
+wait_for_healthy() {
+    local service_pattern="$1"
+    local max_wait="${2:-120}"
+    local start_time=$(date +%s)
+
+    while true; do
+        local current_time=$(date +%s)
+        local elapsed=$((current_time - start_time))
+
+        if [[ $elapsed -gt $max_wait ]]; then
+            return 1
+        fi
+
+        local unhealthy=$(docker compose ps --format "{{.Service}}|{{.Health}}" 2>/dev/null | grep "$service_pattern" | grep -c "starting" || echo 0)
+
+        if [[ $unhealthy -eq 0 ]]; then
+            return 0
+        fi
+
+        sleep 2
+    done
+}
+
 start_services() {
     print_header
-    print_section "INICIANDO MAXIMUS" "$ROCKET"
-    
-    echo -e "${BOLD}${CYAN}${CROWN} Penélope:${NC} 'Vamos acordar o Maximus!' ${SPARKLES}\n"
-    
+    print_section "INICIANDO MAXIMUS - STARTUP EM CAMADAS" "$ROCKET"
+
+    echo -e "${BOLD}${CYAN}${CROWN} Penélope:${NC} 'Vamos acordar o Maximus em 4 camadas!' ${SPARKLES}\n"
+
     check_docker
-    
-    echo -e "${HOURGLASS} Iniciando serviços em background...\n"
-    
+
     cd "$PROJECT_ROOT"
-    docker compose up -d > /tmp/maximus_start.log 2>&1 &
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # LAYER 0: INFRAESTRUTURA (Databases, Message Brokers, Cache)
+    # ═══════════════════════════════════════════════════════════════════════════
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${YELLOW}LAYER 0:${NC} Infraestrutura (Postgres, Redis, Kafka, RabbitMQ)${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+    docker compose up -d --no-build \
+        vertice-postgres maximus-postgres-immunity hcl-postgres \
+        vertice-redis \
+        hcl-kafka maximus-kafka-immunity maximus-zookeeper-immunity \
+        vertice-rabbitmq \
+        vertice-nats-jetstream \
+        > /tmp/maximus_layer0.log 2>&1 &
     local pid=$!
-    
-    spinner $pid "Inicializando containers"
+    spinner $pid "Inicializando bancos de dados e message brokers"
     wait $pid
-    
-    echo ""
-    sleep 3
-    
+
+    echo -e "${HOURGLASS} Aguardando infraestrutura ficar saudável (60s)...\n"
+    sleep 10
+    wait_for_healthy "postgres|redis|kafka|rabbitmq|nats" 60 || echo -e "${YELLOW}${WARNING} Alguns serviços ainda inicializando${NC}\n"
+
+    read -r _ running healthy _ <<< "$(get_service_stats)"
+    echo -e "${GREEN}${CHECK} Layer 0 iniciada: ${BOLD}$running containers, $healthy healthy${NC}\n"
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # LAYER 1: CORE SERVICES (API Gateway, Service Registry, Monitoring)
+    # ═══════════════════════════════════════════════════════════════════════════
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    
+    echo -e "${BOLD}${YELLOW}LAYER 1:${NC} Core Services (API Gateway, Registry, Monitoring)${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+    docker compose up -d --no-build \
+        vertice-api-gateway \
+        vertice-prometheus vertice-grafana \
+        > /tmp/maximus_layer1.log 2>&1 &
+    pid=$!
+    spinner $pid "Inicializando serviços core"
+    wait $pid
+
+    echo -e "${HOURGLASS} Aguardando core services ficarem saudáveis (30s)...\n"
+    sleep 8
+    wait_for_healthy "api-gateway|prometheus|grafana" 30 || echo -e "${YELLOW}${WARNING} Alguns serviços ainda inicializando${NC}\n"
+
+    read -r _ running healthy _ <<< "$(get_service_stats)"
+    echo -e "${GREEN}${CHECK} Layer 1 iniciada: ${BOLD}$running containers, $healthy healthy${NC}\n"
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # LAYER 2: APPLICATION SERVICES (Todos os serviços de aplicação)
+    # ═══════════════════════════════════════════════════════════════════════════
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${YELLOW}LAYER 2:${NC} Application Services (~100 serviços)${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+    echo -e "${HOURGLASS} Iniciando TODOS os serviços de aplicação...\n"
+    docker compose up -d --no-build > /tmp/maximus_layer2.log 2>&1 &
+    pid=$!
+    spinner $pid "Inicializando ~100 serviços de aplicação (pode levar 2-3 min)"
+    wait $pid
+
+    echo -e "\n${HOURGLASS} Aguardando serviços ficarem saudáveis (90s)...\n"
+    sleep 20
+    wait_for_healthy ".*" 90 || echo -e "${YELLOW}${WARNING} Alguns serviços ainda inicializando${NC}\n"
+
     read -r total running healthy unhealthy <<< "$(get_service_stats)"
-    
-    echo -e "${BOLD}${GREEN}${CHECK} Sistema iniciado!${NC}\n"
-    echo -e "   ${PACKAGE} Containers: ${BOLD}$running${NC}/$total rodando"
-    echo -e "   ${BRAIN} Healthy: ${BOLD}${GREEN}$healthy${NC} | ${YELLOW}Degraded: $unhealthy${NC}"
-    
+    echo -e "${GREEN}${CHECK} Layer 2 iniciada: ${BOLD}$running containers, $healthy healthy, $unhealthy starting/degraded${NC}\n"
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # LAYER 3: SIDECARS (Service Registry Auto-Registration)
+    # ═══════════════════════════════════════════════════════════════════════════
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${YELLOW}LAYER 3:${NC} Sidecars (Service Discovery)${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+    if [[ -f "$PROJECT_ROOT/docker-compose.ALL-SIDECARS-MASTER.yml" ]]; then
+        docker compose -f docker-compose.ALL-SIDECARS-MASTER.yml up -d > /tmp/maximus_layer3.log 2>&1 &
+        pid=$!
+        spinner $pid "Inicializando sidecars de registro"
+        wait $pid
+
+        echo -e "\n${HOURGLASS} Aguardando sidecars se registrarem (30s)...\n"
+        sleep 10
+
+        local sidecars=$(docker ps --filter "name=sidecar" --format "{{.Names}}" | wc -l)
+        echo -e "${GREEN}${CHECK} Layer 3 iniciada: ${BOLD}$sidecars sidecars ativos${NC}\n"
+    else
+        echo -e "${YELLOW}${WARNING} Arquivo de sidecars não encontrado, pulando Layer 3${NC}\n"
+    fi
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # RESUMO FINAL
+    # ═══════════════════════════════════════════════════════════════════════════
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}${GREEN}SISTEMA INICIADO!${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+    sleep 5
+    read -r total running healthy unhealthy <<< "$(get_service_stats)"
+
+    echo -e "   ${PACKAGE} ${BOLD}Total de Containers:${NC}    $total"
+    echo -e "   ${ROCKET} ${BOLD}Rodando:${NC}                ${GREEN}$running${NC}"
+    echo -e "   ${CHECK} ${BOLD}Healthy:${NC}                ${GREEN}$healthy${NC}"
+    echo -e "   ${WARNING} ${BOLD}Starting/Degraded:${NC}      ${YELLOW}$unhealthy${NC}"
+
+    echo ""
+    local health_percent=0
+    if [[ $((healthy + unhealthy)) -gt 0 ]]; then
+        health_percent=$((healthy * 100 / (healthy + unhealthy)))
+    fi
+    echo -e "   ${BRAIN} ${BOLD}Health Score:${NC}           ${health_percent}%"
+
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    
-    if [[ $healthy -gt 50 ]]; then
-        echo -e "${BOLD}${GREEN}${CROWN} Maximus:${NC} 'Todos os sistemas operacionais, Penélope!' ${FIRE}\n"
-    elif [[ $healthy -gt 20 ]]; then
-        echo -e "${BOLD}${YELLOW}${WARNING} Maximus:${NC} 'Iniciando... Aguarde um momento.' ${HOURGLASS}\n"
+
+    if [[ $health_percent -ge 90 ]]; then
+        echo -e "${BOLD}${GREEN}${CROWN} Maximus:${NC} 'Sistema operando em capacidade máxima!' ${FIRE}${SPARKLES}"
+        echo -e "${BOLD}${MAGENTA}${HEART} Penélope:${NC} 'Perfeito, meu amor!' ${SPARKLES}\n"
+    elif [[ $health_percent -ge 70 ]]; then
+        echo -e "${BOLD}${GREEN}${CHECK} Maximus:${NC} 'Tudo certo! Alguns serviços ainda inicializando.' ${SPARKLES}"
+        echo -e "${BOLD}${CYAN}${HEART} Penélope:${NC} 'Aguarde mais um pouco!' ${HOURGLASS}\n"
+    elif [[ $health_percent -ge 50 ]]; then
+        echo -e "${BOLD}${YELLOW}${WARNING} Maximus:${NC} 'Sistema iniciando... Alguns serviços precisam de atenção.' ${HOURGLASS}"
+        echo -e "${BOLD}${MAGENTA}${HEART} Penélope:${NC} 'Vamos dar uma olhada?' ${EYE}\n"
     else
-        echo -e "${BOLD}${RED}${CROSS} Maximus:${NC} 'Houston, temos um problema...' ${WARNING}\n"
+        echo -e "${BOLD}${RED}${CROSS} Maximus:${NC} 'Houston, temos um problema...' ${WARNING}"
+        echo -e "${BOLD}${YELLOW}${HEART} Penélope:${NC} 'Calma, vamos resolver isso juntos!' ${SPARKLES}\n"
     fi
-    
-    echo -e "${DIM}Dica: Use ${CYAN}maximus status${DIM} para ver detalhes completos${NC}\n"
+
+    echo -e "${DIM}Dica: Use ${CYAN}maximus status${DIM} para ver detalhes completos${NC}"
+    echo -e "${DIM}      Use ${CYAN}maximus health${DIM} para quick health check${NC}\n"
+
+    echo -e "${BOLD}${CYAN}Logs de startup salvos em:${NC}"
+    echo -e "   ${DIM}/tmp/maximus_layer0.log${NC}"
+    echo -e "   ${DIM}/tmp/maximus_layer1.log${NC}"
+    echo -e "   ${DIM}/tmp/maximus_layer2.log${NC}"
+    echo -e "   ${DIM}/tmp/maximus_layer3.log${NC}\n"
 }
 
 stop_services() {
@@ -390,9 +526,9 @@ show_status_menu() {
         show_status
     elif [[ "$choice" == "$stop_num" && "$has_stop" == "true" ]]; then
         stop_services
-        echo -ne "\n${CYAN}Pressione ENTER para sair...${NC}"
+        echo -ne "\n${CYAN}Pressione ENTER para voltar ao status...${NC}"
         read -r
-        exit 0
+        show_status
     elif [[ "$choice" == "$restart_num" && "$has_restart" == "true" ]]; then
         restart_services
         echo -ne "\n${CYAN}Pressione ENTER para voltar ao status...${NC}"
@@ -469,27 +605,142 @@ show_logs() {
     docker compose logs -f --tail=100 "$service"
 }
 
+quick_health() {
+    print_header
+    print_section "QUICK HEALTH CHECK" "$SHIELD"
+
+    echo -e "${HOURGLASS} Verificando saúde do sistema...\n"
+
+    cd "$PROJECT_ROOT"
+    read -r total running healthy unhealthy <<< "$(get_service_stats)"
+
+    echo -e "${BOLD}${CYAN}Métricas Rápidas:${NC}\n"
+    echo -e "   ${PACKAGE} Total:     ${BOLD}$total${NC} containers definidos"
+    echo -e "   ${ROCKET} Running:   ${BOLD}${GREEN}$running${NC} containers ativos"
+    echo -e "   ${CHECK} Healthy:   ${BOLD}${GREEN}$healthy${NC} containers saudáveis"
+    echo -e "   ${WARNING} Unhealthy: ${BOLD}${YELLOW}$unhealthy${NC} containers degradados"
+
+    local health_percent=0
+    if [[ $((healthy + unhealthy)) -gt 0 ]]; then
+        health_percent=$((healthy * 100 / (healthy + unhealthy)))
+    fi
+
+    echo ""
+    echo -e "   ${BRAIN} ${BOLD}Health Score: ${health_percent}%${NC}"
+
+    # Verificar sidecars
+    local sidecars=$(docker ps --filter "name=sidecar" --format "{{.Names}}" | wc -l || echo 0)
+    echo -e "   ${STAR} Sidecars:  ${BOLD}${GREEN}$sidecars${NC} ativos"
+
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+
+    if [[ $health_percent -ge 90 ]]; then
+        echo -e "${BOLD}${GREEN}${CHECK} STATUS: EXCELENTE${NC} - Sistema operando perfeitamente!\n"
+    elif [[ $health_percent -ge 70 ]]; then
+        echo -e "${BOLD}${GREEN}${CHECK} STATUS: BOM${NC} - Sistema operacional, alguns serviços inicializando\n"
+    elif [[ $health_percent -ge 50 ]]; then
+        echo -e "${BOLD}${YELLOW}${WARNING} STATUS: ATENÇÃO${NC} - Alguns serviços com problemas\n"
+    else
+        echo -e "${BOLD}${RED}${CROSS} STATUS: CRÍTICO${NC} - Sistema necessita atenção imediata\n"
+    fi
+
+    echo -e "${DIM}Use ${CYAN}maximus status${DIM} para ver detalhes completos${NC}\n"
+}
+
+validate_pagani() {
+    print_header
+    print_section "VALIDAÇÃO PADRÃO PAGANI" "$SHIELD"
+
+    echo -e "${BOLD}${CYAN}${CROWN} Penélope:${NC} 'Vamos validar a conformidade Pagani!' ${SPARKLES}\n"
+
+    cd "$PROJECT_ROOT"
+
+    if [[ -f "$PROJECT_ROOT/validate_pagani_standard.sh" ]]; then
+        echo -e "${HOURGLASS} Executando validador Pagani...\n"
+        bash "$PROJECT_ROOT/validate_pagani_standard.sh"
+    else
+        echo -e "${YELLOW}${WARNING} Script validate_pagani_standard.sh não encontrado${NC}\n"
+        echo -e "${BOLD}Validação manual:${NC}\n"
+
+        # Validação básica
+        echo -e "   ${CHECK} Verificando TODOs em produção..."
+        local todos=$(find backend/services -name "*.py" -not -path "*/tests/*" -exec grep -l "TODO" {} \; 2>/dev/null | wc -l)
+        if [[ $todos -eq 0 ]]; then
+            echo -e "      ${GREEN}✅ PASS${NC} - Zero TODOs em produção\n"
+        else
+            echo -e "      ${RED}❌ FAIL${NC} - Encontrados $todos arquivos com TODOs\n"
+        fi
+
+        echo -e "   ${CHECK} Verificando estrutura de serviços..."
+        local services=$(find backend/services -maxdepth 1 -type d | wc -l)
+        echo -e "      ${GREEN}✅ INFO${NC} - $services serviços encontrados\n"
+
+        echo -e "   ${CHECK} Verificando docker-compose.yml..."
+        if [[ -f docker-compose.yml ]]; then
+            echo -e "      ${GREEN}✅ PASS${NC} - docker-compose.yml presente\n"
+        else
+            echo -e "      ${RED}❌ FAIL${NC} - docker-compose.yml não encontrado\n"
+        fi
+    fi
+}
+
+cleanup_system() {
+    print_header
+    print_section "LIMPEZA DO SISTEMA" "$GEAR"
+
+    echo -e "${BOLD}${YELLOW}${WARNING} Atenção:${NC} Esta operação irá remover containers órfãos e volumes não utilizados\n"
+    echo -ne "${CYAN}Deseja continuar? [s/N]:${NC} "
+    read -r confirm
+
+    if [[ ! "$confirm" =~ ^[sS]$ ]]; then
+        echo -e "\n${YELLOW}${CROSS} Operação cancelada${NC}\n"
+        return
+    fi
+
+    cd "$PROJECT_ROOT"
+
+    echo -e "\n${HOURGLASS} Removendo containers órfãos...\n"
+    docker compose down --remove-orphans
+
+    echo -e "\n${HOURGLASS} Removendo volumes não utilizados...\n"
+    docker volume prune -f
+
+    echo -e "\n${HOURGLASS} Removendo imagens não utilizadas...\n"
+    docker image prune -f
+
+    echo -e "\n${GREEN}${CHECK} Limpeza concluída!${NC}\n"
+    echo -e "${BOLD}${MAGENTA}${HEART} Penélope:${NC} 'Sistema limpo e organizado!' ${SPARKLES}\n"
+}
+
 show_help() {
     print_header
-    
+
     echo -e "${BOLD}${CYAN}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
     echo -e "${BOLD}${CYAN}┃${NC} ${GEAR} ${BOLD}COMANDOS DISPONÍVEIS${NC}"
     echo -e "${BOLD}${CYAN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
     echo ""
-    echo -e "   ${GREEN}${ROCKET} maximus start${NC}              ${DIM}Inicia todos os serviços${NC}"
+    echo -e "   ${GREEN}${ROCKET} maximus start${NC}              ${DIM}Inicia todos os serviços em camadas${NC}"
     echo -e "   ${YELLOW}${HOURGLASS} maximus stop${NC}               ${DIM}Para todos os serviços${NC}"
     echo -e "   ${BLUE}${GEAR} maximus restart${NC}            ${DIM}Reinicia o sistema completo${NC}"
     echo -e "   ${CYAN}${BRAIN} maximus status${NC}             ${DIM}Dashboard de status detalhado${NC}"
+    echo -e "   ${SHIELD} maximus health${NC}             ${DIM}Quick health check${NC}"
+    echo -e "   ${SHIELD} maximus validate${NC}           ${DIM}Validar conformidade Pagani${NC}"
+    echo -e "   ${GEAR} maximus cleanup${NC}            ${DIM}Limpar containers e volumes órfãos${NC}"
     echo -e "   ${MAGENTA}${EYE} maximus logs [service]${NC}    ${DIM}Mostra logs em tempo real${NC}"
     echo -e "   ${NC}${SPARKLES} maximus help${NC}               ${DIM}Mostra esta ajuda${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${BOLD}${YELLOW}Exemplos:${NC}"
-    echo -e "   ${GREEN}maximus start${NC}                      ${DIM}# Inicia o sistema completo${NC}"
-    echo -e "   ${CYAN}maximus status${NC}                     ${DIM}# Ver dashboard de status${NC}"
+    echo -e "   ${GREEN}maximus start${NC}                      ${DIM}# Inicia o sistema completo em 4 camadas${NC}"
+    echo -e "   ${CYAN}maximus status${NC}                     ${DIM}# Ver dashboard de status completo${NC}"
+    echo -e "   ${SHIELD}maximus health${NC}                     ${DIM}# Quick health check (rápido)${NC}"
+    echo -e "   ${SHIELD}maximus validate${NC}                   ${DIM}# Validar padrão Pagani${NC}"
     echo -e "   ${MAGENTA}maximus logs api_gateway${NC}          ${DIM}# Ver logs do API Gateway${NC}"
     echo -e "   ${BLUE}maximus restart${NC}                    ${DIM}# Reiniciar tudo${NC}"
+    echo -e "   ${GEAR}maximus cleanup${NC}                    ${DIM}# Limpar sistema${NC}"
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
@@ -509,6 +760,15 @@ main() {
             ;;
         status)
             show_status
+            ;;
+        health)
+            quick_health
+            ;;
+        validate)
+            validate_pagani
+            ;;
+        cleanup)
+            cleanup_system
             ;;
         logs)
             show_logs "${2:-api_gateway}"

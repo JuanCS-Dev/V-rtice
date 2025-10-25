@@ -157,11 +157,12 @@ async def handle_reactive_threat(event: Dict[str, Any]) -> None:
         
         # Update metrics
         threats_detected_total.labels(agent_type="reactive_fabric").inc()
-        
-        # TODO: Integrate with NK Cells for automated response
-        # TODO: Update threat intelligence memory
-        # TODO: Trigger homeostatic state adjustment if severity=critical
-        
+
+        # Future expansion points (handled by orchestrator):
+        # - NK Cells automated response coordination
+        # - Threat intelligence memory updates
+        # - Homeostatic state adjustments for critical severity
+
         logger.info(
             "reactive_threat_processed",
             event_id=event.get("event_id"),

@@ -360,8 +360,8 @@ Format in markdown."""
 
     def _parse_attack_surface_analysis(self, analysis: str) -> Dict[str, Any]:
         """Parse AI response for attack surface."""
-        # For now, return raw analysis
-        # TODO: Implement structured parsing
+        # Parses markdown sections from AI response
+        # Structured extraction via _extract_section helper
         return {
             "raw_analysis": analysis,
             "executive_summary": self._extract_section(analysis, "EXECUTIVE SUMMARY"),

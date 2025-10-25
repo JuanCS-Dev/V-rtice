@@ -19,6 +19,12 @@ services:
     networks:
     - maximus-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     depends_on: {}
   offensive_orchestrator_service-sidecar:
     image: vertice-registry-sidecar:latest

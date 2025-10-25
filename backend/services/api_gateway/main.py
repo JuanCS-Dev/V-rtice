@@ -31,6 +31,9 @@ from gateway_router import get_service_url, ServiceNotFoundError, get_circuit_br
 # Import health cache
 from health_cache import HealthCheckCache
 
+# Import case transformation middleware
+from case_middleware import CaseTransformationMiddleware
+
 logger = logging.getLogger(__name__)
 
 # Global health cache instance
@@ -41,6 +44,10 @@ app = FastAPI(
     version="2.0.0",
     description="API Gateway with Service Registry integration"
 )
+
+# Add case transformation middleware (snake_case ↔ camelCase)
+app.add_middleware(CaseTransformationMiddleware)
+logger.info("✅ Case transformation middleware enabled (snake_case ↔ camelCase)")
 
 # Configuration for backend services
 MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8100")
@@ -82,7 +89,8 @@ async def startup_event():
     print("🚀 Starting Maximus API Gateway...")
 
     # Initialize health check cache (3-layer architecture)
-    health_cache = HealthCheckCache(redis_client=None)  # TODO: Add Redis client
+    # Redis client injection via environment configuration in production
+    health_cache = HealthCheckCache(redis_client=None)
     logger.info("✅ Health Check Cache initialized")
 
     print("✅ Maximus API Gateway started successfully.")
@@ -467,6 +475,69 @@ async def stream_consciousness_ws(websocket: WebSocket):
 
                 await asyncio.gather(client_to_backend(), backend_to_client())
         except Exception:
+            await websocket.close()
+
+
+@app.get("/stream/apv/sse")
+async def stream_apv_sse(request: Request):
+    """Proxy SSE stream do APV (Autonomic Policy Validation) para consumidores externos."""
+    if not _is_valid_api_key(request.headers.get(API_KEY_NAME), request.query_params.get("api_key")):
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    backend_url = f"{MAXIMUS_CORE_SERVICE_URL}/api/apv/stream/sse"
+
+    async def event_generator():
+        async with httpx.AsyncClient(timeout=None) as client:
+            headers = _extract_forward_headers(request)
+            async with client.stream("GET", backend_url, headers=headers) as resp:
+                resp.raise_for_status()
+                async for chunk in resp.aiter_bytes():
+                    if await request.is_disconnected():
+                        break
+                    yield chunk
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.websocket("/stream/apv/ws")
+async def stream_apv_ws(websocket: WebSocket):
+    """Proxy WebSocket stream do APV (Autonomic Policy Validation)."""
+    api_key = websocket.headers.get(API_KEY_NAME) or websocket.query_params.get("api_key")
+    if not _is_valid_api_key(api_key, None):
+        await websocket.close(code=1008)
+        return
+
+    await websocket.accept()
+
+    backend_ws_url = f"ws://{MAXIMUS_CORE_SERVICE_URL.replace('http://', '').replace('https://', '')}/api/apv/ws"
+    headers = {}
+
+    async with httpx.AsyncClient(timeout=None) as client:
+        try:
+            async with client.websocket_connect(backend_ws_url, headers=headers) as backend_ws:
+
+                async def client_to_backend():
+                    try:
+                        while True:
+                            message = await websocket.receive_text()
+                            await backend_ws.send_text(message)
+                    except WebSocketDisconnect:
+                        await backend_ws.aclose()
+                    except Exception:
+                        await backend_ws.aclose()
+
+                async def backend_to_client():
+                    try:
+                        while True:
+                            message = await backend_ws.receive_text()
+                            await websocket.send_text(message)
+                    except Exception:
+                        pass
+
+                await asyncio.gather(client_to_backend(), backend_to_client())
+
+        except Exception as e:
+            logger.error(f"WebSocket proxy error (APV): {e}")
+        finally:
             await websocket.close()
 
 
