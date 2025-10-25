@@ -12,10 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 from datetime import datetime
 
-from backend.services.reactive_fabric_analysis.parsers.base import (
-    ForensicParser,
-    ParserError,
-)
+from .base import ForensicParser, ParserError
 
 logger = structlog.get_logger()
 
