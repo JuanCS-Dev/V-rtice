@@ -38,18 +38,18 @@ export const ServiceEndpoints = {
   // API Gateway (Single Entry Point)
   apiGateway: env.VITE_API_GATEWAY_URL || 'http://localhost:8000',
 
-  // MAXIMUS Core Services (REAL PORTS FROM DOCKER COMPOSE)
+  // MAXIMUS Core Services (GKE Service Ports)
   maximus: {
     core: env.VITE_MAXIMUS_CORE_URL || 'http://localhost:8150',
-    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || 'http://localhost:8125',
-    eureka: env.VITE_MAXIMUS_EUREKA_URL || 'http://localhost:9103',
-    oraculo: env.VITE_MAXIMUS_ORACULO_URL || 'http://localhost:8152',
-    dlqMonitor: env.VITE_MAXIMUS_DLQ_MONITOR_URL || 'http://localhost:8012',
+    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || 'http://localhost:8151',
+    eureka: env.VITE_MAXIMUS_EUREKA_URL || 'http://localhost:8152',
+    oraculo: env.VITE_MAXIMUS_ORACULO_URL || 'http://localhost:8153',
+    dlqMonitor: env.VITE_MAXIMUS_DLQ_MONITOR_URL || 'http://localhost:8220',
   },
 
   // Offensive Arsenal
   offensive: {
-    gateway: env.VITE_OFFENSIVE_GATEWAY_URL || 'http://localhost:8037',
+    gateway: env.VITE_OFFENSIVE_GATEWAY_URL || 'http://localhost:8048',
     networkRecon: env.VITE_OFFENSIVE_NETWORK_RECON_URL || 'http://localhost:8032',
     vulnIntel: env.VITE_OFFENSIVE_VULN_INTEL_URL || 'http://localhost:8033',
     webAttack: env.VITE_OFFENSIVE_WEB_ATTACK_URL || 'http://localhost:8034',
@@ -64,9 +64,9 @@ export const ServiceEndpoints = {
 
   // Cockpit Soberano Services
   cockpit: {
-    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || 'http://localhost:8090',
-    verdictEngine: env.VITE_VERDICT_ENGINE_API || 'http://localhost:8091',
-    commandBus: env.VITE_COMMAND_BUS_API || 'http://localhost:8092',
+    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || 'http://localhost:8000',  // GKE: 8000
+    verdictEngine: env.VITE_VERDICT_ENGINE_API || 'http://localhost:8093',      // GKE: 8093
+    commandBus: env.VITE_COMMAND_BUS_API || 'http://localhost:8092',            // GKE: 8092
   },
 
   // HITL (Human-in-the-Loop) Service

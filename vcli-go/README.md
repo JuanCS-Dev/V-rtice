@@ -56,12 +56,21 @@ Transform cybersecurity operations from fragmented tool-juggling to seamless, AI
 git clone https://github.com/verticedev/vcli-go.git
 cd vcli-go
 
-# Build
+# Build (optimized)
+CGO_ENABLED=0 go build -ldflags="-s -w" -o vcli ./cmd/
+
+# Or using make
 make build
 
 # Run
-./bin/vcli --help
+./vcli --help
 ```
+
+**Binary Size Optimization:**
+- Original: ~74MB (with debug symbols)
+- Optimized: ~51MB (31% reduction)
+- Flags: `-ldflags="-s -w"` removes symbol table and DWARF debugging info
+- Static binary: `CGO_ENABLED=0` for maximum portability
 
 ### Install via Go
 
@@ -265,6 +274,56 @@ vcli maximus list --timeout 60s
 ```
 
 For detailed troubleshooting, see [Quick Fixes Guide](QUICK_FIXES_20250122.md).
+
+---
+
+## ☁️ Deployment & Operations
+
+### Google Kubernetes Engine (GKE)
+
+VCLI 2.0 is tested and optimized for GKE deployment with the Vértice backend:
+
+```bash
+# Connect to GKE cluster
+gcloud container clusters get-credentials vertice-us-cluster \
+  --region=us-east1 --project=projeto-vertice
+
+# Verify cluster connection
+vcli k8s get nodes
+
+# Check Vértice deployment status
+bash /home/juan/vertice-dev/scripts/health_check.sh
+```
+
+**Health Check Script:**
+- Automated cluster health monitoring
+- Pod status analysis (Running/Pending/Failed)
+- Resource usage metrics
+- Event log monitoring
+- Color-coded output with status indicators
+- Located at: `/home/juan/vertice-dev/scripts/health_check.sh`
+
+**Typical Production Metrics:**
+- 85%+ pods operational (normal state)
+- 8 nodes (GKE cluster)
+- ~100 microservices deployed
+- Resource usage: ~3-5% CPU, 15-20% memory per node
+
+**Monitoring Commands:**
+```bash
+# Quick health check
+bash /home/juan/vertice-dev/scripts/health_check.sh
+
+# Check specific services
+vcli k8s get pods -n vertice | grep Running
+
+# Monitor resource usage
+vcli k8s top nodes
+vcli k8s top pods -n vertice
+
+# View pod logs
+vcli k8s logs -n vertice <pod-name> --follow
+```
 
 ---
 

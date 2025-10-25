@@ -22,9 +22,6 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../../.. /workspace
-ENV PYTHONPATH="/workspace"
-
 COPY . /app
 
-CMD ["python", "-m", "backend.services.tegumentar_service.main"]
+CMD ["python", "main.py"]

@@ -1,13 +1,13 @@
-cat <<'EOF' > .gitignore
-# Byte-compiled / optimized / DLL files
+# Vértice - Production .gitignore
+
+# Archives (backups, logs)
+.archive/
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -21,39 +21,79 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
+*.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Virtual Environments
-.venv/
+# Virtual environments
 venv/
-ENV/
 env/
-virtualenv/
-.virtualenv/
+ENV/
+.venv
 
-# Secrets
-*.env
-
-# Editor backups
-*.save
+# IDEs
+.vscode/
+.idea/
 *.swp
 *.swo
+*~
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
-EOF
-oraculo_ideias_*.md
 
-# Backups
-*.backup
-*.backup-*
-LEGADO/
+# Secrets & credentials
+*.pem
+*.key
+*.env
+.env.*
+secrets/
+vault-data/
+*.credentials
+
+# Docker volumes & data
+data/postgres/
+data/redis/
+data/vault/
+data/mongodb/
+
+# Logs
+*.log
+logs/
+*.log.*
 
 # Temporary files
-docker-compose.yml.backup*
-README.md.backup
+tmp/
+temp/
+*.tmp
+
+# Coverage & test artifacts
+coverage.xml
+.coverage
+htmlcov/
+test-results/
+
+# Build artifacts
+*.tar.gz
+*.zip
+dist/
+
+# Node (if any)
+node_modules/
+package-lock.json
+
+# Large model files
+*.onnx
+*.pt
+*.pth
+models/downloads/
+
+# Generated files
+*.generated.*

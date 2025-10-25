@@ -1,0 +1,84 @@
+# Docker Compose - Vulnerable Test Applications
+# Purpose: Deploy intentionally vulnerable apps for Adaptive Immunity validation
+# WARNING: DO NOT EXPOSE THESE TO INTERNET - LOCAL TESTING ONLY
+
+version: '3.8'
+
+services:
+  # SQL Injection Target - DVWA
+  vuln-sqli:
+    image: vulnerables/web-dvwa:latest
+    container_name: maximus-vuln-sqli
+    ports:
+      - "8081:80"
+    environment:
+      - SECURITY_LEVEL=low
+      - MYSQL_ROOT_PASSWORD=vulnerable
+    networks:
+      - immune_test
+    restart: unless-stopped
+    labels:
+      - "maximus.role=vulnerable-target"
+      - "maximus.vulnerability=sql-injection"
+
+  # XSS Target - WebGoat
+  vuln-xss:
+    image: webgoat/webgoat-8.0:latest
+    container_name: maximus-vuln-xss
+    ports:
+      - "8082:8080"
+    environment:
+      - WEBGOAT_PORT=8080
+    networks:
+      - immune_test
+    restart: unless-stopped
+    labels:
+      - "maximus.role=vulnerable-target"
+      - "maximus.vulnerability=xss"
+
+  # Command Injection Target - Custom NodeJS
+  vuln-cmdi:
+    image: appsecco/dvna:latest
+    container_name: maximus-vuln-cmdi
+    ports:
+      - "8083:9090"
+    networks:
+      - immune_test
+    restart: unless-stopped
+    labels:
+      - "maximus.role=vulnerable-target"
+      - "maximus.vulnerability=command-injection"
+
+  # Path Traversal Target - Damn Vulnerable GraphQL
+  vuln-path:
+    image: dolevf/dvga:latest
+    container_name: maximus-vuln-path
+    ports:
+      - "8084:5013"
+    environment:
+      - WEB_HOST=0.0.0.0
+      - WEB_PORT=5013
+    networks:
+      - immune_test
+    restart: unless-stopped
+    labels:
+      - "maximus.role=vulnerable-target"
+      - "maximus.vulnerability=path-traversal"
+
+  # SSRF Target - Juice Shop
+  vuln-ssrf:
+    image: bkimminich/juice-shop:latest
+    container_name: maximus-vuln-ssrf
+    ports:
+      - "8085:3000"
+    networks:
+      - immune_test
+    restart: unless-stopped
+    labels:
+      - "maximus.role=vulnerable-target"
+      - "maximus.vulnerability=ssrf"
+
+networks:
+  immune_test:
+    driver: bridge
+    name: maximus_immune_test

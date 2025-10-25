@@ -1,0 +1,39 @@
+# /home/juan/vertice-dev/prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api_gateway:8000']
+    metrics_path: /metrics
+
+  - job_name: 'osint-service'
+    static_configs:
+      - targets: ['osint-service:8049']
+    metrics_path: /api/stats
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Adaptive Immunity System Metrics
+  - job_name: 'wargaming-crisol'
+    static_configs:
+      - targets: ['maximus-wargaming-crisol:8026']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  - job_name: 'maximus-eureka'
+    static_configs:
+      - targets: ['maximus-eureka:8036']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  - job_name: 'maximus-oraculo'
+    static_configs:
+      - targets: ['maximus-oraculo:8038']
+    metrics_path: /metrics
+    scrape_interval: 10s

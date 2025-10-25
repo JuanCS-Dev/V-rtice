@@ -202,7 +202,11 @@
         <li><a href="#parte7">7. Operações do Dia a Dia</a></li>
         <li><a href="#parte8">8. Troubleshooting (Resolvendo Problemas)</a></li>
         <li><a href="#parte9">9. Custos e Como Economizar</a></li>
-        <li><a href="#parte10">10. Comandos Úteis (Cola)</a></li>
+        <li><a href="#parte10">10. Comandos Úteis (Cola)</a>
+            <ul>
+                <li><a href="#vcli">10.6 - VCLI (Neuroshell) 🧠</a></li>
+            </ul>
+        </li>
     </ul>
 </div>
 
@@ -1091,6 +1095,107 @@ KUBECONFIG=/tmp/kubeconfig kubectl scale deployment --all -n vertice --replicas=
 
 # Deletar o cluster (PERIGO! Só se quiser começar do zero)
 # gcloud container clusters delete vertice-us-cluster --region=us-east1 --project=projeto-vertice
+</pre>
+
+<h2 id="vcli">10.6 - VCLI (Neuroshell) - O Cérebro do Vértice 🧠</h2>
+
+<div class="importante">
+    <strong>🚀 O que é o VCLI?</strong>
+    <p>VCLI (Vértice CLI) é o <strong>NEUROSHELL</strong> do organismo Vértice. É uma ferramenta de linha de comando super poderosa escrita em Go que permite você controlar TODOS os sistemas do Vértice de forma rápida e interativa.</p>
+</div>
+
+<h3>Como Usar o VCLI</h3>
+
+<div class="passo">
+    <span class="numero-grande">1</span>
+    <strong>Vá para a pasta do vcli-go:</strong>
+    <pre>cd /home/juan/vertice-dev/vcli-go</pre>
+</div>
+
+<div class="passo">
+    <span class="numero-grande">2</span>
+    <strong>Execute o VCLI:</strong>
+    <pre>./vcli --help</pre>
+    <p>Isso mostra todos os comandos disponíveis</p>
+</div>
+
+<h3>Comandos Mais Úteis do VCLI</h3>
+
+<pre>
+# 1. VER STATUS DO MAXIMUS (Orquestrador Principal)
+./vcli maximus status
+
+# 2. VER MÉTRICAS DO SISTEMA
+./vcli metrics query --service=api-gateway
+
+# 3. INVESTIGAÇÃO AUTOMÁTICA
+./vcli investigate --target="dominio-suspeito.com"
+
+# 4. GERENCIAR KUBERNETES (forma fácil)
+./vcli k8s get pods          # Ver todos os pods
+./vcli k8s logs api-gateway  # Ver logs
+./vcli k8s describe api-gateway  # Detalhes completos
+
+# 5. SHELL INTERATIVO (Modo TUI - Interface Visual)
+./vcli shell
+# Isso abre uma interface visual estilo "hackezona" muito massa!
+
+# 6. VERIFICAR SISTEMA IMUNOLÓGICO
+./vcli immunis status
+
+# 7. OPERAÇÕES ÉTICAS (HITL - Human in the Loop)
+./vcli ethical hitl list  # Ver decisões pendentes
+
+# 8. TROUBLESHOOTING (Diagnóstico Automático)
+./vcli troubleshoot --service=api-gateway
+</pre>
+
+<div class="sucesso">
+    <h4>🎯 Por que usar VCLI em vez de kubectl/gcloud?</h4>
+    <ul>
+        <li>✅ <strong>Mais rápido:</strong> Comandos simples (sem precisar lembrar sintaxe complexa)</li>
+        <li>✅ <strong>Interface visual:</strong> Modo TUI com cores e interatividade</li>
+        <li>✅ <strong>Inteligente:</strong> Ele já conhece a arquitetura do Vértice</li>
+        <li>✅ <strong>Tudo em um:</strong> Kubernetes + Serviços + Métricas + Investigação</li>
+    </ul>
+</div>
+
+<h3>Comandos Avançados (Para Quando Você Ficar Ninja)</h3>
+
+<pre>
+# CONFIGURAR O VCLI (primeira vez)
+./vcli configure --backend=http --api-gateway=http://34.148.161.131:8000
+
+# STREAM DE EVENTOS EM TEMPO REAL
+./vcli stream consciousness  # Ver stream de consciência
+./vcli stream alerts         # Ver alertas ao vivo
+
+# ORQUESTRAÇÃO COMPLEXA
+./vcli orchestrate workflow --name="scan-and-analyze"
+
+# GESTÃO DE PLUGINS
+./vcli plugin list
+./vcli plugin install nome-do-plugin
+
+# MODO OFFLINE (para trabalhar sem internet)
+./vcli sync cache            # Baixar cache
+./vcli offline enable        # Ativar modo offline
+</pre>
+
+<div class="importante">
+    <strong>💡 Dica Profissa:</strong> Use <code>./vcli shell</code> quando quiser uma experiência mais visual. É tipo o Google Cloud Console, mas no terminal e 100x mais rápido!
+</div>
+
+<h3>Atalhos Úteis para o Dia a Dia</h3>
+
+<pre>
+# Criar alias para não precisar digitar ./vcli toda hora
+alias v='cd /home/juan/vertice-dev/vcli-go && ./vcli'
+
+# Agora você pode usar apenas:
+v maximus status
+v k8s get pods
+v shell
 </pre>
 
 <h1>🎓 Conclusão e Próximos Passos</h1>

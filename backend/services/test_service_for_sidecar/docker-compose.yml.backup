@@ -1,0 +1,47 @@
+# Complete Sidecar Test: Service + Sidecar Agent
+# This demonstrates the sidecar pattern end-to-end
+
+version: '3.8'
+
+networks:
+  maximus-network:
+    external: true
+
+services:
+  # Test service (minimal FastAPI app)
+  test-service:
+    build: .
+    container_name: vertice-test-service
+    hostname: vertice-test-service
+    ports:
+      - "9999:8080"
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Sidecar agent (auto-registers the service)
+  test-service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-test-service-sidecar
+    environment:
+      - SERVICE_NAME=test_service
+      - SERVICE_HOST=vertice-test-service
+      - SERVICE_PORT=8080
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+    depends_on:
+      test-service:
+        condition: service_healthy
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M

@@ -1,0 +1,84 @@
+# Docker Compose - HashiCorp Vault for Secrets Management
+# VÉRTICE Platform - FASE 3
+#
+# Architecture:
+#   - Vault server (dev mode for now, will migrate to HA later)
+#   - KV v2 secrets engine
+#   - Dynamic secrets for PostgreSQL
+#
+# Usage:
+#   docker compose -f docker-compose.vault.yml up -d
+#
+# Access Vault:
+#   docker compose -f docker-compose.vault.yml exec vault sh
+#   export VAULT_ADDR='http://127.0.0.1:8200'
+#   vault kv list secret/
+
+version: '3.8'
+
+networks:
+  maximus-network:
+    external: true
+
+volumes:
+  vault-data:
+  vault-logs:
+  vault-config:
+
+services:
+  # ===================================
+  # HashiCorp Vault
+  # ===================================
+  vault:
+    image: hashicorp/vault:1.15
+    container_name: vertice-vault
+    hostname: vault
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: 'http://0.0.0.0:8200'
+      VAULT_API_ADDR: 'http://0.0.0.0:8200'
+      VAULT_DEV_ROOT_TOKEN_ID: 'vertice-dev-root-token'
+      VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
+    ports:
+      - "8201:8200"
+    volumes:
+      - vault-data:/vault/file
+      - vault-logs:/vault/logs
+      - vault-config:/vault/config
+    networks:
+      maximus-network:
+        aliases:
+          - vault
+    restart: unless-stopped
+    command: server -dev -dev-root-token-id="vertice-dev-root-token"
+    healthcheck:
+      test: ["CMD", "vault", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ===================================
+  # Vault Agent (Auto-auth for services)
+  # ===================================
+  vault-agent:
+    image: hashicorp/vault:1.15
+    container_name: vertice-vault-agent
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: 'http://vault:8200'
+    volumes:
+      - ./vault-agent-config.hcl:/vault/config/agent.hcl
+      - vault-data:/vault/data
+    networks:
+      - maximus-network
+    restart: unless-stopped
+    command: agent -config=/vault/config/agent.hcl
+    healthcheck:
+      test: ["CMD", "pgrep", "vault"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
