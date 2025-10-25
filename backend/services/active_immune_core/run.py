@@ -11,4 +11,5 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8200, workers=4)
+    # Kubernetes handles replication - use 1 worker per container (FastAPI best practice)
+    uvicorn.run("main:app", host="0.0.0.0", port=8200, workers=1)

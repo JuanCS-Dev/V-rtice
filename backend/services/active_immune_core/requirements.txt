@@ -17,6 +17,7 @@ annotated-types==0.7.0
 anyio==4.11.0
     # via
     #   httpx
+    #   openai
     #   starlette
     #   watchfiles
 async-timeout==5.0.1
@@ -33,6 +34,8 @@ certifi==2025.10.5
     #   httpx
 click==8.3.0
     # via uvicorn
+distro==1.9.0
+    # via openai
 fastapi==0.118.2
     # via active-immune-core (pyproject.toml)
 frozenlist==1.8.0
@@ -50,12 +53,18 @@ httpcore==1.0.9
 httptools==0.6.4
     # via uvicorn
 httpx==0.28.1
-    # via active-immune-core (pyproject.toml)
+    # via
+    #   active-immune-core (pyproject.toml)
+    #   openai
 idna==3.10
     # via
     #   anyio
     #   httpx
     #   yarl
+jiter==0.11.1
+    # via openai
+kafka-python==2.2.15
+    # via active-immune-core (pyproject.toml)
 mako==1.3.10
     # via alembic
 markupsafe==3.0.3
@@ -64,6 +73,10 @@ multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
+networkx==3.5
+    # via active-immune-core (pyproject.toml)
+openai==2.6.1
+    # via active-immune-core (pyproject.toml)
 packaging==25.0
     # via aiokafka
 prometheus-client==0.23.1
@@ -76,6 +89,7 @@ pydantic==2.12.0
     # via
     #   active-immune-core (pyproject.toml)
     #   fastapi
+    #   openai
     #   pydantic-settings
 pydantic-core==2.41.1
     # via pydantic
@@ -93,7 +107,9 @@ pyyaml==6.0.3
 redis==6.4.0
     # via active-immune-core (pyproject.toml)
 sniffio==1.3.1
-    # via anyio
+    # via
+    #   anyio
+    #   openai
 sqlalchemy==2.0.43
     # via
     #   active-immune-core (pyproject.toml)
@@ -104,6 +120,8 @@ starlette==0.48.0
     #   fastapi
 structlog==25.4.0
     # via active-immune-core (pyproject.toml)
+tqdm==4.67.1
+    # via openai
 typing-extensions==4.15.0
     # via
     #   aiokafka
@@ -112,6 +130,7 @@ typing-extensions==4.15.0
     #   alembic
     #   anyio
     #   fastapi
+    #   openai
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
