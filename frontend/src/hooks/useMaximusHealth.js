@@ -4,13 +4,15 @@
  * Polls MAXIMUS core service health endpoint every 30s
  * Updates AI status (core, oraculo, eureka) based on health response
  *
+ * INTEGRATION: Uses ServiceEndpoints for environment-aware URLs
+ *
  * @returns {Object} { aiStatus, setAiStatus } - AI service status object
  */
 
 import { useState, useEffect } from 'react';
+import { ServiceEndpoints } from '@/config/endpoints';
 import logger from '@/utils/logger';
 
-const MAXIMUS_CORE_URL = 'http://localhost:8099';
 const HEALTH_CHECK_INTERVAL = 30000; // 30s
 
 export const useMaximusHealth = () => {
@@ -23,7 +25,8 @@ export const useMaximusHealth = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch(`${MAXIMUS_CORE_URL}/health`);
+        // Use centralized endpoint configuration
+        const response = await fetch(`${ServiceEndpoints.maximus.core}/health`);
         if (response.ok) {
           const data = await response.json();
           setAiStatus(prev => ({

@@ -46,7 +46,13 @@ SERVICE_NAME = os.getenv("SERVICE_NAME")  # Required: e.g., "osint_service"
 SERVICE_HOST = os.getenv("SERVICE_HOST")  # Required: e.g., "vertice-osint"
 SERVICE_PORT = int(os.getenv("SERVICE_PORT", "8080"))  # Default: 8080
 SERVICE_HEALTH_ENDPOINT = os.getenv("SERVICE_HEALTH_ENDPOINT", "/health")
-REGISTRY_URL = os.getenv("REGISTRY_URL", "http://vertice-register-lb:8888")
+REGISTRY_URL = os.getenv("REGISTRY_URL", "http://vertice-register-lb:80")
+DEFAULT_REGISTRY_TOKEN = "titanium-registry-token"
+REGISTRY_TOKEN = (
+    os.getenv("VERTICE_REGISTRY_TOKEN")
+    or os.getenv("REGISTRY_AUTH_TOKEN")
+    or DEFAULT_REGISTRY_TOKEN
+)
 HEARTBEAT_INTERVAL = int(os.getenv("HEARTBEAT_INTERVAL", "30"))  # seconds
 INITIAL_WAIT_TIMEOUT = int(os.getenv("INITIAL_WAIT_TIMEOUT", "60"))  # seconds
 
@@ -72,6 +78,16 @@ logger.info(f"Health Check: {SERVICE_HEALTH_URL}")
 logger.info(f"Registry URL: {REGISTRY_URL}")
 logger.info(f"Heartbeat Interval: {HEARTBEAT_INTERVAL}s")
 logger.info("=" * 80)
+
+if REGISTRY_TOKEN == DEFAULT_REGISTRY_TOKEN:
+    logger.warning("Using default registry token; override VERTICE_REGISTRY_TOKEN for production deployments.")
+
+
+def _auth_headers() -> dict[str, str]:
+    """Return headers for authenticated calls."""
+    if REGISTRY_TOKEN:
+        return {"X-Registry-Token": REGISTRY_TOKEN}
+    return {}
 
 
 class RegistrySidecar:
@@ -172,7 +188,8 @@ class RegistrySidecar:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
                 f"{self.registry_url}/register",
-                json=registration_data
+                json=registration_data,
+                headers=_auth_headers()
             )
             response.raise_for_status()
 
@@ -192,7 +209,8 @@ class RegistrySidecar:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.post(
                     f"{self.registry_url}/heartbeat",
-                    json={"service_name": self.service_name}
+                    json={"service_name": self.service_name},
+                    headers=_auth_headers()
                 )
                 response.raise_for_status()
 

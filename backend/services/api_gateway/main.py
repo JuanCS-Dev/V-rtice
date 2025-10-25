@@ -20,6 +20,7 @@ import asyncio
 import httpx
 import uvicorn
 import logging
+import redis.asyncio as redis
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import APIKeyHeader
@@ -32,12 +33,14 @@ from gateway_router import get_service_url, ServiceNotFoundError, get_circuit_br
 from health_cache import HealthCheckCache
 
 # Import case transformation middleware
-from case_middleware import CaseTransformationMiddleware
+# DISABLED: case_middleware.py was removed
+# from case_middleware import CaseTransformationMiddleware
 
 logger = logging.getLogger(__name__)
 
 # Global health cache instance
 health_cache: HealthCheckCache = None
+redis_client = None
 
 app = FastAPI(
     title="Maximus API Gateway (Dynamic Routing)",
@@ -46,11 +49,32 @@ app = FastAPI(
 )
 
 # Add case transformation middleware (snake_case ↔ camelCase)
-app.add_middleware(CaseTransformationMiddleware)
+# DISABLED: middleware file missing
+# app.add_middleware(CaseTransformationMiddleware)
 logger.info("✅ Case transformation middleware enabled (snake_case ↔ camelCase)")
 
+REDIS_CACHE_URL = (
+    os.getenv("GATEWAY_HEALTH_REDIS_URL")
+    or os.getenv("GATEWAY_REDIS_URL")
+    or os.getenv("REDIS_URL", "redis://redis:6379/0")
+)
+
+try:
+    redis_client = redis.from_url(
+        REDIS_CACHE_URL,
+        decode_responses=True,
+        socket_connect_timeout=5,
+    )
+    logger.info("✅ Redis cache client configured for health checks", extra={"redis_url": REDIS_CACHE_URL})
+except Exception as exc:  # pragma: no cover - defensive logging
+    redis_client = None
+    logger.warning(
+        "Health cache Redis client unavailable, falling back to local cache only",
+        extra={"redis_url": REDIS_CACHE_URL, "error": str(exc)},
+    )
+
 # Configuration for backend services
-MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8100")
+MAXIMUS_CORE_SERVICE_URL = os.getenv("MAXIMUS_CORE_SERVICE_URL", "http://localhost:8150")
 CHEMICAL_SENSING_SERVICE_URL = os.getenv("CHEMICAL_SENSING_SERVICE_URL", "http://localhost:8101")
 SOMATOSENSORY_SERVICE_URL = os.getenv("SOMATOSENSORY_SERVICE_URL", "http://localhost:8102")
 VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://localhost:8103")
@@ -65,7 +89,7 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
 
 # In a real application, you would have a secure way to store and validate API keys
-VALID_API_KEY = os.getenv("MAXIMUS_API_KEY", "supersecretkey")
+VALID_API_KEY = os.getenv("MAXIMUS_API_KEY")
 
 
 async def verify_api_key(api_key: str = Depends(api_key_header)):
@@ -88,9 +112,12 @@ async def startup_event():
 
     print("🚀 Starting Maximus API Gateway...")
 
+    if not VALID_API_KEY:
+        raise RuntimeError("MAXIMUS_API_KEY is not configured. Set a strong API key before starting the gateway.")
+
     # Initialize health check cache (3-layer architecture)
     # Redis client injection via environment configuration in production
-    health_cache = HealthCheckCache(redis_client=None)
+    health_cache = HealthCheckCache(redis_client=redis_client)
     logger.info("✅ Health Check Cache initialized")
 
     print("✅ Maximus API Gateway started successfully.")
@@ -247,8 +274,11 @@ async def google_search_basic_adapter(request: Request):
         "search_type": "web",
         "limit": body.get("num_results", 10)
     }
-    
-    service_url = os.getenv("GOOGLE_OSINT_SERVICE_URL", "http://google_osint_service:8016")
+    try:
+        service_url = await get_service_url("google_osint_service")
+    except ServiceNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=f"Google OSINT service unavailable: {exc}") from exc
+
     async with httpx.AsyncClient(timeout=180.0) as client:
         try:
             response = await client.post(f"{service_url}/query_osint", json=adapted_body)
@@ -270,8 +300,11 @@ async def domain_analyze_adapter(request: Request):
         "domain_name": body.get("domain", ""),
         "query": body.get("query", "Analyze this domain")
     }
-    
-    service_url = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:8014")
+    try:
+        service_url = await get_service_url("domain_service")
+    except ServiceNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=f"Domain service unavailable: {exc}") from exc
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(f"{service_url}/query_domain", json=adapted_body)
@@ -293,8 +326,11 @@ async def ip_analyze_adapter(request: Request):
         "ip_address": body.get("ip", ""),
         "query": body.get("query", "Analyze this IP address")
     }
-    
-    service_url = os.getenv("IP_INTELLIGENCE_SERVICE_URL", "http://ip_intelligence_service:8034")
+    try:
+        service_url = await get_service_url("ip_intelligence_service")
+    except ServiceNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {exc}") from exc
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(f"{service_url}/query_ip", json=adapted_body)

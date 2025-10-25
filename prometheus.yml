@@ -12,7 +12,7 @@ scrape_configs:
 
   - job_name: 'osint-service'
     static_configs:
-      - targets: ['osint-service:8007']
+      - targets: ['osint-service:8049']
     metrics_path: /api/stats
 
   - job_name: 'redis'

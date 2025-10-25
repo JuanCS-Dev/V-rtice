@@ -88,8 +88,8 @@ type DampeningDecision struct {
 	HumanAlert          bool
 }
 
-// NewAntithrombinService creates global dampening service.
-func NewAntithrombinService(
+// NewAntithrombinServiceWithDeps creates service with injected dependencies (used by orchestrator).
+func NewAntithrombinServiceWithDeps(
 	logger *logger.Logger,
 	metrics *metrics.Collector,
 	eventBus *eventbus.Client,
@@ -110,7 +110,7 @@ func NewAntithrombinService(
 		dampeningActive:    false,
 		dampeningIntensity: 0.0,
 
-		impactThreshold:    0.7, // 70% system impact triggers emergency
+		impactThreshold:    0.7,
 		dampeningDuration:  5 * time.Minute,
 		monitoringInterval: 10 * time.Second,
 
@@ -119,16 +119,57 @@ func NewAntithrombinService(
 	}
 }
 
+// NewAntithrombinService creates global dampening service (standalone).
+func NewAntithrombinService(natsURL string) (*AntithrombinService, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	log, err := logger.NewLogger("antithrombin", "regulation", false)
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to init logger: %w", err)
+	}
+
+	metricsCollector := metrics.NewCollector("antithrombin", "regulation")
+
+	bus, err := eventbus.NewClient(natsURL, "antithrombin")
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to connect to event bus: %w", err)
+	}
+
+	return &AntithrombinService{
+		logger:   log,
+		metrics:  metricsCollector,
+		eventBus: bus,
+
+		activeQuarantines: make(map[string]*QuarantineMetrics),
+		systemImpact: &SystemImpactMetrics{
+			CPUAvailability:     1.0,
+			NetworkThroughput:   1.0,
+			ServiceAvailability: 1.0,
+		},
+		dampeningActive:    false,
+		dampeningIntensity: 0.0,
+
+		impactThreshold:    0.7, // 70% system impact triggers emergency
+		dampeningDuration:  5 * time.Minute,
+		monitoringInterval: 10 * time.Second,
+
+		ctx:        ctx,
+		cancelFunc: cancel,
+	}, nil
+}
+
 // Start begins monitoring and regulation.
 func (a *AntithrombinService) Start() error {
 	a.logger.Info("Starting Antithrombin Service (Global Dampening)")
 
 	// Subscribe to critical events
-	if err := a.eventBus.Subscribe("quarantine.applied", a.handleQuarantineApplied); err != nil {
+	if err := a.eventBus.Subscribe("quarantine.applied", "antithrombin-quarantine", a.handleQuarantineApplied); err != nil {
 		return fmt.Errorf("failed to subscribe to quarantine events: %w", err)
 	}
 
-	if err := a.eventBus.Subscribe("system.impact", a.handleSystemImpact); err != nil {
+	if err := a.eventBus.Subscribe("system.impact", "antithrombin-impact", a.handleSystemImpact); err != nil {
 		return fmt.Errorf("failed to subscribe to system impact events: %w", err)
 	}
 
@@ -172,10 +213,10 @@ func (a *AntithrombinService) EmergencyDampening() error {
 	}
 
 	a.logger.Error("EMERGENCY DAMPENING ACTIVATED",
-		"impact_score", impact.BusinessImpactScore,
-		"dampening_intensity", decision.DampeningIntensity,
-		"affected_assets", impact.TotalAffectedAssets,
-		"services_down", impact.TotalServicesDown,
+		logger.Float64("impact_score", impact.BusinessImpactScore),
+		logger.Float64("dampening_intensity", decision.DampeningIntensity),
+		logger.Int("affected_assets", impact.TotalAffectedAssets),
+		logger.Int("services_down", impact.TotalServicesDown),
 	)
 
 	// Activate dampening
@@ -188,10 +229,11 @@ func (a *AntithrombinService) EmergencyDampening() error {
 	}
 
 	// Publish dampening event
-	a.eventBus.Publish("regulation.emergency_dampening", map[string]interface{}{
+	ctx := context.Background()
+	a.eventBus.Publish(ctx, "regulation.emergency_dampening", createEvent("regulation.emergency_dampening", map[string]interface{}{
 		"decision": decision,
 		"impact":   impact,
-	})
+	}))
 
 	// Metrics
 	a.metrics.IncrementCounter("emergency_dampening_total", map[string]string{
@@ -211,16 +253,17 @@ func (a *AntithrombinService) ReduceResponseIntensity(reduction float64) {
 	defer a.mu.Unlock()
 
 	a.logger.Warn("Reducing cascade response intensity",
-		"reduction_factor", reduction,
-		"from_intensity", 1.0,
-		"to_intensity", 1.0-reduction,
+		logger.Float64("reduction_factor", reduction),
+		logger.Float64("from_intensity", 1.0),
+		logger.Float64("to_intensity", 1.0-reduction),
 	)
 
 	// Publish intensity reduction
-	a.eventBus.Publish("regulation.intensity_reduction", map[string]interface{}{
+	ctx := context.Background()
+	a.eventBus.Publish(ctx, "regulation.intensity_reduction", createEvent("regulation.intensity_reduction", map[string]interface{}{
 		"reduction": reduction,
 		"timestamp": time.Now(),
-	})
+	}))
 
 	a.metrics.RecordGauge("cascade_intensity_multiplier", 1.0-reduction, nil)
 }
@@ -322,21 +365,22 @@ func (a *AntithrombinService) calculateServiceAvailability() float64 {
 // alertHumanOperators sends critical alerts.
 func (a *AntithrombinService) alertHumanOperators(decision *DampeningDecision) {
 	a.logger.Error("HUMAN OPERATOR ALERT: Emergency Dampening Active",
-		"decision_id", decision.ID,
-		"business_impact", decision.SystemImpact.BusinessImpactScore,
-		"dampening_intensity", decision.DampeningIntensity,
-		"affected_assets", decision.SystemImpact.TotalAffectedAssets,
-		"services_down", decision.SystemImpact.TotalServicesDown,
+		logger.String("decision_id", decision.ID),
+		logger.Float64("business_impact", decision.SystemImpact.BusinessImpactScore),
+		logger.Float64("dampening_intensity", decision.DampeningIntensity),
+		logger.Int("affected_assets", decision.SystemImpact.TotalAffectedAssets),
+		logger.Int("services_down", decision.SystemImpact.TotalServicesDown),
 	)
 
 	// TODO: Integrate with alerting system (PagerDuty, Slack, etc.)
 	// Publish critical alert event
-	a.eventBus.Publish("alerts.critical", map[string]interface{}{
+	ctx := context.Background()
+	a.eventBus.Publish(ctx, "alerts.critical", createEvent("alerts.critical", map[string]interface{}{
 		"type":     "emergency_dampening",
 		"decision": decision,
 		"severity": "CRITICAL",
 		"requires_human_intervention": true,
-	})
+	}))
 }
 
 // scheduleDeactivation deactivates dampening after duration.
@@ -347,7 +391,7 @@ func (a *AntithrombinService) scheduleDeactivation(duration time.Duration) {
 	defer a.mu.Unlock()
 
 	a.logger.Info("Emergency dampening duration expired - deactivating",
-		"duration", duration,
+		logger.String("duration", duration.String()),
 	)
 
 	a.dampeningActive = false
@@ -357,24 +401,26 @@ func (a *AntithrombinService) scheduleDeactivation(duration time.Duration) {
 	a.metrics.RecordGauge("dampening_intensity", 0.0, nil)
 
 	// Publish deactivation event
-	a.eventBus.Publish("regulation.dampening_deactivated", map[string]interface{}{
+	ctx := context.Background()
+	a.eventBus.Publish(ctx, "regulation.dampening_deactivated", createEvent("regulation.dampening_deactivated", map[string]interface{}{
 		"timestamp": time.Now(),
 		"duration":  duration,
-	})
+	}))
 }
 
 // handleQuarantineApplied tracks new quarantines.
-func (a *AntithrombinService) handleQuarantineApplied(event map[string]interface{}) {
-	breachID := event["breach_id"].(string)
+func (a *AntithrombinService) handleQuarantineApplied(event *eventbus.Event) error {
+	data := eventToMap(event)
+	breachID := data["breach_id"].(string)
 	
 	metrics := &QuarantineMetrics{
 		BreachID:  breachID,
 		StartTime: time.Now(),
 		// Extract from event
-		AffectedAssets:      extractInt(event, "affected_assets"),
-		NetworkSegments:     extractInt(event, "network_segments"),
-		ProcessesTerminated: extractInt(event, "processes_terminated"),
-		ServicesDown:        extractInt(event, "services_down"),
+		AffectedAssets:      extractInt(data, "affected_assets"),
+		NetworkSegments:     extractInt(data, "network_segments"),
+		ProcessesTerminated: extractInt(data, "processes_terminated"),
+		ServicesDown:        extractInt(data, "services_down"),
 	}
 
 	a.mu.Lock()
@@ -382,18 +428,22 @@ func (a *AntithrombinService) handleQuarantineApplied(event map[string]interface
 	a.mu.Unlock()
 
 	a.logger.Debug("Tracking new quarantine",
-		"breach_id", breachID,
-		"affected_assets", metrics.AffectedAssets,
+		logger.String("breach_id", breachID),
+		logger.Int("affected_assets", metrics.AffectedAssets),
 	)
+
+	return nil
 }
 
 // handleSystemImpact processes system impact updates.
-func (a *AntithrombinService) handleSystemImpact(event map[string]interface{}) {
+func (a *AntithrombinService) handleSystemImpact(event *eventbus.Event) error {
 	// Update system impact metrics
 	a.mu.Lock()
 	a.systemImpact.Timestamp = time.Now()
 	// Update fields from event
 	a.mu.Unlock()
+
+	return nil
 }
 
 // monitoringLoop continuously monitors for over-quarantine.
@@ -407,7 +457,7 @@ func (a *AntithrombinService) monitoringLoop() {
 			if a.DetectSystemWideImpact() && !a.dampeningActive {
 				a.logger.Warn("System-wide impact detected - triggering emergency dampening")
 				if err := a.EmergencyDampening(); err != nil {
-					a.logger.Error("Failed to activate emergency dampening", "error", err)
+					a.logger.Error("Failed to activate emergency dampening", logger.Error(err))
 				}
 			}
 		case <-a.ctx.Done():
@@ -439,3 +489,4 @@ func extractInt(event map[string]interface{}, key string) int {
 	}
 	return 0
 }
+

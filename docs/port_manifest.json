@@ -1,0 +1,661 @@
+[
+  {
+    "container": "vertice-immunis-api",
+    "external_port": 8300,
+    "internal_mapped": 8025,
+    "real_port": 8025,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.62",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-integration",
+    "external_port": 8127,
+    "internal_mapped": 8037,
+    "real_port": 8037,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.68",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-oraculo",
+    "external_port": 8152,
+    "internal_mapped": 8038,
+    "real_port": 8038,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.72",
+    "mismatch": true
+  }
+,
+  {
+    "container": "narrative-analysis-service",
+    "external_port": 8015,
+    "internal_mapped": 8042,
+    "real_port": 8042,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.73",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-maximus_eureka",
+    "external_port": 9103,
+    "internal_mapped": 8200,
+    "real_port": 8200,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.67",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-strategic-planning",
+    "external_port": 9094,
+    "internal_mapped": 8042,
+    "real_port": 8058,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.64",
+    "mismatch": true
+  }
+,
+  {
+    "container": "predictive-threat-hunting-service",
+    "external_port": 8016,
+    "internal_mapped": 8050,
+    "real_port": 8050,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.66",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-adr-core",
+    "external_port": 8130,
+    "internal_mapped": 8030,
+    "real_port": 8001,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.69",
+    "mismatch": true
+  }
+,
+  {
+    "container": "autonomous-investigation-service",
+    "external_port": 8017,
+    "internal_mapped": 8007,
+    "real_port": 8007,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.65",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-core",
+    "external_port": 8151,
+    "internal_mapped": 8001,
+    "real_port": 8150,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.70",
+    "mismatch": true
+  }
+,
+  {
+    "container": "hcl-analyzer",
+    "external_port": 8427,
+    "internal_mapped": 8002,
+    "real_port": 8017,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.58",
+    "mismatch": true
+  }
+,
+  {
+    "container": "hcl-monitor",
+    "external_port": 8424,
+    "internal_mapped": 8001,
+    "real_port": 8020,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.50",
+    "mismatch": true
+  }
+,
+  {
+    "container": "hcl-kb-service",
+    "external_port": 8421,
+    "internal_mapped": 8019,
+    "real_port": 8019,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.63",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-macrophage",
+    "external_port": 8312,
+    "internal_mapped": 8030,
+    "real_port": 8030,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.59",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-ai-immune",
+    "external_port": 8214,
+    "internal_mapped": 8014,
+    "real_port": 8002,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.60",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-narrative-filter",
+    "external_port": 8213,
+    "internal_mapped": 8013,
+    "real_port": 8043,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.51",
+    "mismatch": true
+  }
+,
+  {
+    "container": "adaptive-immunity-service",
+    "external_port": 8020,
+    "internal_mapped": 8000,
+    "real_port": 8000,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.49",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-neutrophil",
+    "external_port": 8313,
+    "internal_mapped": 8031,
+    "real_port": 8031,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.45",
+    "mismatch": true
+  }
+,
+  {
+    "container": "active-immune-core",
+    "external_port": 8200,
+    "internal_mapped": 8200,
+    "real_port": 8200,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.61",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-adaptive-immune",
+    "external_port": 8003,
+    "internal_mapped": 8003,
+    "real_port": 8003,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.48",
+    "mismatch": true
+  }
+,
+  {
+    "container": "immunis-treg-service",
+    "external_port": 8018,
+    "internal_mapped": 8033,
+    "real_port": 8033,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.55",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-dendritic",
+    "external_port": 8314,
+    "internal_mapped": 8028,
+    "real_port": 8028,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.53",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-bcell",
+    "external_port": 8316,
+    "internal_mapped": 8026,
+    "real_port": 8026,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.57",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-cytotoxic-t",
+    "external_port": 8318,
+    "internal_mapped": 8027,
+    "real_port": 8027,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.54",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-helper-t",
+    "external_port": 8317,
+    "internal_mapped": 8029,
+    "real_port": 8029,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.56",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-immunis-nk-cell",
+    "external_port": 8319,
+    "internal_mapped": 8032,
+    "real_port": 8032,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.52",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-prefrontal-cortex",
+    "external_port": 8211,
+    "internal_mapped": 8011,
+    "real_port": 8051,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.46",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-digital-thalamus",
+    "external_port": 8212,
+    "internal_mapped": 8012,
+    "real_port": 8013,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.47",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-vestibular",
+    "external_port": 8210,
+    "internal_mapped": 8010,
+    "real_port": 8060,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.44",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-visual-cortex",
+    "external_port": 8206,
+    "internal_mapped": 8006,
+    "real_port": 8061,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.42",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-auditory-cortex",
+    "external_port": 8207,
+    "internal_mapped": 8007,
+    "real_port": 8005,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.39",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-chemical-sensing",
+    "external_port": 8209,
+    "internal_mapped": 8009,
+    "real_port": 8010,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.41",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-somatosensory",
+    "external_port": 8208,
+    "internal_mapped": 8008,
+    "real_port": 8056,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.43",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-neuromodulation",
+    "external_port": 9093,
+    "internal_mapped": 8033,
+    "real_port": 8046,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.40",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-antithrombin",
+    "external_port": 8052,
+    "internal_mapped": 8052,
+    "real_port": 8052,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.36",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-factor-xa",
+    "external_port": 8050,
+    "internal_mapped": 8050,
+    "real_port": 8050,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.38",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-factor-viia",
+    "external_port": 8051,
+    "internal_mapped": 8051,
+    "real_port": 8051,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.37",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-auth",
+    "external_port": 8110,
+    "internal_mapped": 80,
+    "real_port": 8006,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.35",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-nats-jetstream",
+    "external_port": 4222,
+    "internal_mapped": 4222,
+    "real_port": 4222,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.5",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-network-monitor",
+    "external_port": 8120,
+    "internal_mapped": 8044,
+    "real_port": 8044,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.22",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-domain",
+    "external_port": 8104,
+    "internal_mapped": 8014,
+    "real_port": 8014,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.21",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-api-gateway",
+    "external_port": 8000,
+    "internal_mapped": 8000,
+    "real_port": 8000,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.20",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-osint",
+    "external_port": 8036,
+    "internal_mapped": 8049,
+    "real_port": 8049,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.33",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-orchestrator",
+    "external_port": 8125,
+    "internal_mapped": 8016,
+    "real_port": 8016,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.34",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-vuln-scanner",
+    "external_port": 8111,
+    "internal_mapped": 8063,
+    "real_port": 8063,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.28",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-grafana",
+    "external_port": 3001,
+    "internal_mapped": 3000,
+    "real_port": 3000,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.30",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-atlas",
+    "external_port": 8109,
+    "internal_mapped": 8004,
+    "real_port": 8004,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.19",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-ssl-monitor",
+    "external_port": 8115,
+    "internal_mapped": 8057,
+    "real_port": 8057,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.29",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-malware-analysis",
+    "external_port": 8114,
+    "internal_mapped": 8035,
+    "real_port": 8035,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.24",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-nmap",
+    "external_port": 8106,
+    "internal_mapped": 8047,
+    "real_port": 8047,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.32",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-cyber",
+    "external_port": 8103,
+    "internal_mapped": 8012,
+    "real_port": 8012,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.26",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-social-eng",
+    "external_port": 8112,
+    "internal_mapped": 8055,
+    "real_port": 8055,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.18",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-predict",
+    "external_port": 8126,
+    "internal_mapped": 8040,
+    "real_port": 8040,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.27",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-prometheus",
+    "external_port": 9090,
+    "internal_mapped": 9090,
+    "real_port": 9090,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.23",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-ip-intel",
+    "external_port": 8105,
+    "internal_mapped": 8034,
+    "real_port": 8034,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.17",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-threat-intel",
+    "external_port": 8113,
+    "internal_mapped": 8059,
+    "real_port": 8059,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.25",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-sinesp",
+    "external_port": 8102,
+    "internal_mapped": 8054,
+    "real_port": 8054,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.31",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-register-lb",
+    "external_port": 8888,
+    "internal_mapped": 80,
+    "real_port": 80,
+    "health_status": "healthy",
+    "container_ip": "172.18.0.16",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-kafka-immunity",
+    "external_port": 9096,
+    "internal_mapped": 9096,
+    "real_port": 9096,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.10",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-zookeeper-immunity",
+    "external_port": 2181,
+    "internal_mapped": 2181,
+    "real_port": 2181,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.7",
+    "mismatch": true
+  }
+,
+  {
+    "container": "hcl-postgres",
+    "external_port": 5433,
+    "internal_mapped": 5432,
+    "real_port": 5432,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.3",
+    "mismatch": true
+  }
+,
+  {
+    "container": "hcl-kafka",
+    "external_port": 9092,
+    "internal_mapped": 9092,
+    "real_port": 9092,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.2",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-rabbitmq",
+    "external_port": 5672,
+    "internal_mapped": 5672,
+    "real_port": 5672,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.8",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-postgres",
+    "external_port": 5432,
+    "internal_mapped": 5432,
+    "real_port": 5432,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.6",
+    "mismatch": true
+  }
+,
+  {
+    "container": "vertice-redis",
+    "external_port": 6379,
+    "internal_mapped": 6379,
+    "real_port": 6379,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.9",
+    "mismatch": true
+  }
+,
+  {
+    "container": "maximus-postgres-immunity",
+    "external_port": 5434,
+    "internal_mapped": 5432,
+    "real_port": 5432,
+    "health_status": "unknown",
+    "container_ip": "172.18.0.4",
+    "mismatch": true
+  }
+]

@@ -129,8 +129,8 @@ func (p *ProteinSService) AccelerateHealthCheck(
 		})
 
 		p.logger.Debug("Health check cache HIT",
-			"segment", segmentID,
-			"age_seconds", time.Since(cached.CachedAt).Seconds(),
+			logger.String("segment", segmentID),
+			logger.Float64("age_seconds", time.Since(cached.CachedAt).Seconds()),
 		)
 
 		return cached.Result, nil
@@ -189,8 +189,8 @@ func (p *ProteinSService) BatchHealthCheck(
 	if len(uncached) == 0 {
 		result.Duration = time.Since(start)
 		p.logger.Info("Batch health check complete - all from cache",
-			"segments", len(segmentIDs),
-			"duration_ms", result.Duration.Milliseconds(),
+			logger.Int("segments", len(segmentIDs)),
+			logger.Int("duration_ms", int(result.Duration.Milliseconds())),
 		)
 		return result
 	}
@@ -244,11 +244,11 @@ func (p *ProteinSService) BatchHealthCheck(
 	result.Duration = time.Since(start)
 
 	p.logger.Info("Batch health check complete",
-		"total_segments", len(segmentIDs),
-		"cache_hits", result.CacheHits,
-		"cache_misses", result.CacheMisses,
-		"duration_ms", result.Duration.Milliseconds(),
-		"segments_per_second", float64(len(segmentIDs))/result.Duration.Seconds(),
+		logger.Int("total_segments", len(segmentIDs)),
+		logger.Int("cache_hits", result.CacheHits),
+		logger.Int("cache_misses", result.CacheMisses),
+		logger.Int("duration_ms", int(result.Duration.Milliseconds())),
+		logger.Float64("segments_per_second", float64(len(segmentIDs))/result.Duration.Seconds()),
 	)
 
 	// Metrics
@@ -295,8 +295,8 @@ func (p *ProteinSService) cacheHealthResult(segmentID string, health *HealthStat
 	p.healthCache[segmentID] = cached
 
 	p.logger.Debug("Cached health result",
-		"segment", segmentID,
-		"ttl_seconds", p.cacheTTL.Seconds(),
+		logger.String("segment", segmentID),
+		logger.Float64("ttl_seconds", p.cacheTTL.Seconds()),
 	)
 }
 
@@ -334,7 +334,7 @@ func (p *ProteinSService) cleanupExpiredCache() {
 	}
 
 	if len(expired) > 0 {
-		p.logger.Debug("Cleaned up expired health cache entries", "count", len(expired))
+		p.logger.Debug("Cleaned up expired health cache entries", logger.Int("count", len(expired)))
 	}
 
 	// Metrics
@@ -347,8 +347,8 @@ func (p *ProteinSService) InvalidateCache(segmentID string) {
 	defer p.mu.Unlock()
 
 	delete(p.healthCache, segmentID)
-	
-	p.logger.Debug("Invalidated health cache", "segment", segmentID)
+
+	p.logger.Debug("Invalidated health cache", logger.String("segment", segmentID))
 }
 
 // GetCacheStats returns cache performance statistics.
@@ -374,5 +374,5 @@ func (p *ProteinSService) SetCacheTTL(ttl time.Duration) {
 	defer p.mu.Unlock()
 
 	p.cacheTTL = ttl
-	p.logger.Info("Updated health cache TTL", "ttl_seconds", ttl.Seconds())
+	p.logger.Info("Updated health cache TTL", logger.Float64("ttl_seconds", ttl.Seconds()))
 }

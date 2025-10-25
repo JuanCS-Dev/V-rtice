@@ -115,6 +115,14 @@ func Float64(key string, val float64) zap.Field {
 	return zap.Float64(key, val)
 }
 
+func Bool(key string, val bool) zap.Field {
+	return zap.Bool(key, val)
+}
+
+func Strings(key string, val []string) zap.Field {
+	return zap.Strings(key, val)
+}
+
 func Error(err error) zap.Field {
 	return zap.Error(err)
 }

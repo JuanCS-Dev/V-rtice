@@ -38,12 +38,12 @@ export const ServiceEndpoints = {
   // API Gateway (Single Entry Point)
   apiGateway: env.VITE_API_GATEWAY_URL || 'http://localhost:8000',
 
-  // MAXIMUS Core Services
+  // MAXIMUS Core Services (REAL PORTS FROM DOCKER COMPOSE)
   maximus: {
-    core: env.VITE_MAXIMUS_CORE_URL || 'http://localhost:8001',
-    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || 'http://localhost:8002',
-    eureka: env.VITE_MAXIMUS_EUREKA_URL || 'http://localhost:8010',
-    oraculo: env.VITE_MAXIMUS_ORACULO_URL || 'http://localhost:8011',
+    core: env.VITE_MAXIMUS_CORE_URL || 'http://localhost:8150',
+    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || 'http://localhost:8125',
+    eureka: env.VITE_MAXIMUS_EUREKA_URL || 'http://localhost:9103',
+    oraculo: env.VITE_MAXIMUS_ORACULO_URL || 'http://localhost:8152',
     dlqMonitor: env.VITE_MAXIMUS_DLQ_MONITOR_URL || 'http://localhost:8012',
   },
 
@@ -59,7 +59,7 @@ export const ServiceEndpoints = {
 
   // Defensive Services
   defensive: {
-    core: env.VITE_DEFENSIVE_CORE_URL || 'http://localhost:8001', // Maximus Core
+    core: env.VITE_DEFENSIVE_CORE_URL || 'http://localhost:8150', // Maximus Core
   },
 
   // Cockpit Soberano Services
@@ -71,7 +71,12 @@ export const ServiceEndpoints = {
 
   // HITL (Human-in-the-Loop) Service
   hitl: {
-    api: env.VITE_HITL_API_URL || 'http://localhost:8003',
+    api: env.VITE_HITL_API_URL || 'http://localhost:8127',
+  },
+
+  // Immunis System
+  immunis: {
+    api: env.VITE_IMMUNIS_API_URL || 'http://localhost:8300',
   },
 
   // OSINT Services
@@ -91,7 +96,7 @@ export const ServiceEndpoints = {
 
 export const WebSocketEndpoints = {
   maximus: {
-    stream: env.VITE_MAXIMUS_WS_URL || 'ws://localhost:8001/ws/stream',
+    stream: env.VITE_MAXIMUS_WS_URL || 'ws://localhost:8150/ws/stream',
   },
 
   consciousness: {
@@ -107,7 +112,7 @@ export const WebSocketEndpoints = {
   },
 
   hitl: {
-    ws: env.VITE_HITL_WS_URL || 'ws://localhost:8003/hitl/ws',
+    ws: env.VITE_HITL_WS_URL || 'ws://localhost:8127/hitl/ws',
   },
 
   offensive: {
@@ -115,7 +120,7 @@ export const WebSocketEndpoints = {
   },
 
   defensive: {
-    alerts: env.VITE_DEFENSIVE_WS_URL || 'ws://localhost:8001/ws/alerts',
+    alerts: env.VITE_DEFENSIVE_WS_URL || 'ws://localhost:8150/ws/alerts',
   },
 } as const;
 

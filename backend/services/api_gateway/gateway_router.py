@@ -34,9 +34,21 @@ logger = logging.getLogger(__name__)
 
 # Registry configuration
 # NOTE: Use internal Docker port 80 (not 8888 which is external/host port)
+DEFAULT_REGISTRY_TOKEN = "titanium-registry-token"
 REGISTRY_URL = os.getenv("VERTICE_REGISTRY_URL", "http://vertice-register-lb:80")
+REGISTRY_AUTH_TOKEN = (
+    os.getenv("VERTICE_REGISTRY_TOKEN")
+    or os.getenv("REGISTRY_AUTH_TOKEN")
+    or DEFAULT_REGISTRY_TOKEN
+)
 CACHE_TTL_SECONDS = int(os.getenv("GATEWAY_CACHE_TTL", "5"))
 REGISTRY_TIMEOUT = int(os.getenv("REGISTRY_TIMEOUT", "2"))
+REGISTRY_HEADERS = {"X-Registry-Token": REGISTRY_AUTH_TOKEN} if REGISTRY_AUTH_TOKEN else {}
+
+if REGISTRY_AUTH_TOKEN == DEFAULT_REGISTRY_TOKEN:
+    logger.warning(
+        "Gateway using default registry token. Override VERTICE_REGISTRY_TOKEN for hardened deployments."
+    )
 
 # Local cache for service lookups (5s TTL)
 _service_cache = TTLCache(maxsize=200, ttl=CACHE_TTL_SECONDS)
@@ -129,7 +141,10 @@ async def get_service_url(service_name: str, use_cache: bool = True) -> str:
     # 3. Query Service Registry
     try:
         async with httpx.AsyncClient(timeout=REGISTRY_TIMEOUT) as client:
-            response = await client.get(f"{REGISTRY_URL}/services/{service_name}")
+            response = await client.get(
+                f"{REGISTRY_URL}/services/{service_name}",
+                headers=REGISTRY_HEADERS
+            )
             response.raise_for_status()
 
             service_data = response.json()

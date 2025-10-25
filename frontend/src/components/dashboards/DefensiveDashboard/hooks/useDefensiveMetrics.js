@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * useDefensiveMetrics Hook
  * Fetch REAL defensive metrics from backend
  *
@@ -8,17 +7,18 @@ import logger from '@/utils/logger';
  * - Background refetching
  * - Retry with exponential backoff
  *
+ * INTEGRATION: Uses ServiceEndpoints for environment-aware configuration
  * NO MOCKS - Production Ready
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { ServiceEndpoints } from '@/config/endpoints';
 import { queryKeys } from '../../../../config/queryClient';
-
-const API_BASE = 'http://localhost:8001'; // Maximus Core
+import logger from '@/utils/logger';
 
 const fetchDefensiveMetrics = async () => {
-  // Fetch from Maximus Core health endpoint
-  const healthResponse = await fetch(`${API_BASE}/health`);
+  // Fetch from Maximus Core health endpoint (centralized config)
+  const healthResponse = await fetch(`${ServiceEndpoints.defensive.core}/health`);
 
   if (!healthResponse.ok) {
     throw new Error('Failed to fetch defensive metrics');

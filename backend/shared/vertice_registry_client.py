@@ -46,9 +46,21 @@ import httpx
 logger = logging.getLogger(__name__)
 
 # Registry configuration
-REGISTRY_URL = os.getenv("VERTICE_REGISTRY_URL", "http://vertice-register:8888")
+DEFAULT_REGISTRY_TOKEN = "titanium-registry-token"
+REGISTRY_URL = os.getenv("VERTICE_REGISTRY_URL", "http://vertice-register-lb:80")
+REGISTRY_AUTH_TOKEN = (
+    os.getenv("VERTICE_REGISTRY_TOKEN")
+    or os.getenv("REGISTRY_AUTH_TOKEN")
+    or DEFAULT_REGISTRY_TOKEN
+)
 HEARTBEAT_INTERVAL = int(os.getenv("REGISTRY_HEARTBEAT_INTERVAL", "30"))  # seconds
 REGISTRATION_TIMEOUT = int(os.getenv("REGISTRY_TIMEOUT", "5"))  # seconds
+REGISTRY_TOKEN_HEADER = "X-Registry-Token"
+
+if REGISTRY_AUTH_TOKEN == DEFAULT_REGISTRY_TOKEN:
+    logger.warning(
+        "Using default registry token. Set VERTICE_REGISTRY_TOKEN to a unique value for production deployments."
+    )
 
 
 class RegistryClient:
@@ -65,6 +77,13 @@ class RegistryClient:
                 follow_redirects=True
             )
         return cls._http_client
+
+    @classmethod
+    def _get_headers(cls) -> Dict[str, str]:
+        """Return default headers for registry communication."""
+        if REGISTRY_AUTH_TOKEN:
+            return {REGISTRY_TOKEN_HEADER: REGISTRY_AUTH_TOKEN}
+        return {}
 
     @classmethod
     async def close(cls):
@@ -117,7 +136,8 @@ class RegistryClient:
             client = cls._get_client()
             response = await client.post(
                 f"{REGISTRY_URL}/register",
-                json=payload
+                json=payload,
+                headers=cls._get_headers()
             )
             response.raise_for_status()
 
@@ -166,7 +186,8 @@ class RegistryClient:
             client = cls._get_client()
             response = await client.post(
                 f"{REGISTRY_URL}/heartbeat",
-                json=payload
+                json=payload,
+                headers=cls._get_headers()
             )
             response.raise_for_status()
             logger.debug(f"💓 Heartbeat sent for '{service_name}'")
@@ -222,7 +243,8 @@ class RegistryClient:
         try:
             client = cls._get_client()
             response = await client.delete(
-                f"{REGISTRY_URL}/deregister/{service_name}"
+                f"{REGISTRY_URL}/deregister/{service_name}",
+                headers=cls._get_headers()
             )
             response.raise_for_status()
 
@@ -247,7 +269,8 @@ class RegistryClient:
         try:
             client = cls._get_client()
             response = await client.get(
-                f"{REGISTRY_URL}/services/{service_name}"
+                f"{REGISTRY_URL}/services/{service_name}",
+                headers=cls._get_headers()
             )
             response.raise_for_status()
             return response.json()
@@ -273,7 +296,10 @@ class RegistryClient:
         """
         try:
             client = cls._get_client()
-            response = await client.get(f"{REGISTRY_URL}/services")
+            response = await client.get(
+                f"{REGISTRY_URL}/services",
+                headers=cls._get_headers()
+            )
             response.raise_for_status()
             return response.json()
 

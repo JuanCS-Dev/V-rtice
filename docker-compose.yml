@@ -13,9 +13,9 @@ services:
     - IP_INTELLIGENCE_SERVICE_URL=http://ip_intelligence_service:8034
     - NETWORK_MONITOR_SERVICE_URL=http://network_monitor_service:8120
     - NMAP_SERVICE_URL=http://nmap_service:80
-    - OSINT_SERVICE_URL=http://osint-service:8007
+    - OSINT_SERVICE_URL=http://osint-service:8049
     - GOOGLE_OSINT_SERVICE_URL=http://google_osint_service:8016
-    - MAXIMUS_PREDICT_URL=http://maximus_predict:80
+    - MAXIMUS_PREDICT_URL=http://maximus_predict:804040
     - ATLAS_SERVICE_URL=http://atlas_service:8000
     - AUTH_SERVICE_URL=http://auth_service:80
     - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
@@ -24,15 +24,15 @@ services:
     - MALWARE_ANALYSIS_SERVICE_URL=http://malware_analysis_service:8014
     - SSL_MONITOR_SERVICE_URL=http://ssl_monitor_service:8015
     - MAXIMUS_ORCHESTRATOR_URL=http://maximus_orchestrator_service:8125
-    - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8100
+    - MAXIMUS_CORE_SERVICE_URL=http://maximus_core_service:8150
     - MAXIMUS_EUREKA_URL=http://maximus_eureka:8200
-    - MAXIMUS_ORACULO_URL=http://maximus-oraculo:8201
+    - MAXIMUS_ORACULO_URL=http://maximus-oraculo:8038
     - ETHICAL_AUDIT_SERVICE_URL=http://ethical_audit_service:8612
     - IMMUNIS_API_URL=http://immunis_api_service:8300
-    - HCL_ANALYZER_URL=http://hcl-analyzer:8002
+    - HCL_ANALYZER_URL=http://hcl-analyzer:8017
     - HCL_EXECUTOR_URL=http://hcl-executor:8004
-    - HCL_KB_URL=http://hcl-kb-service:8000
-    - HCL_MONITOR_URL=http://hcl-monitor:8001
+    - HCL_KB_URL=http://hcl-kb-service:8019
+    - HCL_MONITOR_URL=http://hcl-monitor:8020
     - HCL_PLANNER_URL=http://hcl-planner:8003
     - VISUAL_CORTEX_URL=http://visual_cortex_service:8206
     - AUDITORY_CORTEX_URL=http://auditory_cortex_service:8207
@@ -51,12 +51,12 @@ services:
     - BAS_URL=http://bas_service:8536
     - OFFENSIVE_GATEWAY_URL=http://offensive_gateway:8537
     - OFFENSIVE_TOOLS_URL=http://offensive_tools_service:8010
-    - NARRATIVE_ANALYSIS_URL=http://narrative_analysis_service:8015
-    - PREDICTIVE_THREAT_HUNTING_URL=http://predictive_threat_hunting_service:8016
-    - AUTONOMOUS_INVESTIGATION_URL=http://autonomous_investigation_service:8017
-    - IMMUNIS_TREG_URL=http://immunis_treg_service:8018
+    - NARRATIVE_ANALYSIS_URL=http://narrative_analysis_service:8042
+    - PREDICTIVE_THREAT_HUNTING_URL=http://predictive_threat_hunting_service:8050
+    - AUTONOMOUS_INVESTIGATION_URL=http://autonomous_investigation_service:8007
+    - IMMUNIS_TREG_URL=http://immunis_treg_service:8033
     - MEMORY_CONSOLIDATION_URL=http://memory_consolidation_service:8019
-    - ADAPTIVE_IMMUNITY_URL=http://adaptive_immunity_service:8020
+    - ADAPTIVE_IMMUNITY_URL=http://adaptive_immunity_service:8000
     - REFLEX_TRIAGE_ENGINE_URL=http://reflex_triage_engine:8052
     - THREAT_INTEL_BRIDGE_URL=http://threat_intel_bridge:8710
     - REACTIVE_FABRIC_ANALYSIS_URL=http://reactive_fabric_analysis:8601
@@ -67,6 +67,7 @@ services:
     - MAXIMUS_INTEGRATION_URL=http://maximus_integration_service:8099
     - TATACA_INGESTION_URL=http://tataca_ingestion:8028
     - MAXIMUS_EUREKA_URL=http://maximus_eureka:8200
+    - MAXIMUS_API_KEY=${MAXIMUS_API_KEY:-changeme-maximus-key}
     depends_on:
     - redis
     - sinesp_service
@@ -111,7 +112,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8060/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -199,7 +200,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -215,7 +216,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -344,7 +345,7 @@ services:
     volumes:
     - ./backend/services/auth_service:/app
     ports:
-    - 8110:80
+    - 8110:8006
     environment:
     - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -359,7 +360,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8061/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -497,14 +498,14 @@ services:
     build: ./backend/services/adr_core_service
     container_name: vertice-adr-core
     ports:
-    - 8130:8030
+    - 8130:8001
     volumes:
     - ./backend/services/adr_core_service:/app
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8030/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8150/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -513,7 +514,7 @@ services:
     build: ./backend/services/maximus_integration_service
     container_name: maximus-integration
     ports:
-    - 8127:8099
+    - 8127:8037
     volumes:
     - ./backend/services/maximus_integration_service:/app
     - ./backend/services/maximus_oraculo:/app/maximus_oraculo
@@ -530,7 +531,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8099/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8037/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -571,7 +572,7 @@ services:
     container_name: maximus-core
     ports:
     - 8150:8150
-    - 8151:8001
+    - 8151:8150
     # volumes:  # REMOVED: Volume mount was overriding Dockerfile COPY, causing import errors
     # - ./backend/services/maximus_core_service:/app
     environment:
@@ -588,7 +589,7 @@ services:
     - NMAP_SERVICE_URL=http://nmap_service:80
     - VULN_SCANNER_SERVICE_URL=http://vuln_scanner_service:80
     - DOMAIN_SERVICE_URL=http://domain_service:80
-    - MAXIMUS_PREDICT_URL=http://maximus_predict:80
+    - MAXIMUS_PREDICT_URL=http://maximus_predict:804040
     - OSINT_SERVICE_URL=http://osint-service:8100
     - NEUROMODULATION_URL=http://neuromodulation_service:8033
     - STRATEGIC_PLANNING_URL=http://strategic_planning_service:8042
@@ -717,10 +718,10 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-monitor
     ports:
-    - 8424:8001
+    - 8424:8020
     environment:
       SERVICE_NAME: hcl_monitor
-      KB_API_URL: http://hcl-kb-service:8000
+      KB_API_URL: http://hcl-kb-service:8019
       KAFKA_BROKERS: hcl-kafka:9092
       COLLECTION_INTERVAL: 15
       LOG_LEVEL: INFO
@@ -737,7 +738,7 @@ services:
     - /proc:/host/proc:ro
     - /sys:/host/sys:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8150/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -748,10 +749,10 @@ services:
       dockerfile: Dockerfile
     container_name: hcl-analyzer
     ports:
-    - 8427:8002
+    - 8427:8017
     environment:
       SERVICE_NAME: hcl_analyzer
-      KB_API_URL: http://hcl-kb-service:8000
+      KB_API_URL: http://hcl-kb-service:8019
       KAFKA_BROKERS: hcl-kafka:9092
       MODEL_DIR: /app/models
       LOG_LEVEL: INFO
@@ -766,7 +767,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8017/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -780,7 +781,7 @@ services:
     - 8430:8003
     environment:
       SERVICE_NAME: hcl_planner
-      KB_API_URL: http://hcl-kb-service:8000
+      KB_API_URL: http://hcl-kb-service:8019
       KAFKA_BROKERS: hcl-kafka:9092
       MODEL_DIR: /app/models
       LOG_LEVEL: INFO
@@ -811,7 +812,7 @@ services:
     - 8433:8004
     environment:
       SERVICE_NAME: hcl_executor
-      KB_API_URL: http://hcl-kb-service:8000
+      KB_API_URL: http://hcl-kb-service:8019
       KAFKA_BROKERS: hcl-kafka:9092
       K8S_NAMESPACE: default
       IN_CLUSTER: 'false'
@@ -842,7 +843,7 @@ services:
       dockerfile: Dockerfile
     container_name: maximus-oraculo
     ports:
-    - 8152:8201
+    - 8152:8038
     environment:
       SERVICE_NAME: maximus_oraculo
       GEMINI_API_KEY: ${GEMINI_API_KEY}
@@ -856,7 +857,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8201/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8038/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -886,7 +887,7 @@ services:
     build: ./backend/services/immunis_api_service
     container_name: vertice-immunis-api
     ports:
-    - 8300:8005
+    - 8300:8025
     volumes:
     - ./backend/services/immunis_api_service:/app
     environment:
@@ -909,7 +910,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8025/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -932,7 +933,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8030/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8150/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1058,7 +1059,7 @@ services:
     build: ./backend/services/auditory_cortex_service
     container_name: vertice-auditory-cortex
     ports:
-    - 8207:8007
+    - 8207:8005
     volumes:
     - ./backend/services/auditory_cortex_service:/app
     environment:
@@ -1069,7 +1070,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1078,7 +1079,7 @@ services:
     build: ./backend/services/visual_cortex_service
     container_name: vertice-visual-cortex
     ports:
-    - 8206:8006
+    - 8206:8061
     volumes:
     - ./backend/services/visual_cortex_service:/app
     environment:
@@ -1088,7 +1089,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8061/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1097,7 +1098,7 @@ services:
     build: ./backend/services/somatosensory_service
     container_name: vertice-somatosensory
     ports:
-    - 8208:8008
+    - 8208:8056
     volumes:
     - ./backend/services/somatosensory_service:/app
     environment:
@@ -1107,7 +1108,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8056/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1116,28 +1117,9 @@ services:
     build: ./backend/services/chemical_sensing_service
     container_name: vertice-chemical-sensing
     ports:
-    - 8209:8009
+    - 8209:8010
     volumes:
     - ./backend/services/chemical_sensing_service:/app
-    environment:
-    - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
-    # depends_on removed to break circular dependency with digital_thalamus_service
-    networks:
-    - maximus-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8009/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-  vestibular_service:
-    build: ./backend/services/vestibular_service
-    container_name: vertice-vestibular
-    ports:
-    - 8210:8010
-    volumes:
-    - ./backend/services/vestibular_service:/app
     environment:
     - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
     # depends_on removed to break circular dependency with digital_thalamus_service
@@ -1150,11 +1132,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+  vestibular_service:
+    build: ./backend/services/vestibular_service
+    container_name: vertice-vestibular
+    ports:
+    - 8210:8060
+    volumes:
+    - ./backend/services/vestibular_service:/app
+    environment:
+    - DIGITAL_THALAMUS_URL=http://digital_thalamus_service:8012
+    # depends_on removed to break circular dependency with digital_thalamus_service
+    networks:
+    - maximus-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8060/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   prefrontal_cortex_service:
     build: ./backend/services/prefrontal_cortex_service
     container_name: vertice-prefrontal-cortex
     ports:
-    - 8211:8011
+    - 8211:8051
     volumes:
     - ./backend/services/prefrontal_cortex_service:/app
     environment:
@@ -1176,7 +1177,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8051/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1185,7 +1186,7 @@ services:
     build: ./backend/services/digital_thalamus_service
     container_name: vertice-digital-thalamus
     ports:
-    - 8212:8012
+    - 8212:8013
     volumes:
     - ./backend/services/digital_thalamus_service:/app
     environment:
@@ -1208,7 +1209,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1217,14 +1218,14 @@ services:
     build: ./backend/services/narrative_manipulation_filter
     container_name: vertice-narrative-filter
     ports:
-    - 8213:8013
+    - 8213:8043
     volumes:
     - ./backend/services/narrative_manipulation_filter:/app
     networks:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8013/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8043/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1233,7 +1234,7 @@ services:
     build: ./backend/services/ai_immune_system
     container_name: vertice-ai-immune
     ports:
-    - 8214:8014
+    - 8214:8002
     volumes:
     - ./backend/services/ai_immune_system:/app
     environment:
@@ -1253,7 +1254,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8014/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1571,7 +1572,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8009/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1624,7 +1625,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8056/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1706,7 +1707,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8042/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8058/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1765,7 +1766,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1792,7 +1793,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8046/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1867,7 +1868,7 @@ services:
     build: ./backend/services/neuromodulation_service
     container_name: vertice-neuromodulation
     ports:
-    - 9093:8033
+    - 9093:8046
     volumes:
     - ./backend/services/neuromodulation_service:/app
     environment:
@@ -1881,7 +1882,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8033/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8046/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1890,7 +1891,7 @@ services:
     build: ./backend/services/strategic_planning_service
     container_name: vertice-strategic-planning
     ports:
-    - 9094:8042
+    - 9094:8058
     volumes:
     - ./backend/services/strategic_planning_service:/app
     environment:
@@ -1904,7 +1905,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8042/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8058/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1925,7 +1926,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8011/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8051/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2025,7 +2026,7 @@ services:
     - maximus-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "zkServer.sh", "status"]
+      test: ["CMD-SHELL", "echo srvr | nc -w 2 localhost 2181 | grep Mode"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2630,13 +2631,11 @@ services:
       - "8222:8222"  # HTTP monitoring
       - "6222:6222"  # Cluster routing
     command:
-      - "--jetstream"
-      - "--store_dir=/data"
-      - "--max_payload=8MB"
-      - "--max_memory_store=1GB"
-      - "--max_file_store=10GB"
+      - "--config"
+      - "/etc/nats/nats.conf"
     volumes:
       - nats-jetstream-data:/data
+      - ./backend/config/nats/nats.conf:/etc/nats/nats.conf:ro
     networks:
       - maximus-network
     restart: unless-stopped
@@ -2732,7 +2731,7 @@ services:
       - PORT=8053
       - NATS_URL=nats://nats-jetstream:4222
       - LOG_LEVEL=INFO
-      - MAXIMUS_CORE_URL=http://maximus_core_service:8100
+      - MAXIMUS_CORE_URL=http://maximus_core_service:8150
     depends_on:
       - nats-jetstream
       - maximus_core_service

@@ -128,13 +128,13 @@ wait_for_healthy() {
         local current_time=$(date +%s)
         local elapsed=$((current_time - start_time))
 
-        if [[ $elapsed -gt $max_wait ]]; then
+        if (( elapsed > max_wait )); then
             return 1
         fi
 
         local unhealthy=$(docker compose ps --format "{{.Service}}|{{.Health}}" 2>/dev/null | grep "$service_pattern" | grep -c "starting" || echo 0)
 
-        if [[ $unhealthy -eq 0 ]]; then
+        if (( unhealthy == 0 )); then
             return 0
         fi
 
@@ -159,12 +159,12 @@ start_services() {
     echo -e "${BOLD}${YELLOW}LAYER 0:${NC} Infraestrutura (Postgres, Redis, Kafka, RabbitMQ)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-    docker compose up -d --no-build \
-        vertice-postgres maximus-postgres-immunity hcl-postgres \
-        vertice-redis \
-        hcl-kafka maximus-kafka-immunity maximus-zookeeper-immunity \
-        vertice-rabbitmq \
-        vertice-nats-jetstream \
+    docker compose up -d \
+        postgres postgres-immunity hcl-postgres \
+        redis \
+        hcl-kafka kafka-immunity zookeeper-immunity \
+        rabbitmq \
+        nats-jetstream \
         > /tmp/maximus_layer0.log 2>&1 &
     local pid=$!
     spinner $pid "Inicializando bancos de dados e message brokers"
@@ -177,6 +177,29 @@ start_services() {
     read -r _ running healthy _ <<< "$(get_service_stats)"
     echo -e "${GREEN}${CHECK} Layer 0 iniciada: ${BOLD}$running containers, $healthy healthy${NC}\n"
 
+    # Service Registry (separate compose file)
+    if [[ -f "$PROJECT_ROOT/docker-compose.service-registry.yml" ]]; then
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${BOLD}${YELLOW}REGISTRY:${NC} Vértice Service Registry (5 replicas + LB)${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+
+        docker compose -f docker-compose.service-registry.yml up -d > /tmp/maximus_registry.log 2>&1 &
+        pid=$!
+        spinner $pid "Inicializando Vértice Service Registry"
+        wait $pid
+
+        echo -e "${HOURGLASS} Validando health do registry...\n"
+        for attempt in {1..10}; do
+            if curl -sf "http://localhost:8888/health" >/dev/null 2>&1; then
+                echo -e "${GREEN}${CHECK} Registry saudável e pronto${NC}\n"
+                break
+            fi
+            sleep 3
+        done
+    else
+        echo -e "${YELLOW}${WARNING} docker-compose.service-registry.yml não encontrado, pulando registry${NC}\n"
+    fi
+
     # ═══════════════════════════════════════════════════════════════════════════
     # LAYER 1: CORE SERVICES (API Gateway, Service Registry, Monitoring)
     # ═══════════════════════════════════════════════════════════════════════════
@@ -184,9 +207,9 @@ start_services() {
     echo -e "${BOLD}${YELLOW}LAYER 1:${NC} Core Services (API Gateway, Registry, Monitoring)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
-    docker compose up -d --no-build \
-        vertice-api-gateway \
-        vertice-prometheus vertice-grafana \
+    docker compose up -d \
+        api_gateway \
+        prometheus grafana \
         > /tmp/maximus_layer1.log 2>&1 &
     pid=$!
     spinner $pid "Inicializando serviços core"
@@ -194,7 +217,7 @@ start_services() {
 
     echo -e "${HOURGLASS} Aguardando core services ficarem saudáveis (30s)...\n"
     sleep 8
-    wait_for_healthy "api-gateway|prometheus|grafana" 30 || echo -e "${YELLOW}${WARNING} Alguns serviços ainda inicializando${NC}\n"
+    wait_for_healthy "api_gateway|prometheus|grafana" 30 || echo -e "${YELLOW}${WARNING} Alguns serviços ainda inicializando${NC}\n"
 
     read -r _ running healthy _ <<< "$(get_service_stats)"
     echo -e "${GREEN}${CHECK} Layer 1 iniciada: ${BOLD}$running containers, $healthy healthy${NC}\n"
@@ -207,7 +230,7 @@ start_services() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
     echo -e "${HOURGLASS} Iniciando TODOS os serviços de aplicação...\n"
-    docker compose up -d --no-build > /tmp/maximus_layer2.log 2>&1 &
+    docker compose up -d > /tmp/maximus_layer2.log 2>&1 &
     pid=$!
     spinner $pid "Inicializando ~100 serviços de aplicação (pode levar 2-3 min)"
     wait $pid
@@ -721,7 +744,7 @@ show_help() {
     echo -e "${BOLD}${CYAN}┃${NC} ${GEAR} ${BOLD}COMANDOS DISPONÍVEIS${NC}"
     echo -e "${BOLD}${CYAN}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
     echo ""
-    echo -e "   ${GREEN}${ROCKET} maximus start${NC}              ${DIM}Inicia todos os serviços em camadas${NC}"
+    echo -e "   ${GREEN}${ROCKET} maximus start [core|full]${NC}  ${DIM}Inicia serviços (core=rápido, full=organismo completo)${NC}"
     echo -e "   ${YELLOW}${HOURGLASS} maximus stop${NC}               ${DIM}Para todos os serviços${NC}"
     echo -e "   ${BLUE}${GEAR} maximus restart${NC}            ${DIM}Reinicia o sistema completo${NC}"
     echo -e "   ${CYAN}${BRAIN} maximus status${NC}             ${DIM}Dashboard de status detalhado${NC}"
@@ -734,7 +757,8 @@ show_help() {
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "${BOLD}${YELLOW}Exemplos:${NC}"
-    echo -e "   ${GREEN}maximus start${NC}                      ${DIM}# Inicia o sistema completo em 4 camadas${NC}"
+    echo -e "   ${GREEN}maximus start core${NC}                 ${DIM}# Inicia apenas core (~40 containers, rápido)${NC}"
+    echo -e "   ${GREEN}maximus start full${NC}                 ${DIM}# Inicia organismo completo (9 layers, ~70 containers)${NC}"
     echo -e "   ${CYAN}maximus status${NC}                     ${DIM}# Ver dashboard de status completo${NC}"
     echo -e "   ${SHIELD}maximus health${NC}                     ${DIM}# Quick health check (rápido)${NC}"
     echo -e "   ${SHIELD}maximus validate${NC}                   ${DIM}# Validar padrão Pagani${NC}"
@@ -750,7 +774,22 @@ show_help() {
 main() {
     case "${1:-status}" in
         start)
-            start_services
+            # Suporte a subcomandos: core ou full
+            case "${2:-core}" in
+                core)
+                    start_services  # Default: apenas core (layers 0-2)
+                    ;;
+                full)
+                    # Source organism layers e ativa completo
+                    source "$SCRIPT_DIR/organism_layers_functions.sh" 2>/dev/null || true
+                    bash "$SCRIPT_DIR/bring_organism_alive.sh"
+                    ;;
+                *)
+                    echo -e "${RED}${CROSS} Opção inválida: start $2${NC}"
+                    echo -e "${YELLOW}Use: maximus start [core|full]${NC}\n"
+                    exit 1
+                    ;;
+            esac
             ;;
         stop)
             stop_services

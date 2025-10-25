@@ -25,6 +25,7 @@ version: '3.8'
 networks:
   maximus-network:
     external: true
+    name: maximus-ai-network
 
 volumes:
   nginx-cache:
@@ -40,9 +41,10 @@ services:
     container_name: vertice-register-1
     hostname: vertice-register-1
     environment:
-      - REDIS_HOST=vertice-redis-master
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REPLICA_ID=1
+      - REGISTRY_AUTH_TOKEN=${VERTICE_REGISTRY_TOKEN:-titanium-registry-token}
     networks:
       - maximus-network
     restart: unless-stopped
@@ -71,9 +73,10 @@ services:
     container_name: vertice-register-2
     hostname: vertice-register-2
     environment:
-      - REDIS_HOST=vertice-redis-master
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REPLICA_ID=2
+      - REGISTRY_AUTH_TOKEN=${VERTICE_REGISTRY_TOKEN:-titanium-registry-token}
     networks:
       - maximus-network
     restart: unless-stopped
@@ -102,9 +105,10 @@ services:
     container_name: vertice-register-3
     hostname: vertice-register-3
     environment:
-      - REDIS_HOST=vertice-redis-master
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REPLICA_ID=3
+      - REGISTRY_AUTH_TOKEN=${VERTICE_REGISTRY_TOKEN:-titanium-registry-token}
     networks:
       - maximus-network
     restart: unless-stopped
@@ -133,10 +137,11 @@ services:
     container_name: vertice-register-4
     hostname: vertice-register-4
     environment:
-      - REDIS_HOST=vertice-redis-master
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REPLICA_ID=4
       - ZONE=ZONE_B
+      - REGISTRY_AUTH_TOKEN=${VERTICE_REGISTRY_TOKEN:-titanium-registry-token}
     networks:
       - maximus-network
     restart: unless-stopped
@@ -165,10 +170,11 @@ services:
     container_name: vertice-register-5
     hostname: vertice-register-5
     environment:
-      - REDIS_HOST=vertice-redis-master
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REPLICA_ID=5
       - ZONE=ZONE_C
+      - REGISTRY_AUTH_TOKEN=${VERTICE_REGISTRY_TOKEN:-titanium-registry-token}
     networks:
       - maximus-network
     restart: unless-stopped

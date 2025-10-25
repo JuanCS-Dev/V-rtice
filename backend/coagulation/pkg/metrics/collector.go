@@ -1,6 +1,10 @@
 package metrics
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -12,6 +16,7 @@ import (
 // and regulation effectiveness.
 type Collector struct {
 	component string
+	subsystem string
 	
 	// Detection metrics
 	BreachesDetected prometheus.Counter
@@ -36,6 +41,25 @@ type Collector struct {
 	IntegrityViolations   prometheus.Counter
 	EmotionalValence      prometheus.Gauge
 	SystemHealthScore     prometheus.Gauge
+
+	dynamicCounters   map[string]*counterVecWrapper
+	dynamicGauges     map[string]*gaugeVecWrapper
+	dynamicHistograms map[string]*histogramVecWrapper
+}
+
+type counterVecWrapper struct {
+	vec  *prometheus.CounterVec
+	keys []string
+}
+
+type gaugeVecWrapper struct {
+	vec  *prometheus.GaugeVec
+	keys []string
+}
+
+type histogramVecWrapper struct {
+	vec  *prometheus.HistogramVec
+	keys []string
 }
 
 // NewCollector creates a new metrics collector for a component.
@@ -46,11 +70,18 @@ type Collector struct {
 //
 // Returns initialized collector with consciousness-aware metrics.
 func NewCollector(component, subsystem string) *Collector {
+	// Sanitize component name: Prometheus only allows [a-zA-Z0-9_:]
+	sanitizedComponent := strings.ReplaceAll(component, "-", "_")
+
 	// Use component-specific names to avoid registry conflicts in tests
-	namePrefix := component + "_" + subsystem
+	namePrefix := sanitizedComponent + "_" + subsystem
 	
 	return &Collector{
 		component: component,
+		subsystem: subsystem,
+		dynamicCounters:   make(map[string]*counterVecWrapper),
+		dynamicGauges:     make(map[string]*gaugeVecWrapper),
+		dynamicHistograms: make(map[string]*histogramVecWrapper),
 		
 		// Detection
 		BreachesDetected: promauto.NewCounter(prometheus.CounterOpts{
@@ -200,4 +231,135 @@ func (c *Collector) UpdateSystemHealth(score float64) {
 	} else if score < 0.5 {
 		c.EmotionalValence.Set(-0.7) // Negative (distressed)
 	}
+}
+
+// IncrementCounter increments a dynamic counter identified by name/labels.
+func (c *Collector) IncrementCounter(name string, labels map[string]string) {
+	keys, values := prepareLabels(labels)
+	counter := c.getCounterVec(name, keys)
+
+	if len(keys) == 0 {
+		counter.vec.WithLabelValues().Inc()
+		return
+	}
+
+	counter.vec.WithLabelValues(values...).Inc()
+}
+
+// RecordGauge sets a dynamic gauge identified by name/labels.
+func (c *Collector) RecordGauge(name string, value float64, labels map[string]string) {
+	keys, values := prepareLabels(labels)
+	gauge := c.getGaugeVec(name, keys)
+
+	if len(keys) == 0 {
+		gauge.vec.WithLabelValues().Set(value)
+		return
+	}
+
+	gauge.vec.WithLabelValues(values...).Set(value)
+}
+
+// RecordHistogram observes a value in a dynamic histogram identified by name/labels.
+func (c *Collector) RecordHistogram(name string, value float64, labels map[string]string) {
+	keys, values := prepareLabels(labels)
+	histogram := c.getHistogramVec(name, keys)
+
+	if len(keys) == 0 {
+		histogram.vec.WithLabelValues().Observe(value)
+		return
+	}
+
+	histogram.vec.WithLabelValues(values...).Observe(value)
+}
+
+func (c *Collector) getCounterVec(name string, keys []string) *counterVecWrapper {
+	cacheKey := metricCacheKey(name, keys)
+	if wrapper, ok := c.dynamicCounters[cacheKey]; ok {
+		return wrapper
+	}
+
+	sanitizedComponent := strings.ReplaceAll(c.component, "-", "_")
+	counter := promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "coagulation",
+		Subsystem: c.subsystem,
+		Name:      fmt.Sprintf("%s_%s", sanitizedComponent, name),
+		Help:      fmt.Sprintf("Dynamic counter %s for component %s", name, c.component),
+	}, keys)
+
+	wrapper := &counterVecWrapper{
+		vec:  counter,
+		keys: keys,
+	}
+	c.dynamicCounters[cacheKey] = wrapper
+	return wrapper
+}
+
+func (c *Collector) getGaugeVec(name string, keys []string) *gaugeVecWrapper {
+	cacheKey := metricCacheKey(name, keys)
+	if wrapper, ok := c.dynamicGauges[cacheKey]; ok {
+		return wrapper
+	}
+
+	sanitizedComponent := strings.ReplaceAll(c.component, "-", "_")
+	gauge := promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "coagulation",
+		Subsystem: c.subsystem,
+		Name:      fmt.Sprintf("%s_%s", sanitizedComponent, name),
+		Help:      fmt.Sprintf("Dynamic gauge %s for component %s", name, c.component),
+	}, keys)
+
+	wrapper := &gaugeVecWrapper{
+		vec:  gauge,
+		keys: keys,
+	}
+	c.dynamicGauges[cacheKey] = wrapper
+	return wrapper
+}
+
+func (c *Collector) getHistogramVec(name string, keys []string) *histogramVecWrapper {
+	cacheKey := metricCacheKey(name, keys)
+	if wrapper, ok := c.dynamicHistograms[cacheKey]; ok {
+		return wrapper
+	}
+
+	sanitizedComponent := strings.ReplaceAll(c.component, "-", "_")
+	histogram := promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "coagulation",
+		Subsystem: c.subsystem,
+		Name:      fmt.Sprintf("%s_%s", sanitizedComponent, name),
+		Help:      fmt.Sprintf("Dynamic histogram %s for component %s", name, c.component),
+		Buckets:   prometheus.ExponentialBuckets(0.001, 2, 10), // 1ms to 1s
+	}, keys)
+
+	wrapper := &histogramVecWrapper{
+		vec:  histogram,
+		keys: keys,
+	}
+	c.dynamicHistograms[cacheKey] = wrapper
+	return wrapper
+}
+
+func prepareLabels(labels map[string]string) ([]string, []string) {
+	if len(labels) == 0 {
+		return nil, nil
+	}
+
+	keys := make([]string, 0, len(labels))
+	for k := range labels {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	values := make([]string, len(keys))
+	for i, k := range keys {
+		values[i] = labels[k]
+	}
+	return keys, values
+}
+
+func metricCacheKey(name string, keys []string) string {
+	if len(keys) == 0 {
+		return name
+	}
+	return fmt.Sprintf("%s|%s", name, strings.Join(keys, ","))
 }

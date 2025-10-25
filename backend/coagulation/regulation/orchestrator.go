@@ -77,7 +77,7 @@ func NewRegulationOrchestrator(
 
 		proteinC:     NewProteinCService(logger, metrics, eventBus),
 		proteinS:     NewProteinSService(logger, metrics, eventBus),
-		antithrombin: NewAntithrombinService(logger, metrics, eventBus),
+		antithrombin: NewAntithrombinServiceWithDeps(logger, metrics, eventBus),
 		tfpi:         NewTFPIService(logger, metrics, eventBus),
 
 		started: false,
@@ -150,7 +150,7 @@ func (r *RegulationOrchestrator) Stop() error {
 
 	for _, svc := range services {
 		if err := svc.stopper(); err != nil {
-			r.logger.Error(fmt.Sprintf("Error stopping %s", svc.name), "error", err)
+			r.logger.Error(fmt.Sprintf("Error stopping %s", svc.name), logger.Error(err))
 		}
 	}
 
@@ -228,16 +228,17 @@ func (r *RegulationOrchestrator) performHealthCheck() {
 	metrics := r.GetMetrics()
 
 	r.logger.Info("Regulation Health Check",
-		"system_safe", metrics.SystemSafe,
-		"dampening_active", metrics.DampeningActive,
-		"pending_triggers", metrics.PendingTriggers,
-		"regulation_effective", metrics.RegulationEffective,
+		logger.Bool("system_safe", metrics.SystemSafe),
+		logger.Bool("dampening_active", metrics.DampeningActive),
+		logger.Int("pending_triggers", metrics.PendingTriggers),
+		logger.Bool("regulation_effective", metrics.RegulationEffective),
 	)
 
 	// Publish metrics
-	r.eventBus.Publish("regulation.health_check", map[string]interface{}{
+	ctx := context.Background()
+	r.eventBus.Publish(ctx, "regulation.health_check", createEvent("regulation.health_check", map[string]interface{}{
 		"metrics": metrics,
-	})
+	}))
 
 	// Record to Prometheus
 	if metrics.DampeningActive {
@@ -275,3 +276,4 @@ func (r *RegulationOrchestrator) IsStarted() bool {
 	defer r.mu.RUnlock()
 	return r.started
 }
+

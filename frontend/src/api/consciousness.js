@@ -1,4 +1,6 @@
 import logger from '@/utils/logger';
+import { ServiceEndpoints, AuthConfig } from '../config/endpoints';
+
 /**
  * Consciousness System - API Client
  * ===================================
@@ -13,21 +15,15 @@ import logger from '@/utils/logger';
  * - Manual consciousness control
  * - WebSocket real-time updates
  *
- * Port: 8001 (maximus_core_service)
+ * Port: 8150 (maximus_core_service)
  * REGRA: NO MOCK, NO PLACEHOLDER - Dados REAIS via API
  */
 
-const env = typeof import.meta !== 'undefined' ? import.meta.env : process.env;
+// Use ServiceEndpoints para configuração centralizada
+const CONSCIOUSNESS_BASE_URL = `${ServiceEndpoints.maximus.core}/api/consciousness`;
+const CONSCIOUSNESS_GATEWAY_URL = ServiceEndpoints.apiGateway;
 
-const resolveBase = (value, fallback) => {
-  if (!value) return fallback;
-  return value.endsWith('/') ? value.slice(0, -1) : value;
-};
-
-const CONSCIOUSNESS_BASE_URL = `${resolveBase(env?.VITE_CONSCIOUSNESS_API_URL || env?.VITE_API_URL || 'http://localhost:8001', 'http://localhost:8001')}/api/consciousness`;
-const CONSCIOUSNESS_GATEWAY_URL = resolveBase(env?.VITE_API_GATEWAY_URL || env?.VITE_API_URL || 'http://localhost:8000', 'http://localhost:8000');
-
-const getApiKey = () => env?.VITE_API_KEY || (typeof localStorage !== 'undefined' ? localStorage.getItem('MAXIMUS_API_KEY') : '') || '';
+const getApiKey = () => AuthConfig.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('MAXIMUS_API_KEY') : '') || '';
 
 /**
  * ============================================================================

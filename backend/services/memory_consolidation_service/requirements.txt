@@ -53,3 +53,5 @@ uvicorn==0.37.0
 numpy>=1.24.0
 aiokafka==0.8.1
     # FASE 3: Global Workspace Kafka consumer
+kafka-python==2.0.2
+async-timeout==4.0.3

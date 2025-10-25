@@ -41,10 +41,7 @@ func main() {
 	}
 
 	// Start service
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	if err := service.Start(ctx); err != nil {
+	if err := service.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "❌ Failed to start Factor VIIa service: %v\n", err)
 		os.Exit(1)
 	}
@@ -93,6 +90,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "❌ HTTP server shutdown error: %v\n", err)
 	}
 
-	service.Stop()
-	fmt.Println("🛑 Factor VIIa Service stopped")
+	if err := service.Shutdown(); err != nil {
+		fmt.Fprintf(os.Stderr, "❌ Factor VIIa shutdown error: %v\n", err)
+	} else {
+		fmt.Println("🛑 Factor VIIa Service stopped")
+	}
 }

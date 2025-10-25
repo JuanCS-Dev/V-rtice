@@ -58,7 +58,13 @@ func NewClient(natsURL, component string) (*Client, error) {
 		conn.Close()
 		return nil, fmt.Errorf("failed to create JetStream context: %w", err)
 	}
-	
+
+	// Ensure required streams exist (idempotent - won't fail if already exists)
+	if err := ensureStreamsExist(js); err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("failed to ensure streams exist: %w", err)
+	}
+
 	return &Client{
 		conn:      conn,
 		js:        js,
@@ -158,4 +164,41 @@ func unmarshalEvent(data []byte) (*Event, error) {
 	// Production: protobuf unmarshal
 	// Foundation: simplified parsing
 	return &Event{}, nil
+}
+
+// ensureStreamsExist creates required JetStream streams if they don't exist.
+// This is idempotent - will not fail if streams already exist.
+func ensureStreamsExist(js nats.JetStreamContext) error {
+	streams := []struct {
+		name     string
+		subjects []string
+	}{
+		{"COAGULATION", []string{"coagulation.>"}},
+		{"REGULATION", []string{"regulation.>"}},
+		{"QUARANTINE", []string{"quarantine.>"}},
+		{"SYSTEM", []string{"system.>"}},
+		{"DETECTION", []string{"detection.>"}},
+	}
+
+	for _, stream := range streams {
+		// Check if stream exists
+		_, err := js.StreamInfo(stream.name)
+		if err == nil {
+			// Stream already exists, skip
+			continue
+		}
+
+		// Create stream
+		_, err = js.AddStream(&nats.StreamConfig{
+			Name:     stream.name,
+			Subjects: stream.subjects,
+			Storage:  nats.FileStorage,
+			MaxAge:   24 * time.Hour, // 24h retention
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create stream %s: %w", stream.name, err)
+		}
+	}
+
+	return nil
 }

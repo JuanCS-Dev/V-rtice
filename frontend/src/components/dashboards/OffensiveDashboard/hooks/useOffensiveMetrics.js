@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * useOffensiveMetrics Hook
  * Fetches real offensive operation metrics from backend services
  *
@@ -9,52 +8,50 @@ import logger from '@/utils/logger';
  * - Retry with exponential backoff
  * - Optimistic updates
  *
- * NO MOCKS - Real data from:
- * - Network Recon Service (port 8032)
- * - Vuln Intel Service (port 8033)
- * - Web Attack Service (port 8034)
- * - C2 Orchestration Service (port 8035)
- * - BAS Service (port 8036)
- * - Offensive Gateway (port 8037)
+ * INTEGRATION: Uses ServiceEndpoints for environment-aware configuration
+ *
+ * TODO: Offensive services not yet exposed publicly
+ * Currently returns mock data until services are deployed with proper ports
+ *
+ * When ready, uncomment sections below and configure in .env:
+ * - Network Recon Service (VITE_OFFENSIVE_NETWORK_RECON_URL)
+ * - Vuln Intel Service (VITE_OFFENSIVE_VULN_INTEL_URL)
+ * - Web Attack Service (VITE_OFFENSIVE_WEB_ATTACK_URL)
+ * - C2 Orchestration Service (VITE_OFFENSIVE_C2_URL)
+ * - BAS Service (VITE_OFFENSIVE_BAS_URL)
+ * - Offensive Gateway (VITE_OFFENSIVE_GATEWAY_URL)
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { ServiceEndpoints } from '@/config/endpoints';
 import { queryKeys } from '../../../../config/queryClient';
-
-const OFFENSIVE_SERVICES = {
-  networkRecon: 'http://localhost:8032',
-  vulnIntel: 'http://localhost:8033',
-  webAttack: 'http://localhost:8034',
-  c2: 'http://localhost:8035',
-  bas: 'http://localhost:8036',
-  gateway: 'http://localhost:8037'
-};
+import logger from '@/utils/logger';
 
 const fetchOffensiveMetrics = async () => {
-  // Aggregate metrics from multiple services
+  // TODO: Uncomment when offensive services are exposed
+  /*
   const results = await Promise.allSettled([
     // Network Recon active scans
-    fetch(`${OFFENSIVE_SERVICES.networkRecon}/api/scans/active`)
+    fetch(`${ServiceEndpoints.offensive.networkRecon}/api/scans/active`)
       .then(res => res.ok ? res.json() : { scans: [] })
       .catch(() => ({ scans: [] })),
 
     // Vuln Intel findings
-    fetch(`${OFFENSIVE_SERVICES.vulnIntel}/api/vulnerabilities/count`)
+    fetch(`${ServiceEndpoints.offensive.vulnIntel}/api/vulnerabilities/count`)
       .then(res => res.ok ? res.json() : { count: 0 })
       .catch(() => ({ count: 0 })),
 
     // Web Attack targets
-    fetch(`${OFFENSIVE_SERVICES.webAttack}/api/targets`)
+    fetch(`${ServiceEndpoints.offensive.webAttack}/api/targets`)
       .then(res => res.ok ? res.json() : { targets: [] })
       .catch(() => ({ targets: [] })),
 
     // C2 Sessions
-    fetch(`${OFFENSIVE_SERVICES.c2}/api/sessions/active`)
+    fetch(`${ServiceEndpoints.offensive.c2Orchestration}/api/sessions/active`)
       .then(res => res.ok ? res.json() : { sessions: [] })
       .catch(() => ({ sessions: [] }))
   ]);
 
-  // Calculate metrics from results
   const [reconData, vulnData, targetData, c2Data] = results.map(r =>
     r.status === 'fulfilled' ? r.value : null
   );
@@ -64,6 +61,16 @@ const fetchOffensiveMetrics = async () => {
     exploitsFound: vulnData?.count || 0,
     targets: targetData?.targets?.length || 0,
     c2Sessions: c2Data?.sessions?.length || 0
+  };
+  */
+
+  // Temporary: Return zero metrics until services are exposed
+  logger.warn('Offensive services not yet exposed - returning zero metrics');
+  return {
+    activeScans: 0,
+    exploitsFound: 0,
+    targets: 0,
+    c2Sessions: 0
   };
 };
 

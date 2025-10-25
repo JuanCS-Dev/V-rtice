@@ -38,7 +38,7 @@ scrape_configs:
   - job_name: 'vertice-maximus'
     static_configs:
       - targets:
-          - 'maximus_core_service:8100'
+          - 'maximus_core_service:8150'
           - 'maximus_oraculo:8101'
           - 'maximus_oraculo_v2:8102'
           - 'maximus_eureka:8103'

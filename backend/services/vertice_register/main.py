@@ -28,7 +28,7 @@ import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -91,6 +91,8 @@ class HeartbeatRequest(BaseModel):
 # Global instances
 redis_backend: Optional[RedisBackend] = None
 local_cache: LocalCache = LocalCache(max_age_seconds=60)
+DEFAULT_REGISTRY_TOKEN = "titanium-registry-token"
+REGISTRY_AUTH_TOKEN = os.getenv("REGISTRY_AUTH_TOKEN", DEFAULT_REGISTRY_TOKEN)
 
 # Lifespan management
 @asynccontextmanager
@@ -134,6 +136,19 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+
+def _require_auth(request: Request):
+    """Validate registry access token when configured."""
+    if not REGISTRY_AUTH_TOKEN:
+        return
+    provided = request.headers.get("x-registry-token")
+    if provided != REGISTRY_AUTH_TOKEN:
+        registry_operations.labels(operation="auth", status="denied").inc()
+        raise HTTPException(status_code=401, detail="Invalid registry token")
+
+if REGISTRY_AUTH_TOKEN == DEFAULT_REGISTRY_TOKEN:
+    logger.warning("Registry running with default auth token. Set REGISTRY_AUTH_TOKEN for production deployments.")
 
 # ============================================================================
 # API ENDPOINTS
@@ -266,11 +281,12 @@ async def health_check() -> Dict[str, Any]:
     return response_data
 
 @app.post("/register", status_code=status.HTTP_201_CREATED)
-async def register_service(registration: ServiceRegistration) -> JSONResponse:
+async def register_service(registration: ServiceRegistration, request: Request) -> JSONResponse:
     """Register a new service or update existing registration."""
     start_time = time.time()
 
     try:
+        _require_auth(request)
         timestamp = time.time()
         # Prepare complete service info for caching
         service_info_dict = {
@@ -339,9 +355,10 @@ async def register_service(registration: ServiceRegistration) -> JSONResponse:
         raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 @app.post("/heartbeat")
-async def heartbeat(request: HeartbeatRequest) -> JSONResponse:
+async def heartbeat(request: HeartbeatRequest, http_request: Request) -> JSONResponse:
     """Refresh service TTL (keepalive)."""
     try:
+        _require_auth(http_request)
         if redis_backend and redis_backend.is_healthy():
             await redis_backend.heartbeat(request.service_name)
             registry_operations.labels(operation="heartbeat", status="success").inc()
@@ -357,9 +374,10 @@ async def heartbeat(request: HeartbeatRequest) -> JSONResponse:
         raise HTTPException(status_code=500, detail=f"Heartbeat failed: {str(e)}")
 
 @app.delete("/deregister/{service_name}")
-async def deregister_service(service_name: str) -> JSONResponse:
+async def deregister_service(service_name: str, request: Request) -> JSONResponse:
     """Deregister a service."""
     try:
+        _require_auth(request)
         if redis_backend:
             await redis_backend.deregister(service_name)
         local_cache.delete(service_name)

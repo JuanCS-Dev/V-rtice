@@ -1,0 +1,319 @@
+{
+  "timestamp": "2025-10-25T03:29:30.562022",
+  "total_corrected": 66,
+  "success_rate": 59.09090909090909,
+  "results": {
+    "healthy": [
+      {
+        "container": "vertice-immunis-api",
+        "port": 8300,
+        "real_port": 8025
+      },
+      {
+        "container": "maximus-integration",
+        "port": 8127,
+        "real_port": 8037
+      },
+      {
+        "container": "maximus-oraculo",
+        "port": 8152,
+        "real_port": 8038
+      },
+      {
+        "container": "narrative-analysis-service",
+        "port": 8015,
+        "real_port": 8042
+      },
+      {
+        "container": "vertice-maximus_eureka",
+        "port": 9103,
+        "real_port": 8200
+      },
+      {
+        "container": "predictive-threat-hunting-service",
+        "port": 8016,
+        "real_port": 8050
+      },
+      {
+        "container": "autonomous-investigation-service",
+        "port": 8017,
+        "real_port": 8007
+      },
+      {
+        "container": "hcl-kb-service",
+        "port": 8421,
+        "real_port": 8019
+      },
+      {
+        "container": "vertice-immunis-macrophage",
+        "port": 8312,
+        "real_port": 8030
+      },
+      {
+        "container": "adaptive-immunity-service",
+        "port": 8020,
+        "real_port": 8000
+      },
+      {
+        "container": "vertice-immunis-neutrophil",
+        "port": 8313,
+        "real_port": 8031
+      },
+      {
+        "container": "vertice-adaptive-immune",
+        "port": 8003,
+        "real_port": 8003
+      },
+      {
+        "container": "immunis-treg-service",
+        "port": 8018,
+        "real_port": 8033
+      },
+      {
+        "container": "vertice-immunis-dendritic",
+        "port": 8314,
+        "real_port": 8028
+      },
+      {
+        "container": "vertice-immunis-bcell",
+        "port": 8316,
+        "real_port": 8026
+      },
+      {
+        "container": "vertice-immunis-cytotoxic-t",
+        "port": 8318,
+        "real_port": 8027
+      },
+      {
+        "container": "vertice-immunis-helper-t",
+        "port": 8317,
+        "real_port": 8029
+      },
+      {
+        "container": "vertice-immunis-nk-cell",
+        "port": 8319,
+        "real_port": 8032
+      },
+      {
+        "container": "vertice-antithrombin",
+        "port": 8052,
+        "real_port": 8052
+      },
+      {
+        "container": "vertice-factor-xa",
+        "port": 8050,
+        "real_port": 8050
+      },
+      {
+        "container": "vertice-factor-viia",
+        "port": 8051,
+        "real_port": 8051
+      },
+      {
+        "container": "maximus-network-monitor",
+        "port": 8120,
+        "real_port": 8044
+      },
+      {
+        "container": "vertice-domain",
+        "port": 8104,
+        "real_port": 8014
+      },
+      {
+        "container": "vertice-api-gateway",
+        "port": 8000,
+        "real_port": 8000
+      },
+      {
+        "container": "vertice-osint",
+        "port": 8036,
+        "real_port": 8049
+      },
+      {
+        "container": "maximus-orchestrator",
+        "port": 8125,
+        "real_port": 8016
+      },
+      {
+        "container": "vertice-vuln-scanner",
+        "port": 8111,
+        "real_port": 8063
+      },
+      {
+        "container": "vertice-grafana",
+        "port": 3001,
+        "real_port": 3000
+      },
+      {
+        "container": "vertice-atlas",
+        "port": 8109,
+        "real_port": 8004
+      },
+      {
+        "container": "vertice-ssl-monitor",
+        "port": 8115,
+        "real_port": 8057
+      },
+      {
+        "container": "vertice-malware-analysis",
+        "port": 8114,
+        "real_port": 8035
+      },
+      {
+        "container": "vertice-nmap",
+        "port": 8106,
+        "real_port": 8047
+      },
+      {
+        "container": "vertice-cyber",
+        "port": 8103,
+        "real_port": 8012
+      },
+      {
+        "container": "vertice-social-eng",
+        "port": 8112,
+        "real_port": 8055
+      },
+      {
+        "container": "maximus-predict",
+        "port": 8126,
+        "real_port": 8040
+      },
+      {
+        "container": "vertice-ip-intel",
+        "port": 8105,
+        "real_port": 8034
+      },
+      {
+        "container": "vertice-threat-intel",
+        "port": 8113,
+        "real_port": 8059
+      },
+      {
+        "container": "vertice-sinesp",
+        "port": 8102,
+        "real_port": 8054
+      },
+      {
+        "container": "vertice-register-lb",
+        "port": 8888,
+        "real_port": 80
+      }
+    ],
+    "unhealthy": [
+      {
+        "container": "vertice-prometheus",
+        "port": 9090,
+        "message": "HTTP 404"
+      }
+    ],
+    "unreachable": [
+      {
+        "container": "vertice-strategic-planning",
+        "port": 9094
+      },
+      {
+        "container": "vertice-adr-core",
+        "port": 8130
+      },
+      {
+        "container": "maximus-core",
+        "port": 8151
+      },
+      {
+        "container": "hcl-analyzer",
+        "port": 8427
+      },
+      {
+        "container": "hcl-monitor",
+        "port": 8424
+      },
+      {
+        "container": "vertice-ai-immune",
+        "port": 8214
+      },
+      {
+        "container": "vertice-narrative-filter",
+        "port": 8213
+      },
+      {
+        "container": "active-immune-core",
+        "port": 8200
+      },
+      {
+        "container": "vertice-prefrontal-cortex",
+        "port": 8211
+      },
+      {
+        "container": "vertice-digital-thalamus",
+        "port": 8212
+      },
+      {
+        "container": "vertice-vestibular",
+        "port": 8210
+      },
+      {
+        "container": "vertice-visual-cortex",
+        "port": 8206
+      },
+      {
+        "container": "vertice-auditory-cortex",
+        "port": 8207
+      },
+      {
+        "container": "vertice-chemical-sensing",
+        "port": 8209
+      },
+      {
+        "container": "vertice-somatosensory",
+        "port": 8208
+      },
+      {
+        "container": "vertice-neuromodulation",
+        "port": 9093
+      },
+      {
+        "container": "vertice-auth",
+        "port": 8110
+      },
+      {
+        "container": "vertice-nats-jetstream",
+        "port": 4222
+      },
+      {
+        "container": "maximus-kafka-immunity",
+        "port": 9096
+      },
+      {
+        "container": "maximus-zookeeper-immunity",
+        "port": 2181
+      },
+      {
+        "container": "hcl-postgres",
+        "port": 5433
+      },
+      {
+        "container": "hcl-kafka",
+        "port": 9092
+      },
+      {
+        "container": "vertice-rabbitmq",
+        "port": 5672
+      },
+      {
+        "container": "vertice-postgres",
+        "port": 5432
+      },
+      {
+        "container": "vertice-redis",
+        "port": 6379
+      },
+      {
+        "container": "maximus-postgres-immunity",
+        "port": 5434
+      }
+    ],
+    "timeout": [],
+    "container_down": []
+  }
+}

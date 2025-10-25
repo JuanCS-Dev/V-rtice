@@ -41,10 +41,7 @@ func main() {
 	}
 
 	// Start service
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	if err := service.Start(ctx); err != nil {
+	if err := service.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "❌ Failed to start Antithrombin service: %v\n", err)
 		os.Exit(1)
 	}

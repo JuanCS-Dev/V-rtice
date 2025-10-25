@@ -200,7 +200,7 @@ func (p *ProteinCService) Start() error {
 	p.logger.Info("Starting Protein C Service (Context-Aware Regulation)")
 	
 	// Subscribe to quarantine expansion events
-	if err := p.eventBus.Subscribe("quarantine.expansion", p.handleExpansionRequest); err != nil {
+	if err := p.eventBus.Subscribe("quarantine.expansion", "protein-c-expansion", p.handleExpansionRequest); err != nil {
 		return fmt.Errorf("failed to subscribe to expansion events: %w", err)
 	}
 
@@ -225,16 +225,16 @@ func (p *ProteinCService) Stop() error {
 // on multi-dimensional health assessment.
 func (p *ProteinCService) RegulateExpansion(qctx *QuarantineContext) error {
 	p.logger.Info("Evaluating quarantine expansion",
-		"breach_id", qctx.BreachID,
-		"source", qctx.SourceSegment,
-		"targets", qctx.TargetSegments,
+		logger.String("breach_id", qctx.BreachID),
+		logger.String("source", qctx.SourceSegment),
+		logger.Strings("targets", qctx.TargetSegments),
 	)
 
 	for _, targetSegID := range qctx.TargetSegments {
 		// Get target segment
 		segment := p.getSegment(targetSegID)
 		if segment == nil {
-			p.logger.Warn("Unknown segment in expansion request", "segment", targetSegID)
+			p.logger.Warn("Unknown segment in expansion request", logger.String("segment", targetSegID))
 			continue
 		}
 
@@ -260,9 +260,9 @@ func (p *ProteinCService) RegulateExpansion(qctx *QuarantineContext) error {
 			)
 			
 			p.logger.Warn("INHIBITING quarantine expansion",
-				"target", targetSegID,
-				"health_score", health.OverallScore,
-				"reason", "healthy_neighbor_detected",
+				logger.String("target", targetSegID),
+				logger.Float64("health_score", health.OverallScore),
+				logger.String("reason", "healthy_neighbor_detected"),
 			)
 
 			// Metrics
@@ -272,10 +272,11 @@ func (p *ProteinCService) RegulateExpansion(qctx *QuarantineContext) error {
 			})
 
 			// Publish inhibition event
-			p.eventBus.Publish("regulation.inhibition", map[string]interface{}{
+			ctx := context.Background()
+			p.eventBus.Publish(ctx, "regulation.inhibition", createEvent("regulation.inhibition", map[string]interface{}{
 				"decision": decision,
 				"health":   health,
-			})
+			}))
 
 		} else {
 			// ALLOW EXPANSION - target shows signs of compromise
@@ -287,8 +288,8 @@ func (p *ProteinCService) RegulateExpansion(qctx *QuarantineContext) error {
 			)
 			
 			p.logger.Info("Allowing quarantine expansion",
-				"target", targetSegID,
-				"health_score", health.OverallScore,
+				logger.String("target", targetSegID),
+				logger.Float64("health_score", health.OverallScore),
 			)
 
 			// Metrics
@@ -363,10 +364,10 @@ func (p *ProteinCService) CheckHealth(segment *NetworkSegment) *HealthStatus {
 	})
 
 	p.logger.Debug("Health check complete",
-		"segment", segment.ID,
-		"score", health.OverallScore,
-		"healthy", health.IsHealthy,
-		"duration_ms", duration*1000,
+		logger.String("segment", segment.ID),
+		logger.Float64("score", health.OverallScore),
+		logger.Bool("healthy", health.IsHealthy),
+		logger.Float64("duration_ms", duration*1000),
 	)
 
 	return health
@@ -391,20 +392,24 @@ func (p *ProteinCService) GetNeighborSegments(qctx *QuarantineContext) []*Networ
 }
 
 // handleExpansionRequest processes quarantine expansion event.
-func (p *ProteinCService) handleExpansionRequest(event map[string]interface{}) {
+func (p *ProteinCService) handleExpansionRequest(event *eventbus.Event) error {
 	// Extract quarantine context from event
+	data := eventToMap(event)
 	qctx := &QuarantineContext{
-		BreachID:       event["breach_id"].(string),
-		SourceSegment:  event["source_segment"].(string),
-		TargetSegments: event["target_segments"].([]string),
+		BreachID:       data["breach_id"].(string),
+		SourceSegment:  data["source_segment"].(string),
+		TargetSegments: data["target_segments"].([]string),
 	}
 
 	if err := p.RegulateExpansion(qctx); err != nil {
 		p.logger.Error("Failed to regulate expansion",
-			"breach_id", qctx.BreachID,
-			"error", err,
+			logger.String("breach_id", qctx.BreachID),
+			logger.Error(err),
 		)
+		return err
 	}
+
+	return nil
 }
 
 // healthMonitoringLoop continuously monitors segment health.
@@ -431,8 +436,8 @@ func (p *ProteinCService) performHealthScan() {
 		
 		if !health.IsHealthy {
 			p.logger.Warn("Unhealthy segment detected in periodic scan",
-				"segment", segment.ID,
-				"score", health.OverallScore,
+				logger.String("segment", segment.ID),
+				logger.Float64("score", health.OverallScore),
 			)
 		}
 	}

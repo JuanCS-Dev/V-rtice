@@ -110,7 +110,7 @@ func (t *TFPIService) Start() error {
 	t.logger.Info("Starting TFPI Service (Trigger Validation)")
 
 	// Subscribe to detection triggers
-	if err := t.eventBus.Subscribe("detection.trigger", t.handleTrigger); err != nil {
+	if err := t.eventBus.Subscribe("detection.trigger", "tfpi-trigger", t.handleTrigger); err != nil {
 		return fmt.Errorf("failed to subscribe to triggers: %w", err)
 	}
 
@@ -150,8 +150,8 @@ func (t *TFPIService) ValidateTrigger(trigger *PendingTrigger) *ValidationResult
 		)
 		
 		t.logger.Info("Trigger validated - high confidence",
-			"trigger_id", trigger.ID,
-			"confidence", trigger.Confidence,
+			logger.String("trigger_id", trigger.ID),
+			logger.Float64("confidence", trigger.Confidence),
 		)
 
 		// Metrics
@@ -177,9 +177,9 @@ func (t *TFPIService) ValidateTrigger(trigger *PendingTrigger) *ValidationResult
 		)
 		
 		t.logger.Info("Trigger validated - corroborated",
-			"trigger_id", trigger.ID,
-			"confidence", trigger.Confidence,
-			"correlated_signals", len(correlatedSignals),
+			logger.String("trigger_id", trigger.ID),
+			logger.Float64("confidence", trigger.Confidence),
+			logger.Int("correlated_signals", len(correlatedSignals)),
 		)
 
 		// Metrics
@@ -199,10 +199,10 @@ func (t *TFPIService) ValidateTrigger(trigger *PendingTrigger) *ValidationResult
 		)
 		
 		t.logger.Debug("Trigger rejected - insufficient corroboration",
-			"trigger_id", trigger.ID,
-			"confidence", trigger.Confidence,
-			"correlated_signals", len(correlatedSignals),
-			"required", t.minCorrelatedSignals,
+			logger.String("trigger_id", trigger.ID),
+			logger.Float64("confidence", trigger.Confidence),
+			logger.Int("correlated_signals", len(correlatedSignals)),
+			logger.Int("required", t.minCorrelatedSignals),
 		)
 
 		// Metrics
@@ -284,22 +284,23 @@ func (t *TFPIService) storePendingTrigger(trigger *PendingTrigger) {
 	t.pendingTriggers[trigger.ID] = trigger
 
 	t.logger.Debug("Stored pending trigger for correlation",
-		"trigger_id", trigger.ID,
-		"expires_at", trigger.ExpiresAt,
+		logger.String("trigger_id", trigger.ID),
+		logger.String("expires_at", trigger.ExpiresAt.String()),
 	)
 }
 
 // handleTrigger processes incoming detection trigger.
-func (t *TFPIService) handleTrigger(event map[string]interface{}) {
+func (t *TFPIService) handleTrigger(event *eventbus.Event) error {
+	data := eventToMap(event)
 	trigger := &PendingTrigger{
-		ID:         event["id"].(string),
-		Type:       event["type"].(string),
-		Source:     extractString(event, "source"),
-		Confidence: extractFloat(event, "confidence"),
+		ID:         data["id"].(string),
+		Type:       data["type"].(string),
+		Source:     extractString(data, "source"),
+		Confidence: extractFloat(data, "confidence"),
 		Signal: &DetectionSignal{
-			Type:      extractString(event, "signal_type"),
-			Value:     extractString(event, "value"),
-			Severity:  extractString(event, "severity"),
+			Type:      extractString(data, "signal_type"),
+			Value:     extractString(data, "value"),
+			Severity:  extractString(data, "severity"),
 			Timestamp: time.Now(),
 		},
 		ReceivedAt: time.Now(),
@@ -309,19 +310,22 @@ func (t *TFPIService) handleTrigger(event map[string]interface{}) {
 	result := t.ValidateTrigger(trigger)
 
 	// Publish validation result
-	t.eventBus.Publish("tfpi.validation_result", map[string]interface{}{
+	ctx := context.Background()
+	t.eventBus.Publish(ctx, "tfpi.validation_result", createEvent("tfpi.validation_result", map[string]interface{}{
 		"result":     result,
 		"trigger_id": trigger.ID,
 		"validated":  result.Validated,
-	})
+	}))
 
 	// If validated, forward to cascade
 	if result.Validated {
-		t.eventBus.Publish("cascade.activate", map[string]interface{}{
+		t.eventBus.Publish(ctx, "cascade.activate", createEvent("cascade.activate", map[string]interface{}{
 			"trigger":    trigger,
 			"validation": result,
-		})
+		}))
 	}
+
+	return nil
 }
 
 // cleanupLoop removes expired pending triggers.
@@ -358,7 +362,7 @@ func (t *TFPIService) cleanupExpiredTriggers() {
 	}
 
 	if len(expired) > 0 {
-		t.logger.Debug("Cleaned up expired pending triggers", "count", len(expired))
+		t.logger.Debug("Cleaned up expired pending triggers", logger.Int("count", len(expired)))
 	}
 }
 
