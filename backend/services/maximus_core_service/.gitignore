@@ -70,4 +70,5 @@ temp/
 *.tmp
 
 # Demonstration/Mock Code (not for production)
-_demonstration/
+# REMOVED: _demonstration/ is now used in production (maximus_integrated.py)
+# _demonstration/
