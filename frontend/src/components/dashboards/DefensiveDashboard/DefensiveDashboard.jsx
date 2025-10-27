@@ -20,10 +20,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import DefensiveHeader from './components/DefensiveHeader';
 import DefensiveSidebar from './components/DefensiveSidebar';
 import { DashboardFooter } from '../../shared/DashboardFooter';
 import ModuleContainer from './components/ModuleContainer';
+import SkipLink from '../../shared/SkipLink';
 import { useDefensiveMetrics } from '@/hooks/services/useDefensiveService';
 import { useRealTimeAlerts } from './hooks/useRealTimeAlerts';
 
@@ -58,6 +60,7 @@ const DEFENSIVE_MODULES = [
 ];
 
 const DefensiveDashboard = ({ setCurrentView }) => {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeModule, setActiveModule] = useState('threats');
 
@@ -92,6 +95,8 @@ const DefensiveDashboard = ({ setCurrentView }) => {
       data-maximus-version="2.0"
       data-maximus-category="blue-team">
 
+      <SkipLink href="#defensive-main-content">{t('accessibility.skipToMain')}</SkipLink>
+
       {/* Scanline Effect - Decorative */}
       <div className={styles.scanlineOverlay} aria-hidden="true"></div>
 
@@ -108,6 +113,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
 
       {/* Main Content Area */}
       <section
+        id="defensive-main-content"
         className={styles.dashboardMain}
         role="region"
         aria-label="Defensive operations workspace"
