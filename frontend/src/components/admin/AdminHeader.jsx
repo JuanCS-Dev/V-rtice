@@ -45,7 +45,7 @@ export const AdminHeader = ({
   const activeModuleData = modules.find(m => m.id === activeModule);
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} role="banner">
       {/* TOP BAR - Branding & Actions */}
       <div className={styles.topBar}>
         {/* LEFT - Logo & Branding */}
@@ -97,7 +97,7 @@ export const AdminHeader = ({
       </div>
 
       {/* NAVIGATION BAR - Module Selection */}
-      <div className={styles.navBar}>
+      <div className={styles.navBar} role="tablist" aria-label="Admin modules">
         {modules.map((module, index) => {
           const isActive = activeModule === module.id;
           const itemProps = getItemProps ? getItemProps(index, {
@@ -110,6 +110,7 @@ export const AdminHeader = ({
           return (
             <button
               key={module.id}
+              id={`${module.id}-tab`}
               onClick={() => setActiveModule(module.id)}
               {...itemProps}
               className={`${styles.navButton} ${isActive ? styles.active : styles.inactive}`}
