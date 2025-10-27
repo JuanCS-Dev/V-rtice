@@ -11,8 +11,21 @@
  * - Real-time attack metrics
  * - Live execution monitoring
  *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - Fully navigable by Maximus AI via data-maximus-* attributes
+ * - WCAG 2.1 AAA compliant
+ * - Semantic HTML5 structure (article, section, aside)
+ * - ARIA 1.2 patterns for landmarks and live regions
+ *
+ * Maximus can:
+ * - Identify dashboard via data-maximus-module="offensive-dashboard"
+ * - Navigate between tools via data-maximus-tool attributes
+ * - Monitor executions via data-maximus-live="true"
+ * - Access all interactive elements via aria-labels
+ *
  * i18n: Fully internationalized with pt-BR and en-US support
- * @version 1.0.0
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { lazy, Suspense } from 'react';
@@ -38,6 +51,11 @@ const OffensiveGateway = lazy(() => import('../../cyber/OffensiveGateway/Offensi
 
 // NEW: Offensive Arsenal Tools
 const NetworkScanner = lazy(() => import('../../cyber/NetworkScanner/NetworkScanner'));
+
+// NEW: Defensive Arsenal Tools (Active Immune System)
+const BehavioralAnalyzer = lazy(() => import('../../cyber/BehavioralAnalyzer/BehavioralAnalyzer'));
+const TrafficAnalyzer = lazy(() => import('../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer'));
+const MAVDetection = lazy(() => import('../../cyber/MAVDetection/MAVDetection'));
 
 const LoadingFallback = () => {
   const { t } = useTranslation();
@@ -76,15 +94,26 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
     { id: 'web-attack', name: t('dashboard.offensive.modules.webAttack'), icon: '🌐', component: WebAttack },
     { id: 'c2-orchestration', name: t('dashboard.offensive.modules.c2Control'), icon: '⚡', component: C2Orchestration },
     { id: 'bas', name: t('dashboard.offensive.modules.bas'), icon: '💥', component: BAS },
-    { id: 'offensive-gateway', name: t('dashboard.offensive.modules.gateway'), icon: '⚔️', component: OffensiveGateway }
+    { id: 'offensive-gateway', name: t('dashboard.offensive.modules.gateway'), icon: '⚔️', component: OffensiveGateway },
+    { id: 'behavioral-analyzer', name: t('dashboard.defensive.modules.behavioral', 'BEHAVIORAL ANALYZER'), icon: '🧠', component: BehavioralAnalyzer },
+    { id: 'traffic-analyzer', name: t('dashboard.defensive.modules.traffic', 'TRAFFIC ANALYZER'), icon: '🔒', component: TrafficAnalyzer },
+    { id: 'mav-detection', name: t('dashboard.defensive.modules.mav', 'MAV DETECTION 🇧🇷'), icon: '🛡️', component: MAVDetection }
   ];
 
   const currentModule = modules.find(m => m.id === activeModule);
   const ModuleComponent = currentModule?.component;
 
   return (
-    <div className={styles.offensiveDashboard}>
-      <SkipLink href="#main-content">{t('accessibility.skipToMain')}</SkipLink>
+    <article
+      className={styles.offensiveDashboard}
+      role="article"
+      aria-labelledby="offensive-dashboard-title"
+      data-maximus-module="offensive-dashboard"
+      data-maximus-navigable="true"
+      data-maximus-version="2.0"
+      data-maximus-category="red-team">
+
+      <SkipLink href="#offensive-tool-content">{t('accessibility.skipToMain')}</SkipLink>
 
       <QueryErrorBoundary>
         <OffensiveHeader
@@ -97,8 +126,23 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         />
       </QueryErrorBoundary>
 
-      <div className={styles.mainContent}>
-        <div id="main-content" className={styles.moduleArea} role="main">
+      <section
+        className={styles.mainContent}
+        role="region"
+        aria-label={t('dashboard.offensive.workspace', 'Offensive operations workspace')}
+        data-maximus-section="workspace">
+
+        <section
+          id="offensive-tool-content"
+          className={styles.moduleArea}
+          role="region"
+          aria-label={t('dashboard.offensive.activeTool', 'Active offensive tool')}
+          aria-live="polite"
+          aria-atomic="false"
+          data-maximus-section="active-tool"
+          data-maximus-tool={activeModule}
+          data-maximus-interactive="true">
+
           <Suspense fallback={<LoadingFallback />}>
             {ModuleComponent && (
               <WidgetErrorBoundary widgetName={currentModule.name}>
@@ -108,12 +152,20 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
               </WidgetErrorBoundary>
             )}
           </Suspense>
-        </div>
+        </section>
 
-        <WidgetErrorBoundary widgetName="Live Executions">
-          <OffensiveSidebar executions={executions} ariaLabel={t('accessibility.executionsSidebar')} />
-        </WidgetErrorBoundary>
-      </div>
+        <aside
+          role="complementary"
+          aria-label={t('accessibility.executionsSidebar', 'Live executions sidebar')}
+          data-maximus-section="sidebar"
+          data-maximus-live="true"
+          data-maximus-monitor="executions">
+
+          <WidgetErrorBoundary widgetName="Live Executions">
+            <OffensiveSidebar executions={executions} ariaLabel={t('accessibility.executionsSidebar')} />
+          </WidgetErrorBoundary>
+        </aside>
+      </section>
 
       <DashboardFooter
         moduleName="OFFENSIVE OPERATIONS"
@@ -129,7 +181,7 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         ]}
         showTimestamp={true}
       />
-    </div>
+    </article>
   );
 };
 

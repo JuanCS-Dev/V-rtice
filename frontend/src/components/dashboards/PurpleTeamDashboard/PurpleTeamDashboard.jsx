@@ -8,7 +8,20 @@
  * - GAP ANALYSIS: Identification of detection blind spots
  * - UNIFIED TIMELINE: Synchronized view of attacks and detections
  *
- * @version 1.0.0
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - Fully navigable by Maximus AI via data-maximus-* attributes
+ * - WCAG 2.1 AAA compliant
+ * - Semantic HTML5 structure (article, section)
+ * - ARIA 1.2 patterns for dynamic view switching
+ *
+ * Maximus can:
+ * - Identify dashboard via data-maximus-module="purple-team-dashboard"
+ * - Monitor correlations via data-maximus-monitor="correlations"
+ * - Switch views via data-maximus-view attributes
+ * - Track coverage metrics in real-time
+ *
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState } from 'react';
@@ -34,8 +47,16 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
   };
 
   return (
-    <div className={styles.purpleDashboard}>
-      <SkipLink href="#main-content">{t('accessibility.skipToMain')}</SkipLink>
+    <article
+      className={styles.purpleDashboard}
+      role="article"
+      aria-labelledby="purple-team-dashboard-title"
+      data-maximus-module="purple-team-dashboard"
+      data-maximus-navigable="true"
+      data-maximus-version="2.0"
+      data-maximus-category="purple-team">
+
+      <SkipLink href="#purple-team-content">{t('accessibility.skipToMain')}</SkipLink>
 
       <PurpleHeader
         onBack={handleBack}
@@ -49,7 +70,18 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
         }}
       />
 
-      <div id="main-content" className={styles.content} role="main">
+      <section
+        id="purple-team-content"
+        className={styles.content}
+        role="region"
+        aria-label={t('dashboard.purple.content', 'Purple team operations content')}
+        aria-live="polite"
+        aria-atomic="false"
+        data-maximus-section="content"
+        data-maximus-view={activeView}
+        data-maximus-monitor="correlations"
+        data-maximus-interactive="true">
+
         {activeView === 'split' && (
           <SplitView
             attackData={attackData}
@@ -75,7 +107,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
             loading={loading}
           />
         )}
-      </div>
+      </section>
 
       <DashboardFooter
         moduleName="PURPLE TEAM OPERATIONS"
@@ -90,7 +122,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
           { label: 'CORRELATIONS', value: correlations.length }
         ]}
       />
-    </div>
+    </article>
   );
 };
 

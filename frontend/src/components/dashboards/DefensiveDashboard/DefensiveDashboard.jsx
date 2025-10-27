@@ -2,6 +2,21 @@
  * DEFENSIVE OPERATIONS DASHBOARD
  * Blue Team - Threat Detection & Monitoring
  * Production-Ready | Quality-First | Real Data Only
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - Fully navigable by Maximus AI via data-maximus-* attributes
+ * - WCAG 2.1 AAA compliant
+ * - Semantic HTML5 structure (article, section, aside)
+ * - ARIA 1.2 patterns for landmarks and live regions
+ *
+ * Maximus can:
+ * - Identify dashboard via data-maximus-module="defensive-dashboard"
+ * - Monitor threats via data-maximus-monitor="threats"
+ * - Navigate tools via data-maximus-tool attributes
+ * - Access real-time alerts via data-maximus-live="true"
+ *
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -68,9 +83,17 @@ const DefensiveDashboard = ({ setCurrentView }) => {
   const ActiveComponent = activeModuleData?.component;
 
   return (
-    <div className={styles.dashboardContainer}>
-      {/* Scanline Effect */}
-      <div className={styles.scanlineOverlay}></div>
+    <article
+      className={styles.dashboardContainer}
+      role="article"
+      aria-labelledby="defensive-dashboard-title"
+      data-maximus-module="defensive-dashboard"
+      data-maximus-navigable="true"
+      data-maximus-version="2.0"
+      data-maximus-category="blue-team">
+
+      {/* Scanline Effect - Decorative */}
+      <div className={styles.scanlineOverlay} aria-hidden="true"></div>
 
       {/* Header */}
       <DefensiveHeader
@@ -84,20 +107,43 @@ const DefensiveDashboard = ({ setCurrentView }) => {
       />
 
       {/* Main Content Area */}
-      <main className={styles.dashboardMain}>
+      <section
+        className={styles.dashboardMain}
+        role="region"
+        aria-label="Defensive operations workspace"
+        data-maximus-section="workspace">
+
         {/* Sidebar - Real-time Alerts */}
-        <DefensiveSidebar
-          alerts={alerts}
-          metrics={metrics}
-        />
+        <aside
+          role="complementary"
+          aria-label="Real-time security alerts"
+          data-maximus-section="sidebar"
+          data-maximus-live="true"
+          data-maximus-monitor="alerts">
+
+          <DefensiveSidebar
+            alerts={alerts}
+            metrics={metrics}
+          />
+        </aside>
 
         {/* Active Module Content */}
-        <div className={styles.dashboardContent}>
+        <section
+          id="defensive-tool-content"
+          className={styles.dashboardContent}
+          role="region"
+          aria-label="Active defensive tool"
+          aria-live="polite"
+          aria-atomic="false"
+          data-maximus-section="active-tool"
+          data-maximus-tool={activeModule}
+          data-maximus-interactive="true">
+
           <ModuleContainer>
-            {ActiveComponent ? <ActiveComponent /> : <div>Module not found</div>}
+            {ActiveComponent ? <ActiveComponent /> : <div role="alert">Module not found</div>}
           </ModuleContainer>
-        </div>
-      </main>
+        </section>
+      </section>
 
       {/* Footer */}
       <DashboardFooter
@@ -113,7 +159,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
           { label: 'MONITORED', value: metrics?.monitored || 0 }
         ]}
       />
-    </div>
+    </article>
   );
 };
 
