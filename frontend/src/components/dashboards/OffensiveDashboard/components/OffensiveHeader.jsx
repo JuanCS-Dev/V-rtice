@@ -1,8 +1,27 @@
 /**
- * OffensiveHeader - Red Team Ops Header
- * Displays offensive metrics, module navigation, and control buttons
- * Memoized for performance optimization with MemoizedMetricCard
- * i18n: Fully internationalized with pt-BR and en-US support
+ * OFFENSIVE HEADER - Red Team Operations Header
+ *
+ * Semantic header with:
+ * - Real-time offensive metrics
+ * - Module navigation
+ * - Control buttons
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <header> with data-maximus-section="header"
+ * - Metrics as semantic description list (<dl>, <dt>, <dd>)
+ * - <nav> with proper ARIA for keyboard navigation
+ * - All interactive elements keyboard accessible
+ *
+ * Maximus can:
+ * - Identify header via data-maximus-section="header"
+ * - Access metrics via data-maximus-metrics="offensive"
+ * - Navigate modules via data-maximus-nav="modules"
+ *
+ * Performance: React.memo optimization
+ * i18n: react-i18next (pt-BR, en-US)
+ *
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React from 'react';
@@ -30,26 +49,38 @@ export const OffensiveHeader = React.memo(({
   });
 
   return (
-    <header className={styles.header}>
+    <header
+      className={styles.header}
+      role="banner"
+      data-maximus-section="header"
+      data-maximus-category="offensive">
+
       <div className={styles.topBar}>
         <div className={styles.titleSection}>
           <button
             onClick={onBack}
             className={styles.backButton}
             aria-label={t('navigation.back_to_hub')}
-          >
+            data-maximus-action="back">
             ← {t('common.back').toUpperCase()}
           </button>
+
           <div className={styles.title}>
             <span className={styles.icon} aria-hidden="true">⚔️</span>
             <div>
-              <h1>{t('dashboard.offensive.title')}</h1>
+              <h1 id="offensive-dashboard-title">{t('dashboard.offensive.title')}</h1>
               <p className={styles.subtitle}>{t('dashboard.offensive.subtitle')}</p>
             </div>
           </div>
         </div>
 
-        <div className={styles.metrics}>
+        <section
+          className={styles.metrics}
+          role="region"
+          aria-label={t('dashboard.offensive.metrics.title', 'Offensive metrics')}
+          data-maximus-section="metrics"
+          data-maximus-metrics="offensive">
+
           <MemoizedMetricCard
             label={t('dashboard.offensive.metrics.activeScans')}
             value={metrics.activeScans || 0}
@@ -74,10 +105,16 @@ export const OffensiveHeader = React.memo(({
             icon="⚡"
             loading={loading}
           />
-        </div>
+        </section>
       </div>
 
-      <nav className={styles.moduleNav} role="navigation" aria-label={t('dashboard.offensive.title')}>
+      <nav
+        className={styles.moduleNav}
+        role="navigation"
+        aria-label={t('dashboard.offensive.navigation', 'Offensive tools navigation')}
+        data-maximus-section="navigation"
+        data-maximus-nav="modules">
+
         {modules.map((module, index) => (
           <button
             key={module.id}
@@ -85,7 +122,9 @@ export const OffensiveHeader = React.memo(({
               onClick: () => onModuleChange(module.id),
               className: `${styles.moduleButton} ${activeModule === module.id ? styles.active : ''}`,
               'aria-label': `${t('navigation.access_module')}: ${module.name}`,
-              'aria-current': activeModule === module.id ? 'page' : undefined
+              'aria-current': activeModule === module.id ? 'page' : undefined,
+              'data-maximus-item': module.id,
+              'data-maximus-active': activeModule === module.id ? 'true' : 'false'
             })}
           >
             <span className={styles.moduleIcon} aria-hidden="true">{module.icon}</span>
