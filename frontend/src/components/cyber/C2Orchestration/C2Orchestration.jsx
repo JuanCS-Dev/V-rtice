@@ -4,10 +4,27 @@ import { AttackChains } from './components/AttackChains';
 import { useC2 } from './hooks/useC2';
 
 /**
- * C2Orchestration - Command & Control Orchestration Widget
+ * C2 ORCHESTRATION - Command & Control Orchestration Tool
  *
  * Gerencia sessões Cobalt Strike/Metasploit, executa comandos, attack chains
  * Visual: Matrix-style com sessões ativas e comandos em tempo real
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="c2-orchestration"
+ * - <header> for tool header with stats
+ * - <nav> for tab navigation with ARIA tablist pattern
+ * - <section> for content area (sessions/chains/console)
+ * - <footer> for status bar
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="c2-orchestration"
+ * - Navigate tabs via role="tablist" and aria-selected
+ * - Monitor execution via data-maximus-status="executing"
+ * - Access active sessions via semantic structure
+ *
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 export const C2Orchestration = () => {
   const [activeTab, setActiveTab] = useState('sessions'); // 'sessions' | 'chains' | 'console'
@@ -23,6 +40,28 @@ export const C2Orchestration = () => {
     refreshSessions,
   } = useC2();
 
+  const tabs = ['sessions', 'chains', 'console'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabs[tabs.length - 1]);
+    }
+  };
+
   const [sessionConfig, setSessionConfig] = useState({
     framework: 'metasploit', // 'metasploit' | 'cobalt_strike'
     targetHost: '',
@@ -32,13 +71,24 @@ export const C2Orchestration = () => {
   });
 
   return (
-    <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
+    <article
+      className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
+      role="article"
+      aria-labelledby="c2-orchestration-title"
+      data-maximus-tool="c2-orchestration"
+      data-maximus-category="offensive"
+      data-maximus-status={isExecuting ? 'executing' : 'ready'}>
+
       {/* Header */}
-      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
+      <header
+        className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20"
+        data-maximus-section="tool-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
-              <span className="text-3xl">🎯</span>
+            <h2
+              id="c2-orchestration-title"
+              className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
+              <span className="text-3xl" aria-hidden="true">🎯</span>
               C2 ORCHESTRATION
             </h2>
             <p className="text-red-400/60 text-sm mt-1">
@@ -79,53 +129,81 @@ export const C2Orchestration = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mt-4">
+        <nav
+          className="flex gap-2 mt-4"
+          role="tablist"
+          aria-label="C2 orchestration views"
+          data-maximus-section="tab-navigation">
           <button
+            id="sessions-tab"
+            role="tab"
+            aria-selected={activeTab === 'sessions'}
+            aria-controls="sessions-panel"
+            tabIndex={activeTab === 'sessions' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('sessions')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'sessions'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            🎮 SESSIONS
+            data-maximus-tab="sessions">
+            <span aria-hidden="true">🎮</span> SESSIONS
           </button>
 
           <button
+            id="chains-tab"
+            role="tab"
+            aria-selected={activeTab === 'chains'}
+            aria-controls="chains-panel"
+            tabIndex={activeTab === 'chains' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('chains')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'chains'
                 ? 'bg-orange-400/20 text-orange-400 border-b-2 border-orange-400'
                 : 'bg-black/30 text-orange-400/50 hover:text-orange-400'
             }`}
-          >
-            ⛓️ ATTACK CHAINS
+            data-maximus-tab="chains">
+            <span aria-hidden="true">⛓️</span> ATTACK CHAINS
           </button>
 
           <button
+            id="console-tab"
+            role="tab"
+            aria-selected={activeTab === 'console'}
+            aria-controls="console-panel"
+            tabIndex={activeTab === 'console' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('console')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'console'
                 ? 'bg-green-400/20 text-green-400 border-b-2 border-green-400'
                 : 'bg-black/30 text-green-400/50 hover:text-green-400'
             }`}
-          >
-            💻 CONSOLE
+            data-maximus-tab="console">
+            <span aria-hidden="true">💻</span> CONSOLE
           </button>
 
           <button
             onClick={refreshSessions}
             className="ml-auto px-4 py-2 bg-black/30 text-red-400/70 hover:text-red-400 rounded-t border border-red-400/30 hover:border-red-400 transition-all"
           >
-            🔄 REFRESH
+            <span aria-hidden="true">🔄</span> REFRESH
           </button>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6 custom-scrollbar">
+      <section
+        className="flex-1 overflow-auto p-6 custom-scrollbar"
+        role="region"
+        aria-label="C2 orchestration content"
+        data-maximus-section="content">
+
         {activeTab === 'sessions' && (
-          <SessionManager
+          <div id="sessions-panel" role="tabpanel" aria-labelledby="sessions-tab" tabIndex={0}>
+            <SessionManager
             sessions={sessions}
             activeSessions={activeSessions}
             sessionConfig={sessionConfig}
@@ -135,18 +213,21 @@ export const C2Orchestration = () => {
             onPassSession={passSession}
             isExecuting={isExecuting}
           />
+          </div>
         )}
 
         {activeTab === 'chains' && (
-          <AttackChains
+          <div id="chains-panel" role="tabpanel" aria-labelledby="chains-tab" tabIndex={0}>
+            <AttackChains
             chains={attackChains}
             onExecuteChain={executeChain}
             isExecuting={isExecuting}
           />
+          </div>
         )}
 
         {activeTab === 'console' && (
-          <div className="max-w-6xl mx-auto">
+          <div id="console-panel" role="tabpanel" aria-labelledby="console-tab" tabIndex={0} className="max-w-6xl mx-auto">
             <div className="bg-black border-2 border-green-400/30 rounded-lg p-4 font-mono">
               <div className="text-green-400 mb-4">
                 <span className="text-green-400/60">root@maximus-c2:~#</span> _
@@ -159,13 +240,16 @@ export const C2Orchestration = () => {
             </div>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Footer */}
-      <div className="border-t border-red-400/30 bg-black/50 p-3">
+      <footer
+        className="border-t border-red-400/30 bg-black/50 p-3"
+        role="contentinfo"
+        data-maximus-section="status-bar">
         <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
-            <span>STATUS: {isExecuting ? '🔴 EXECUTING' : '🟢 READY'}</span>
+            <span role="status" aria-live="polite">STATUS: {isExecuting ? '🔴 EXECUTING' : '🟢 READY'}</span>
             <span>FRAMEWORKS: Cobalt Strike v4.9 | Metasploit v6.3</span>
             <span>MODE: ORCHESTRATION</span>
           </div>
@@ -173,7 +257,7 @@ export const C2Orchestration = () => {
             C2 ORCHESTRATION v3.0 | MAXIMUS AI KILL CHAIN
           </div>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -190,7 +274,7 @@ export const C2Orchestration = () => {
           background: rgba(239, 68, 68, 0.5);
         }
       `}</style>
-    </div>
+    </article>
   );
 };
 

@@ -7,10 +7,27 @@ import { useNetworkRecon } from './hooks/useNetworkRecon';
 import { AskMaximusButton } from '../../shared/AskMaximusButton';
 
 /**
- * NetworkRecon - Network Reconnaissance Widget
+ * NETWORK RECON - Network Reconnaissance Tool
  *
  * Varredura de rede com Masscan + Nmap + Service Detection
  * Visual: Hacker cinematográfico com animações de scan em tempo real
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="network-recon"
+ * - <header> for tool header with stats
+ * - <nav> for tab navigation with ARIA tablist pattern
+ * - <section> for content area (scan/active/history)
+ * - <footer> for status bar
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="network-recon"
+ * - Navigate tabs via role="tablist" and aria-selected
+ * - Monitor active scans via data-maximus-status="scanning"
+ * - Access scan results via semantic structure
+ *
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 export const NetworkRecon = () => {
   const [activeTab, setActiveTab] = useState('scan'); // 'scan' | 'active' | 'history'
@@ -32,6 +49,28 @@ export const NetworkRecon = () => {
     osDetection: false,
   });
 
+  const tabs = ['scan', 'active', 'history'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabs[tabs.length - 1]);
+    }
+  };
+
   const handleStartScan = async () => {
     const result = await startScan(
       scanConfig.target,
@@ -45,13 +84,24 @@ export const NetworkRecon = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
+    <article
+      className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
+      role="article"
+      aria-labelledby="network-recon-title"
+      data-maximus-tool="network-recon"
+      data-maximus-category="offensive"
+      data-maximus-status={isScanning ? 'scanning' : 'ready'}>
+
       {/* Header */}
-      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
+      <header
+        className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20"
+        data-maximus-section="tool-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
-              <span className="text-3xl">🔍</span>
+            <h2
+              id="network-recon-title"
+              className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
+              <span className="text-3xl" aria-hidden="true">🔍</span>
               NETWORK RECONNAISSANCE
             </h2>
             <p className="text-red-400/60 text-sm mt-1">
@@ -98,58 +148,84 @@ export const NetworkRecon = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mt-4">
+        <nav
+          className="flex gap-2 mt-4"
+          role="tablist"
+          aria-label="Network recon views"
+          data-maximus-section="tab-navigation">
           <button
+            id="scan-tab"
+            role="tab"
+            aria-selected={activeTab === 'scan'}
+            aria-controls="scan-panel"
+            tabIndex={activeTab === 'scan' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('scan')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'scan'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            🎯 NEW SCAN
+            data-maximus-tab="scan">
+            <span aria-hidden="true">🎯</span> NEW SCAN
           </button>
 
           <button
+            id="active-tab"
+            role="tab"
+            aria-selected={activeTab === 'active'}
+            aria-controls="active-panel"
+            tabIndex={activeTab === 'active' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('active')}
             className={`px-6 py-2 rounded-t font-bold transition-all relative ${
               activeTab === 'active'
                 ? 'bg-orange-400/20 text-orange-400 border-b-2 border-orange-400'
                 : 'bg-black/30 text-orange-400/50 hover:text-orange-400'
             }`}
-          >
-            ⚡ ACTIVE SCANS
+            data-maximus-tab="active">
+            <span aria-hidden="true">⚡</span> ACTIVE SCANS
             {activeScans.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-orange-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse" aria-label={`${activeScans.length} active scans`}>
                 {activeScans.length}
               </span>
             )}
           </button>
 
           <button
+            id="history-tab"
+            role="tab"
+            aria-selected={activeTab === 'history'}
+            aria-controls="history-panel"
+            tabIndex={activeTab === 'history' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('history')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'history'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            📚 HISTORY
+            data-maximus-tab="history">
+            <span aria-hidden="true">📚</span> HISTORY
           </button>
 
           <button
             onClick={refreshScans}
             className="ml-auto px-4 py-2 bg-black/30 text-red-400/70 hover:text-red-400 rounded-t border border-red-400/30 hover:border-red-400 transition-all"
           >
-            🔄 REFRESH
+            <span aria-hidden="true">🔄</span> REFRESH
           </button>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6 custom-scrollbar">
+      <section
+        className="flex-1 overflow-auto p-6 custom-scrollbar"
+        role="region"
+        aria-label="Scan content"
+        data-maximus-section="content">
         {activeTab === 'scan' && (
-          <div className="max-w-4xl mx-auto">
+          <div id="scan-panel" role="tabpanel" aria-labelledby="scan-tab" tabIndex={0} className="max-w-4xl mx-auto">
             <ScanForm
               config={scanConfig}
               onChange={setScanConfig}
@@ -166,25 +242,32 @@ export const NetworkRecon = () => {
         )}
 
         {activeTab === 'active' && (
-          <ActiveScans
-            scans={activeScans}
-            onSelectScan={getScanDetails}
-          />
+          <div id="active-panel" role="tabpanel" aria-labelledby="active-tab" tabIndex={0}>
+            <ActiveScans
+              scans={activeScans}
+              onSelectScan={getScanDetails}
+            />
+          </div>
         )}
 
         {activeTab === 'history' && (
-          <ScanHistory
-            scans={scans.filter(s => s.status === 'completed' || s.status === 'failed')}
-            onSelectScan={getScanDetails}
-          />
+          <div id="history-panel" role="tabpanel" aria-labelledby="history-tab" tabIndex={0}>
+            <ScanHistory
+              scans={scans.filter(s => s.status === 'completed' || s.status === 'failed')}
+              onSelectScan={getScanDetails}
+            />
+          </div>
         )}
-      </div>
+      </section>
 
       {/* Footer */}
-      <div className="border-t border-red-400/30 bg-black/50 p-3">
+      <footer
+        className="border-t border-red-400/30 bg-black/50 p-3"
+        role="contentinfo"
+        data-maximus-section="status-bar">
         <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
-            <span>STATUS: {isScanning ? '🟢 SCANNING' : '🔵 READY'}</span>
+            <span role="status" aria-live="polite">STATUS: {isScanning ? '🟢 SCANNING' : '🔵 READY'}</span>
             <span>ENGINE: Masscan v1.3.2 + Nmap v7.94</span>
             <span>MODE: {scanConfig.scanType.toUpperCase()}</span>
           </div>
@@ -192,7 +275,7 @@ export const NetworkRecon = () => {
             NETWORK RECON TOOLKIT v3.0 | MAXIMUS AI INTEGRATION
           </div>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -209,7 +292,7 @@ export const NetworkRecon = () => {
           background: rgba(34, 211, 238, 0.5);
         }
       `}</style>
-    </div>
+    </article>
   );
 };
 

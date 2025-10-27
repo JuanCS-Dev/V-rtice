@@ -12,6 +12,28 @@ export const OffensiveGateway = () => {
   const [executions, setExecutions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const tabs = ['workflows', 'executions', 'builder'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabs[tabs.length - 1]);
+    }
+  };
+
   useEffect(() => {
     loadWorkflows();
   }, []);
@@ -78,13 +100,24 @@ export const OffensiveGateway = () => {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
+    <article
+      className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
+      role="article"
+      aria-labelledby="offensive-gateway-title"
+      data-maximus-tool="offensive-gateway"
+      data-maximus-category="offensive"
+      data-maximus-status={isLoading ? 'loading' : 'ready'}>
+
       {/* Header */}
-      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20">
+      <header
+        className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-orange-900/20"
+        data-maximus-section="tool-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
-              <span className="text-3xl">⚔️</span>
+            <h2
+              id="offensive-gateway-title"
+              className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
+              <span className="text-3xl" aria-hidden="true">⚔️</span>
               OFFENSIVE GATEWAY
             </h2>
             <p className="text-red-400/60 text-sm mt-1">
@@ -111,27 +144,73 @@ export const OffensiveGateway = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mt-4">
-          {['workflows', 'executions', 'builder'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-t font-bold transition-all ${
-                activeTab === tab
-                  ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
-                  : 'bg-black/30 text-red-400/50 hover:text-red-400'
-              }`}
-            >
-              {tab.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
+        <nav
+          className="flex gap-2 mt-4"
+          role="tablist"
+          aria-label="Offensive gateway views"
+          data-maximus-section="tab-navigation">
+          <button
+            id="workflows-tab"
+            role="tab"
+            aria-selected={activeTab === 'workflows'}
+            aria-controls="workflows-panel"
+            tabIndex={activeTab === 'workflows' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
+            onClick={() => setActiveTab('workflows')}
+            className={`px-6 py-2 rounded-t font-bold transition-all ${
+              activeTab === 'workflows'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
+            }`}
+            data-maximus-tab="workflows">
+            WORKFLOWS
+          </button>
+
+          <button
+            id="executions-tab"
+            role="tab"
+            aria-selected={activeTab === 'executions'}
+            aria-controls="executions-panel"
+            tabIndex={activeTab === 'executions' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
+            onClick={() => setActiveTab('executions')}
+            className={`px-6 py-2 rounded-t font-bold transition-all ${
+              activeTab === 'executions'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
+            }`}
+            data-maximus-tab="executions">
+            EXECUTIONS
+          </button>
+
+          <button
+            id="builder-tab"
+            role="tab"
+            aria-selected={activeTab === 'builder'}
+            aria-controls="builder-panel"
+            tabIndex={activeTab === 'builder' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
+            onClick={() => setActiveTab('builder')}
+            className={`px-6 py-2 rounded-t font-bold transition-all ${
+              activeTab === 'builder'
+                ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
+                : 'bg-black/30 text-red-400/50 hover:text-red-400'
+            }`}
+            data-maximus-tab="builder">
+            BUILDER
+          </button>
+        </nav>
+      </header>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <section
+        className="flex-1 overflow-auto p-6"
+        role="region"
+        aria-label="Offensive gateway content"
+        data-maximus-section="content">
+
         {activeTab === 'workflows' && (
-          <div className="max-w-6xl mx-auto">
+          <div id="workflows-panel" role="tabpanel" aria-labelledby="workflows-tab" tabIndex={0} className="max-w-6xl mx-auto">
             <div className="mb-6">
               <h3 className="text-red-400 font-bold text-xl mb-4 flex items-center gap-2">
                 <span>�</span>
@@ -205,7 +284,7 @@ export const OffensiveGateway = () => {
         )}
 
         {activeTab === 'executions' && (
-          <div className="max-w-6xl mx-auto space-y-4">
+          <div id="executions-panel" role="tabpanel" aria-labelledby="executions-tab" tabIndex={0} className="max-w-6xl mx-auto space-y-4">
             {executions.length === 0 ? (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4 opacity-50">�</div>
@@ -298,7 +377,7 @@ export const OffensiveGateway = () => {
         )}
 
         {activeTab === 'builder' && (
-          <div className="max-w-4xl mx-auto">
+          <div id="builder-panel" role="tabpanel" aria-labelledby="builder-tab" tabIndex={0} className="max-w-4xl mx-auto">
             <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-8 text-center">
               <div className="text-6xl mb-4">='</div>
               <h3 className="text-red-400 font-bold text-2xl mb-4">
@@ -313,20 +392,23 @@ export const OffensiveGateway = () => {
             </div>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Footer */}
-      <div className="border-t border-red-400/30 bg-black/50 p-3">
+      <footer
+        className="border-t border-red-400/30 bg-black/50 p-3"
+        role="contentinfo"
+        data-maximus-section="status-bar">
         <div className="flex justify-between text-xs text-red-400/60">
           <div className="flex gap-4">
-            <span>STATUS: {isLoading ? '=� LOADING' : '=� READY'}</span>
+            <span role="status" aria-live="polite">STATUS: {isLoading ? '=� LOADING' : '=� READY'}</span>
             <span>SERVICES: 6 Connected</span>
             <span>RBAC: Enabled</span>
           </div>
           <div>OFFENSIVE GATEWAY v3.0 | ORCHESTRATION ENGINE</div>
         </div>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 };
 

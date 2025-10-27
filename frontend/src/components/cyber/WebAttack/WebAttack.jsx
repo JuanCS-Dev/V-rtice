@@ -4,10 +4,27 @@ import { ScanResults } from './components/ScanResults';
 import { useWebAttack } from './hooks/useWebAttack';
 
 /**
- * WebAttack - Web Attack Surface Widget
+ * WEB ATTACK - Web Attack Surface Tool
  *
  * Scan de superfície web: OWASP Top 10, SQLi, XSS, SSRF, etc
  * Visual: Terminal de ataque com resultados em tempo real
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="web-attack"
+ * - <header> for tool header with stats
+ * - <nav> for tab navigation with ARIA tablist pattern
+ * - <section> for content area (scan/results/history)
+ * - <footer> for status bar
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="web-attack"
+ * - Navigate tabs via role="tablist" and aria-selected
+ * - Monitor scan status via data-maximus-status="scanning"
+ * - Access scan results via semantic structure
+ *
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 export const WebAttack = () => {
   const [activeTab, setActiveTab] = useState('scan'); // 'scan' | 'results' | 'history'
@@ -20,6 +37,28 @@ export const WebAttack = () => {
     runTest: _runTest,
     getReport,
   } = useWebAttack();
+
+  const tabs = ['scan', 'results', 'history'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabs[tabs.length - 1]);
+    }
+  };
 
   const [scanConfig, setScanConfig] = useState({
     url: '',
@@ -48,13 +87,24 @@ export const WebAttack = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
+    <article
+      className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
+      role="article"
+      aria-labelledby="web-attack-title"
+      data-maximus-tool="web-attack"
+      data-maximus-category="offensive"
+      data-maximus-status={isScanning ? 'scanning' : 'ready'}>
+
       {/* Header */}
-      <div className="border-b border-orange-400/30 p-4 bg-gradient-to-r from-orange-900/20 to-red-900/20">
+      <header
+        className="border-b border-orange-400/30 p-4 bg-gradient-to-r from-orange-900/20 to-red-900/20"
+        data-maximus-section="tool-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-orange-400 tracking-wider flex items-center gap-3">
-              <span className="text-3xl">🌐</span>
+            <h2
+              id="web-attack-title"
+              className="text-2xl font-bold text-orange-400 tracking-wider flex items-center gap-3">
+              <span className="text-3xl" aria-hidden="true">🌐</span>
               WEB ATTACK SURFACE
             </h2>
             <p className="text-orange-400/60 text-sm mt-1">
@@ -88,46 +138,73 @@ export const WebAttack = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mt-4">
+        <nav
+          className="flex gap-2 mt-4"
+          role="tablist"
+          aria-label="Web attack views"
+          data-maximus-section="tab-navigation">
           <button
+            id="scan-tab"
+            role="tab"
+            aria-selected={activeTab === 'scan'}
+            aria-controls="scan-panel"
+            tabIndex={activeTab === 'scan' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('scan')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'scan'
                 ? 'bg-orange-400/20 text-orange-400 border-b-2 border-orange-400'
                 : 'bg-black/30 text-orange-400/50 hover:text-orange-400'
             }`}
-          >
-            🎯 NEW SCAN
+            data-maximus-tab="scan">
+            <span aria-hidden="true">🎯</span> NEW SCAN
           </button>
 
           <button
+            id="results-tab"
+            role="tab"
+            aria-selected={activeTab === 'results'}
+            aria-controls="results-panel"
+            tabIndex={activeTab === 'results' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('results')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'results'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            📊 RESULTS
+            data-maximus-tab="results">
+            <span aria-hidden="true">📊</span> RESULTS
           </button>
 
           <button
+            id="history-tab"
+            role="tab"
+            aria-selected={activeTab === 'history'}
+            aria-controls="history-panel"
+            tabIndex={activeTab === 'history' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('history')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'history'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            📚 HISTORY
+            data-maximus-tab="history">
+            <span aria-hidden="true">📚</span> HISTORY
           </button>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6 custom-scrollbar">
+      <section
+        className="flex-1 overflow-auto p-6 custom-scrollbar"
+        role="region"
+        aria-label="Web attack content"
+        data-maximus-section="content">
+
         {activeTab === 'scan' && (
-          <div className="max-w-4xl mx-auto">
+          <div id="scan-panel" role="tabpanel" aria-labelledby="scan-tab" tabIndex={0} className="max-w-4xl mx-auto">
             <ScanForm
               config={scanConfig}
               onChange={setScanConfig}
@@ -138,7 +215,7 @@ export const WebAttack = () => {
         )}
 
         {activeTab === 'results' && (
-          <div className="max-w-6xl mx-auto">
+          <div id="results-panel" role="tabpanel" aria-labelledby="results-tab" tabIndex={0} className="max-w-6xl mx-auto">
             {scanResults ? (
               <ScanResults results={scanResults} />
             ) : (
@@ -156,7 +233,7 @@ export const WebAttack = () => {
         )}
 
         {activeTab === 'history' && (
-          <div className="max-w-6xl mx-auto space-y-4">
+          <div id="history-panel" role="tabpanel" aria-labelledby="history-tab" tabIndex={0} className="max-w-6xl mx-auto space-y-4">
             {scans.length > 0 ? (
               scans.map((scan, idx) => (
                 <div
@@ -213,13 +290,16 @@ export const WebAttack = () => {
             )}
           </div>
         )}
-      </div>
+      </section>
 
       {/* Footer */}
-      <div className="border-t border-orange-400/30 bg-black/50 p-3">
+      <footer
+        className="border-t border-orange-400/30 bg-black/50 p-3"
+        role="contentinfo"
+        data-maximus-section="status-bar">
         <div className="flex justify-between items-center text-xs text-orange-400/60">
           <div className="flex gap-4">
-            <span>STATUS: {isScanning ? '🟠 SCANNING' : '🟢 READY'}</span>
+            <span role="status" aria-live="polite">STATUS: {isScanning ? '🟠 SCANNING' : '🟢 READY'}</span>
             <span>ENGINE: ZAP Proxy + Custom Modules</span>
             <span>MODE: {scanConfig.scanProfile.toUpperCase()}</span>
           </div>
@@ -227,7 +307,7 @@ export const WebAttack = () => {
             WEB ATTACK SURFACE v3.0 | MAXIMUS AI INTEGRATION
           </div>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -244,7 +324,7 @@ export const WebAttack = () => {
           background: rgba(251, 146, 60, 0.5);
         }
       `}</style>
-    </div>
+    </article>
   );
 };
 

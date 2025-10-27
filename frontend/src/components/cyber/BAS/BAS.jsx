@@ -4,10 +4,27 @@ import { PurpleTeam } from './components/PurpleTeam';
 import { useBAS } from './hooks/useBAS';
 
 /**
- * BAS - Breach & Attack Simulation Widget
+ * BAS - Breach & Attack Simulation Tool
  *
  * Simulação de técnicas MITRE ATT&CK, Purple Team validation
  * Visual: Matrix ATT&CK interativa com heatmap de coverage
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="bas"
+ * - <header> for tool header with stats
+ * - <nav> for tab navigation with ARIA tablist pattern
+ * - <section> for content area (matrix/purple/coverage)
+ * - <footer> for status bar
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="bas"
+ * - Navigate tabs via role="tablist" and aria-selected
+ * - Monitor simulation status via data-maximus-status="simulating"
+ * - Access MITRE ATT&CK matrix via semantic structure
+ *
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 export const BAS = () => {
   const [activeTab, setActiveTab] = useState('matrix'); // 'matrix' | 'purple' | 'coverage'
@@ -21,6 +38,28 @@ export const BAS = () => {
     getCoverage,
     refreshTechniques,
   } = useBAS();
+
+  const tabs = ['matrix', 'purple', 'coverage'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabs[tabs.length - 1]);
+    }
+  };
 
   const [selectedTactic, setSelectedTactic] = useState(null);
   const [simulationConfig, setSimulationConfig] = useState({
@@ -49,13 +88,24 @@ export const BAS = () => {
   const detectionRate = totalSimulations > 0 ? ((detectedSimulations / totalSimulations) * 100).toFixed(1) : 0;
 
   return (
-    <div className="h-full flex flex-col bg-black/20 backdrop-blur-sm">
+    <article
+      className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
+      role="article"
+      aria-labelledby="bas-title"
+      data-maximus-tool="bas"
+      data-maximus-category="offensive"
+      data-maximus-status={isSimulating ? 'simulating' : 'ready'}>
+
       {/* Header */}
-      <div className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-pink-900/20">
+      <header
+        className="border-b border-red-400/30 p-4 bg-gradient-to-r from-red-900/20 to-pink-900/20"
+        data-maximus-section="tool-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
-              <span className="text-3xl">🎭</span>
+            <h2
+              id="bas-title"
+              className="text-2xl font-bold text-red-400 tracking-wider flex items-center gap-3">
+              <span className="text-3xl" aria-hidden="true">🎭</span>
               BREACH & ATTACK SIMULATION
             </h2>
             <p className="text-red-400/60 text-sm mt-1">
@@ -96,53 +146,81 @@ export const BAS = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mt-4">
+        <nav
+          className="flex gap-2 mt-4"
+          role="tablist"
+          aria-label="BAS views"
+          data-maximus-section="tab-navigation">
           <button
+            id="matrix-tab"
+            role="tab"
+            aria-selected={activeTab === 'matrix'}
+            aria-controls="matrix-panel"
+            tabIndex={activeTab === 'matrix' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('matrix')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'matrix'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            🎯 ATT&CK MATRIX
+            data-maximus-tab="matrix">
+            <span aria-hidden="true">🎯</span> ATT&CK MATRIX
           </button>
 
           <button
+            id="purple-tab"
+            role="tab"
+            aria-selected={activeTab === 'purple'}
+            aria-controls="purple-panel"
+            tabIndex={activeTab === 'purple' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('purple')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'purple'
                 ? 'bg-pink-400/20 text-pink-400 border-b-2 border-pink-400'
                 : 'bg-black/30 text-pink-400/50 hover:text-pink-400'
             }`}
-          >
-            🟣 PURPLE TEAM
+            data-maximus-tab="purple">
+            <span aria-hidden="true">🟣</span> PURPLE TEAM
           </button>
 
           <button
+            id="coverage-tab"
+            role="tab"
+            aria-selected={activeTab === 'coverage'}
+            aria-controls="coverage-panel"
+            tabIndex={activeTab === 'coverage' ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
             onClick={() => setActiveTab('coverage')}
             className={`px-6 py-2 rounded-t font-bold transition-all ${
               activeTab === 'coverage'
                 ? 'bg-red-400/20 text-red-400 border-b-2 border-red-400'
                 : 'bg-black/30 text-red-400/50 hover:text-red-400'
             }`}
-          >
-            📊 COVERAGE
+            data-maximus-tab="coverage">
+            <span aria-hidden="true">📊</span> COVERAGE
           </button>
 
           <button
             onClick={refreshTechniques}
             className="ml-auto px-4 py-2 bg-black/30 text-red-400/70 hover:text-red-400 rounded-t border border-red-400/30 hover:border-red-400 transition-all"
           >
-            🔄 REFRESH
+            <span aria-hidden="true">🔄</span> REFRESH
           </button>
-        </div>
-      </div>
+        </nav>
+      </header>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-auto p-6 custom-scrollbar">
+      <section
+        className="flex-1 overflow-auto p-6 custom-scrollbar"
+        role="region"
+        aria-label="BAS content"
+        data-maximus-section="content">
+
         {activeTab === 'matrix' && (
-          <AttackMatrix
+          <div id="matrix-panel" role="tabpanel" aria-labelledby="matrix-tab" tabIndex={0}>
+            <AttackMatrix
             tactics={tactics}
             techniques={techniques}
             selectedTactic={selectedTactic}
@@ -153,19 +231,22 @@ export const BAS = () => {
             isSimulating={isSimulating}
             simulations={simulations}
           />
+          </div>
         )}
 
         {activeTab === 'purple' && (
-          <PurpleTeam
+          <div id="purple-panel" role="tabpanel" aria-labelledby="purple-tab" tabIndex={0}>
+            <PurpleTeam
             simulations={simulations}
             onValidate={validatePurpleTeam}
             isSimulating={isSimulating}
             detectionRate={detectionRate}
           />
+          </div>
         )}
 
         {activeTab === 'coverage' && (
-          <div className="max-w-6xl mx-auto">
+          <div id="coverage-panel" role="tabpanel" aria-labelledby="coverage-tab" tabIndex={0} className="max-w-6xl mx-auto">
             <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-8">
               <h3 className="text-red-400 font-bold text-2xl mb-6 flex items-center gap-3">
                 <span className="text-3xl">📊</span>
@@ -239,13 +320,16 @@ export const BAS = () => {
             </div>
           </div>
         )}
-      </div>
+      </section>
 
       {/* Footer */}
-      <div className="border-t border-red-400/30 bg-black/50 p-3">
+      <footer
+        className="border-t border-red-400/30 bg-black/50 p-3"
+        role="contentinfo"
+        data-maximus-section="status-bar">
         <div className="flex justify-between items-center text-xs text-red-400/60">
           <div className="flex gap-4">
-            <span>STATUS: {isSimulating ? '🟣 SIMULATING' : '🟢 READY'}</span>
+            <span role="status" aria-live="polite">STATUS: {isSimulating ? '🟣 SIMULATING' : '🟢 READY'}</span>
             <span>FRAMEWORK: MITRE ATT&CK v14.0</span>
             <span>MODE: {simulationConfig.platform.toUpperCase()}</span>
           </div>
@@ -253,7 +337,7 @@ export const BAS = () => {
             BREACH & ATTACK SIMULATION v3.0 | MAXIMUS AI POWERED
           </div>
         </div>
-      </div>
+      </footer>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -270,7 +354,7 @@ export const BAS = () => {
           background: rgba(168, 85, 247, 0.5);
         }
       `}</style>
-    </div>
+    </article>
   );
 };
 

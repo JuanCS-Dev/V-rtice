@@ -133,7 +133,8 @@ export const ScanResults = ({ results }) => {
                   }
                 }}
                 tabIndex={0}
-                role="button"
+                role={severity === 'CRITICAL' ? 'alert' : 'button'}
+                aria-live={severity === 'CRITICAL' ? 'assertive' : undefined}
                 aria-expanded={selectedVuln === idx}
                 aria-label={`${vuln.type} vulnerability - ${severity} severity`}
                 className={`

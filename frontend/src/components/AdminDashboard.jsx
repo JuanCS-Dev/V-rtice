@@ -74,7 +74,8 @@ const AdminDashboard = ({ setCurrentView }) => {
         id="main-content"
         className={styles.mainContent}
         role="tabpanel"
-        aria-labelledby={`tab-${activeModule}`}
+        aria-labelledby={`${activeModule}-tab`}
+        tabIndex={0}
       >
         {renderModuleContent()}
       </main>
@@ -192,7 +193,11 @@ const ServiceStatus = ({ name, status, port }) => {
 // Componente de Item de Alerta
 const AlertItem = ({ alert }) => {
   return (
-    <div className={`${styles.alertItem} ${styles[alert.severity]}`}>
+    <div
+      className={`${styles.alertItem} ${styles[alert.severity]}`}
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true">
       <div className={styles.alertHeader}>
         <div className={styles.alertMeta}>
           <span className={styles.alertType}>{alert.type}</span>

@@ -19,9 +19,9 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="region" aria-live="polite" aria-atomic="false">
       <div className="text-orange-400 font-bold mb-4 flex items-center gap-2">
-        <span className="text-2xl animate-pulse">⚡</span>
+        <span className="text-2xl animate-pulse" aria-hidden="true">⚡</span>
         <span>ACTIVE SCANS ({scans.length})</span>
       </div>
 
