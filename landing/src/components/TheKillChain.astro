@@ -1,0 +1,551 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * THE KILL CHAIN SECTION - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Como o organismo neutraliza atacantes.
+ * O diferencial mortal: CONVIDA → CAPTURA → DECIDE → CONTRA-ATACA → LEMBRA
+ *
+ * 5 Fases:
+ * 1. THE INVITATION: Honeypot inteligente atrai atacantes
+ * 2. THE CAPTURE: Células de Langerhans capturam comportamento
+ * 3. THE DECISION: Consciência valida resposta ética
+ * 4. THE COUNTER-ATTACK: Resposta ofensiva automatizada
+ * 5. THE MEMORY: Sistema nunca esquece
+ *
+ * Design: Scroll-triggered animations, dark theme, lethal aesthetic
+ * Visual: Phase progression with icons and descriptions
+ */
+---
+
+<section id="kill-chain" class="kill-chain-section section">
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <div class="section-badge">
+        <span class="badge badge-danger">
+          ⚔️ The Kill Chain
+        </span>
+      </div>
+      <h2 class="section-title">
+        How the Organism <span class="text-gradient">Neutralizes</span> Attackers
+      </h2>
+      <p class="section-subtitle">
+        Five phases. From invitation to annihilation.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- KILL CHAIN PHASES -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="kill-chain-phases">
+      <!-- PHASE 1: THE INVITATION -->
+      <div class="phase-card phase-1">
+        <div class="phase-number">01</div>
+        <div class="phase-content">
+          <div class="phase-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <div class="phase-info">
+            <h3 class="phase-title">The Invitation</h3>
+            <p class="phase-description">
+              <strong>Intelligent honeypots</strong> simulate vulnerabilities.
+              <br />
+              Attacker thinks they found access.
+              <br /><br />
+              <span class="phase-quote">"Come in. Please. Let's talk."</span>
+            </p>
+            <div class="phase-details">
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>Decoy Bayou network</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Fake vulnerabilities (CVE-like)</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Believable bait (credentials, APIs)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 2: THE CAPTURE -->
+      <div class="phase-card phase-2">
+        <div class="phase-number">02</div>
+        <div class="phase-content">
+          <div class="phase-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6"/>
+            </svg>
+          </div>
+          <div class="phase-info">
+            <h3 class="phase-title">The Capture</h3>
+            <p class="phase-description">
+              <strong>Langerhans Cells</strong> (Derme layer) capture attacker behavior.
+              <br />
+              <strong>Theory of Mind</strong> infers: intention, TTP, objectives.
+              <br /><br />
+              <span class="phase-quote">"I understand who you are."</span>
+            </p>
+            <div class="phase-details">
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                <span>Behavioral profiling</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>TTP extraction (MITRE ATT&CK)</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Intent inference (ToM engine)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 3: THE DECISION -->
+      <div class="phase-card phase-3">
+        <div class="phase-number">03</div>
+        <div class="phase-content">
+          <div class="phase-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+          </div>
+          <div class="phase-info">
+            <h3 class="phase-title">The Decision</h3>
+            <p class="phase-description">
+              <strong>Consciousness</strong> evaluates against Constitution:
+              <br />
+              • Real threat? <strong>YES.</strong>
+              <br />
+              • Proportional response? <strong>CALCULATED.</strong>
+              <br />
+              • Human flourishing protected? <strong>VALIDATED.</strong>
+              <br /><br />
+              <span class="phase-quote">"Constitutional authorization granted."</span>
+            </p>
+            <div class="phase-details">
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>4 ethical frameworks evaluate</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Lei Zero check (flourishing)</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Proportionality analysis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 4: THE COUNTER-ATTACK -->
+      <div class="phase-card phase-4">
+        <div class="phase-number">04</div>
+        <div class="phase-content">
+          <div class="phase-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="phase-info">
+            <h3 class="phase-title">The Counter-Attack</h3>
+            <p class="phase-description">
+              <strong>Automated offensive response:</strong>
+              <br />
+              → Maps attacker infrastructure (C2, pivots)
+              <br />
+              → Identifies other targets/campaigns
+              <br />
+              → Implements active countermeasures
+              <br />
+              → Neutralizes operational capability
+              <br /><br />
+              <span class="phase-quote danger">"Digital life terminated."</span>
+            </p>
+            <div class="phase-details">
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>C2 server identification</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Attribution & campaign mapping</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Capability neutralization</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 5: THE MEMORY -->
+      <div class="phase-card phase-5">
+        <div class="phase-number">05</div>
+        <div class="phase-content">
+          <div class="phase-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </div>
+          <div class="phase-info">
+            <h3 class="phase-title">The Memory</h3>
+            <p class="phase-description">
+              <strong>B-Cells</strong> create "antibodies" (signatures).
+              <br />
+              <strong>Clonal expansion</strong> generates specialized agents.
+              <br />
+              <strong>Affinity maturation</strong> improves detection.
+              <br /><br />
+              <span class="phase-quote">"I will never forget you."</span>
+            </p>
+            <div class="phase-details">
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Signature generation (antibodies)</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Agent specialization (clones)</span>
+              </div>
+              <div class="detail-item">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Permanent immunity</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- RESULT STATEMENT -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="result-statement">
+      <div class="result-content">
+        <h3 class="result-title">Result:</h3>
+        <ul class="result-list">
+          <li><strong>Attacker neutralized.</strong> Infrastructure mapped and disabled.</li>
+          <li><strong>Network protected.</strong> Threat contained and eliminated.</li>
+          <li><strong>Organism evolved.</strong> Immune memory updated.</li>
+          <li><strong>Next attack: IMPOSSIBLE.</strong> Permanent immunity established.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark Background -->
+  <div class="kill-chain-bg" aria-hidden="true"></div>
+</section>
+
+<style>
+  .kill-chain-section {
+    position: relative;
+    background: var(--color-bg-primary);
+    overflow: hidden;
+  }
+
+  .kill-chain-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(239, 68, 68, 0.1) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* KILL CHAIN PHASES */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .kill-chain-phases {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-3xl);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .phase-card {
+    position: relative;
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border-default);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-2xl);
+    transition: all var(--transition-base);
+  }
+
+  .phase-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateX(8px);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  .phase-number {
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    color: var(--color-border-default);
+    line-height: 1;
+  }
+
+  .phase-content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+    padding-left: var(--space-3xl);
+  }
+
+  .phase-icon {
+    color: var(--color-accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+  }
+
+  .phase-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .phase-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .phase-description {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .phase-description strong {
+    color: var(--color-accent-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .phase-quote {
+    display: block;
+    margin-top: var(--space-md);
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--color-text-primary);
+    padding: var(--space-md);
+    background: rgba(239, 68, 68, 0.05);
+    border-left: 4px solid var(--color-accent-primary);
+    border-radius: var(--radius-md);
+  }
+
+  .phase-quote.danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* PHASE DETAILS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .phase-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+  }
+
+  .detail-item svg {
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESULT STATEMENT */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .result-statement {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-3xl);
+    background: linear-gradient(135deg,
+      rgba(239, 68, 68, 0.1) 0%,
+      rgba(249, 115, 22, 0.1) 100%
+    );
+    border: 2px solid var(--color-accent-primary);
+    border-radius: var(--radius-2xl);
+    text-align: center;
+  }
+
+  .result-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    margin: 0 0 var(--space-xl);
+  }
+
+  .result-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    text-align: left;
+  }
+
+  .result-list li {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    padding-left: var(--space-xl);
+    position: relative;
+  }
+
+  .result-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+  }
+
+  .result-list strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-bold);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 1024px) {
+    .phase-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .phase-icon {
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .phase-number {
+      font-size: var(--text-4xl);
+      top: var(--space-md);
+      left: var(--space-md);
+    }
+
+    .phase-content {
+      padding-left: 0;
+      gap: var(--space-lg);
+    }
+
+    .phase-title {
+      font-size: var(--text-2xl);
+    }
+
+    .phase-description {
+      font-size: var(--text-base);
+    }
+
+    .phase-quote {
+      font-size: var(--text-lg);
+    }
+
+    .result-list li {
+      font-size: var(--text-base);
+    }
+  }
+</style>
