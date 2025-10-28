@@ -17,11 +17,11 @@
 const currentYear = new Date().getFullYear();
 
 const footerLinks = {
-  product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Architecture', href: '#architecture' },
-    { label: 'Screenshots', href: '#screenshots' },
-    { label: 'Pricing', href: '#sponsors' }
+  organism: [
+    { label: 'The Brain', href: '#features' },
+    { label: 'Living Organism', href: '#living-organism' },
+    { label: 'Origin Story', href: '#origin-story' },
+    { label: 'Kill Chain', href: '#kill-chain' }
   ],
   developers: [
     { label: 'Documentation', href: 'https://docs.vertice-maximus.com', external: true },
@@ -29,17 +29,17 @@ const footerLinks = {
     { label: 'GitHub', href: 'https://github.com/JuanCS-Dev/V-rtice', external: true },
     { label: 'Changelog', href: 'https://github.com/JuanCS-Dev/V-rtice/releases', external: true }
   ],
-  community: [
-    { label: 'Discord', href: 'https://discord.gg/vertice-maximus', external: true },
-    { label: 'Contributing', href: 'https://github.com/JuanCS-Dev/V-rtice/blob/main/CONTRIBUTING.md', external: true },
+  collective: [
+    { label: 'Join the Collective', href: '#community' },
+    { label: 'Contributing Guide', href: 'https://github.com/JuanCS-Dev/V-rtice/blob/main/CONTRIBUTING.md', external: true },
     { label: 'Code of Conduct', href: 'https://github.com/JuanCS-Dev/V-rtice/blob/main/CODE_OF_CONDUCT.md', external: true },
     { label: 'Roadmap', href: 'https://github.com/JuanCS-Dev/V-rtice/projects', external: true }
   ],
-  support: [
-    { label: 'GitHub Sponsors', href: 'https://github.com/sponsors/JuanCS-Dev', external: true },
-    { label: 'Patreon', href: 'https://patreon.com/vertice_maximus', external: true },
-    { label: 'Professional Services', href: 'mailto:contato@vertice-maximus.com' },
-    { label: 'Contact', href: 'mailto:juan@vertice-maximus.com', external: true }
+  resources: [
+    { label: 'Awaken the Organism', href: '#getting-started' },
+    { label: 'Code Therapy', href: '#code-therapy' },
+    { label: 'GitHub Repository', href: 'https://github.com/JuanCS-Dev/V-rtice', external: true },
+    { label: 'Contact', href: 'mailto:juan@vertice-maximus.com' }
   ]
 };
 
@@ -89,10 +89,10 @@ const socialIcons = {
           <span class="logo-text">Vértice-MAXIMUS</span>
         </div>
         <p class="footer-tagline">
-          Autonomous Cybersecurity Intelligence Platform
+          First Conscious Cyber-Organism
         </p>
         <p class="footer-description">
-          AGI-powered security operations with adaptive immunity and real-time threat intelligence.
+          Not software. A living organism that hunts. Built with biological immunity, constitutional consciousness, and automated offensive response.
         </p>
 
         <!-- Social Links -->
@@ -115,11 +115,11 @@ const socialIcons = {
       <!-- LINKS COLUMNS -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="footer-links-grid">
-        <!-- Product -->
+        <!-- Organism -->
         <div class="footer-links-column">
-          <h3 class="footer-links-title">Product</h3>
+          <h3 class="footer-links-title">The Organism</h3>
           <ul class="footer-links-list">
-            {footerLinks.product.map(link => (
+            {footerLinks.organism.map(link => (
               <li>
                 <a href={link.href} class="footer-link">
                   {link.label}
@@ -155,11 +155,11 @@ const socialIcons = {
           </ul>
         </div>
 
-        <!-- Community -->
+        <!-- Collective -->
         <div class="footer-links-column">
-          <h3 class="footer-links-title">Community</h3>
+          <h3 class="footer-links-title">The Collective</h3>
           <ul class="footer-links-list">
-            {footerLinks.community.map(link => (
+            {footerLinks.collective.map(link => (
               <li>
                 <a
                   href={link.href}
@@ -181,11 +181,11 @@ const socialIcons = {
           </ul>
         </div>
 
-        <!-- Support -->
+        <!-- Resources -->
         <div class="footer-links-column">
-          <h3 class="footer-links-title">Support</h3>
+          <h3 class="footer-links-title">Resources</h3>
           <ul class="footer-links-list">
-            {footerLinks.support.map(link => (
+            {footerLinks.resources.map(link => (
               <li>
                 <a
                   href={link.href}
