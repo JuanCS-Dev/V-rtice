@@ -1,0 +1,25 @@
+# Vértice-MAXIMUS - Robots.txt
+# Allow all crawlers to discover the first conscious cyber-organism
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://vertice-maximus.com/sitemap.xml
+
+# Crawl-delay (optional, for polite crawlers)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Block only sensitive paths (if any in future)
+# Disallow: /admin/
+# Disallow: /private/
