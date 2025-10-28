@@ -1,0 +1,200 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy Policy | Vértice-MAXIMUS"
+  description="Privacy Policy for Vértice-MAXIMUS - First Conscious Cyber-Organism"
+>
+  <div class="legal-page">
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Last updated: October 28, 2025</p>
+
+      <section>
+        <h2>1. Introduction</h2>
+        <p>
+          Vértice-MAXIMUS ("we," "our," or "us") is committed to protecting your privacy.
+          This Privacy Policy explains how we collect, use, and safeguard your information
+          when you use our open-source cybersecurity platform.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Information We Collect</h2>
+        <h3>2.1 Usage Data</h3>
+        <p>
+          When you visit our website, we may automatically collect certain information about
+          your device, including information about your web browser, IP address, time zone,
+          and some of the cookies that are installed on your device.
+        </p>
+
+        <h3>2.2 Analytics</h3>
+        <p>
+          We use privacy-friendly analytics (Plausible) that does not use cookies and
+          complies with GDPR, CCPA, and PECR. No personal data is collected.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. How We Use Your Information</h2>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Improve and optimize our website and platform</li>
+          <li>Understand how visitors use our services</li>
+          <li>Communicate with you about updates and security advisories</li>
+          <li>Provide technical support</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Open Source Commitment</h2>
+        <p>
+          Vértice-MAXIMUS is 100% open source. All code is publicly available on GitHub
+          under the MIT License. You can audit our code to verify our privacy practices.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Third-Party Services</h2>
+        <p>We may use the following third-party services:</p>
+        <ul>
+          <li><strong>GitHub:</strong> Code hosting and collaboration</li>
+          <li><strong>Plausible Analytics:</strong> Privacy-friendly website analytics</li>
+        </ul>
+        <p>These services have their own privacy policies governing their use of your information.</p>
+      </section>
+
+      <section>
+        <h2>6. Data Security</h2>
+        <p>
+          We implement appropriate technical and organizational measures to protect your
+          personal information. However, no method of transmission over the Internet is
+          100% secure.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access your personal data</li>
+          <li>Correct inaccurate data</li>
+          <li>Request deletion of your data</li>
+          <li>Object to data processing</li>
+          <li>Data portability</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>8. Children's Privacy</h2>
+        <p>
+          Our service is not directed to individuals under the age of 13. We do not
+          knowingly collect personal information from children under 13.
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Changes to This Policy</h2>
+        <p>
+          We may update this Privacy Policy from time to time. We will notify you of
+          any changes by posting the new Privacy Policy on this page and updating the
+          "Last updated" date.
+        </p>
+      </section>
+
+      <section>
+        <h2>10. Contact Us</h2>
+        <p>
+          If you have questions about this Privacy Policy, please contact us:
+        </p>
+        <ul>
+          <li>Email: <a href="mailto:privacy@vertice-maximus.com">privacy@vertice-maximus.com</a></li>
+          <li>GitHub: <a href="https://github.com/JuanCS-Dev/V-rtice/issues" target="_blank" rel="noopener">Create an issue</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    min-height: 100vh;
+    padding: var(--space-3xl) 0;
+    background: var(--gradient-dark);
+  }
+
+  .container {
+    max-width: 800px;
+  }
+
+  h1 {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    margin-bottom: var(--space-md);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .last-updated {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3xl);
+  }
+
+  section {
+    margin-bottom: var(--space-2xl);
+  }
+
+  h2 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-lg);
+  }
+
+  h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-md);
+  }
+
+  p {
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+  }
+
+  ul {
+    list-style: disc;
+    margin-left: var(--space-xl);
+    margin-bottom: var(--space-md);
+  }
+
+  li {
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+
+  a {
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+
+  a:hover {
+    color: var(--color-accent-secondary);
+    text-decoration: underline;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+  }
+</style>
