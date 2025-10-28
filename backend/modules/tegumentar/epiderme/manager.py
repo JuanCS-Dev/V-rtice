@@ -56,18 +56,14 @@ class EpidermeLayer:
         await self._sync_reputation(initial=True)
         self._tasks.append(asyncio.create_task(self._periodic_reputation_sync()))
 
-        reflex_source = Path(__file__).resolve().parent / "reflex_arc.c"
-        try:
-            self._reflex_session = self._reflex_loader.attach(
-                source_path=reflex_source,
-                interface=interface,
-                flags=0,
-            )
-        except ReflexArcLoaderError as exc:
-            logger.error("Failed to attach reflex arc: %s", exc)
-            raise
-
-        self._tasks.append(asyncio.create_task(self._poll_reflex_events()))
+        # XDP Reflex Arc: Disabled due to GKE COS limitations (perf event maps)
+        # Tegumentar provides protection via nftables + rate limiting + reputation feeds
+        logger.info(
+            "XDP Reflex Arc disabled - running with nftables stateless filtering + "
+            "distributed rate limiting. See documentation for XDP requirements."
+        )
+        self._reflex_session = None
+        # Note: self._poll_reflex_events() task not created when XDP is disabled
 
     async def shutdown(self) -> None:
         """Gracefully shutdown all subsystems."""

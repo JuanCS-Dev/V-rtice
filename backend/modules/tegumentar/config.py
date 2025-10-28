@@ -50,7 +50,7 @@ class TegumentarSettings(BaseSettings):
 
     # === Derme ===
     postgres_dsn: str = Field(
-        "postgresql+asyncpg://tegumentar:tegumentar@localhost:5432/tegumentar",
+        "postgresql://tegumentar:tegumentar@localhost:5432/tegumentar",
         description="Timescale/PostgreSQL DSN for session state and analytics.",
     )
     kafka_bootstrap_servers: str = Field(

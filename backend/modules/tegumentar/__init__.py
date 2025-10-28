@@ -11,7 +11,7 @@ consume the firewall capabilities without needing to know the internal
 package layout.
 """
 
-__all__ = ["TegumentarSettings", "TegumentarModule"]
+__all__ = ["TegumentarSettings", "TegumentarModule", "get_settings"]
 
 
 def __getattr__(name):
@@ -23,4 +23,8 @@ def __getattr__(name):
         from .orchestrator import TegumentarModule as _TegumentarModule
 
         return _TegumentarModule
+    if name == "get_settings":
+        from .config import get_settings as _get_settings
+
+        return _get_settings
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 from .config import TegumentarSettings, get_settings
+
+logger = logging.getLogger(__name__)
 from .derme.manager import DermeLayer, FlowObservation, InspectionResult
 from .epiderme.manager import EpidermeLayer
 from .hipoderme.adaptive_throttling import AdaptiveThrottler
@@ -26,7 +29,8 @@ class TegumentarModule:
 
     async def startup(self, interface: str) -> None:
         await self.epiderme.startup(interface)
-        await self.derme.startup()
+        # Derme layer disabled - requires PostgreSQL infrastructure (no PostgreSQL available)
+        # await self.derme.startup()
         self._throttler = AdaptiveThrottler(interface)
 
     async def shutdown(self) -> None:
@@ -35,7 +39,7 @@ class TegumentarModule:
     async def controller_shutdown(self) -> None:
         await self.permeability.shutdown()
         await self.wound_healing.shutdown()
-        await self.derme.shutdown()
+        # await self.derme.shutdown()  # Disabled
         await self.epiderme.shutdown()
 
     async def process_packet(self, observation: FlowObservation, payload: bytes) -> InspectionResult:

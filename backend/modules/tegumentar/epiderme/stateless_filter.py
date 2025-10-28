@@ -69,20 +69,24 @@ class StatelessFilter:
     def sync_blocked_ips(self, ips: Iterable[str]) -> None:
         """Replace the blocked IP set with the given list."""
 
-        validated_ips: List[str] = []
+        validated_ipv4: List[str] = []
+        validated_ipv6: List[str] = []
         for ip in ips:
             try:
-                ipaddress.ip_network(ip, strict=False)
+                network = ipaddress.ip_network(ip, strict=False)
+                if network.version == 4:
+                    validated_ipv4.append(ip)
+                else:
+                    validated_ipv6.append(ip)
             except ValueError:
                 logger.warning("Skipping invalid IP/CIDR %s", ip)
                 continue
-            validated_ips.append(ip)
 
         chain_name = self._settings.nft_chain_name
         set_name = f"{chain_name}_blocked_ips"
         table_family, table_name = self._table_spec
 
-        if not validated_ips:
+        if not validated_ipv4 and not validated_ipv6:
             logger.info("Clearing nftables blocked IP set")
             self._run_nft(
                 ["flush", "set", table_family, table_name, set_name],
@@ -90,8 +94,10 @@ class StatelessFilter:
             )
             return
 
-        elements = ", ".join(validated_ips)
-        logger.debug("Updating blocked IP set with %d entries", len(validated_ips))
+        # Only update IPv4 for now (IPv6 requires separate set configuration)
+        elements = ", ".join(validated_ipv4)
+        logger.debug("Updating blocked IP set with %d IPv4 entries (skipping %d IPv6)",
+                     len(validated_ipv4), len(validated_ipv6))
         nft_input = (
             f"flush set {table_family} {table_name} {set_name}\n"
             f"add element {table_family} {table_name} {set_name} {{ {elements} }}\n"
@@ -104,14 +110,15 @@ class StatelessFilter:
         table_family, table_name = self._table_spec
         chain_name = self._settings.nft_chain_name
 
+        # Delete and recreate to ensure idempotency (handles CrashLoopBackOff state)
         hook_rule = (
-            f"flush chain {table_family} {table_name} {chain_name}\n"
+            f"delete chain {table_family} {table_name} {chain_name}\n"
             f"add chain {table_family} {table_name} {chain_name} "
             f"{{ type filter hook prerouting priority {priority}; policy accept; }}\n"
             f"add rule {table_family} {table_name} {chain_name} ip saddr @{chain_name}_blocked_ips drop\n"
         )
 
-        self._run_nft(["-f", "-"], input_=hook_rule)
+        self._run_nft(["-f", "-"], input_=hook_rule, check=False)
         logger.info(
             "Epiderme chain %s attached to prerouting hook with priority %d",
             chain_name,
