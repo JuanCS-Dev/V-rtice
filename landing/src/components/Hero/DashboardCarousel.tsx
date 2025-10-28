@@ -129,11 +129,6 @@ export default function DashboardCarousel() {
               width="1200"
               height="800"
             />
-            {index === activeIndex && (
-              <div className="carousel-caption">
-                {dashboard.title}
-              </div>
-            )}
           </div>
         ))}
       </div>
