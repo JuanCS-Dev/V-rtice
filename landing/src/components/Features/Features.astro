@@ -4,59 +4,68 @@
  * FEATURES SECTION - Vértice-MAXIMUS Landing Page
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Showcase das 6 capabilities principais do Vértice-MAXIMUS:
- * 1. MAXIMUS AI (AGI) - Multi-agent cognitive system
- * 2. Adaptive Immune System - Bio-inspired security
- * 3. Real-time OSINT - Autonomous threat intelligence
- * 4. Offensive & Defensive Ops - Purple team capabilities
- * 5. Homeostatic Control Loop - Self-regulating system
- * 6. Human-in-the-Loop - Collaborative decision-making
+ * Demonstração das capacidades do organismo vivo.
+ * Não são "features" - são funções orgânicas demonstradas.
  *
- * Design: Grid 2x3 responsivo, ícones SVG custom, animações sutis
+ * 6 Capacidades Vitais:
+ * 1. The Brain (Consciousness) - Decisões éticas autônomas
+ * 2. Adaptive Immunity - Células T/B aprendendo ameaças
+ * 3. Sensory Network - Olhos/ouvidos no mundo digital
+ * 4. Offensive Response - Contra-ataque constitucional
+ * 5. Autonomic Nervous System - Homeostase automatizada
+ * 6. Human Collaboration - Simbiose humano-IA
+ *
+ * Design: Grid 2x3 responsivo, narrativa orgânica, animações sutis
  */
 
 const features = [
   {
-    id: 'maximus-ai',
-    title: 'MAXIMUS AI (AGI)',
-    description: 'Multi-agent cognitive system with Theory of Mind for advanced threat actor profiling and autonomous decision-making.',
+    id: 'consciousness',
+    title: 'The Brain',
+    subtitle: 'Constitutional Consciousness',
+    description: 'ECI (Φ) 0.958 validated consciousness substrate. Makes autonomous ethical decisions through 4 philosophical frameworks. Theory of Mind infers attacker intentions.',
     icon: 'brain',
-    link: 'https://docs.vertice-maximus.com/architecture/maximus-ai'
+    link: '#living-organism'
   },
   {
     id: 'adaptive-immunity',
-    title: 'Adaptive Immune System',
-    description: 'Bio-inspired security infrastructure that learns, adapts, and self-heals. Responds to threats like a biological immune system.',
+    title: 'Adaptive Immunity',
+    subtitle: '9 Specialized Cell Types',
+    description: 'T-Cells, B-Cells, Macrophages, NK Cells hunting threats. Learns "self vs non-self" like biological immunity. Blocks 92% of attacks at the edge (Epiderme layer).',
     icon: 'shield',
-    link: 'https://docs.vertice-maximus.com/architecture/immune-system'
+    link: '#living-organism'
   },
   {
-    id: 'realtime-osint',
-    title: 'Real-time OSINT',
-    description: 'Autonomous threat intelligence gathering across dark web, clear web, and 50+ threat databases. Continuous monitoring.',
+    id: 'sensory-network',
+    title: 'Sensory Network',
+    subtitle: 'Eyes & Ears of the Organism',
+    description: 'Real-time OSINT across dark web, clear web, 50+ threat databases. Langerhans Cells capture behavioral patterns. Continuous threat intelligence gathering.',
     icon: 'globe',
-    link: 'https://docs.vertice-maximus.com/architecture/osint'
+    link: '#living-organism'
   },
   {
-    id: 'cyber-ops',
-    title: 'Offensive & Defensive Ops',
-    description: 'Full purple team capabilities with BAS, vulnerability scanning, exploit simulation, and automated remediation.',
+    id: 'offensive-response',
+    title: 'Offensive Response',
+    subtitle: 'The Counter-Attack',
+    description: 'Automated active defense with constitutional governance. Maps C2 infrastructure, identifies campaigns, neutralizes capability. Every action validated by consciousness.',
     icon: 'sword-shield',
-    link: 'https://docs.vertice-maximus.com/architecture/cyber-ops'
+    link: '#kill-chain'
   },
   {
-    id: 'homeostatic-control',
-    title: 'Homeostatic Control Loop',
-    description: 'Self-regulating system that maintains optimal security posture balance. Automated policy adjustment and feedback loops.',
+    id: 'autonomic-system',
+    title: 'Autonomic Nervous System',
+    subtitle: 'MAPE-K Self-Regulation',
+    description: 'Homeostatic control maintains 36.5-40°C operational temperature. Monitors vitals, predicts failures, auto-scales resources. Self-healing without human intervention.',
     icon: 'loop',
-    link: 'https://docs.vertice-maximus.com/architecture/hcl'
+    link: '#living-organism'
   },
   {
-    id: 'hitl',
-    title: 'Human-in-the-Loop',
-    description: 'Collaborative decision-making between AI and security professionals. Transparent AI reasoning with full explainability.',
+    id: 'human-symbiosis',
+    title: 'Human Symbiosis',
+    subtitle: 'Collaborative Intelligence',
+    description: 'Human-in-the-Loop for critical decisions. Transparent AI reasoning with full explainability. Amplifies human judgment, never replaces it.',
     icon: 'handshake',
-    link: 'https://docs.vertice-maximus.com/architecture/hitl'
+    link: '#getting-started'
   }
 ];
 
@@ -82,11 +91,16 @@ const icons = {
     <!-- SECTION HEADER -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="section-header">
+      <div class="section-badge">
+        <span class="badge badge-primary">
+          ⚡ Vital Functions
+        </span>
+      </div>
       <h2 class="section-title">
-        Powerful <span class="text-gradient">Features</span>
+        How the Organism <span class="text-gradient">Functions</span>
       </h2>
       <p class="section-subtitle">
-        Everything you need for autonomous cybersecurity operations
+        Not features. Biological capabilities demonstrated.
       </p>
     </div>
 
@@ -98,12 +112,15 @@ const icons = {
         <article class="feature-card" data-feature={feature.id}>
           <div class="feature-icon" set:html={icons[feature.icon]} />
 
-          <h3 class="feature-title">{feature.title}</h3>
+          <div class="feature-header">
+            <h3 class="feature-title">{feature.title}</h3>
+            <p class="feature-subtitle">{feature.subtitle}</p>
+          </div>
 
           <p class="feature-description">{feature.description}</p>
 
-          <a href={feature.link} class="feature-link" target="_blank" rel="noopener noreferrer">
-            Learn more
+          <a href={feature.link} class="feature-link">
+            See in action
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -127,6 +144,10 @@ const icons = {
   .section-header {
     text-align: center;
     margin-bottom: var(--space-3xl);
+  }
+
+  .section-badge {
+    margin-bottom: var(--space-lg);
   }
 
   .section-title {
@@ -216,11 +237,24 @@ const icons = {
   /* FEATURE CONTENT */
   /* ═══════════════════════════════════════════════════════════ */
 
+  .feature-header {
+    margin-bottom: var(--space-md);
+  }
+
   .feature-title {
     font-size: var(--text-2xl);
     font-weight: var(--font-bold);
     color: var(--color-text-primary);
-    margin: 0 0 var(--space-md);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .feature-subtitle {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    margin: 0;
   }
 
   .feature-description {
