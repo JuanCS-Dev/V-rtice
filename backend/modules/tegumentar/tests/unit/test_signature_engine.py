@@ -383,6 +383,26 @@ class TestMatch:
         assert result is not None
         assert result.name == "PATTERN"
 
+    def test_handles_generic_exception_during_decode(self, engine):
+        """Deve capturar Exception genérica durante decode e retornar None (linhas 59-61)."""
+        engine._signatures["TEST"] = Signature(
+            name="TEST",
+            pattern=re.compile(r"test", re.IGNORECASE),
+            severity="low",
+            action="alert",
+        )
+
+        # Mock payload que levanta Exception no decode (não UnicodeDecodeError)
+        from unittest.mock import MagicMock, patch
+
+        mock_payload = MagicMock(spec=bytes)
+        mock_payload.decode.side_effect = RuntimeError("Forced decode failure")
+
+        # Deve capturar Exception e retornar None
+        result = engine.match(mock_payload)
+
+        assert result is None
+
     def test_searches_all_signatures_in_order(self, engine):
         """Deve buscar em todas as signatures até encontrar match."""
         engine._signatures["NO_MATCH_1"] = Signature(

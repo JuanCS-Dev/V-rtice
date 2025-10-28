@@ -731,6 +731,79 @@ class TestNonTCPProtocols:
         assert decision.connection_state.syn_seen is False
         assert decision.connection_state.packets == 1
 
+    @pytest.mark.asyncio
+    async def test_udp_multiple_packets_existing_connection(self, settings, mock_pool):
+        """UDP com múltiplos pacotes deve atualizar state sem entrar bloco TCP (branch 99->105)."""
+        inspector = StatefulInspector(settings)
+        inspector._pool = mock_pool
+
+        # Primeiro pacote UDP (cria conexão)
+        obs1 = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="8.8.8.8",
+            src_port=53,
+            dst_port=53,
+            protocol="UDP",
+            flags=None,
+            payload_size=256,
+        )
+        await inspector.process(obs1)
+
+        # Segundo pacote UDP (conexão existente, entra else linha 88, depois skip TCP linha 99->105)
+        obs2 = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="8.8.8.8",
+            src_port=53,
+            dst_port=53,
+            protocol="UDP",
+            flags=None,
+            payload_size=512,
+        )
+        decision2 = await inspector.process(obs2)
+
+        # Deve ter 2 pacotes, 768 bytes total
+        assert decision2.connection_state.packets == 2
+        assert decision2.connection_state.bytes == 768
+        # Não deve ter setado TCP state
+        assert decision2.connection_state.syn_seen is False
+        assert decision2.connection_state.established is False
+
+    @pytest.mark.asyncio
+    async def test_tcp_with_fin_but_no_ack(self, settings, mock_pool):
+        """TCP com FIN mas sem ACK não deve marcar established (branch 102->105)."""
+        inspector = StatefulInspector(settings)
+        inspector._pool = mock_pool
+
+        # Primeiro: SYN para marcar syn_seen
+        obs1 = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="10.0.0.1",
+            src_port=12345,
+            dst_port=80,
+            protocol="TCP",
+            flags="S",
+            payload_size=0,
+        )
+        await inspector.process(obs1)
+
+        # Segundo: FIN sem ACK (linha 102: "A" not in flags, então skip linha 103)
+        obs2 = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="10.0.0.1",
+            src_port=12345,
+            dst_port=80,
+            protocol="TCP",
+            flags="F",  # FIN sem ACK
+            payload_size=100,
+        )
+        decision2 = await inspector.process(obs2)
+
+        # syn_seen deve estar True (do primeiro pacote)
+        assert decision2.connection_state.syn_seen is True
+        # Mas established False (linha 102 falhou: "A" not in flags)
+        assert decision2.connection_state.established is False
+        assert decision2.connection_state.packets == 2
+
 
 class TestDataclasses:
     """Testa dataclasses (FlowObservation, ConnectionState, InspectorDecision)."""
