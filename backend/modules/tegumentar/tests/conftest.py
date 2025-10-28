@@ -150,7 +150,7 @@ def mock_tegumentar_settings() -> MagicMock:
     """Mock das configurações do Tegumentar."""
     from backend.modules.tegumentar.config import TegumentarSettings
 
-    settings = MagicMock(spec=Tegumentar Settings)
+    settings = MagicMock(spec=TegumentarSettings)
     settings.EPIDERME_NFTABLES_TABLE = "filter"
     settings.EPIDERME_NFTABLES_CHAIN = "tegumentar_input"
     settings.EPIDERME_RATE_LIMIT_DEFAULT = 100

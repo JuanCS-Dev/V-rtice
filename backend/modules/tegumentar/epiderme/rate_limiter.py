@@ -8,6 +8,7 @@ import time
 from typing import Optional
 
 import redis.asyncio as aioredis
+from redis import exceptions as redis_exceptions
 
 from ..config import TegumentarSettings
 
@@ -91,11 +92,10 @@ class DistributedRateLimiter:
                 now,
             )
             return bool(allowed)
-        except aioredis.exceptions.NoScriptError:
+        except redis_exceptions.NoScriptError:
             # Script evicted, reload and retry once.
             async with self._lock:
-                if self._script_sha is None:
-                    self._script_sha = await self._redis.script_load(_TOKEN_BUCKET_LUA)
+                self._script_sha = await self._redis.script_load(_TOKEN_BUCKET_LUA)
             return await self.allow(ip_address, tokens)
 
 

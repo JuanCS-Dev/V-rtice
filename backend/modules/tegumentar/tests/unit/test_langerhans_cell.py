@@ -129,9 +129,9 @@ class TestStartupShutdown:
 
     @pytest.mark.asyncio
     async def test_startup_creates_pool(self, langerhans_cell, mock_pool):
-        with patch("asyncpg.create_pool", return_value=mock_pool):
+        with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("aiokafka.AIOKafkaProducer") as mock_producer_class:
+                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -142,9 +142,9 @@ class TestStartupShutdown:
 
     @pytest.mark.asyncio
     async def test_startup_initializes_schema(self, langerhans_cell, mock_pool):
-        with patch("asyncpg.create_pool", return_value=mock_pool):
+        with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()) as mock_init:
-                with patch("aiokafka.AIOKafkaProducer") as mock_producer_class:
+                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -155,9 +155,9 @@ class TestStartupShutdown:
 
     @pytest.mark.asyncio
     async def test_startup_creates_kafka_producer(self, langerhans_cell, mock_pool):
-        with patch("asyncpg.create_pool", return_value=mock_pool):
+        with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("aiokafka.AIOKafkaProducer") as mock_producer_class:
+                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -170,9 +170,9 @@ class TestStartupShutdown:
     @pytest.mark.asyncio
     async def test_startup_is_idempotent(self, langerhans_cell, mock_pool):
         """Múltiplas chamadas a startup() não devem reconectar."""
-        with patch("asyncpg.create_pool", return_value=mock_pool) as mock_create_pool:
+        with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)) as mock_create_pool:
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("aiokafka.AIOKafkaProducer") as mock_producer_class:
+                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
