@@ -105,9 +105,8 @@ const socialIcons = {
               rel="noopener noreferrer"
               class="social-link"
               aria-label={social.name}
-            >
-              <span set:html={socialIcons[social.icon]} />
-            </a>
+              set:html={socialIcons[social.icon]}
+            />
           ))}
         </div>
       </div>
