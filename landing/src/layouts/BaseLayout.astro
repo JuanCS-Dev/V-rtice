@@ -25,6 +25,9 @@ const {
 } = Astro.props;
 
 const currentYear = new Date().getFullYear();
+
+// Import global styles
+import '../styles/design-system.css';
 ---
 
 <!DOCTYPE html>
@@ -135,7 +138,7 @@ const currentYear = new Date().getFullYear();
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <!-- STYLES -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
-  <link rel="stylesheet" href="/src/styles/design-system.css">
+  <!-- design-system.css is imported in the frontmatter above -->
 
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <!-- ANALYTICS (Plausible - Privacy-Friendly) -->

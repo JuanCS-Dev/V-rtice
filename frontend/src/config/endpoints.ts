@@ -34,59 +34,62 @@ const isDev = env.DEV;
 // SERVICE ENDPOINTS
 // ============================================================================
 
+// Default fallback for development (localhost)
+const DEFAULT_API_URL = 'http://localhost:8000';
+
 export const ServiceEndpoints = {
   // API Gateway (Single Entry Point)
-  apiGateway: env.VITE_API_GATEWAY_URL || 'http://34.148.161.131:8000',
+  apiGateway: env.VITE_API_GATEWAY_URL || DEFAULT_API_URL,
 
   // MAXIMUS Core Services (GKE Service Ports)
   maximus: {
-    core: env.VITE_MAXIMUS_CORE_URL || 'http://34.148.161.131:8000',
-    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || 'http://34.148.161.131:8000',
-    eureka: env.VITE_MAXIMUS_EUREKA_URL || 'http://34.148.161.131:8000',
-    oraculo: env.VITE_MAXIMUS_ORACULO_URL || 'http://34.148.161.131:8000',
-    dlqMonitor: env.VITE_MAXIMUS_DLQ_MONITOR_URL || 'http://34.148.161.131:8000',
+    core: env.VITE_MAXIMUS_CORE_URL || DEFAULT_API_URL,
+    orchestrator: env.VITE_MAXIMUS_ORCHESTRATOR_URL || DEFAULT_API_URL,
+    eureka: env.VITE_MAXIMUS_EUREKA_URL || DEFAULT_API_URL,
+    oraculo: env.VITE_MAXIMUS_ORACULO_URL || DEFAULT_API_URL,
+    dlqMonitor: env.VITE_MAXIMUS_DLQ_MONITOR_URL || DEFAULT_API_URL,
   },
 
   // Offensive Arsenal
   offensive: {
-    gateway: env.VITE_OFFENSIVE_GATEWAY_URL || 'http://34.148.161.131:8000',
-    networkRecon: env.VITE_OFFENSIVE_NETWORK_RECON_URL || 'http://34.148.161.131:8000',
-    vulnIntel: env.VITE_OFFENSIVE_VULN_INTEL_URL || 'http://34.148.161.131:8000',
-    webAttack: env.VITE_OFFENSIVE_WEB_ATTACK_URL || 'http://34.148.161.131:8000',
-    c2Orchestration: env.VITE_OFFENSIVE_C2_URL || 'http://34.148.161.131:8000',
-    bas: env.VITE_OFFENSIVE_BAS_URL || 'http://34.148.161.131:8000',
+    gateway: env.VITE_OFFENSIVE_GATEWAY_URL || DEFAULT_API_URL,
+    networkRecon: env.VITE_OFFENSIVE_NETWORK_RECON_URL || DEFAULT_API_URL,
+    vulnIntel: env.VITE_OFFENSIVE_VULN_INTEL_URL || DEFAULT_API_URL,
+    webAttack: env.VITE_OFFENSIVE_WEB_ATTACK_URL || DEFAULT_API_URL,
+    c2Orchestration: env.VITE_OFFENSIVE_C2_URL || DEFAULT_API_URL,
+    bas: env.VITE_OFFENSIVE_BAS_URL || DEFAULT_API_URL,
   },
 
   // Defensive Services
   defensive: {
-    core: env.VITE_DEFENSIVE_CORE_URL || 'http://34.148.161.131:8000', // Maximus Core
+    core: env.VITE_DEFENSIVE_CORE_URL || DEFAULT_API_URL, // Maximus Core
   },
 
   // Cockpit Soberano Services
   cockpit: {
-    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || 'http://34.148.161.131:8000',  // GKE: 8000
-    verdictEngine: env.VITE_VERDICT_ENGINE_API || 'http://34.148.161.131:8000',      // GKE: 8093
-    commandBus: env.VITE_COMMAND_BUS_API || 'http://34.148.161.131:8000',            // GKE: 8092
+    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || DEFAULT_API_URL,  // GKE: 8000
+    verdictEngine: env.VITE_VERDICT_ENGINE_API || DEFAULT_API_URL,      // GKE: 8093
+    commandBus: env.VITE_COMMAND_BUS_API || DEFAULT_API_URL,            // GKE: 8092
   },
 
   // HITL (Human-in-the-Loop) Service
   hitl: {
-    api: env.VITE_HITL_API_URL || 'http://34.148.161.131:8000',
+    api: env.VITE_HITL_API_URL || DEFAULT_API_URL,
   },
 
   // Immunis System
   immunis: {
-    api: env.VITE_IMMUNIS_API_URL || 'http://34.148.161.131:8000',
+    api: env.VITE_IMMUNIS_API_URL || DEFAULT_API_URL,
   },
 
   // OSINT Services
   osint: {
-    api: env.VITE_OSINT_API_URL || env.VITE_API_GATEWAY_URL || 'http://34.148.161.131:8000',
+    api: env.VITE_OSINT_API_URL || env.VITE_API_GATEWAY_URL || DEFAULT_API_URL,
   },
 
   // Reactive Fabric
   reactiveFabric: {
-    api: env.VITE_REACTIVE_FABRIC_API_URL || 'http://34.148.161.131:8000',
+    api: env.VITE_REACTIVE_FABRIC_API_URL || DEFAULT_API_URL,
   },
 } as const;
 
@@ -94,33 +97,36 @@ export const ServiceEndpoints = {
 // WEBSOCKET ENDPOINTS
 // ============================================================================
 
+// Default fallback for development (localhost)
+const DEFAULT_WS_URL = 'ws://localhost:8000';
+
 export const WebSocketEndpoints = {
   maximus: {
-    stream: env.VITE_MAXIMUS_WS_URL || 'ws://34.148.161.131:8000/ws/stream',
+    stream: env.VITE_MAXIMUS_WS_URL || `${DEFAULT_WS_URL}/ws/stream`,
   },
 
   consciousness: {
-    stream: env.VITE_CONSCIOUSNESS_WS_URL || 'ws://34.148.161.131:8000/stream/consciousness/ws',
+    stream: env.VITE_CONSCIOUSNESS_WS_URL || `${DEFAULT_WS_URL}/stream/consciousness/ws`,
   },
 
   apv: {
-    stream: env.VITE_APV_WS_URL || 'ws://34.148.161.131:8000/stream/apv/ws',
+    stream: env.VITE_APV_WS_URL || `${DEFAULT_WS_URL}/stream/apv/ws`,
   },
 
   cockpit: {
-    verdicts: env.VITE_VERDICT_ENGINE_WS || 'ws://34.148.161.131:8000/ws/verdicts',
+    verdicts: env.VITE_VERDICT_ENGINE_WS || `${DEFAULT_WS_URL}/ws/verdicts`,
   },
 
   hitl: {
-    ws: env.VITE_HITL_WS_URL || 'ws://34.148.161.131:8000/hitl/ws',
+    ws: env.VITE_HITL_WS_URL || `${DEFAULT_WS_URL}/hitl/ws`,
   },
 
   offensive: {
-    executions: env.VITE_OFFENSIVE_WS_URL || 'ws://34.148.161.131:8000/ws/executions',
+    executions: env.VITE_OFFENSIVE_WS_URL || `${DEFAULT_WS_URL}/ws/executions`,
   },
 
   defensive: {
-    alerts: env.VITE_DEFENSIVE_WS_URL || 'ws://34.148.161.131:8000/ws/alerts',
+    alerts: env.VITE_DEFENSIVE_WS_URL || `${DEFAULT_WS_URL}/ws/alerts`,
   },
 } as const;
 
@@ -144,6 +150,9 @@ const REQUIRED_ENV_VARS_PROD = [
   'VITE_API_GATEWAY_URL',
   'VITE_MAXIMUS_CORE_URL',
   'VITE_API_KEY',
+  'VITE_SUPER_ADMIN_EMAIL',
+  'VITE_MAXIMUS_WS_URL',
+  'VITE_DEFENSIVE_WS_URL',
 ] as const;
 
 const REQUIRED_ENV_VARS_DEV = [

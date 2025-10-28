@@ -34,6 +34,11 @@ const dashboards = [
     src: '/dashboard-3.png',
     alt: 'MAXIMUS AI - Defensive Operations Dashboard',
     title: 'Defensive Operations'
+  },
+  {
+    src: '/neuroshell.png',
+    alt: 'MAXIMUS AI - Neuroshell Command Interface',
+    title: 'Neuroshell Interface'
   }
 ];
 

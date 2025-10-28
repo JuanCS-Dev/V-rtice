@@ -10,10 +10,16 @@ process.env.NODE_ENV = 'test';
 import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { toReceiveMessage, toHaveReceivedMessages } from 'vitest-websocket-mock';
+
+// Add custom WebSocket matchers
+expect.extend({ toReceiveMessage, toHaveReceivedMessages });
 
 // Cleanup after each test
-afterEach(() => {
+afterEach(async () => {
   cleanup();
+  // Wait for any pending promises to resolve
+  await new Promise(resolve => setTimeout(resolve, 0));
 });
 
 // Mock window.matchMedia
@@ -50,35 +56,19 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 };
 
-// Mock WebSocket (for testing)
-global.WebSocket = class WebSocket {
-  constructor(url) {
-    this.url = url;
-    this.readyState = WebSocket.CONNECTING;
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      if (this.onopen) this.onopen();
-    }, 0);
-  }
+// Fix jsdom offset properties for virtualized lists
+Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+  configurable: true,
+  value: 600,
+});
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+  configurable: true,
+  value: 800,
+});
 
-  send(data) {
-    if (this.onmessage) {
-      setTimeout(() => {
-        this.onmessage({ data });
-      }, 0);
-    }
-  }
-
-  close() {
-    this.readyState = WebSocket.CLOSED;
-    if (this.onclose) this.onclose();
-  }
-
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
-};
+// WebSocket mock removed - using vitest-websocket-mock for scientific testing
+// Note: vitest-websocket-mock provides a real WebSocket protocol mock via mock-socket
+// This gives us behavioral testing instead of implementation mocking
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -94,6 +84,36 @@ vi.mock('@/utils/logger', () => ({
     table: vi.fn(),
     setLevel: vi.fn()
   }
+}));
+
+// Mock i18next globally to fix NO_I18NEXT_INSTANCE errors
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key, options) => {
+      // Support interpolation for realistic translations
+      if (options && typeof options === 'object') {
+        let result = key;
+        Object.keys(options).forEach(optKey => {
+          result = result.replace(`{{${optKey}}}`, options[optKey]);
+        });
+        return result;
+      }
+      return key;
+    },
+    i18n: {
+      changeLanguage: vi.fn(),
+      language: 'en',
+      languages: ['en', 'pt'],
+      exists: vi.fn(() => true),
+    },
+  }),
+  Trans: ({ children, i18nKey }) => children || i18nKey,
+  Translation: ({ children }) => children((key) => key),
+  I18nextProvider: ({ children }) => children,
+  initReactI18next: {
+    type: '3rdParty',
+    init: vi.fn(),
+  },
 }));
 
 // Console spy setup (to catch errors in tests)

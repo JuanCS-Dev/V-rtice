@@ -1,0 +1,16 @@
+# Production dependencies
+fastapi>=0.118.0
+starlette>=0.47.2
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.6
+pydantic-settings>=2.7.1
+httpx>=0.28.1
+python-dotenv>=1.0.0
+
+# Development dependencies (optional - install with: pip install -r requirements.txt -r requirements-dev.txt)
+# Or create requirements-dev.txt separately
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+pytest-mock>=3.15.0
+ruff>=0.13.0

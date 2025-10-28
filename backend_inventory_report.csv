@@ -1,0 +1,14 @@
+service,dockerfile,requirements,tests_dir,test_count,readme,main_py,app_py,py_files,completeness
+offensive-gateway-service,FALSE,FALSE,FALSE,0,FALSE,FALSE,FALSE,0,0
+behavioral-analyzer-service,TRUE,TRUE,FALSE,0,FALSE,TRUE,FALSE,2,50
+mav-detection-service,TRUE,TRUE,FALSE,0,FALSE,TRUE,FALSE,2,50
+test_service_for_sidecar,TRUE,TRUE,FALSE,0,FALSE,TRUE,FALSE,2,50
+traffic-analyzer-service,TRUE,TRUE,FALSE,0,FALSE,TRUE,FALSE,2,50
+vertice_register,TRUE,TRUE,FALSE,0,FALSE,TRUE,FALSE,12,50
+command_bus_service,TRUE,TRUE,TRUE,4,FALSE,TRUE,FALSE,8,75
+hitl_patch_service,TRUE,TRUE,FALSE,0,TRUE,FALSE,TRUE,7,75
+maximus_oraculo_v2,TRUE,FALSE,TRUE,0,TRUE,TRUE,FALSE,23,75
+narrative_filter_service,TRUE,TRUE,TRUE,1,FALSE,TRUE,FALSE,5,75
+threat_intel_bridge,TRUE,TRUE,TRUE,1,FALSE,TRUE,FALSE,5,75
+verdict_engine_service,TRUE,TRUE,TRUE,1,FALSE,TRUE,FALSE,5,75
+vertice_registry_sidecar,TRUE,TRUE,FALSE,0,TRUE,TRUE,FALSE,6,75

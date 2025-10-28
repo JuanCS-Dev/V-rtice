@@ -110,7 +110,7 @@ vi.mock('../../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer', () =
 
 // Mock dashboard child components
 vi.mock('../components/DefensiveHeader', () => ({
-  default: ({ modules, setActiveModule }) => (
+  default: ({ modules, setActiveModule, setCurrentView, metrics, metricsLoading }) => (
     <div data-testid="defensive-header">
       Defensive Header
       {modules?.map(m => (

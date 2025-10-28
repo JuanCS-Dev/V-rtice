@@ -14,6 +14,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import DefensiveDashboard from '../../components/dashboards/DefensiveDashboard/DefensiveDashboard';
+import { createAlertFixture, generateTimestamp } from '../../tests/helpers/fixtures';
 
 // Mock all hooks and components
 vi.mock('../../components/dashboards/DefensiveDashboard/hooks/useDefensiveMetrics');
@@ -81,8 +82,18 @@ describe('Defensive Dashboard Integration Tests', () => {
 
     useRealTimeAlerts.mockReturnValue({
       alerts: [
-        { id: 1, severity: 'critical', message: 'SQL Injection detected', timestamp: Date.now() },
-        { id: 2, severity: 'high', message: 'Port scan from 192.168.1.50', timestamp: Date.now() - 5000 }
+        createAlertFixture({
+          id: 'alert-1',
+          severity: 'critical',
+          message: 'SQL Injection detected',
+          timestamp: generateTimestamp()
+        }),
+        createAlertFixture({
+          id: 'alert-2',
+          severity: 'high',
+          message: 'Port scan from 192.168.1.50',
+          timestamp: generateTimestamp(-5000)
+        })
       ],
       addAlert: vi.fn()
     });

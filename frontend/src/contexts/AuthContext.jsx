@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('vertice_auth_token'));
 
-  // Super Admin do sistema
-  const SUPER_ADMIN = 'juan.brainfarma@gmail.com';
+  // Super Admin do sistema - configurado via environment variable
+  const SUPER_ADMIN = import.meta.env.VITE_SUPER_ADMIN_EMAIL || '';
 
   // Roles e permissões (sincronizado com vertice-terminal)
   const ROLES = {
