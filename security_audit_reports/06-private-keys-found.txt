@@ -1,0 +1,9 @@
+./scripts/scan_secrets.sh:61:grep -r -n "BEGIN.*PRIVATE KEY" \
+./vertice-terminal/vertice/dlp/content_inspector.py:221:            re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
+./backend/services/reactive_fabric_core/htmlcov/z_c74a942cf80543db_deception_engine_py.html:271:    <p class="mis show_mis"><span class="n"><a id="t189" href="#t189">189</a></span><span class="t">        <span class="key">return</span> <span class="str">f"-----BEGIN {key_type} PRIVATE KEY-----\n{fake_key}\n-----END {key_type} PRIVATE KEY-----"</span>&nbsp;</span><span class="r"></span></p>
+./backend/services/reactive_fabric_core/htmlcov/z_422ff2f17da41d0a_postgres_honeypot_py.html:373:    <p class="mis mis2 show_mis"><span class="n"><a id="t291" href="#t291">291</a></span><span class="t"><span class="str">    '-----BEGIN RSA PRIVATE KEY-----</span>&nbsp;</span><span class="r"></span></p>
+./backend/services/reactive_fabric_core/deception/deception_engine.py:189:        return f"-----BEGIN {key_type} PRIVATE KEY-----\n{fake_key}\n-----END {key_type} PRIVATE KEY-----"
+./backend/services/reactive_fabric_core/honeypots/postgres_honeypot.py:291:    '-----BEGIN RSA PRIVATE KEY-----
+./backend/htmlcov/z_434c6b0af7a6ebb3_deception_engine_py.html:271:    <p class="mis show_mis"><span class="n"><a id="t189" href="#t189">189</a></span><span class="t">        <span class="key">return</span> <span class="str">f"-----BEGIN {key_type} PRIVATE KEY-----\n{fake_key}\n-----END {key_type} PRIVATE KEY-----"</span>&nbsp;</span><span class="r"></span></p>
+./backend/htmlcov/z_4edd17ed21673375_postgres_honeypot_py.html:373:    <p class="mis mis2 show_mis"><span class="n"><a id="t291" href="#t291">291</a></span><span class="t"><span class="str">    '-----BEGIN RSA PRIVATE KEY-----</span>&nbsp;</span><span class="r"></span></p>
+./vcli-go/pkg/nlp/auth/crypto_keys_test.go:438:assert.Contains(t, string(pemData), "BEGIN PRIVATE KEY")

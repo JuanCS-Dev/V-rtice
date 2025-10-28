@@ -11,7 +11,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 
 default_language_version:
-  python: python3.10
+  python: python3.11
 
 # Global settings
 fail_fast: false  # Continue running hooks even if one fails
@@ -66,7 +66,7 @@ repos:
     rev: 24.2.0
     hooks:
       - id: black
-        language_version: python3.10
+        language_version: python3.11
         args: ['--line-length=88']
         exclude: '^(LEGADO|venv|\.venv|env|build|dist|node_modules)/'
 
