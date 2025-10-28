@@ -11,12 +11,13 @@ Testa a configuração Pydantic do Tegumentar, incluindo:
 Padrão Pagani: Zero mocks desnecessários, validação real de Pydantic.
 """
 import os
-import pytest
 from pathlib import Path
 from unittest.mock import patch
-from pydantic import ValidationError
 
-from backend.modules.tegumentar.config import TegumentarSettings, get_settings
+from pydantic import ValidationError
+import pytest
+
+from backend.modules.tegumentar.config import get_settings, TegumentarSettings
 
 
 class TestTegumentarSettingsDefaults:
@@ -169,7 +170,9 @@ class TestTegumentarSettingsValidation:
 
     def test_lymphnode_endpoint_validates_url(self):
         """Endpoint do Linfonodo deve ser URL válida."""
-        settings = TegumentarSettings(lymphnode_endpoint="https://lymphnode.example.com")
+        settings = TegumentarSettings(
+            lymphnode_endpoint="https://lymphnode.example.com"
+        )
         assert str(settings.lymphnode_endpoint) == "https://lymphnode.example.com/"
 
         with pytest.raises(ValidationError) as exc_info:
@@ -194,10 +197,7 @@ class TestIPReputationSourcesValidator:
 
     def test_reputation_sources_accepts_list_of_urls(self):
         """Deve aceitar lista de URLs."""
-        sources = [
-            "https://example.com/list1.txt",
-            "https://example.org/list2.txt"
-        ]
+        sources = ["https://example.com/list1.txt", "https://example.org/list2.txt"]
         settings = TegumentarSettings(ip_reputation_sources=sources)
         assert len(settings.ip_reputation_sources) == 2
 
@@ -259,13 +259,17 @@ class TestEnvironmentVariableParsing:
 
     def test_parses_kafka_servers_from_env_var(self, monkeypatch):
         """Deve parsear TEGUMENTAR_KAFKA_BOOTSTRAP_SERVERS."""
-        monkeypatch.setenv("TEGUMENTAR_KAFKA_BOOTSTRAP_SERVERS", "kafka1:9092,kafka2:9092")
+        monkeypatch.setenv(
+            "TEGUMENTAR_KAFKA_BOOTSTRAP_SERVERS", "kafka1:9092,kafka2:9092"
+        )
         settings = TegumentarSettings()
         assert settings.kafka_bootstrap_servers == "kafka1:9092,kafka2:9092"
 
     def test_parses_lymphnode_endpoint_from_env_var(self, monkeypatch):
         """Deve parsear TEGUMENTAR_LYMPHNODE_ENDPOINT."""
-        monkeypatch.setenv("TEGUMENTAR_LYMPHNODE_ENDPOINT", "https://lymphnode.prod.com")
+        monkeypatch.setenv(
+            "TEGUMENTAR_LYMPHNODE_ENDPOINT", "https://lymphnode.prod.com"
+        )
         settings = TegumentarSettings()
         assert "lymphnode.prod.com" in str(settings.lymphnode_endpoint)
 
@@ -388,10 +392,7 @@ class TestConfigurationIntegrity:
 
     def test_optional_fields_can_be_none(self):
         """Campos opcionais devem aceitar None."""
-        settings = TegumentarSettings(
-            lymphnode_api_key=None,
-            sdnc_endpoint=None
-        )
+        settings = TegumentarSettings(lymphnode_api_key=None, sdnc_endpoint=None)
 
         assert settings.lymphnode_api_key is None
         assert settings.sdnc_endpoint is None

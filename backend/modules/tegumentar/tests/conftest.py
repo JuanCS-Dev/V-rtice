@@ -7,16 +7,17 @@ Seguindo Padrão Pagani (Constituição Vértice v2.5 - Artigo II):
 - Isolamento completo entre testes
 """
 import asyncio
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from typing import AsyncGenerator, Generator
-import tempfile
 import os
+import tempfile
+from typing import AsyncGenerator, Generator
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 
 # ============================================================================
 # ASYNCIO EVENT LOOP
 # ============================================================================
+
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
@@ -29,6 +30,7 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 # ============================================================================
 # MOCK EXTERNAL SERVICES
 # ============================================================================
+
 
 @pytest.fixture
 def mock_redis() -> MagicMock:
@@ -77,10 +79,10 @@ def mock_postgresql() -> MagicMock:
 @pytest.fixture
 def mock_nftables_command() -> Generator[MagicMock, None, None]:
     """Mock de comandos nftables (subprocess)."""
-    with patch('asyncio.create_subprocess_exec') as mock_proc:
+    with patch("asyncio.create_subprocess_exec") as mock_proc:
         # Mock process
         process = MagicMock()
-        process.communicate = AsyncMock(return_value=(b'', b''))
+        process.communicate = AsyncMock(return_value=(b"", b""))
         process.returncode = 0
 
         mock_proc.return_value = process
@@ -113,11 +115,13 @@ def mock_httpx_client() -> MagicMock:
 # CONFIGURATION FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def temp_config_file() -> Generator[str, None, None]:
     """Cria arquivo de configuração temporário."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
-        f.write("""
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+        f.write(
+            """
 epiderme:
   nftables_table: "filter"
   nftables_chain: "tegumentar_input"
@@ -135,7 +139,8 @@ derme:
 hipoderme:
   mmei_url: "http://localhost:8600"
   lymphnode_url: "http://localhost:8021"
-""")
+"""
+        )
         temp_path = f.name
 
     yield temp_path
@@ -174,6 +179,7 @@ def mock_tegumentar_settings() -> MagicMock:
 # SAMPLE DATA FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def sample_ip_packet() -> dict:
     """Pacote IP de exemplo para testes."""
@@ -184,7 +190,7 @@ def sample_ip_packet() -> dict:
         "dst_port": 80,
         "protocol": "TCP",
         "payload": b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n",
-        "timestamp": 1698765432.123
+        "timestamp": 1698765432.123,
     }
 
 
@@ -197,7 +203,7 @@ def sample_threat_signature() -> dict:
         "pattern": r"(?i)(union.*select|select.*from|insert.*into|drop.*table)",
         "severity": "HIGH",
         "category": "injection",
-        "cve_ids": ["CVE-2023-12345"]
+        "cve_ids": ["CVE-2023-12345"],
     }
 
 
@@ -213,7 +219,7 @@ def sample_langerhans_antigen() -> dict:
         "payload_hash": "a1b2c3d4e5f6",
         "signatures_matched": ["SIG-001", "SIG-042"],
         "ml_anomaly_score": 0.87,
-        "captured_at": "2025-10-28T10:30:00Z"
+        "captured_at": "2025-10-28T10:30:00Z",
     }
 
 
@@ -227,14 +233,15 @@ def sample_wound_healing_playbook() -> dict:
         "actions": [
             {"type": "firewall", "action": "block_ip", "duration": 3600},
             {"type": "alert", "channels": ["slack", "email"]},
-            {"type": "log", "destination": "siem"}
-        ]
+            {"type": "log", "destination": "siem"},
+        ],
     }
 
 
 # ============================================================================
 # INTEGRATION TEST FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 async def real_redis_client() -> AsyncGenerator:
@@ -271,7 +278,7 @@ async def real_postgresql_pool() -> AsyncGenerator:
 
     dsn = os.getenv(
         "POSTGRESQL_TEST_DSN",
-        "postgresql://postgres:postgres@localhost:5432/tegumentar_test"
+        "postgresql://postgres:postgres@localhost:5432/tegumentar_test",
     )
 
     try:
@@ -279,14 +286,16 @@ async def real_postgresql_pool() -> AsyncGenerator:
 
         # Setup: criar schema de teste
         async with pool.acquire() as conn:
-            await conn.execute("""
+            await conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS antigens (
                     id UUID PRIMARY KEY,
                     source_ip INET NOT NULL,
                     payload_hash TEXT NOT NULL,
                     captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
-            """)
+            """
+            )
 
         yield pool
 

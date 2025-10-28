@@ -7,8 +7,8 @@ import logging
 import time
 from typing import Optional
 
-import redis.asyncio as aioredis
 from redis import exceptions as redis_exceptions
+import redis.asyncio as aioredis
 
 from ..config import TegumentarSettings
 
@@ -64,7 +64,9 @@ class DistributedRateLimiter:
         if self._redis is not None:
             return
 
-        self._redis = aioredis.from_url(self._settings.redis_url, encoding="utf-8", decode_responses=True)
+        self._redis = aioredis.from_url(
+            self._settings.redis_url, encoding="utf-8", decode_responses=True
+        )
         self._script_sha = await self._redis.script_load(_TOKEN_BUCKET_LUA)
         logger.info("Rate limiter initialised with Redis %s", self._settings.redis_url)
 

@@ -35,7 +35,9 @@ class AdaptiveThrottler:
             "400ms",
         ]
         self._run(command)
-        logger.info("Applied throttling on %s rate=%s burst=%s", self._interface, rate, burst)
+        logger.info(
+            "Applied throttling on %s rate=%s burst=%s", self._interface, rate, burst
+        )
 
     def clear(self) -> None:
         command = ["tc", "qdisc", "del", "dev", self._interface, "root"]
@@ -46,10 +48,14 @@ class AdaptiveThrottler:
 
     def _run(self, command: list[str]) -> None:
         try:
-            subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(
+                command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
         except subprocess.CalledProcessError as exc:
             stderr = exc.stderr.decode().strip()
-            raise AdaptiveThrottlerError(f"Command {' '.join(command)} failed: {stderr}") from exc
+            raise AdaptiveThrottlerError(
+                f"Command {' '.join(command)} failed: {stderr}"
+            ) from exc
 
 
 __all__ = ["AdaptiveThrottler", "AdaptiveThrottlerError"]

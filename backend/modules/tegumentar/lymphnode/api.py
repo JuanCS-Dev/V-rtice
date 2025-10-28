@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import logging
 import time
-import uuid
-from dataclasses import dataclass
 from typing import Any, Dict, Optional
+import uuid
 
 import httpx
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,9 @@ class LymphnodeAPI:
     async def submit_threat(self, threat_report: Dict[str, Any]) -> ThreatValidation:
         """Submete ameaça para validação e orquestração imune."""
 
-        threat_id = threat_report.get("threat_id") or f"teg-threat-{uuid.uuid4().hex[:12]}"
+        threat_id = (
+            threat_report.get("threat_id") or f"teg-threat-{uuid.uuid4().hex[:12]}"
+        )
         severity = threat_report.get("severity") or self._classify_severity(
             threat_report.get("anomaly_score", 0.0)
         )
@@ -80,7 +82,11 @@ class LymphnodeAPI:
                 threat_id=threat_id,
                 severity=severity,
                 confidence=confidence,
-                extra={"immunis_response": immunis_response, "raw": body, "latency": latency},
+                extra={
+                    "immunis_response": immunis_response,
+                    "raw": body,
+                    "latency": latency,
+                },
             )
 
     async def broadcast_vaccination(self, rule: Dict[str, Any]) -> bool:

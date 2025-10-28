@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+import csv
 import logging
 from pathlib import Path
 from typing import List, Optional
 
-import csv
 import joblib
 from sklearn.ensemble import IsolationForest  # type: ignore[import]
 
-from ...config import TegumentarSettings, get_settings
+from ...config import get_settings, TegumentarSettings
 from .feature_extractor import FeatureVector
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,9 @@ class AnomalyDetector:
     def load(self) -> None:
         path = Path(self._settings.anomaly_model_path)
         if not path.exists():
-            logger.warning("Anomaly model missing at %s. Training baseline model.", path)
+            logger.warning(
+                "Anomaly model missing at %s. Training baseline model.", path
+            )
             self._train_default_model(path)
         self._model = joblib.load(path)
         if not isinstance(self._model, IsolationForest):
@@ -42,7 +44,12 @@ class AnomalyDetector:
         return 1.0 - score
 
     def _train_default_model(self, output_path: Path) -> None:
-        dataset_path = Path(__file__).resolve().parents[2] / "resources" / "ml" / "baseline_dataset.csv"
+        dataset_path = (
+            Path(__file__).resolve().parents[2]
+            / "resources"
+            / "ml"
+            / "baseline_dataset.csv"
+        )
         if not dataset_path.exists():
             raise FileNotFoundError(
                 f"Baseline dataset not found at {dataset_path}; provide training data or model."

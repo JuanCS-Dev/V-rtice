@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 import yaml
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,9 @@ class WoundHealingOrchestrator:
                 await self._execute_step(step, context)
             logger.info("Completed phase %s", name)
 
-    async def _execute_step(self, step: Dict[str, Any], context: Dict[str, Any]) -> None:
+    async def _execute_step(
+        self, step: Dict[str, Any], context: Dict[str, Any]
+    ) -> None:
         step_type = step.get("type")
         if step_type == "command":
             await self._run_command(step["command"], step.get("timeout", 60))

@@ -10,7 +10,7 @@ from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 from ..derme.manager import DermeLayer
 from ..epiderme.manager import EpidermeLayer
 from .permeability_control import PermeabilityController

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
-import subprocess
 from pathlib import Path
+import subprocess
 from typing import Callable
 
 from ..config import TegumentarSettings
@@ -26,7 +26,9 @@ class ReflexArcSession:
         """Blocking poll on the perf buffer to emit reflex events."""
         # Note: Perf buffer polling requires libbpf C API through ctypes
         # This is a placeholder - full implementation pending
-        logger.warning("Perf buffer polling not implemented - events will not be collected")
+        logger.warning(
+            "Perf buffer polling not implemented - events will not be collected"
+        )
         while True:
             pass  # Placeholder
 
@@ -49,10 +51,12 @@ class ReflexArcLoader:
     def __init__(self, settings: TegumentarSettings):
         self._settings = settings
 
-    def attach(self, source_path: Path, interface: str, flags: int = 0) -> ReflexArcSession:
+    def attach(
+        self, source_path: Path, interface: str, flags: int = 0
+    ) -> ReflexArcSession:
         """Load pre-compiled BPF object (CO-RE) and attach to interface via XDP."""
 
-        object_path = source_path.with_suffix('.o')
+        object_path = source_path.with_suffix(".o")
 
         if not object_path.exists():
             raise ReflexArcLoaderError(
@@ -66,7 +70,18 @@ class ReflexArcLoader:
             # Attach XDP program using ip link command
             # xdpgeneric mode works in most environments including containers
             result = subprocess.run(
-                ["ip", "link", "set", "dev", interface, "xdpgeneric", "obj", str(object_path), "sec", "xdp"],
+                [
+                    "ip",
+                    "link",
+                    "set",
+                    "dev",
+                    interface,
+                    "xdpgeneric",
+                    "obj",
+                    str(object_path),
+                    "sec",
+                    "xdp",
+                ],
                 check=True,
                 capture_output=True,
                 text=True,
@@ -77,7 +92,9 @@ class ReflexArcLoader:
 
         except subprocess.CalledProcessError as exc:
             error_msg = exc.stderr if exc.stderr else str(exc)
-            raise ReflexArcLoaderError(f"Failed to attach XDP program: {error_msg}") from exc
+            raise ReflexArcLoaderError(
+                f"Failed to attach XDP program: {error_msg}"
+            ) from exc
         except Exception as exc:  # noqa: BLE001
             raise ReflexArcLoaderError(f"Failed to attach reflex arc: {exc}") from exc
 

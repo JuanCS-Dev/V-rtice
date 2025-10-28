@@ -11,17 +11,18 @@ Testa o rate limiter distribuído baseado em Token Bucket com Redis:
 Padrão Pagani: Mocks do Redis, validação real do algoritmo.
 """
 import asyncio
-import pytest
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from redis.asyncio.client import Redis
 from redis.exceptions import NoScriptError
 
-from backend.modules.tegumentar.epiderme.rate_limiter import (
-    DistributedRateLimiter,
-    _TOKEN_BUCKET_LUA
-)
 from backend.modules.tegumentar.config import TegumentarSettings
+from backend.modules.tegumentar.epiderme.rate_limiter import (
+    _TOKEN_BUCKET_LUA,
+    DistributedRateLimiter,
+)
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def settings():
     return TegumentarSettings(
         redis_url="redis://localhost:6379/15",
         rate_limit_capacity=100,
-        rate_limit_refill_per_second=10
+        rate_limit_refill_per_second=10,
     )
 
 
@@ -101,7 +102,9 @@ class TestTokenBucketAlgorithm:
     """Testa algoritmo Token Bucket via mocks."""
 
     @pytest.mark.asyncio
-    async def test_allow_returns_true_when_tokens_available(self, rate_limiter, mock_redis):
+    async def test_allow_returns_true_when_tokens_available(
+        self, rate_limiter, mock_redis
+    ):
         """allow() deve retornar True quando há tokens disponíveis."""
         mock_redis.evalsha.return_value = 1  # Script retorna 1 = allowed
 
@@ -112,7 +115,9 @@ class TestTokenBucketAlgorithm:
             assert result is True
 
     @pytest.mark.asyncio
-    async def test_allow_returns_false_when_rate_limited(self, rate_limiter, mock_redis):
+    async def test_allow_returns_false_when_rate_limited(
+        self, rate_limiter, mock_redis
+    ):
         """allow() deve retornar False quando rate limited."""
         mock_redis.evalsha.return_value = 0  # Script retorna 0 = rate limited
 
@@ -125,8 +130,9 @@ class TestTokenBucketAlgorithm:
     @pytest.mark.asyncio
     async def test_allow_uses_correct_redis_key(self, rate_limiter, mock_redis):
         """allow() deve usar chave Redis correta."""
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1698765432.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1698765432.0
+        ):
             await rate_limiter.startup()
             await rate_limiter.allow("10.0.0.42")
 
@@ -139,8 +145,9 @@ class TestTokenBucketAlgorithm:
     @pytest.mark.asyncio
     async def test_allow_passes_correct_capacity(self, rate_limiter, mock_redis):
         """allow() deve passar capacidade correta para Lua script."""
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1698765432.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1698765432.0
+        ):
             await rate_limiter.startup()
             await rate_limiter.allow("10.0.0.1")
 
@@ -150,8 +157,9 @@ class TestTokenBucketAlgorithm:
     @pytest.mark.asyncio
     async def test_allow_passes_correct_refill_rate(self, rate_limiter, mock_redis):
         """allow() deve passar refill rate correta para Lua script."""
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1698765432.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1698765432.0
+        ):
             await rate_limiter.startup()
             await rate_limiter.allow("10.0.0.1")
 
@@ -161,8 +169,9 @@ class TestTokenBucketAlgorithm:
     @pytest.mark.asyncio
     async def test_allow_passes_custom_token_count(self, rate_limiter, mock_redis):
         """allow() deve aceitar número customizado de tokens."""
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1698765432.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1698765432.0
+        ):
             await rate_limiter.startup()
             await rate_limiter.allow("10.0.0.1", tokens=5)
 
@@ -173,8 +182,9 @@ class TestTokenBucketAlgorithm:
     async def test_allow_passes_current_timestamp(self, rate_limiter, mock_redis):
         """allow() deve passar timestamp atual para Lua script."""
         frozen_time = 1698765432.123
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=frozen_time):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=frozen_time
+        ):
             await rate_limiter.startup()
             await rate_limiter.allow("10.0.0.1")
 
@@ -186,7 +196,9 @@ class TestScriptReloading:
     """Testa recarga automática de Lua script."""
 
     @pytest.mark.asyncio
-    async def test_allow_reloads_script_on_no_script_error(self, rate_limiter, mock_redis):
+    async def test_allow_reloads_script_on_no_script_error(
+        self, rate_limiter, mock_redis
+    ):
         """allow() deve recarregar script se Redis retornar NoScriptError."""
         # Primeira chamada: NoScriptError
         # Segunda chamada: sucesso
@@ -272,10 +284,7 @@ class TestConcurrency:
             await rate_limiter.startup()
 
             # Fazer 100 chamadas concorrentes
-            tasks = [
-                rate_limiter.allow(f"10.0.0.{i % 255}")
-                for i in range(100)
-            ]
+            tasks = [rate_limiter.allow(f"10.0.0.{i % 255}") for i in range(100)]
             results = await asyncio.gather(*tasks)
 
             # Todas devem ter sucesso
@@ -283,7 +292,9 @@ class TestConcurrency:
             assert mock_redis.evalsha.call_count == 100
 
     @pytest.mark.asyncio
-    async def test_different_ips_have_independent_buckets(self, rate_limiter, mock_redis):
+    async def test_different_ips_have_independent_buckets(
+        self, rate_limiter, mock_redis
+    ):
         """IPs diferentes devem ter buckets independentes."""
         with patch("redis.asyncio.from_url", return_value=mock_redis):
             await rate_limiter.startup()
@@ -308,9 +319,7 @@ class TestConfigurationRespect:
     @pytest.mark.asyncio
     async def test_uses_configured_redis_url(self, mock_redis):
         """Deve usar Redis URL configurado."""
-        custom_settings = TegumentarSettings(
-            redis_url="redis://custom-redis:6380/5"
-        )
+        custom_settings = TegumentarSettings(redis_url="redis://custom-redis:6380/5")
         limiter = DistributedRateLimiter(custom_settings)
 
         with patch("redis.asyncio.from_url") as mock_from_url:
@@ -318,22 +327,20 @@ class TestConfigurationRespect:
             await limiter.startup()
 
             mock_from_url.assert_called_once_with(
-                "redis://custom-redis:6380/5",
-                encoding="utf-8",
-                decode_responses=True
+                "redis://custom-redis:6380/5", encoding="utf-8", decode_responses=True
             )
 
     @pytest.mark.asyncio
     async def test_uses_configured_capacity(self, mock_redis):
         """Deve usar capacidade configurada."""
         custom_settings = TegumentarSettings(
-            redis_url="redis://localhost:6379/0",
-            rate_limit_capacity=5000
+            redis_url="redis://localhost:6379/0", rate_limit_capacity=5000
         )
         limiter = DistributedRateLimiter(custom_settings)
 
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1.0
+        ):
             await limiter.startup()
             await limiter.allow("10.0.0.1")
 
@@ -344,13 +351,13 @@ class TestConfigurationRespect:
     async def test_uses_configured_refill_rate(self, mock_redis):
         """Deve usar refill rate configurada."""
         custom_settings = TegumentarSettings(
-            redis_url="redis://localhost:6379/0",
-            rate_limit_refill_per_second=25
+            redis_url="redis://localhost:6379/0", rate_limit_refill_per_second=25
         )
         limiter = DistributedRateLimiter(custom_settings)
 
-        with patch("redis.asyncio.from_url", return_value=mock_redis), \
-             patch("time.time", return_value=1.0):
+        with patch("redis.asyncio.from_url", return_value=mock_redis), patch(
+            "time.time", return_value=1.0
+        ):
             await limiter.startup()
             await limiter.allow("10.0.0.1")
 

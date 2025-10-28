@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import ipaddress
 import logging
-import subprocess
 from pathlib import Path
+import subprocess
 from typing import Iterable, List, Sequence
 
 from ..config import TegumentarSettings
@@ -61,7 +61,8 @@ class StatelessFilter:
         base_rules = [
             f"flush chain {table_family} {table_name} {chain_name}",
             f"add set {table_family} {table_name} {set_name} {{ type ipv4_addr; flags interval; }}",
-            f"add rule {table_family} {table_name} {chain_name} ip saddr @%s drop" % set_name,
+            f"add rule {table_family} {table_name} {chain_name} ip saddr @%s drop"
+            % set_name,
         ]
 
         self._run_nft(["-f", "-"], input_="\n".join(base_rules) + "\n", check=False)
@@ -96,8 +97,11 @@ class StatelessFilter:
 
         # Only update IPv4 for now (IPv6 requires separate set configuration)
         elements = ", ".join(validated_ipv4)
-        logger.debug("Updating blocked IP set with %d IPv4 entries (skipping %d IPv6)",
-                     len(validated_ipv4), len(validated_ipv6))
+        logger.debug(
+            "Updating blocked IP set with %d IPv4 entries (skipping %d IPv6)",
+            len(validated_ipv4),
+            len(validated_ipv6),
+        )
         nft_input = (
             f"flush set {table_family} {table_name} {set_name}\n"
             f"add element {table_family} {table_name} {set_name} {{ {elements} }}\n"
@@ -141,7 +145,9 @@ class StatelessFilter:
         self._run_nft(["-f", "-"], input_=statement)
         logger.info("Updated epiderme policy to %s", policy.upper())
 
-    def _run_nft(self, args: Sequence[str], input_: str | None = None, check: bool = True) -> subprocess.CompletedProcess:
+    def _run_nft(
+        self, args: Sequence[str], input_: str | None = None, check: bool = True
+    ) -> subprocess.CompletedProcess:
         """Run nft command with consistent error handling."""
 
         command = [self._settings.nft_binary, *args]

@@ -6,14 +6,14 @@ import asyncio
 import contextlib
 import json
 import logging
+from pathlib import Path
 import socket
 import struct
-from pathlib import Path
 from typing import Optional
 
 from aiokafka import AIOKafkaProducer
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 from ..metrics import record_reflex_event
 from .ip_reputation import IPReputationFeed, LocalReputationStore
 from .rate_limiter import DistributedRateLimiter
@@ -30,7 +30,9 @@ class EpidermeLayer:
         self._settings = settings or get_settings()
         self._stateless_filter = StatelessFilter(self._settings)
         self._reputation_feed = IPReputationFeed(self._settings)
-        self._reputation_store = LocalReputationStore(Path(self._settings.reputation_cache_path))
+        self._reputation_store = LocalReputationStore(
+            Path(self._settings.reputation_cache_path)
+        )
         self._rate_limiter = DistributedRateLimiter(self._settings)
         self._reflex_loader = ReflexArcLoader(self._settings)
         self._reflex_session: Optional[ReflexArcSession] = None
@@ -95,7 +97,9 @@ class EpidermeLayer:
                 value_serializer=lambda payload: json.dumps(payload).encode("utf-8"),
             )
             await self._producer.start()
-            logger.info("Kafka producer connected to %s", self._settings.kafka_bootstrap_servers)
+            logger.info(
+                "Kafka producer connected to %s", self._settings.kafka_bootstrap_servers
+            )
 
     async def _poll_reflex_events(self) -> None:
         if not self._reflex_session:

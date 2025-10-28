@@ -6,7 +6,7 @@ import asyncio
 import logging
 from typing import Optional
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 from .deep_inspector import DeepPacketInspector, InspectionResult
 from .langerhans_cell import LangerhansCell
 from .sensory_processor import SensoryProcessor
@@ -35,7 +35,9 @@ class DermeLayer:
         await self._langerhans.shutdown()
         await self._stateful.shutdown()
 
-    async def process_packet(self, observation: FlowObservation, payload: bytes) -> InspectionResult:
+    async def process_packet(
+        self, observation: FlowObservation, payload: bytes
+    ) -> InspectionResult:
         decision = await self._stateful.process(observation)
 
         if decision.action == InspectorAction.DROP:
@@ -58,7 +60,9 @@ class DermeLayer:
 
         return await self._deep_inspection(observation, payload)
 
-    async def _deep_inspection(self, observation: FlowObservation, payload: bytes) -> InspectionResult:
+    async def _deep_inspection(
+        self, observation: FlowObservation, payload: bytes
+    ) -> InspectionResult:
         result = self._dpi.inspect(observation, payload)
         self._sensory.register_event(observation, result)
 

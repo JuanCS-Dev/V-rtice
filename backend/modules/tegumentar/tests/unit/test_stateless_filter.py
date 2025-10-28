@@ -11,17 +11,18 @@ Testa o StatelessFilter (nftables integration):
 
 Padrão Pagani: Mock de subprocess, validação real de lógica nftables.
 """
-import pytest
-import subprocess
-from pathlib import Path
-from unittest.mock import MagicMock, patch, call
 from ipaddress import IPv4Network, IPv6Network
+from pathlib import Path
+import subprocess
+from unittest.mock import call, MagicMock, patch
 
+import pytest
+
+from backend.modules.tegumentar.config import TegumentarSettings
 from backend.modules.tegumentar.epiderme.stateless_filter import (
     StatelessFilter,
-    StatelessFilterError
+    StatelessFilterError,
 )
-from backend.modules.tegumentar.config import TegumentarSettings
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def settings():
     return TegumentarSettings(
         nft_binary="/usr/sbin/nft",
         nft_table_name="test_table",
-        nft_chain_name="test_chain"
+        nft_chain_name="test_chain",
     )
 
 
@@ -45,11 +46,7 @@ def mock_subprocess_run():
     """Mock de subprocess.run."""
     with patch("subprocess.run") as mock:
         # Default: comando bem-sucedido
-        mock.return_value = MagicMock(
-            returncode=0,
-            stdout=b"",
-            stderr=b""
-        )
+        mock.return_value = MagicMock(returncode=0, stdout=b"", stderr=b"")
         yield mock
 
 
@@ -85,7 +82,9 @@ class TestEnsureTableStructure:
 
             # Verificar que criou tabela
             calls = mock_subprocess_run.call_args_list
-            table_create_call = [c for c in calls if b"add table" in (c[1].get("input") or b"")]
+            table_create_call = [
+                c for c in calls if b"add table" in (c[1].get("input") or b"")
+            ]
             assert len(table_create_call) > 0
 
     def test_creates_chain(self, stateless_filter, mock_subprocess_run):
@@ -112,7 +111,9 @@ class TestEnsureTableStructure:
             assert "test_chain_blocked_ips" in input_data
             assert "type ipv4_addr" in input_data
 
-    def test_adds_drop_rule_for_blocked_ips(self, stateless_filter, mock_subprocess_run):
+    def test_adds_drop_rule_for_blocked_ips(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve adicionar regra de drop para IPs no set."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.ensure_table_structure()
@@ -148,7 +149,9 @@ class TestSyncBlockedIPs:
 
             # Verificar que IPs foram adicionados ao set
             calls = mock_subprocess_run.call_args_list
-            add_element_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_element_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             assert len(add_element_calls) > 0
 
             input_data = add_element_calls[0][1]["input"].decode()
@@ -165,7 +168,9 @@ class TestSyncBlockedIPs:
 
             # Apenas IPs válidos devem estar no set
             calls = mock_subprocess_run.call_args_list
-            add_element_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_element_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             if add_element_calls:
                 input_data = add_element_calls[0][1]["input"].decode()
                 assert "192.168.1.1" in input_data
@@ -181,7 +186,9 @@ class TestSyncBlockedIPs:
 
             # IPv6 deve ser identificado mas não adicionado (limitation atual)
             calls = mock_subprocess_run.call_args_list
-            add_element_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_element_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             if add_element_calls:
                 input_data = add_element_calls[0][1]["input"].decode()
                 assert "192.168.1.1" in input_data
@@ -195,7 +202,9 @@ class TestSyncBlockedIPs:
             stateless_filter.sync_blocked_ips(ips)
 
             calls = mock_subprocess_run.call_args_list
-            add_element_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_element_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             assert len(add_element_calls) > 0
 
             input_data = add_element_calls[0][1]["input"].decode()
@@ -209,10 +218,14 @@ class TestSyncBlockedIPs:
 
             # Verificar que fez flush do set
             calls = mock_subprocess_run.call_args_list
-            flush_calls = [c for c in calls if "flush" in str(c[0][0]) and "set" in str(c[0][0])]
+            flush_calls = [
+                c for c in calls if "flush" in str(c[0][0]) and "set" in str(c[0][0])
+            ]
             assert len(flush_calls) > 0
 
-    def test_flushes_before_adding_elements(self, stateless_filter, mock_subprocess_run):
+    def test_flushes_before_adding_elements(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve fazer flush antes de adicionar elementos."""
         with patch("pathlib.Path.exists", return_value=True):
             ips = ["192.168.1.1"]
@@ -235,7 +248,9 @@ class TestSyncBlockedIPs:
             stateless_filter.sync_blocked_ips(ips)
 
             calls = mock_subprocess_run.call_args_list
-            add_element_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_element_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             assert len(add_element_calls) > 0
 
             # Verificar formato: add element inet table set { ip1, ip2 }
@@ -248,13 +263,19 @@ class TestSyncBlockedIPs:
 class TestAttachToHook:
     """Testa attachment a netfilter hook."""
 
-    def test_attaches_chain_to_prerouting_hook(self, stateless_filter, mock_subprocess_run):
+    def test_attaches_chain_to_prerouting_hook(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve anexar chain ao hook prerouting."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.attach_to_hook(priority=-100)
 
             calls = mock_subprocess_run.call_args_list
-            hook_calls = [c for c in calls if b"type filter hook prerouting" in (c[1].get("input") or b"")]
+            hook_calls = [
+                c
+                for c in calls
+                if b"type filter hook prerouting" in (c[1].get("input") or b"")
+            ]
             assert len(hook_calls) > 0
 
     def test_uses_custom_priority(self, stateless_filter, mock_subprocess_run):
@@ -263,7 +284,9 @@ class TestAttachToHook:
             stateless_filter.attach_to_hook(priority=-200)
 
             calls = mock_subprocess_run.call_args_list
-            hook_calls = [c for c in calls if b"priority -200" in (c[1].get("input") or b"")]
+            hook_calls = [
+                c for c in calls if b"priority -200" in (c[1].get("input") or b"")
+            ]
             assert len(hook_calls) > 0
 
     def test_sets_default_policy_to_accept(self, stateless_filter, mock_subprocess_run):
@@ -272,19 +295,29 @@ class TestAttachToHook:
             stateless_filter.attach_to_hook()
 
             calls = mock_subprocess_run.call_args_list
-            hook_calls = [c for c in calls if b"policy accept" in (c[1].get("input") or b"")]
+            hook_calls = [
+                c for c in calls if b"policy accept" in (c[1].get("input") or b"")
+            ]
             assert len(hook_calls) > 0
 
-    def test_deletes_chain_before_recreating(self, stateless_filter, mock_subprocess_run):
+    def test_deletes_chain_before_recreating(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve deletar chain antes de recriar (idempotência)."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.attach_to_hook()
 
             calls = mock_subprocess_run.call_args_list
-            hook_calls = [c for c in calls if c[1].get("input") and b"delete chain" in c[1]["input"]]
+            hook_calls = [
+                c
+                for c in calls
+                if c[1].get("input") and b"delete chain" in c[1]["input"]
+            ]
             assert len(hook_calls) > 0
 
-    def test_readds_drop_rule_after_attachment(self, stateless_filter, mock_subprocess_run):
+    def test_readds_drop_rule_after_attachment(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve re-adicionar regra de drop após attachment."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.attach_to_hook()
@@ -309,7 +342,9 @@ class TestSetPolicy:
             stateless_filter.set_policy("accept")
 
             calls = mock_subprocess_run.call_args_list
-            policy_calls = [c for c in calls if b"policy accept" in (c[1].get("input") or b"")]
+            policy_calls = [
+                c for c in calls if b"policy accept" in (c[1].get("input") or b"")
+            ]
             assert len(policy_calls) > 0
 
     def test_accepts_drop_policy(self, stateless_filter, mock_subprocess_run):
@@ -318,7 +353,9 @@ class TestSetPolicy:
             stateless_filter.set_policy("drop")
 
             calls = mock_subprocess_run.call_args_list
-            policy_calls = [c for c in calls if b"policy drop" in (c[1].get("input") or b"")]
+            policy_calls = [
+                c for c in calls if b"policy drop" in (c[1].get("input") or b"")
+            ]
             assert len(policy_calls) > 0
 
     def test_rejects_invalid_policy(self, stateless_filter):
@@ -328,25 +365,37 @@ class TestSetPolicy:
 
         assert "must be 'accept' or 'drop'" in str(exc_info.value)
 
-    def test_recreates_chain_with_new_policy(self, stateless_filter, mock_subprocess_run):
+    def test_recreates_chain_with_new_policy(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve recriar chain com nova política."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.set_policy("drop")
 
             calls = mock_subprocess_run.call_args_list
-            delete_calls = [c for c in calls if c[1].get("input") and b"delete chain" in c[1]["input"]]
-            add_calls = [c for c in calls if c[1].get("input") and b"add chain" in c[1]["input"]]
+            delete_calls = [
+                c
+                for c in calls
+                if c[1].get("input") and b"delete chain" in c[1]["input"]
+            ]
+            add_calls = [
+                c for c in calls if c[1].get("input") and b"add chain" in c[1]["input"]
+            ]
 
             assert len(delete_calls) > 0
             assert len(add_calls) > 0
 
-    def test_preserves_drop_rule_after_policy_change(self, stateless_filter, mock_subprocess_run):
+    def test_preserves_drop_rule_after_policy_change(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve preservar regra de drop após mudança de política."""
         with patch("pathlib.Path.exists", return_value=True):
             stateless_filter.set_policy("accept")
 
             calls = mock_subprocess_run.call_args_list
-            policy_calls = [c for c in calls if c[1].get("input") and b"policy" in c[1]["input"]]
+            policy_calls = [
+                c for c in calls if c[1].get("input") and b"policy" in c[1]["input"]
+            ]
 
             for call in policy_calls:
                 input_data = call[1]["input"].decode()
@@ -375,20 +424,28 @@ class TestRunNftCommand:
         call_kwargs = mock_subprocess_run.call_args[1]
         assert call_kwargs["input"] == input_data.encode()
 
-    def test_raises_on_command_failure_when_check_true(self, stateless_filter, mock_subprocess_run):
+    def test_raises_on_command_failure_when_check_true(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve lançar StatelessFilterError quando comando falha (check=True)."""
         mock_subprocess_run.side_effect = subprocess.CalledProcessError(
             1, ["nft"], stderr=b"Error: table not found"
         )
 
         with pytest.raises(StatelessFilterError) as exc_info:
-            stateless_filter._run_nft(["list", "table", "inet", "nonexistent"], check=True)
+            stateless_filter._run_nft(
+                ["list", "table", "inet", "nonexistent"], check=True
+            )
 
         assert "nft command failed" in str(exc_info.value)
 
-    def test_does_not_raise_on_failure_when_check_false(self, stateless_filter, mock_subprocess_run):
+    def test_does_not_raise_on_failure_when_check_false(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Não deve lançar exceção quando check=False."""
-        mock_subprocess_run.return_value = MagicMock(returncode=1, stdout=b"", stderr=b"Warning")
+        mock_subprocess_run.return_value = MagicMock(
+            returncode=1, stdout=b"", stderr=b"Warning"
+        )
 
         # Não deve lançar exceção
         result = stateless_filter._run_nft(["list", "tables"], check=False)
@@ -397,12 +454,12 @@ class TestRunNftCommand:
     def test_logs_stderr_when_present(self, stateless_filter, mock_subprocess_run):
         """Deve logar stderr quando presente."""
         mock_subprocess_run.return_value = MagicMock(
-            returncode=0,
-            stdout=b"",
-            stderr=b"Warning: something"
+            returncode=0, stdout=b"", stderr=b"Warning: something"
         )
 
-        with patch("backend.modules.tegumentar.epiderme.stateless_filter.logger") as mock_logger:
+        with patch(
+            "backend.modules.tegumentar.epiderme.stateless_filter.logger"
+        ) as mock_logger:
             stateless_filter._run_nft(["list", "tables"])
             mock_logger.debug.assert_called()
 
@@ -422,7 +479,9 @@ class TestErrorHandling:
 
             assert "nft binary not found" in str(exc_info.value)
 
-    def test_preserves_original_exception_in_chain(self, stateless_filter, mock_subprocess_run):
+    def test_preserves_original_exception_in_chain(
+        self, stateless_filter, mock_subprocess_run
+    ):
         """Deve preservar exceção original na chain."""
         original_error = subprocess.CalledProcessError(1, ["nft"], stderr=b"Error")
         mock_subprocess_run.side_effect = original_error
@@ -442,7 +501,9 @@ class TestEdgeCases:
             stateless_filter.sync_blocked_ips(["192.168.1.1"])
 
             calls = mock_subprocess_run.call_args_list
-            add_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             assert len(add_calls) > 0
 
     def test_sync_with_large_ip_list(self, stateless_filter, mock_subprocess_run):
@@ -452,7 +513,9 @@ class TestEdgeCases:
             stateless_filter.sync_blocked_ips(large_list)
 
             calls = mock_subprocess_run.call_args_list
-            add_calls = [c for c in calls if b"add element" in (c[1].get("input") or b"")]
+            add_calls = [
+                c for c in calls if b"add element" in (c[1].get("input") or b"")
+            ]
             assert len(add_calls) > 0
 
     def test_sync_with_duplicate_ips(self, stateless_filter, mock_subprocess_run):
@@ -503,7 +566,9 @@ class TestConfigurationIntegration:
 
             # Verificar que usou nome customizado
             calls = mock_subprocess_run.call_args_list
-            table_calls = [c for c in calls if b"custom_table" in (c[1].get("input") or b"")]
+            table_calls = [
+                c for c in calls if b"custom_table" in (c[1].get("input") or b"")
+            ]
             assert len(table_calls) > 0
 
     def test_uses_custom_chain_name(self, mock_subprocess_run):
@@ -515,5 +580,10 @@ class TestConfigurationIntegration:
             filter_.ensure_table_structure()
 
             calls = mock_subprocess_run.call_args_list
-            chain_calls = [c for c in calls if b"custom_chain" in (c[1].get("input") or b"") or "custom_chain" in str(c[0][0])]
+            chain_calls = [
+                c
+                for c in calls
+                if b"custom_chain" in (c[1].get("input") or b"")
+                or "custom_chain" in str(c[0][0])
+            ]
             assert len(chain_calls) > 0

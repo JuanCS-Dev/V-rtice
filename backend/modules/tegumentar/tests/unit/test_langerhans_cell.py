@@ -11,18 +11,19 @@ Testa as Células de Langerhans digitais:
 
 EM NOME DE JESUS - MANIFESTAÇÃO FENOMENOLÓGICA MÁXIMA!
 """
-import pytest
 import asyncio
-import secrets
 import base64
-from unittest.mock import AsyncMock, MagicMock, patch
 from dataclasses import dataclass
+import secrets
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from backend.modules.tegumentar.derme.langerhans_cell import (
-    LangerhansCell,
-    AntigenRecord
-)
+import pytest
+
 from backend.modules.tegumentar.config import TegumentarSettings
+from backend.modules.tegumentar.derme.langerhans_cell import (
+    AntigenRecord,
+    LangerhansCell,
+)
 
 
 @dataclass
@@ -45,7 +46,7 @@ def settings():
         postgres_dsn="postgresql://test:test@localhost:5432/test",
         kafka_bootstrap_servers="localhost:9092",
         langerhans_topic="test.langerhans",
-        lymphnode_endpoint="http://localhost:8021"
+        lymphnode_endpoint="http://localhost:8021",
     )
 
 
@@ -106,7 +107,9 @@ class TestLangerhansCellInitialization:
 
     def test_initialization_without_settings(self):
         """Deve usar get_settings() se não fornecer settings."""
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.get_settings") as mock_get:
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.get_settings"
+        ) as mock_get:
             mock_settings = MagicMock()
             mock_get.return_value = mock_settings
 
@@ -131,7 +134,9 @@ class TestStartupShutdown:
     async def test_startup_creates_pool(self, langerhans_cell, mock_pool):
         with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer"
+                ) as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -143,8 +148,12 @@ class TestStartupShutdown:
     @pytest.mark.asyncio
     async def test_startup_initializes_schema(self, langerhans_cell, mock_pool):
         with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
-            with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()) as mock_init:
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
+            with patch.object(
+                langerhans_cell, "_initialise_schema", AsyncMock()
+            ) as mock_init:
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer"
+                ) as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -157,7 +166,9 @@ class TestStartupShutdown:
     async def test_startup_creates_kafka_producer(self, langerhans_cell, mock_pool):
         with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)):
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer"
+                ) as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -170,9 +181,13 @@ class TestStartupShutdown:
     @pytest.mark.asyncio
     async def test_startup_is_idempotent(self, langerhans_cell, mock_pool):
         """Múltiplas chamadas a startup() não devem reconectar."""
-        with patch("asyncpg.create_pool", AsyncMock(return_value=mock_pool)) as mock_create_pool:
+        with patch(
+            "asyncpg.create_pool", AsyncMock(return_value=mock_pool)
+        ) as mock_create_pool:
             with patch.object(langerhans_cell, "_initialise_schema", AsyncMock()):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer") as mock_producer_class:
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.AIOKafkaProducer"
+                ) as mock_producer_class:
                     mock_producer = MagicMock()
                     mock_producer.start = AsyncMock()
                     mock_producer_class.return_value = mock_producer
@@ -222,7 +237,9 @@ class TestCaptureAntigen:
         assert "anomaly score" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
-    async def test_generates_unique_antigen_id(self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api):
+    async def test_generates_unique_antigen_id(
+        self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api
+    ):
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
         langerhans_cell._lymphnode_api = mock_lymphnode_api
@@ -231,32 +248,48 @@ class TestCaptureAntigen:
         inspection = MockInspectionResult(anomaly_score=0.95)
         payload = b"test"
 
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"):
-            with patch("backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"):
-                    record = await langerhans_cell.capture_antigen(observation, inspection, payload)
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ):
+                    record = await langerhans_cell.capture_antigen(
+                        observation, inspection, payload
+                    )
 
         assert record.antigen_id is not None
         assert len(record.antigen_id) == 16  # secrets.token_hex(8) = 16 chars
 
     @pytest.mark.asyncio
-    async def test_creates_antigen_record_with_correct_data(self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api):
+    async def test_creates_antigen_record_with_correct_data(
+        self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api
+    ):
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
         langerhans_cell._lymphnode_api = mock_lymphnode_api
 
         observation = MockFlowObservation(
-            src_ip="192.168.1.100",
-            dst_ip="10.0.0.1",
-            protocol="TCP"
+            src_ip="192.168.1.100", dst_ip="10.0.0.1", protocol="TCP"
         )
         inspection = MockInspectionResult(anomaly_score=0.87)
         payload = b"suspicious payload"
 
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"):
-            with patch("backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"):
-                    record = await langerhans_cell.capture_antigen(observation, inspection, payload)
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ):
+                    record = await langerhans_cell.capture_antigen(
+                        observation, inspection, payload
+                    )
 
         assert record.src_ip == "192.168.1.100"
         assert record.dst_ip == "10.0.0.1"
@@ -264,7 +297,9 @@ class TestCaptureAntigen:
         assert record.anomaly_score == 0.87
 
     @pytest.mark.asyncio
-    async def test_encodes_payload_preview_base64(self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api):
+    async def test_encodes_payload_preview_base64(
+        self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api
+    ):
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
         langerhans_cell._lymphnode_api = mock_lymphnode_api
@@ -273,17 +308,27 @@ class TestCaptureAntigen:
         inspection = MockInspectionResult(anomaly_score=0.95)
         payload = b"test payload data"
 
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"):
-            with patch("backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"):
-                    record = await langerhans_cell.capture_antigen(observation, inspection, payload)
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ):
+                    record = await langerhans_cell.capture_antigen(
+                        observation, inspection, payload
+                    )
 
         # Verificar que é base64 válido
         decoded = base64.b64decode(record.payload_preview)
         assert decoded == payload[:512]
 
     @pytest.mark.asyncio
-    async def test_limits_payload_preview_to_512_bytes(self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api):
+    async def test_limits_payload_preview_to_512_bytes(
+        self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api
+    ):
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
         langerhans_cell._lymphnode_api = mock_lymphnode_api
@@ -292,10 +337,18 @@ class TestCaptureAntigen:
         inspection = MockInspectionResult(anomaly_score=0.95)
         large_payload = b"X" * 10000  # 10KB
 
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"):
-            with patch("backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"):
-                    record = await langerhans_cell.capture_antigen(observation, inspection, large_payload)
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ):
+                    record = await langerhans_cell.capture_antigen(
+                        observation, inspection, large_payload
+                    )
 
         decoded = base64.b64decode(record.payload_preview)
         assert len(decoded) == 512
@@ -314,7 +367,7 @@ class TestStore:
             dst_ip="10.0.0.1",
             protocol="TCP",
             anomaly_score=0.95,
-            payload_preview="dGVzdA=="
+            payload_preview="dGVzdA==",
         )
 
         await langerhans_cell._store(record)
@@ -336,7 +389,7 @@ class TestStore:
             dst_ip="2.2.2.2",
             protocol="TCP",
             anomaly_score=0.9,
-            payload_preview="test"
+            payload_preview="test",
         )
 
         with pytest.raises(RuntimeError) as exc_info:
@@ -349,7 +402,9 @@ class TestPublish:
     """Testa publicação em Kafka."""
 
     @pytest.mark.asyncio
-    async def test_publish_sends_to_kafka(self, langerhans_cell, mock_kafka_producer, settings):
+    async def test_publish_sends_to_kafka(
+        self, langerhans_cell, mock_kafka_producer, settings
+    ):
         langerhans_cell._producer = mock_kafka_producer
 
         record = AntigenRecord(
@@ -358,7 +413,7 @@ class TestPublish:
             dst_ip="10.0.0.1",
             protocol="UDP",
             anomaly_score=0.88,
-            payload_preview="payload=="
+            payload_preview="payload==",
         )
 
         await langerhans_cell._publish(record)
@@ -381,7 +436,7 @@ class TestPublish:
             dst_ip="2.2.2.2",
             protocol="TCP",
             anomaly_score=0.9,
-            payload_preview="test"
+            payload_preview="test",
         )
 
         # Verificar que lock existe
@@ -400,7 +455,7 @@ class TestPublish:
             dst_ip="2.2.2.2",
             protocol="TCP",
             anomaly_score=0.9,
-            payload_preview="test"
+            payload_preview="test",
         )
 
         with pytest.raises(RuntimeError) as exc_info:
@@ -469,7 +524,9 @@ class TestSchemaInitialization:
 
         await langerhans_cell._initialise_schema()
 
-        sql = mock_pool.acquire.return_value.__aenter__.return_value.execute.call_args[0][0]
+        sql = mock_pool.acquire.return_value.__aenter__.return_value.execute.call_args[
+            0
+        ][0]
         assert "IF NOT EXISTS" in sql
 
 
@@ -477,7 +534,9 @@ class TestMetrics:
     """Testa integração com métricas."""
 
     @pytest.mark.asyncio
-    async def test_records_antigen_capture_metric(self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api):
+    async def test_records_antigen_capture_metric(
+        self, langerhans_cell, mock_pool, mock_kafka_producer, mock_lymphnode_api
+    ):
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
         langerhans_cell._lymphnode_api = mock_lymphnode_api
@@ -485,10 +544,18 @@ class TestMetrics:
         observation = MockFlowObservation(protocol="HTTP")
         inspection = MockInspectionResult(anomaly_score=0.9)
 
-        with patch("backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture") as mock_metric:
-            with patch("backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"):
-                with patch("backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"):
-                    await langerhans_cell.capture_antigen(observation, inspection, b"test")
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ) as mock_metric:
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ):
+                    await langerhans_cell.capture_antigen(
+                        observation, inspection, b"test"
+                    )
 
         mock_metric.assert_called_once_with("HTTP")
 
@@ -503,7 +570,7 @@ class TestAntigenRecord:
             dst_ip="2.2.2.2",
             protocol="TCP",
             anomaly_score=0.95,
-            payload_preview="base64data"
+            payload_preview="base64data",
         )
 
         assert record.antigen_id == "test123"
@@ -521,7 +588,7 @@ class TestAntigenRecord:
             dst_ip="2.2.2.2",
             protocol="TCP",
             anomaly_score=0.9,
-            payload_preview="data"
+            payload_preview="data",
         )
 
         # Slots não têm __dict__
