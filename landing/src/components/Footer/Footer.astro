@@ -235,10 +235,15 @@ const socialIcons = {
         </span>
       </div>
 
-      <!-- Easter Egg para Penélope -->
-      <div class="easter-egg">
+      <!-- Easter Eggs para os filhos -->
+      <div class="easter-egg easter-egg-penelope">
         <span class="cockroach">🪳</span>
         <span class="easter-egg-text">para Penélope</span>
+      </div>
+
+      <div class="easter-egg easter-egg-filho">
+        <span class="yakult">🥛</span>
+        <span class="easter-egg-text">para você que ama Yakult</span>
       </div>
     </div>
   </div>
@@ -417,13 +422,11 @@ const socialIcons = {
   }
 
   /* ═══════════════════════════════════════════════════════════ */
-  /* EASTER EGG (Penélope) */
+  /* EASTER EGGS (Para os filhos) */
   /* ═══════════════════════════════════════════════════════════ */
 
   .easter-egg {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -435,9 +438,26 @@ const socialIcons = {
     opacity: 1;
   }
 
+  /* Penélope - Baratinha no canto inferior direito */
+  .easter-egg-penelope {
+    bottom: 8px;
+    right: 8px;
+  }
+
   .cockroach {
     font-size: 12px;
     animation: wiggle 2s ease-in-out infinite;
+  }
+
+  /* Filho - Yakult no canto inferior esquerdo */
+  .easter-egg-filho {
+    bottom: 8px;
+    left: 8px;
+  }
+
+  .yakult {
+    font-size: 12px;
+    animation: bounce 1.5s ease-in-out infinite;
   }
 
   .easter-egg-text {
@@ -450,6 +470,11 @@ const socialIcons = {
     0%, 100% { transform: rotate(0deg); }
     25% { transform: rotate(-5deg); }
     75% { transform: rotate(5deg); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
   }
 
   /* ═══════════════════════════════════════════════════════════ */
