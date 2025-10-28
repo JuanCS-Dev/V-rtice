@@ -1,0 +1,17 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# GITHUB SPONSORS CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Support Vértice-MAXIMUS development through GitHub Sponsors
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
+# GitHub Sponsors (replace with your username)
+github: [yourusername]
+
+# Other platforms (optional - uncomment and configure as needed)
+# patreon: yourusername
+# open_collective: yourusername
+# ko_fi: yourusername
+# tidelift: npm/vertice-maximus
+# custom: ["https://vertice-maximus.web.app/sponsor", "https://buymeacoffee.com/yourusername"]
