@@ -16,6 +16,8 @@
  */
 
 import GitHubStars from './GitHubStars.tsx';
+import DashboardCarousel from './DashboardCarousel.tsx';
+import './DashboardCarousel.css';
 ---
 
 <section class="hero">
@@ -112,21 +114,10 @@ import GitHubStars from './GitHubStars.tsx';
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- HERO VISUAL (Right Side) -->
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="hero-visual animate-float">
-      <div class="hero-image-wrapper">
-        <!-- Real MAXIMUS AI Dashboard Screenshot -->
-        <img
-          src="/maximus-dashboard.png"
-          alt="MAXIMUS AI Dashboard - Neural Architecture and Operations Overview"
-          class="hero-dashboard-image"
-          loading="eager"
-          width="1200"
-          height="800"
-        />
-
-        <!-- Glow Effect -->
-        <div class="hero-glow"></div>
-      </div>
+    <div class="hero-visual">
+      <DashboardCarousel client:load />
+      <!-- Glow Effect -->
+      <div class="hero-glow"></div>
     </div>
   </div>
 
@@ -267,27 +258,9 @@ import GitHubStars from './GitHubStars.tsx';
 
   .hero-visual {
     position: relative;
-    animation-duration: 4s;
-  }
-
-  .hero-image-wrapper {
-    position: relative;
-    border-radius: var(--radius-2xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-2xl);
-  }
-
-  .hero-dashboard-image {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: var(--radius-2xl);
-    box-shadow: var(--shadow-2xl);
-    transition: transform var(--transition-base);
-  }
-
-  .hero-dashboard-image:hover {
-    transform: scale(1.02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-glow {
@@ -403,8 +376,5 @@ import GitHubStars from './GitHubStars.tsx';
       animation: fadeIn 0.8s ease-out backwards;
     }
 
-    .animate-float {
-      animation: float 6s ease-in-out infinite;
-    }
   }
 </style>

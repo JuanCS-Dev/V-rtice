@@ -1,0 +1,211 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DASHBOARD CAROUSEL STYLES - Vertical Perspective Effect
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  perspective: 1500px;
+  overflow: hidden;
+}
+
+.carousel-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.carousel-slide {
+  position: absolute;
+  width: 90%;
+  max-width: 700px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+              0 0 80px rgba(239, 68, 68, 0.2);
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  backface-visibility: hidden;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* NAVIGATION BUTTONS */
+/* ═══════════════════════════════════════════════════════════ */
+
+.carousel-button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  color: #ef4444;
+  cursor: pointer;
+  z-index: 40;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.carousel-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.carousel-button-prev {
+  top: 20px;
+}
+
+.carousel-button-next {
+  bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* INDICATORS */
+/* ═══════════════════════════════════════════════════════════ */
+
+.carousel-indicators {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 40;
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.carousel-indicator:hover {
+  border-color: #ef4444;
+  transform: scale(1.2);
+}
+
+.carousel-indicator.active {
+  background: #ef4444;
+  border-color: #ef4444;
+  height: 32px;
+  border-radius: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RESPONSIVE */
+/* ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .carousel-container {
+    height: 500px;
+  }
+
+  .carousel-slide {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-container {
+    height: 400px;
+    perspective: 1000px;
+  }
+
+  .carousel-slide {
+    width: 95%;
+    max-width: 500px;
+  }
+
+  .carousel-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-button-prev {
+    top: 10px;
+  }
+
+  .carousel-button-next {
+    bottom: 10px;
+  }
+
+  .carousel-indicators {
+    right: 12px;
+    gap: 8px;
+  }
+
+  .carousel-indicator.active {
+    height: 24px;
+  }
+
+  .carousel-caption {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* ANIMATIONS */
+/* ═══════════════════════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pause indicator on hover */
+.carousel-container:hover .carousel-slide {
+  animation-play-state: paused;
+}
