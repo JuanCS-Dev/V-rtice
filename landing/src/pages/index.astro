@@ -1,0 +1,80 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INDEX PAGE - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Landing page principal integrando todos os componentes:
+ * - Hero Section
+ * - Features Grid
+ * - Getting Started
+ * - Footer
+ *
+ * Próximos componentes a adicionar:
+ * - Architecture Diagram
+ * - Screenshots Carousel
+ * - Community Section
+ * - Sponsors Section
+ *
+ * Build: npm run build
+ * Dev: npm run dev
+ * Preview: npm run preview
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero/Hero.astro';
+import Features from '../components/Features/Features.astro';
+import GettingStarted from '../components/GettingStarted/GettingStarted.astro';
+import Footer from '../components/Footer/Footer.astro';
+
+// Import styles
+import '../styles/code-highlight.css';
+---
+
+<BaseLayout>
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Hero />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FEATURES SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Features />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- GETTING STARTED SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <GettingStarted />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- COMING SOON SECTIONS -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- TODO: Add Architecture Diagram -->
+  <!-- TODO: Add Screenshots Carousel -->
+  <!-- TODO: Add Community Section (GitHub stats, contributors) -->
+  <!-- TODO: Add Sponsors Section (GitHub Sponsors, Patreon, Pro Services) -->
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════ */
+  /* PAGE-LEVEL STYLES */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  /* Smooth scroll behavior is already in BaseLayout */
+
+  /* Section spacing consistency */
+  :global(.section + .section) {
+    margin-top: 0;
+  }
+
+  /* Prevent layout shift during load */
+  :global(body) {
+    min-height: 100vh;
+  }
+</style>

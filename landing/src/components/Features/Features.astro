@@ -1,0 +1,317 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FEATURES SECTION - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Showcase das 6 capabilities principais do Vértice-MAXIMUS:
+ * 1. MAXIMUS AI (AGI) - Multi-agent cognitive system
+ * 2. Adaptive Immune System - Bio-inspired security
+ * 3. Real-time OSINT - Autonomous threat intelligence
+ * 4. Offensive & Defensive Ops - Purple team capabilities
+ * 5. Homeostatic Control Loop - Self-regulating system
+ * 6. Human-in-the-Loop - Collaborative decision-making
+ *
+ * Design: Grid 2x3 responsivo, ícones SVG custom, animações sutis
+ */
+
+const features = [
+  {
+    id: 'maximus-ai',
+    title: 'MAXIMUS AI (AGI)',
+    description: 'Multi-agent cognitive system with Theory of Mind for advanced threat actor profiling and autonomous decision-making.',
+    icon: 'brain',
+    link: 'https://docs.vertice-maximus.com/architecture/maximus-ai'
+  },
+  {
+    id: 'adaptive-immunity',
+    title: 'Adaptive Immune System',
+    description: 'Bio-inspired security infrastructure that learns, adapts, and self-heals. Responds to threats like a biological immune system.',
+    icon: 'shield',
+    link: 'https://docs.vertice-maximus.com/architecture/immune-system'
+  },
+  {
+    id: 'realtime-osint',
+    title: 'Real-time OSINT',
+    description: 'Autonomous threat intelligence gathering across dark web, clear web, and 50+ threat databases. Continuous monitoring.',
+    icon: 'globe',
+    link: 'https://docs.vertice-maximus.com/architecture/osint'
+  },
+  {
+    id: 'cyber-ops',
+    title: 'Offensive & Defensive Ops',
+    description: 'Full purple team capabilities with BAS, vulnerability scanning, exploit simulation, and automated remediation.',
+    icon: 'sword-shield',
+    link: 'https://docs.vertice-maximus.com/architecture/cyber-ops'
+  },
+  {
+    id: 'homeostatic-control',
+    title: 'Homeostatic Control Loop',
+    description: 'Self-regulating system that maintains optimal security posture balance. Automated policy adjustment and feedback loops.',
+    icon: 'loop',
+    link: 'https://docs.vertice-maximus.com/architecture/hcl'
+  },
+  {
+    id: 'hitl',
+    title: 'Human-in-the-Loop',
+    description: 'Collaborative decision-making between AI and security professionals. Transparent AI reasoning with full explainability.',
+    icon: 'handshake',
+    link: 'https://docs.vertice-maximus.com/architecture/hitl'
+  }
+];
+
+// SVG Icons (custom, não emojis)
+const icons = {
+  brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 2-1 3-2 4s-1.5 1-1.5 2-.5 1.5-1 2-1.5 1-2.5 1-2-.5-2.5-1-.5-1.5-1-2-.5-1-1.5-2-2-2-2-4a4 4 0 0 1 4-4zM12 14v6M8 17h8"/></svg>`,
+
+  shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>`,
+
+  globe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+
+  'sword-shield': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/><path d="m14.5 9-5 5M9.5 9l5 5"/></svg>`,
+
+  loop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>`,
+
+  handshake: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v1.4M14 11V9a2 2 0 1 0-4 0v2M10 10.5V10a2 2 0 1 0-4 0v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.4M18 14h0M6 15l2-2"/></svg>`
+};
+---
+
+<section id="features" class="features-section section">
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <h2 class="section-title">
+        Powerful <span class="text-gradient">Features</span>
+      </h2>
+      <p class="section-subtitle">
+        Everything you need for autonomous cybersecurity operations
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- FEATURES GRID -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="features-grid">
+      {features.map((feature, index) => (
+        <article class="feature-card" data-feature={feature.id}>
+          <div class="feature-icon" set:html={icons[feature.icon]} />
+
+          <h3 class="feature-title">{feature.title}</h3>
+
+          <p class="feature-description">{feature.description}</p>
+
+          <a href={feature.link} class="feature-link" target="_blank" rel="noopener noreferrer">
+            Learn more
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features-section {
+    position: relative;
+    background: var(--gradient-dark);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .section-title {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    margin: 0 0 var(--space-md);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURES GRID */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+  }
+
+  .feature-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-base);
+  }
+
+  .feature-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .feature-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURE ICON */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    padding: var(--space-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--color-accent-primary);
+    margin-bottom: var(--space-lg);
+    transition: all var(--transition-base);
+  }
+
+  .feature-card:hover .feature-icon {
+    background: rgba(239, 68, 68, 0.2);
+    box-shadow: var(--shadow-glow-primary);
+    transform: scale(1.1);
+  }
+
+  .feature-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURE CONTENT */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .feature-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-md);
+  }
+
+  .feature-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-lg);
+  }
+
+  .feature-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .feature-link:hover {
+    color: var(--color-accent-secondary);
+    gap: var(--space-sm);
+  }
+
+  .feature-link:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .feature-link svg {
+    transition: transform var(--transition-base);
+  }
+
+  .feature-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-lg);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: var(--text-4xl);
+    }
+
+    .section-subtitle {
+      font-size: var(--text-lg);
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .feature-card {
+      padding: var(--space-lg);
+    }
+
+    .feature-title {
+      font-size: var(--text-xl);
+    }
+
+    .feature-description {
+      font-size: var(--text-sm);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* ANIMATIONS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .feature-card {
+      animation: slideInUp 0.6s ease-out backwards;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+  }
+</style>

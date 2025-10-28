@@ -621,14 +621,17 @@ class TestLangerhansErrorHandling:
         self, langerhans_cell, mock_pool, mock_kafka_producer
     ):
         """Deve capturar e logar HTTPError ao fazer broadcast de vacinação."""
+        from backend.modules.tegumentar.lymphnode.api import ThreatValidation
+
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
-        langerhans_cell._lymphnode_api.report_threat = AsyncMock(
-            return_value={
-                "validated": True,
-                "auto_vaccinate": True,
-                "rule": {"id": "rule123"},
-            }
+        langerhans_cell._lymphnode_api.submit_threat = AsyncMock(
+            return_value=ThreatValidation(
+                confirmed=True,
+                threat_id="threat-123",
+                severity="critical",
+                confidence=0.95,
+            )
         )
         langerhans_cell._lymphnode_api.broadcast_vaccination = AsyncMock(
             side_effect=httpx.HTTPError("Broadcast failed")
@@ -638,24 +641,48 @@ class TestLangerhansErrorHandling:
         inspection = MockInspectionResult()
 
         # Não deve propagar exceção (HTTPError capturado linha 145-148)
-        await langerhans_cell.capture_antigen(observation, inspection, b"payload")
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                with patch(
+                    "backend.modules.tegumentar.derme.langerhans_cell.record_vaccination"
+                ) as mock_record_vaccination:
+                    await langerhans_cell.capture_antigen(
+                        observation, inspection, b"payload"
+                    )
+
+                    # Deve ter chamado record_vaccination("failure") devido ao HTTPError
+                    mock_record_vaccination.assert_called_with("failure")
 
     @pytest.mark.asyncio
     async def test_capture_antigen_when_lymphnode_rejects_threat(
         self, langerhans_cell, mock_pool, mock_kafka_producer
     ):
         """Deve logar warning quando Linfonodo não confirma ameaça."""
+        from backend.modules.tegumentar.lymphnode.api import ThreatValidation
+
         langerhans_cell._pool = mock_pool
         langerhans_cell._producer = mock_kafka_producer
-        langerhans_cell._lymphnode_api.report_threat = AsyncMock(
-            return_value={"validated": False}  # Rejeitado
+        langerhans_cell._lymphnode_api.submit_threat = AsyncMock(
+            return_value=ThreatValidation(confirmed=False)  # Rejeitado
         )
 
         observation = MockFlowObservation()
         inspection = MockInspectionResult()
 
         # Sem exceção, warning logado (linha 150)
-        await langerhans_cell.capture_antigen(observation, inspection, b"payload")
+        with patch(
+            "backend.modules.tegumentar.derme.langerhans_cell.record_antigen_capture"
+        ):
+            with patch(
+                "backend.modules.tegumentar.derme.langerhans_cell.record_lymphnode_validation"
+            ):
+                await langerhans_cell.capture_antigen(
+                    observation, inspection, b"payload"
+                )
 
     @pytest.mark.asyncio
     async def test_initialise_schema_returns_early_when_no_pool(self):

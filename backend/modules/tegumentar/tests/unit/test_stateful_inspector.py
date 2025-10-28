@@ -656,6 +656,82 @@ class TestInitialiseSchema:
         await inspector._initialise_schema()
 
 
+class TestNonTCPProtocols:
+    """Testa handling de protocolos não-TCP (UDP, ICMP)."""
+
+    @pytest.mark.asyncio
+    async def test_handles_udp_traffic(self, settings, mock_pool):
+        """Deve processar tráfego UDP corretamente (branches 99->105, 152->172)."""
+        inspector = StatefulInspector(settings)
+        inspector._pool = mock_pool
+
+        # UDP não tem flags, não deve entrar no bloco TCP
+        observation = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="8.8.8.8",
+            src_port=53,
+            dst_port=53,
+            protocol="UDP",
+            flags=None,  # UDP não tem TCP flags
+            payload_size=512,
+        )
+
+        decision = await inspector.process(observation)
+
+        # UDP normal deve passar
+        assert decision.action == InspectorAction.PASS
+        assert decision.connection_state.packets == 1
+        assert decision.connection_state.bytes == 512
+        # TCP-specific state não deve ser setado
+        assert decision.connection_state.syn_seen is False
+        assert decision.connection_state.established is False
+
+    @pytest.mark.asyncio
+    async def test_handles_icmp_traffic(self, settings, mock_pool):
+        """Deve processar tráfego ICMP corretamente."""
+        inspector = StatefulInspector(settings)
+        inspector._pool = mock_pool
+
+        observation = FlowObservation(
+            src_ip="10.0.0.1",
+            dst_ip="10.0.0.2",
+            src_port=0,
+            dst_port=0,
+            protocol="ICMP",
+            flags=None,
+            payload_size=64,
+        )
+
+        decision = await inspector.process(observation)
+
+        # ICMP deve passar normalmente
+        assert decision.action == InspectorAction.PASS
+
+    @pytest.mark.asyncio
+    async def test_tcp_with_ack_but_no_syn_seen(self, settings, mock_pool):
+        """TCP com ACK mas sem SYN prévio não deve marcar established (branch 102->105)."""
+        inspector = StatefulInspector(settings)
+        inspector._pool = mock_pool
+
+        # ACK sem SYN prévio (possível pacote out-of-order ou scan)
+        observation = FlowObservation(
+            src_ip="192.168.1.100",
+            dst_ip="10.0.0.1",
+            src_port=12345,
+            dst_port=80,
+            protocol="TCP",
+            flags="A",  # ACK sem SYN prévio
+            payload_size=100,
+        )
+
+        decision = await inspector.process(observation)
+
+        # Deve processar mas não marcar established (branch 102 false)
+        assert decision.connection_state.established is False
+        assert decision.connection_state.syn_seen is False
+        assert decision.connection_state.packets == 1
+
+
 class TestDataclasses:
     """Testa dataclasses (FlowObservation, ConnectionState, InspectorDecision)."""
 
