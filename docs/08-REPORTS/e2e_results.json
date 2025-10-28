@@ -1,0 +1,59 @@
+[
+  {"name":"Frontend loads","url":"https://vertice-frontend-172846394274.us-east1.run.app","expected":200,"actual":200,"status":"PASS","priority":"critical","duration_ms":439}
+,
+  {"name":"Backend health","url":"http://34.148.161.131:8000/health","expected":200,"actual":200,"status":"PASS","priority":"critical","duration_ms":291}
+,
+  {"name":"Maximus Core status","url":"http://34.148.161.131:8000/api/maximus/status","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":581}
+,
+  {"name":"Maximus Core health","url":"http://34.148.161.131:8000/api/maximus/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":575}
+,
+  {"name":"Maximus Eureka","url":"http://34.148.161.131:8000/api/eureka/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":332}
+,
+  {"name":"Maximus Oráculo","url":"http://34.148.161.131:8000/api/oraculo/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":327}
+,
+  {"name":"Network Recon","url":"http://34.148.161.131:8000/api/network-recon/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":310}
+,
+  {"name":"BAS","url":"http://34.148.161.131:8000/api/bas/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":340}
+,
+  {"name":"C2 Orchestration","url":"http://34.148.161.131:8000/api/c2/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":338}
+,
+  {"name":"Web Attack","url":"http://34.148.161.131:8000/api/web-attack/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":331}
+,
+  {"name":"Vuln Intel","url":"http://34.148.161.131:8000/api/vuln-intel/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":336}
+,
+  {"name":"Behavioral Analyzer","url":"http://34.148.161.131:8000/api/behavioral/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":325}
+,
+  {"name":"Traffic Analyzer","url":"http://34.148.161.131:8000/api/traffic/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":334}
+,
+  {"name":"MAV Detection","url":"http://34.148.161.131:8000/api/mav/health","expected":200,"actual":200,"status":"PASS","priority":"high","duration_ms":327}
+,
+  {"name":"OSINT","url":"http://34.148.161.131:8000/api/osint/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":327}
+,
+  {"name":"Domain Intel","url":"http://34.148.161.131:8000/api/domain/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":328}
+,
+  {"name":"IP Intel","url":"http://34.148.161.131:8000/api/ip/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":397}
+,
+  {"name":"Threat Intel","url":"http://34.148.161.131:8000/api/threat-intel/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":407}
+,
+  {"name":"Nmap","url":"http://34.148.161.131:8000/api/nmap/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":312}
+,
+  {"name":"Consciousness","url":"http://34.148.161.131:8000/api/consciousness/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":340}
+,
+  {"name":"Reactive Fabric","url":"http://34.148.161.131:8000/api/reactive-fabric/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":327}
+,
+  {"name":"Immune System","url":"http://34.148.161.131:8000/api/immune/health","expected":200,"actual":000,"status":"FAIL","priority":"medium","duration_ms":354}
+,
+  {"name":"Tegumentar","url":"http://34.148.161.131:8000/api/tegumentar/health","expected":200,"actual":000,"status":"FAIL","priority":"medium","duration_ms":324}
+,
+  {"name":"Visual Cortex","url":"http://34.148.161.131:8000/api/visual-cortex/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":310}
+,
+  {"name":"Auditory Cortex","url":"http://34.148.161.131:8000/api/auditory-cortex/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":331}
+,
+  {"name":"Somatosensory","url":"http://34.148.161.131:8000/api/somatosensory/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":323}
+,
+  {"name":"Chemical Sensing","url":"http://34.148.161.131:8000/api/chemical-sensing/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":324}
+,
+  {"name":"HITL","url":"http://34.148.161.131:8000/api/hitl/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":324}
+,
+  {"name":"HITL Patch","url":"http://34.148.161.131:8000/api/hitl-patch/health","expected":200,"actual":200,"status":"PASS","priority":"medium","duration_ms":325}
+]

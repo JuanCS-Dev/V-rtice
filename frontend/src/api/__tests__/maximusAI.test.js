@@ -25,7 +25,7 @@ import {
   getAIStats,
 } from '../maximusAI';
 
-const MAXIMUS_BASE_URL = 'http://localhost:8001';
+const MAXIMUS_BASE_URL = 'http://34.148.161.131:8000';
 
 describe('maximusAI API Client', () => {
   beforeEach(() => {

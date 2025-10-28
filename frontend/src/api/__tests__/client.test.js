@@ -14,7 +14,7 @@ import * as security from '../../utils/security';
 // Mock dependencies
 vi.mock('../../config/endpoints', () => ({
   ServiceEndpoints: {
-    apiGateway: 'http://localhost:8000',
+    apiGateway: 'http://34.148.161.131:8000',
   },
   AuthConfig: {
     apiKey: 'test-api-key',
@@ -64,7 +64,7 @@ describe('apiClient', () => {
       const result = await apiClient.get('/test/endpoint');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test/endpoint',
+        'http://34.148.161.131:8000/test/endpoint',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -149,7 +149,7 @@ describe('apiClient', () => {
       const result = await apiClient.post('/test', requestBody);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test',
+        'http://34.148.161.131:8000/test',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify(requestBody),
@@ -172,7 +172,7 @@ describe('apiClient', () => {
       await apiClient.post('/test');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test',
+        'http://34.148.161.131:8000/test',
         expect.objectContaining({
           body: JSON.stringify({}),
         })
@@ -190,7 +190,7 @@ describe('apiClient', () => {
       });
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test',
+        'http://34.148.161.131:8000/test',
         expect.objectContaining({
           headers: expect.objectContaining({
             'X-Custom-Header': 'custom-value',
@@ -218,7 +218,7 @@ describe('apiClient', () => {
       const result = await apiClient.put('/test/123', requestBody);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test/123',
+        'http://34.148.161.131:8000/test/123',
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify(requestBody),
@@ -245,7 +245,7 @@ describe('apiClient', () => {
       const result = await apiClient.delete('/test/123');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/test/123',
+        'http://34.148.161.131:8000/test/123',
         expect.objectContaining({
           method: 'DELETE',
         })
@@ -320,7 +320,7 @@ describe('getWebSocketUrl', () => {
   it('should convert HTTP to WebSocket URL', () => {
     const wsUrl = getWebSocketUrl('/ws/stream');
 
-    expect(wsUrl).toBe('ws://localhost:8000/ws/stream?api_key=test-api-key');
+    expect(wsUrl).toBe('ws://34.148.161.131:8000/ws/stream?api_key=test-api-key');
   });
 
   it('should append api_key as query parameter', () => {
@@ -332,7 +332,7 @@ describe('getWebSocketUrl', () => {
   it('should handle existing query parameters', () => {
     const wsUrl = getWebSocketUrl('/ws/stream?channel=alerts');
 
-    expect(wsUrl).toBe('ws://localhost:8000/ws/stream?channel=alerts&api_key=test-api-key');
+    expect(wsUrl).toBe('ws://34.148.161.131:8000/ws/stream?channel=alerts&api_key=test-api-key');
   });
 });
 

@@ -1,0 +1,462 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * STATIC FLOWCHART - Fluxograma Estático da Arquitetura
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Fluxograma visual e didático mostrando:
+ * - Atacantes → Defesas → Resultado
+ * - 9 Fases do sistema imunológico
+ * - Emojis e setas para clareza
+ */
+---
+
+<div class="static-flowchart">
+  <h2 class="flowchart-title">Como Funciona a Defesa</h2>
+  <p class="flowchart-subtitle">Do ataque à memória: 9 fases em cascata</p>
+
+  <!-- FASE 1: ATAQUE INICIAL -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 1</span>
+      <h3>🦠 Ataque Inicial</h3>
+      <span class="time-badge">0-300ms</span>
+    </div>
+    <div class="flow-content">
+      <div class="attackers-box">
+        <div class="emoji-row">
+          <span class="emoji-large">🦠</span>
+          <span class="emoji-large">🐛</span>
+          <span class="emoji-large">🔐</span>
+          <span class="emoji-large">🎭</span>
+          <span class="emoji-large">🪱</span>
+        </div>
+        <p class="box-label">Atacantes chegam ao sistema</p>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="defense-box firewall">
+        <span class="emoji-large">🛡️</span>
+        <p class="box-title">Firewall (Tegumentar)</p>
+        <p class="box-description">eBPF/XDP detecta o ataque instantaneamente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 2: REFLEXO AUTONÔMICO -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 2</span>
+      <h3>⚡ Reflexo Autonômico</h3>
+      <span class="time-badge">15-45ms</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box autonomic">
+        <span class="emoji-large">⚡</span>
+        <p class="box-title">Reflex Triage Engine</p>
+        <p class="box-description">Decide em milissegundos: BLOCK / INVESTIGATE / ALLOW</p>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="result-box blocked">
+        <span class="emoji-large">🚫</span>
+        <p>Ameaças conhecidas bloqueadas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 3: NEUTRÓFILOS -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 3</span>
+      <h3>🦠 Neutrófilos (Primeira Resposta)</h3>
+      <span class="time-badge">2-4 segundos</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box innate">
+        <div class="emoji-row">
+          <span class="emoji-medium">🔵</span>
+          <span class="emoji-medium">🔵</span>
+          <span class="emoji-medium">🔵</span>
+        </div>
+        <p class="box-title">Neutrófilos + NK Cells</p>
+        <p class="box-description">Isolam hosts comprometidos, detectam "missing self"</p>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="result-box destroyed">
+        <span class="emoji-large">💥</span>
+        <p>🦠 Vírus e 🐛 Malware destruídos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 4: MACRÓFAGOS -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 4</span>
+      <h3>🔬 Macrófagos (Fagocitose)</h3>
+      <span class="time-badge">90-150 segundos</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box macrophage">
+        <span class="emoji-large">🔬</span>
+        <p class="box-title">Macrophage Service</p>
+        <p class="box-description">Engole ameaças via Cuckoo Sandbox</p>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="result-box destroyed">
+        <span class="emoji-large">💥</span>
+        <p>🔐 Ransomware e 🎭 Trojan fagocitados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 5: CÉLULAS DENDRÍTICAS -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 5</span>
+      <h3>🧬 Células Dendríticas (Correlação)</h3>
+      <span class="time-badge">500-900ms</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box dendritic">
+        <span class="emoji-large">🧬</span>
+        <p class="box-title">Dendritic Cell + Qdrant</p>
+        <p class="box-description">Correlaciona com ataques passados (vector search)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 6: CÉLULAS T HELPER -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 6</span>
+      <h3>🎯 Células T Helper (Orquestração)</h3>
+      <span class="time-badge">200-400ms</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box helper">
+        <span class="emoji-large">🎯</span>
+        <p class="box-title">Helper T-Cell</p>
+        <p class="box-description">Decide estratégia: Th1 (agressivo) vs Th2 (defensivo)</p>
+      </div>
+      <div class="branching-arrows">
+        <div class="branch left">
+          <span>Th1 →</span>
+        </div>
+        <div class="branch right">
+          <span>← Th2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 7: RESPOSTA ADAPTATIVA -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 7</span>
+      <h3>💉 Resposta Adaptativa</h3>
+      <span class="time-badge">1-3 segundos</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-row">
+        <div class="defense-box bcell">
+          <span class="emoji-large">💉</span>
+          <p class="box-title">B-Cells</p>
+          <p class="box-description">Geram YARA signatures</p>
+        </div>
+        <div class="defense-box tcell">
+          <span class="emoji-large">⚔️</span>
+          <p class="box-title">Cytotoxic T-Cells</p>
+          <p class="box-description">Matam processos infectados</p>
+        </div>
+        <div class="defense-box treg">
+          <span class="emoji-large">🛑</span>
+          <p class="box-title">Regulatory T-Cells</p>
+          <p class="box-description">Previnem falsos positivos</p>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="result-box destroyed">
+        <span class="emoji-large">💥💥💥</span>
+        <p>🪱 Último atacante (Worm) eliminado!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 8: FORMAÇÃO DE MEMÓRIA -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 8</span>
+      <h3>🧠 Formação de Memória</h3>
+      <span class="time-badge">2-10 minutos</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box memory">
+        <span class="emoji-large">🧠</span>
+        <p class="box-title">Oráculo-Eureka</p>
+        <p class="box-description">CVE feeds → APV generation → LLM remedies → GitHub PRs</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FASE 9: CONSCIÊNCIA -->
+  <div class="flow-section">
+    <div class="flow-header">
+      <span class="phase-badge">Fase 9</span>
+      <h3>✨ Atualização da Consciência</h3>
+      <span class="time-badge">100-500ms</span>
+    </div>
+    <div class="flow-content">
+      <div class="arrow-down">↓</div>
+      <div class="defense-box consciousness">
+        <span class="emoji-large">✨</span>
+        <p class="box-title">MAXIMUS Core</p>
+        <p class="box-description">Atualiza modelo de ameaças (IIT + Free Energy Principle)</p>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="result-box success">
+        <span class="emoji-large">🎉</span>
+        <p class="success-text">Sistema imunológico fortalecido!</p>
+        <p class="box-description">Próximo ataque será detectado instantaneamente</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .static-flowchart {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .flowchart-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .flowchart-subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  /* Flow Sections */
+  .flow-section {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .flow-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+  }
+
+  .flow-header h3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+    flex: 1;
+  }
+
+  .phase-badge {
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-accent-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+  }
+
+  .time-badge {
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+  }
+
+  /* Flow Content */
+  .flow-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  /* Boxes */
+  .attackers-box,
+  .defense-box,
+  .result-box {
+    width: 100%;
+    padding: var(--space-xl);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    transition: all var(--transition-base);
+  }
+
+  .attackers-box {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    border: 2px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .defense-box {
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border-primary);
+  }
+
+  .defense-box:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--color-accent-primary);
+  }
+
+  /* Box variants */
+  .defense-box.firewall { border-color: #f97316; }
+  .defense-box.autonomic { border-color: #ef4444; }
+  .defense-box.innate { border-color: #10b981; }
+  .defense-box.macrophage { border-color: #14b8a6; }
+  .defense-box.dendritic { border-color: #8b5cf6; }
+  .defense-box.helper { border-color: #a855f7; }
+  .defense-box.bcell { border-color: #c084fc; }
+  .defense-box.tcell { border-color: #dc2626; }
+  .defense-box.treg { border-color: #6366f1; }
+  .defense-box.memory { border-color: #7c3aed; }
+  .defense-box.consciousness { border-color: #fbbf24; }
+
+  .result-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+    border: 2px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .result-box.blocked {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .result-box.destroyed {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+    border-color: rgba(251, 191, 36, 0.3);
+  }
+
+  .result-box.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+  /* Emoji */
+  .emoji-large {
+    font-size: 64px;
+    display: inline-block;
+    margin: var(--space-md) 0;
+  }
+
+  .emoji-medium {
+    font-size: 40px;
+    display: inline-block;
+  }
+
+  .emoji-row {
+    display: flex;
+    gap: var(--space-lg);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Text */
+  .box-label,
+  .box-description {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin: var(--space-sm) 0 0;
+    line-height: var(--leading-relaxed);
+  }
+
+  .box-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: var(--space-sm) 0;
+  }
+
+  .success-text {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    margin: var(--space-sm) 0;
+  }
+
+  /* Arrows */
+  .arrow-down {
+    font-size: 48px;
+    color: var(--color-accent-primary);
+    line-height: 1;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+  }
+
+  /* Branching */
+  .branching-arrows {
+    display: flex;
+    gap: var(--space-3xl);
+    justify-content: center;
+    font-size: var(--text-xl);
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+  }
+
+  .branch {
+    padding: var(--space-md);
+  }
+
+  /* Defense Row (multiple boxes side by side) */
+  .defense-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+    width: 100%;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .flow-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .flow-header h3 {
+      font-size: var(--text-xl);
+    }
+
+    .emoji-large {
+      font-size: 48px;
+    }
+
+    .emoji-medium {
+      font-size: 32px;
+    }
+
+    .defense-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
 import logger from '@/utils/logger';
  * useAdminMetrics - Admin Dashboard Metrics Hook
@@ -11,7 +12,7 @@ import logger from '@/utils/logger';
 import { useState, useEffect } from 'react';
 import { parseMetrics } from '../utils/metricsParser';
 
-const API_GATEWAY_METRICS_URL = 'http://localhost:8000/metrics';
+const API_GATEWAY_METRICS_URL = `${API_BASE_URL}/metrics`;
 const POLLING_INTERVAL = 5000; // 5s
 
 export const useAdminMetrics = () => {

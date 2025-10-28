@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import logger from '@/utils/logger';
@@ -21,8 +22,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('vertice_auth_token'));
 
-  // Super Admin do sistema
-  const SUPER_ADMIN = 'juan.brainfarma@gmail.com';
+  // Super Admin do sistema - configurado via environment variable
+  const SUPER_ADMIN = import.meta.env.VITE_SUPER_ADMIN_EMAIL || '';
 
   // Roles e permissões (sincronizado com vertice-terminal)
   const ROLES = {
@@ -113,7 +114,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // OAuth2 REAL via auth_service
-      const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8010';
+      const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || API_BASE_URL;
 
       // Simula Google OAuth flow (em produção, usar Google Sign-In SDK)
       const response = await fetch(`${AUTH_SERVICE_URL}/auth/login`, {

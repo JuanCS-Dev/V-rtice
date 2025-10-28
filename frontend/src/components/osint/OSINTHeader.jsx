@@ -84,6 +84,7 @@ const OSINTHeader = ({ currentTime, setCurrentView, activeModule, setActiveModul
           {modules.map((module, index) => (
             <button
               key={module.id}
+              id={`${module.id}-tab`}
               {...getItemProps(index, {
                 onClick: () => setActiveModule(module.id),
                 role: 'tab',

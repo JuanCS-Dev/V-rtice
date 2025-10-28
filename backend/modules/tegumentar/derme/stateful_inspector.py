@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass, field
 import enum
 import logging
 import time
-from dataclasses import dataclass, field
 from typing import Dict, Optional, Tuple
 
 import asyncpg
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +61,14 @@ class StatefulInspector:
 
     async def startup(self) -> None:
         if self._pool is None:
-            self._pool = await asyncpg.create_pool(self._settings.postgres_dsn, min_size=2, max_size=10)
+            self._pool = await asyncpg.create_pool(
+                self._settings.postgres_dsn, min_size=2, max_size=10
+            )
             await self._initialise_schema()
-            logger.info("Stateful inspector connected to PostgreSQL at %s", self._settings.postgres_dsn)
+            logger.info(
+                "Stateful inspector connected to PostgreSQL at %s",
+                self._settings.postgres_dsn,
+            )
 
     async def shutdown(self) -> None:
         if self._pool:
@@ -73,7 +78,13 @@ class StatefulInspector:
     async def process(self, observation: FlowObservation) -> InspectorDecision:
         """Update connection state and return the required action."""
 
-        key = (observation.src_ip, observation.dst_ip, observation.src_port, observation.dst_port, observation.protocol)
+        key = (
+            observation.src_ip,
+            observation.dst_ip,
+            observation.src_port,
+            observation.dst_port,
+            observation.protocol,
+        )
 
         async with self._lock:
             state = self._state.get(key)
@@ -146,7 +157,12 @@ class StatefulInspector:
                     connection_state=state,
                 )
 
-            if observation.flags and "S" in observation.flags and state.packets > 10 and not state.established:
+            if (
+                observation.flags
+                and "S" in observation.flags
+                and state.packets > 10
+                and not state.established
+            ):
                 return InspectorDecision(
                     action=InspectorAction.DROP,
                     reason="Repeated SYN without ACK (potential SYN flood)",

@@ -23,12 +23,14 @@ import logger from '@/utils/logger';
 
 export class DefensiveService extends BaseService {
   constructor(client) {
-    super(ServiceEndpoints.defensive.core, client);
+    // Use RELATIVE PATH for API Gateway routing
+    // BaseService will concatenate this with apiClient's API_BASE
+    super('/api/defensive', client);
 
-    // Service-specific endpoints
+    // Service-specific endpoints (relative paths)
     this.endpoints = {
-      core: ServiceEndpoints.defensive.core,
-      immune: `${ServiceEndpoints.defensive.core}/api/v1/immune/defensive`,
+      core: '/api/defensive',
+      immune: '/api/v1/immune/defensive',
     };
   }
 

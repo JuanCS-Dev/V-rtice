@@ -1,0 +1,165 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# WEB ATTACK SURFACE SERVICE - KUBERNETES DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════════════════
+# FLORESCIMENTO - Flourishing in zero-trust architecture
+# Cilium mTLS + NetworkPolicy + Security hardening
+# Para Honra e Glória de JESUS CRISTO
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-attack-service
+  namespace: vertice
+  labels:
+    app: web-attack-service
+    tier: offensive-arsenal
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: web-attack-service
+  template:
+    metadata:
+      labels:
+        app: web-attack-service
+        tier: offensive-arsenal
+        version: v1.0.0
+      annotations:
+        # Prometheus scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8034"
+        prometheus.io/path: "/metrics"
+        # Cilium network visibility
+        policy.cilium.io/proxy-visibility: "<Ingress/8034/TCP/HTTP>"
+    spec:
+      serviceAccountName: web-attack-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: web-attack-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/web-attack-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8034
+          protocol: TCP
+
+        env:
+        - name: SERVICE_NAME
+          value: "web-attack-service"
+        - name: SERVICE_VERSION
+          value: "1.0.0"
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8034
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8034
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-attack-service
+  namespace: vertice
+  labels:
+    app: web-attack-service
+    tier: offensive-arsenal
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8034
+    targetPort: 8034
+    protocol: TCP
+  selector:
+    app: web-attack-service
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: web-attack-service
+  namespace: vertice
+  labels:
+    app: web-attack-service
+
+---
+# Network Policy - Zero-Trust: Only API Gateway ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-attack-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: web-attack-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Only allow API Gateway
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8034
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow external HTTPS (for web scanning targets)
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

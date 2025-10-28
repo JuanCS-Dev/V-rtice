@@ -1,6 +1,6 @@
 // /home/juan/vertice-dev/frontend/src/App.jsx
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LandingPage } from './components/LandingPage';
@@ -17,16 +17,19 @@ import './i18n/config'; // Initialize i18n
 import './styles/tokens/transitions.css';
 import './styles/micro-interactions.css';
 
-// Lazy load dashboards for code splitting
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const DefensiveDashboard = lazy(() => import('./components/dashboards/DefensiveDashboard/DefensiveDashboard'));
-const OffensiveDashboard = lazy(() => import('./components/dashboards/OffensiveDashboard/OffensiveDashboard'));
-const PurpleTeamDashboard = lazy(() => import('./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard'));
-const CockpitSoberano = lazy(() => import('./components/dashboards/CockpitSoberano/CockpitSoberano'));
-const OSINTDashboard = lazy(() => import('./components/OSINTDashboard'));
-const MaximusDashboard = lazy(() => import('./components/maximus/MaximusDashboard'));
-const ReactiveFabricDashboard = lazy(() => import('./components/reactive-fabric/ReactiveFabricDashboard'));
-const HITLDecisionConsole = lazy(() => import('./components/reactive-fabric/HITLDecisionConsole'));
+// Import dashboards directly (fix for lazy loading issues)
+import AdminDashboard from './components/AdminDashboard';
+import DefensiveDashboard from './components/dashboards/DefensiveDashboard/DefensiveDashboard';
+import OffensiveDashboard from './components/dashboards/OffensiveDashboard/OffensiveDashboard';
+import PurpleTeamDashboard from './components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard';
+import CockpitSoberano from './components/dashboards/CockpitSoberano/CockpitSoberano';
+import OSINTDashboard from './components/OSINTDashboard';
+import MaximusDashboard from './components/maximus/MaximusDashboard';
+import ReactiveFabricDashboard from './components/reactive-fabric/ReactiveFabricDashboard';
+import HITLDecisionConsole from './components/reactive-fabric/HITLDecisionConsole';
+import ToMEngineDashboard from './components/tom-engine/ToMEngineDashboard';
+import ImmuneSystemDashboard from './components/immune-system/ImmuneSystemDashboard';
+import MonitoringDashboard from './components/monitoring/MonitoringDashboard';
 
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'cockpit', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
@@ -91,6 +94,21 @@ function App() {
         <HITLDecisionConsole setCurrentView={setCurrentView} />
       </ErrorBoundary>
     ),
+    'tom-engine': (
+      <ErrorBoundary context="tom-engine" title="ToM Engine Error">
+        <ToMEngineDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    'immune-system': (
+      <ErrorBoundary context="immune-system" title="Immune System Error">
+        <ImmuneSystemDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    'monitoring': (
+      <ErrorBoundary context="monitoring" title="Monitoring Error">
+        <MonitoringDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
   };
 
   return (
@@ -106,9 +124,11 @@ function App() {
             {currentView === 'main' ? (
               <LandingPage setCurrentView={setCurrentView} />
             ) : (
-              <Suspense fallback={<DashboardLoader />}>
-                {views[currentView]}
-              </Suspense>
+              views[currentView] || (
+                <ErrorBoundary context="unknown-view" title="Unknown View Error">
+                  <div>View not found: {currentView}</div>
+                </ErrorBoundary>
+              )
             )}
           </main>
         </ErrorBoundary>

@@ -56,63 +56,28 @@ export const VirtualList = ({
   style = {},
   emptyMessage = 'No items to display',
 }) => {
-  // Memoize items count to avoid recalculation
-  const itemCount = items.length;
+  const safeItems = Array.isArray(items) ? items : [];
+  
+  if (!renderItem) {
+    return <div>No render function</div>;
+  }
 
-  // Row renderer for react-window
-  const Row = useMemo(
-    () =>
-      ({ index, style: rowStyle }) => {
-        const item = items[index];
-        return renderItem({ item, index, style: rowStyle });
-      },
-    [items, renderItem]
-  );
-
-  // Empty state
-  if (itemCount === 0) {
+  if (safeItems.length === 0) {
     return (
-      <div className={`${styles.emptyState} ${className}`} style={style}>
+      <div className={className} style={style}>
         <p>{emptyMessage}</p>
       </div>
     );
   }
 
-  // If height and width are provided, use them directly
-  if (height && width) {
-    return (
-      <div className={className} style={style}>
-        <List
-          height={height}
-          width={width}
-          itemCount={itemCount}
-          itemSize={itemHeight}
-          overscanCount={overscanCount}
-          className={styles.list}
-        >
-          {Row}
-        </List>
-      </div>
-    );
-  }
-
-  // Otherwise, use AutoSizer to fill container
+  // SIMPLE RENDER - NO react-window
   return (
-    <div className={`${styles.container} ${className}`} style={style}>
-      <AutoSizer>
-        {({ height: autoHeight, width: autoWidth }) => (
-          <List
-            height={autoHeight}
-            width={autoWidth}
-            itemCount={itemCount}
-            itemSize={itemHeight}
-            overscanCount={overscanCount}
-            className={styles.list}
-          >
-            {Row}
-          </List>
-        )}
-      </AutoSizer>
+    <div className={className} style={style}>
+      {safeItems.map((item, index) => (
+        <div key={index}>
+          {renderItem({ item, index, style: {} })}
+        </div>
+      ))}
     </div>
   );
 };

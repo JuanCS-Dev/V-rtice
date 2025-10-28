@@ -74,9 +74,12 @@ export const VirtualizedAlertsList = ({
   filterSeverity = null,
   filterStatus = null,
 }) => {
+  // SAFE GUARD: Ensure alerts is always an array
+  const safeAlerts = Array.isArray(alerts) ? alerts : [];
+  
   // Filter alerts based on props
   const filteredAlerts = useMemo(() => {
-    let filtered = alerts;
+    let filtered = safeAlerts;
 
     if (filterSeverity) {
       filtered = filtered.filter((alert) => alert.severity === filterSeverity);
@@ -87,7 +90,7 @@ export const VirtualizedAlertsList = ({
     }
 
     return filtered;
-  }, [alerts, filterSeverity, filterStatus]);
+  }, [safeAlerts, filterSeverity, filterStatus]);
 
   // Render function for each alert
   const renderAlert = useCallback(

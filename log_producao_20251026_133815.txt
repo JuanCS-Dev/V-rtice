@@ -1,0 +1,134 @@
+═══════════════════════════════════════════════════════════
+🎬 VÉRTICE - MATERIALIZAÇÃO DE VÍDEO OPERACIONAL
+═══════════════════════════════════════════════════════════
+
+📝 Log sendo salvo em: log_producao_20251026_133815.txt
+
+--- FASE 0: CHECKUP DO AMBIENTE ---
+
+🔍 VÉRTICE - CHECKUP DO AMBIENTE DE PRODUÇÃO
+==============================================
+
+📦 DEPENDÊNCIAS:
+
+Verificando 'node'... ✅ OK
+  ├─ v22.20.0
+Verificando 'npm'... ✅ OK
+  ├─ 10.9.3
+Verificando 'ffmpeg'... ✅ OK
+  ├─ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+Verificando 'jq'... ✅ OK
+  ├─ jq-1.7
+Verificando 'bc'... ✅ OK
+  ├─ bc 1.07.1
+Verificando 'gcloud'... ✅ OK
+  ├─ Google Cloud SDK 540.0.0
+Verificando 'gh'... ✅ OK
+  ├─ gh version 2.45.0 (2025-07-18 Ubuntu 2.45.0-1ubuntu0.3)
+
+☁️  GOOGLE CLOUD:
+
+Verificando autenticação GCloud... ✅ OK
+  ├─ Conta ativa: juan.brainfarma@gmail.com
+Verificando projeto GCP... ✅ OK
+  ├─ Projeto: projeto-vertice
+Verificando billing no projeto... ✅ OK
+  ├─ Billing está ativo (APIs habilitadas)
+  └─ Text-to-Speech API disponível para uso
+
+==============================================
+✅ AMBIENTE VERIFICADO. Pronto para materialização.
+
+--- FASE 1: GERANDO NARRAÇÃO (GOOGLE CLOUD TTS) ---
+
+🎤 VÉRTICE - GERAÇÃO DE NARRAÇÃO (Google Cloud TTS - English v3.0)
+====================================================================
+
+🔐 Verificando autenticação Google Cloud...
+   ℹ️  Conta: juan.brainfarma@gmail.com
+   ℹ️  Projeto: projeto-vertice
+   ✅ Usando credenciais de usuário
+
+🔧 Habilitando Text-to-Speech API...
+   ✅ API habilitada
+
+📋 Processando roteiro (English v3.0)...
+
+gerar_narracao_gcp.sh: line 53: ((: i<0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0: syntax error in expression (error token is "0
+0
+0
+0
+0
+0
+0
+0
+0
+0")
+
+====================================================================
+✅ Narração completa. Áudios salvos em: audio_narracoes/
+====================================================================
+
+
+--- FASE 2: GRAVANDO TOUR DO FRONTEND (PLAYWRIGHT) ---
+
+⚠️  IMPORTANTE: O frontend DEVE estar rodando!
+
+Se não estiver rodando, execute em outro terminal:
+  cd ~/vertice-dev/frontend
+  npm run dev
+
+Frontend está rodando em http://localhost:5173? (Enter para continuar, Ctrl+C para cancelar) 
+
+Running 1 test using 1 worker
+
+🎬 Iniciando gravação do tour do Vértice (180s)...
+  ✘  1 [chromium] › video_tour.spec.ts:16:5 › Vértice Frontend Tour - Full Recording (180s Synced) (237ms)
+
+
+  1) [chromium] › video_tour.spec.ts:16:5 › Vértice Frontend Tour - Full Recording (180s Synced) ───
+
+    SyntaxError: Unexpected non-whitespace character after JSON at position 216 (line 8 column 1)
+
+      18 |   
+      19 |   // Load roteiro for scene durations
+    > 20 |   const roteiro = JSON.parse(
+         |                        ^
+      21 |     fs.readFileSync(path.join(__dirname, 'roteiro_v3_english.json'), 'utf-8')
+      22 |   );
+      23 |   
+        at /home/juan/vertice-dev/vertice_video_producao/video_tour.spec.ts:20:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/video_tour-Vértice-Fronten-612d5-Full-Recording-180s-Synced--chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/video_tour-Vértice-Fronten-612d5-Full-Recording-180s-Synced--chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/video_tour-Vértice-Fronten-612d5-Full-Recording-180s-Synced--chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/video_tour-Vértice-Fronten-612d5-Full-Recording-180s-Synced--chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › video_tour.spec.ts:16:5 › Vértice Frontend Tour - Full Recording (180s Synced) ────
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

@@ -1,0 +1,221 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * BASE LAYOUT - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Layout principal para todas as páginas da landing page.
+ * Inclui SEO, meta tags, structured data, analytics e estilos globais.
+ *
+ * Filosofia: Production-Ready desde o primeiro commit (Padrão Pagani)
+ */
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonical?: string;
+}
+
+const {
+  title = 'Vértice-MAXIMUS | First Conscious Cyber-Organism',
+  description = 'Not software. A living organism that hunts. The world\'s first cyber-organism with biological immunity, constitutional consciousness, and automated offensive response. 125 microservices, 9 immune cell types, IIT-validated consciousness. 100% open source.',
+  ogImage = '/og-image.png',
+  canonical = 'https://vertice-maximus.com',
+} = Astro.props;
+
+const currentYear = new Date().getFullYear();
+
+// Import global styles
+import '../styles/design-system.css';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- META TAGS FUNDAMENTAIS -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content={Astro.generator}>
+
+  <!-- SEO Básico -->
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <meta name="keywords" content="conscious cybersecurity, living organism, biological immunity, adaptive immune system, constitutional AI, IIT consciousness, cyber-organism, autonomous defense, offensive response, threat hunting, kill chain, OSINT, open source security, AGI, SOC automation, active defense">
+  <meta name="author" content="Vértice-MAXIMUS Team">
+  <link rel="canonical" href={canonical}>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- OPEN GRAPH (Facebook, LinkedIn) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:image" content={new URL(ogImage, Astro.site).toString()}>
+  <meta property="og:url" content={canonical}>
+  <meta property="og:site_name" content="Vértice-MAXIMUS">
+  <meta property="og:locale" content="en_US">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TWITTER CARD -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()}>
+  <meta name="twitter:creator" content="@vertice_maximus">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- FAVICONS -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- THEME COLOR (Mobile Browsers) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="msapplication-TileColor" content="#0a0a0a">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- STRUCTURED DATA (JSON-LD) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Vértice-MAXIMUS",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Linux, Docker, Kubernetes",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "The world's first conscious cyber-organism with biological immunity, constitutional consciousness, and automated offensive response. 125 microservices functioning as organs, 9 immune cell types, IIT-validated consciousness substrate.",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Person",
+        "name": "Juan Carlos de Souza",
+        "url": "https://github.com/JuanCS-Dev"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Vértice-MAXIMUS",
+        "url": "https://vertice-maximus.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://vertice-maximus.com/logo.png"
+        }
+      },
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/JuanCS-Dev/V-rtice",
+      "programmingLanguage": ["Python", "Go", "TypeScript", "Rust"],
+      "keywords": ["cybersecurity", "biological immunity", "conscious AI", "adaptive defense", "offensive response", "threat hunting"],
+      "featureList": [
+        "Biological Adaptive Immunity",
+        "IIT-Validated Consciousness (ECI 0.958)",
+        "9 Specialized Immune Cell Types",
+        "Constitutional Ethical Governance",
+        "Automated Offensive Response",
+        "Real-time Threat Intelligence",
+        "MAPE-K Autonomic Control",
+        "125 Microservices Architecture"
+      ]
+    }
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PRECONNECT (Performance Optimization) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://api.github.com">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- STYLES -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- design-system.css is imported in the frontmatter above -->
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- ANALYTICS (Plausible - Privacy-Friendly) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- Uncomment when ready to deploy -->
+  <!-- <script defer data-domain="vertice-maximus.com" src="https://plausible.io/js/script.js"></script> -->
+</head>
+
+<body>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- SKIP TO MAIN CONTENT (Accessibility) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <a href="#main-content" class="sr-only">Skip to main content</a>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <main id="main-content">
+    <slot />
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- PERFORMANCE MONITORING (Development Only) -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <script is:inline>
+    // Log page load performance
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', () => {
+        const perfData = window.performance.timing;
+        const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+        console.log(`[Vértice Performance] Page load time: ${pageLoadTime}ms`);
+      });
+    }
+  </script>
+</body>
+</html>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* GLOBAL BACKGROUND */
+  /* ═══════════════════════════════════════════════════════════════ */
+  body {
+    position: relative;
+    background: var(--color-bg-primary);
+    overflow-x: hidden;
+  }
+
+  /* Radial gradient overlay for depth */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-radial-primary);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SMOOTH SCROLLING */
+  /* ═══════════════════════════════════════════════════════════════ */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

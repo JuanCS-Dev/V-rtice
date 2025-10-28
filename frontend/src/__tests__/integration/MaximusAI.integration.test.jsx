@@ -40,7 +40,7 @@ describe('Maximus AI Integration Tests', () => {
 
       // analyzeNarrative calls callTool which uses /api/tool-call
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8001/api/tool-call',
+        'http://34.148.161.131:8000/api/tool-call',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

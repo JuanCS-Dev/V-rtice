@@ -9,8 +9,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/api';
 
-const API_BASE_URL = import.meta.env.VITE_HITL_API_URL || 'http://localhost:8003';
+const API_BASE_URL = API_ENDPOINTS.hitl;
 
 /**
  * Submit decision to API

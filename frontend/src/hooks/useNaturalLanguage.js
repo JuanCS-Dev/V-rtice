@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 import { useState, useCallback } from 'react';
 import logger from '@/utils/logger';
 
@@ -21,7 +22,7 @@ export const useNaturalLanguage = () => {
       }
 
       // Se não encontrar padrão local, usar o AI Agent Service
-      const response = await fetch('http://localhost:8013/api/ai-agent/process-command', {
+      const response = await fetch(`${API_BASE_URL}/api/ai-agent/process-command`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

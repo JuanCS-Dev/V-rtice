@@ -1,0 +1,515 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ARCHITECTURE PAGE - Vértice-MAXIMUS Biological Architecture
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Interactive animated flowchart showing the biological immune system
+ * architecture of Vértice-MAXIMUS.
+ *
+ * Demonstrates:
+ * - Firewall/Honeypot layer ("the skin")
+ * - Autonomic nervous system (millisecond reflexes)
+ * - Innate immune system (seconds response)
+ * - Adaptive immune system (minutes response)
+ * - Consciousness layer (strategic thought)
+ * - Communication infrastructure
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BiologicalFlowchart from '../components/Architecture/BiologicalFlowchart';
+import StaticFlowchart from '../components/Architecture/StaticFlowchart.astro';
+import IntegratedDiagram from '../components/Architecture/IntegratedDiagram.astro';
+---
+
+<BaseLayout
+  title="Architecture | Vértice-MAXIMUS"
+  description="Explore the biological architecture of Vértice-MAXIMUS. 125 microservices functioning as organs, 9 immune cell types, millisecond-to-hour response cascade. A living cyber-organism."
+  ogImage="/og-architecture.png"
+>
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ARCHITECTURE HERO -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section architecture-hero">
+    <div class="container">
+      <div class="section-badge">
+        <span class="badge badge-organic">🧬 System Architecture</span>
+      </div>
+
+      <h1 class="section-title">
+        Biological <span class="text-gradient">Architecture</span>
+      </h1>
+
+      <p class="section-description">
+        125 Microservices. 9 Immune Cell Types. One Living Organism.
+      </p>
+
+      <p class="architecture-intro">
+        Vértice-MAXIMUS doesn't just <em>use</em> biological metaphors—it <strong>implements</strong> them.
+        <br>
+        Watch how a threat triggers a cascade from <strong>milliseconds</strong> (reflex) to <strong>hours</strong> (memory formation).
+        <br>
+        From the "skin" (firewall) to the "brain" (MAXIMUS consciousness), every service has a biological analog.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- INTEGRATED DIAGRAM (Resumo Visual) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section integrated-diagram-section">
+    <div class="container-wide">
+      <IntegratedDiagram />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- STATIC FLOWCHART (Seção 1) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section static-flowchart-section">
+    <div class="container">
+      <StaticFlowchart />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- INTERACTIVE FLOWCHART (Seção 2) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section architecture-visualization">
+    <div class="container-wide">
+      <h2 class="visualization-title">
+        Visualização <span class="text-gradient">Interativa</span>
+      </h2>
+      <p class="visualization-subtitle">
+        Explore os microserviços e suas conexões em tempo real
+      </p>
+      <BiologicalFlowchart client:idle />
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ARCHITECTURE EXPLANATION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section architecture-explanation">
+    <div class="container">
+      <h2 class="section-title">
+        How the <span class="text-gradient">Immune Cascade</span> Works
+      </h2>
+
+      <div class="cascade-phases">
+        <!-- Phase 1 -->
+        <div class="phase-card">
+          <div class="phase-number">1</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🛡️ Firewall Detection</h3>
+            <p class="phase-time">0-300ms</p>
+            <p class="phase-description">
+              <strong>🦠 Atacantes chegam:</strong> Vírus, malware, ransomware e outros ataques chegam ao sistema.
+              <br>
+              <strong>Tegumentar Service</strong> (eBPF/XDP firewall) detecta o ataque instantaneamente.
+              <strong>Honeypots</strong> capturam exploits para análise.
+              <br>
+              <em>Como a pele detectando um patógeno - primeira linha de defesa!</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card">
+          <div class="phase-number">2</div>
+          <div class="phase-content">
+            <h3 class="phase-title">⚡ Autonomic Reflex</h3>
+            <p class="phase-time">15-45ms</p>
+            <p class="phase-description">
+              <strong>🛡️ Escudo ativa:</strong> Sistema responde automaticamente, bloqueando ameaças conhecidas.
+              <br>
+              <strong>Reflex Triage Engine</strong> (Hyperscan + Isolation Forest + VAE) decide em milissegundos: BLOCK/INVESTIGATE/ALLOW.
+              <br>
+              <em>Responde antes do pensamento consciente - como retirar a mão do fogo!</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-card">
+          <div class="phase-number">3</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🦠 Neutrophil Response</h3>
+            <p class="phase-time">2-4 seconds</p>
+            <p class="phase-description">
+              <strong>💥 Primeiros atacantes destruídos:</strong> Vírus e malware são eliminados!
+              <br>
+              <strong>Neutrophil Service</strong> (24h TTL) chega primeiro, isola host infectado.
+              <strong>NK Cells</strong> detectam "missing self" (hosts comprometidos).
+              <br>
+              <em>Primeiros socorristas - como glóbulos brancos correndo para infecção!</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="phase-card">
+          <div class="phase-number">4</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🔬 Macrophage Phagocytosis</h3>
+            <p class="phase-time">90-150 seconds</p>
+            <p class="phase-description">
+              <strong>💥 Ransomware e Trojan engolidos:</strong> Macrófagos "comem" os atacantes restantes!
+              <br>
+              <strong>Macrophage Service</strong> engole ameaça via <strong>Cuckoo Sandbox</strong>.
+              Extrai IOCs (IPs, domínios, hashes), gera assinaturas YARA.
+              <br>
+              <em>Como macrófagos digerindo patógenos - fagocitose total!</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 5 -->
+        <div class="phase-card">
+          <div class="phase-number">5</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🧬 Antigen Presentation</h3>
+            <p class="phase-time">500-900ms</p>
+            <p class="phase-description">
+              <strong>Dendritic Cell</strong> correlates threat with past attacks via <strong>Qdrant</strong> vector database.
+              Presents to T-Cells and B-Cells.
+              Bridge between innate and adaptive immunity.
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 6 -->
+        <div class="phase-card">
+          <div class="phase-number">6</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🎯 Helper T-Cell Orchestration</h3>
+            <p class="phase-time">200-400ms</p>
+            <p class="phase-description">
+              <strong>Helper T-Cell</strong> decides strategy:
+              <strong>Th1</strong> (aggressive, cell-mediated) vs <strong>Th2</strong> (defensive, antibody-based).
+              Orchestrates the adaptive response.
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 7 -->
+        <div class="phase-card">
+          <div class="phase-number">7</div>
+          <div class="phase-content">
+            <h3 class="phase-title">💉 Adaptive Response</h3>
+            <p class="phase-time">1-3 seconds</p>
+            <p class="phase-description">
+              <strong>💥 Último atacante (Worm) destruído!</strong> Células T citotóxicas atacam com força total!
+              <br>
+              <strong>B-Cells</strong> geram assinaturas YARA (anticorpos).
+              <strong>Cytotoxic T-Cells</strong> matam processos infectados.
+              <strong>Regulatory T-Cells</strong> previnem autoimmunidade (falsos positivos).
+              <br>
+              <em>Resposta adaptativa completa - múltiplas explosões! 💥💥💥💥</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 8 -->
+        <div class="phase-card">
+          <div class="phase-number">8</div>
+          <div class="phase-content">
+            <h3 class="phase-title">🧠 Memory Formation</h3>
+            <p class="phase-time">2-10 minutes</p>
+            <p class="phase-description">
+              <strong>🛡️ Vitória alcançada!</strong> Sistema aprende e armazena memória do ataque.
+              <br>
+              <strong>Oráculo-Eureka</strong> aprende com o ataque.
+              CVE feeds → APV generation → LLM-powered remedies → GitHub PRs.
+              <br>
+              <em>Como células B/T de memória - próximo ataque será detectado instantaneamente!</em>
+            </p>
+          </div>
+        </div>
+
+        <!-- Phase 9 -->
+        <div class="phase-card">
+          <div class="phase-number">9</div>
+          <div class="phase-content">
+            <h3 class="phase-title">✨ Consciousness Update</h3>
+            <p class="phase-time">100-500ms</p>
+            <p class="phase-description">
+              <strong>MAXIMUS Core</strong> (IIT consciousness) updates threat model.
+              Predictive coding + Free Energy Principle.
+              Strategic learning from the entire cascade.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CALL TO ACTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="section architecture-cta">
+    <div class="container">
+      <div class="cta-box">
+        <h2 class="cta-title">Ready to Deploy the Organism?</h2>
+        <p class="cta-description">
+          All 125 microservices are production-ready.
+          <br>
+          Kubernetes manifests, Helm charts, full observability stack included.
+        </p>
+        <div class="cta-buttons">
+          <a href="#getting-started" class="btn btn-primary">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            Deploy Now
+          </a>
+          <a href="https://github.com/JuanCS-Dev/V-rtice" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+            </svg>
+            View Code
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════ */
+  /* ARCHITECTURE HERO */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .architecture-hero {
+    text-align: center;
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-2xl);
+  }
+
+  .architecture-hero .section-badge {
+    margin-bottom: var(--space-xl);
+  }
+
+  .architecture-hero .badge {
+    font-size: var(--text-lg);
+    padding: var(--space-md) var(--space-2xl);
+    font-weight: var(--font-bold);
+  }
+
+  .architecture-hero .section-title {
+    margin-top: var(--space-2xl);
+  }
+
+  .architecture-intro {
+    max-width: 800px;
+    margin: var(--space-xl) auto 0;
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .architecture-intro em {
+    font-style: italic;
+    color: var(--color-text-primary);
+  }
+
+  .architecture-intro strong {
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* INTEGRATED DIAGRAM SECTION */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .integrated-diagram-section {
+    background: var(--color-bg-secondary);
+    padding: var(--space-3xl) 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* STATIC FLOWCHART SECTION */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .static-flowchart-section {
+    background: var(--color-bg-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* VISUALIZATION SECTION */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .architecture-visualization {
+    background: var(--color-bg-secondary);
+    padding-top: var(--space-3xl);
+  }
+
+  .visualization-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .visualization-subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* CASCADE PHASES */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .cascade-phases {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .phase-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: var(--space-xl);
+    padding: var(--space-xl);
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    transition: all var(--transition-base);
+  }
+
+  .phase-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateX(8px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .phase-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    font-size: var(--text-4xl);
+    font-weight: var(--font-extrabold);
+    color: var(--color-accent-primary);
+    background: var(--color-bg-primary);
+    border: 3px solid var(--color-border-primary);
+    border-radius: var(--radius-xl);
+  }
+
+  .phase-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .phase-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .phase-time {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    margin: 0;
+  }
+
+  .phase-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .phase-description strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .phase-description em {
+    font-style: italic;
+    color: var(--color-accent-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* CTA */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .architecture-cta {
+    background: linear-gradient(
+      180deg,
+      var(--color-bg-secondary) 0%,
+      var(--color-bg-primary) 100%
+    );
+  }
+
+  .cta-box {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-3xl);
+    text-align: center;
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border-primary);
+    border-radius: var(--radius-2xl);
+  }
+
+  .cta-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-lg);
+  }
+
+  .cta-description {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-xl);
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 768px) {
+    .phase-card {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .phase-number {
+      margin: 0 auto;
+    }
+
+    .cta-buttons {
+      flex-direction: column;
+    }
+
+    .cta-buttons .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

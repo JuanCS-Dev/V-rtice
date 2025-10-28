@@ -38,6 +38,7 @@ export const useWebSocket = (url, options = {}) => {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
   const [usePolling, setUsePolling] = useState(false);
+  const [queuedMessages, setQueuedMessages] = useState(0);
 
   const wsRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
@@ -92,6 +93,7 @@ export const useWebSocket = (url, options = {}) => {
     } else {
       // Queue message for when connection is restored
       messageQueueRef.current.push(message);
+      setQueuedMessages(messageQueueRef.current.length);
       log('Message queued (offline):', message);
     }
   }, [log]);
@@ -104,6 +106,7 @@ export const useWebSocket = (url, options = {}) => {
         const message = messageQueueRef.current.shift();
         wsRef.current.send(typeof message === 'string' ? message : JSON.stringify(message));
       }
+      setQueuedMessages(0);
     }
   }, [log]);
 
@@ -273,7 +276,7 @@ export const useWebSocket = (url, options = {}) => {
     send,
     reconnect,
     disconnect,
-    queuedMessages: messageQueueRef.current.length
+    queuedMessages
   };
 };
 

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
  * Cyber Services API Client
  * ==========================
@@ -14,10 +15,10 @@
 import logger from '../utils/logger';
 
 const API_ENDPOINTS = {
-  IP_INTELLIGENCE: 'http://localhost:8000/api/ip',
-  THREAT_INTEL: 'http://localhost:8013/api/threat-intel',
-  MALWARE_ANALYSIS: 'http://localhost:8011',
-  SSL_MONITOR: 'http://localhost:8012',
+  IP_INTELLIGENCE: `${API_BASE_URL}/api/ip`,
+  THREAT_INTEL: `${API_BASE_URL}/api/threat-intel`,
+  MALWARE_ANALYSIS: API_BASE_URL,
+  SSL_MONITOR: API_BASE_URL,
 };
 
 /**

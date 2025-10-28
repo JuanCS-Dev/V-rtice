@@ -34,6 +34,7 @@ LYMPHNODE_VACCINATIONS_TOTAL = Counter(
     labelnames=("result",),
 )
 
+
 def record_reflex_event(signature_id: str) -> None:
     REFLEX_EVENTS_TOTAL.labels(signature_id=signature_id).inc()
 

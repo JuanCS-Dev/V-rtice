@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
-from .config import TegumentarSettings, get_settings
+from .config import get_settings, TegumentarSettings
+
+logger = logging.getLogger(__name__)
 from .derme.manager import DermeLayer, FlowObservation, InspectionResult
 from .epiderme.manager import EpidermeLayer
 from .hipoderme.adaptive_throttling import AdaptiveThrottler
@@ -20,12 +23,15 @@ class TegumentarModule:
         self._settings = settings or get_settings()
         self.epiderme = EpidermeLayer(self._settings)
         self.derme = DermeLayer(self._settings)
-        self.permeability = PermeabilityController(self.epiderme.stateless_filter, self._settings)
+        self.permeability = PermeabilityController(
+            self.epiderme.stateless_filter, self._settings
+        )
         self.wound_healing = WoundHealingOrchestrator(self._settings)
         self._throttler: Optional[AdaptiveThrottler] = None
 
     async def startup(self, interface: str) -> None:
         await self.epiderme.startup(interface)
+        # Derme layer enabled - PostgreSQL infrastructure provisioned
         await self.derme.startup()
         self._throttler = AdaptiveThrottler(interface)
 
@@ -38,11 +44,19 @@ class TegumentarModule:
         await self.derme.shutdown()
         await self.epiderme.shutdown()
 
-    async def process_packet(self, observation: FlowObservation, payload: bytes) -> InspectionResult:
+    async def process_packet(
+        self, observation: FlowObservation, payload: bytes
+    ) -> InspectionResult:
         return await self.derme.process_packet(observation, payload)
 
     def fastapi_app(self):
-        return create_app(self.epiderme, self.derme, self.permeability, self.wound_healing, self._settings)
+        return create_app(
+            self.epiderme,
+            self.derme,
+            self.permeability,
+            self.wound_healing,
+            self._settings,
+        )
 
 
 __all__ = ["TegumentarModule"]

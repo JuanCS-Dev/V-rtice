@@ -17,6 +17,28 @@ const ReviewDetails = ({ review, loading, apvSelected }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('cve');
 
+  const tabIds = ['cve', 'patch', 'wargame', 'validation'];
+
+  const handleTabKeyDown = (e) => {
+    const currentIndex = tabIds.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % tabIds.length;
+      setActiveTab(tabIds[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + tabIds.length) % tabIds.length;
+      setActiveTab(tabIds[prevIndex]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(tabIds[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(tabIds[tabIds.length - 1]);
+    }
+  };
+
   if (!apvSelected) {
     return (
       <div className={styles.emptyState}>
@@ -61,15 +83,18 @@ const ReviewDetails = ({ review, loading, apvSelected }) => {
       </div>
 
       {/* Tabs */}
-      <div className={styles.tabs} role="tablist">
+      <div className={styles.tabs} role="tablist" aria-label="Review details">
         {tabs.map((tab) => (
           <button
             key={tab.id}
+            id={`${tab.id}-tab`}
             className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
             onClick={() => setActiveTab(tab.id)}
             role="tab"
             aria-selected={activeTab === tab.id}
             aria-controls={`panel-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            onKeyDown={handleTabKeyDown}
           >
             <span aria-hidden="true">{tab.icon}</span> {tab.label}
           </button>
@@ -77,7 +102,7 @@ const ReviewDetails = ({ review, loading, apvSelected }) => {
       </div>
 
       {/* Tab Content */}
-      <div className={styles.tabContent} role="tabpanel" id={`panel-${activeTab}`}>
+      <div className={styles.tabContent} role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`${activeTab}-tab`} tabIndex={0}>
         {activeTab === 'cve' && <CVETab review={review} />}
         {activeTab === 'patch' && <PatchTab review={review} />}
         {activeTab === 'wargame' && <WargameTab review={review} />}

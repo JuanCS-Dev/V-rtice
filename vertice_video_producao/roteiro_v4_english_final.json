@@ -1,0 +1,94 @@
+{
+  "titulo": "Vértice - The Living Cybersecurity Organism",
+  "duracao_total": 180,
+  "cenas": [
+    {
+      "id": 1,
+      "duracao": 18,
+      "timestamp_inicio": 0,
+      "texto": "Welcome to Vértice. A next-generation cybersecurity platform powered by adaptive AI and biomimetic architectures.",
+      "acao": "landing_page_intro",
+      "view": "main"
+    },
+    {
+      "id": 2,
+      "duracao": 18,
+      "timestamp_inicio": 18,
+      "texto": "At its core is MAXIMUS: a multi-agent cognitive intelligence system with emergent consciousness and Theory of Mind capabilities.",
+      "acao": "navigate_to_maximus",
+      "view": "maximus"
+    },
+    {
+      "id": 3,
+      "duracao": 17,
+      "timestamp_inicio": 36,
+      "texto": "MAXIMUS features advanced reasoning, social cognition, and real-time monitoring of its own cognitive states.",
+      "acao": "explore_maximus_features",
+      "view": "maximus"
+    },
+    {
+      "id": 4,
+      "duracao": 16,
+      "timestamp_inicio": 53,
+      "texto": "The Offensive Intelligence layer executes autonomous penetration testing, vulnerability assessment, and threat simulation.",
+      "acao": "navigate_to_offensive",
+      "view": "offensive"
+    },
+    {
+      "id": 5,
+      "duracao": 16,
+      "timestamp_inicio": 69,
+      "texto": "Real-time tracking of offensive operations with detailed execution logs, success metrics, and exploit cataloging.",
+      "acao": "explore_offensive_modules",
+      "view": "offensive"
+    },
+    {
+      "id": 6,
+      "duracao": 15,
+      "timestamp_inicio": 85,
+      "texto": "The Defensive layer provides adaptive immunity with self-healing security infrastructure and biomimetic response patterns.",
+      "acao": "navigate_to_defensive",
+      "view": "defensive"
+    },
+    {
+      "id": 7,
+      "duracao": 16,
+      "timestamp_inicio": 100,
+      "texto": "Immune responses detect and neutralize threats in real-time, learning from each attack to strengthen future defenses.",
+      "acao": "explore_defensive_metrics",
+      "view": "defensive"
+    },
+    {
+      "id": 8,
+      "duracao": 15,
+      "timestamp_inicio": 116,
+      "texto": "Purple Team operations unify offensive and defensive strategies, creating a continuous feedback loop of improvement.",
+      "acao": "navigate_to_purple",
+      "view": "purple"
+    },
+    {
+      "id": 9,
+      "duracao": 16,
+      "timestamp_inicio": 131,
+      "texto": "The Cockpit Soberano provides sovereign command and control, with real-time intelligence and strategic decision-making.",
+      "acao": "navigate_to_cockpit",
+      "view": "cockpit"
+    },
+    {
+      "id": 10,
+      "duracao": 16,
+      "timestamp_inicio": 147,
+      "texto": "OSINT intelligence gathering continuously maps the threat landscape, feeding data to all system layers.",
+      "acao": "navigate_to_osint",
+      "view": "osint"
+    },
+    {
+      "id": 11,
+      "duracao": 17,
+      "timestamp_inicio": 163,
+      "texto": "Vértice. Where artificial consciousness meets adaptive cybersecurity. The future of autonomous defense is here.",
+      "acao": "finale_return_home",
+      "view": "main"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ export const MessageType = {
  * Custom hook for WebSocket connection
  *
  * @param {Object} options - Configuration options
- * @param {string} options.url - WebSocket URL (e.g., 'ws://localhost:8003/hitl/ws')
+ * @param {string} options.url - WebSocket URL (e.g., 'ws://34.148.161.131:8000/hitl/ws')
  * @param {Array<string>} options.channels - Channels to subscribe to (e.g., ['apvs', 'decisions', 'stats'])
  * @param {Function} options.onMessage - Callback for incoming messages
  * @param {boolean} options.autoConnect - Auto-connect on mount (default: true)

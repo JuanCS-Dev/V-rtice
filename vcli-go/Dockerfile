@@ -22,7 +22,8 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o vcli \
     -ldflags="-w -s" \
-    -trimpath
+    -trimpath \
+    ./cmd
 
 # ============================================================================
 # Stage 2: Runtime

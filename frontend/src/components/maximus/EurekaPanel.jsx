@@ -144,7 +144,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
     
     const connect = () => {
       try {
-        ws = new WebSocket('ws://localhost:8024/ws/wargaming');
+        ws = new WebSocket('ws://34.148.161.131:8000/ws/wargaming');
         ws.onopen = () => logger.info('[Eureka] WebSocket connected');
         ws.onmessage = (event) => {
           const msg = JSON.parse(event.data);

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Optional
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 from .ml.anomaly_detector import AnomalyDetector
 from .ml.feature_extractor import FeatureExtractor
 from .signature_engine import Signature, SignatureEngine
@@ -38,8 +38,17 @@ class DeepPacketInspector:
     def inspect(self, observation: FlowObservation, payload: bytes) -> InspectionResult:
         signature = self._signature_engine.match(payload)
         if signature:
-            action = InspectorAction.DROP if signature.action == "block" else InspectorAction.INSPECT_DEEP
-            logger.info("Signature %s matched for %s:%d", signature.name, observation.src_ip, observation.src_port)
+            action = (
+                InspectorAction.DROP
+                if signature.action == "block"
+                else InspectorAction.INSPECT_DEEP
+            )
+            logger.info(
+                "Signature %s matched for %s:%d",
+                signature.name,
+                observation.src_ip,
+                observation.src_port,
+            )
             return InspectionResult(
                 action=action,
                 confidence=0.99,

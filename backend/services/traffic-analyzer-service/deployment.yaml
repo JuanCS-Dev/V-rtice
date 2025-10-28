@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-analyzer-service
+  namespace: vertice
+  labels:
+    app: traffic-analyzer-service
+    tier: defensive-arsenal
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: traffic-analyzer-service
+  template:
+    metadata:
+      labels:
+        app: traffic-analyzer-service
+        tier: defensive-arsenal
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8038"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: traffic-analyzer-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: traffic-analyzer-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/traffic-analyzer-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8038
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8038
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8038
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-analyzer-service
+  namespace: vertice
+  labels:
+    app: traffic-analyzer-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8038
+    targetPort: 8038
+  selector:
+    app: traffic-analyzer-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traffic-analyzer-service
+  namespace: vertice
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: traffic-analyzer-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: traffic-analyzer-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8038
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53

@@ -47,7 +47,7 @@ describe('World Class Tools API Client', () => {
 
       expect(result).toEqual(mockResponse);
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8017/tools/world-class/execute',
+        'http://34.148.161.131:8000/tools/world-class/execute',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }

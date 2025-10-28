@@ -1,0 +1,543 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INTEGRATED DIAGRAM - Diagrama Integrado (Resumo Visual)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Um único quadro mostrando todo o fluxo:
+ * Atacantes → Camadas de Defesa → Resultado Final
+ */
+---
+
+<div class="integrated-diagram">
+  <div class="diagram-header">
+    <h2 class="diagram-title">Cascata Imunológica Completa</h2>
+    <p class="diagram-subtitle">Do ataque à memória em um único diagrama</p>
+  </div>
+
+  <div class="diagram-container">
+    <!-- COLUNA 1: ATACANTES -->
+    <div class="diagram-column attackers-column">
+      <div class="column-header">
+        <h3>⚠️ Atacantes</h3>
+        <span class="time-label">t=0</span>
+      </div>
+      <div class="column-content">
+        <div class="threat-item">
+          <span class="emoji">🦠</span>
+          <span class="label">Vírus</span>
+        </div>
+        <div class="threat-item">
+          <span class="emoji">🐛</span>
+          <span class="label">Malware</span>
+        </div>
+        <div class="threat-item">
+          <span class="emoji">🔐</span>
+          <span class="label">Ransomware</span>
+        </div>
+        <div class="threat-item">
+          <span class="emoji">🎭</span>
+          <span class="label">Trojan</span>
+        </div>
+        <div class="threat-item">
+          <span class="emoji">🪱</span>
+          <span class="label">Worm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETA -->
+    <div class="arrow-connector">
+      <div class="arrow-line"></div>
+      <span class="arrow-head">→</span>
+    </div>
+
+    <!-- COLUNA 2: CAMADAS DE DEFESA -->
+    <div class="diagram-column defense-layers-column">
+      <div class="column-header">
+        <h3>🛡️ Camadas de Defesa</h3>
+        <span class="time-label">t=0ms → 10min</span>
+      </div>
+      <div class="column-content layers">
+        <!-- Layer 1: Firewall -->
+        <div class="defense-layer firewall-layer">
+          <div class="layer-header">
+            <span class="emoji">🛡️</span>
+            <div class="layer-info">
+              <strong>1. Firewall</strong>
+              <span class="time">0-300ms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 2: Reflex -->
+        <div class="defense-layer reflex-layer">
+          <div class="layer-header">
+            <span class="emoji">⚡</span>
+            <div class="layer-info">
+              <strong>2. Reflexo</strong>
+              <span class="time">15-45ms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 3: Neutrophils -->
+        <div class="defense-layer neutrophil-layer">
+          <div class="layer-header">
+            <span class="emoji">🔵</span>
+            <div class="layer-info">
+              <strong>3. Neutrófilos</strong>
+              <span class="time">2-4s</span>
+            </div>
+          </div>
+          <div class="kills">💥 🦠 🐛</div>
+        </div>
+
+        <!-- Layer 4: Macrophages -->
+        <div class="defense-layer macrophage-layer">
+          <div class="layer-header">
+            <span class="emoji">🔬</span>
+            <div class="layer-info">
+              <strong>4. Macrófagos</strong>
+              <span class="time">90-150s</span>
+            </div>
+          </div>
+          <div class="kills">💥 🔐 🎭</div>
+        </div>
+
+        <!-- Layer 5-7: Adaptive -->
+        <div class="defense-layer adaptive-layer">
+          <div class="layer-header">
+            <span class="emoji">💉</span>
+            <div class="layer-info">
+              <strong>5-7. Adaptativa</strong>
+              <span class="time">1-3s</span>
+            </div>
+          </div>
+          <div class="adaptive-cells">
+            <span>🧬 Dendríticas</span>
+            <span>🎯 T-Helper</span>
+            <span>⚔️ T-Citotóxicas</span>
+          </div>
+          <div class="kills">💥💥💥 🪱</div>
+        </div>
+
+        <!-- Layer 8: Memory -->
+        <div class="defense-layer memory-layer">
+          <div class="layer-header">
+            <span class="emoji">🧠</span>
+            <div class="layer-info">
+              <strong>8. Memória</strong>
+              <span class="time">2-10min</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 9: Consciousness -->
+        <div class="defense-layer consciousness-layer">
+          <div class="layer-header">
+            <span class="emoji">✨</span>
+            <div class="layer-info">
+              <strong>9. Consciência</strong>
+              <span class="time">100-500ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETA -->
+    <div class="arrow-connector">
+      <div class="arrow-line"></div>
+      <span class="arrow-head">→</span>
+    </div>
+
+    <!-- COLUNA 3: RESULTADO -->
+    <div class="diagram-column result-column">
+      <div class="column-header">
+        <h3>✅ Resultado</h3>
+        <span class="time-label">t=final</span>
+      </div>
+      <div class="column-content result-content">
+        <div class="result-icon">
+          <span class="emoji-large">🎉</span>
+        </div>
+        <div class="result-text">
+          <h4>Sistema Protegido!</h4>
+          <ul class="result-list">
+            <li>✅ Todos atacantes eliminados</li>
+            <li>✅ IOCs extraídos e catalogados</li>
+            <li>✅ Assinaturas YARA geradas</li>
+            <li>✅ Memória imunológica criada</li>
+            <li>✅ Modelo de ameaças atualizado</li>
+          </ul>
+        </div>
+        <div class="next-attack">
+          <span class="emoji">🛡️</span>
+          <p>Próximo ataque = <strong>Detecção Instantânea</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legenda -->
+  <div class="diagram-legend">
+    <div class="legend-item">
+      <span class="legend-symbol">💥</span>
+      <span>= Atacante eliminado</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol">→</span>
+      <span>= Fluxo sequencial</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol time-symbol">ms/s/min</span>
+      <span>= Tempo de resposta</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .integrated-diagram {
+    background: linear-gradient(
+      180deg,
+      var(--color-bg-primary) 0%,
+      var(--color-bg-secondary) 100%
+    );
+    padding: var(--space-3xl) var(--space-xl);
+    border-radius: var(--radius-2xl);
+    border: 2px solid var(--color-border-primary);
+  }
+
+  .diagram-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .diagram-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-md);
+  }
+
+  .diagram-subtitle {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+  }
+
+  /* Container principal */
+  .diagram-container {
+    display: grid;
+    grid-template-columns: 1fr auto 2fr auto 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Colunas */
+  .diagram-column {
+    background: var(--color-bg-elevated);
+    border: 2px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .column-header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--color-border-default);
+  }
+
+  .column-header h3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-sm);
+  }
+
+  .time-label {
+    font-size: var(--text-sm);
+    color: var(--color-accent-primary);
+    font-weight: var(--font-semibold);
+    background: rgba(239, 68, 68, 0.1);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    display: inline-block;
+  }
+
+  /* Coluna de Atacantes */
+  .attackers-column {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.05));
+  }
+
+  .threat-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-primary);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-md);
+    transition: all var(--transition-base);
+  }
+
+  .threat-item:hover {
+    transform: translateX(8px);
+    border-color: var(--color-accent-primary);
+  }
+
+  .threat-item .emoji {
+    font-size: 32px;
+  }
+
+  .threat-item .label {
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+  }
+
+  /* Coluna de Camadas de Defesa */
+  .defense-layers-column {
+    border-color: var(--color-border-primary);
+  }
+
+  .column-content.layers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .defense-layer {
+    padding: var(--space-md);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+  }
+
+  .defense-layer:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .layer-header .emoji {
+    font-size: 28px;
+  }
+
+  .layer-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .layer-info strong {
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+  }
+
+  .layer-info .time {
+    font-size: var(--text-xs);
+    color: var(--color-accent-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .kills {
+    margin-top: var(--space-sm);
+    font-size: var(--text-lg);
+    text-align: center;
+    padding: var(--space-xs);
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: var(--radius-md);
+  }
+
+  .adaptive-cells {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    font-size: var(--text-xs);
+  }
+
+  .adaptive-cells span {
+    background: var(--color-bg-secondary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+  }
+
+  /* Cores das camadas */
+  .firewall-layer { border-color: #f97316; }
+  .reflex-layer { border-color: #ef4444; }
+  .neutrophil-layer { border-color: #10b981; }
+  .macrophage-layer { border-color: #14b8a6; }
+  .adaptive-layer { border-color: #a855f7; }
+  .memory-layer { border-color: #7c3aed; }
+  .consciousness-layer { border-color: #fbbf24; }
+
+  /* Coluna de Resultado */
+  .result-column {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));
+  }
+
+  .result-content {
+    text-align: center;
+  }
+
+  .result-icon .emoji-large {
+    font-size: 64px;
+    display: block;
+    margin-bottom: var(--space-lg);
+  }
+
+  .result-text h4 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    margin-bottom: var(--space-md);
+  }
+
+  .result-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-xl);
+    text-align: left;
+  }
+
+  .result-list li {
+    padding: var(--space-sm) 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .next-attack {
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-top: auto;
+  }
+
+  .next-attack .emoji {
+    font-size: 32px;
+    display: block;
+    margin-bottom: var(--space-sm);
+  }
+
+  .next-attack p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .next-attack strong {
+    color: var(--color-accent-primary);
+  }
+
+  /* Setas Conectoras */
+  .arrow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) 0;
+  }
+
+  .arrow-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--color-accent-primary) 50%,
+      transparent 100%
+    );
+  }
+
+  .arrow-head {
+    font-size: 48px;
+    color: var(--color-accent-primary);
+    line-height: 1;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* Legenda */
+  .diagram-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2xl);
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-2xl);
+    border-top: 2px solid var(--color-border-default);
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .legend-symbol {
+    font-size: var(--text-xl);
+  }
+
+  .time-symbol {
+    background: rgba(239, 68, 68, 0.1);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+    font-size: var(--text-xs);
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .diagram-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto auto;
+    }
+
+    .arrow-connector {
+      transform: rotate(90deg);
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    .diagram-column {
+      min-height: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .integrated-diagram {
+      padding: var(--space-xl) var(--space-md);
+    }
+
+    .diagram-title {
+      font-size: var(--text-2xl);
+    }
+
+    .column-header h3 {
+      font-size: var(--text-xl);
+    }
+  }
+</style>

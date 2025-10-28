@@ -1,12 +1,27 @@
 /**
- * Network Monitor Widget - REFATORADO
+ * NETWORK MONITOR - Real-time Network Traffic Monitoring Center
  *
- * Monitoramento de tráfego de rede em tempo real.
- * Este componente orquestra a UI, delegando a lógica para o hook
- * useNetworkMonitoring e a apresentação para subcomponentes dedicados.
+ * Monitoramento de tráfego de rede em tempo real
+ * Delegação de lógica para useNetworkMonitoring hook
  *
- * @version 2.0.0
- * @author Gemini
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - Card wrapper with data-maximus-tool="network-monitor"
+ * - <section> for AI assistance
+ * - <section> for monitoring header/controls
+ * - <section> for statistics dashboard
+ * - <section> for event stream
+ * - <section> for advanced controls
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="network-monitor"
+ * - Monitor network status via data-maximus-status
+ * - Access statistics via data-maximus-section="statistics"
+ * - Interpret event stream via semantic structure
+ *
+ * @version 2.0.0 (Maximus Vision)
+ * @author Gemini + Maximus Vision Protocol
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
 import React from 'react';
@@ -33,9 +48,16 @@ export const NetworkMonitor = () => {
       title="NETWORK MONITORING CENTER"
       badge="CYBER"
       variant="cyber"
+      data-maximus-tool="network-monitor"
+      data-maximus-category="shared"
+      data-maximus-status={isMonitoring ? 'monitoring' : 'idle'}
     >
       <div className={styles.widgetBody}>
-        <div style={{ marginBottom: '1rem' }}>
+        <section
+          style={{ marginBottom: '1rem' }}
+          role="region"
+          aria-label="AI assistance"
+          data-maximus-section="ai-assistance">
           <AskMaximusButton
             context={{
               type: 'network_monitor',
@@ -47,22 +69,42 @@ export const NetworkMonitor = () => {
             size="medium"
             variant="secondary"
           />
-        </div>
+        </section>
 
-        <NetworkMonitorHeader
-          isMonitoring={isMonitoring}
-          onToggleMonitoring={toggleMonitoring}
-        />
+        <section
+          role="region"
+          aria-label="Monitoring controls"
+          data-maximus-section="controls">
+          <NetworkMonitorHeader
+            isMonitoring={isMonitoring}
+            onToggleMonitoring={toggleMonitoring}
+          />
+        </section>
 
-        <NetworkStatistics statistics={statistics} />
+        <section
+          role="region"
+          aria-label="Network statistics"
+          data-maximus-section="statistics">
+          <NetworkStatistics statistics={statistics} />
+        </section>
 
-        <NetworkEventStream
-          isMonitoring={isMonitoring}
-          networkEvents={networkEvents}
-          getSeverityClass={getSeverityClass}
-        />
+        <section
+          role="region"
+          aria-label="Network events stream"
+          data-maximus-section="events">
+          <NetworkEventStream
+            isMonitoring={isMonitoring}
+            networkEvents={networkEvents}
+            getSeverityClass={getSeverityClass}
+          />
+        </section>
 
-        <NetworkAdvancedControls isMonitoring={isMonitoring} />
+        <section
+          role="region"
+          aria-label="Advanced controls"
+          data-maximus-section="advanced-controls">
+          <NetworkAdvancedControls isMonitoring={isMonitoring} />
+        </section>
       </div>
     </Card>
   );

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
 import logger from '@/utils/logger';
  * useDefensiveMetricsQuery Hook
@@ -15,15 +16,15 @@ import logger from '@/utils/logger';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../config/queryClient';
 
-const API_BASE = 'http://localhost:8001';
+const API_BASE = API_BASE_URL;
 
 // Fetcher function
 const fetchDefensiveMetrics = async () => {
   const endpoints = [
     { name: 'malware', url: `${API_BASE}/health`, field: 'threats' },
-    { name: 'ip-intel', url: 'http://localhost:8005/api/health', field: 'suspiciousIPs' },
-    { name: 'domain', url: 'http://localhost:8006/api/health', field: 'domains' },
-    { name: 'network', url: 'http://localhost:8010/api/health', field: 'monitored' }
+    { name: 'ip-intel', url: `${API_BASE}/api/health`, field: 'suspiciousIPs' },
+    { name: 'domain', url: `${API_BASE}/api/health`, field: 'domains' },
+    { name: 'network', url: `${API_BASE}/api/health`, field: 'monitored' }
   ];
 
   const results = await Promise.allSettled(

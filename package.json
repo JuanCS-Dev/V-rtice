@@ -1,0 +1,60 @@
+{
+  "name": "vertice-maximus",
+  "version": "0.1.0",
+  "description": "A living cybersecurity organism that learns, adapts, and evolves. Biological immune system architecture for modern threat defense.",
+  "keywords": [
+    "cybersecurity",
+    "ai",
+    "immune-system",
+    "threat-detection",
+    "adaptive-defense",
+    "biological-architecture",
+    "security",
+    "llm",
+    "maximus",
+    "osint"
+  ],
+  "homepage": "https://vertice-maximus.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JuanCS-Dev/V-rtice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JuanCS-Dev/V-rtice/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Juan Carlos de Souza <juan@vertice-maximus.com>",
+  "main": "bin/vertice.js",
+  "bin": {
+    "vertice": "./bin/vertice.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/vertice.js start",
+    "init": "node bin/vertice.js init",
+    "scan": "node bin/vertice.js scan",
+    "status": "node bin/vertice.js status",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "inquirer": "^9.2.12",
+    "commander": "^11.1.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0"
+  }
+}

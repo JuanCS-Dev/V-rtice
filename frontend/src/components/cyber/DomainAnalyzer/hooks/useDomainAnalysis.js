@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import logger from '@/utils/logger';
 
-const API_BASE = 'http://localhost:8000/api/domain';
+import { API_ENDPOINTS } from '@/config/api';
+const API_BASE = API_ENDPOINTS.domain;
 
 /**
  * Gera dados fallback quando a API não está disponível

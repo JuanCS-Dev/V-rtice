@@ -50,11 +50,11 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       reportsDirectory: './coverage',
 
-      // Coverage thresholds
-      lines: 80,
-      functions: 80,
-      branches: 80,
-      statements: 80,
+      // Coverage thresholds - PADRÃO PAGANI: 100%
+      lines: 100,
+      functions: 100,
+      branches: 100,
+      statements: 100,
 
       // Files to include
       include: [
@@ -91,8 +91,8 @@ export default defineConfig({
       '.cache'
     ],
 
-    // Test timeout
-    testTimeout: 10000,
+    // Test timeout (increased for complex async components and integration tests)
+    testTimeout: 90000,
 
     // Watch options
     watch: false,

@@ -16,7 +16,7 @@ global.EventSource = vi.fn();
 
 // Mock dependencies
 vi.mock('@/config/endpoints', () => ({
-  getWebSocketEndpoint: (path) => `ws://localhost:8001/ws/${path}`,
+  getWebSocketEndpoint: (path) => `ws://34.148.161.131:8000/ws/${path}`,
 }));
 
 vi.mock('@/utils/logger', () => ({

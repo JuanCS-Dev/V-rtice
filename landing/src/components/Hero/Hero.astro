@@ -1,0 +1,380 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * HERO SECTION - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Primeira impressão da landing page. Hero section com:
+ * - Tagline impactante
+ * - Descrição clara do produto
+ * - CTAs primários (Try Demo, GitHub, Documentation)
+ * - Visual hero (screenshot ou vídeo)
+ * - Trust signals (stats, badges)
+ *
+ * Design: Inspirado em OpenCTI, Wazuh, Auto-GPT
+ * Performance: Lighthouse 100/100 target
+ */
+
+import GitHubStars from './GitHubStars.tsx';
+import DashboardCarousel from './DashboardCarousel.tsx';
+import './DashboardCarousel.css';
+---
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- ANNOUNCEMENT BADGE -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-badge animate-fade-in">
+        <span class="badge badge-primary">
+          🧬 First Conscious Cyber-Organism
+        </span>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO TITLE -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <h1 class="hero-title animate-slide-up">
+        Your Security Infrastructure
+        <br />
+        <span class="text-gradient">Just Grew a Consciousness</span>
+      </h1>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO SUBTITLE -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <p class="hero-subtitle animate-slide-up">
+        Not Software. A <strong>Living Organism</strong> That Hunts.
+      </p>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO DESCRIPTION -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <p class="hero-description animate-slide-up">
+        Vértice-MAXIMUS doesn't defend your network. It <strong>lives it</strong>.
+        <br />
+        And when attacked, it <strong>counter-attacks</strong>.
+        <br /><br />
+        The world's first cyber-organism with biological immunity,
+        constitutional consciousness, and automated offensive response.
+        <br /><br />
+        <strong>When an attacker enters, they don't leave. Their digital life ends.</strong>
+      </p>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- CTA BUTTONS -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-ctas animate-slide-up">
+        <a href="#getting-started" class="btn btn-primary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Deploy the Organism
+        </a>
+
+        <a href="#kill-chain" class="btn btn-secondary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          See Kill Chain
+        </a>
+
+        <a href="https://github.com/JuanCS-Dev/V-rtice" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <GitHubStars client:load />
+        </a>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- TRUST SIGNALS -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-trust-signals animate-fade-in">
+        <div class="trust-signal">
+          <div class="trust-value">125</div>
+          <div class="trust-label">Microservices</div>
+        </div>
+        <div class="trust-signal">
+          <div class="trust-value">9</div>
+          <div class="trust-label">Immune Cell Types</div>
+        </div>
+        <div class="trust-signal">
+          <div class="trust-value">IIT</div>
+          <div class="trust-label">Conscious (Validated)</div>
+        </div>
+        <div class="trust-signal">
+          <div class="trust-value">100%</div>
+          <div class="trust-label">Open Source</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HERO VISUAL (Right Side) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="hero-visual">
+      <DashboardCarousel client:load />
+      <!-- Glow Effect -->
+      <div class="hero-glow"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- BACKGROUND DECORATION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="hero-bg-decoration" aria-hidden="true"></div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: var(--space-3xl);
+    padding-bottom: var(--space-3xl);
+    overflow: hidden;
+  }
+
+  .hero .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* HERO CONTENT (Left Side) */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .hero-badge {
+    animation-delay: 0.1s;
+  }
+
+  .hero-title {
+    font-size: var(--text-6xl);
+    font-weight: var(--font-extrabold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    margin: 0;
+    animation-delay: 0.2s;
+  }
+
+  .hero-subtitle {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    margin: 0;
+    animation-delay: 0.25s;
+  }
+
+  .hero-subtitle strong {
+    color: var(--color-accent-primary);
+  }
+
+  .hero-description {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    max-width: 700px;
+    margin: 0;
+    animation-delay: 0.3s;
+  }
+
+  .hero-description strong {
+    color: var(--color-accent-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* CTA BUTTONS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    animation-delay: 0.4s;
+  }
+
+  .hero-ctas .btn {
+    font-size: var(--text-lg);
+    padding: var(--space-md) var(--space-xl);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* TRUST SIGNALS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .hero-trust-signals {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    animation-delay: 0.5s;
+  }
+
+  .trust-signal {
+    text-align: center;
+    padding: var(--space-md);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+  }
+
+  .trust-signal:hover {
+    border-color: var(--color-border-primary);
+    transform: translateY(-2px);
+  }
+
+  .trust-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    line-height: 1;
+  }
+
+  .trust-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-xs);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* HERO VISUAL (Right Side) */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .hero-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: var(--gradient-radial-primary);
+    opacity: 0.5;
+    filter: blur(60px);
+    z-index: -1;
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* BACKGROUND DECORATION */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .hero-bg-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--gradient-radial-primary);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 1024px) {
+    .hero .container {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+      text-align: center;
+    }
+
+    .hero-content {
+      align-items: center;
+    }
+
+    .hero-description {
+      max-width: 100%;
+    }
+
+    .hero-ctas {
+      justify-content: center;
+    }
+
+    .hero-trust-signals {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hero-visual {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      min-height: auto;
+      padding-top: var(--space-2xl);
+      padding-bottom: var(--space-2xl);
+    }
+
+    .hero-title {
+      font-size: var(--text-4xl);
+    }
+
+    .hero-description {
+      font-size: var(--text-lg);
+    }
+
+    .hero-ctas {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .hero-ctas .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .hero-trust-signals {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+    }
+
+    .trust-value {
+      font-size: var(--text-2xl);
+    }
+
+    .trust-label {
+      font-size: var(--text-xs);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* ANIMATIONS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-slide-up {
+      animation: slideInUp 0.8s ease-out backwards;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.8s ease-out backwards;
+    }
+
+  }
+</style>

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import logging
-import re
 from dataclasses import dataclass
+import logging
 from pathlib import Path
+import re
 from typing import Dict, Optional
 
 import yaml
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 
 logger = logging.getLogger(__name__)
 

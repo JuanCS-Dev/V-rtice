@@ -118,7 +118,7 @@ const HITLDecisionConsole = () => {
    */
   useEffect(() => {
     const username = localStorage.getItem('hitl_username') || 'analyst';
-    const ws = new WebSocket(`ws://localhost:8000/ws/${username}`);
+    const ws = new WebSocket(`ws://34.148.161.131:8000/ws/${username}`);
 
     ws.onopen = () => {
       console.log('🔗 WebSocket connected');

@@ -1,0 +1,185 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# VULNERABILITY INTELLIGENCE SERVICE - KUBERNETES DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════════════════
+# Zero-trust architecture with Cilium mTLS
+# Observability-first with OpenTelemetry + Prometheus
+# Para Honra e Glória de JESUS CRISTO
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vuln-intel-service
+  namespace: vertice
+  labels:
+    app: vuln-intel-service
+    tier: offensive-arsenal
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: vuln-intel-service
+  template:
+    metadata:
+      labels:
+        app: vuln-intel-service
+        tier: offensive-arsenal
+        version: v1.0.0
+      annotations:
+        # Prometheus scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8033"
+        prometheus.io/path: "/metrics"
+        # Cilium network policy
+        policy.cilium.io/proxy-visibility: "<Ingress/8033/TCP/HTTP>"
+    spec:
+      serviceAccountName: vuln-intel-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: vuln-intel-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/vuln-intel-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8033
+          protocol: TCP
+
+        env:
+        - name: SERVICE_NAME
+          value: "vuln-intel-service"
+        - name: SERVICE_VERSION
+          value: "1.0.0"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: vuln-intel-secrets
+              key: database-url
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8033
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8033
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vuln-intel-service
+  namespace: vertice
+  labels:
+    app: vuln-intel-service
+    tier: offensive-arsenal
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8033
+    targetPort: 8033
+    protocol: TCP
+  selector:
+    app: vuln-intel-service
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vuln-intel-service
+  namespace: vertice
+  labels:
+    app: vuln-intel-service
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vuln-intel-secrets
+  namespace: vertice
+type: Opaque
+stringData:
+  database-url: "postgresql+asyncpg://vertice:vertice@postgres:5432/vuln_intel"
+
+---
+# Network Policy - Allow only from API Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vuln-intel-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: vuln-intel-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8033
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow external HTTPS (for NVD API, MITRE, etc)
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443

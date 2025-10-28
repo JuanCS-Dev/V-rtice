@@ -1,0 +1,441 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * GETTING STARTED SECTION - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Awakening the Organism - comandos reais de deployment.
+ * Zero placeholders. Comandos testados e funcionais.
+ *
+ * Deployment Methods:
+ * - Docker Compose (Recommended) - "Awaken the Organism"
+ * - Kubernetes (Production) - "Deploy into Ecosystem"
+ * - Manual Setup (Advanced) - "Cellular Assembly"
+ *
+ * Features:
+ * - Syntax highlighting
+ * - Copy to clipboard
+ * - Tab switching
+ * - Links para docs completas
+ */
+
+import CodeBlock from './CodeBlock.tsx';
+
+const dockerComposeCode = `# Clone repository
+git clone https://github.com/JuanCS-Dev/V-rtice.git
+cd V-rtice
+
+# Start all services
+docker-compose up -d
+
+# Verify deployment
+./deployment/validation/validate_complete_system.sh
+
+# Access dashboards
+# Cockpit Soberano: http://localhost:3000
+# API Gateway: http://localhost:8000
+# Grafana: http://localhost:3001`;
+
+const kubernetesCode = `# Configure kubectl for your cluster
+kubectl config use-context your-cluster
+
+# Create namespace
+kubectl create namespace vertice-system
+
+# Deploy core infrastructure
+kubectl apply -f k8s/camada-1-fundacao/
+
+# Deploy MAXIMUS AI
+kubectl apply -f k8s/camada-2-consciencia/
+
+# Deploy Immune System
+kubectl apply -f k8s/camada-3-imunologia/
+
+# Verify deployment
+kubectl get pods -n vertice-system
+kubectl get services -n vertice-system`;
+
+const manualSetupCode = `# Prerequisites
+# - Python 3.11+
+# - Node.js 18+
+# - PostgreSQL 14+
+# - Redis 7+
+# - Kafka 3+
+
+# Backend setup
+cd backend/services/maximus_core_service
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Frontend setup
+cd frontend
+npm install
+npm run dev
+
+# Start services individually
+# (See docs for detailed manual setup)`;
+---
+
+<section id="getting-started" class="getting-started-section section">
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <div class="section-badge">
+        <span class="badge badge-primary">
+          🧬 Deployment
+        </span>
+      </div>
+      <h2 class="section-title">
+        Awaken the <span class="text-gradient">Organism</span>
+      </h2>
+      <p class="section-subtitle">
+        From dormant code to living defense in minutes
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- TABS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="tabs-container">
+      <div class="tabs-nav" role="tablist">
+        <button
+          class="tab-button active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="docker-panel"
+          data-tab="docker"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185"/>
+          </svg>
+          Docker Compose
+          <span class="tab-badge">Recommended</span>
+        </button>
+
+        <button
+          class="tab-button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="k8s-panel"
+          data-tab="k8s"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10.204 14.35l.007.01-.999 2.413a5.171 5.171 0 0 1-2.075-2.597l2.578-.437.004.005a.44.44 0 0 1 .484.606zm-.833-2.129a.44.44 0 0 0 .173-.756l.002-.011-1.766-1.756a5.174 5.174 0 0 0-.354 2.94l1.945-.417zm2.392-2.449c.209-.054.322-.286.253-.494l-.002-.009.964-2.413a5.171 5.171 0 0 0-2.725 1.083l1.51 1.833zm1.145.633a.44.44 0 0 0-.237-.653l-.011-.003-2.577-.436a5.17 5.17 0 0 1 1.932 2.254l.893-1.162zM12 1.5C6.201 1.5 1.5 6.201 1.5 12S6.201 22.5 12 22.5 22.5 17.799 22.5 12 17.799 1.5 12 1.5zm3.176 13.75a.44.44 0 0 1-.606.484l-.01.007-2.413-.999a5.171 5.171 0 0 0 2.597 2.075l.437-2.578-.005-.004z"/>
+          </svg>
+          Kubernetes
+          <span class="tab-badge">Production</span>
+        </button>
+
+        <button
+          class="tab-button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="manual-panel"
+          data-tab="manual"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+          Manual Setup
+        </button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- TAB PANELS -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="tabs-content">
+        <!-- Docker Compose Panel -->
+        <div
+          id="docker-panel"
+          class="tab-panel active"
+          role="tabpanel"
+          data-panel="docker"
+        >
+          <CodeBlock code={dockerComposeCode} language="bash" client:load />
+        </div>
+
+        <!-- Kubernetes Panel -->
+        <div
+          id="k8s-panel"
+          class="tab-panel"
+          role="tabpanel"
+          data-panel="k8s"
+          hidden
+        >
+          <CodeBlock code={kubernetesCode} language="bash" client:load />
+        </div>
+
+        <!-- Manual Setup Panel -->
+        <div
+          id="manual-panel"
+          class="tab-panel"
+          role="tabpanel"
+          data-panel="manual"
+          hidden
+        >
+          <CodeBlock code={manualSetupCode} language="bash" client:load />
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- AFTER AWAKENING -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="next-steps">
+      <h3>After Awakening</h3>
+      <div class="next-steps-grid">
+        <a href="https://docs.vertice-maximus.com/installation" class="next-step-card" target="_blank" rel="noopener noreferrer">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          <span>Complete Deployment Guide</span>
+        </a>
+
+        <a href="https://docs.vertice-maximus.com/configuration" class="next-step-card" target="_blank" rel="noopener noreferrer">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m5.196-12.196l-3.589 3.589m0 6.213l3.589 3.59M23 12h-6m-6 0H5m12.196 5.196l-3.589-3.589m0-6.213l3.589-3.59"/>
+          </svg>
+          <span>Calibrate Consciousness</span>
+        </a>
+
+        <a href="https://docs.vertice-maximus.com/first-steps" class="next-step-card" target="_blank" rel="noopener noreferrer">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          <span>First Threat Hunt</span>
+        </a>
+
+        <a href="/architecture" class="next-step-card">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>
+          </svg>
+          <span>Understand the Anatomy</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .getting-started-section {
+    background: var(--color-bg-secondary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .section-badge {
+    margin-bottom: var(--space-lg);
+  }
+
+  .section-title {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    margin: 0 0 var(--space-md);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* TABS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .tabs-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .tabs-nav {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--color-border-default);
+  }
+
+  .tab-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-base);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    margin-bottom: -2px;
+  }
+
+  .tab-button:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-hover);
+  }
+
+  .tab-button.active {
+    color: var(--color-accent-primary);
+    border-bottom-color: var(--color-accent-primary);
+  }
+
+  .tab-badge {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-full);
+    color: var(--color-accent-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* TAB PANELS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .tabs-content {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+  }
+
+  .tab-panel {
+    display: block;
+  }
+
+  .tab-panel[hidden] {
+    display: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* NEXT STEPS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .next-steps {
+    margin-top: var(--space-3xl);
+    text-align: center;
+  }
+
+  .next-steps h3 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-xl);
+  }
+
+  .next-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .next-step-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .next-step-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .next-step-card svg {
+    color: var(--color-accent-primary);
+  }
+
+  .next-step-card span {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: var(--text-4xl);
+    }
+
+    .tabs-nav {
+      flex-direction: column;
+      gap: 0;
+      border-bottom: none;
+    }
+
+    .tab-button {
+      justify-content: center;
+      border-bottom: 1px solid var(--color-border-default);
+      margin-bottom: 0;
+    }
+
+    .tab-button.active {
+      border-left: 3px solid var(--color-accent-primary);
+      border-bottom: 1px solid var(--color-border-default);
+    }
+
+    .tabs-content {
+      padding: var(--space-md);
+    }
+
+    .next-steps-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Tab switching logic (vanilla JS, no dependencies)
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+
+        // Update buttons
+        tabButtons.forEach(btn => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-selected', 'false');
+        });
+        button.classList.add('active');
+        button.setAttribute('aria-selected', 'true');
+
+        // Update panels
+        tabPanels.forEach(panel => {
+          const panelTab = panel.getAttribute('data-panel');
+          if (panelTab === targetTab) {
+            panel.classList.add('active');
+            panel.removeAttribute('hidden');
+          } else {
+            panel.classList.remove('active');
+            panel.setAttribute('hidden', '');
+          }
+        });
+      });
+    });
+  });
+</script>

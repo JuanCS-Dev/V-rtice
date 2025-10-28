@@ -1,0 +1,5 @@
+> """Interfaces com o Linfonodo Digital (Immunis API)."""
+  
+> from .api import LymphnodeAPI, ThreatValidation
+  
+> __all__ = ["LymphnodeAPI", "ThreatValidation"]

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import logger from '@/utils/logger';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/api';
 
 const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
   const [targetData, setTargetData] = useState({
@@ -45,7 +46,7 @@ const MaximusAIModule = ({ setIsAIProcessing, setResults }) => {
 
     try {
       // Fazer chamada para o API Gateway que irá encaminhar para o OSINT service
-      const response = await axios.post('http://localhost:8000/api/investigate/auto', targetData);
+      const response = await axios.post(`${API_ENDPOINTS.investigate}/auto`, targetData);
       setResult(response.data.data);
       setResults(response.data.data);
     } catch (error) {

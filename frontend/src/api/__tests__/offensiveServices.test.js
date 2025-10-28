@@ -65,7 +65,7 @@ describe('offensiveServices API Client', () => {
       const result = await scanNetwork('192.168.1.0/24', 'quick', '1-1000');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8032/api/scan',
+        'http://34.148.161.131:8000/api/scan',
         expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining('192.168.1.0/24'),

@@ -1,3 +1,27 @@
+/**
+ * SYSTEM SECURITY - Comprehensive System Security Analysis
+ *
+ * Análise completa de segurança do sistema
+ * Monitora portas, integridade de arquivos, processos e configurações
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="system-security"
+ * - <header> for SecurityHeader component
+ * - <section> for AI assistance
+ * - <section> for analysis panels (port, file, process, config, logs)
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="system-security"
+ * - Monitor analysis via data-maximus-status
+ * - Access header via data-maximus-section="header"
+ * - Interpret security analysis via semantic structure
+ *
+ * @version 2.0.0 (Maximus Vision)
+ * @author Gemini + Maximus Vision Protocol
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ */
+
 import React from 'react';
 import AskMaximusButton from '../../shared/AskMaximusButton';
 import { useSystemSecurity } from './hooks/useSystemSecurity';
@@ -5,18 +29,33 @@ import { SecurityHeader } from './components/SecurityHeader';
 import { AnalysisPanel } from './components/AnalysisPanel';
 import styles from './SystemSecurity.module.css';
 
-/**
- * SystemSecurity - Análise completa de segurança do sistema
- * Monitora portas, integridade de arquivos, processos e configurações
- */
 export const SystemSecurity = () => {
   const { securityData, loading, lastUpdate, refresh } = useSystemSecurity();
 
-  return (
-    <div className={styles.container}>
-      <SecurityHeader lastUpdate={lastUpdate} onRefresh={refresh} />
+  const isAnalyzing = Object.values(loading).some(l => l);
 
-      <div style={{ margin: '1rem 0' }}>
+  return (
+    <article
+      className={styles.container}
+      role="article"
+      aria-labelledby="system-security-title"
+      data-maximus-tool="system-security"
+      data-maximus-category="shared"
+      data-maximus-status={isAnalyzing ? 'analyzing' : 'ready'}>
+
+      <header
+        role="region"
+        aria-label="System security header"
+        data-maximus-section="header">
+        <h2 id="system-security-title" className={styles.visuallyHidden}>System Security</h2>
+        <SecurityHeader lastUpdate={lastUpdate} onRefresh={refresh} />
+      </header>
+
+      <section
+        style={{ margin: '1rem 0' }}
+        role="region"
+        aria-label="AI assistance"
+        data-maximus-section="ai-assistance">
         <AskMaximusButton
           context={{
             type: 'system_security',
@@ -27,9 +66,13 @@ export const SystemSecurity = () => {
           size="medium"
           variant="secondary"
         />
-      </div>
+      </section>
 
-      <div className={styles.panels}>
+      <section
+        className={styles.panels}
+        role="region"
+        aria-label="Security analysis panels"
+        data-maximus-section="analysis-panels">
         <AnalysisPanel
           title="ANÁLISE DE PORTAS"
           icon="🔍"
@@ -69,8 +112,8 @@ export const SystemSecurity = () => {
           loading={loading.securityLogs}
           emptyMessage="Nenhum log recente"
         />
-      </div>
-    </div>
+      </section>
+    </article>
   );
 };
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uvicorn
 
-from .app import app, service_settings
+from app import app, service_settings
 
 
 def run() -> None:

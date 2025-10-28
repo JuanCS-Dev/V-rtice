@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎭 HITL API Client - Backend Communication Layer
@@ -18,7 +19,7 @@ const HITL_API_BASE =
   process.env.NEXT_PUBLIC_HITL_API || 
   (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
     ? `${window.location.protocol}//${window.location.hostname}:8027`
-    : 'http://localhost:8027');
+    : API_BASE_URL);
 
 // Configuration
 const DEFAULT_TIMEOUT = 10000; // 10 seconds

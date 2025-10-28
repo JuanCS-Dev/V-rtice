@@ -1,0 +1,115 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INDEX PAGE - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Landing page principal integrando todos os componentes:
+ * - Hero Section
+ * - Features Grid
+ * - Getting Started
+ * - Footer
+ *
+ * Próximos componentes a adicionar:
+ * - Architecture Diagram
+ * - Screenshots Carousel
+ * - Community Section
+ * - Sponsors Section
+ *
+ * Build: npm run build
+ * Dev: npm run dev
+ * Preview: npm run preview
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero/Hero.astro';
+import CodeTherapy from '../components/CodeTherapy.astro';
+import LivingOrganism from '../components/LivingOrganism.astro';
+import OriginStory from '../components/OriginStory.astro';
+import TheKillChain from '../components/TheKillChain.astro';
+import Features from '../components/Features/Features.astro';
+import Neuroshell from '../components/Neuroshell.astro';
+import GettingStarted from '../components/GettingStarted/GettingStarted.astro';
+import Community from '../components/Community.astro';
+import Footer from '../components/Footer/Footer.astro';
+
+// Import styles
+import '../styles/code-highlight.css';
+---
+
+<BaseLayout>
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Hero />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CODE THERAPY SECTION (Personal Journey) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <CodeTherapy />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- LIVING ORGANISM SECTION (5 Biological Systems) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <LivingOrganism />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ORIGIN STORY SECTION (Biology + Philosophy + Faith) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <OriginStory />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- THE KILL CHAIN SECTION (5 Phases of Neutralization) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <TheKillChain />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FEATURES SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Features />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- NEUROSHELL SECTION (Natural Language Command Interface) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Neuroshell />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- GETTING STARTED SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <GettingStarted />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- COMMUNITY SECTION -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Community />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FUTURE SECTIONS -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FUTURE: Add Architecture Diagram -->
+  <!-- FUTURE: Add Screenshots Carousel (need assets) -->
+  <!-- FUTURE: Add Sponsors Section (monetization decision pending) -->
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════ */
+  /* PAGE-LEVEL STYLES */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  /* Smooth scroll behavior is already in BaseLayout */
+
+  /* Section spacing consistency */
+  :global(.section + .section) {
+    margin-top: 0;
+  }
+
+  /* Prevent layout shift during load */
+  :global(body) {
+    min-height: 100vh;
+  }
+</style>

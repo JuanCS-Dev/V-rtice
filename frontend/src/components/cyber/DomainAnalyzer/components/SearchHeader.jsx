@@ -1,3 +1,22 @@
+/**
+ * DOMAIN SEARCH HEADER - Semantic Form for Domain Analysis
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <form> with role="search"
+ * - <label> associated with input
+ * - <fieldset> for history group
+ * - aria-live for loading status
+ *
+ * WCAG 2.1 AAA Compliance:
+ * - All form controls labeled
+ * - Keyboard accessible (Enter key support)
+ * - Loading status announced
+ * - History as shortcuts
+ *
+ * @version 2.0.0 (Maximus Vision)
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ */
+
 import React from 'react';
 import { Input, Button } from '../../../shared';
 import { useKeyPress } from '../../../../hooks';
@@ -17,12 +36,28 @@ export const SearchHeader = ({
     }
   });
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (domain.trim() && !loading) {
+      onAnalyze();
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>DOMAIN INTELLIGENCE ANALYZER</h2>
 
-      <div className={styles.searchBar}>
+      <form
+        className={styles.searchBar}
+        onSubmit={handleSubmit}
+        role="search"
+        aria-label="Domain intelligence search">
+
+        <label htmlFor="domain-input" className={styles.visuallyHidden}>
+          Domain Name
+        </label>
         <Input
+          id="domain-input"
           variant="cyber"
           size="lg"
           value={domain}
@@ -31,34 +66,42 @@ export const SearchHeader = ({
           disabled={loading}
           fullWidth
           className={styles.input}
+          aria-describedby={loading ? "domain-search-status" : undefined}
         />
 
         <Button
+          type="submit"
           variant="cyber"
           size="md"
-          onClick={onAnalyze}
           disabled={loading || !domain.trim()}
           loading={loading}
-        >
+          aria-label="Analyze domain">
           {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
         </Button>
-      </div>
+      </form>
+
+      {loading && (
+        <div id="domain-search-status" className={styles.visuallyHidden} role="status" aria-live="polite">
+          Analyzing domain...
+        </div>
+      )}
 
       {searchHistory.length > 0 && (
-        <div className={styles.history}>
-          <span className={styles.historyLabel}>HISTÓRICO:</span>
-          <div className={styles.historyItems}>
+        <fieldset className={styles.history}>
+          <legend className={styles.historyLabel}>HISTÓRICO:</legend>
+          <div className={styles.historyItems} role="group" aria-label="Recent domain searches">
             {searchHistory.slice(0, 5).map((historicDomain, index) => (
               <button
                 key={index}
+                type="button"
                 onClick={() => onSelectHistory(historicDomain)}
                 className={styles.historyItem}
-              >
+                aria-label={`Load domain ${historicDomain}`}>
                 {historicDomain}
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
       )}
     </div>
   );

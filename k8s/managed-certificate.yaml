@@ -1,0 +1,11 @@
+# Google-managed SSL Certificate
+# IMPORTANT: Replace 'your-domain.com' with actual domain
+# DNS must point to: 34.49.122.184
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: vertice-ssl-cert
+  namespace: vertice
+spec:
+  domains:
+    - api.vertice-maximus.com

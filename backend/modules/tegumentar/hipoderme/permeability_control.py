@@ -7,7 +7,7 @@ from typing import Optional
 
 import httpx
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
 from ..epiderme.stateless_filter import StatelessFilter
 
 logger = logging.getLogger(__name__)

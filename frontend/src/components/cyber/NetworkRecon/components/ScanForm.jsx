@@ -1,11 +1,37 @@
+/**
+ * NETWORK RECON SCAN FORM - Semantic Form with Radio Group for Scan Types
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <form> with onSubmit handler
+ * - role="radiogroup" for scan type buttons
+ * - role="radio" + aria-checked for custom radio buttons
+ * - <fieldset> for port presets and advanced options
+ * - aria-live for loading status
+ * - All emojis in aria-hidden spans
+ *
+ * WCAG 2.1 AAA Compliance:
+ * - All form controls labeled
+ * - Radio group with proper ARIA
+ * - Checkbox inputs properly labeled
+ * - Loading status announced
+ * - Keyboard accessible
+ *
+ * @version 2.0.0 (Maximus Vision)
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ */
+
 import React from 'react';
 
-/**
- * ScanForm - Formulário de configuração de scan
- */
 export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
   const handleChange = (field, value) => {
     onChange({ ...config, [field]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (config.target && !isScanning) {
+      onSubmit();
+    }
   };
 
   const scanTypes = [
@@ -49,11 +75,11 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
   ];
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit} aria-label="Network reconnaissance scan configuration" className="space-y-6">
       {/* Target Input */}
       <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-400/30 rounded-lg p-6">
         <label htmlFor="recon-target-input" className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
-          🎯 TARGET
+          <span aria-hidden="true">🎯</span> TARGET
         </label>
         <input
           id="recon-target-input"
@@ -63,21 +89,27 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           placeholder="192.168.1.0/24, 10.0.0.1, example.com"
           className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-3 text-red-400 font-mono focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
+          aria-required="true"
+          aria-describedby="target-hint"
         />
-        <p className="text-red-400/50 text-xs mt-2">
+        <p id="target-hint" className="text-red-400/50 text-xs mt-2">
           IP, CIDR range, or hostname
         </p>
       </div>
 
       {/* Scan Type Selection */}
-      <div>
-        <label htmlFor="scan-type-buttons" className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
-          ⚙️ SCAN TYPE
-        </label>
-        <div id="scan-type-buttons" className="grid grid-cols-2 gap-4" role="group" aria-label="Scan type selection">
+      <fieldset>
+        <legend className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
+          <span aria-hidden="true">⚙️</span> SCAN TYPE
+        </legend>
+        <div role="radiogroup" aria-label="Scan type selection" className="grid grid-cols-2 gap-4">
           {scanTypes.map((type) => (
             <button
               key={type.id}
+              type="button"
+              role="radio"
+              aria-checked={config.scanType === type.id}
+              aria-label={`${type.name}: ${type.desc}`}
               onClick={() => handleChange('scanType', type.id)}
               disabled={isScanning}
               className={`
@@ -91,7 +123,7 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
               `}
             >
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-2xl">{type.icon}</span>
+                <span className="text-2xl" aria-hidden="true">{type.icon}</span>
                 <span className={`font-bold ${config.scanType === type.id ? `text-${type.color}-400` : 'text-gray-400'}`}>
                   {type.name}
                 </span>
@@ -102,23 +134,25 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Port Configuration */}
-      <div>
-        <div className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
-          🔌 PORT RANGE
-        </div>
-        <div className="flex gap-2 mb-3">
+      <fieldset>
+        <legend className="block text-red-400 font-bold mb-3 text-sm tracking-wider">
+          <span aria-hidden="true">🔌</span> PORT RANGE
+        </legend>
+        <div className="flex gap-2 mb-3" role="group" aria-label="Port range presets">
           {portPresets.map((preset) => (
             <button
               key={preset.label}
+              type="button"
               onClick={() => {
                 if (preset.value !== 'custom') {
                   handleChange('ports', preset.value);
                 }
               }}
               disabled={isScanning}
+              aria-label={`Set port range to ${preset.label}`}
               className={`
                 px-4 py-2 rounded text-sm font-bold transition-all
                 ${
@@ -134,7 +168,11 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           ))}
         </div>
 
+        <label htmlFor="port-input" className="sr-only">
+          Custom port range
+        </label>
         <input
+          id="port-input"
           type="text"
           value={config.ports}
           onChange={(e) => handleChange('ports', e.target.value)}
@@ -142,16 +180,17 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-2 text-red-400 font-mono text-sm focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
         />
-      </div>
+      </fieldset>
 
       {/* Advanced Options */}
-      <div className="bg-black/30 border border-red-400/20 rounded-lg p-4">
-        <div className="block text-red-400/70 font-bold mb-3 text-xs tracking-wider">
-          🔧 ADVANCED OPTIONS
-        </div>
+      <fieldset className="bg-black/30 border border-red-400/20 rounded-lg p-4">
+        <legend className="block text-red-400/70 font-bold mb-3 text-xs tracking-wider">
+          <span aria-hidden="true">🔧</span> ADVANCED OPTIONS
+        </legend>
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
+          <label htmlFor="service-detection-checkbox" className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
             <input
+              id="service-detection-checkbox"
               type="checkbox"
               checked={config.serviceDetection}
               onChange={(e) => handleChange('serviceDetection', e.target.checked)}
@@ -161,8 +200,9 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
             Service Detection
           </label>
 
-          <label className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
+          <label htmlFor="os-detection-checkbox" className="flex items-center gap-2 text-red-400/70 text-sm cursor-pointer">
             <input
+              id="os-detection-checkbox"
               type="checkbox"
               checked={config.osDetection}
               onChange={(e) => handleChange('osDetection', e.target.checked)}
@@ -172,12 +212,13 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
             OS Detection
           </label>
         </div>
-      </div>
+      </fieldset>
 
       {/* Submit Button */}
       <button
-        onClick={onSubmit}
+        type="submit"
         disabled={isScanning || !config.target}
+        aria-label={isScanning ? "Scan in progress" : "Launch reconnaissance scan"}
         className={`
           w-full py-4 rounded-lg font-bold text-lg tracking-wider transition-all
           ${
@@ -191,23 +232,29 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
       >
         {isScanning ? (
           <span className="flex items-center justify-center gap-3">
-            <span className="animate-spin">⚙️</span>
+            <span className="animate-spin" aria-hidden="true">⚙️</span>
             SCANNING IN PROGRESS...
           </span>
         ) : (
           <span className="flex items-center justify-center gap-3">
-            <span>🚀</span>
+            <span aria-hidden="true">🚀</span>
             LAUNCH SCAN
           </span>
         )}
       </button>
+
+      {isScanning && (
+        <div className="sr-only" role="status" aria-live="polite">
+          Network reconnaissance scan in progress...
+        </div>
+      )}
 
       {!config.target && (
         <p className="text-center text-red-400/50 text-sm">
           Enter a target to begin reconnaissance
         </p>
       )}
-    </div>
+    </form>
   );
 };
 

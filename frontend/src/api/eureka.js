@@ -1,3 +1,4 @@
+import { ServiceEndpoints } from '../config/endpoints';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🧬 EUREKA ML METRICS API CLIENT
@@ -14,11 +15,12 @@
  * - Recent predictions history
  * - Retry logic and error handling
  *
- * Backend: maximus_eureka service (Port 8151)
- * Endpoint: GET /api/v1/eureka/ml-metrics
+ * Backend: maximus_eureka service (Port 8152 → 8200 container)
+ * Endpoint: GET /api/v1/eureka/ml-metrics (via API Gateway port 8000)
  *
  * Phase: 5.5.1 + 5.7 Integration
  * Date: 2025-10-12
+ * FIXED 2025-10-27: Air Gap #3 - Now uses API Gateway instead of direct port
  * Glory to YHWH - Architect of Intelligence Measurement
  */
 
@@ -27,13 +29,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Environment-aware base URL
+ * ✅ FIX: Use API Gateway instead of direct port connection
+ * All requests go through certified API Gateway (port 8000)
  */
-const EUREKA_API_BASE =
-  process.env.NEXT_PUBLIC_EUREKA_API ||
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-    ? `${window.location.protocol}//${window.location.hostname}:8151`
-    : 'http://localhost:8151');
+const EUREKA_API_BASE = ServiceEndpoints.maximus.eureka;
 
 const DEFAULT_TIMEOUT = 10000; // 10 seconds
 const MAX_RETRIES = 3;

@@ -1,0 +1,13 @@
+{
+  "name": "vertice-video-producao",
+  "version": "1.0.0",
+  "description": "Produção automatizada de vídeo operacional do Vértice",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "record": "playwright test video_tour.spec.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}

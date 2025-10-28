@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const WS_URL = import.meta.env.VITE_VERDICT_ENGINE_WS || 'ws://localhost:8091/ws/verdicts';
+const WS_URL = import.meta.env.VITE_VERDICT_ENGINE_WS || 'ws://34.148.161.131:8000/ws/verdicts';
 const RECONNECT_DELAY = 3000;
 const MAX_VERDICTS = 100;
 

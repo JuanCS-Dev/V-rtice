@@ -10,14 +10,16 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, HttpUrl, PositiveInt, field_validator
+from pydantic import Field, field_validator, HttpUrl, PositiveInt
 from pydantic_settings import BaseSettings
 
 
 class TegumentarSettings(BaseSettings):
     """Pydantic settings for the Tegumentar module."""
 
-    environment: str = Field("production", pattern=r"^(development|staging|production)$")
+    environment: str = Field(
+        "production", pattern=r"^(development|staging|production)$"
+    )
 
     # === Epiderme ===
     nft_binary: str = Field("/usr/sbin/nft", description="Path to nftables binary.")
@@ -50,7 +52,7 @@ class TegumentarSettings(BaseSettings):
 
     # === Derme ===
     postgres_dsn: str = Field(
-        "postgresql+asyncpg://tegumentar:tegumentar@localhost:5432/tegumentar",
+        "postgresql://tegumentar:tegumentar@localhost:5432/tegumentar",
         description="Timescale/PostgreSQL DSN for session state and analytics.",
     )
     kafka_bootstrap_servers: str = Field(
@@ -73,7 +75,9 @@ class TegumentarSettings(BaseSettings):
         description="Token opcional para autenticação no Linfonodo (Bearer).",
     )
     anomaly_model_path: str = Field(
-        str(Path.home() / ".cache" / "tegumentar" / "models" / "anomaly_detector.joblib"),
+        str(
+            Path.home() / ".cache" / "tegumentar" / "models" / "anomaly_detector.joblib"
+        ),
         description="Path to the trained anomaly detection model.",
     )
     signature_directory: str = Field(

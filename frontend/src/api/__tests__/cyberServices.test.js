@@ -66,7 +66,7 @@ describe('cyberServices API Client', () => {
       const result = await analyzeIP('8.8.8.8');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/ip/analyze',
+        'http://34.148.161.131:8000/api/ip/analyze',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -207,7 +207,7 @@ describe('cyberServices API Client', () => {
       const result = await checkThreatIntelligence('45.142.212.61', 'ip');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8013/api/threat-intel/check',
+        'http://34.148.161.131:8000/api/threat-intel/check',
         expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining('45.142.212.61'),

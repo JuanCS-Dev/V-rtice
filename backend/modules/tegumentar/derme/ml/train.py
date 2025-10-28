@@ -53,7 +53,9 @@ def train(dataset: Path, output: Path, contamination: float) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train Tegumentar anomaly detector.")
     parser.add_argument("--dataset", type=Path, required=True, help="CSV dataset path.")
-    parser.add_argument("--output", type=Path, required=True, help="Output .joblib path.")
+    parser.add_argument(
+        "--output", type=Path, required=True, help="Output .joblib path."
+    )
     parser.add_argument(
         "--contamination",
         type=float,

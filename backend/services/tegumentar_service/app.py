@@ -8,7 +8,7 @@ from fastapi import FastAPI
 
 from backend.modules.tegumentar import TegumentarModule
 
-from .config import get_module, get_service_settings
+from config import get_module, get_service_settings
 
 logger = logging.getLogger(__name__)
 

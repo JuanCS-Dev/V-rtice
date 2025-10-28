@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 import logger from '@/utils/logger';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -13,7 +14,7 @@ import logger from '@/utils/logger';
  * - Integration workflows
  */
 
-const MAXIMUS_BASE_URL = 'http://localhost:8099';
+const MAXIMUS_BASE_URL = API_BASE_URL;
 
 /**
  * Generic API request handler

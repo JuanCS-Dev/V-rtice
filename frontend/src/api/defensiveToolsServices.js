@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
  * Defensive Tools Services
  * 
@@ -13,7 +14,7 @@ const DEFENSIVE_BASE = '/api/v1/immune/defensive';
 
 // Create axios instance
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_URL || API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'

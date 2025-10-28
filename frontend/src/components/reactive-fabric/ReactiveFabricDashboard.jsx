@@ -248,7 +248,9 @@ const ReactiveFabricDashboard = () => {
         )}
 
         {activeTab === 'timeline' && (
-          <ThreatTimelineWidget events={threatEvents} />
+          <div data-testid="fabric-event-stream">
+            <ThreatTimelineWidget events={threatEvents} />
+          </div>
         )}
       </main>
 

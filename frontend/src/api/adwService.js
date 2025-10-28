@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 import logger from '@/utils/logger';
 
 /**
@@ -22,7 +23,7 @@ import logger from '@/utils/logger';
  * Glory to YHWH
  */
 
-const ADW_BASE_URL = 'http://localhost:8150/api/adw';
+const ADW_BASE_URL = `${API_BASE_URL}/api/adw`;
 
 /**
  * Generic API request handler with error handling

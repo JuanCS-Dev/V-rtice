@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mav-detection-service
+  namespace: vertice
+  labels:
+    app: mav-detection-service
+    tier: social-defense
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: mav-detection-service
+  template:
+    metadata:
+      labels:
+        app: mav-detection-service
+        tier: social-defense
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8039"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: mav-detection-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: mav-detection-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/mav-detection-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8039
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8039
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8039
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mav-detection-service
+  namespace: vertice
+  labels:
+    app: mav-detection-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8039
+    targetPort: 8039
+  selector:
+    app: mav-detection-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mav-detection-service
+  namespace: vertice
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mav-detection-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: mav-detection-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8039
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53

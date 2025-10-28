@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * OSINT SERVICE - Unified Intelligence API
@@ -20,7 +21,7 @@
 import logger from '@/utils/logger';
 
 // MAXIMUS Core Service endpoint (OSINT router está aqui)
-const OSINT_BASE_URL = 'http://localhost:9106';
+const OSINT_BASE_URL = API_BASE_URL;
 
 /**
  * Generic API request handler with error handling

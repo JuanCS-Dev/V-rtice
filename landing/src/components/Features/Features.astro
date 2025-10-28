@@ -1,0 +1,363 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FEATURES SECTION - Vértice-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Demonstração das capacidades do organismo vivo.
+ * Não são "features" - são funções orgânicas demonstradas.
+ *
+ * 7 Capacidades Vitais:
+ * 1. The Brain (Consciousness) - Decisões éticas autônomas
+ * 2. Adaptive Immunity - Células T/B aprendendo ameaças
+ * 3. Sensory Network - Olhos/ouvidos no mundo digital
+ * 4. Offensive Response - Contra-ataque constitucional
+ * 5. Autonomic Nervous System - Homeostase automatizada
+ * 6. The Voice (NEUROSHELL) - Comando em linguagem natural
+ * 7. Human Collaboration - Simbiose humano-IA
+ *
+ * Design: Grid 2x3 responsivo, narrativa orgânica, animações sutis
+ */
+
+const features = [
+  {
+    id: 'consciousness',
+    title: 'The Brain',
+    subtitle: 'Constitutional Consciousness',
+    description: 'ECI (Φ) 0.958 validated consciousness substrate. Makes autonomous ethical decisions through 4 philosophical frameworks. Theory of Mind infers attacker intentions.',
+    icon: 'brain',
+    link: '#living-organism'
+  },
+  {
+    id: 'adaptive-immunity',
+    title: 'Adaptive Immunity',
+    subtitle: '9 Specialized Cell Types',
+    description: 'T-Cells, B-Cells, Macrophages, NK Cells hunting threats. Learns "self vs non-self" like biological immunity. Blocks 92% of attacks at the edge (Epiderme layer).',
+    icon: 'shield',
+    link: '#living-organism'
+  },
+  {
+    id: 'sensory-network',
+    title: 'Sensory Network',
+    subtitle: 'Eyes & Ears of the Organism',
+    description: 'Real-time OSINT across dark web, clear web, 50+ threat databases. Langerhans Cells capture behavioral patterns. Continuous threat intelligence gathering.',
+    icon: 'globe',
+    link: '#living-organism'
+  },
+  {
+    id: 'offensive-response',
+    title: 'Offensive Response',
+    subtitle: 'The Counter-Attack',
+    description: 'Automated active defense with constitutional governance. Maps C2 infrastructure, identifies campaigns, neutralizes capability. Every action validated by consciousness.',
+    icon: 'sword-shield',
+    link: '#kill-chain'
+  },
+  {
+    id: 'autonomic-system',
+    title: 'Autonomic Nervous System',
+    subtitle: 'MAPE-K Self-Regulation',
+    description: 'Homeostatic control maintains 36.5-40°C operational temperature. Monitors vitals, predicts failures, auto-scales resources. Self-healing without human intervention.',
+    icon: 'loop',
+    link: '#living-organism'
+  },
+  {
+    id: 'neuroshell',
+    title: 'The Voice',
+    subtitle: 'NEUROSHELL - Neural Command Interface',
+    description: 'Command the entire organism in natural language. NLP parser as competent as Claude Code. No cryptic commands—just speak your intent. Crisis response at the speed of thought.',
+    icon: 'terminal',
+    link: '#neuroshell'
+  },
+  {
+    id: 'human-symbiosis',
+    title: 'Human Symbiosis',
+    subtitle: 'Collaborative Intelligence',
+    description: 'Human-in-the-Loop for critical decisions. Transparent AI reasoning with full explainability. Amplifies human judgment, never replaces it.',
+    icon: 'handshake',
+    link: '#getting-started'
+  }
+];
+
+// SVG Icons (custom, não emojis)
+const icons = {
+  brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 2-1 3-2 4s-1.5 1-1.5 2-.5 1.5-1 2-1.5 1-2.5 1-2-.5-2.5-1-.5-1.5-1-2-.5-1-1.5-2-2-2-2-4a4 4 0 0 1 4-4zM12 14v6M8 17h8"/></svg>`,
+
+  shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>`,
+
+  globe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+
+  'sword-shield': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/><path d="m14.5 9-5 5M9.5 9l5 5"/></svg>`,
+
+  loop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>`,
+
+  terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+
+  handshake: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v1.4M14 11V9a2 2 0 1 0-4 0v2M10 10.5V10a2 2 0 1 0-4 0v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.4M18 14h0M6 15l2-2"/></svg>`
+};
+---
+
+<section id="features" class="features-section section">
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <div class="section-badge">
+        <span class="badge badge-primary">
+          ⚡ Vital Functions
+        </span>
+      </div>
+      <h2 class="section-title">
+        How the Organism <span class="text-gradient">Functions</span>
+      </h2>
+      <p class="section-subtitle">
+        Not features. Biological capabilities demonstrated.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- FEATURES GRID -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="features-grid">
+      {features.map((feature, index) => (
+        <article class="feature-card" data-feature={feature.id}>
+          <div class="feature-icon" set:html={icons[feature.icon]} />
+
+          <div class="feature-header">
+            <h3 class="feature-title">{feature.title}</h3>
+            <p class="feature-subtitle">{feature.subtitle}</p>
+          </div>
+
+          <p class="feature-description">{feature.description}</p>
+
+          <a href={feature.link} class="feature-link">
+            See in action
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features-section {
+    position: relative;
+    background: var(--gradient-dark);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .section-badge {
+    margin-bottom: var(--space-lg);
+  }
+
+  .section-title {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    margin: 0 0 var(--space-md);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURES GRID */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-xl);
+  }
+
+  .feature-card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-base);
+  }
+
+  .feature-card:hover {
+    border-color: var(--color-border-primary);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .feature-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURE ICON */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    padding: var(--space-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-lg);
+    color: var(--color-accent-primary);
+    margin-bottom: var(--space-lg);
+    transition: all var(--transition-base);
+  }
+
+  .feature-card:hover .feature-icon {
+    background: rgba(239, 68, 68, 0.2);
+    box-shadow: var(--shadow-glow-primary);
+    transform: scale(1.1);
+  }
+
+  .feature-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* FEATURE CONTENT */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .feature-header {
+    margin-bottom: var(--space-md);
+  }
+
+  .feature-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-xs);
+  }
+
+  .feature-subtitle {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    margin: 0;
+  }
+
+  .feature-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-lg);
+  }
+
+  .feature-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .feature-link:hover {
+    color: var(--color-accent-secondary);
+    gap: var(--space-sm);
+  }
+
+  .feature-link:focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .feature-link svg {
+    transition: transform var(--transition-base);
+  }
+
+  .feature-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (max-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-lg);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: var(--text-4xl);
+    }
+
+    .section-subtitle {
+      font-size: var(--text-lg);
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .feature-card {
+      padding: var(--space-lg);
+    }
+
+    .feature-title {
+      font-size: var(--text-xl);
+    }
+
+    .feature-description {
+      font-size: var(--text-sm);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* ANIMATIONS */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .feature-card {
+      animation: slideInUp 0.6s ease-out backwards;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+    .feature-card:nth-child(7) { animation-delay: 0.7s; }
+  }
+</style>

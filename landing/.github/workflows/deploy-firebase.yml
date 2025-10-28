@@ -1,0 +1,48 @@
+name: Deploy Landing Page to Firebase
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'landing/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: landing/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./landing
+        run: npm ci
+
+      - name: Build
+        working-directory: ./landing
+        run: npm run build
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_VERTICE_MAXIMUS }}'
+          channelId: live
+          projectId: vertice-maximus
+          target: vertice-maximus
+          entryPoint: ./landing
+
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Landing page deployed successfully!"
+          echo "🌐 URL: https://vertice-maximus.com"

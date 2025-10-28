@@ -4,19 +4,20 @@ from __future__ import annotations
 
 import asyncio
 import base64
+from dataclasses import dataclass
+from datetime import datetime
 import json
 import logging
 import secrets
 import time
-from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
+from aiokafka import AIOKafkaProducer
 import asyncpg
 import httpx
-from aiokafka import AIOKafkaProducer
 
-from ..config import TegumentarSettings, get_settings
+from ..config import get_settings, TegumentarSettings
+from ..lymphnode import LymphnodeAPI
 from ..metrics import (
     record_antigen_capture,
     record_lymphnode_validation,
@@ -25,7 +26,6 @@ from ..metrics import (
 from .deep_inspector import InspectionResult
 from .ml.feature_extractor import FeatureExtractor
 from .stateful_inspector import FlowObservation
-from ..lymphnode import LymphnodeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,9 @@ class LangerhansCell:
 
     async def startup(self) -> None:
         if self._pool is None:
-            self._pool = await asyncpg.create_pool(self._settings.postgres_dsn, min_size=2, max_size=5)
+            self._pool = await asyncpg.create_pool(
+                self._settings.postgres_dsn, min_size=2, max_size=5
+            )
             await self._initialise_schema()
         if self._producer is None:
             self._producer = AIOKafkaProducer(
@@ -77,7 +79,9 @@ class LangerhansCell:
         payload: bytes,
     ) -> AntigenRecord:
         if inspection.anomaly_score is None:
-            raise ValueError("Inspection must contain anomaly score to capture antigen.")
+            raise ValueError(
+                "Inspection must contain anomaly score to capture antigen."
+            )
         antigen_id = secrets.token_hex(8)
         preview = base64.b64encode(payload[:512]).decode("ascii")
         record = AntigenRecord(
@@ -145,7 +149,9 @@ class LangerhansCell:
         else:
             logger.warning("Linfonodo não confirmou ameaça %s", record.antigen_id)
 
-        logger.info("Captured antigen %s score=%.3f", antigen_id, inspection.anomaly_score)
+        logger.info(
+            "Captured antigen %s score=%.3f", antigen_id, inspection.anomaly_score
+        )
         return record
 
     async def _store(self, record: AntigenRecord) -> None:

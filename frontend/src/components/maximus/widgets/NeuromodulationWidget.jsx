@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * NEUROMODULATION WIDGET - Digital Neurotransmitters
@@ -29,7 +30,7 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:8001/stats');
+        const response = await fetch(API_ENDPOINTS.stats);
         if (response.ok) {
           const data = await response.json();
           setModulators({
@@ -55,7 +56,7 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch('http://localhost:8001/history?limit=50');
+        const response = await fetch(`${API_ENDPOINTS.history}?limit=50`);
         if (response.ok) {
           const data = await response.json();
           setHistory(data.records || []);
@@ -83,7 +84,7 @@ export const NeuromodulationWidget = ({ systemHealth: _systemHealth }) => {
 
   const resetModulator = async (modulatorName) => {
     try {
-      const response = await fetch('http://localhost:8001/reset', {
+      const response = await fetch(API_ENDPOINTS.reset, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ modulator: modulatorName })

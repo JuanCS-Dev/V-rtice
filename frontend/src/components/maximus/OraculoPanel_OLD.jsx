@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * ORÁCULO PANEL - Sentinela de Threat Intelligence (Adaptive Immunity Phase 1)
@@ -53,7 +54,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
   // === DATA FETCHING ===
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/stats');
+      const response = await fetch(`${API_ENDPOINTS.oraculo}/stats');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') {
@@ -67,7 +68,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchFeedsHealth = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/feeds/health');
+      const response = await fetch(`${API_ENDPOINTS.oraculo}/feeds/health');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') {
@@ -81,7 +82,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const fetchAPVs = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/apvs?limit=20');
+      const response = await fetch(`${API_ENDPOINTS.oraculo}/apvs?limit=20');
       if (response.ok) {
         const data = await response.json();
         if (data.status === 'success') {
@@ -118,7 +119,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
     }));
 
     try {
-      const response = await fetch('http://localhost:8026/api/v1/oraculo/scan', {
+      const response = await fetch(`${API_ENDPOINTS.oraculo}/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scanConfig)
@@ -147,7 +148,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
 
   const forwardAPVToEureka = async (apvId) => {
     try {
-      const response = await fetch(`http://localhost:8026/api/v1/oraculo/apv/${apvId}/forward`, {
+      const response = await fetch(`${API_ENDPOINTS.oraculo}/apv/${apvId}/forward`, {
         method: 'POST'
       });
 

@@ -9,9 +9,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/api';
 
-const NARRATIVE_FILTER_API = import.meta.env.VITE_NARRATIVE_FILTER_API || 'http://localhost:8090';
-const VERDICT_ENGINE_API = import.meta.env.VITE_VERDICT_ENGINE_API || 'http://localhost:8091';
+const NARRATIVE_FILTER_API = API_ENDPOINTS.narrativeFilter;
+const VERDICT_ENGINE_API = API_ENDPOINTS.verdictEngine;
 const POLL_INTERVAL = 5000; // 5 seconds
 
 export const useCockpitMetrics = () => {

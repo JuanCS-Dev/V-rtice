@@ -9,7 +9,7 @@ import structlog
 import health_api
 from audit_repository import AuditRepository
 from c2l_executor import C2LCommandExecutor
-from backend.services.command_bus_service.config import settings
+from config import settings
 from kill_switch import KillSwitch
 from nats_publisher import NATSPublisher
 from nats_subscriber import NATSSubscriber

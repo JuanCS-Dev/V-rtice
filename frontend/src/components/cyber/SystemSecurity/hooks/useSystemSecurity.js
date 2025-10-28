@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
 
-const API_BASE = 'http://localhost:8000';
+import { API_ENDPOINTS } from '@/config/api';
 
 const ENDPOINTS = [
-  { endpoint: '/cyber/port-analysis', key: 'portAnalysis' },
-  { endpoint: '/cyber/file-integrity', key: 'fileIntegrity' },
-  { endpoint: '/cyber/process-analysis', key: 'processAnalysis' },
-  { endpoint: '/cyber/security-config', key: 'securityConfig' },
-  { endpoint: '/cyber/security-logs', key: 'securityLogs' }
+  { endpoint: `${API_ENDPOINTS.cyber}/port-analysis`, key: 'portAnalysis' },
+  { endpoint: `${API_ENDPOINTS.cyber}/file-integrity`, key: 'fileIntegrity' },
+  { endpoint: `${API_ENDPOINTS.cyber}/process-analysis`, key: 'processAnalysis' },
+  { endpoint: `${API_ENDPOINTS.cyber}/security-config`, key: 'securityConfig' },
+  { endpoint: `${API_ENDPOINTS.cyber}/security-logs`, key: 'securityLogs' }
 ];
 
 export const useSystemSecurity = () => {
@@ -29,7 +29,7 @@ export const useSystemSecurity = () => {
   const fetchSecurityData = useCallback(async (endpoint, key) => {
     setLoading(prev => ({ ...prev, [key]: true }));
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`);
+      const response = await fetch(endpoint);
       const data = await response.json();
 
       if (data.success) {

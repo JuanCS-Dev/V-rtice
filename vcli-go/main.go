@@ -8,4 +8,4 @@
 // This file just provides the build entry point.
 package main
 
-// main function is in cmd/root.go Execute()
+// main function is in cmd/root.go

@@ -181,7 +181,7 @@ describe('useDefensiveMetrics Hook', () => {
     });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8001/health');
+      expect(global.fetch).toHaveBeenCalledWith('http://34.148.161.131:8000/health');
     });
   });
 });

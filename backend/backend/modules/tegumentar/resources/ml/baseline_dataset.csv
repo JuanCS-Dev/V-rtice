@@ -1,0 +1,2 @@
+payload_length,entropy,printable_ratio,digit_ratio,average_byte_value,tcp_flag_score,inter_packet_interval
+123,4.56,0.78,0.12,67.89,1.5,0.23

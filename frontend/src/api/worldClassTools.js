@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 import logger from '@/utils/logger';
 /**
  * World-Class Tools API Client
@@ -6,7 +7,7 @@ import logger from '@/utils/logger';
  * Backend: ai_agent_service (porta 8017)
  */
 
-const AI_AGENT_BASE_URL = 'http://localhost:8017';
+const AI_AGENT_BASE_URL = API_BASE_URL;
 
 /**
  * Executa uma World-Class Tool
@@ -190,7 +191,7 @@ export const scanContainer = async (image, options = {}) => {
 // OSINT TOOLS (5) - World-Class Suite
 // ============================================
 
-const OSINT_SERVICE_URL = 'http://localhost:8036';
+const OSINT_SERVICE_URL = API_BASE_URL;
 
 /**
  * Social Media Deep Dive
