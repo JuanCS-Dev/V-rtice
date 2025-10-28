@@ -234,6 +234,12 @@ const socialIcons = {
           100% Open Source
         </span>
       </div>
+
+      <!-- Easter Egg para Penélope -->
+      <div class="easter-egg">
+        <span class="cockroach">🪳</span>
+        <span class="easter-egg-text">para Penélope</span>
+      </div>
     </div>
   </div>
 </footer>
@@ -369,6 +375,7 @@ const socialIcons = {
   /* ═══════════════════════════════════════════════════════════ */
 
   .footer-bottom {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -407,6 +414,42 @@ const socialIcons = {
 
   .legal-separator {
     color: var(--color-text-muted);
+  }
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* EASTER EGG (Penélope) */
+  /* ═══════════════════════════════════════════════════════════ */
+
+  .easter-egg {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.15;
+    transition: opacity 0.3s ease;
+  }
+
+  .easter-egg:hover {
+    opacity: 1;
+  }
+
+  .cockroach {
+    font-size: 12px;
+    animation: wiggle 2s ease-in-out infinite;
+  }
+
+  .easter-egg-text {
+    font-size: 8px;
+    color: var(--color-text-tertiary);
+    font-style: italic;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
   }
 
   /* ═══════════════════════════════════════════════════════════ */
