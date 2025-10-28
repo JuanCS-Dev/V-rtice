@@ -7,13 +7,14 @@
  * Demonstração das capacidades do organismo vivo.
  * Não são "features" - são funções orgânicas demonstradas.
  *
- * 6 Capacidades Vitais:
+ * 7 Capacidades Vitais:
  * 1. The Brain (Consciousness) - Decisões éticas autônomas
  * 2. Adaptive Immunity - Células T/B aprendendo ameaças
  * 3. Sensory Network - Olhos/ouvidos no mundo digital
  * 4. Offensive Response - Contra-ataque constitucional
  * 5. Autonomic Nervous System - Homeostase automatizada
- * 6. Human Collaboration - Simbiose humano-IA
+ * 6. The Voice (NEUROSHELL) - Comando em linguagem natural
+ * 7. Human Collaboration - Simbiose humano-IA
  *
  * Design: Grid 2x3 responsivo, narrativa orgânica, animações sutis
  */
@@ -60,6 +61,14 @@ const features = [
     link: '#living-organism'
   },
   {
+    id: 'neuroshell',
+    title: 'The Voice',
+    subtitle: 'NEUROSHELL - Neural Command Interface',
+    description: 'Command the entire organism in natural language. NLP parser as competent as Claude Code. No cryptic commands—just speak your intent. Crisis response at the speed of thought.',
+    icon: 'terminal',
+    link: '#neuroshell'
+  },
+  {
     id: 'human-symbiosis',
     title: 'Human Symbiosis',
     subtitle: 'Collaborative Intelligence',
@@ -80,6 +89,8 @@ const icons = {
   'sword-shield': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/><path d="m14.5 9-5 5M9.5 9l5 5"/></svg>`,
 
   loop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>`,
+
+  terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
 
   handshake: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 12.5V10a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v1.4M14 11V9a2 2 0 1 0-4 0v2M10 10.5V10a2 2 0 1 0-4 0v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.4M18 14h0M6 15l2-2"/></svg>`
 };
@@ -347,5 +358,6 @@ const icons = {
     .feature-card:nth-child(4) { animation-delay: 0.4s; }
     .feature-card:nth-child(5) { animation-delay: 0.5s; }
     .feature-card:nth-child(6) { animation-delay: 0.6s; }
+    .feature-card:nth-child(7) { animation-delay: 0.7s; }
   }
 </style>
