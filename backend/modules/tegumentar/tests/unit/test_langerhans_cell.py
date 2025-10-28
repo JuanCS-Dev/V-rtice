@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import secrets
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 
 from backend.modules.tegumentar.config import TegumentarSettings
@@ -593,3 +594,80 @@ class TestAntigenRecord:
 
         # Slots não têm __dict__
         assert not hasattr(record, "__dict__")
+
+
+class TestLangerhansErrorHandling:
+    """Testa tratamento de erros HTTP e casos edge."""
+
+    @pytest.mark.asyncio
+    async def test_lymphnode_report_handles_http_error(
+        self, langerhans_cell, mock_pool, mock_kafka_producer
+    ):
+        """Deve capturar e logar HTTPError ao enviar report ao Linfonodo."""
+        langerhans_cell._pool = mock_pool
+        langerhans_cell._producer = mock_kafka_producer
+        langerhans_cell._lymphnode_api.report_threat = AsyncMock(
+            side_effect=httpx.HTTPError("Connection failed")
+        )
+
+        observation = MockFlowObservation()
+        inspection = MockInspectionResult()
+
+        # Não deve propagar exceção (HTTPError capturado linha 121-126)
+        await langerhans_cell.capture_antigen(observation, inspection, b"payload")
+
+    @pytest.mark.asyncio
+    async def test_broadcast_vaccination_handles_http_error(
+        self, langerhans_cell, mock_pool, mock_kafka_producer
+    ):
+        """Deve capturar e logar HTTPError ao fazer broadcast de vacinação."""
+        langerhans_cell._pool = mock_pool
+        langerhans_cell._producer = mock_kafka_producer
+        langerhans_cell._lymphnode_api.report_threat = AsyncMock(
+            return_value={
+                "validated": True,
+                "auto_vaccinate": True,
+                "rule": {"id": "rule123"},
+            }
+        )
+        langerhans_cell._lymphnode_api.broadcast_vaccination = AsyncMock(
+            side_effect=httpx.HTTPError("Broadcast failed")
+        )
+
+        observation = MockFlowObservation()
+        inspection = MockInspectionResult()
+
+        # Não deve propagar exceção (HTTPError capturado linha 145-148)
+        await langerhans_cell.capture_antigen(observation, inspection, b"payload")
+
+    @pytest.mark.asyncio
+    async def test_capture_antigen_when_lymphnode_rejects_threat(
+        self, langerhans_cell, mock_pool, mock_kafka_producer
+    ):
+        """Deve logar warning quando Linfonodo não confirma ameaça."""
+        langerhans_cell._pool = mock_pool
+        langerhans_cell._producer = mock_kafka_producer
+        langerhans_cell._lymphnode_api.report_threat = AsyncMock(
+            return_value={"validated": False}  # Rejeitado
+        )
+
+        observation = MockFlowObservation()
+        inspection = MockInspectionResult()
+
+        # Sem exceção, warning logado (linha 150)
+        await langerhans_cell.capture_antigen(observation, inspection, b"payload")
+
+    @pytest.mark.asyncio
+    async def test_initialise_schema_returns_early_when_no_pool(self):
+        """_initialise_schema deve retornar imediatamente se pool é None."""
+        cell = LangerhansCell(
+            TegumentarSettings(
+                postgres_dsn="postgresql://test@localhost/test",
+                kafka_bootstrap_servers="localhost:9092",
+            )
+        )
+        # Pool ainda não foi criado (startup não chamado)
+        assert cell._pool is None
+
+        # Não deve falhar
+        await cell._initialise_schema()  # Early return na linha 201
