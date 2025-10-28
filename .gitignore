@@ -1,9 +1,35 @@
 # Vértice - Production .gitignore
 
-# Archives (backups, logs)
-.archive/
+# ═══════════════════════════════════════════════════════════════════════════
+# AI ASSISTANTS & TOOLS
+# ═══════════════════════════════════════════════════════════════════════════
 
-# Python
+# Claude Code
+.claude/
+!.claude/commands/
+!.claude/README.md
+
+# Gemini
+.gemini/
+
+# Other AI assistants
+.cursor/
+.continue/
+.aider/
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ARCHIVES & BACKUPS
+# ═══════════════════════════════════════════════════════════════════════════
+
+.archive/
+*.backup
+*.bak
+*_backup_*
+.migration-backup-*/
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PYTHON
+# ═══════════════════════════════════════════════════════════════════════════
 __pycache__/
 *.py[cod]
 *$py.class
@@ -38,12 +64,17 @@ env/
 ENV/
 .venv
 
-# IDEs
+# ═══════════════════════════════════════════════════════════════════════════
+# IDEs & EDITORS
+# ═══════════════════════════════════════════════════════════════════════════
+
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vscode-server/
+.fleet/
 
 # OS
 .DS_Store
@@ -85,9 +116,16 @@ test-results/
 *.zip
 dist/
 
-# Node (if any)
+# ═══════════════════════════════════════════════════════════════════════════
+# NODE.JS & NPM
+# ═══════════════════════════════════════════════════════════════════════════
+
 node_modules/
-package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
 
 # Large model files
 *.onnx
@@ -97,3 +135,60 @@ models/downloads/
 
 # Generated files
 *.generated.*
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DEPLOYMENT & CLOUD
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Firebase
+.firebase/
+firebase-debug.log
+.firebaserc
+
+# GCP
+.gcloud/
+.config/gcloud/
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FRONTEND SPECIFIC
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Astro
+.astro/
+dist/
+
+# React/Vite
+.vite/
+*.local
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MISCELLANEOUS
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Claude Code workspace (keep commands)
+.agents-workspace/
+
+# OS specific
+*.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.Trash-*/
+.nfs*
