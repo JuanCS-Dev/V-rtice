@@ -29,8 +29,8 @@ class TegumentarModule:
 
     async def startup(self, interface: str) -> None:
         await self.epiderme.startup(interface)
-        # Derme layer disabled - requires PostgreSQL infrastructure (no PostgreSQL available)
-        # await self.derme.startup()
+        # Derme layer enabled - PostgreSQL infrastructure provisioned
+        await self.derme.startup()
         self._throttler = AdaptiveThrottler(interface)
 
     async def shutdown(self) -> None:
@@ -39,7 +39,7 @@ class TegumentarModule:
     async def controller_shutdown(self) -> None:
         await self.permeability.shutdown()
         await self.wound_healing.shutdown()
-        # await self.derme.shutdown()  # Disabled
+        await self.derme.shutdown()
         await self.epiderme.shutdown()
 
     async def process_packet(self, observation: FlowObservation, payload: bytes) -> InspectionResult:

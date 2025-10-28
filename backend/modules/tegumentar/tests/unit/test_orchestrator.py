@@ -145,10 +145,10 @@ class TestStartupShutdown:
     """Testa lifecycle do módulo."""
 
     @pytest.mark.asyncio
-    async def test_startup_calls_epiderme_startup(self, settings, mock_epiderme):
+    async def test_startup_calls_epiderme_startup(self, settings, mock_epiderme, mock_derme):
         """startup() deve inicializar Epiderme com interface."""
         with patch("backend.modules.tegumentar.orchestrator.EpidermeLayer", return_value=mock_epiderme), \
-             patch("backend.modules.tegumentar.orchestrator.DermeLayer"), \
+             patch("backend.modules.tegumentar.orchestrator.DermeLayer", return_value=mock_derme), \
              patch("backend.modules.tegumentar.orchestrator.PermeabilityController"), \
              patch("backend.modules.tegumentar.orchestrator.WoundHealingOrchestrator"), \
              patch("backend.modules.tegumentar.orchestrator.AdaptiveThrottler"):
@@ -158,8 +158,8 @@ class TestStartupShutdown:
             mock_epiderme.startup.assert_called_once_with("eth0")
 
     @pytest.mark.asyncio
-    async def test_startup_does_not_call_derme_startup(self, settings, mock_derme):
-        """startup() NÃO deve inicializar Derme (disabled)."""
+    async def test_startup_calls_derme_startup(self, settings, mock_derme):
+        """startup() deve inicializar Derme layer."""
         mock_epiderme = MagicMock()
         mock_epiderme.startup = AsyncMock()
 
@@ -171,18 +171,18 @@ class TestStartupShutdown:
             module = TegumentarModule(settings)
             await module.startup("eth0")
 
-            # Derme disabled
-            mock_derme.startup.assert_not_called()
+            # Derme agora está ENABLED
+            mock_derme.startup.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_startup_creates_adaptive_throttler(self, settings):
+    async def test_startup_creates_adaptive_throttler(self, settings, mock_derme):
         """startup() deve criar AdaptiveThrottler."""
         mock_throttler = MagicMock()
         mock_epiderme = MagicMock()
         mock_epiderme.startup = AsyncMock()
 
         with patch("backend.modules.tegumentar.orchestrator.EpidermeLayer", return_value=mock_epiderme), \
-             patch("backend.modules.tegumentar.orchestrator.DermeLayer"), \
+             patch("backend.modules.tegumentar.orchestrator.DermeLayer", return_value=mock_derme), \
              patch("backend.modules.tegumentar.orchestrator.PermeabilityController"), \
              patch("backend.modules.tegumentar.orchestrator.WoundHealingOrchestrator"), \
              patch("backend.modules.tegumentar.orchestrator.AdaptiveThrottler", return_value=mock_throttler) as mock_class:
@@ -207,10 +207,10 @@ class TestStartupShutdown:
             module.controller_shutdown.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_controller_shutdown_stops_all_layers(self, settings, mock_epiderme, mock_permeability, mock_wound_healing):
+    async def test_controller_shutdown_stops_all_layers(self, settings, mock_epiderme, mock_derme, mock_permeability, mock_wound_healing):
         """controller_shutdown() deve parar todas as camadas."""
         with patch("backend.modules.tegumentar.orchestrator.EpidermeLayer", return_value=mock_epiderme), \
-             patch("backend.modules.tegumentar.orchestrator.DermeLayer"), \
+             patch("backend.modules.tegumentar.orchestrator.DermeLayer", return_value=mock_derme), \
              patch("backend.modules.tegumentar.orchestrator.PermeabilityController", return_value=mock_permeability), \
              patch("backend.modules.tegumentar.orchestrator.WoundHealingOrchestrator", return_value=mock_wound_healing):
             module = TegumentarModule(settings)
@@ -218,11 +218,12 @@ class TestStartupShutdown:
 
             mock_permeability.shutdown.assert_called_once()
             mock_wound_healing.shutdown.assert_called_once()
+            mock_derme.shutdown.assert_called_once()
             mock_epiderme.shutdown.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_controller_shutdown_does_not_stop_derme(self, settings, mock_derme):
-        """controller_shutdown() NÃO deve parar Derme (disabled)."""
+    async def test_controller_shutdown_stops_derme(self, settings, mock_derme):
+        """controller_shutdown() deve parar Derme layer."""
         mock_epiderme = MagicMock()
         mock_epiderme.shutdown = AsyncMock()
         mock_permeability = MagicMock()
@@ -237,8 +238,8 @@ class TestStartupShutdown:
             module = TegumentarModule(settings)
             await module.controller_shutdown()
 
-            # Derme disabled
-            mock_derme.shutdown.assert_not_called()
+            # Derme agora está ENABLED
+            mock_derme.shutdown.assert_called_once()
 
 
 class TestProcessPacket:
