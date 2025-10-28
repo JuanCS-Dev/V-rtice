@@ -1,6 +1,6 @@
 import logger from '@/utils/logger';
 // Conecta-se ao backend real rodando no Docker
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = API_BASE_URL;
 
 export const consultarPlacaApi = async (placa) => {
   try {

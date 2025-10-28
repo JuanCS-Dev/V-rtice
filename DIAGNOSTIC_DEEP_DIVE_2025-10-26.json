@@ -1,0 +1,163 @@
+{
+  "timestamp": "2025-10-26T07:22:17.094591",
+  "version": "1.0",
+  "infrastructure": {
+    "frontend": {
+      "platform": "Cloud Run",
+      "url": "https://vertice-frontend-172846394274.us-east1.run.app",
+      "status": "OPERATIONAL",
+      "issues": []
+    },
+    "backend": {
+      "platform": "GKE (us-east1)",
+      "cluster": "vertice-us-cluster",
+      "loadbalancer_ip": "34.148.161.131:8000",
+      "status": "OPERATIONAL",
+      "total_pods": 99,
+      "running_pods": 99,
+      "critical_services": {
+        "api_gateway": {
+          "status": "Running",
+          "replicas": 2,
+          "airgap": "CLOSED"
+        },
+        "auth_service": {
+          "status": "Running",
+          "replicas": 2,
+          "airgap": "CLOSED"
+        },
+        "maximus_core": {
+          "status": "Running",
+          "replicas": 2,
+          "airgap": "CLOSED"
+        },
+        "google_osint": {
+          "status": "Running",
+          "replicas": 1,
+          "airgap": "CLOSED"
+        },
+        "osint_service": {
+          "status": "Running",
+          "replicas": 1,
+          "airgap": "CLOSED"
+        }
+      }
+    }
+  },
+  "airgaps_analysis": {
+    "frontend_source": {
+      "total_localhost_hardcoded": 1,
+      "location": "frontend/src/api/orchestrator.js (comment only)",
+      "impact": "ZERO - Only in comment line",
+      "status": "\u2705 CLOSED"
+    },
+    "frontend_endpoints_config": {
+      "fallbacks_to_loadbalancer": true,
+      "all_env_vars_point_to": "34.148.161.131:8000",
+      "status": "\u2705 CLOSED"
+    },
+    "backend_routing": {
+      "api_gateway_mode": "Dynamic Service Registry",
+      "single_entry_point": "34.148.161.131:8000",
+      "internal_routing": "ClusterIP (private)",
+      "status": "\u2705 CLOSED"
+    }
+  },
+  "integration_health": {
+    "frontend_to_backend": {
+      "connectivity": "OPERATIONAL",
+      "latency_ms": 301,
+      "http_status": 200,
+      "cors": "OK"
+    },
+    "backend_internal": {
+      "service_mesh": "K8s ClusterIP",
+      "dns_resolution": "OK",
+      "service_discovery": "Service Registry (RSS)"
+    }
+  },
+  "critical_issues": {
+    "crashloop_pods": [
+      {
+        "name": "hitl-patch-service",
+        "reason": "Database connection failure (PostgreSQL)",
+        "exit_code": 3,
+        "restart_count": 178,
+        "impact": "HITL Console Dashboard n\u00e3o funcional",
+        "fix_required": "Database connectivity repair"
+      },
+      {
+        "name": "agent-communication",
+        "reason": "CrashLoopBackOff",
+        "impact": "Inter-agent communication degraded"
+      },
+      {
+        "name": "command-bus-service",
+        "reason": "CrashLoopBackOff",
+        "impact": "Command routing degraded"
+      }
+    ],
+    "total_crash_pods": 14,
+    "percentage_operational": 85.9
+  },
+  "dashboards_status": {
+    "maximus": {
+      "status": "\u2705 FUNCTIONAL",
+      "services": 8,
+      "all_running": true
+    },
+    "osint": {
+      "status": "\u2705 FUNCTIONAL",
+      "services": 4,
+      "all_running": true
+    },
+    "admin_panel": {
+      "status": "\u2705 FUNCTIONAL",
+      "services": 2,
+      "all_running": true
+    },
+    "consciousness": {
+      "status": "\u2705 FUNCTIONAL",
+      "services": 1,
+      "all_running": true
+    },
+    "wargaming": {
+      "status": "\u2705 FUNCTIONAL",
+      "services": 1,
+      "all_running": true
+    },
+    "hitl_console": {
+      "status": "\u274c DOWN",
+      "reason": "hitl-patch-service CrashLoop",
+      "fix": "Database repair required"
+    },
+    "defensive": {
+      "status": "\u26a0\ufe0f PARTIAL",
+      "reason": "Some services in CrashLoop"
+    }
+  },
+  "recommendations": {
+    "immediate": [
+      "Fix PostgreSQL connectivity for hitl-patch-service",
+      "Investigate command-bus-service CrashLoop",
+      "Investigate agent-communication CrashLoop"
+    ],
+    "short_term": [
+      "Remove comment with localhost from orchestrator.js (cleanup)",
+      "Add monitoring alerts for CrashLoop pods",
+      "Implement automated health checks for critical dashboards"
+    ],
+    "long_term": [
+      "Migrate all services to Service Registry discovery",
+      "Implement circuit breakers for failing pods",
+      "Add centralized logging for crashloop analysis"
+    ]
+  },
+  "health_score": {
+    "overall": 87,
+    "infrastructure": 90,
+    "airgaps": 99,
+    "integration": 85,
+    "services_availability": 86
+  }
+}

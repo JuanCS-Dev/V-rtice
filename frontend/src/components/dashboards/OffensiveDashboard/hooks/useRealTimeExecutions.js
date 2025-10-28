@@ -17,7 +17,8 @@ import logger from '@/utils/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '../../../../hooks/useWebSocket';
 
-const GATEWAY_WS = 'ws://localhost:8037/ws/executions';
+import { WS_ENDPOINTS } from '../../../../config/api';
+const GATEWAY_WS = WS_ENDPOINTS.executions;
 
 export const useRealTimeExecutions = () => {
   const [executions, setExecutions] = useState([]);

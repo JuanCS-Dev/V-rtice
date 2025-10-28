@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎭 MAXIMUS ORCHESTRATOR API CLIENT
@@ -38,7 +39,7 @@ const ORCHESTRATOR_API_BASE =
   import.meta.env.VITE_ORCHESTRATOR_API ||
   (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
     ? `${window.location.protocol}//${window.location.hostname}:8125`
-    : 'http://localhost:8125');
+    : API_BASE_URL);
 
 const DEFAULT_TIMEOUT = 15000; // 15 seconds (workflows can take time)
 const MAX_RETRIES = 3;

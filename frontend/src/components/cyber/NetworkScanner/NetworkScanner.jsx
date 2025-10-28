@@ -1,10 +1,26 @@
 /**
- * Network Scanner Widget - Offensive Tool
- * 
+ * NETWORK SCANNER - Network Reconnaissance Tool
+ *
  * Advanced network reconnaissance
  * Port scanning, service detection, vulnerability assessment
- * 
  * Philosophy: Ethical boundaries enforced
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="network-scanner"
+ * - <header> for tool header with risk indicators
+ * - <section> for form (scan configuration)
+ * - <section> for results display
+ * - <footer> for status bar
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="network-scanner"
+ * - Monitor scan status via data-maximus-status
+ * - Access scan configuration via semantic form structure
+ * - Interpret results via semantic sections
+ *
+ * i18n: react-i18next
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -93,17 +109,29 @@ export const NetworkScanner = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>🔍 {t('offensive.scanner.title', 'Network Scanner')}</h2>
+    <article
+      className={styles.container}
+      role="article"
+      aria-labelledby="network-scanner-title"
+      data-maximus-tool="network-scanner"
+      data-maximus-category="offensive"
+      data-maximus-status={loading ? 'scanning' : 'ready'}>
+      <header
+        className={styles.header}
+        data-maximus-section="tool-header">
+        <h2 id="network-scanner-title"><span aria-hidden="true">🔍</span> {t('offensive.scanner.title', 'Network Scanner')}</h2>
         <p className={styles.subtitle}>
           {t('offensive.scanner.subtitle', 'Advanced port scanning and service detection')}
         </p>
-      </div>
+      </header>
 
       {/* Tool Info */}
       {toolInfo && (
-        <div className={styles.toolInfo}>
+        <section
+          className={styles.toolInfo}
+          role="region"
+          aria-label="Tool information"
+          data-maximus-section="tool-info">
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Category:</span>
             <span className={styles.infoBadge}>{toolInfo.category}</span>
@@ -114,11 +142,15 @@ export const NetworkScanner = () => {
               {toolInfo.risk_level}
             </span>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Scan Form */}
-      <form onSubmit={handleScan} className={styles.form}>
+      <section
+        role="region"
+        aria-label="Scan configuration"
+        data-maximus-section="form">
+        <form onSubmit={handleScan} className={styles.form}>
         <div className={styles.formGroup}>
           <label htmlFor="target">Target (IP or Hostname)</label>
           <input
@@ -203,6 +235,7 @@ export const NetworkScanner = () => {
           {loading ? 'Scanning...' : 'Launch Scan'}
         </button>
       </form>
+      </section>
 
       {/* Error */}
       {error && (
@@ -214,7 +247,11 @@ export const NetworkScanner = () => {
 
       {/* Results */}
       {result && (
-        <div className={styles.result}>
+        <section
+          className={styles.result}
+          role="region"
+          aria-label="Scan results"
+          data-maximus-section="results">
           <div className={styles.resultHeader}>
             <h3>{result.success ? '✅ Scan Complete' : '❌ Scan Failed'}</h3>
             <div className={styles.timing}>
@@ -273,9 +310,9 @@ export const NetworkScanner = () => {
               Scanned at: {new Date(result.timestamp).toLocaleString()}
             </div>
           </div>
-        </div>
+        </section>
       )}
-    </div>
+    </article>
   );
 };
 

@@ -1,0 +1,152 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# C2 ORCHESTRATION SERVICE - KUBERNETES DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════════════════
+# FLORESCIMENTO - Ethical C2 operations in zero-trust architecture
+# Para Honra e Glória de JESUS CRISTO
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: c2-orchestration-service
+  namespace: vertice
+  labels:
+    app: c2-orchestration-service
+    tier: offensive-arsenal
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: c2-orchestration-service
+  template:
+    metadata:
+      labels:
+        app: c2-orchestration-service
+        tier: offensive-arsenal
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8035"
+        prometheus.io/path: "/metrics"
+        policy.cilium.io/proxy-visibility: "<Ingress/8035/TCP/HTTP>"
+    spec:
+      serviceAccountName: c2-orchestration-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: c2-orchestration-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/c2-orchestration-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8035
+          protocol: TCP
+
+        env:
+        - name: SERVICE_NAME
+          value: "c2-orchestration-service"
+        - name: SERVICE_VERSION
+          value: "1.0.0"
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8035
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8035
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: c2-orchestration-service
+  namespace: vertice
+  labels:
+    app: c2-orchestration-service
+    tier: offensive-arsenal
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8035
+    targetPort: 8035
+    protocol: TCP
+  selector:
+    app: c2-orchestration-service
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: c2-orchestration-service
+  namespace: vertice
+  labels:
+    app: c2-orchestration-service
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: c2-orchestration-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: c2-orchestration-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8035
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53

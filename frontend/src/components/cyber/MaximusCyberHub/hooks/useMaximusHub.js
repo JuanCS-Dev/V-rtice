@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import logger from '@/utils/logger';
+import { API_ENDPOINTS } from '@/config/api';
 
 const INITIAL_SERVICES = {
   ip_intelligence: { name: 'IP Intelligence', status: 'ready', icon: '🌐', priority: 1 },
@@ -35,7 +36,7 @@ export const useMaximusHub = () => {
   const pollInvestigationStatus = async (investigationId) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:8016/api/aurora/investigation/${investigationId}`);
+        const response = await fetch(`${API_ENDPOINTS.aurora}/investigation/${investigationId}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch investigation status');
@@ -132,7 +133,7 @@ export const useMaximusHub = () => {
     setResults({});
 
     try {
-      const response = await fetch('http://localhost:8016/api/aurora/investigate', {
+      const response = await fetch(`${API_ENDPOINTS.aurora}/investigate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

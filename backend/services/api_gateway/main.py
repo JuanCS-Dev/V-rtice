@@ -24,6 +24,7 @@ import redis.asyncio as redis
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import APIKeyHeader
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketDisconnect
 
 # Import dynamic router
@@ -47,6 +48,21 @@ app = FastAPI(
     version="2.0.0",
     description="API Gateway with Service Registry integration"
 )
+
+# CORS Configuration - Allow Cloud Run Frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Local development
+        "http://localhost:3000",  # Local development alternative
+        "https://vertice-frontend-172846394274.us-east1.run.app",  # Cloud Run production
+        "https://vertice-maximus.com",  # Future custom domain
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+logger.info("✅ CORS middleware enabled for Cloud Run frontend")
 
 # Add case transformation middleware (snake_case ↔ camelCase)
 # DISABLED: middleware file missing
@@ -81,6 +97,29 @@ VISUAL_CORTEX_SERVICE_URL = os.getenv("VISUAL_CORTEX_SERVICE_URL", "http://local
 AUDITORY_CORTEX_SERVICE_URL = os.getenv("AUDITORY_CORTEX_SERVICE_URL", "http://localhost:8104")
 EUREKA_SERVICE_URL = os.getenv("EUREKA_SERVICE_URL", "http://localhost:8024")
 ORACULO_SERVICE_URL = os.getenv("ORACULO_SERVICE_URL", "http://localhost:8026")
+NETWORK_RECON_SERVICE_URL = os.getenv("NETWORK_RECON_SERVICE_URL", "http://network-recon-service:8032")
+VULN_INTEL_SERVICE_URL = os.getenv("VULN_INTEL_SERVICE_URL", "http://vuln-intel-service:8033")
+WEB_ATTACK_SERVICE_URL = os.getenv("WEB_ATTACK_SERVICE_URL", "http://web-attack-service:8034")
+C2_ORCHESTRATION_SERVICE_URL = os.getenv("C2_ORCHESTRATION_SERVICE_URL", "http://c2-orchestration-service:8035")
+BAS_SERVICE_URL = os.getenv("BAS_SERVICE_URL", "http://bas-service:8036")
+BEHAVIORAL_ANALYZER_SERVICE_URL = os.getenv("BEHAVIORAL_ANALYZER_SERVICE_URL", "http://behavioral-analyzer-service:8037")
+TRAFFIC_ANALYZER_SERVICE_URL = os.getenv("TRAFFIC_ANALYZER_SERVICE_URL", "http://traffic-analyzer-service:8038")
+MAV_DETECTION_SERVICE_URL = os.getenv("MAV_DETECTION_SERVICE_URL", "http://mav-detection-service:8039")
+
+# OSINT Services (Grupo D)
+OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint-service:8049")
+DOMAIN_SERVICE_URL = os.getenv("DOMAIN_SERVICE_URL", "http://domain-service:8014")
+IP_INTELLIGENCE_SERVICE_URL = os.getenv("IP_INTELLIGENCE_SERVICE_URL", "http://ip-intelligence-service:8034")
+THREAT_INTEL_SERVICE_URL = os.getenv("THREAT_INTEL_SERVICE_URL", "http://threat-intel-service:8059")
+NMAP_SERVICE_URL = os.getenv("NMAP_SERVICE_URL", "http://nmap-service:8047")
+
+# Consciousness & Reactive Fabric Services (Grupo E)
+REACTIVE_FABRIC_SERVICE_URL = os.getenv("REACTIVE_FABRIC_SERVICE_URL", "http://reactive-fabric-core:8600")
+AI_IMMUNE_SYSTEM_SERVICE_URL = os.getenv("AI_IMMUNE_SYSTEM_SERVICE_URL", "http://ai-immune-system:8073")
+TEGUMENTAR_SERVICE_URL = os.getenv("TEGUMENTAR_SERVICE_URL", "http://tegumentar-service:8085")
+
+# HITL Services (Grupo F)
+HITL_PATCH_SERVICE_URL = os.getenv("HITL_PATCH_SERVICE_URL", "http://hitl-patch-service:8027")
 
 CONSCIOUSNESS_SERVICE_BASE = os.getenv("CONSCIOUSNESS_SERVICE_URL", MAXIMUS_CORE_SERVICE_URL)
 
@@ -342,6 +381,264 @@ async def ip_analyze_adapter(request: Request):
             raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
 
 
+@app.post("/api/ip/analyze-my-ip")
+async def ip_analyze_my_ip_adapter(request: Request):
+    """Adapter: Analyze My IP (client's public IP).
+    Proxies directly to IP Intelligence service /analyze-my-ip endpoint.
+    """
+    try:
+        service_url = await get_service_url("ip_intelligence_service")
+    except ServiceNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {exc}") from exc
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(f"{service_url}/analyze-my-ip")
+            response.raise_for_status()
+            return JSONResponse(content=response.json(), status_code=response.status_code)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {e}")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+# REMOVED: /api/ip/my-ip endpoint - redundant with /api/ip/analyze-my-ip
+# Backend service (ip-intelligence) does not implement /my-ip endpoint
+# Use /api/ip/analyze-my-ip instead which provides full IP analysis
+
+# @app.get("/api/ip/my-ip")
+# async def ip_my_ip_adapter(request: Request):
+#     """Adapter: Get My IP (simple detection without full analysis).
+#     Proxies directly to IP Intelligence service /my-ip endpoint.
+#     """
+#     try:
+#         service_url = await get_service_url("ip_intelligence_service")
+#     except ServiceNotFoundError as exc:
+#         raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {exc}") from exc
+#
+#     async with httpx.AsyncClient(timeout=60.0) as client:
+#         try:
+#             response = await client.get(f"{service_url}/my-ip")
+#             response.raise_for_status()
+#             return JSONResponse(content=response.json(), status_code=response.status_code)
+#         except httpx.RequestError as e:
+#             raise HTTPException(status_code=503, detail=f"IP Intelligence service unavailable: {e}")
+#         except httpx.HTTPStatusError as e:
+#             raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+@app.post("/api/threat-intel/check")
+async def threat_intel_check_adapter(request: Request):
+    """Adapter: Threat Intelligence Check.
+    Translates: gateway format → microservice /query_threat_intel format.
+
+    Frontend sends:
+    {
+        "target": "8.8.8.8",
+        "target_type": "ip"
+    }
+
+    Backend expects:
+    {
+        "indicator": "8.8.8.8",
+        "indicator_type": "ip",
+        "context": {}
+    }
+    """
+    body = await request.json()
+    adapted_body = {
+        "indicator": body.get("target", ""),
+        "indicator_type": body.get("target_type", "auto"),
+        "context": body.get("context", {})
+    }
+    try:
+        service_url = await get_service_url("threat_intel_service")
+    except ServiceNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=f"Threat Intel service unavailable: {exc}") from exc
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(f"{service_url}/query_threat_intel", json=adapted_body)
+            response.raise_for_status()
+            return JSONResponse(content=response.json(), status_code=response.status_code)
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Threat Intel service unavailable: {e}")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+# ============================================================================
+# FRONTEND-COMPATIBLE ROUTES (/api/* prefix)
+# Added to fix air gaps detected in E2E validation
+# ============================================================================
+
+# GRUPO A: MAXIMUS CORE (4 endpoints)
+@app.api_route("/api/maximus/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_maximus_route(path: str, request: Request):
+    """Frontend-compatible route: /api/maximus/* → /core/*"""
+    # Alias: /status → /health (Maximus only has /health endpoint)
+    if path == "status":
+        path = "health"
+    return await _proxy_request(MAXIMUS_CORE_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/eureka/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_eureka_route(path: str, request: Request):
+    """Frontend-compatible route: /api/eureka/* → /eureka/*"""
+    return await _proxy_request(EUREKA_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/oraculo/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_oraculo_route(path: str, request: Request):
+    """Frontend-compatible route: /api/oraculo/* → /oraculo/*"""
+    return await _proxy_request(ORACULO_SERVICE_URL, path, request)
+
+
+# GRUPO B: OFFENSIVE TOOLS (5 endpoints)
+@app.api_route("/api/network-recon/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_network_recon_route(path: str, request: Request):
+    """Frontend-compatible route: /api/network-recon/* → network-recon-service"""
+    return await _proxy_request(NETWORK_RECON_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/bas/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_bas_route(path: str, request: Request):
+    """Frontend-compatible route: /api/bas/* → bas-service"""
+    return await _proxy_request(BAS_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/c2/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_c2_route(path: str, request: Request):
+    """Frontend-compatible route: /api/c2/* → c2-orchestration-service"""
+    return await _proxy_request(C2_ORCHESTRATION_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/web-attack/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_web_attack_route(path: str, request: Request):
+    """Frontend-compatible route: /api/web-attack/* → web-attack-service"""
+    return await _proxy_request(WEB_ATTACK_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/vuln-intel/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_vuln_intel_route(path: str, request: Request):
+    """Frontend-compatible route: /api/vuln-intel/* → vuln-intel-service"""
+    return await _proxy_request(VULN_INTEL_SERVICE_URL, path, request)
+
+
+# GRUPO C: DEFENSIVE TOOLS (3 endpoints)
+@app.api_route("/api/behavioral/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_behavioral_route(path: str, request: Request):
+    """Frontend-compatible route: /api/behavioral/* → behavioral-analyzer-service"""
+    return await _proxy_request(BEHAVIORAL_ANALYZER_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/traffic/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_traffic_route(path: str, request: Request):
+    """Frontend-compatible route: /api/traffic/* → traffic-analyzer-service"""
+    return await _proxy_request(TRAFFIC_ANALYZER_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/mav/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_mav_route(path: str, request: Request):
+    """Frontend-compatible route: /api/mav/* → mav-detection-service"""
+    return await _proxy_request(MAV_DETECTION_SERVICE_URL, path, request)
+
+
+# GRUPO D: OSINT TOOLS (5 endpoints) - Static routing
+@app.api_route("/api/osint/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_osint_route(path: str, request: Request):
+    """Frontend-compatible route: /api/osint/* → osint-service:8049"""
+    return await _proxy_request(OSINT_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/domain/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_domain_route(path: str, request: Request):
+    """Frontend-compatible route: /api/domain/* → domain-service:8014"""
+    return await _proxy_request(DOMAIN_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/ip/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_ip_route(path: str, request: Request):
+    """Frontend-compatible route: /api/ip/* → ip-intelligence-service:8034"""
+    return await _proxy_request(IP_INTELLIGENCE_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/threat-intel/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_threat_intel_route(path: str, request: Request):
+    """Frontend-compatible route: /api/threat-intel/* → threat-intel-service:8059"""
+    return await _proxy_request(THREAT_INTEL_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/nmap/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_nmap_route(path: str, request: Request):
+    """Frontend-compatible route: /api/nmap/* → nmap-service:8047"""
+    return await _proxy_request(NMAP_SERVICE_URL, path, request)
+
+
+# GRUPO E: CONSCIOUSNESS & SENSORY (8 endpoints)
+@app.api_route("/api/consciousness/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_consciousness_route(path: str, request: Request):
+    """Frontend-compatible route: /api/consciousness/* → maximus-core-service
+    Note: Consciousness endpoints are exposed by Maximus Core Service"""
+    return await _proxy_request(MAXIMUS_CORE_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/reactive-fabric/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_reactive_fabric_route(path: str, request: Request):
+    """Frontend-compatible route: /api/reactive-fabric/* → reactive-fabric-core:8600"""
+    return await _proxy_request(REACTIVE_FABRIC_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/immune/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_immune_route(path: str, request: Request):
+    """Frontend-compatible route: /api/immune/* → ai-immune-system:8073"""
+    return await _proxy_request(AI_IMMUNE_SYSTEM_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/tegumentar/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_tegumentar_route(path: str, request: Request):
+    """Frontend-compatible route: /api/tegumentar/* → tegumentar-service:8085"""
+    return await _proxy_request(TEGUMENTAR_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/visual-cortex/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_visual_cortex_route(path: str, request: Request):
+    """Frontend-compatible route: /api/visual-cortex/* → visual-cortex-service"""
+    return await _proxy_request(VISUAL_CORTEX_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/auditory-cortex/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_auditory_cortex_route(path: str, request: Request):
+    """Frontend-compatible route: /api/auditory-cortex/* → auditory-cortex-service"""
+    return await _proxy_request(AUDITORY_CORTEX_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/somatosensory/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_somatosensory_route(path: str, request: Request):
+    """Frontend-compatible route: /api/somatosensory/* → somatosensory-service"""
+    return await _proxy_request(SOMATOSENSORY_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/chemical-sensing/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_chemical_sensing_route(path: str, request: Request):
+    """Frontend-compatible route: /api/chemical-sensing/* → chemical-sensing-service"""
+    return await _proxy_request(CHEMICAL_SENSING_SERVICE_URL, path, request)
+
+
+# GRUPO F: HITL (2 endpoints)
+@app.api_route("/api/hitl/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_hitl_route(path: str, request: Request):
+    """Frontend-compatible route: /api/hitl/* → hitl-patch-service:8027
+    Note: There's no separate hitl-service, both routes use hitl-patch-service"""
+    return await _proxy_request(HITL_PATCH_SERVICE_URL, path, request)
+
+
+@app.api_route("/api/hitl-patch/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def api_hitl_patch_route(path: str, request: Request):
+    """Frontend-compatible route: /api/hitl-patch/* → hitl-patch-service:8027"""
+    return await _proxy_request(HITL_PATCH_SERVICE_URL, path, request)
+
+
 # ============================================================================
 # ORIGINAL ROUTES (Maximus Core Services)
 # ============================================================================
@@ -434,7 +731,8 @@ async def route_eureka_service(path: str, request: Request, api_key: str = Depen
     Returns:
         JSONResponse: The response from the Eureka Service.
     """
-    return await _proxy_request(EUREKA_SERVICE_URL, f"api/v1/eureka/{path}", request)
+    # FIX: Eureka service responds directly at /{path}, not /api/v1/eureka/{path}
+    return await _proxy_request(EUREKA_SERVICE_URL, path, request)
 
 
 @app.api_route("/oraculo/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
@@ -449,7 +747,146 @@ async def route_oraculo_service(path: str, request: Request, api_key: str = Depe
     Returns:
         JSONResponse: The response from the Oraculo Service.
     """
-    return await _proxy_request(ORACULO_SERVICE_URL, f"api/v1/oraculo/{path}", request)
+    # FIX: Oráculo service responds directly at /{path}, not /api/v1/oraculo/{path}
+    return await _proxy_request(ORACULO_SERVICE_URL, path, request)
+
+
+@app.api_route("/offensive/network-recon/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_network_recon_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Network Reconnaissance Service (Offensive Arsenal).
+
+    Args:
+        path (str): The path to the network-recon service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Network Recon Service.
+    """
+    return await _proxy_request(NETWORK_RECON_SERVICE_URL, path, request)
+
+
+@app.api_route("/offensive/vuln-intel/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_vuln_intel_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Vulnerability Intelligence Service (Offensive Arsenal).
+
+    Args:
+        path (str): The path to the vuln-intel service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Vuln Intel Service.
+    """
+    return await _proxy_request(VULN_INTEL_SERVICE_URL, path, request)
+
+
+@app.api_route("/offensive/web-attack/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_web_attack_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Web Attack Surface Service (Offensive Arsenal).
+
+    FLORESCIMENTO - Organic growth through attack surface analysis.
+
+    Args:
+        path (str): The path to the web-attack service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Web Attack Service.
+    """
+    return await _proxy_request(WEB_ATTACK_SERVICE_URL, path, request)
+
+
+@app.api_route("/offensive/c2/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_c2_orchestration_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the C2 Orchestration Service (Offensive Arsenal).
+
+    FLORESCIMENTO - Ethical C2 operations for authorized testing.
+
+    Args:
+        path (str): The path to the c2 service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the C2 Orchestration Service.
+    """
+    return await _proxy_request(C2_ORCHESTRATION_SERVICE_URL, path, request)
+
+
+@app.api_route("/offensive/bas/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_bas_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the BAS Service (Offensive Arsenal).
+
+    FLORESCIMENTO - Defense validation through ethical attack simulation.
+
+    Args:
+        path (str): The path to the bas service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the BAS Service.
+    """
+    return await _proxy_request(BAS_SERVICE_URL, path, request)
+
+
+@app.api_route("/defensive/behavioral/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_behavioral_analyzer_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Behavioral Analyzer Service.
+
+    FLORESCIMENTO - Behavioral threat detection through ML-based anomaly analysis.
+
+    Args:
+        path (str): The path to the behavioral analyzer service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Behavioral Analyzer Service.
+    """
+    return await _proxy_request(BEHAVIORAL_ANALYZER_SERVICE_URL, path, request)
+
+
+@app.api_route("/defensive/traffic/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_traffic_analyzer_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the Traffic Analyzer Service.
+
+    FLORESCIMENTO - Network traffic threat detection with deep packet inspection.
+
+    Args:
+        path (str): The path to the traffic analyzer service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the Traffic Analyzer Service.
+    """
+    return await _proxy_request(TRAFFIC_ANALYZER_SERVICE_URL, path, request)
+
+
+@app.api_route("/social-defense/mav/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def route_mav_detection_service(path: str, request: Request, api_key: str = Depends(verify_api_key)):
+    """Routes requests to the MAV Detection & Protection Service.
+
+    FLORESCIMENTO - Protecting people from coordinated social media attacks.
+    Research-based detection of MAV (Militância em Ambientes Virtuais) campaigns.
+
+    This service detects coordinated harassment campaigns, reputation assassination,
+    and mass disinformation attacks on social media platforms. Built with 2025
+    state-of-the-art techniques including temporal coordination analysis, content
+    similarity detection, and network behavior analysis.
+
+    Args:
+        path (str): The path to the MAV detection service endpoint.
+        request (Request): The incoming request object.
+        api_key (str): The validated API key.
+
+    Returns:
+        JSONResponse: The response from the MAV Detection Service.
+    """
+    return await _proxy_request(MAV_DETECTION_SERVICE_URL, path, request)
 
 
 @app.get("/stream/consciousness/sse")

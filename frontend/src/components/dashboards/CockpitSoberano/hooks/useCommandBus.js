@@ -9,8 +9,9 @@
 
 import { useState, useCallback } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/api';
 
-const API_URL = import.meta.env.VITE_COMMAND_BUS_API || 'http://localhost:8092';
+const API_URL = API_ENDPOINTS.commandBus;
 
 const COMMAND_TYPES = {
   MUTE: 'MUTE',

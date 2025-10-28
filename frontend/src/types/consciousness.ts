@@ -343,8 +343,8 @@ export function formatDuration(durationMs: number): string {
 // =============================================================================
 
 export const PROTOCOL_VERSION = '1.0.0';
-export const DEFAULT_BASE_URL = 'http://localhost:8001';
-export const DEFAULT_WS_URL = 'ws://localhost:8001/ws/consciousness';
+export const DEFAULT_BASE_URL = 'http://34.148.161.131:8000';
+export const DEFAULT_WS_URL = 'ws://34.148.161.131:8000/ws/consciousness';
 
 // =============================================================================
 // METADATA

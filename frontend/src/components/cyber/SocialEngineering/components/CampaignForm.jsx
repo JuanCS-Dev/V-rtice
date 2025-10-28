@@ -1,3 +1,23 @@
+/**
+ * PHISHING CAMPAIGN FORM - Semantic Form for Campaign Creation
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <form> with onSubmit handler
+ * - All inputs properly labeled
+ * - <select> with explicit label + id
+ * - aria-live for loading status
+ * - Emojis isolated in aria-hidden span
+ *
+ * WCAG 2.1 AAA Compliance:
+ * - All form controls labeled
+ * - Required fields marked
+ * - Loading status announced
+ * - Keyboard accessible
+ *
+ * @version 2.0.0 (Maximus Vision)
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ */
+
 import React, { useState } from 'react';
 import { Input, Button } from '../../../shared';
 import styles from './CampaignForm.module.css';
@@ -29,9 +49,11 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.title}>🎯 Criar Campanha de Phishing</h3>
+      <h3 className={styles.title}>
+        <span aria-hidden="true">🎯</span> Criar Campanha de Phishing
+      </h3>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={styles.form} aria-label="Phishing campaign configuration">
         <Input
           label="Nome da Campanha"
           variant="cyber"
@@ -42,13 +64,17 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
         />
 
         <div className={styles.field}>
-          <label htmlFor="select-template-cdc3b" className={styles.label}>Template</label>
-<select id="select-template-cdc3b"
+          <label htmlFor="campaign-template" className={styles.label}>
+            Template
+          </label>
+          <select
+            id="campaign-template"
             value={formData.template_id}
             onChange={(e) => setFormData({ ...formData, template_id: e.target.value })}
             className={styles.select}
             required
-          >
+            aria-required="true"
+            aria-label="Select phishing template">
             <option value="">Selecione um template...</option>
             {templates.map(template => (
               <option key={template.id} value={template.id}>
@@ -101,10 +127,16 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
           variant="warning"
           loading={loading}
           fullWidth
-        >
+          aria-label="Create phishing campaign">
           {loading ? 'Criando Campanha...' : 'Criar Campanha'}
         </Button>
       </form>
+
+      {loading && (
+        <div className={styles.visuallyHidden} role="status" aria-live="polite">
+          Creating phishing campaign...
+        </div>
+      )}
     </div>
   );
 };

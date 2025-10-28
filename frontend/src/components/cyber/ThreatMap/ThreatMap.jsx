@@ -1,18 +1,34 @@
 /**
- * Threat Map - REFATORADO
+ * THREAT MAP - Real-time Global Cyber Threat Visualization
  *
  * Visualização geográfica de ameaças cyber em tempo real
  * Integração com Leaflet + clustering
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="threat-map"
+ * - <header> for tool header via Card wrapper
+ * - <section> for filters
+ * - <section> for map container
+ * - <section> for stats bar
+ * - <section> for threat details (conditional)
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="threat-map"
+ * - Monitor threats via data-maximus-status
+ * - Access filters via data-maximus-section="filters"
+ * - Interpret threat distribution via semantic structure
  *
  * REFATORAÇÃO:
  * - Lógica de dados isolada (useThreatData)
  * - Marcadores em componente separado
  * - Filtros em componente separado
  * - Utils isolados
- * - CSS Modules
- * - Design tokens
+ * - CSS Modules + Design tokens
  *
  * Antes: 621 linhas | Depois: ~150 linhas
+ * i18n: Ready for internationalization
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState, lazy, Suspense } from 'react';
@@ -41,6 +57,9 @@ export const ThreatMap = () => {
       badge={`${threats.length} THREATS`}
       variant="cyber"
       className={styles.widget}
+      data-maximus-tool="threat-map"
+      data-maximus-category="shared"
+      data-maximus-status={loading ? 'loading' : 'ready'}
       headerActions={
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <AskMaximusButton
@@ -67,10 +86,19 @@ export const ThreatMap = () => {
     >
       <div className={styles.container}>
         {/* Filters */}
-        <ThreatFilters filters={filters} onFiltersChange={setFilters} />
+        <section
+          role="region"
+          aria-label="Threat filters"
+          data-maximus-section="filters">
+          <ThreatFilters filters={filters} onFiltersChange={setFilters} />
+        </section>
 
         {/* Map Container */}
-        <div className={styles.mapWrapper}>
+        <section
+          className={styles.mapWrapper}
+          role="region"
+          aria-label="Threat map visualization"
+          data-maximus-section="map">
           {loading && (
             <div className={styles.loadingOverlay}>
               <LoadingSpinner variant="cyber" size="lg" text="Carregando ameaças..." />
@@ -103,10 +131,14 @@ export const ThreatMap = () => {
               <ThreatMarkers threats={threats} onThreatClick={handleThreatClick} />
             </Suspense>
           </MapContainer>
-        </div>
+        </section>
 
         {/* Stats Bar */}
-        <div className={styles.statsBar}>
+        <section
+          className={styles.statsBar}
+          role="region"
+          aria-label="Threat statistics"
+          data-maximus-section="stats">
           <div className={styles.stat}>
             <span className={styles.statLabel}>TOTAL:</span>
             <span className={styles.statValue}>{threats.length}</span>
@@ -135,11 +167,15 @@ export const ThreatMap = () => {
               {threats.filter(t => t.severity === 'low').length}
             </Badge>
           </div>
-        </div>
+        </section>
 
         {/* Selected Threat Details */}
         {selectedThreat && (
-          <div className={styles.threatDetails}>
+          <section
+            className={styles.threatDetails}
+            role="region"
+            aria-label="Selected threat details"
+            data-maximus-section="threat-details">
             <div className={styles.detailsHeader}>
               <h6 className={styles.detailsTitle}>
                 {selectedThreat.type.toUpperCase()}
@@ -175,7 +211,7 @@ export const ThreatMap = () => {
                 </span>
               </div>
             </div>
-          </div>
+          </section>
         )}
       </div>
     </Card>

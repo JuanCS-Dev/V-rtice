@@ -24,6 +24,7 @@ import uuid
 import logging
 from datetime import datetime
 from typing import Optional, List
+from urllib.parse import quote_plus
 
 from fastapi import FastAPI, HTTPException, Query, Depends, WebSocket, Header
 from fastapi.security import OAuth2PasswordBearer
@@ -136,7 +137,10 @@ async def startup_event():
     db_user = os.getenv("POSTGRES_USER", "maximus")
     db_pass = os.getenv("POSTGRES_PASSWORD", "maximus_immunity_2024")
     
-    connection_string = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    # URL-encode password to handle special characters (/, +, =)
+    db_pass_encoded = quote_plus(db_pass)
+    
+    connection_string = f"postgresql://{db_user}:{db_pass_encoded}@{db_host}:{db_port}/{db_name}"
     
     db = HITLDatabase(connection_string)
     await db.connect()
@@ -262,11 +266,15 @@ async def health_check(db: HITLDatabase = Depends(get_database)):
     # Check database connectivity
     try:
         # Simple query to verify DB is responsive
-        await db.get_analytics_summary()
-        health_status["checks"]["database"] = {
-            "status": "ok",
-            "message": "Database connection successful"
-        }
+        if db.pool:
+            async with db.pool.acquire() as conn:
+                await conn.fetchval("SELECT 1")
+            health_status["checks"]["database"] = {
+                "status": "ok",
+                "message": "Database connection successful"
+            }
+        else:
+            raise Exception("Database pool not initialized")
     except Exception as e:
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = {

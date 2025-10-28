@@ -2,14 +2,17 @@
  * Offensive Service
  * =================
  *
- * Service layer for Offensive Security Arsenal
- * Manages communication with 6 offensive services:
+ * Service layer for Offensive & Defensive Security Arsenal
+ * Manages communication with 9 offensive/defensive services:
  * - Network Reconnaissance (8032)
  * - Vulnerability Intelligence (8033)
  * - Web Attack Surface (8034)
  * - C2 Orchestration (8035)
  * - Breach & Attack Simulation (8036)
- * - Offensive Gateway (8037)
+ * - Behavioral Analyzer (8037) - DEFENSIVE
+ * - Traffic Analyzer (8038) - DEFENSIVE
+ * - MAV Detection (8039) - DEFENSIVE
+ * - Offensive Gateway (8040)
  *
  * Governed by: Constituição Vértice v2.5 - ADR-002 (Service Layer Pattern)
  *
@@ -32,6 +35,9 @@ export class OffensiveService extends BaseService {
       webAttack: ServiceEndpoints.offensive.webAttack,
       c2: ServiceEndpoints.offensive.c2Orchestration,
       bas: ServiceEndpoints.offensive.bas,
+      behavioral: '/api/defensive/behavioral',
+      traffic: '/api/defensive/traffic',
+      mav: '/api/social-defense/mav',
       gateway: ServiceEndpoints.offensive.gateway,
     };
   }
@@ -332,6 +338,254 @@ export class OffensiveService extends BaseService {
   }
 
   // ============================================================================
+  // BEHAVIORAL ANALYZER (DEFENSIVE - 8037)
+  // ============================================================================
+
+  /**
+   * Analyzes behavioral event for anomalies
+   * @param {Object} eventData - Event data
+   * @param {string} eventData.entityId - Entity identifier (user/process/host)
+   * @param {string} eventData.eventType - Event type (login/file_access/network/privilege)
+   * @param {string} eventData.sourceIp - Source IP address
+   * @param {Object} eventData.metadata - Additional metadata
+   * @returns {Promise<Object>} Analysis result with anomaly detection
+   */
+  async analyzeBehavioralEvent(eventData) {
+    this.validateRequest(eventData);
+
+    return await this.client.post(`${this.endpoints.behavioral}/analyze`, {
+      entity_id: eventData.entityId,
+      event_type: eventData.eventType,
+      source_ip: eventData.sourceIp,
+      timestamp: new Date().toISOString(),
+      metadata: eventData.metadata || {},
+    });
+  }
+
+  /**
+   * Analyzes batch of behavioral events
+   * @param {Array<Object>} events - Array of event objects
+   * @returns {Promise<Object>} Batch analysis results
+   */
+  async analyzeBatchBehavioralEvents(events) {
+    if (!Array.isArray(events) || events.length === 0) {
+      throw new Error('Events array is required');
+    }
+
+    const formattedEvents = events.map((e) => ({
+      entity_id: e.entityId,
+      event_type: e.eventType,
+      source_ip: e.sourceIp,
+      timestamp: e.timestamp || new Date().toISOString(),
+      metadata: e.metadata || {},
+    }));
+
+    return await this.client.post(`${this.endpoints.behavioral}/analyze-batch`, {
+      events: formattedEvents,
+    });
+  }
+
+  /**
+   * Trains baseline profile for entity
+   * @param {string} entityId - Entity identifier
+   * @param {Array<Object>} trainingEvents - Historical events for training
+   * @returns {Promise<Object>} Training result
+   */
+  async trainBehavioralBaseline(entityId, trainingEvents) {
+    if (!entityId || !Array.isArray(trainingEvents)) {
+      throw new Error('Entity ID and training events are required');
+    }
+
+    return await this.client.post(`${this.endpoints.behavioral}/train-baseline`, {
+      entity_id: entityId,
+      training_events: trainingEvents,
+    });
+  }
+
+  /**
+   * Gets behavioral analysis metrics
+   * @returns {Promise<Object>} Behavioral metrics
+   */
+  async getBehavioralMetrics() {
+    return await this.client.get(`${this.endpoints.behavioral}/metrics`);
+  }
+
+  // ============================================================================
+  // TRAFFIC ANALYZER (DEFENSIVE - 8038)
+  // ============================================================================
+
+  /**
+   * Analyzes network flow for threats
+   * @param {Object} flowData - Network flow data
+   * @param {string} flowData.sourceIp - Source IP address
+   * @param {string} flowData.destIp - Destination IP address
+   * @param {number} flowData.sourcePort - Source port
+   * @param {number} flowData.destPort - Destination port
+   * @param {string} flowData.protocol - Protocol (tcp/udp/icmp)
+   * @param {number} flowData.bytesSent - Bytes sent
+   * @param {number} flowData.bytesReceived - Bytes received
+   * @param {number} flowData.duration - Flow duration in seconds
+   * @returns {Promise<Object>} Threat analysis result
+   */
+  async analyzeTrafficFlow(flowData) {
+    this.validateRequest(flowData);
+
+    return await this.client.post(`${this.endpoints.traffic}/analyze`, {
+      source_ip: flowData.sourceIp,
+      dest_ip: flowData.destIp,
+      source_port: flowData.sourcePort,
+      dest_port: flowData.destPort,
+      protocol: flowData.protocol || 'tcp',
+      bytes_sent: flowData.bytesSent || 0,
+      bytes_received: flowData.bytesReceived || 0,
+      duration_seconds: flowData.duration || 0,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Analyzes batch of network flows
+   * @param {Array<Object>} flows - Array of flow objects
+   * @returns {Promise<Object>} Batch analysis results
+   */
+  async analyzeBatchTrafficFlows(flows) {
+    if (!Array.isArray(flows) || flows.length === 0) {
+      throw new Error('Flows array is required');
+    }
+
+    const formattedFlows = flows.map((f) => ({
+      source_ip: f.sourceIp,
+      dest_ip: f.destIp,
+      source_port: f.sourcePort,
+      dest_port: f.destPort,
+      protocol: f.protocol || 'tcp',
+      bytes_sent: f.bytesSent || 0,
+      bytes_received: f.bytesReceived || 0,
+      duration_seconds: f.duration || 0,
+      timestamp: f.timestamp || new Date().toISOString(),
+    }));
+
+    return await this.client.post(`${this.endpoints.traffic}/analyze-batch`, {
+      flows: formattedFlows,
+    });
+  }
+
+  /**
+   * Detects C2 beaconing patterns
+   * @param {Array<Object>} flows - Network flows to analyze
+   * @returns {Promise<Object>} C2 detection result
+   */
+  async detectC2Beacons(flows) {
+    return await this.analyzeBatchTrafficFlows(flows);
+  }
+
+  /**
+   * Gets traffic analysis metrics
+   * @returns {Promise<Object>} Traffic metrics
+   */
+  async getTrafficMetrics() {
+    return await this.client.get(`${this.endpoints.traffic}/metrics`);
+  }
+
+  // ============================================================================
+  // MAV DETECTION (DEFENSIVE - 8039) - CRITICAL FOR BRAZIL
+  // ============================================================================
+
+  /**
+   * Detects Manipulative Amplification & Viralization campaigns
+   * @param {Object} campaignData - Campaign data
+   * @param {Array<Object>} campaignData.posts - Social media posts
+   * @param {Array<Object>} campaignData.accounts - Account profiles
+   * @param {string} campaignData.platform - Platform (twitter/instagram/facebook)
+   * @param {string} campaignData.timeWindow - Time window (e.g., '24h')
+   * @returns {Promise<Object>} MAV detection result
+   */
+  async detectMAVCampaign(campaignData) {
+    this.validateRequest(campaignData);
+
+    if (!Array.isArray(campaignData.posts) || campaignData.posts.length === 0) {
+      throw new Error('Posts array is required');
+    }
+
+    return await this.client.post(`${this.endpoints.mav}/detect`, {
+      posts: campaignData.posts,
+      accounts: campaignData.accounts || [],
+      platform: campaignData.platform || 'twitter',
+      time_window: campaignData.timeWindow || '24h',
+    });
+  }
+
+  /**
+   * Analyzes temporal coordination patterns
+   * @param {Array<Object>} posts - Social media posts with timestamps
+   * @returns {Promise<Object>} Coordination analysis
+   */
+  async analyzeTemporalCoordination(posts) {
+    if (!Array.isArray(posts) || posts.length === 0) {
+      throw new Error('Posts array is required');
+    }
+
+    return await this.client.post(`${this.endpoints.mav}/coordination/temporal`, {
+      posts,
+    });
+  }
+
+  /**
+   * Analyzes content similarity (embeddings + semantic analysis)
+   * @param {Array<Object>} posts - Social media posts
+   * @returns {Promise<Object>} Content similarity analysis
+   */
+  async analyzeContentSimilarity(posts) {
+    if (!Array.isArray(posts) || posts.length === 0) {
+      throw new Error('Posts array is required');
+    }
+
+    return await this.client.post(`${this.endpoints.mav}/coordination/content`, {
+      posts,
+    });
+  }
+
+  /**
+   * Analyzes network coordination (GNN-based)
+   * @param {Array<Object>} accounts - Account profiles with connections
+   * @returns {Promise<Object>} Network analysis
+   */
+  async analyzeNetworkCoordination(accounts) {
+    if (!Array.isArray(accounts) || accounts.length === 0) {
+      throw new Error('Accounts array is required');
+    }
+
+    return await this.client.post(`${this.endpoints.mav}/coordination/network`, {
+      accounts,
+    });
+  }
+
+  /**
+   * Gets MAV detection metrics
+   * @returns {Promise<Object>} MAV metrics
+   */
+  async getMAVMetrics() {
+    return await this.client.get(`${this.endpoints.mav}/metrics`);
+  }
+
+  /**
+   * Lists detected MAV campaigns
+   * @param {Object} filters - Optional filters
+   * @param {string} filters.severity - Severity filter (low/medium/high/critical)
+   * @param {string} filters.platform - Platform filter
+   * @param {number} filters.limit - Maximum campaigns to return
+   * @returns {Promise<Array>} List of detected campaigns
+   */
+  async listMAVCampaigns(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.severity) params.append('severity', filters.severity);
+    if (filters.platform) params.append('platform', filters.platform);
+    if (filters.limit) params.append('limit', filters.limit);
+
+    return await this.client.get(`${this.endpoints.mav}/campaigns?${params}`);
+  }
+
+  // ============================================================================
   // OFFENSIVE GATEWAY (WORKFLOWS)
   // ============================================================================
 
@@ -428,7 +682,7 @@ export class OffensiveService extends BaseService {
   }
 
   /**
-   * Checks health of all offensive services
+   * Checks health of all offensive/defensive services
    * @returns {Promise<Object>} Service health status
    */
   async checkHealth() {
@@ -438,6 +692,9 @@ export class OffensiveService extends BaseService {
       webAttack: false,
       c2Orchestration: false,
       bas: false,
+      behavioral: false,
+      traffic: false,
+      mav: false,
       offensiveGateway: false,
     };
 
@@ -459,6 +716,9 @@ export class OffensiveService extends BaseService {
       checkService('webAttack', this.endpoints.webAttack),
       checkService('c2Orchestration', this.endpoints.c2),
       checkService('bas', this.endpoints.bas),
+      checkService('behavioral', this.endpoints.behavioral),
+      checkService('traffic', this.endpoints.traffic),
+      checkService('mav', this.endpoints.mav),
       checkService('offensiveGateway', this.endpoints.gateway),
     ]);
 

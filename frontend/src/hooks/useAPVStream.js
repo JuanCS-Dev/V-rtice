@@ -10,7 +10,7 @@
  * - Real-time antigen presentation
  * - Immediate immune response triggering
  * 
- * Backend Endpoint: ws://localhost:8001/ws/adaptive-immunity
+ * Backend Endpoint: ws://34.148.161.131:8000/ws/adaptive-immunity
  * 
  * Message Types:
  * - apv: New vulnerability detected
@@ -42,7 +42,7 @@ export const WS_STATES = {
  * 
  * @param {Object} options - Configuration options
  * @param {boolean} options.autoConnect - Auto-connect on mount (default: true)
- * @param {string} options.url - WebSocket URL (default: ws://localhost:8001/ws/adaptive-immunity)
+ * @param {string} options.url - WebSocket URL (default: ws://34.148.161.131:8000/ws/adaptive-immunity)
  * @param {number} options.reconnectDelay - Delay between reconnect attempts in ms (default: 3000)
  * @param {number} options.maxReconnectAttempts - Max reconnect attempts (default: 5)
  * @param {Function} options.onApv - Callback when new APV received
@@ -56,7 +56,7 @@ export const WS_STATES = {
  */
 export const useAPVStream = ({
   autoConnect = true,
-  url = 'ws://localhost:8001/ws/adaptive-immunity',
+  url = 'ws://34.148.161.131:8000/ws/adaptive-immunity',
   reconnectDelay = 3000,
   maxReconnectAttempts = 5,
   onApv = null,

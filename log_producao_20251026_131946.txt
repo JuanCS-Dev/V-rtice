@@ -1,0 +1,358 @@
+═══════════════════════════════════════════════════════════
+🎬 VÉRTICE - MATERIALIZAÇÃO DE VÍDEO OPERACIONAL
+═══════════════════════════════════════════════════════════
+
+📝 Log sendo salvo em: log_producao_20251026_131946.txt
+
+--- FASE 0: CHECKUP DO AMBIENTE ---
+
+═══════════════════════════════════════════════════════════
+🎬 VÉRTICE - MATERIALIZAÇÃO DE VÍDEO OPERACIONAL
+═══════════════════════════════════════════════════════════
+
+📝 Log sendo salvo em: log_producao_20251026_131946.txt
+
+--- FASE 0: CHECKUP DO AMBIENTE ---
+
+🔍 VÉRTICE - CHECKUP DO AMBIENTE DE PRODUÇÃO
+==============================================
+
+🔍 VÉRTICE - CHECKUP DO AMBIENTE DE PRODUÇÃO
+==============================================
+
+📦 DEPENDÊNCIAS:
+
+📦 DEPENDÊNCIAS:
+
+Verificando 'node'... Verificando 'node'... ✅ OK
+✅ OK
+  ├─ v22.20.0
+  ├─ v22.20.0
+Verificando 'npm'... Verificando 'npm'... ✅ OK
+✅ OK
+  ├─ 10.9.3
+  ├─ 10.9.3
+Verificando 'ffmpeg'... Verificando 'ffmpeg'... ✅ OK
+✅ OK
+  ├─ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+  ├─ ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+Verificando 'jq'... Verificando 'jq'... ✅ OK
+  ├─ jq-1.7
+✅ OK
+  ├─ jq-1.7
+Verificando 'bc'... Verificando 'bc'... ✅ OK
+✅ OK
+  ├─ bc 1.07.1
+  ├─ bc 1.07.1
+Verificando 'gcloud'... Verificando 'gcloud'... ✅ OK
+✅ OK
+  ├─ Google Cloud SDK 540.0.0
+  ├─ Google Cloud SDK 540.0.0
+Verificando 'gh'... ✅ OK
+Verificando 'gh'... ✅ OK
+  ├─ gh version 2.45.0 (2025-07-18 Ubuntu 2.45.0-1ubuntu0.3)
+  ├─ gh version 2.45.0 (2025-07-18 Ubuntu 2.45.0-1ubuntu0.3)
+
+
+☁️  GOOGLE CLOUD:
+
+Verificando autenticação GCloud... ☁️  GOOGLE CLOUD:
+
+Verificando autenticação GCloud... ✅ OK
+  ├─ Conta ativa: juan.brainfarma@gmail.com
+Verificando projeto GCP... ✅ OK
+  ├─ Conta ativa: juan.brainfarma@gmail.com
+Verificando projeto GCP... ✅ OK
+  ├─ Projeto: projeto-vertice
+✅ OK
+  ├─ Projeto: projeto-vertice
+Verificando billing no projeto... Verificando billing no projeto... ✅ OK
+  ├─ Billing está ativo (APIs habilitadas)
+  └─ Text-to-Speech API disponível para uso
+
+==============================================
+✅ AMBIENTE VERIFICADO. Pronto para materialização.
+✅ OK
+  ├─ Billing está ativo (APIs habilitadas)
+  └─ Text-to-Speech API disponível para uso
+
+==============================================
+✅ AMBIENTE VERIFICADO. Pronto para materialização.
+
+
+--- FASE 1: GERANDO NARRAÇÃO (GOOGLE CLOUD TTS) ---
+--- FASE 1: GERANDO NARRAÇÃO (GOOGLE CLOUD TTS) ---
+
+
+🎤 VÉRTICE - GERAÇÃO DE NARRAÇÃO (Google Cloud Text-to-Speech)
+===============================================================
+
+🎤 VÉRTICE - GERAÇÃO DE NARRAÇÃO (Google Cloud Text-to-Speech)
+===============================================================
+
+🔐 Verificando autenticação Google Cloud...
+🔐 Verificando autenticação Google Cloud...
+   ℹ️  Conta: juan.brainfarma@gmail.com
+   ℹ️  Conta: juan.brainfarma@gmail.com
+   ℹ️  Projeto: projeto-vertice
+   ℹ️  Projeto: projeto-vertice
+   ✅ Token obtido
+
+🔧 Habilitando Text-to-Speech API...
+   ✅ Token obtido
+
+🔧 Habilitando Text-to-Speech API...
+   ✅ API habilitada
+
+   ✅ API habilitada
+
+📋 Processando roteiro...
+📋 Processando roteiro...
+
+
+🎙️  Cena 1: Gerando áudio...
+🎙️  Cena 1: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_1.mp3 (188K)
+   ✅ Salvo: audio_narracoes/cena_1.mp3 (188K)
+🎙️  Cena 2: Gerando áudio...
+🎙️  Cena 2: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_2.mp3 (244K)
+   ✅ Salvo: audio_narracoes/cena_2.mp3 (244K)
+🎙️  Cena 3: Gerando áudio...
+🎙️  Cena 3: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_3.mp3 (220K)
+   ✅ Salvo: audio_narracoes/cena_3.mp3 (220K)
+🎙️  Cena 4: Gerando áudio...
+🎙️  Cena 4: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_4.mp3 (220K)
+   ✅ Salvo: audio_narracoes/cena_4.mp3 (220K)
+🎙️  Cena 5: Gerando áudio...
+🎙️  Cena 5: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_5.mp3 (216K)
+   ✅ Salvo: audio_narracoes/cena_5.mp3 (216K)
+🎙️  Cena 6: Gerando áudio...
+🎙️  Cena 6: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_6.mp3 (308K)
+   ✅ Salvo: audio_narracoes/cena_6.mp3 (308K)
+🎙️  Cena 7: Gerando áudio...
+🎙️  Cena 7: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_7.mp3 (240K)
+   ✅ Salvo: audio_narracoes/cena_7.mp3 (240K)
+🎙️  Cena 8: Gerando áudio...
+🎙️  Cena 8: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_8.mp3 (252K)
+   ✅ Salvo: audio_narracoes/cena_8.mp3 (252K)
+🎙️  Cena 9: Gerando áudio...
+🎙️  Cena 9: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_9.mp3 (284K)
+   ✅ Salvo: audio_narracoes/cena_9.mp3 (284K)
+🎙️  Cena 10: Gerando áudio...
+🎙️  Cena 10: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_10.mp3 (260K)
+   ✅ Salvo: audio_narracoes/cena_10.mp3 (260K)
+🎙️  Cena 11: Gerando áudio...
+🎙️  Cena 11: Gerando áudio...
+   ✅ Salvo: audio_narracoes/cena_11.mp3 (284K)
+   ✅ Salvo: audio_narracoes/cena_11.mp3 (284K)
+
+===============================================================
+
+===============================================================
+✅ Narração completa. Áudios salvos em: audio_narracoes/
+
+✅ Narração completa. Áudios salvos em: audio_narracoes/
+
+
+
+--- FASE 2: GRAVANDO TOUR DO FRONTEND (PLAYWRIGHT) ---
+
+--- FASE 2: GRAVANDO TOUR DO FRONTEND (PLAYWRIGHT) ---
+
+⚠️  IMPORTANTE: O frontend DEVE estar rodando!
+
+⚠️  IMPORTANTE: O frontend DEVE estar rodando!
+
+Se não estiver rodando, execute em outro terminal:
+  cd ~/vertice-dev/frontend
+  npm run dev
+Se não estiver rodando, execute em outro terminal:
+  cd ~/vertice-dev/frontend
+  npm run dev
+
+
+Frontend está rodando em http://localhost:5173? (Enter para continuar, Ctrl+C para cancelar) Frontend está rodando em http://localhost:5173? (Enter para continuar, Ctrl+C para cancelar) 
+
+
+Running 1 test using 1 worker
+
+Running 1 test using 1 worker
+
+
+🎬 Iniciando gravação do tour do Vértice...
+🎬 Iniciando gravação do tour do Vértice...
+📍 Cena 1: Navegando para homepage...
+📍 Cena 1: Navegando para homepage...
+📍 Cena 2: Dashboard Overview...
+📍 Cena 2: Dashboard Overview...
+📍 Cena 3: Sistema Imune...
+📍 Cena 3: Sistema Imune...
+📍 Cena 4: MAXIMUS Consciousness...
+📍 Cena 4: MAXIMUS Consciousness...
+📍 Cena 5: Theory of Mind Engine...
+📍 Cena 5: Theory of Mind Engine...
+📍 Cena 6: Reactive Fabric...
+📍 Cena 6: Reactive Fabric...
+📍 Cena 7: Honeypots Distribuídos...
+📍 Cena 7: Honeypots Distribuídos...
+📍 Cena 8: Analytics em Tempo Real...
+📍 Cena 8: Analytics em Tempo Real...
+📍 Cena 9: Infraestrutura Kubernetes...
+📍 Cena 9: Infraestrutura Kubernetes...
+📍 Cena 10: Sobre o Projeto...
+📍 Cena 10: Sobre o Projeto...
+📍 Cena 11: Finale...
+📍 Cena 11: Finale...
+✅ Tour completo! Vídeo salvo em: test-results/
+✅ Tour completo! Vídeo salvo em: test-results/
+  ✓  1 [chromium] › video_tour.spec.ts:12:5 › Vértice Frontend Tour - Full Recording (13.8s)
+  ✓  1 [chromium] › video_tour.spec.ts:12:5 › Vértice Frontend Tour - Full Recording (13.8s)
+
+
+  1 passed (14.4s)
+  1 passed (14.4s)
+
+To open last HTML report run:
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m
+
+
+📦 Extraindo vídeo do Playwright...
+📦 Extraindo vídeo do Playwright...
+   ✅ Vídeo encontrado: test-results/video_tour-Vértice-Frontend-Tour---Full-Recording-chromium/video.webm
+   ✅ Vídeo encontrado: test-results/video_tour-Vértice-Frontend-Tour---Full-Recording-chromium/video.webm
+   ✅ Copiado para: video_tour.webm (1,5M)
+
+   ✅ Copiado para: video_tour.webm (1,5M)
+
+
+
+--- FASE 3: MONTAGEM FINAL (FFMPEG CINEMA EDITION) ---
+--- FASE 3: MONTAGEM FINAL (FFMPEG CINEMA EDITION) ---
+
+
+🎬 VÉRTICE - MONTAGEM FINAL (FFmpeg Cinema Edition)
+🎬 VÉRTICE - MONTAGEM FINAL (FFmpeg Cinema Edition)
+====================================================
+
+====================================================
+
+📋 Carregando configurações do roteiro...
+📋 Carregando configurações do roteiro...
+   ⚙️  Detectando duração do vídeo automaticamente...
+   ⚙️  Detectando duração do vídeo automaticamente...
+   ℹ️  Duração total: 14s
+   ℹ️  Número de cenas: 11
+
+📦 FASE 1: Preparando fonte para overlay de texto...
+   ℹ️  Duração total: 14s
+   ℹ️  Número de cenas: 11
+
+📦 FASE 1: Preparando fonte para overlay de texto...
+   ✅ Fonte já existe
+   ✅ Fonte já existe
+
+🎵 FASE 2: Concatenando áudios de narração...
+
+🎵 FASE 2: Concatenando áudios de narração...
+  Duration: N/A, start: 0.000000, bitrate: 64 kb/s
+Output #0, mp3, to 'audio_completo.mp3':
+  Duration: N/A, start: 0.000000, bitrate: 64 kb/s
+Output #0, mp3, to 'audio_completo.mp3':
+   ✅ Áudio completo: audio_completo.mp3 (2,6M)
+
+   ✅ Áudio completo: audio_completo.mp3 (2,6M)
+🎥 FASE 3: Convertendo vídeo Playwright (WebM → MP4)...
+
+🎥 FASE 3: Convertendo vídeo Playwright (WebM → MP4)...
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 848 kb/s
+Output #0, mp4, to 'video_sem_audio.mp4':
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 848 kb/s
+Output #0, mp4, to 'video_sem_audio.mp4':
+   ✅ Vídeo convertido
+   ✅ Vídeo convertido
+
+
+🔊 FASE 4: Mixando vídeo + narração...
+🔊 FASE 4: Mixando vídeo + narração...
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 660 kb/s
+  Duration: 00:05:32.90, start: 0.022042, bitrate: 64 kb/s
+Output #0, mp4, to 'video_com_audio.mp4':
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 660 kb/s
+  Duration: 00:05:32.90, start: 0.022042, bitrate: 64 kb/s
+Output #0, mp4, to 'video_com_audio.mp4':
+   ✅ Áudio mixado
+   ✅ Áudio mixado
+
+
+✨ FASE 5: Aplicando fade in/out e overlays de texto...
+✨ FASE 5: Aplicando fade in/out e overlays de texto...
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 769 kb/s
+Output #0, mp4, to 'video_final.mp4':
+  Duration: 00:00:14.12, start: 0.000000, bitrate: 769 kb/s
+Output #0, mp4, to 'video_final.mp4':
+   ✅ Efeitos aplicados
+
+   ✅ Efeitos aplicados
+
+====================================================
+✅ VÍDEO FINAL PRONTO: video_final.mp4 (1,3M)
+====================================================
+✅ VÍDEO FINAL PRONTO: video_final.mp4 (1,3M)
+====================================================
+
+🧹 Limpando arquivos temporários...
+====================================================
+
+🧹 Limpando arquivos temporários...
+   ✅ Limpeza concluída
+
+   ✅ Limpeza concluída
+
+
+
+═══════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════
+✅ MATERIALIZAÇÃO COMPLETA!
+═══════════════════════════════════════════════════════════
+
+✅ MATERIALIZAÇÃO COMPLETA!
+═══════════════════════════════════════════════════════════
+
+📹 Vídeo final: /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+📝 Log completo: ../log_producao_20251026_131946.txt
+📹 Vídeo final: /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+
+🎉 Abra o vídeo com:
+📝 Log completo: ../log_producao_20251026_131946.txt
+
+🎉 Abra o vídeo com:
+   vlc /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+   vlc /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+
+ou
+
+
+ou
+
+   mpv /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+   mpv /home/juan/vertice-dev/vertice_video_producao/video_final.mp4
+
+
+═══════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════

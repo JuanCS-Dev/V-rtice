@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 /**
 import logger from '@/utils/logger';
  * useOffensiveMetricsQuery Hook
@@ -15,12 +16,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../config/queryClient';
 
 const OFFENSIVE_SERVICES = {
-  networkRecon: 'http://localhost:8030',
-  vulnIntel: 'http://localhost:8031',
-  webAttack: 'http://localhost:8032',
-  c2: 'http://localhost:8033',
-  bas: 'http://localhost:8034',
-  gateway: 'http://localhost:8035'
+  networkRecon: API_BASE_URL,
+  vulnIntel: API_BASE_URL,
+  webAttack: API_BASE_URL,
+  c2: API_BASE_URL,
+  bas: API_BASE_URL,
+  gateway: API_BASE_URL
 };
 
 // Fetcher function

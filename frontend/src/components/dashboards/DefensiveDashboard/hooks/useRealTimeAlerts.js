@@ -7,8 +7,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '../../../../hooks/useWebSocket';
 
-const API_BASE = 'http://localhost:8001'; // Maximus Core
-const WS_URL = 'ws://localhost:8001/ws/alerts';
+import { API_BASE_URL } from '../../../../config/api';
+const API_BASE = API_BASE_URL; // Maximus Core
+import { WS_ENDPOINTS } from '../../../../config/api';
+const WS_URL = WS_ENDPOINTS.alerts;
 const MAX_ALERTS = 50; // Keep last 50 alerts
 
 export const useRealTimeAlerts = () => {

@@ -19,8 +19,9 @@ import logger from '@/utils/logger';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../../../../config/queryClient';
 
-const OFFENSIVE_BASE = 'http://localhost:8037'; // Offensive Gateway
-const DEFENSIVE_BASE = 'http://localhost:8000'; // API Gateway
+import { API_BASE_URL } from '../../../../config/api';
+const OFFENSIVE_BASE = API_BASE_URL; // Offensive Gateway
+const DEFENSIVE_BASE = API_BASE_URL; // API Gateway
 
 const fetchPurpleTeamData = async () => {
 

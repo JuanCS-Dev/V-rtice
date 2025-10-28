@@ -37,14 +37,14 @@ describe('useWebSocket', () => {
   });
 
   it('should connect to WebSocket on mount', () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     renderHook(() => useWebSocket(url));
 
     expect(global.WebSocket).toHaveBeenCalledWith(url);
   });
 
   it('should update connection state when opened', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     expect(result.current.isConnected).toBe(false);
@@ -61,7 +61,7 @@ describe('useWebSocket', () => {
   });
 
   it('should receive messages', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     const testData = { type: 'test', message: 'Hello' };
@@ -83,7 +83,7 @@ describe('useWebSocket', () => {
   });
 
   it('should send messages when connected', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     // Connect
@@ -102,7 +102,7 @@ describe('useWebSocket', () => {
   });
 
   it('should queue messages when offline', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     // Send message while offline
@@ -114,7 +114,7 @@ describe('useWebSocket', () => {
   });
 
   it('should process queued messages when connected', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     // Queue messages while offline
@@ -134,7 +134,7 @@ describe('useWebSocket', () => {
   });
 
   it('should start heartbeat when connected', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() =>
       useWebSocket(url, {
         heartbeatInterval: 5000,
@@ -159,7 +159,7 @@ describe('useWebSocket', () => {
   });
 
   it('should reconnect with exponential backoff', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     renderHook(() =>
       useWebSocket(url, {
         reconnect: true,
@@ -193,7 +193,7 @@ describe('useWebSocket', () => {
       json: async () => ({ data: 'test' })
     });
 
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() =>
       useWebSocket(url, {
         reconnect: true,
@@ -226,7 +226,7 @@ describe('useWebSocket', () => {
   });
 
   it('should handle manual reconnect', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     // Disconnect
@@ -243,7 +243,7 @@ describe('useWebSocket', () => {
   });
 
   it('should cleanup on unmount', () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { unmount } = renderHook(() => useWebSocket(url));
 
     unmount();
@@ -252,7 +252,7 @@ describe('useWebSocket', () => {
   });
 
   it('should handle connection errors', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const onError = vi.fn();
 
     const { result } = renderHook(() =>
@@ -273,7 +273,7 @@ describe('useWebSocket', () => {
   });
 
   it('should ignore pong messages', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const { result } = renderHook(() => useWebSocket(url));
 
     // Connect
@@ -292,7 +292,7 @@ describe('useWebSocket', () => {
   });
 
   it('should call custom callbacks', async () => {
-    const url = 'ws://localhost:8001/ws/test';
+    const url = 'ws://34.148.161.131:8000/ws/test';
     const onOpen = vi.fn();
     const onMessage = vi.fn();
     const onClose = vi.fn();

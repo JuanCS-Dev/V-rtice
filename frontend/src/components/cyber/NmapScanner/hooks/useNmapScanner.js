@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
 import { SCAN_PROFILES } from '../utils/scanUtils';
 
-const API_BASE = 'http://localhost:8000/api/nmap';
+import { API_ENDPOINTS } from '@/config/api';
+const API_BASE = API_ENDPOINTS.nmap;
 
 const DEFAULT_PROFILES = {
   quick: { name: "Quick Scan", description: "Scan rápido das portas mais comuns", command: "-T4 -F" },

@@ -1,17 +1,42 @@
-# Reports
+# 08-REPORTS
 
-Relatórios estruturados por categoria de atividade.
+**Development reports and project tracking**
 
-## Estrutura
+## Structure
 
-### `/status/`
-Status geral do sistema e progresso.
+### `/status/` - Status Reports
+Current state and progress tracking
 
-### `/execution/`
-Relatórios de execução de correções e validações.
+### `/execution/` - Execution Reports
+Implementation and deployment execution
 
-### `/planning/`
-Planos de implementação e estratégias.
+### `/planning/` - Planning Documents
+Strategic plans and blueprints
 
-### `/certification/`
-Certificações de conformidade e qualidade.
+### `/certification/` - Certification Reports
+Quality and compliance certifications
+
+### `/integration/` - Integration Reports
+Service integration status
+
+### `/performance/` - Performance Analysis
+Performance metrics and optimization
+
+### `/diagnostico/` - Diagnostics
+System diagnostics and troubleshooting
+
+### `/fases/` - Phase Reports
+Project phase completions
+
+### `/sessions/` - Session Reports
+Development session summaries
+
+### `/auditorias/` - Audits
+System and code audits
+
+### `/analysis/` - Analysis Reports
+Deep dive analysis
+
+---
+
+**Historical tracking of all development activities.**

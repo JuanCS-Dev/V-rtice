@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
+import { API_ENDPOINTS } from '@/config/api';
 
 /**
  * Custom hook for managing network monitoring logic and state.
@@ -69,7 +70,7 @@ export const useNetworkMonitoring = () => {
   // Fetches real-time data from backend
   const fetchNetworkData = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/network/monitor'); // Assuming this API exists
+      const response = await fetch(`${API_ENDPOINTS.network}/monitor`);
       const data = await response.json();
 
       setRealTimeData(data);

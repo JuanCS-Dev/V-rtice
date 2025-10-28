@@ -1,3 +1,15 @@
+/**
+ * NMAP SCAN FORM - Semantic Form for Network Scanning
+ *
+ * AI-FIRST DESIGN:
+ * - <form> with proper structure
+ * - All inputs labeled
+ * - <fieldset> for history group
+ * - aria-live for loading status
+ *
+ * @version 2.0.0 (Maximus Vision)
+ */
+
 import React from 'react';
 import { Input, Button } from '../../../shared';
 import { useKeyPress } from '../../../../hooks';
@@ -21,11 +33,18 @@ export const ScanForm = ({
     }
   });
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (target.trim() && !loading) {
+      onScan();
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>NMAP NETWORK SCANNER</h2>
 
-      <div className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit} aria-label="Nmap scan configuration">
         <Input
           label="Target (IP/CIDR/Hostname)"
           variant="cyber"
@@ -35,16 +54,20 @@ export const ScanForm = ({
           placeholder="8.8.8.8"
           disabled={loading}
           fullWidth
+          aria-required="true"
         />
 
         <div className={styles.field}>
-          <label htmlFor="select-perfil-de-scan-izv4s" className={styles.label}>Perfil de Scan</label>
-<select id="select-perfil-de-scan-izv4s"
+          <label htmlFor="nmap-scan-profile" className={styles.label}>
+            Perfil de Scan
+          </label>
+          <select
+            id="nmap-scan-profile"
             value={selectedProfile}
             onChange={(e) => setSelectedProfile(e.target.value)}
             className={styles.select}
             disabled={loading}
-          >
+            aria-label="Select scan profile">
             {Object.entries(profiles).map(([key, profile]) => (
               <option key={key} value={key}>
                 {profile.name} - {profile.description}
@@ -65,35 +88,42 @@ export const ScanForm = ({
         />
 
         <Button
+          type="submit"
           variant="cyber"
           size="md"
-          onClick={onScan}
           disabled={loading || !target.trim()}
           loading={loading}
           fullWidth
-        >
+          aria-label="Start Nmap scan">
           {loading ? 'EXECUTANDO SCAN...' : 'INICIAR SCAN'}
         </Button>
-      </div>
+      </form>
+
+      {loading && (
+        <div className={styles.visuallyHidden} role="status" aria-live="polite">
+          Executing Nmap scan...
+        </div>
+      )}
 
       {scanHistory.length > 0 && (
-        <div className={styles.history}>
-          <span className={styles.historyLabel}>HISTÓRICO RECENTE:</span>
-          <div className={styles.historyItems}>
+        <fieldset className={styles.history}>
+          <legend className={styles.historyLabel}>HISTÓRICO RECENTE:</legend>
+          <div className={styles.historyItems} role="group" aria-label="Recent scans">
             {scanHistory.slice(0, 5).map((item, index) => (
               <button
                 key={index}
+                type="button"
                 onClick={() => {
                   setTarget(item.target);
                   setSelectedProfile(item.profile);
                 }}
                 className={styles.historyItem}
-              >
+                aria-label={`Load scan: ${item.target} with ${item.profile} profile from ${item.timestamp}`}>
                 {item.target} ({item.profile}) - {item.timestamp}
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
       )}
     </div>
   );

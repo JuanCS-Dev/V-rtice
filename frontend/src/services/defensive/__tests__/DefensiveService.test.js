@@ -14,9 +14,9 @@ import { ServiceEndpoints } from '@/config/endpoints';
 // Mock dependencies
 vi.mock('@/config/endpoints', () => ({
   ServiceEndpoints: {
-    apiGateway: 'http://localhost:8000',
+    apiGateway: 'http://34.148.161.131:8000',
     defensive: {
-      core: 'http://localhost:8001',
+      core: 'http://34.148.161.131:8000',
     },
   },
   AuthConfig: {
@@ -77,7 +77,7 @@ describe('DefensiveService', () => {
 
   describe('constructor', () => {
     it('should initialize with correct base endpoint', () => {
-      expect(service.baseEndpoint).toBe('http://localhost:8001');
+      expect(service.baseEndpoint).toBe('http://34.148.161.131:8000');
     });
 
     it('should store service endpoints', () => {

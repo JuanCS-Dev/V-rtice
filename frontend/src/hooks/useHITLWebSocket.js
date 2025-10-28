@@ -26,7 +26,7 @@ const WS_BASE_URL =
   process.env.NEXT_PUBLIC_HITL_WS || 
   (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
     ? `ws://${window.location.hostname}:8027`
-    : 'ws://localhost:8027');
+    : 'ws://34.148.161.131:8000');
 
 const WS_ENDPOINT = `${WS_BASE_URL}/hitl/ws`;
 

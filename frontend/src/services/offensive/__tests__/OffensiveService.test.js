@@ -14,14 +14,14 @@ import { ServiceEndpoints } from '@/config/endpoints';
 // Mock dependencies
 vi.mock('@/config/endpoints', () => ({
   ServiceEndpoints: {
-    apiGateway: 'http://localhost:8000',
+    apiGateway: 'http://34.148.161.131:8000',
     offensive: {
-      gateway: 'http://localhost:8037',
-      networkRecon: 'http://localhost:8032',
-      vulnIntel: 'http://localhost:8033',
-      webAttack: 'http://localhost:8034',
-      c2Orchestration: 'http://localhost:8035',
-      bas: 'http://localhost:8036',
+      gateway: 'http://34.148.161.131:8000',
+      networkRecon: 'http://34.148.161.131:8000',
+      vulnIntel: 'http://34.148.161.131:8000',
+      webAttack: 'http://34.148.161.131:8000',
+      c2Orchestration: 'http://34.148.161.131:8000',
+      bas: 'http://34.148.161.131:8000',
     },
   },
   AuthConfig: {
@@ -82,7 +82,7 @@ describe('OffensiveService', () => {
 
   describe('constructor', () => {
     it('should initialize with correct base endpoint', () => {
-      expect(service.baseEndpoint).toBe('http://localhost:8037');
+      expect(service.baseEndpoint).toBe('http://34.148.161.131:8000');
     });
 
     it('should store all service endpoints', () => {
@@ -107,7 +107,7 @@ describe('OffensiveService', () => {
       const result = await service.scanNetwork('192.168.1.0/24', 'quick', '1-1000');
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8032/api/scan',
+        'http://34.148.161.131:8000/api/scan',
         {
           target: '192.168.1.0/24',
           scan_type: 'quick',
@@ -147,7 +147,7 @@ describe('OffensiveService', () => {
       const result = await service.getScanStatus('scan-123');
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'http://localhost:8032/api/scan/scan-123/status'
+        'http://34.148.161.131:8000/api/scan/scan-123/status'
       );
       expect(result).toEqual(mockStatus);
     });
@@ -165,7 +165,7 @@ describe('OffensiveService', () => {
       const result = await service.listScans();
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'http://localhost:8032/api/scans',
+        'http://34.148.161.131:8000/api/scans',
         { params: { limit: 50 } }
       );
       expect(result).toEqual(mockScans);
@@ -191,7 +191,7 @@ describe('OffensiveService', () => {
       const result = await service.discoverHosts('192.168.1.0/24');
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8032/api/discover',
+        'http://34.148.161.131:8000/api/discover',
         { network: '192.168.1.0/24' }
       );
       expect(result).toEqual(mockHosts);
@@ -210,7 +210,7 @@ describe('OffensiveService', () => {
       const result = await service.searchCVE('CVE-2024-1234');
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'http://localhost:8033/api/cve/CVE-2024-1234'
+        'http://34.148.161.131:8000/api/cve/CVE-2024-1234'
       );
       expect(result).toEqual(mockCVE);
     });
@@ -256,7 +256,7 @@ describe('OffensiveService', () => {
       const result = await service.getExploits('CVE-2024-1234');
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'http://localhost:8033/api/cve/CVE-2024-1234/exploits'
+        'http://34.148.161.131:8000/api/cve/CVE-2024-1234/exploits'
       );
       expect(result).toEqual(mockExploits);
     });
@@ -278,7 +278,7 @@ describe('OffensiveService', () => {
       const result = await service.scanWebTarget('https://example.com');
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8034/api/scan',
+        'http://34.148.161.131:8000/api/scan',
         expect.objectContaining({
           url: 'https://example.com',
           scan_profile: 'full',
@@ -315,7 +315,7 @@ describe('OffensiveService', () => {
       const result = await service.runWebTest('https://example.com', 'sqli');
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8034/api/test/sqli',
+        'http://34.148.161.131:8000/api/test/sqli',
         expect.objectContaining({ url: 'https://example.com' })
       );
       expect(result).toEqual(mockResult);
@@ -338,7 +338,7 @@ describe('OffensiveService', () => {
       );
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8035/api/session/create',
+        'http://34.148.161.131:8000/api/session/create',
         expect.objectContaining({
           framework: 'metasploit',
           target_host: '192.168.1.100',
@@ -357,7 +357,7 @@ describe('OffensiveService', () => {
 
       const result = await service.listC2Sessions();
 
-      expect(mockClient.get).toHaveBeenCalledWith('http://localhost:8035/api/sessions');
+      expect(mockClient.get).toHaveBeenCalledWith('http://34.148.161.131:8000/api/sessions');
       expect(result).toEqual(mockSessions);
     });
 
@@ -367,7 +367,7 @@ describe('OffensiveService', () => {
       await service.listC2Sessions('cobalt_strike');
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'http://localhost:8035/api/sessions?framework=cobalt_strike'
+        'http://34.148.161.131:8000/api/sessions?framework=cobalt_strike'
       );
     });
   });
@@ -380,7 +380,7 @@ describe('OffensiveService', () => {
       const result = await service.executeC2Command('session-123', 'sysinfo');
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8035/api/session/session-123/execute',
+        'http://34.148.161.131:8000/api/session/session-123/execute',
         expect.objectContaining({
           command: 'sysinfo',
           args: [],
@@ -406,7 +406,7 @@ describe('OffensiveService', () => {
       );
 
       expect(mockClient.post).toHaveBeenCalledWith(
-        'http://localhost:8036/api/simulate',
+        'http://34.148.161.131:8000/api/simulate',
         expect.objectContaining({
           technique_id: 'T1078',
           target_host: '192.168.1.100',

@@ -1,8 +1,25 @@
 /**
- * Behavioral Analyzer Widget
- * 
+ * BEHAVIORAL ANALYZER - Behavioral Anomaly Detection Tool
+ *
  * Real-time behavioral anomaly detection visualization
  * Displays entity behavior analysis and anomaly alerts
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="behavioral-analyzer"
+ * - <header> for tool header
+ * - <section> for metrics dashboard
+ * - <section> for analysis form
+ * - <section> for results display
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="behavioral-analyzer"
+ * - Monitor analysis via data-maximus-status
+ * - Access metrics via data-maximus-section="metrics"
+ * - Interpret results via semantic structure
+ *
+ * i18n: react-i18next
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -71,17 +88,30 @@ export const BehavioralAnalyzer = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>🧠 {t('defensive.behavioral.title', 'Behavioral Analyzer')}</h2>
+    <article
+      className={styles.container}
+      role="article"
+      aria-labelledby="behavioral-analyzer-title"
+      data-maximus-tool="behavioral-analyzer"
+      data-maximus-category="defensive"
+      data-maximus-status={loading ? 'analyzing' : 'ready'}>
+
+      <header
+        className={styles.header}
+        data-maximus-section="tool-header">
+        <h2 id="behavioral-analyzer-title"><span aria-hidden="true">🧠</span> {t('defensive.behavioral.title', 'Behavioral Analyzer')}</h2>
         <p className={styles.subtitle}>
           {t('defensive.behavioral.subtitle', 'Detect anomalous behavior patterns')}
         </p>
-      </div>
+      </header>
 
       {/* Metrics Dashboard */}
       {metrics && (
-        <div className={styles.metrics}>
+        <section
+          className={styles.metrics}
+          role="region"
+          aria-label="Behavioral metrics"
+          data-maximus-section="metrics">
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>Total Analyzed</span>
             <span className={styles.metricValue}>{metrics.total_analyzed}</span>
@@ -102,11 +132,15 @@ export const BehavioralAnalyzer = () => {
               {metrics.avg_processing_time_ms.toFixed(0)}ms
             </span>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Analysis Form */}
-      <form onSubmit={handleAnalyze} className={styles.form}>
+      <section
+        role="region"
+        aria-label="Analysis form"
+        data-maximus-section="form">
+        <form onSubmit={handleAnalyze} className={styles.form}>
         <div className={styles.formGroup}>
           <label htmlFor="entityId">Entity ID</label>
           <input
@@ -156,6 +190,7 @@ export const BehavioralAnalyzer = () => {
           {loading ? 'Analyzing...' : 'Analyze Behavior'}
         </button>
       </form>
+      </section>
 
       {/* Error Display */}
       {error && (
@@ -167,7 +202,11 @@ export const BehavioralAnalyzer = () => {
 
       {/* Result Display */}
       {result && (
-        <div className={styles.result}>
+        <section
+          className={styles.result}
+          role="region"
+          aria-label="Analysis results"
+          data-maximus-section="results">
           <div
             className={styles.resultHeader}
             style={{ borderLeftColor: getRiskColor(result.risk_level) }}
@@ -209,9 +248,9 @@ export const BehavioralAnalyzer = () => {
               </span>
             </div>
           </div>
-        </div>
+        </section>
       )}
-    </div>
+    </article>
   );
 };
 

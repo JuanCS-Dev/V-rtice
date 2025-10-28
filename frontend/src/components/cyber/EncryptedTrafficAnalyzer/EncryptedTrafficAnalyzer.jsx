@@ -1,8 +1,25 @@
 /**
- * Encrypted Traffic Analyzer Widget
- * 
+ * ENCRYPTED TRAFFIC ANALYZER - Encrypted Network Flow Analysis Tool
+ *
  * Analyze encrypted network flows for threats
  * Detects C2 communication, data exfiltration, tunneling
+ *
+ * AI-FIRST DESIGN (Maximus Vision Protocol):
+ * - <article> with data-maximus-tool="encrypted-traffic-analyzer"
+ * - <header> for tool header
+ * - <section> for metrics dashboard
+ * - <section> for analysis form
+ * - <section> for results display
+ *
+ * Maximus can:
+ * - Identify tool via data-maximus-tool="encrypted-traffic-analyzer"
+ * - Monitor analysis via data-maximus-status
+ * - Access metrics via data-maximus-section="metrics"
+ * - Interpret threat scores via semantic structure
+ *
+ * i18n: react-i18next
+ * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
+ * @version 2.0.0 (Maximus Vision)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -83,17 +100,30 @@ export const EncryptedTrafficAnalyzer = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>🔐 {t('defensive.traffic.title', 'Encrypted Traffic Analyzer')}</h2>
+    <article
+      className={styles.container}
+      role="article"
+      aria-labelledby="encrypted-traffic-title"
+      data-maximus-tool="encrypted-traffic-analyzer"
+      data-maximus-category="defensive"
+      data-maximus-status={loading ? 'analyzing' : 'ready'}>
+
+      <header
+        className={styles.header}
+        data-maximus-section="tool-header">
+        <h2 id="encrypted-traffic-title"><span aria-hidden="true">🔐</span> {t('defensive.traffic.title', 'Encrypted Traffic Analyzer')}</h2>
         <p className={styles.subtitle}>
           {t('defensive.traffic.subtitle', 'Detect threats in encrypted communications')}
         </p>
-      </div>
+      </header>
 
       {/* Metrics */}
       {metrics && (
-        <div className={styles.metrics}>
+        <section
+          className={styles.metrics}
+          role="region"
+          aria-label="Traffic metrics"
+          data-maximus-section="metrics">
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>Total Analyzed</span>
             <span className={styles.metricValue}>{metrics.total_analyzed}</span>
@@ -114,11 +144,15 @@ export const EncryptedTrafficAnalyzer = () => {
               {metrics.avg_processing_time_ms.toFixed(0)}ms
             </span>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Analysis Form */}
-      <form onSubmit={handleAnalyze} className={styles.form}>
+      <section
+        role="region"
+        aria-label="Traffic analysis form"
+        data-maximus-section="form">
+        <form onSubmit={handleAnalyze} className={styles.form}>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label htmlFor="sourceIp">Source IP</label>
@@ -247,6 +281,7 @@ export const EncryptedTrafficAnalyzer = () => {
           {loading ? 'Analyzing...' : 'Analyze Traffic'}
         </button>
       </form>
+      </section>
 
       {/* Error */}
       {error && (
@@ -258,7 +293,11 @@ export const EncryptedTrafficAnalyzer = () => {
 
       {/* Result */}
       {result && (
-        <div className={styles.result}>
+        <section
+          className={styles.result}
+          role="region"
+          aria-label="Traffic analysis results"
+          data-maximus-section="results">
           <div
             className={styles.resultHeader}
             style={{ borderLeftColor: getThreatColor(result.threat_score) }}
@@ -318,9 +357,9 @@ export const EncryptedTrafficAnalyzer = () => {
               </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
-    </div>
+    </article>
   );
 };
 

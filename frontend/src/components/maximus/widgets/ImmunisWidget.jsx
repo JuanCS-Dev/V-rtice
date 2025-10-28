@@ -13,6 +13,7 @@
 
 import logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '@/config/api';
 import './ImmunisWidget.css';
 
 export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
@@ -28,7 +29,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchInnate = async () => {
       try {
-        const response = await fetch('http://localhost:8005/innate/status');
+        const response = await fetch(`${API_ENDPOINTS.innate}/status`);
         if (response.ok) {
           const data = await response.json();
           setInnateStatus(data);
@@ -47,7 +48,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchAdaptive = async () => {
       try {
-        const response = await fetch('http://localhost:8005/adaptive/status');
+        const response = await fetch(`${API_ENDPOINTS.adaptive}/status`);
         if (response.ok) {
           const data = await response.json();
           setAdaptiveStatus(data);
@@ -67,7 +68,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchCytokines = async () => {
       try {
-        const response = await fetch('http://localhost:8005/cytokines/signals');
+        const response = await fetch(`${API_ENDPOINTS.cytokines}/signals`);
         if (response.ok) {
           const data = await response.json();
           setCytokineActivity(data);
@@ -86,7 +87,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchAntibodies = async () => {
       try {
-        const response = await fetch('http://localhost:8005/antibody/library');
+        const response = await fetch(`${API_ENDPOINTS.antibody}/library`);
         if (response.ok) {
           const data = await response.json();
           setAntibodies(data.antibodies || []);
@@ -105,7 +106,7 @@ export const ImmunisWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchMemory = async () => {
       try {
-        const response = await fetch('http://localhost:8005/memory/cells');
+        const response = await fetch(`${API_ENDPOINTS.memory}/cells`);
         if (response.ok) {
           const data = await response.json();
           setMemoryCells(data.memory_cells || []);

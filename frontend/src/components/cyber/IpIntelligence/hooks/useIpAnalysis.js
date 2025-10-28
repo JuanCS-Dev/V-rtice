@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import logger from '@/utils/logger';
 
-const API_BASE = 'http://localhost:8000/api/ip';
+import { API_ENDPOINTS } from '@/config/api';
+const API_BASE = API_ENDPOINTS.ip;
 
 /**
  * Formata resposta da API para o formato esperado

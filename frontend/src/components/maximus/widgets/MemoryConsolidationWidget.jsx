@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * MEMORY CONSOLIDATION WIDGET - Hippocampal Replay Engine
@@ -38,7 +39,7 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchBufferStats = async () => {
       try {
-        const response = await fetch('http://localhost:8002/buffer/stats');
+        const response = await fetch(`${API_ENDPOINTS.buffer}/stats`);
         if (response.ok) {
           const data = await response.json();
           setBufferStats(data);
@@ -57,7 +58,7 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchConsolidationStats = async () => {
       try {
-        const response = await fetch('http://localhost:8002/stats');
+        const response = await fetch(API_ENDPOINTS.stats);
         if (response.ok) {
           const data = await response.json();
           setConsolidationStats(data);
@@ -76,8 +77,8 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
 
   const toggleMode = async (targetMode) => {
     try {
-      const endpoint = targetMode === 'SLEEP' ? '/sleep' : '/wake';
-      const response = await fetch(`http://localhost:8002${endpoint}`, {
+      const endpoint = targetMode === 'SLEEP' ? API_ENDPOINTS.sleep : API_ENDPOINTS.wake;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -94,7 +95,7 @@ export const MemoryConsolidationWidget = ({ systemHealth: _systemHealth }) => {
 
   const triggerConsolidation = async () => {
     try {
-      const response = await fetch('http://localhost:8002/consolidate', {
+      const response = await fetch(API_ENDPOINTS.consolidate, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

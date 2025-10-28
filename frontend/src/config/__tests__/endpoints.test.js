@@ -113,7 +113,7 @@ describe('getWebSocketEndpoint', () => {
 
 describe('httpToWs', () => {
   it('should convert http to ws', () => {
-    expect(httpToWs('http://localhost:8000')).toBe('ws://localhost:8000');
+    expect(httpToWs('http://34.148.161.131:8000')).toBe('ws://34.148.161.131:8000');
   });
 
   it('should convert https to wss', () => {

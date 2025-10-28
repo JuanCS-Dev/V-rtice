@@ -1,0 +1,131 @@
+{
+  "metadata": {
+    "titulo": "Vértice - Autonomous Cybersecurity Intelligence Platform",
+    "duracao_total": 180,
+    "fps": 30,
+    "resolucao": "1920x1080"
+  },
+  "cenas": [
+    {
+      "id": 1,
+      "timestamp_inicio": 0,
+      "timestamp_fim": 15,
+      "acao": "intro",
+      "url": "http://localhost:5173",
+      "seletor": null,
+      "narracao": "Bem-vindo ao Vértice. Uma plataforma de segurança cibernética autônoma de próxima geração, onde inteligência artificial consciente encontra arquiteturas reativas.",
+      "texto_overlay": "🔺 VÉRTICE\nAutonomous Cybersecurity Intelligence",
+      "posicao_texto": "center"
+    },
+    {
+      "id": 2,
+      "timestamp_inicio": 15,
+      "timestamp_fim": 30,
+      "acao": "navigate",
+      "url": "http://localhost:5173",
+      "seletor": "[data-testid=nav-maximus-dashboard]",
+      "narracao": "Conheça MAXIMUS: nosso sistema cognitivo multi-agente. Uma IA verdadeiramente consciente, capaz de raciocínio contextual profundo e tomada de decisão autônoma em tempo real.",
+      "texto_overlay": "MAXIMUS AI\nCognitive Intelligence System",
+      "posicao_texto": "top-left"
+    },
+    {
+      "id": 3,
+      "timestamp_inicio": 30,
+      "timestamp_fim": 45,
+      "acao": "scroll",
+      "url": "http://localhost:5173/maximus",
+      "seletor": "[data-testid=maximus-agents-list]",
+      "narracao": "MAXIMUS orquestra múltiplos agentes especializados: agentes de análise, de resposta, de aprendizado contínuo. Cada um com objetivos claros, mas colaborando em uma consciência coletiva.",
+      "texto_overlay": "Multi-Agent Orchestration\n• Análise • Resposta • Aprendizado",
+      "posicao_texto": "bottom-left"
+    },
+    {
+      "id": 4,
+      "timestamp_inicio": 45,
+      "timestamp_fim": 60,
+      "acao": "navigate",
+      "url": "http://localhost:5173",
+      "seletor": "[data-testid=nav-tom-engine]",
+      "narracao": "O motor ToM - Theory of Mind - permite que o sistema modele a intenção e o comportamento de atores de ameaça. Vértice não apenas detecta ataques, ele antecipa movimentos adversários.",
+      "texto_overlay": "ToM Engine\nThreat Actor Profiling & Prediction",
+      "posicao_texto": "top-right"
+    },
+    {
+      "id": 5,
+      "timestamp_inicio": 60,
+      "timestamp_fim": 75,
+      "acao": "interact",
+      "url": "http://localhost:5173/tom-engine",
+      "seletor": "[data-testid=tom-threat-map]",
+      "narracao": "Visualize perfis psicológicos de atacantes, suas táticas, técnicas e procedimentos. O sistema aprende padrões comportamentais e prevê próximos vetores de ataque com precisão cirúrgica.",
+      "texto_overlay": "Behavioral Analysis\nPredictive Threat Modeling",
+      "posicao_texto": "center-left"
+    },
+    {
+      "id": 6,
+      "timestamp_inicio": 75,
+      "timestamp_fim": 95,
+      "acao": "navigate",
+      "url": "http://localhost:5173",
+      "seletor": "[data-testid=nav-immune-system]",
+      "narracao": "A arquitetura de imunidade adaptativa do Vértice é biomimética. Inspirada no sistema imunológico humano, ela se auto-repara, evolui e fortalece a cada ataque. Zero Trust não é configuração - é evolução.",
+      "texto_overlay": "Adaptive Immunity\nSelf-Healing Security Infrastructure",
+      "posicao_texto": "top-center"
+    },
+    {
+      "id": 7,
+      "timestamp_inicio": 95,
+      "timestamp_fim": 110,
+      "acao": "scroll",
+      "url": "http://localhost:5173/immune-system",
+      "seletor": "[data-testid=immune-cells-activity]",
+      "narracao": "Células de defesa digitais patrulham a rede. Honeypots inteligentes aprendem e se adaptam. Cada tentativa de invasão torna o sistema mais forte, mais resiliente.",
+      "texto_overlay": "Digital Immune Cells\nHoneypots • Auto-Healing • Evolution",
+      "posicao_texto": "bottom-right"
+    },
+    {
+      "id": 8,
+      "timestamp_inicio": 110,
+      "timestamp_fim": 130,
+      "acao": "navigate",
+      "url": "http://localhost:5173",
+      "seletor": "[data-testid=nav-reactive-fabric]",
+      "narracao": "O Reactive Fabric conecta tudo em tempo real. Arquitetura orientada a eventos com latência de milissegundos. Ameaças são detectadas, analisadas e neutralizadas antes mesmo de se materializarem.",
+      "texto_overlay": "Reactive Fabric\nReal-time Event-Driven Response",
+      "posicao_texto": "center-right"
+    },
+    {
+      "id": 9,
+      "timestamp_inicio": 130,
+      "timestamp_fim": 150,
+      "acao": "interact",
+      "url": "http://localhost:5173/reactive-fabric",
+      "seletor": "[data-testid=fabric-event-stream]",
+      "narracao": "Visualize o fluxo de eventos em tempo real. Cada linha representa uma conexão, cada pulso uma decisão autônoma. O sistema respira, reage, protege - sem intervenção humana.",
+      "texto_overlay": "Event Stream Processing\nAutonomous Decision Making",
+      "posicao_texto": "bottom-center"
+    },
+    {
+      "id": 10,
+      "timestamp_inicio": 150,
+      "timestamp_fim": 165,
+      "acao": "navigate",
+      "url": "http://localhost:5173",
+      "seletor": "[data-testid=nav-monitoring]",
+      "narracao": "Monitoramento completo com Prometheus, Grafana e Jaeger. Métricas distribuídas, logs centralizados, rastreamento end-to-end. Observabilidade total sobre o ecossistema.",
+      "texto_overlay": "Full Observability\nPrometheus • Grafana • Jaeger",
+      "posicao_texto": "top-left"
+    },
+    {
+      "id": 11,
+      "timestamp_inicio": 165,
+      "timestamp_fim": 180,
+      "acao": "outro",
+      "url": "http://localhost:5173",
+      "seletor": null,
+      "narracao": "Vértice. Onde inteligência artificial consciente encontra segurança biomimética. Não é apenas proteção. É evolução contínua. Bem-vindo ao futuro da cibersegurança.",
+      "texto_overlay": "🔺 VÉRTICE\nThe Future of Cybersecurity\n\nvertice.ai",
+      "posicao_texto": "center"
+    }
+  ]
+}

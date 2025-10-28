@@ -9,8 +9,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '@/config/api';
 
-const API_URL = import.meta.env.VITE_NARRATIVE_FILTER_API || 'http://localhost:8090';
+const API_URL = API_ENDPOINTS.narrativeFilter;
 const POLL_INTERVAL = 10000; // 10 seconds
 
 export const useAllianceGraph = () => {

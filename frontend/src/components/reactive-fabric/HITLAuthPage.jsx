@@ -25,6 +25,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/config/api';
 import styles from './HITLAuthPage.module.css';
 
 const HITLAuthPage = ({ onAuthSuccess }) => {
@@ -50,7 +51,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
       formData.append('username', username);
       formData.append('password', password);
 
-      const response = await fetch('http://localhost:8000/api/auth/login', {
+      const response = await fetch(`${API_ENDPOINTS.auth}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -101,7 +102,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/2fa/verify', {
+      const response = await fetch(`${API_ENDPOINTS.auth}/2fa/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

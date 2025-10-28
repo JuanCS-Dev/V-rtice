@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/api';
 import logger from '@/utils/logger';
 /**
  * Safety Protocol - API Client
@@ -19,8 +20,8 @@ import logger from '@/utils/logger';
  * Version: 1.0.0 - FASE VII Week 9-10
  */
 
-const SAFETY_BASE_URL = 'http://localhost:8001/api/consciousness/safety';
-const WS_BASE_URL = 'ws://localhost:8001/api/consciousness';
+const SAFETY_BASE_URL = `${API_BASE_URL}/api/consciousness/safety`;
+const WS_BASE_URL = API_BASE_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/api/consciousness';
 
 /**
  * ============================================================================

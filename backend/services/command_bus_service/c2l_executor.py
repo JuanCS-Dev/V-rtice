@@ -7,7 +7,7 @@ from uuid import UUID
 import structlog
 from audit_repository import AuditLog, AuditRepository
 from kill_switch import KillSwitch
-from backend.services.command_bus_service.models import (
+from models import (
     C2LCommand,
     C2LCommandType,
     CommandReceipt,

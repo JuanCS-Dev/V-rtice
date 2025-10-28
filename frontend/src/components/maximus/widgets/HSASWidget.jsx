@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * HSAS WIDGET - Hybrid Skill Acquisition System
@@ -33,7 +34,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('http://localhost:8003/skills');
+        const response = await fetch(API_ENDPOINTS.skills);
         if (response.ok) {
           const data = await response.json();
           setSkills(data.skills || []);
@@ -52,7 +53,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchPrimitives = async () => {
       try {
-        const response = await fetch('http://localhost:8003/primitives');
+        const response = await fetch(API_ENDPOINTS.primitives);
         if (response.ok) {
           const data = await response.json();
           setPrimitives(data.primitives || []);
@@ -71,7 +72,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:8003/stats');
+        const response = await fetch(API_ENDPOINTS.stats);
         if (response.ok) {
           const data = await response.json();
           setLearningStats(data);
@@ -90,7 +91,7 @@ export const HSASWidget = ({ systemHealth: _systemHealth }) => {
 
   const changeLearningMode = async (mode) => {
     try {
-      const response = await fetch(`http://localhost:8003/mode?mode=${mode}`, {
+      const response = await fetch(`${API_ENDPOINTS.mode}?mode=${mode}`, {
         method: 'POST'
       });
 

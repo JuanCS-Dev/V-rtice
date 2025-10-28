@@ -1,6 +1,7 @@
 // /home/juan/vertice-dev/frontend/src/components/admin/SystemSelfCheck.jsx
 import logger from '@/utils/logger';
 import { apiClient } from '@/api/client';
+import { API_ENDPOINTS } from '@/config/api';
 
 import React, { useState, useEffect } from 'react';
 
@@ -77,7 +78,7 @@ const SystemSelfCheck = () => {
   const analyzeSecurityLogs = async () => {
     // Análise de logs de segurança
     try {
-      const response = await fetch('http://localhost:8000/cyber/security-logs');
+      const response = await fetch(`${API_ENDPOINTS.cyber}/security-logs`);
       return response.ok ? await response.json() : {
         failed_logins: 0,
         suspicious_activities: [],

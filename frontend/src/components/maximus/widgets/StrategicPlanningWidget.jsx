@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from '@/config/api';
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * STRATEGIC PLANNING WIDGET - Digital Prefrontal Cortex
@@ -28,7 +29,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
-        const response = await fetch('http://localhost:8004/policies?active_only=true');
+        const response = await fetch(`${API_ENDPOINTS.policies}?active_only=true`);
         if (response.ok) {
           const data = await response.json();
           setActivePolicies(data.policies || []);
@@ -47,7 +48,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const response = await fetch('http://localhost:8004/resources');
+        const response = await fetch(API_ENDPOINTS.resources);
         if (response.ok) {
           const data = await response.json();
           setResources(data.allocations || []);
@@ -66,7 +67,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchRisks = async () => {
       try {
-        const response = await fetch('http://localhost:8004/risks');
+        const response = await fetch(API_ENDPOINTS.risks);
         if (response.ok) {
           const data = await response.json();
           setRisks(data.risks || []);
@@ -86,7 +87,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchApprovals = async () => {
       try {
-        const response = await fetch('http://localhost:8004/approvals?status_filter=pending');
+        const response = await fetch(`${API_ENDPOINTS.approvals}?status_filter=pending`);
         if (response.ok) {
           const data = await response.json();
           setPendingApprovals(data.approvals || []);
@@ -105,7 +106,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await fetch('http://localhost:8004/plans');
+        const response = await fetch(API_ENDPOINTS.plans);
         if (response.ok) {
           const data = await response.json();
           setStrategicPlans(data.plans || []);

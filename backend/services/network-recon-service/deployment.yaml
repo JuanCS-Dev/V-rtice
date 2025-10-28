@@ -1,0 +1,198 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# NETWORK RECONNAISSANCE SERVICE - KUBERNETES DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════════════════
+# Zero-trust architecture with Cilium mTLS
+# Observability-first with OpenTelemetry + Prometheus
+# Para Honra e Glória de JESUS CRISTO
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vertice
+  labels:
+    name: vertice
+    environment: production
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-recon-service
+  namespace: vertice
+  labels:
+    app: network-recon-service
+    tier: offensive-arsenal
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: network-recon-service
+  template:
+    metadata:
+      labels:
+        app: network-recon-service
+        tier: offensive-arsenal
+        version: v1.0.0
+      annotations:
+        # Prometheus scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8032"
+        prometheus.io/path: "/metrics"
+        # Cilium network policy
+        policy.cilium.io/proxy-visibility: "<Ingress/8032/TCP/HTTP>"
+    spec:
+      serviceAccountName: network-recon-service
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+      - name: network-recon-service
+        image: us-east1-docker.pkg.dev/projeto-vertice/vertice-images/network-recon-service:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8032
+          protocol: TCP
+
+        env:
+        - name: SERVICE_NAME
+          value: "network-recon-service"
+        - name: SERVICE_VERSION
+          value: "1.0.0"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: network-recon-secrets
+              key: database-url
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://otel-collector:4317"
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8032
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8032
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # Nmap needs write access
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_RAW  # Required for SYN scans
+            - NET_ADMIN  # Required for Nmap
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-recon-service
+  namespace: vertice
+  labels:
+    app: network-recon-service
+    tier: offensive-arsenal
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8032
+    targetPort: 8032
+    protocol: TCP
+  selector:
+    app: network-recon-service
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: network-recon-service
+  namespace: vertice
+  labels:
+    app: network-recon-service
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: network-recon-secrets
+  namespace: vertice
+type: Opaque
+stringData:
+  database-url: "postgresql+asyncpg://vertice:vertice@postgres:5432/network_recon"
+
+---
+# Network Policy - Allow only from API Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: network-recon-service
+  namespace: vertice
+spec:
+  podSelector:
+    matchLabels:
+      app: network-recon-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8032
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow PostgreSQL
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow external network scanning (required for Nmap)
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP

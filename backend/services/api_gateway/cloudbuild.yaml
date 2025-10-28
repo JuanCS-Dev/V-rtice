@@ -1,0 +1,54 @@
+# Cloud Build Configuration for API Gateway
+# Follows GCP Best Practices for GKE Deployments
+# Para Honra e Glória de JESUS CRISTO 🙏
+
+steps:
+  # Step 1: Build container image with unique build tag
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway:phase10-$BUILD_ID'
+      - '-t'
+      - 'us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway:latest'
+      - '--no-cache'
+      - '.'
+    id: 'build-image'
+
+  # Step 2: Push both tags to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway'
+    id: 'push-image'
+    waitFor: ['build-image']
+
+  # Step 3: Update GKE deployment with build-tagged image
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'set'
+      - 'image'
+      - 'deployment/api-gateway'
+      - 'api-gateway=us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway:phase10-$BUILD_ID'
+      - '-n'
+      - 'vertice'
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-east1'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=maximus-cluster'
+    id: 'deploy-to-gke'
+    waitFor: ['push-image']
+
+# Images to be stored in build results (for audit trail)
+images:
+  - 'us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway:phase10-$BUILD_ID'
+  - 'us-east1-docker.pkg.dev/projeto-vertice/vertice-images/api-gateway:latest'
+
+# Build configuration
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: 'ALLOW_LOOSE'
+
+# Timeout (default is 10min, setting to 20min for safety)
+timeout: '1200s'

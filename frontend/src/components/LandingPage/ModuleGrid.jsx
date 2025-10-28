@@ -114,6 +114,7 @@ export const ModuleGrid = ({ setCurrentView }) => {
             role="button"
             tabIndex={0}
             aria-label={`${t('navigation.access_module')} ${module.name}`}
+            data-testid={`nav-${module.id}-dashboard`}
           >
             <div className="module-header">
               <span className="module-icon" aria-hidden="true">{module.icon}</span>

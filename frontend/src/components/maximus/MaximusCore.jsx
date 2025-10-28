@@ -390,7 +390,7 @@ export const MaximusCore = ({ aiStatus, setAiStatus }) => {
                   </select>
                 </div>
 
-                <div className="tools-grid">
+                <div className="tools-grid" data-testid="maximus-agents-list">
                   {getToolsByCategory().map((tool, idx) => (
                     <button
                       key={idx}

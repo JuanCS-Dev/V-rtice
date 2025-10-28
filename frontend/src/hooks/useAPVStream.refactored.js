@@ -12,7 +12,7 @@
  * - Real-time antigen presentation
  * - Immediate immune response triggering
  *
- * Backend Endpoint: ws://localhost:8000/stream/apv/ws
+ * Backend Endpoint: ws://34.148.161.131:8000/stream/apv/ws
  *
  * Message Types:
  * - apv: New vulnerability detected

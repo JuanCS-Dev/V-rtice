@@ -1,0 +1,83 @@
+{
+  "titulo": "Vértice - Autonomous Cybersecurity Intelligence Platform",
+  "duracao_total": 180,
+  "cenas": [
+    {
+      "id": 1,
+      "duracao": 18,
+      "timestamp_inicio": 0,
+      "acao": "wait_landing_page",
+      "narracao": "Welcome to Vértice. A next-generation cybersecurity platform powered by adaptive AI and reactive architectures."
+    },
+    {
+      "id": 2,
+      "duracao": 16,
+      "timestamp_inicio": 18,
+      "acao": "navigate_to_maximus_dashboard",
+      "narracao": "At its core is MAXIMUS: a multi-agent cognitive intelligence system with emergent consciousness."
+    },
+    {
+      "id": 3,
+      "duracao": 17,
+      "timestamp_inicio": 34,
+      "acao": "show_consciousness_tab",
+      "narracao": "MAXIMUS features Theory of Mind capabilities, enabling deep understanding of threat actor psychology."
+    },
+    {
+      "id": 4,
+      "duracao": 16,
+      "timestamp_inicio": 51,
+      "acao": "wait_consciousness_metrics",
+      "narracao": "The system monitors its own cognitive states through real-time consciousness metrics and synchronization analysis."
+    },
+    {
+      "id": 5,
+      "duracao": 15,
+      "timestamp_inicio": 67,
+      "acao": "navigate_to_offensive_dashboard",
+      "narracao": "Vértice's Offensive Intelligence module executes autonomous penetration testing and vulnerability assessment."
+    },
+    {
+      "id": 6,
+      "duracao": 16,
+      "timestamp_inicio": 82,
+      "acao": "wait_offensive_modules",
+      "narracao": "Real-time tracking of offensive operations with detailed execution logs and success metrics."
+    },
+    {
+      "id": 7,
+      "duracao": 15,
+      "timestamp_inicio": 98,
+      "acao": "navigate_to_defensive_dashboard",
+      "narracao": "The Defensive layer provides adaptive immunity, with self-healing security infrastructure."
+    },
+    {
+      "id": 8,
+      "duracao": 16,
+      "timestamp_inicio": 113,
+      "acao": "wait_defensive_metrics",
+      "narracao": "Biomimetic immune responses detect and neutralize threats in real-time, learning from each attack."
+    },
+    {
+      "id": 9,
+      "duracao": 15,
+      "timestamp_inicio": 129,
+      "acao": "navigate_to_chat",
+      "narracao": "The NLP interface enables natural language interaction with MAXIMUS for threat analysis and system control."
+    },
+    {
+      "id": 10,
+      "duracao": 16,
+      "timestamp_inicio": 144,
+      "acao": "show_monitoring_overview",
+      "narracao": "All operations are monitored through comprehensive observability: metrics, tracing, and centralized logging."
+    },
+    {
+      "id": 11,
+      "duracao": 20,
+      "timestamp_inicio": 160,
+      "acao": "return_to_landing",
+      "narracao": "Vértice. Where artificial consciousness meets adaptive cybersecurity. The future of autonomous defense is here."
+    }
+  ]
+}

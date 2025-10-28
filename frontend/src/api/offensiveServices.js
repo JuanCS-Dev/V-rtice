@@ -1,9 +1,12 @@
 import logger from '@/utils/logger';
+import { ServiceEndpoints } from '../config/endpoints';
+
 /**
  * Offensive Security Arsenal - API Client
  * ========================================
  *
- * Cliente unificado para os 6 serviços do arsenal ofensivo:
+ * Cliente unificado para os 6 serviços do arsenal ofensivo via API Gateway certificado.
+ * Todos os requests passam pelo API Gateway (porta 8000) que roteia para:
  * - Network Reconnaissance (8032)
  * - Vulnerability Intelligence (8033)
  * - Web Attack Surface (8034)
@@ -12,17 +15,19 @@ import logger from '@/utils/logger';
  * - Offensive Gateway (8037)
  *
  * QUALITY-FIRST: Implementação real, zero mocks, zero placeholders.
+ * FIXED 2025-10-27: Air Gap #1 - Now uses API Gateway instead of localhost
  */
 
-const API_BASE = 'http://localhost';
+// ✅ FIX: Use API Gateway instead of localhost
+const API_BASE = ServiceEndpoints.apiGateway;
 
 const ENDPOINTS = {
-  NETWORK_RECON: `${API_BASE}:8032`,
-  VULN_INTEL: `${API_BASE}:8033`,
-  WEB_ATTACK: `${API_BASE}:8034`,
-  C2_ORCHESTRATION: `${API_BASE}:8035`,
-  BAS: `${API_BASE}:8036`,
-  OFFENSIVE_GATEWAY: `${API_BASE}:8037`,
+  NETWORK_RECON: `${API_BASE}/offensive/network-recon`,
+  VULN_INTEL: `${API_BASE}/offensive/vuln-intel`,
+  WEB_ATTACK: `${API_BASE}/offensive/web-attack`,
+  C2_ORCHESTRATION: `${API_BASE}/offensive/c2`,
+  BAS: `${API_BASE}/offensive/bas`,
+  OFFENSIVE_GATEWAY: `${API_BASE}/offensive/gateway`,
 };
 
 /**

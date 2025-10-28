@@ -2,7 +2,8 @@ import { useState, useEffect, useContext, useCallback } from 'react';
 import logger from '@/utils/logger';
 import { AuthContext } from '../../../../contexts/AuthContext';
 
-const API_BASE = 'http://localhost:8000/api/social-eng';
+import { API_ENDPOINTS } from '@/config/api';
+const API_BASE = API_ENDPOINTS.socialEng;
 
 export const useSocialEngineering = () => {
   const { user, getAuthToken } = useContext(AuthContext);

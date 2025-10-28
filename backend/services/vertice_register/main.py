@@ -105,10 +105,12 @@ async def lifespan(app: FastAPI):
     # Initialize Redis backend with circuit breaker
     redis_host = os.getenv("REDIS_HOST", "vertice-redis-master")
     redis_port = int(os.getenv("REDIS_PORT", "6379"))
+    redis_password = os.getenv("REDIS_PASSWORD")  # Read password from environment
 
     redis_backend = RedisBackend(
         host=redis_host,
         port=redis_port,
+        password=redis_password,
         circuit_breaker_threshold=3
     )
 

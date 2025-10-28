@@ -79,9 +79,12 @@ export const VirtualizedExecutionsList = ({
   filterStatus = null,
   filterType = null,
 }) => {
+  // SAFE GUARD: Ensure executions is always an array
+  const safeExecutions = Array.isArray(executions) ? executions : [];
+  
   // Filter executions
   const filteredExecutions = useMemo(() => {
-    let filtered = executions;
+    let filtered = safeExecutions;
 
     if (filterStatus) {
       filtered = filtered.filter((exec) => exec.status === filterStatus);
@@ -92,7 +95,7 @@ export const VirtualizedExecutionsList = ({
     }
 
     return filtered;
-  }, [executions, filterStatus, filterType]);
+  }, [safeExecutions, filterStatus, filterType]);
 
   // Render function
   const renderExecution = useCallback(
