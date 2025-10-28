@@ -11,7 +11,7 @@ FAILED=0
 check_command() {
     local cmd=$1
     local version_flag=$2
-    
+
     echo -n "Verificando '$cmd'... "
     if command -v "$cmd" &> /dev/null; then
         echo "✅ OK"
@@ -67,7 +67,7 @@ fi
 # Verificar billing (método alternativo rápido)
 if [ -n "$PROJECT" ]; then
     echo -n "Verificando billing no projeto... "
-    
+
     # Tenta listar APIs habilitadas (prova indireta de billing ativo)
     # Timeout de 5 segundos para evitar travamento
     if timeout 5 gcloud services list --enabled --project="$PROJECT" --limit=1 &> /dev/null; then

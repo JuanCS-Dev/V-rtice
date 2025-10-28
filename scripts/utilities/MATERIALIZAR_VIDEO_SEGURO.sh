@@ -51,7 +51,7 @@ echo ""
 
 if [ "$DRY_RUN" != "--dry-run" ]; then
     bash gerar_narracao_gcp.sh
-    
+
     if [ $? -ne 0 ]; then
         echo ""
         echo "❌ Geração de narração falhou."
@@ -88,14 +88,14 @@ fi
 if [ "$DRY_RUN" != "--dry-run" ]; then
     # Executar Playwright
     npx playwright test video_tour.spec.ts
-    
+
     if [ $? -ne 0 ]; then
         echo ""
         echo "❌ Gravação Playwright falhou."
         echo "Verifique se o frontend está rodando em http://localhost:5173"
         exit 1
     fi
-    
+
     # Extrair vídeo
     echo ""
     bash extrair_video_playwright.sh
@@ -111,7 +111,7 @@ echo ""
 
 if [ "$DRY_RUN" != "--dry-run" ]; then
     bash montagem_final.sh
-    
+
     if [ $? -ne 0 ]; then
         echo ""
         echo "❌ Montagem final falhou."
@@ -153,4 +153,3 @@ echo ""
 echo "═══════════════════════════════════════════════════════════"
 
 cd ..
-
