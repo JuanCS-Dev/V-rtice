@@ -40,6 +40,157 @@ Traditional cybersecurity is reactive and rigid. **Biological systems are adapti
 
 ---
 
+## ⚠️ LEGAL DISCLAIMER - OFFENSIVE SECURITY TOOLS
+
+**READ THIS BEFORE USING VÉRTICE-MAXIMUS**
+
+Vértice-MAXIMUS contains **offensive security capabilities** including autonomous penetration testing, C2 orchestration, exploit frameworks, and OSINT tools. These features are designed **EXCLUSIVELY for authorized security testing** in controlled environments.
+
+### 🚨 Legal Notice
+
+**BY USING THIS SOFTWARE, YOU AGREE TO THE FOLLOWING:**
+
+1. **You have EXPLICIT WRITTEN AUTHORIZATION** from system owners before conducting any security testing
+2. **You will COMPLY with all applicable laws** in your jurisdiction
+3. **You accept FULL LEGAL RESPONSIBILITY** for your actions
+4. **You will NOT use these tools** for unauthorized access, illegal activities, or malicious purposes
+
+### ⚖️ Legal Framework
+
+#### 🇺🇸 United States Laws
+
+**Unauthorized use of offensive security tools violates:**
+
+- **18 U.S.C. § 1030 (Computer Fraud and Abuse Act - CFAA)**
+  - Unauthorized access to protected computers is a **federal crime**
+  - Penalties: Up to **20 years imprisonment**, **$250,000 fines** (individuals), **$500,000** (organizations)
+  - Applies to any computer used in interstate/foreign commerce
+
+- **18 U.S.C. § 2701 (Stored Communications Act)**
+  - Unauthorized access to stored electronic communications
+  - Penalties: Up to **5 years imprisonment**, civil damages
+
+- **18 U.S.C. § 2511 (Wiretap Act)**
+  - Interception of electronic communications
+  - Penalties: Up to **5 years imprisonment**, **$250,000 fines**
+
+- **DMCA § 1201 (Digital Millennium Copyright Act)**
+  - Anti-circumvention provisions with **security research exceptions** under § 1201(j)
+  - Requires **good faith security research** with authorization
+
+**Security Research Exception**: DMCA § 1201(j) allows security testing IF you have authorization and act in good faith.
+
+#### 🇧🇷 Brazilian Laws (Leis Brasileiras)
+
+**O uso não autorizado viola:**
+
+- **Lei 12.737/2012 (Lei Carolina Dieckmann)**
+  - **Art. 154-A**: Invasão de dispositivo informático
+    - Penas: **Detenção de 3 meses a 1 ano + multa**
+    - Qualificação (dados sensíveis): **Reclusão de 6 meses a 2 anos + multa**
+  - **Art. 154-B**: Disseminação de ferramentas de invasão sem autorização
+    - Penas: **Detenção de 6 meses a 2 anos + multa**
+
+- **Lei 12.965/2014 (Marco Civil da Internet)**
+  - Art. 10: Inviolabilidade e sigilo de dados e comunicações
+  - Art. 11: Direitos e garantias do usuário
+  - Violações podem resultar em **responsabilidade civil e criminal**
+
+- **Lei 13.709/2018 (LGPD - Lei Geral de Proteção de Dados)**
+  - Proteção de dados pessoais é obrigatória
+  - Sanções administrativas: Multas de até **R$ 50 milhões** ou **2% do faturamento**
+  - Violações graves podem resultar em **ações criminais**
+
+- **Código Penal Brasileiro**
+  - **Art. 313-A/313-B**: Crimes de inserção/modificação não autorizada de dados
+  - Penas: **Reclusão de 2 a 12 anos + multa**
+
+#### 🇪🇺 European Union & International
+
+- **GDPR (General Data Protection Regulation)**: Data protection requirements, up to **€20M fines** or **4% of global revenue**
+- **Computer Misuse Act (UK)**: Unauthorized access is a criminal offense, up to **10 years imprisonment**
+- **NIS Directive**: Network security obligations for critical infrastructure operators
+
+### ✅ Authorized Use Cases
+
+Vértice-MAXIMUS is **LEGAL and APPROPRIATE** for:
+
+- ✅ **Authorized penetration testing** with written permission from system owners
+- ✅ **Security research** on systems you own or have explicit authorization to test
+- ✅ **Red team exercises** conducted by/for organizations on their own infrastructure
+- ✅ **CTF competitions** and authorized hacking challenges
+- ✅ **Educational purposes** in isolated lab environments (not connected to production networks)
+- ✅ **Bug bounty programs** where you follow the program's rules and scope
+- ✅ **Defensive security** (detection, monitoring, threat intelligence) with proper authorization
+
+### ❌ Prohibited Use Cases
+
+The following uses are **ILLEGAL and PROHIBITED**:
+
+- ❌ **Unauthorized access** to any computer system, network, or data
+- ❌ **Scanning or attacking** systems without explicit written permission
+- ❌ **Deploying malware** or destructive payloads on unauthorized systems
+- ❌ **Data exfiltration** from systems you don't own or aren't authorized to test
+- ❌ **Denial of service attacks** against any target
+- ❌ **Credential harvesting** or phishing without authorization
+- ❌ **Exploiting vulnerabilities** for personal gain, extortion, or malicious purposes
+- ❌ **Violating bug bounty program rules** or testing out-of-scope targets
+
+### 📋 Authorization Requirements
+
+**Before using Vértice-MAXIMUS offensive capabilities, you MUST have:**
+
+1. **Written authorization** specifying:
+   - Target systems (IP ranges, domains, applications)
+   - Authorized testing timeframe
+   - Permitted testing techniques
+   - Point of contact for emergencies
+   - Scope boundaries and exclusions
+
+2. **Legal review** confirming compliance with:
+   - Local laws (federal, state/provincial, municipal)
+   - International laws (if targets are cross-border)
+   - Contractual obligations (NDAs, service agreements)
+   - Industry regulations (PCI-DSS, HIPAA, etc.)
+
+3. **Technical safeguards**:
+   - Isolated testing environment OR authorized production access
+   - Documented scope and exclusions in configuration
+   - Audit logging enabled for all operations
+   - Incident response procedures in place
+
+### 🔒 Security & Audit Features
+
+Vértice-MAXIMUS includes built-in safeguards:
+
+- **Authorization checks** before executing offensive operations
+- **Scope validation** to prevent out-of-scope testing
+- **Comprehensive audit logging** of all offensive actions
+- **Rate limiting** to prevent accidental DoS conditions
+- **Safe defaults** (passive scanning unless explicitly enabled)
+
+### 📞 Contact & Legal Questions
+
+- **Security/Legal Inquiries**: juan@vertice-maximus.com
+- **Security Vulnerability Reports**: See [SECURITY.md](./SECURITY.md)
+- **Code of Conduct**: See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
+- **Contributing Guidelines**: See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+### 🎓 Educational Resources
+
+- [SANS Ethics Guidelines](https://www.sans.org/security-resources/ethics.php)
+- [EC-Council Code of Ethics](https://www.eccouncil.org/code-of-ethics/)
+- [CERT Coordinated Vulnerability Disclosure](https://vuls.cert.org/confluence/display/CVD)
+- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+
+---
+
+**BY PROCEEDING WITH INSTALLATION, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREED TO THESE TERMS.**
+
+**THE AUTHORS AND CONTRIBUTORS DISCLAIM ALL LIABILITY FOR MISUSE OF THIS SOFTWARE. YOU ARE SOLELY RESPONSIBLE FOR YOUR ACTIONS.**
+
+---
+
 ## ⚡ Quick Start
 
 ### Installation

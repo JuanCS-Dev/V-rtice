@@ -209,3 +209,50 @@ While the software is licensed under Apache 2.0, the copyright holder maintains
 authorship rights and requests proper attribution in derivative works.
 
 ═══════════════════════════════════════════════════════════════════════════
+
+ADDITIONAL LEGAL RESTRICTIONS FOR OFFENSIVE SECURITY CAPABILITIES
+
+This software includes offensive security tools, penetration testing capabilities,
+and exploit frameworks. In addition to the Apache License 2.0 terms above:
+
+1. AUTHORIZATION REQUIREMENT
+   You MUST obtain explicit written authorization from system owners before
+   using any offensive security features against any computer system, network,
+   or data. Unauthorized access is illegal under multiple jurisdictions.
+
+2. COMPLIANCE WITH APPLICABLE LAWS
+   You agree to comply with all applicable laws including but not limited to:
+   - United States: 18 U.S.C. § 1030 (CFAA), 18 U.S.C. § 2701, § 2511, DMCA § 1201
+   - Brazil: Lei 12.737/2012, Lei 12.965/2014, Lei 13.709/2018
+   - European Union: GDPR, Computer Misuse Acts, NIS Directive
+   - Any other applicable local, state, federal, or international laws
+
+3. PROHIBITED USES
+   The following uses are STRICTLY PROHIBITED and constitute license violations:
+   - Unauthorized access to computer systems, networks, or data
+   - Deployment of malware or destructive payloads without authorization
+   - Denial of service attacks
+   - Data exfiltration without authorization
+   - Any use for illegal purposes, extortion, fraud, or malicious intent
+
+4. NO LIABILITY FOR MISUSE
+   THE COPYRIGHT HOLDER AND CONTRIBUTORS EXPRESSLY DISCLAIM ALL LIABILITY
+   FOR MISUSE, UNAUTHORIZED USE, OR ILLEGAL USE OF THIS SOFTWARE. YOU ARE
+   SOLELY RESPONSIBLE FOR YOUR ACTIONS AND ANY LEGAL CONSEQUENCES.
+
+5. TERMINATION FOR VIOLATION
+   Your license is automatically terminated if you violate these additional
+   restrictions. The copyright holder reserves the right to report violations
+   to appropriate law enforcement authorities.
+
+6. SECURITY RESEARCH EXCEPTION
+   Authorized security research, penetration testing with proper authorization,
+   red team exercises on systems you own or are authorized to test, and
+   educational use in isolated lab environments are permitted uses.
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD,
+AND AGREED TO THESE ADDITIONAL RESTRICTIONS.
+
+For legal questions or to report misuse: juan@vertice-maximus.com
+
+═══════════════════════════════════════════════════════════════════════════
