@@ -7,7 +7,8 @@
  *
  * A living cybersecurity organism that learns, adapts, and evolves.
  *
- * Copyright © 2025 Juan [Your Last Name]
+ * Copyright © 2025 Juan Carlos de Souza
+ * Contact: juan@vertice-maximus.com
  * Licensed under Apache 2.0
  * ═══════════════════════════════════════════════════════════════════════════
  */

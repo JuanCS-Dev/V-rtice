@@ -301,7 +301,7 @@ This means:
 
 See [LICENSE](LICENSE) for full terms.
 
-**Copyright © 2025 Juan [Your Last Name]. All rights reserved.**
+**Copyright © 2025 Juan Carlos de Souza. All rights reserved.**
 
 ---
 
@@ -310,15 +310,25 @@ See [LICENSE](LICENSE) for full terms.
 - 🌐 **Website**: [https://vertice-maximus.web.app](https://vertice-maximus.web.app)
 - 📖 **Documentation**: [https://vertice-maximus.web.app/architecture](https://vertice-maximus.web.app/architecture)
 - 💬 **Discord**: [https://discord.gg/vertice-maximus](https://discord.gg/vertice-maximus)
-- 🐙 **GitHub**: [https://github.com/yourusername/vertice-dev](https://github.com/yourusername/vertice-dev)
-- 🐦 **Twitter/X**: [@VerticeMaximus](https://twitter.com/VerticeMaximus)
-- 📧 **Contact**: [hello@vertice.dev](mailto:hello@vertice.dev)
+- 🐙 **GitHub**: [https://github.com/JuanCS-Dev/V-rtice](https://github.com/JuanCS-Dev/V-rtice)
+- 📧 **Contact**: [juan@vertice-maximus.com](mailto:juan@vertice-maximus.com)
+
+---
+
+## 🎨 Credits & Attribution
+
+**Architecture & Vision**
+Juan Carlos de Souza - [juan@vertice-maximus.com](mailto:juan@vertice-maximus.com)
+*"Before I formed you in the womb I knew you"* - John 9:25, Holy Bible
+
+**Execution & Documentation**
+Built with [Claude Code](https://claude.com/claude-code) by Anthropic
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by Juan and the Vértice Community**
+**Built with ❤️ by Juan Carlos de Souza and the Vértice Community**
 
 *"Not just software. A living organism."*
 

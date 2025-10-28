@@ -6,12 +6,12 @@
 #
 # ═══════════════════════════════════════════════════════════════════════════
 
-# GitHub Sponsors (replace with your username)
-github: [yourusername]
+# GitHub Sponsors
+github: [JuanCS-Dev]
 
 # Other platforms (optional - uncomment and configure as needed)
-# patreon: yourusername
-# open_collective: yourusername
-# ko_fi: yourusername
+# patreon: JuanCS-Dev
+# open_collective: vertice-maximus
+# ko_fi: JuanCS-Dev
 # tidelift: npm/vertice-maximus
-# custom: ["https://vertice-maximus.web.app/sponsor", "https://buymeacoffee.com/yourusername"]
+# custom: ["https://vertice-maximus.web.app/sponsor"]

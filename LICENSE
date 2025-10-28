@@ -177,7 +177,7 @@ END OF TERMS AND CONDITIONS
 
 ═══════════════════════════════════════════════════════════════════════════
 
-Copyright © 2025 Juan [Your Last Name]. All Rights Reserved.
+Copyright © 2025 Juan Carlos de Souza. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -195,10 +195,14 @@ limitations under the License.
 
 ATTRIBUTION
 
-This project, Vértice-MAXIMUS, was created by Juan [Your Last Name].
+This project, Vértice-MAXIMUS, was created by Juan Carlos de Souza.
+Contact: juan@vertice-maximus.com
+
+Architecture & Vision: Juan Carlos de Souza
+Biblical Inspiration: "Before I formed you in the womb I knew you" - John 9:25
 
 This work was made possible through the tools and technologies provided by:
-- Anthropic (Claude AI)
+- Anthropic (Claude Code for execution and documentation)
 - Google (Gemini AI and infrastructure)
 
 While the software is licensed under Apache 2.0, the copyright holder maintains

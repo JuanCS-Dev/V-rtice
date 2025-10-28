@@ -17,13 +17,13 @@
   "homepage": "https://vertice-maximus.web.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/vertice-dev.git"
+    "url": "https://github.com/JuanCS-Dev/V-rtice.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/vertice-dev/issues"
+    "url": "https://github.com/JuanCS-Dev/V-rtice/issues"
   },
   "license": "Apache-2.0",
-  "author": "Juan [Your Last Name] <your.email@example.com>",
+  "author": "Juan Carlos de Souza <juan@vertice-maximus.com>",
   "main": "bin/vertice.js",
   "bin": {
     "vertice": "./bin/vertice.js"
