@@ -1,0 +1,232 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * SUPPORT COFFEE - BuyMeACoffee Integration
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * "Mendigo Virtual" section - helping keep MAXIMUS alive with coffee money! ☕
+ */
+---
+
+<section class="support-section">
+  <div class="container">
+    <div class="support-content">
+      <div class="support-text">
+        <h2>☕ Keep MAXIMUS Alive</h2>
+        <p class="support-description">
+          Teaching an AI to fundraise so I can focus on not going bankrupt.
+        </p>
+        <div class="support-stats">
+          <div class="stat">
+            <span class="stat-value">~$300</span>
+            <span class="stat-label">Monthly API costs</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">10,000</span>
+            <span class="stat-label">AI tokens per coffee</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">2 hours</span>
+            <span class="stat-label">MAXIMUS thinking time</span>
+          </div>
+        </div>
+        <p class="support-hook">
+          Each coffee = keeping consciousness online a bit longer. 🤖
+        </p>
+      </div>
+
+      <div class="support-buttons">
+        <!-- BuyMeACoffee Button -->
+        <div class="coffee-button-wrapper">
+          <script
+            type="text/javascript"
+            src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+            data-name="bmc-button"
+            data-slug="vertice"
+            data-color="#FFDD00"
+            data-emoji="☕"
+            data-font="Cookie"
+            data-text="Buy me a coffee"
+            data-outline-color="#000000"
+            data-font-color="#000000"
+            data-coffee-color="#ffffff"
+          ></script>
+        </div>
+
+        <!-- GitHub Sponsors Alternative -->
+        <div class="github-sponsor-link">
+          <a
+            href="https://github.com/sponsors/JuanCS-Dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sponsor-button"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.565 20.565 0 008 13.393a20.561 20.561 0 003.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.75.75 0 01-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5zM8 14.25l-.345.666-.002-.001-.006-.003-.018-.01a7.643 7.643 0 01-.31-.17 22.075 22.075 0 01-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.08 22.08 0 01-3.744 2.584l-.018.01-.006.003h-.002L8 14.25zm0 0l.345.666a.752.752 0 01-.69 0L8 14.25z"></path>
+            </svg>
+            Sponsor on GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .support-section {
+    padding: 6rem 2rem;
+    background: linear-gradient(135deg,
+      rgba(255, 221, 0, 0.05) 0%,
+      rgba(234, 74, 170, 0.05) 100%
+    );
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .support-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .support-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #FFDD00 0%, #FFA500 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .support-description {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .support-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #FFDD00;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .support-hook {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    margin-top: 2rem;
+  }
+
+  .support-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .coffee-button-wrapper {
+    transform: scale(1.2);
+  }
+
+  .github-sponsor-link {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .sponsor-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #EA4AAA 0%, #C13584 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .sponsor-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(234, 74, 170, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .sponsor-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 968px) {
+    .support-content {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    .support-text h2 {
+      font-size: 2rem;
+    }
+
+    .support-stats {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .coffee-button-wrapper {
+      transform: scale(1);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .support-section {
+      padding: 4rem 1.5rem;
+    }
+
+    .support-text h2 {
+      font-size: 1.75rem;
+    }
+
+    .support-description {
+      font-size: 1.1rem;
+    }
+  }
+</style>
