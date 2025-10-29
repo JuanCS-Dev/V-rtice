@@ -11,7 +11,7 @@ import styles from './OffensiveSidebar.module.css';
 
 export const OffensiveSidebar = ({ executions, ariaLabel }) => {
   return (
-    <aside className={styles.sidebar} role="complementary" aria-label={ariaLabel || 'Live Executions'}>
+    <aside className={styles.sidebar} aria-label={ariaLabel || 'Live Executions'}>
       <div className={styles.sidebarHeader}>
         <h3 className={styles.sidebarTitle}>
           <span className={styles.sidebarIcon} aria-hidden="true">⚡</span>

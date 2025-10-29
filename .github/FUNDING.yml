@@ -2,16 +2,89 @@
 # GITHUB SPONSORS CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════
 #
-# Support Vértice-MAXIMUS development through GitHub Sponsors
+# Support Vértice-MAXIMUS development through multiple platforms
+#
+# Every coffee = ~10,000 tokens = 2 hours of MAXIMUS thinking! 🧠☕
 #
 # ═══════════════════════════════════════════════════════════════════════════
 
-# GitHub Sponsors
+# GitHub Sponsors (Preferred - integrated with GitHub)
 github: [JuanCS-Dev]
 
-# Other platforms (optional - uncomment and configure as needed)
-# patreon: JuanCS-Dev
+# Buy Me A Coffee (One-time or recurring support)
+# https://buymeacoffee.com/vertice
+buy_me_a_coffee: vertice
+
+# ═══════════════════════════════════════════════════════════════════════════
+# FUTURE PLATFORMS (Configure when ready)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Patreon (Recurring membership tiers)
+# Uncomment after setting up: https://patreon.com
+# Ideal for: Monthly supporters with exclusive benefits
+# patreon: YOUR_PATREON_USERNAME
+
+# Open Collective (Transparent funding for organizations)
+# Uncomment after setting up: https://opencollective.com
+# Ideal for: Corporate sponsors, fiscal transparency
 # open_collective: vertice-maximus
-# ko_fi: JuanCS-Dev
+
+# Ko-fi (Similar to Buy Me A Coffee)
+# Uncomment after setting up: https://ko-fi.com
+# Ideal for: Alternative to BMAC, supports shops
+# ko_fi: YOUR_KOFI_USERNAME
+
+# Tidelift (Enterprise open source support)
+# Uncomment after npm package is published
+# Ideal for: Enterprise customers needing SLAs
 # tidelift: npm/vertice-maximus
-# custom: ["https://vertice-maximus.web.app/sponsor"]
+
+# Custom Funding Links (Your own pages)
+# Uncomment and add custom URLs
+# custom: ["https://vertice-maximus.web.app/sponsor", "https://donate.example.com"]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PLATFORM COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# GitHub Sponsors:
+#   ✅ Integrated with GitHub (1-click support button)
+#   ✅ Recurring tiers with benefits
+#   ✅ Matching program (GitHub may match first $5k/year)
+#   ⚠️  Requires approval + Stripe Connect setup
+#   💰 Low fees (depends on region)
+#
+# Buy Me A Coffee:
+#   ✅ Instant setup, no approval needed
+#   ✅ One-time or membership support
+#   ✅ Simple, friendly UX
+#   ⚠️  5% platform fee
+#   💰 Good for individual supporters
+#
+# Patreon:
+#   ✅ Mature platform with large user base
+#   ✅ Advanced membership tiers
+#   ✅ Exclusive content/benefits
+#   ⚠️  5-12% fees (depending on plan)
+#   💰 Best for creators with exclusive content
+#
+# Open Collective:
+#   ✅ 100% transparent (all transactions public)
+#   ✅ Fiscal sponsorship available
+#   ✅ Ideal for communities/organizations
+#   ⚠️  10% platform + fiscal sponsor fees
+#   💰 Best for community-driven projects
+#
+# Ko-fi:
+#   ✅ Zero fees for one-time donations
+#   ✅ Supports digital shop (sell products)
+#   ⚠️  5% for memberships (Ko-fi Gold)
+#   💰 Good alternative to BMAC
+#
+# Tidelift:
+#   ✅ Enterprise customers with SLAs
+#   ✅ Security/maintenance guarantees
+#   ⚠️  Requires application + approval
+#   💰 Best for enterprise open source
+#
+# ═══════════════════════════════════════════════════════════════════════════

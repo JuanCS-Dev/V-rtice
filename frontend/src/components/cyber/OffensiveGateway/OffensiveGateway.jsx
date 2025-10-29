@@ -102,7 +102,7 @@ export const OffensiveGateway = () => {
   return (
     <article
       className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
-      role="article"
+
       aria-labelledby="offensive-gateway-title"
       data-maximus-tool="offensive-gateway"
       data-maximus-category="offensive"
@@ -205,7 +205,7 @@ export const OffensiveGateway = () => {
       {/* Content */}
       <section
         className="flex-1 overflow-auto p-6"
-        role="region"
+
         aria-label="Offensive gateway content"
         data-maximus-section="content">
 

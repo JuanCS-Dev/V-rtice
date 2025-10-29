@@ -73,7 +73,6 @@ export const C2Orchestration = () => {
   return (
     <article
       className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
-      role="article"
       aria-labelledby="c2-orchestration-title"
       data-maximus-tool="c2-orchestration"
       data-maximus-category="offensive"
@@ -197,7 +196,6 @@ export const C2Orchestration = () => {
       {/* Content Area */}
       <section
         className="flex-1 overflow-auto p-6 custom-scrollbar"
-        role="region"
         aria-label="C2 orchestration content"
         data-maximus-section="content">
 

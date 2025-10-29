@@ -90,7 +90,6 @@ export const BAS = () => {
   return (
     <article
       className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
-      role="article"
       aria-labelledby="bas-title"
       data-maximus-tool="bas"
       data-maximus-category="offensive"
@@ -214,7 +213,6 @@ export const BAS = () => {
       {/* Content Area */}
       <section
         className="flex-1 overflow-auto p-6 custom-scrollbar"
-        role="region"
         aria-label="BAS content"
         data-maximus-section="content">
 

@@ -96,11 +96,13 @@ Thumbs.db
 # Secrets & credentials
 *.pem
 *.key
+.env
 *.env
 .env.*
 secrets/
 vault-data/
 *.credentials
+k8s/secrets/*.yaml
 
 # Docker volumes & data
 data/postgres/
@@ -145,6 +147,15 @@ yarn-error.log*
 *.pt
 *.pth
 models/downloads/
+
+# Cloud SDKs and CLI tools
+google-cloud-sdk/
+google-cloud-cli*/
+
+# CLI binaries (build from source)
+vcli-go/vcli
+vcli-go/vcli.bak
+vcli-go/*.bak
 
 # Generated files
 *.generated.*

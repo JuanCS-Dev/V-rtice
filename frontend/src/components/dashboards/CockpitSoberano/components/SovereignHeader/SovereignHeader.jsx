@@ -113,7 +113,7 @@ export const SovereignHeader = ({
 
       <section
         className={styles.metricsBar}
-        role="region"
+
         aria-label={t('cockpit.metrics.title', 'Command center metrics')}
         data-maximus-section="metrics"
         data-maximus-metrics="cockpit">

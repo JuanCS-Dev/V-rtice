@@ -1,0 +1,132 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for the organism
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Help us understand what you'd like to see added to Vértice-MAXIMUS.
+
+        **Before submitting:** Check if this feature has already been requested by searching [existing issues](https://github.com/JuanCS-Dev/V-rtice/issues).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: I'm frustrated when the organism doesn't...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: I would like the organism to...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Which Component?
+      description: Where should this feature be implemented?
+      options:
+        - Frontend (Cockpit UI)
+        - Backend (New Service/Microservice)
+        - Consciousness (MAXIMUS AI)
+        - Immune System (New Cell Type)
+        - Offensive Operations
+        - CLI (vertice command)
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: biological_layer
+    attributes:
+      label: Biological Layer
+      description: Which immune system layer would benefit from this feature?
+      options:
+        - Layer 1 - Tegumentar (Firewall)
+        - Layer 2 - Reflex Defense
+        - Layer 3 - Neutrophils (First Responders)
+        - Layer 4 - Macrophages (Deep Analyzers)
+        - Layer 5 - Dendritic Cells (Threat Intel)
+        - Layer 6 - T-Helper Cells (Coordinators)
+        - Layer 7 - Adaptive Immune Response
+        - Layer 8 - Immunological Memory
+        - Layer 9 - Consciousness (MAXIMUS)
+        - Cross-layer / System-wide
+        - Not applicable
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: I've tried... but...
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case
+      description: Describe a specific scenario where this feature would be valuable
+      placeholder: |
+        As a SOC analyst, I need...
+        When responding to incidents, I want...
+      validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (Your Perspective)
+      description: How important is this feature to you?
+      options:
+        - Critical - Blocking my use of Vértice
+        - High - Significantly improves workflow
+        - Medium - Nice to have
+        - Low - Minor enhancement
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or references
+      placeholder: Links to similar features in other tools, mockups, architecture diagrams, etc.
+
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution
+      description: Would you be willing to help implement this feature?
+      options:
+        - label: I'm willing to submit a PR for this feature
+          required: false
+        - label: I can help with testing/validation
+          required: false
+        - label: I can provide domain expertise/guidance
+          required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm before submitting
+      options:
+        - label: I have searched existing issues to ensure this hasn't been requested
+          required: true
+        - label: This feature aligns with Vértice's biological architecture philosophy
+          required: false
+        - label: I have provided a clear use case demonstrating the value
+          required: true

@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/JuanCS-Dev/V-rtice/discussions
+    about: Ask questions and discuss ideas with the community (if enabled)
+  - name: 📖 Documentation
+    url: https://vertice-maximus.web.app
+    about: Read the full documentation and guides
+  - name: 🔒 Private Security Report
+    url: mailto:security@vertice-maximus.com
+    about: Report CRITICAL security vulnerabilities privately via email
+  - name: 💖 Support Development
+    url: https://github.com/sponsors/JuanCS-Dev
+    about: Support Vértice-MAXIMUS development through GitHub Sponsors
+  - name: ☕ Buy Me A Coffee
+    url: https://buymeacoffee.com/vertice
+    about: Keep MAXIMUS consciousness online (every coffee = 10k tokens)

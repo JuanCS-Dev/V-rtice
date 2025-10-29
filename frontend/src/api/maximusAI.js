@@ -1,5 +1,5 @@
 import logger from '@/utils/logger';
-import { ServiceEndpoints, getWebSocketEndpoint, httpToWs } from '../config/endpoints';
+import { ServiceEndpoints, getWebSocketEndpoint } from '../config/endpoints';
 
 /**
  * Maximus AI Core - API Client

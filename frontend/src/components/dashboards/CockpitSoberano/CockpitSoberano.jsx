@@ -66,7 +66,7 @@ export const CockpitSoberano = ({ setCurrentView }) => {
   return (
     <article
       className={styles.cockpitContainer}
-      role="article"
+
       aria-labelledby="cockpit-soberano-title"
       data-maximus-module="cockpit-soberano"
       data-maximus-navigable="true"
@@ -93,14 +93,14 @@ export const CockpitSoberano = ({ setCurrentView }) => {
       <section
         id="cockpit-content"
         className={styles.mainContent}
-        role="region"
+
         aria-label={t('cockpit.workspace', 'Command center workspace')}
         data-maximus-section="workspace">
 
         {/* Left Panel: Verdicts */}
         <section
           className={styles.leftPanel}
-          role="region"
+
           aria-label={t('cockpit.verdicts.title', 'Verdicts')}
           aria-live="polite"
           aria-atomic="false"
@@ -120,13 +120,13 @@ export const CockpitSoberano = ({ setCurrentView }) => {
         {/* Right Panel: Alliance Graph + Command Console */}
         <aside
           className={styles.rightPanel}
-          role="complementary"
+
           aria-label={t('cockpit.sidePanel', 'Alliance graph and command console')}
           data-maximus-section="side-panel">
 
           <section
             className={styles.graphSection}
-            role="region"
+
             aria-label={t('cockpit.allianceGraph', 'Alliance relationship graph')}
             data-maximus-section="alliance-graph"
             data-maximus-interactive="true">
@@ -141,7 +141,7 @@ export const CockpitSoberano = ({ setCurrentView }) => {
 
           <section
             className={styles.commandSection}
-            role="region"
+
             aria-label={t('cockpit.commandConsole', 'C2L command console')}
             data-maximus-section="command-console"
             data-maximus-interactive="true">

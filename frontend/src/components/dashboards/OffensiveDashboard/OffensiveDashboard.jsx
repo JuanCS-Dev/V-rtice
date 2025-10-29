@@ -55,7 +55,6 @@ const NetworkScanner = lazy(() => import('../../cyber/NetworkScanner/NetworkScan
 // NEW: Defensive Arsenal Tools (Active Immune System)
 const BehavioralAnalyzer = lazy(() => import('../../cyber/BehavioralAnalyzer/BehavioralAnalyzer'));
 const TrafficAnalyzer = lazy(() => import('../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer'));
-const MAVDetection = lazy(() => import('../../cyber/MAVDetection/MAVDetection'));
 
 const LoadingFallback = () => {
   const { t } = useTranslation();
@@ -96,8 +95,7 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
     { id: 'bas', name: t('dashboard.offensive.modules.bas'), icon: '💥', component: BAS },
     { id: 'offensive-gateway', name: t('dashboard.offensive.modules.gateway'), icon: '⚔️', component: OffensiveGateway },
     { id: 'behavioral-analyzer', name: t('dashboard.defensive.modules.behavioral', 'BEHAVIORAL ANALYZER'), icon: '🧠', component: BehavioralAnalyzer },
-    { id: 'traffic-analyzer', name: t('dashboard.defensive.modules.traffic', 'TRAFFIC ANALYZER'), icon: '🔒', component: TrafficAnalyzer },
-    { id: 'mav-detection', name: t('dashboard.defensive.modules.mav', 'MAV DETECTION 🇧🇷'), icon: '🛡️', component: MAVDetection }
+    { id: 'traffic-analyzer', name: t('dashboard.defensive.modules.traffic', 'TRAFFIC ANALYZER'), icon: '🔒', component: TrafficAnalyzer }
   ];
 
   const currentModule = modules.find(m => m.id === activeModule);
@@ -106,7 +104,7 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
   return (
     <article
       className={styles.offensiveDashboard}
-      role="article"
+
       aria-labelledby="offensive-dashboard-title"
       data-maximus-module="offensive-dashboard"
       data-maximus-navigable="true"
@@ -128,14 +126,14 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
 
       <section
         className={styles.mainContent}
-        role="region"
+
         aria-label={t('dashboard.offensive.workspace', 'Offensive operations workspace')}
         data-maximus-section="workspace">
 
         <section
           id="offensive-tool-content"
           className={styles.moduleArea}
-          role="region"
+
           aria-label={t('dashboard.offensive.activeTool', 'Active offensive tool')}
           aria-live="polite"
           aria-atomic="false"
@@ -155,7 +153,7 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         </section>
 
         <aside
-          role="complementary"
+
           aria-label={t('accessibility.executionsSidebar', 'Live executions sidebar')}
           data-maximus-section="sidebar"
           data-maximus-live="true"

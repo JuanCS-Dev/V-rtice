@@ -76,7 +76,7 @@ export const OffensiveHeader = React.memo(({
 
         <section
           className={styles.metrics}
-          role="region"
+
           aria-label={t('dashboard.offensive.metrics.title', 'Offensive metrics')}
           data-maximus-section="metrics"
           data-maximus-metrics="offensive">

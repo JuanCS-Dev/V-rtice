@@ -1,0 +1,105 @@
+name: ❓ Question
+description: Ask a question about Vértice-MAXIMUS
+title: "[QUESTION] "
+labels: ["question", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about how Vértice-MAXIMUS works? Need help understanding a concept?
+
+        **Before asking:** Check if your question is already answered:
+        - [Documentation](https://vertice-maximus.web.app)
+        - [README.md](https://github.com/JuanCS-Dev/V-rtice/blob/main/README.md)
+        - [Existing Q&A Issues](https://github.com/JuanCS-Dev/V-rtice/issues?q=label%3Aquestion)
+        - [Discussions](https://github.com/JuanCS-Dev/V-rtice/discussions) (if enabled)
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What is your question about?
+      options:
+        - Biological Architecture - How the immune system works
+        - Installation & Setup - Getting started
+        - Configuration - LLM setup, environment variables
+        - Usage - How to use specific features
+        - MAXIMUS AI - Consciousness layer
+        - Offensive Operations - C2, pentesting, red team
+        - Defensive Operations - Detection, response
+        - Immune System - Specific layers or cell types
+        - NEUROSHELL - Natural language commands
+        - Docker/Kubernetes - Deployment
+        - Legal/Compliance - Authorization, regulations
+        - Architecture - System design, patterns
+        - Contribution - How to contribute
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: Ask your question clearly and concisely
+      placeholder: |
+        How does...?
+        What is the difference between...?
+        Can Vértice-MAXIMUS...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context (what you're trying to achieve, what you've already tried, etc.)
+      placeholder: |
+        I'm trying to...
+        I've already looked at...
+        My use case is...
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How urgent is this question for you?
+      options:
+        - Just curious - Learning about the organism
+        - Planning - Evaluating Vértice for adoption
+        - Active User - Need answer to continue work
+        - Blocker - Stuck and can't proceed
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Vértice Version (if applicable)
+      description: What version are you using?
+      placeholder: "v1.0.0 or N/A if not installed yet"
+
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What Have You Tried?
+      description: Have you tried searching for the answer? What did you find?
+      placeholder: |
+        - I checked the README but...
+        - I found X in the docs but it doesn't explain...
+        - I searched Google and found...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm before submitting
+      options:
+        - label: I have searched existing issues/discussions for this question
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: This is a genuine question, not a bug report or feature request
+          required: true

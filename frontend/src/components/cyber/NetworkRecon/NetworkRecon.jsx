@@ -86,7 +86,6 @@ export const NetworkRecon = () => {
   return (
     <article
       className="h-full flex flex-col bg-black/20 backdrop-blur-sm"
-      role="article"
       aria-labelledby="network-recon-title"
       data-maximus-tool="network-recon"
       data-maximus-category="offensive"
@@ -221,7 +220,6 @@ export const NetworkRecon = () => {
       {/* Content Area */}
       <section
         className="flex-1 overflow-auto p-6 custom-scrollbar"
-        role="region"
         aria-label="Scan content"
         data-maximus-section="content">
         {activeTab === 'scan' && (

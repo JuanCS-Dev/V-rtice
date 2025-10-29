@@ -88,7 +88,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
   return (
     <article
       className={styles.dashboardContainer}
-      role="article"
+
       aria-labelledby="defensive-dashboard-title"
       data-maximus-module="defensive-dashboard"
       data-maximus-navigable="true"
@@ -115,13 +115,13 @@ const DefensiveDashboard = ({ setCurrentView }) => {
       <section
         id="defensive-main-content"
         className={styles.dashboardMain}
-        role="region"
+
         aria-label="Defensive operations workspace"
         data-maximus-section="workspace">
 
         {/* Sidebar - Real-time Alerts */}
         <aside
-          role="complementary"
+
           aria-label="Real-time security alerts"
           data-maximus-section="sidebar"
           data-maximus-live="true"
@@ -137,7 +137,7 @@ const DefensiveDashboard = ({ setCurrentView }) => {
         <section
           id="defensive-tool-content"
           className={styles.dashboardContent}
-          role="region"
+
           aria-label="Active defensive tool"
           aria-live="polite"
           aria-atomic="false"

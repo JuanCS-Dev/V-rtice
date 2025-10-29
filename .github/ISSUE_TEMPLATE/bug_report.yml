@@ -1,0 +1,127 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in Vértice-MAXIMUS
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below as completely as possible.
+
+        **Before submitting:** Check if this issue has already been reported by searching [existing issues](https://github.com/JuanCS-Dev/V-rtice/issues).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: The organism crashes when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Start Vértice with `vertice start`
+        2. Navigate to '...'
+        3. Click on '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected the organism to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, the organism...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: |
+        If applicable, paste relevant error logs or stack traces here.
+        **⚠️ DO NOT include sensitive information like API keys or passwords!**
+      render: shell
+      placeholder: |
+        Paste error logs here...
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of the organism is affected?
+      options:
+        - Frontend (Cockpit UI)
+        - Backend (Services/Microservices)
+        - Consciousness (MAXIMUS AI)
+        - Immune System (Defensive)
+        - Offensive Operations
+        - CLI (vertice command)
+        - Documentation
+        - Installation/Setup
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Vértice Version
+      description: What version of Vértice-MAXIMUS are you running?
+      placeholder: "v1.0.0 or commit SHA"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please provide details about your environment
+      value: |
+        - OS: [e.g., Ubuntu 22.04, macOS 14.0, Windows 11]
+        - Docker Version: [e.g., 24.0.5]
+        - Node.js Version: [e.g., 18.17.0]
+        - Python Version: [e.g., 3.11.5]
+        - LLM Provider: [e.g., Claude, OpenAI, Gemini]
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (screenshots, configuration, etc.)
+      placeholder: Any additional information that might help us understand the issue...
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have provided all requested information above
+          required: true
+        - label: I have removed any sensitive information from logs/screenshots
+          required: true
+        - label: This issue is specific to Vértice-MAXIMUS (not a general Docker/Python/Node.js issue)
+          required: false

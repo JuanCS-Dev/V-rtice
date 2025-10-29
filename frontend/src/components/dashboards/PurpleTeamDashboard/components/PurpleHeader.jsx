@@ -70,7 +70,7 @@ export const PurpleHeader = React.memo(({ onBack, activeView, onViewChange, stat
 
         <section
           className={styles.metrics}
-          role="region"
+
           aria-label={t('dashboard.purple.metrics.title', 'Purple team metrics')}
           data-maximus-section="metrics"
           data-maximus-metrics="purple">

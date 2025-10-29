@@ -15,7 +15,7 @@ import styles from './DefensiveSidebar.module.css';
 
 const DefensiveSidebar = ({ alerts }) => {
   return (
-    <aside className={styles.sidebar} role="complementary" aria-label="Live Alerts">
+    <aside className={styles.sidebar} aria-label="Live Alerts">
       {/* Sidebar Header */}
       <div className={styles.header}>
         <h3 className={styles.title}>

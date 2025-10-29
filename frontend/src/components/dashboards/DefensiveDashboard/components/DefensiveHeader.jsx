@@ -73,7 +73,7 @@ const DefensiveHeader = React.memo(({
 
         <section
           className={styles.metrics}
-          role="region"
+
           aria-label={t('dashboard.defensive.metrics.title', 'Defensive metrics')}
           data-maximus-section="metrics"
           data-maximus-metrics="defensive">

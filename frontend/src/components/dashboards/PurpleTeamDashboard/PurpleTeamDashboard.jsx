@@ -49,7 +49,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
   return (
     <article
       className={styles.purpleDashboard}
-      role="article"
+
       aria-labelledby="purple-team-dashboard-title"
       data-maximus-module="purple-team-dashboard"
       data-maximus-navigable="true"
@@ -73,7 +73,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
       <section
         id="purple-team-content"
         className={styles.content}
-        role="region"
+
         aria-label={t('dashboard.purple.content', 'Purple team operations content')}
         aria-live="polite"
         aria-atomic="false"
