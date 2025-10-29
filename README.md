@@ -10,6 +10,9 @@
 [![Coverage](https://img.shields.io/badge/coverage-99.73%25-brightgreen.svg)]()
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/development/CONTRIBUTING.md)
 
+[![Buy Me A Coffee](https://img.shields.io/badge/☕_Buy_Me_A_Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/vertice)
+[![GitHub Sponsors](https://img.shields.io/badge/💖_Sponsor-EA4AAA?style=flat&logo=github-sponsors&logoColor=white)](https://github.com/sponsors/JuanCS-Dev)
+
 [**🚀 Quick Start**](#-quick-start) • [**📖 Documentation**](https://vertice-maximus.web.app) • [**💬 Community**](#-community) • [**🤝 Contributing**](#-contributing)
 
 </div>
@@ -402,9 +405,20 @@ See [CONTRIBUTING.md](docs/development/CONTRIBUTING.md) for guidelines.
 
 If Vértice-MAXIMUS helps protect your infrastructure, consider supporting its development:
 
-**[Become a Sponsor on GitHub](https://github.com/sponsors/yourusername)** 🌟
+<div align="center">
 
-Sponsors receive:
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20MAXIMUS-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/vertice)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Support%20Development-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white)](https://github.com/sponsors/JuanCS-Dev)
+
+</div>
+
+**Why support?**
+- ☕ **Keep MAXIMUS alive**: API costs for Claude, OpenAI, and Gemini (~$300/month)
+- 🚀 **Accelerate development**: More time coding, less time worrying about bills
+- 🧠 **Feed the AI**: Every coffee = ~10,000 tokens = 2 hours of MAXIMUS thinking
+- 🇧🇷 **Prove sovereign tech works**: World-class AI doesn't need Silicon Valley
+
+**Supporters receive:**
 - 🎯 **Priority support** for issues and feature requests
 - 📊 **Early access** to new immune capabilities
 - 🔒 **Security briefings** on emerging threat patterns
