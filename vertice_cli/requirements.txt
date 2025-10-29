@@ -6,7 +6,7 @@ rich==13.7.0
 questionary==2.0.1
 
 # HTTP Requests and API Communication
-requests==2.31.0
+requests>=2.33.0
 
 # Configuration and Environment
 python-dotenv==1.0.0
@@ -18,15 +18,15 @@ google-generativeai==0.3.2
 ruff==0.1.6
 
 # Git Integration
-GitPython==3.1.40
+GitPython>=3.1.43
 
 # Additional Security Tools
 pyjwt==2.8.0
-cryptography==41.0.8
+cryptography>=44.0.0
 
 # JSON and Data Processing
-orjson==3.9.10
+orjson>=3.10.15
 
 # Development Dependencies
 pytest==7.4.3
-black==23.11.0
+black>=24.10.0

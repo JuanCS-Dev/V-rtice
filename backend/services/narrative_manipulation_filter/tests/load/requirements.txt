@@ -14,7 +14,7 @@ greenlet==3.0.3
 faker==22.0.0
 
 # For HTTP requests (used by Locust under the hood)
-requests==2.31.0
+requests>=2.33.0
 
 # For metrics and reporting
 numpy==1.26.2

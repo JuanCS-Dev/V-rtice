@@ -24,7 +24,7 @@ pytest-mock==3.12.0         # Mocking plugin
 
 # HTTP Testing
 httpx==0.25.2               # Async HTTP client
-requests==2.31.0            # Sync HTTP client (for Locust)
+requests>=2.33.0
 
 # Database Testing
 asyncpg==0.29.0             # PostgreSQL async driver (already in main requirements)

@@ -9,7 +9,7 @@
 # ============================================================================
 
 # Black - Opinionated code formatter
-black>=24.0.0
+black>=24.10.0
 
 # isort - Import statement organizer
 isort>=5.13.0

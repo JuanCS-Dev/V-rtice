@@ -8,7 +8,7 @@ python-multipart==0.0.6
 httpx==0.25.2
 
 # Security & Crypto
-cryptography==41.0.7
+cryptography>=44.0.0
 
 # Async & Networking
 aiofiles==23.2.1

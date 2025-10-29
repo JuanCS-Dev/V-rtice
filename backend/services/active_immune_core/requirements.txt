@@ -114,7 +114,7 @@ sqlalchemy==2.0.43
     # via
     #   active-immune-core (pyproject.toml)
     #   alembic
-starlette==0.48.0
+starlette>=0.49.1
     # via
     #   active-immune-core (pyproject.toml)
     #   fastapi
