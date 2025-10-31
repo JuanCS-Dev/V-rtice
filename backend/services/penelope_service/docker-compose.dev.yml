@@ -1,0 +1,157 @@
+# PENELOPE Development Docker Compose
+# Biblical Governance Edition - 7 Articles
+# Simplified version for local testing
+# Uses existing Postgres container (vertice-bot-postgres)
+
+version: "3.8"
+
+services:
+  penelope:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-penelope-dev
+    hostname: vertice-penelope-dev
+    ports:
+      - "8154:8154" # Main service port
+      - "9094:9092" # Prometheus metrics
+    environment:
+      - SERVICE_NAME=penelope
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8154
+      - SERVICE_VERSION=1.0.0
+      - ENVIRONMENT=development
+      - LOG_LEVEL=INFO
+
+      # MAXIMUS Integration (optional for dev)
+      - MAXIMUS_ENDPOINT=http://host.docker.internal:8100
+
+      # Service Registry (optional for dev)
+      - VERTICE_REGISTRY_URL=http://host.docker.internal:8080
+      - VERTICE_REGISTRY_TOKEN=default-dev-token
+      - REGISTRY_HEARTBEAT_INTERVAL=30
+
+      # Database (connect to existing vertice-bot-postgres)
+      - POSTGRES_HOST=vertice-bot-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=vertice_bot
+      - POSTGRES_USER=vertice
+      - POSTGRES_PASSWORD=vertice_dev_password
+      - DATABASE_URL=postgresql://vertice:vertice_dev_password@vertice-bot-postgres:5432/vertice_bot
+
+      # Redis (optional for dev)
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://host.docker.internal:6379
+
+      # Anthropic API (Sophia Engine - Article I)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-sk-ant-placeholder}
+      - ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
+
+      # Observability (Tapeinophrosyne - Article III)
+      - PROMETHEUS_URL=http://host.docker.internal:9090
+      - LOKI_URL=http://host.docker.internal:3100
+      - GRAFANA_URL=http://host.docker.internal:3000
+
+      # Metrics
+      - METRICS_PORT=9092
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus
+
+      # Performance
+      - REQUEST_TIMEOUT=300
+      - WORKER_PROCESSES=1
+
+      # Python path for shared libs
+      - PYTHONPATH=/app:/app/../../../backend
+
+      # =====================================================================
+      # BIBLICAL GOVERNANCE CONFIGURATION
+      # =====================================================================
+
+      # Article I - Sophia (Wisdom)
+      - PENELOPE_SOPHIA_ENABLED=true
+      - PENELOPE_SOPHIA_MODEL=claude-sonnet-4-5-20250929
+      - PENELOPE_SOPHIA_MAX_RETRIES=3
+
+      # Article II - Praotes (Gentleness)
+      - PENELOPE_PRAOTES_ENABLED=true
+      - PENELOPE_PRAOTES_THRESHOLD=0.7
+      - PENELOPE_PRAOTES_REQUIRE_APPROVAL=true
+
+      # Article III - Tapeinophrosyne (Humility)
+      - PENELOPE_TAPEINOPHROSYNE_ENABLED=true
+      - PENELOPE_TAPEINOPHROSYNE_SELF_CRITIQUE=true
+      - PENELOPE_TAPEINOPHROSYNE_REPORT_FAILURES=true
+
+      # Article IV - Stewardship (Resource Management)
+      - PENELOPE_STEWARDSHIP_ENABLED=true
+      - PENELOPE_STEWARDSHIP_MAX_CPU=0.8
+      - PENELOPE_STEWARDSHIP_MAX_MEMORY=0.8
+
+      # Article V - Agape (Love/Service)
+      - PENELOPE_AGAPE_ENABLED=true
+      - PENELOPE_AGAPE_PRIORITIZE_USERS=true
+
+      # Article VI - Sabbath (Rest)
+      - PENELOPE_SABBATH_ENABLED=true
+      - PENELOPE_SABBATH_TIMEZONE=America/Sao_Paulo
+      - PENELOPE_SABBATH_DAY=sunday
+      - PENELOPE_SABBATH_CRITICAL_ONLY=true
+
+      # Article VII - Aletheia (Truth)
+      - PENELOPE_ALETHEIA_ENABLED=true
+      - PENELOPE_ALETHEIA_LOG_ALL_DECISIONS=true
+      - PENELOPE_ALETHEIA_AUDIT_TRAIL=true
+
+    volumes:
+      - penelope-dev-patches:/app/patches
+      - penelope-dev-diagnoses:/app/diagnoses
+      - penelope-dev-logs:/app/logs
+      # Mount shared directory for development
+      - ../../../backend/shared:/app/shared:ro
+
+    networks:
+      - discord-bot-vertice_vertice-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8154/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Resource limits (moderate - Stewardship Article IV)
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+
+    labels:
+      - "service=penelope"
+      - "governance=biblical"
+      - "article.i=sophia-wisdom"
+      - "article.ii=praotes-gentleness"
+      - "article.iii=tapeinophrosyne-humility"
+      - "article.iv=stewardship"
+      - "article.v=agape-love"
+      - "article.vi=sabbath-rest"
+      - "article.vii=aletheia-truth"
+      - "motto=Soli Deo Gloria"
+
+networks:
+  discord-bot-vertice_vertice-network:
+    external: true
+
+volumes:
+  penelope-dev-patches:
+    name: penelope-dev-patches
+  penelope-dev-diagnoses:
+    name: penelope-dev-diagnoses
+  penelope-dev-logs:
+    name: penelope-dev-logs

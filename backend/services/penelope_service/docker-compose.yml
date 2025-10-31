@@ -1,0 +1,173 @@
+version: "3.8"
+
+services:
+  penelope_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-penelope-service
+    hostname: vertice-penelope-service
+    ports:
+      - "8154:8154"
+      - "9094:9090"
+    environment:
+      - SERVICE_NAME=penelope_service
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8154
+      - SERVICE_VERSION=1.0.0
+      - ENVIRONMENT=development
+      - LOG_LEVEL=INFO
+
+      # MAXIMUS Integration
+      - MAXIMUS_ENDPOINT=http://vertice-maximus-core-service:8150
+
+      # Service Registry
+      - VERTICE_REGISTRY_URL=http://vertice-register-lb:80
+      - VERTICE_REGISTRY_TOKEN=titanium-registry-token
+      - REGISTRY_HEARTBEAT_INTERVAL=30
+
+      # Database
+      - POSTGRES_HOST=vertice-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=vertice
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DATABASE_URL=postgresql://postgres:postgres@vertice-postgres:5432/vertice
+
+      # Redis (for rate limiting and caching)
+      - REDIS_HOST=vertice-redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://vertice-redis:6379
+
+      # Observability (Prometheus/Loki)
+      - PROMETHEUS_URL=http://vertice-prometheus:9090
+      - LOKI_URL=http://vertice-loki:3100
+
+      # Anthropic API (for Causal AI and code generation)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LLM_MODEL=claude-sonnet-4
+      - LLM_MAX_TOKENS=4000
+      - LLM_TEMPERATURE=0.2
+
+      # PENELOPE Configuration - 7 Biblical Articles
+
+      # Artigo I - Sophia (Sabedoria/Wisdom)
+      - SOPHIA_ENABLED=true
+      - WISDOM_BASE_MIN_CASES=5
+      - TRANSIENT_FAILURE_WINDOW_MINUTES=15
+      - INTERVENTION_RISK_THRESHOLD=0.70
+
+      # Artigo II - Praotes (Mansidão/Meekness)
+      - PRAOTES_ENABLED=true
+      - MAX_PATCH_LINES=25
+      - MIN_REVERSIBILITY_SCORE=0.90
+      - MAX_FUNCTIONS_MODIFIED=3
+      - MIN_MANSIDAO_SCORE=0.70
+
+      # Artigo III - Tapeinophrosyne (Humildade/Humility)
+      - TAPEINOPHROSYNE_ENABLED=true
+      - CONFIDENCE_THRESHOLD=0.85
+      - ESCALATION_ENABLED=true
+      - LEARNING_FROM_FAILURE_ENABLED=true
+
+      # Artigo IV - Stewardship (Mordomia)
+      - STEWARDSHIP_ENABLED=true
+      - PRESERVE_DEVELOPER_INTENT=true
+      - RESPECT_CODE_STYLE=true
+
+      # Artigo V - Agape (Love)
+      - AGAPE_ENABLED=true
+      - SERVICE_WITH_GENTLENESS=true
+
+      # Artigo VI - Sabbath (Rest)
+      - SABBATH_ENABLED=true
+      - SABBATH_DAY=sunday
+      - SABBATH_TIMEZONE=UTC
+      - SABBATH_ALLOW_P0_CRITICAL=true
+
+      # Artigo VII - Aletheia (Truth)
+      - ALETHEIA_ENABLED=true
+      - RADICAL_HONESTY=true
+      - DECLARE_UNCERTAINTY=true
+
+      # Digital Twin Configuration
+      - DIGITAL_TWIN_ENABLED=true
+      - DIGITAL_TWIN_VALIDATION_MINUTES=15
+      - DIGITAL_TWIN_TIMEOUT_SECONDS=900
+
+      # Metrics
+      - METRICS_PORT=9090
+
+      # Performance
+      - REQUEST_TIMEOUT=300
+      - WORKER_PROCESSES=1
+
+      # Security
+      - SANDBOX_ENABLED=true
+      - MAX_PATCH_ATTEMPTS_PER_HOUR=10
+
+    volumes:
+      - penelope-wisdom-base:/app/wisdom_base
+      - penelope-logs:/app/logs
+      - penelope-patches:/app/patches
+
+    networks:
+      - maximus-network
+      - vertice-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8154/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    depends_on:
+      - vertice-redis
+      - vertice-postgres
+
+    # Resource limits (code analysis and patch generation is CPU-intensive)
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  penelope_service-sidecar:
+    image: vertice-registry-sidecar:latest
+    container_name: vertice-penelope-service-sidecar
+    environment:
+      - SERVICE_NAME=penelope_service
+      - SERVICE_HOST=vertice-penelope-service
+      - SERVICE_PORT=8154
+      - SERVICE_HEALTH_ENDPOINT=/health
+      - REGISTRY_URL=http://vertice-register-lb:80
+      - HEARTBEAT_INTERVAL=30
+      - INITIAL_WAIT_TIMEOUT=60
+    depends_on:
+      penelope_service:
+        condition: service_started
+    networks:
+      - vertice-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+
+networks:
+  maximus-network:
+    external: true
+  vertice-network:
+    external: true
+
+volumes:
+  penelope-wisdom-base:
+  penelope-logs:
+  penelope-patches:
