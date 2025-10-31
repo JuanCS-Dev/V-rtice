@@ -1,0 +1,164 @@
+# MABA Development Docker Compose
+# Simplified version for local testing
+# Uses existing Postgres container (vertice-bot-postgres)
+
+version: "3.8"
+
+services:
+  maba:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-maba-dev
+    hostname: vertice-maba-dev
+    ports:
+      - "8152:8152" # Main service port
+      - "9092:9090" # Prometheus metrics
+    environment:
+      - SERVICE_NAME=maba
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8152
+      - SERVICE_VERSION=1.0.0
+      - ENVIRONMENT=development
+      - LOG_LEVEL=INFO
+
+      # MAXIMUS Integration (optional for dev)
+      - MAXIMUS_ENDPOINT=http://host.docker.internal:8100
+
+      # Service Registry (optional for dev)
+      - VERTICE_REGISTRY_URL=http://host.docker.internal:8080
+      - VERTICE_REGISTRY_TOKEN=default-dev-token
+      - REGISTRY_HEARTBEAT_INTERVAL=30
+
+      # Database (connect to existing vertice-bot-postgres)
+      - POSTGRES_HOST=vertice-bot-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=vertice_bot
+      - POSTGRES_USER=vertice
+      - POSTGRES_PASSWORD=vertice_dev_password
+      - DATABASE_URL=postgresql://vertice:vertice_dev_password@vertice-bot-postgres:5432/vertice_bot
+
+      # Redis (optional for dev - skip for now)
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://host.docker.internal:6379
+
+      # Neo4j (local instance in this compose)
+      - NEO4J_URI=bolt://maba-neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=vertice-neo4j-password
+      - NEO4J_DATABASE=maba_cognitive_map
+
+      # Anthropic API (from .env file)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-sk-ant-placeholder}
+
+      # Browser Configuration
+      - BROWSER_TYPE=chromium
+      - BROWSER_HEADLESS=true
+      - BROWSER_TIMEOUT=30000
+      - MAX_BROWSER_INSTANCES=3
+      - BROWSER_POOL_SIZE=2
+
+      # Cognitive Map
+      - COGNITIVE_MAP_MAX_PAGES=1000
+      - MAX_DOM_ELEMENTS=500
+      - LEARNING_RATE=0.01
+
+      # Metrics
+      - METRICS_PORT=9090
+
+      # Performance
+      - REQUEST_TIMEOUT=300
+      - WORKER_PROCESSES=1
+
+      # Python path for shared libs
+      - PYTHONPATH=/app:/app/../../../backend
+
+    volumes:
+      - maba-dev-screenshots:/app/screenshots
+      - maba-dev-logs:/app/logs
+      # Mount shared directory for development
+      - ../../../backend/shared:/app/shared:ro
+      # tmpfs for Prometheus metrics
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 100000000 # 100MB
+
+    env_file:
+      - ../.env.vertice-subordinates
+
+    networks:
+      - discord-bot-vertice_vertice-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8152/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+    depends_on:
+      maba-neo4j:
+        condition: service_healthy
+
+    # Resource limits (reduced for dev)
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 3G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+  # Neo4j for Cognitive Map
+  maba-neo4j:
+    image: neo4j:5-community
+    container_name: maba-neo4j-dev
+    hostname: maba-neo4j
+    ports:
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/vertice-neo4j-password
+      - NEO4J_dbms_memory_pagecache_size=512M
+      - NEO4J_dbms_memory_heap_initial__size=512M
+      - NEO4J_dbms_memory_heap_max__size=1G
+    volumes:
+      - maba-neo4j-dev-data:/data
+      - maba-neo4j-dev-logs:/logs
+    networks:
+      - discord-bot-vertice_vertice-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "cypher-shell",
+          "-u",
+          "neo4j",
+          "-p",
+          "vertice-neo4j-password",
+          "RETURN 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  discord-bot-vertice_vertice-network:
+    external: true
+
+volumes:
+  maba-dev-screenshots:
+    name: maba-dev-screenshots
+  maba-dev-logs:
+    name: maba-dev-logs
+  maba-neo4j-dev-data:
+    name: maba-neo4j-dev-data
+  maba-neo4j-dev-logs:
+    name: maba-neo4j-dev-logs

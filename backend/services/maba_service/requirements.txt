@@ -1,0 +1,56 @@
+# MABA (MAXIMUS Browser Agent) - Python Dependencies
+# Generated: 2025-10-30
+# Python Version: 3.11+
+
+# Core FastAPI Dependencies
+fastapi==0.118.1
+uvicorn[standard]==0.37.0
+pydantic==2.12.0
+pydantic-core==2.41.1
+
+# HTTP Client
+httpx==0.28.1
+
+# Database & Cache
+asyncpg==0.30.0
+redis==5.0.0
+hiredis==3.2.1
+
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# Monitoring & Observability
+prometheus-client==0.23.1
+
+# Anthropic Claude API
+anthropic==0.69.0
+
+# Browser Automation (MABA-specific)
+playwright==1.52.0
+selenium==4.28.1
+
+# Graph Database for Cognitive Map
+neo4j==5.28.0
+networkx==3.5
+
+# Image Processing (for screenshot analysis)
+pillow==11.3.0
+
+# Async Utilities
+aiofiles==25.1.0
+
+# Logging
+structlog==24.4.0
+
+# Testing
+pytest==8.4.0
+pytest-asyncio==0.26.0
+pytest-cov==7.0.0
+pytest-mock==3.15.1
+
+# Type Checking
+mypy>=1.8.0
+types-redis>=4.6.0
+
+# Code Quality
+ruff>=0.5.0
