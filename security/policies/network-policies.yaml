@@ -1,0 +1,427 @@
+---
+# Default Deny All Traffic (Zero Trust)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: vertice-subordinates
+  labels:
+    security: network-policy
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# PENELOPE Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: penelope-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: penelope
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: penelope
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from NGINX Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8154
+    # Allow metrics scraping from Prometheus
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9094
+    # Allow internal service mesh communication
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: subordinate
+      ports:
+        - protocol: TCP
+          port: 8154
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow PostgreSQL connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Redis connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow Loki logging
+    - to:
+        - podSelector:
+            matchLabels:
+              app: loki
+      ports:
+        - protocol: TCP
+          port: 3100
+    # Allow Anthropic API (external)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow service registry
+    - to:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80
+
+---
+# MABA Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: maba-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: maba
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from NGINX Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8152
+    # Allow metrics scraping from Prometheus
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9092
+    # Allow internal service mesh communication
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: subordinate
+      ports:
+        - protocol: TCP
+          port: 8152
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow PostgreSQL connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Redis connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow Neo4j connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+    # Allow HTTP/HTTPS for browser automation (external websites)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+    # Allow Anthropic API
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# MVP Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mvp-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: mvp
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: mvp
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from NGINX Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8153
+    # Allow metrics scraping from Prometheus
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9093
+    # Allow internal service mesh communication
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: subordinate
+      ports:
+        - protocol: TCP
+          port: 8153
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow PostgreSQL connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Redis connection
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow Prometheus metrics
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+    # Allow Anthropic API (external)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow ElevenLabs API (optional)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# Infrastructure: PostgreSQL Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: postgres
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow connections from subordinate services
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: subordinate
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+# Infrastructure: Redis Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: redis
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow connections from subordinate services
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: subordinate
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+# Infrastructure: Neo4j Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j-network-policy
+  namespace: vertice-subordinates
+  labels:
+    app: neo4j
+    security: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow Bolt connections from MABA only
+    - from:
+        - podSelector:
+            matchLabels:
+              app: maba
+      ports:
+        - protocol: TCP
+          port: 7687
+    # Allow HTTP from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 7474
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

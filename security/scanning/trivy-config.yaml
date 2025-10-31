@@ -1,0 +1,68 @@
+---
+# Trivy Security Scanner Configuration
+# For continuous vulnerability scanning of subordinate services
+
+# Scan configurations
+scan:
+  # Security checks to perform
+  security-checks:
+    - vuln      # Vulnerabilities
+    - config    # Misconfigurations
+    - secret    # Secrets detection
+
+  # Vulnerability severities to report
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+
+  # Ignore unfixed vulnerabilities
+  ignore-unfixed: false
+
+  # Exit code when vulnerabilities found
+  exit-code: 1
+
+  # Timeout for scan
+  timeout: 10m
+
+# Vulnerability database
+db:
+  # Skip database update
+  skip-update: false
+
+# Output format
+format: json
+
+# Report format
+report: all
+
+# File patterns to scan
+file-patterns:
+  - "**/*.py"
+  - "**/requirements.txt"
+  - "**/Dockerfile"
+  - "**/*.yaml"
+  - "**/*.yml"
+
+# Ignore files
+skip-files:
+  - "**/tests/**"
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+  - "**/venv/**"
+  - "**/.venv/**"
+
+# Custom policies (OPA Rego)
+policy:
+  - security/scanning/policies/
+
+# Exceptions (use sparingly)
+rego:
+  skip-dirs:
+    - ".git"
+    - "node_modules"
+    - ".pytest_cache"
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

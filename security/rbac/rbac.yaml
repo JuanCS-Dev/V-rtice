@@ -1,0 +1,223 @@
+---
+# Role for PENELOPE Service Account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: penelope-role
+  namespace: vertice-subordinates
+  labels:
+    app: penelope
+rules:
+  # Allow reading ConfigMaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Allow reading Secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  # Allow updating own pod status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  # Allow creating events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+# RoleBinding for PENELOPE
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: penelope-rolebinding
+  namespace: vertice-subordinates
+  labels:
+    app: penelope
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: penelope-role
+subjects:
+  - kind: ServiceAccount
+    name: penelope
+    namespace: vertice-subordinates
+
+---
+# Role for MABA Service Account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: maba-role
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+rules:
+  # Allow reading ConfigMaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Allow reading Secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  # Allow updating own pod status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  # Allow creating events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  # Allow using PodSecurityPolicy (for SYS_ADMIN)
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["maba-privileged"]
+    verbs: ["use"]
+
+---
+# RoleBinding for MABA
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: maba-rolebinding
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: maba-role
+subjects:
+  - kind: ServiceAccount
+    name: maba
+    namespace: vertice-subordinates
+
+---
+# Role for MVP Service Account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mvp-role
+  namespace: vertice-subordinates
+  labels:
+    app: mvp
+rules:
+  # Allow reading ConfigMaps
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  # Allow reading Secrets
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+  # Allow updating own pod status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  # Allow creating events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+
+---
+# RoleBinding for MVP
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mvp-rolebinding
+  namespace: vertice-subordinates
+  labels:
+    app: mvp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mvp-role
+subjects:
+  - kind: ServiceAccount
+    name: mvp
+    namespace: vertice-subordinates
+
+---
+# ClusterRole for reading cluster-wide metrics (optional)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: subordinates-metrics-reader
+  labels:
+    app: subordinates
+rules:
+  # Allow reading metrics
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list"]
+
+---
+# ClusterRoleBinding for metrics (optional - if services need cluster metrics)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: subordinates-metrics-reader-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: subordinates-metrics-reader
+subjects:
+  - kind: ServiceAccount
+    name: penelope
+    namespace: vertice-subordinates
+  - kind: ServiceAccount
+    name: maba
+    namespace: vertice-subordinates
+  - kind: ServiceAccount
+    name: mvp
+    namespace: vertice-subordinates
+
+---
+# Role for PodSecurityPolicy usage (PENELOPE, MVP)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: use-restricted-psp
+  namespace: vertice-subordinates
+rules:
+  - apiGroups: ["policy"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["subordinates-restricted"]
+    verbs: ["use"]
+
+---
+# RoleBinding for restricted PSP (PENELOPE)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: penelope-use-restricted-psp
+  namespace: vertice-subordinates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: use-restricted-psp
+subjects:
+  - kind: ServiceAccount
+    name: penelope
+    namespace: vertice-subordinates
+
+---
+# RoleBinding for restricted PSP (MVP)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mvp-use-restricted-psp
+  namespace: vertice-subordinates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: use-restricted-psp
+subjects:
+  - kind: ServiceAccount
+    name: mvp
+    namespace: vertice-subordinates
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

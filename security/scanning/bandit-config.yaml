@@ -1,0 +1,112 @@
+# Bandit Security Linter Configuration
+# Python security vulnerability scanner for subordinate services
+
+# Tests to run (all by default)
+tests:
+  - B101  # Assert used
+  - B102  # Exec used
+  - B103  # Set bad file permissions
+  - B104  # Hardcoded bind all interfaces
+  - B105  # Hardcoded password string
+  - B106  # Hardcoded password funcarg
+  - B107  # Hardcoded password default
+  - B108  # Hardcoded tmp directory
+  - B110  # Try except pass
+  - B112  # Try except continue
+  - B201  # Flask debug=True
+  - B301  # Pickle
+  - B302  # Marshal
+  - B303  # MD5
+  - B304  # Insecure ciphers
+  - B305  # Insecure cipher modes
+  - B306  # mktemp
+  - B307  # Eval
+  - B308  # Mark_safe
+  - B309  # HTTPSConnection
+  - B310  # urllib
+  - B311  # Random
+  - B312  # Telnetlib
+  - B313  # XML bad minidom
+  - B314  # XML bad etree
+  - B315  # XML bad expatreader
+  - B316  # XML bad expatbuilder
+  - B317  # XML bad sax
+  - B318  # XML bad expat
+  - B319  # XML bad pulldom
+  - B320  # XML bad xmlrpc
+  - B321  # FTP
+  - B322  # Input
+  - B323  # Unverified context
+  - B324  # Hashlib
+  - B325  # Tempnam
+  - B401  # Import telnetlib
+  - B402  # Import ftplib
+  - B403  # Import pickle
+  - B404  # Import subprocess
+  - B405  # Import xml etree
+  - B406  # Import xml sax
+  - B407  # Import xml expat
+  - B408  # Import xml minidom
+  - B409  # Import xml pulldom
+  - B410  # Import lxml
+  - B411  # Import xmlrpclib
+  - B412  # Import httpoxy
+  - B413  # Import pycrypto
+  - B501  # Request with verify=False
+  - B502  # SSL with bad version
+  - B503  # SSL with bad defaults
+  - B504  # SSL with no version
+  - B505  # Weak cryptographic key
+  - B506  # Yaml load
+  - B507  # SSH no host key verification
+  - B601  # Paramiko calls
+  - B602  # Shell injection
+  - B603  # Subprocess without shell
+  - B604  # Any other function with shell
+  - B605  # Start process with shell
+  - B606  # Start process without shell
+  - B607  # Start process partial path
+  - B608  # SQL injection
+  - B609  # Linux commands wildcard injection
+  - B610  # Django extra
+  - B611  # Django rawsql
+  - B701  # Jinja2 autoescape false
+  - B702  # Mako templates
+
+# Severity levels
+severity:
+  high:
+    - B102  # Exec
+    - B105  # Hardcoded password
+    - B106  # Hardcoded password funcarg
+    - B107  # Hardcoded password default
+    - B201  # Flask debug
+    - B501  # Request verify=False
+    - B502  # SSL bad version
+    - B602  # Shell injection
+    - B608  # SQL injection
+
+# Exclude paths
+exclude_dirs:
+  - /tests
+  - /test
+  - /__pycache__
+  - /.pytest_cache
+  - /venv
+  - /.venv
+  - /node_modules
+
+# Skips (use sparingly)
+skips:
+  - B404  # subprocess import (needed for legitimate use)
+  - B603  # subprocess without shell (we use safely)
+
+# Output format
+format: json
+
+# Confidence level
+confidence: HIGH
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
