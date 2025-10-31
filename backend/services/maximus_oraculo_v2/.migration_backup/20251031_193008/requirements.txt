@@ -14,17 +14,3 @@ pytest-asyncio>=0.23.0
 pytest-cov>=4.1.0
 pytest-mock>=3.15.0
 ruff>=0.13.0
-
-
-# Constitutional v3.0 dependencies
-prometheus-client
-opentelemetry-api
-opentelemetry-sdk
-opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-httpx
-opentelemetry-instrumentation-asyncpg
-opentelemetry-instrumentation-redis
-opentelemetry-exporter-jaeger-thrift
-opentelemetry-exporter-otlp-proto-grpc
-python-json-logger
-structlog
