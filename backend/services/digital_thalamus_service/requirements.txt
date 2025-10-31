@@ -55,3 +55,17 @@ aiokafka==0.8.1
     # FASE 3: Global Workspace Kafka producer
 redis==5.0.1
     # FASE 3: Global Workspace Redis Streams hot path
+
+
+# Constitutional v3.0 dependencies
+prometheus-client
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+python-json-logger
+structlog

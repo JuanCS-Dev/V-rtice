@@ -63,3 +63,17 @@ typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.37.0
     # via auth-service (pyproject.toml)
+
+
+# Constitutional v3.0 dependencies
+prometheus-client
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+python-json-logger
+structlog
