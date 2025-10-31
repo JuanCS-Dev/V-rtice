@@ -11,11 +11,10 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
-
 # Core module imports
 from core.browser_controller import BrowserController
 from core.cognitive_map import CognitiveMapEngine
+from pydantic import BaseModel, Field, field_validator
 from shared.maximus_integration import MaximusIntegrationMixin, RiskLevel, ToolCategory
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)
@@ -49,7 +48,8 @@ class NavigationRequest(BaseModel):
         default=30000, description="Navigation timeout in milliseconds"
     )
 
-    @validator("url")
+    @field_validator("url")
+    @classmethod
     def validate_url(cls, v):
         """Validate URL format."""
         if not v.startswith(("http://", "https://")):

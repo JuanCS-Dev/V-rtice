@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
 class Severity(str, Enum):
@@ -310,14 +310,3 @@ class Report(BaseModel):
     risk_assessment: dict[str, Any]
     similar_precedents: list[dict[str, Any]]
     uncertainty_factors: list[str]
-
-
-# === Validator ===
-
-
-@validator("confidence", pre=True, always=True)
-def validate_confidence(cls, v):
-    """Ensure confidence is between 0.0 and 1.0."""
-    if not 0.0 <= v <= 1.0:
-        raise ValueError("Confidence must be between 0.0 and 1.0")
-    return v

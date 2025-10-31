@@ -1,0 +1,1129 @@
+{
+  "meta": {
+    "format": 3,
+    "version": "7.10.7",
+    "timestamp": "2025-10-31T13:35:31.266173",
+    "branch_coverage": false,
+    "show_contexts": false
+  },
+  "files": {
+    "api/__init__.py": {
+      "executed_lines": [1, 9, 11],
+      "summary": {
+        "covered_lines": 2,
+        "num_statements": 2,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0
+      },
+      "missing_lines": [],
+      "excluded_lines": [],
+      "functions": {
+        "": {
+          "executed_lines": [1, 9, 11],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "": {
+          "executed_lines": [1, 9, 11],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "api/routes.py": {
+      "executed_lines": [
+        1, 18, 19, 21, 23, 25, 28, 34, 35, 53, 58, 134, 136, 149, 150, 162, 167,
+        210, 212, 224, 225, 241, 249, 289, 290, 293, 295, 307, 308, 323, 329,
+        332, 338, 341, 360, 361, 362, 363, 364, 365, 370, 397, 398, 414, 419,
+        460, 461, 464, 466, 477, 478, 496, 503, 527, 531, 546, 547, 560, 562
+      ],
+      "summary": {
+        "covered_lines": 58,
+        "num_statements": 60,
+        "percent_covered": 96.66666666666667,
+        "percent_covered_display": "97",
+        "missing_lines": 2,
+        "excluded_lines": 0
+      },
+      "missing_lines": [367, 368],
+      "excluded_lines": [],
+      "functions": {
+        "get_fruits_status": {
+          "executed_lines": [53, 58, 134, 136],
+          "summary": {
+            "covered_lines": 4,
+            "num_statements": 4,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "get_virtues_metrics": {
+          "executed_lines": [162, 167, 210, 212],
+          "summary": {
+            "covered_lines": 4,
+            "num_statements": 4,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "get_healing_history": {
+          "executed_lines": [241, 249, 289, 290, 293, 295],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 6,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "diagnose_anomaly": {
+          "executed_lines": [
+            323, 329, 332, 338, 341, 360, 361, 362, 363, 364, 365, 370
+          ],
+          "summary": {
+            "covered_lines": 12,
+            "num_statements": 14,
+            "percent_covered": 85.71428571428571,
+            "percent_covered_display": "86",
+            "missing_lines": 2,
+            "excluded_lines": 0
+          },
+          "missing_lines": [367, 368],
+          "excluded_lines": []
+        },
+        "get_patches": {
+          "executed_lines": [414, 419, 460, 461, 464, 466],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 6,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "query_wisdom_base": {
+          "executed_lines": [496, 503, 527, 531],
+          "summary": {
+            "covered_lines": 4,
+            "num_statements": 4,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "synthesize_audio": {
+          "executed_lines": [560, 562],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 18, 19, 21, 23, 25, 28, 34, 35, 149, 150, 224, 225, 307, 308,
+            397, 398, 477, 478, 546, 547
+          ],
+          "summary": {
+            "covered_lines": 20,
+            "num_statements": 20,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "": {
+          "executed_lines": [
+            1, 18, 19, 21, 23, 25, 28, 34, 35, 53, 58, 134, 136, 149, 150, 162,
+            167, 210, 212, 224, 225, 241, 249, 289, 290, 293, 295, 307, 308,
+            323, 329, 332, 338, 341, 360, 361, 362, 363, 364, 365, 370, 397,
+            398, 414, 419, 460, 461, 464, 466, 477, 478, 496, 503, 527, 531,
+            546, 547, 560, 562
+          ],
+          "summary": {
+            "covered_lines": 58,
+            "num_statements": 60,
+            "percent_covered": 96.66666666666667,
+            "percent_covered_display": "97",
+            "missing_lines": 2,
+            "excluded_lines": 0
+          },
+          "missing_lines": [367, 368],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/__init__.py": {
+      "executed_lines": [1, 9, 10, 11, 13],
+      "summary": {
+        "covered_lines": 4,
+        "num_statements": 4,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0
+      },
+      "missing_lines": [],
+      "excluded_lines": [],
+      "functions": {
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13],
+          "summary": {
+            "covered_lines": 4,
+            "num_statements": 4,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13],
+          "summary": {
+            "covered_lines": 4,
+            "num_statements": 4,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/observability_client.py": {
+      "executed_lines": [
+        1, 9, 10, 11, 13, 16, 17, 29, 37, 38, 40, 54, 60, 62, 75, 79, 81, 95, 99
+      ],
+      "summary": {
+        "covered_lines": 17,
+        "num_statements": 17,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0
+      },
+      "missing_lines": [],
+      "excluded_lines": [],
+      "functions": {
+        "ObservabilityClient.__init__": {
+          "executed_lines": [37, 38],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "ObservabilityClient.query_similar_anomalies": {
+          "executed_lines": [54, 60],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "ObservabilityClient.get_service_metrics": {
+          "executed_lines": [75, 79],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "ObservabilityClient.get_recent_logs": {
+          "executed_lines": [95, 99],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13, 16, 17, 29, 40, 62, 81],
+          "summary": {
+            "covered_lines": 9,
+            "num_statements": 9,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "ObservabilityClient": {
+          "executed_lines": [37, 38, 54, 60, 75, 79, 95, 99],
+          "summary": {
+            "covered_lines": 8,
+            "num_statements": 8,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13, 16, 17, 29, 40, 62, 81],
+          "summary": {
+            "covered_lines": 9,
+            "num_statements": 9,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/praotes_validator.py": {
+      "executed_lines": [
+        1, 13, 14, 16, 18, 21, 22, 32, 33, 34, 36, 38, 40, 50, 53, 59, 66, 69,
+        70, 76, 83, 84, 89, 90, 97, 98, 99, 100, 102, 103, 104, 106, 107, 108,
+        110, 111, 117, 122, 130, 134, 141, 142, 143, 144, 145, 147, 148, 149,
+        151, 153, 155, 158, 166, 167, 168, 169, 170, 172, 174, 186, 189, 190,
+        191, 194, 195, 198, 199, 200, 204, 205, 207, 209, 220, 221, 224, 227,
+        230, 235, 238, 245, 247, 249, 268, 273, 283, 285, 286, 290, 291, 296,
+        301, 302, 306
+      ],
+      "summary": {
+        "covered_lines": 91,
+        "num_statements": 96,
+        "percent_covered": 94.79166666666667,
+        "percent_covered_display": "95",
+        "missing_lines": 5,
+        "excluded_lines": 0
+      },
+      "missing_lines": [77, 114, 115, 292, 297],
+      "excluded_lines": [],
+      "functions": {
+        "PraotesValidator.__init__": {
+          "executed_lines": [38],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator.validate_patch": {
+          "executed_lines": [
+            50, 53, 59, 66, 69, 70, 76, 83, 84, 89, 90, 97, 98, 99, 100, 102,
+            103, 104, 106, 107, 108, 110, 111, 117, 122
+          ],
+          "summary": {
+            "covered_lines": 25,
+            "num_statements": 28,
+            "percent_covered": 89.28571428571429,
+            "percent_covered_display": "89",
+            "missing_lines": 3,
+            "excluded_lines": 0
+          },
+          "missing_lines": [77, 114, 115],
+          "excluded_lines": []
+        },
+        "PraotesValidator._count_functions_modified": {
+          "executed_lines": [134, 141, 142, 143, 144, 145, 147, 148, 149, 151],
+          "summary": {
+            "covered_lines": 10,
+            "num_statements": 10,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator._detect_breaking_changes": {
+          "executed_lines": [155, 158, 166, 167, 168, 169, 170, 172],
+          "summary": {
+            "covered_lines": 8,
+            "num_statements": 8,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator._calculate_reversibility_score": {
+          "executed_lines": [
+            186, 189, 190, 191, 194, 195, 198, 199, 200, 204, 205, 207
+          ],
+          "summary": {
+            "covered_lines": 12,
+            "num_statements": 12,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator._calculate_mansidao_score": {
+          "executed_lines": [220, 221, 224, 227, 230, 235, 238, 245],
+          "summary": {
+            "covered_lines": 8,
+            "num_statements": 8,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator._get_biblical_reflection": {
+          "executed_lines": [249, 268],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "PraotesValidator.suggest_improvements": {
+          "executed_lines": [283, 285, 286, 290, 291, 296, 301, 302, 306],
+          "summary": {
+            "covered_lines": 9,
+            "num_statements": 11,
+            "percent_covered": 81.81818181818181,
+            "percent_covered_display": "82",
+            "missing_lines": 2,
+            "excluded_lines": 0
+          },
+          "missing_lines": [292, 297],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 14, 16, 18, 21, 22, 32, 33, 34, 36, 40, 130, 153, 174, 209,
+            247, 273
+          ],
+          "summary": {
+            "covered_lines": 16,
+            "num_statements": 16,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "PraotesValidator": {
+          "executed_lines": [
+            38, 50, 53, 59, 66, 69, 70, 76, 83, 84, 89, 90, 97, 98, 99, 100,
+            102, 103, 104, 106, 107, 108, 110, 111, 117, 122, 134, 141, 142,
+            143, 144, 145, 147, 148, 149, 151, 155, 158, 166, 167, 168, 169,
+            170, 172, 186, 189, 190, 191, 194, 195, 198, 199, 200, 204, 205,
+            207, 220, 221, 224, 227, 230, 235, 238, 245, 249, 268, 283, 285,
+            286, 290, 291, 296, 301, 302, 306
+          ],
+          "summary": {
+            "covered_lines": 75,
+            "num_statements": 80,
+            "percent_covered": 93.75,
+            "percent_covered_display": "94",
+            "missing_lines": 5,
+            "excluded_lines": 0
+          },
+          "missing_lines": [77, 114, 115, 292, 297],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 14, 16, 18, 21, 22, 32, 33, 34, 36, 40, 130, 153, 174, 209,
+            247, 273
+          ],
+          "summary": {
+            "covered_lines": 16,
+            "num_statements": 16,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/sophia_engine.py": {
+      "executed_lines": [
+        1, 13, 14, 15, 17, 19, 22, 23, 32, 40, 41, 44, 45, 46, 48, 58, 63, 64,
+        72, 73, 75, 84, 86, 87, 98, 99, 106, 113, 124, 126, 132, 133, 136, 140,
+        143, 145, 146, 151, 153, 163, 164, 167, 168, 173, 174, 179, 180, 185,
+        186, 190, 199, 209, 212, 218, 221, 222, 224, 225, 226, 227, 228, 229,
+        231, 233, 243, 249, 250, 253, 255, 256, 261, 275, 276, 285, 295, 297,
+        307, 309, 319, 321, 331
+      ],
+      "summary": {
+        "covered_lines": 79,
+        "num_statements": 92,
+        "percent_covered": 85.8695652173913,
+        "percent_covered_display": "86",
+        "missing_lines": 13,
+        "excluded_lines": 0
+      },
+      "missing_lines": [
+        76, 169, 170, 175, 176, 181, 182, 187, 188, 259, 279, 280, 283
+      ],
+      "excluded_lines": [],
+      "functions": {
+        "SophiaEngine.__init__": {
+          "executed_lines": [40, 41, 44, 45, 46],
+          "summary": {
+            "covered_lines": 5,
+            "num_statements": 5,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine.should_intervene": {
+          "executed_lines": [58, 63, 64, 72, 73, 75, 84, 86, 87, 98, 99, 106],
+          "summary": {
+            "covered_lines": 12,
+            "num_statements": 13,
+            "percent_covered": 92.3076923076923,
+            "percent_covered_display": "92",
+            "missing_lines": 1,
+            "excluded_lines": 0
+          },
+          "missing_lines": [76],
+          "excluded_lines": []
+        },
+        "SophiaEngine._is_self_healing_naturally": {
+          "executed_lines": [124, 126, 132, 133, 136, 140, 143, 145, 146, 151],
+          "summary": {
+            "covered_lines": 10,
+            "num_statements": 10,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine._assess_intervention_risk": {
+          "executed_lines": [
+            163, 164, 167, 168, 173, 174, 179, 180, 185, 186, 190
+          ],
+          "summary": {
+            "covered_lines": 11,
+            "num_statements": 19,
+            "percent_covered": 57.89473684210526,
+            "percent_covered_display": "58",
+            "missing_lines": 8,
+            "excluded_lines": 0
+          },
+          "missing_lines": [169, 170, 175, 176, 181, 182, 187, 188],
+          "excluded_lines": []
+        },
+        "SophiaEngine._calculate_current_impact": {
+          "executed_lines": [
+            209, 212, 218, 221, 222, 224, 225, 226, 227, 228, 229, 231
+          ],
+          "summary": {
+            "covered_lines": 12,
+            "num_statements": 12,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine._query_wisdom_base": {
+          "executed_lines": [243, 249, 250, 253, 255, 256],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 7,
+            "percent_covered": 85.71428571428571,
+            "percent_covered_display": "86",
+            "missing_lines": 1,
+            "excluded_lines": 0
+          },
+          "missing_lines": [259],
+          "excluded_lines": []
+        },
+        "SophiaEngine._recommend_intervention_level": {
+          "executed_lines": [275, 276],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 5,
+            "percent_covered": 40.0,
+            "percent_covered_display": "40",
+            "missing_lines": 3,
+            "excluded_lines": 0
+          },
+          "missing_lines": [279, 280, 283],
+          "excluded_lines": []
+        },
+        "SophiaEngine._get_service_complexity": {
+          "executed_lines": [295],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine._get_service_dependencies": {
+          "executed_lines": [307],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine._get_recent_changes": {
+          "executed_lines": [319],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "SophiaEngine._get_test_coverage": {
+          "executed_lines": [331],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 14, 15, 17, 19, 22, 23, 32, 48, 113, 153, 199, 233, 261, 285,
+            297, 309, 321
+          ],
+          "summary": {
+            "covered_lines": 17,
+            "num_statements": 17,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "SophiaEngine": {
+          "executed_lines": [
+            40, 41, 44, 45, 46, 58, 63, 64, 72, 73, 75, 84, 86, 87, 98, 99, 106,
+            124, 126, 132, 133, 136, 140, 143, 145, 146, 151, 163, 164, 167,
+            168, 173, 174, 179, 180, 185, 186, 190, 209, 212, 218, 221, 222,
+            224, 225, 226, 227, 228, 229, 231, 243, 249, 250, 253, 255, 256,
+            275, 276, 295, 307, 319, 331
+          ],
+          "summary": {
+            "covered_lines": 62,
+            "num_statements": 75,
+            "percent_covered": 82.66666666666667,
+            "percent_covered_display": "83",
+            "missing_lines": 13,
+            "excluded_lines": 0
+          },
+          "missing_lines": [
+            76, 169, 170, 175, 176, 181, 182, 187, 188, 259, 279, 280, 283
+          ],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 14, 15, 17, 19, 22, 23, 32, 48, 113, 153, 199, 233, 261, 285,
+            297, 309, 321
+          ],
+          "summary": {
+            "covered_lines": 17,
+            "num_statements": 17,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/tapeinophrosyne_monitor.py": {
+      "executed_lines": [
+        1, 13, 15, 17, 20, 21, 31, 32, 34, 41, 42, 44, 54, 58, 59, 62, 63, 64,
+        74, 86, 97, 109, 114, 116, 117, 121, 122, 124, 125, 130, 134, 136, 143,
+        153, 154, 157, 158, 164, 165, 168, 173, 174, 177, 182, 183, 186, 188,
+        194, 196, 199, 200, 201, 202, 204, 205, 206, 209, 210, 213, 214, 215,
+        217, 218, 220, 222, 235, 240, 244, 254, 257, 259, 261, 271, 273, 275,
+        276, 282, 284, 285, 291, 301
+      ],
+      "summary": {
+        "covered_lines": 79,
+        "num_statements": 87,
+        "percent_covered": 90.80459770114942,
+        "percent_covered_display": "91",
+        "missing_lines": 8,
+        "excluded_lines": 0
+      },
+      "missing_lines": [207, 216, 277, 278, 280, 286, 287, 289],
+      "excluded_lines": [],
+      "functions": {
+        "TapeinophrosyneMonitor.__init__": {
+          "executed_lines": [41, 42],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor.assess_competence": {
+          "executed_lines": [54, 58, 59, 62, 63, 64, 74, 86],
+          "summary": {
+            "covered_lines": 8,
+            "num_statements": 8,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor.generate_uncertainty_report": {
+          "executed_lines": [
+            109, 114, 116, 117, 121, 122, 124, 125, 130, 134, 136
+          ],
+          "summary": {
+            "covered_lines": 11,
+            "num_statements": 11,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor._assess_risk_profile": {
+          "executed_lines": [
+            153, 154, 157, 158, 164, 165, 168, 173, 174, 177, 182, 183, 186, 188
+          ],
+          "summary": {
+            "covered_lines": 14,
+            "num_statements": 14,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor._calculate_overall_risk": {
+          "executed_lines": [
+            196, 199, 200, 201, 202, 204, 205, 206, 209, 210, 213, 214, 215,
+            217, 218, 220
+          ],
+          "summary": {
+            "covered_lines": 16,
+            "num_statements": 18,
+            "percent_covered": 88.88888888888889,
+            "percent_covered_display": "89",
+            "missing_lines": 2,
+            "excluded_lines": 0
+          },
+          "missing_lines": [207, 216],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor.learn_from_failure": {
+          "executed_lines": [235, 240, 244, 254, 257, 259],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 6,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor._diagnose_patch_failure": {
+          "executed_lines": [271],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor._extract_lesson": {
+          "executed_lines": [275, 276],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 5,
+            "percent_covered": 40.0,
+            "percent_covered_display": "40",
+            "missing_lines": 3,
+            "excluded_lines": 0
+          },
+          "missing_lines": [277, 278, 280],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor._recommend_adjustment": {
+          "executed_lines": [284, 285],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 5,
+            "percent_covered": 40.0,
+            "percent_covered_display": "40",
+            "missing_lines": 3,
+            "excluded_lines": 0
+          },
+          "missing_lines": [286, 287, 289],
+          "excluded_lines": []
+        },
+        "TapeinophrosyneMonitor.get_competence_stats": {
+          "executed_lines": [301],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 15, 17, 20, 21, 31, 32, 34, 44, 97, 143, 194, 222, 261, 273,
+            282, 291
+          ],
+          "summary": {
+            "covered_lines": 16,
+            "num_statements": 16,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "TapeinophrosyneMonitor": {
+          "executed_lines": [
+            41, 42, 54, 58, 59, 62, 63, 64, 74, 86, 109, 114, 116, 117, 121,
+            122, 124, 125, 130, 134, 136, 153, 154, 157, 158, 164, 165, 168,
+            173, 174, 177, 182, 183, 186, 188, 196, 199, 200, 201, 202, 204,
+            205, 206, 209, 210, 213, 214, 215, 217, 218, 220, 235, 240, 244,
+            254, 257, 259, 271, 275, 276, 284, 285, 301
+          ],
+          "summary": {
+            "covered_lines": 63,
+            "num_statements": 71,
+            "percent_covered": 88.73239436619718,
+            "percent_covered_display": "89",
+            "missing_lines": 8,
+            "excluded_lines": 0
+          },
+          "missing_lines": [207, 216, 277, 278, 280, 286, 287, 289],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [
+            1, 13, 15, 17, 20, 21, 31, 32, 34, 44, 97, 143, 194, 222, 261, 273,
+            282, 291
+          ],
+          "summary": {
+            "covered_lines": 16,
+            "num_statements": 16,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    },
+    "core/wisdom_base_client.py": {
+      "executed_lines": [
+        1, 9, 10, 11, 13, 16, 17, 30, 32, 33, 35, 49, 53, 59, 61, 71, 72, 73,
+        75, 76, 78, 80, 90, 91, 92, 94, 95, 97, 99, 109, 115, 117, 119
+      ],
+      "summary": {
+        "covered_lines": 31,
+        "num_statements": 31,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0
+      },
+      "missing_lines": [],
+      "excluded_lines": [],
+      "functions": {
+        "WisdomBaseClient.__init__": {
+          "executed_lines": [32, 33],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "WisdomBaseClient.query_precedents": {
+          "executed_lines": [49, 53, 59],
+          "summary": {
+            "covered_lines": 3,
+            "num_statements": 3,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "WisdomBaseClient.store_precedent": {
+          "executed_lines": [71, 72, 73, 75, 76, 78],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 6,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "WisdomBaseClient.store_lesson": {
+          "executed_lines": [90, 91, 92, 94, 95, 97],
+          "summary": {
+            "covered_lines": 6,
+            "num_statements": 6,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "WisdomBaseClient.get_lessons_by_theme": {
+          "executed_lines": [109, 115],
+          "summary": {
+            "covered_lines": 2,
+            "num_statements": 2,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "WisdomBaseClient.get_stats": {
+          "executed_lines": [119],
+          "summary": {
+            "covered_lines": 1,
+            "num_statements": 1,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13, 16, 17, 30, 35, 61, 80, 99, 117],
+          "summary": {
+            "covered_lines": 11,
+            "num_statements": 11,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      },
+      "classes": {
+        "WisdomBaseClient": {
+          "executed_lines": [
+            32, 33, 49, 53, 59, 71, 72, 73, 75, 76, 78, 90, 91, 92, 94, 95, 97,
+            109, 115, 119
+          ],
+          "summary": {
+            "covered_lines": 20,
+            "num_statements": 20,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        },
+        "": {
+          "executed_lines": [1, 9, 10, 11, 13, 16, 17, 30, 35, 61, 80, 99, 117],
+          "summary": {
+            "covered_lines": 11,
+            "num_statements": 11,
+            "percent_covered": 100.0,
+            "percent_covered_display": "100",
+            "missing_lines": 0,
+            "excluded_lines": 0
+          },
+          "missing_lines": [],
+          "excluded_lines": []
+        }
+      }
+    }
+  },
+  "totals": {
+    "covered_lines": 361,
+    "num_statements": 389,
+    "percent_covered": 92.80205655526993,
+    "percent_covered_display": "93",
+    "missing_lines": 28,
+    "excluded_lines": 0
+  }
+}

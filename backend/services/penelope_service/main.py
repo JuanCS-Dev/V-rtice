@@ -210,6 +210,11 @@ from api.routes import router as penelope_router
 
 app.include_router(penelope_router)
 
+# Include WebSocket routes
+from websocket_routes import router as websocket_router
+
+app.include_router(websocket_router)
+
 
 @app.get("/health")
 async def health_check() -> dict[str, Any]:

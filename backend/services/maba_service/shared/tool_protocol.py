@@ -22,7 +22,7 @@ from enum import Enum
 from typing import Any
 
 from prometheus_client import Counter, Histogram
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +91,11 @@ class ToolInvocationRequest(BaseModel):
     )
     timeout_seconds: int | None = Field(default=300, description="Execution timeout")
 
-    @validator("timeout_seconds")
+    @field_validator("timeout_seconds")
+    @classmethod
     def validate_timeout(cls, v):
         """Validate timeout is reasonable."""
-        if v <= 0 or v > 3600:
+        if v is not None and (v <= 0 or v > 3600):
             raise ValueError("Timeout must be between 1 and 3600 seconds")
         return v
 
@@ -122,10 +123,13 @@ class ToolInvocationResponse(BaseModel):
         description="Response timestamp",
     )
 
-    @validator("error")
-    def error_requires_failed_status(cls, v, values):
+    @field_validator("error")
+    @classmethod
+    def error_requires_failed_status(cls, v, info):
         """Ensure error is only set when status is failed."""
-        if v and values.get("status") not in [
+        # In Pydantic V2, use info.data instead of values
+        status = info.data.get("status") if hasattr(info, "data") else None
+        if v and status not in [
             ToolStatus.FAILED,
             ToolStatus.TIMEOUT,
             ToolStatus.CANCELLED,
