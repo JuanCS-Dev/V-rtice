@@ -32,6 +32,7 @@ from core.wisdom_base_client import WisdomBaseClient
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import start_http_server
+from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)
 from shared.vertice_registry_client import RegistryClient, auto_register_service
@@ -49,6 +50,7 @@ observability_client: ObservabilityClient | None = None
 sophia_engine: SophiaEngine | None = None
 praotes_validator: PraotesValidator | None = None
 tapeinophrosyne_monitor: TapeinophrosyneMonitor | None = None
+metrics_exporter: MetricsExporter | None = None
 _heartbeat_task: asyncio.Task | None = None
 
 
@@ -77,7 +79,7 @@ async def lifespan(app: FastAPI):
     - Graceful shutdown with prayer
     """
     global wisdom_base, observability_client, sophia_engine, praotes_validator
-    global tapeinophrosyne_monitor, _heartbeat_task
+    global tapeinophrosyne_monitor, metrics_exporter, _heartbeat_task
 
     # ORAÇÃO DE INICIALIZAÇÃO
     logger.info("✝" * 50)
@@ -104,6 +106,17 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting PENELOPE Service...")
 
     try:
+        # Initialize Metrics Exporter (Constitution v3.0 compliance)
+        service_version = os.getenv("SERVICE_VERSION", "1.0.0")
+        metrics_exporter = MetricsExporter(
+            service_name="penelope", version=service_version
+        )
+        logger.info("✅ Constitutional Metrics Exporter initialized")
+        logger.info("   📊 Tracking: CRS, LEI, FPC, 7 Articles, 9 Fruits")
+
+        # Auto-update Sabbath status in metrics
+        auto_update_sabbath_status("penelope")
+
         # Initialize Wisdom Base
         wisdom_base = WisdomBaseClient()
         logger.info("✅ Wisdom Base initialized")
@@ -214,6 +227,11 @@ app.include_router(penelope_router)
 from websocket_routes import router as websocket_router
 
 app.include_router(websocket_router)
+
+# Include Metrics routes (if metrics_exporter is initialized)
+if metrics_exporter:
+    metrics_router = metrics_exporter.create_router()
+    app.include_router(metrics_router)
 
 
 @app.get("/health")
