@@ -1,0 +1,85 @@
+# Jaeger All-in-One for Vértice Constitutional Tracing
+# Complete distributed tracing backend for PENELOPE, MABA, MVP
+#
+# Access Jaeger UI: http://localhost:16686
+# OTLP gRPC: localhost:4317
+# OTLP HTTP: localhost:4318
+
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.51
+    container_name: vertice-jaeger
+    restart: unless-stopped
+    environment:
+      # Collector configuration
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+
+      # Span storage (badger - embedded DB)
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+
+      # Query configuration
+      - QUERY_BASE_PATH=/
+
+      # Sampling (always sample for constitutional compliance)
+      - SAMPLING_STRATEGIES_FILE=/etc/jaeger/sampling.json
+    ports:
+      # Jaeger Agent (deprecated but still supported)
+      - "5775:5775/udp"  # Zipkin compact thrift
+      - "6831:6831/udp"  # Jaeger compact thrift
+      - "6832:6832/udp"  # Jaeger binary thrift
+      - "5778:5778"      # Agent config HTTP
+
+      # Jaeger Collector
+      - "14250:14250"    # gRPC
+      - "14268:14268"    # HTTP (Jaeger format)
+      - "14269:14269"    # Admin port (health check)
+
+      # Jaeger Query (UI)
+      - "16686:16686"    # Web UI
+
+      # OTLP (OpenTelemetry Protocol)
+      - "4317:4317"      # gRPC
+      - "4318:4318"      # HTTP
+
+      # Zipkin compatibility
+      - "9411:9411"      # Zipkin HTTP
+    volumes:
+      # Persistent storage for traces
+      - jaeger-badger-data:/badger/data
+      - jaeger-badger-key:/badger/key
+
+      # Sampling configuration
+      - ./jaeger-sampling.json:/etc/jaeger/sampling.json:ro
+    networks:
+      - vertice-observability
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:14269"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "com.vertice.service=jaeger"
+      - "com.vertice.component=observability"
+      - "com.vertice.constitution=aletheia"  # Truth/Transparency
+
+networks:
+  vertice-observability:
+    name: vertice-observability
+    driver: bridge
+
+volumes:
+  jaeger-badger-data:
+    name: vertice-jaeger-data
+  jaeger-badger-key:
+    name: vertice-jaeger-key
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

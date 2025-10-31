@@ -1,0 +1,74 @@
+{
+  "service_strategies": [
+    {
+      "service": "penelope",
+      "type": "probabilistic",
+      "param": 1.0,
+      "operation_strategies": [
+        {
+          "operation": "sophia.decision.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "praotes.check.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "tapeinophrosyne.check.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "sabbath.check.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "aletheia.check.*",
+          "type": "const",
+          "param": 1.0
+        }
+      ]
+    },
+    {
+      "service": "maba",
+      "type": "probabilistic",
+      "param": 1.0,
+      "operation_strategies": [
+        {
+          "operation": "browser.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "cognitive_map.*",
+          "type": "const",
+          "param": 1.0
+        }
+      ]
+    },
+    {
+      "service": "mvp",
+      "type": "probabilistic",
+      "param": 1.0,
+      "operation_strategies": [
+        {
+          "operation": "narrative.*",
+          "type": "const",
+          "param": 1.0
+        },
+        {
+          "operation": "pii.*",
+          "type": "const",
+          "param": 1.0
+        }
+      ]
+    }
+  ],
+  "default_strategy": {
+    "type": "probabilistic",
+    "param": 1.0
+  }
+}

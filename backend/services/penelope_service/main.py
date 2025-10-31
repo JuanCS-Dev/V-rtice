@@ -33,6 +33,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import start_http_server
 from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
+from shared.constitutional_tracing import create_constitutional_tracer
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)
 from shared.vertice_registry_client import RegistryClient, auto_register_service
@@ -116,6 +117,15 @@ async def lifespan(app: FastAPI):
 
         # Auto-update Sabbath status in metrics
         auto_update_sabbath_status("penelope")
+
+        # Initialize Constitutional Tracer (OpenTelemetry)
+        constitutional_tracer = create_constitutional_tracer(
+            service_name="penelope", version=service_version
+        )
+        # Instrument FastAPI app with tracing
+        constitutional_tracer.instrument_fastapi(app)
+        logger.info("✅ Constitutional Tracer (OpenTelemetry) initialized")
+        logger.info("   🔍 Tracing: 7 Articles, DETER-AGENT layers, biblical decisions")
 
         # Initialize Wisdom Base
         wisdom_base = WisdomBaseClient()
@@ -232,6 +242,9 @@ app.include_router(websocket_router)
 if metrics_exporter:
     metrics_router = metrics_exporter.create_router()
     app.include_router(metrics_router)
+
+# Instrument FastAPI with OpenTelemetry (if tracer exists)
+# This will be done during lifespan startup after tracer initialization
 
 
 @app.get("/health")
