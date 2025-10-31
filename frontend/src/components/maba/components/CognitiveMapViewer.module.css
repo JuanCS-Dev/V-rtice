@@ -1,0 +1,238 @@
+/**
+ * CognitiveMapViewer Styles
+ */
+
+.viewer {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  min-height: 600px;
+}
+
+.graphContainer {
+  flex: 1;
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(0, 150, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.svg {
+  display: block;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Node styles (applied via D3) */
+.node {
+  transition: all 0.2s ease;
+}
+
+.link {
+  transition: all 0.2s ease;
+}
+
+.label {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Instructions Overlay */
+.instructions {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 150, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Legend */
+.legend {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 150, 255, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 180px;
+}
+
+.legend h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: #0096ff;
+  letter-spacing: 0.5px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.legendCircle {
+  height: 10px;
+  background: #0096ff;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendItem:last-child {
+  margin-bottom: 0;
+}
+
+/* Details Panel */
+.detailsPanel {
+  width: 350px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(0, 150, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.detailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(0, 150, 255, 0.1);
+  border-bottom: 2px solid rgba(0, 150, 255, 0.2);
+}
+
+.detailsHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0096ff;
+}
+
+.closeButton {
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.detailsContent {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0096ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  word-break: break-all;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Empty State */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(0, 150, 255, 0.2);
+  border-radius: 12px;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #0096ff;
+}
+
+.empty p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.7;
+  max-width: 400px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .viewer {
+    flex-direction: column;
+  }
+
+  .detailsPanel {
+    width: 100%;
+  }
+
+  .graphContainer {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .legend {
+    display: none;
+  }
+
+  .instructions {
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .graphContainer {
+    min-height: 400px;
+  }
+}

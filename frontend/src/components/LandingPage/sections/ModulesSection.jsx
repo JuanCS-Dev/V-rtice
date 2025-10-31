@@ -148,6 +148,25 @@ export const ModulesSection = ({ setCurrentView }) => {
         ],
       }),
     },
+    {
+      id: "maba",
+      name: t("modules.maba.name", "MABA"),
+      description: t(
+        "modules.maba.description",
+        "Maximus Autonomous Browser Agent - Agente de Navegação com Mapa Cognitivo",
+      ),
+      icon: "🤖",
+      color: "blue",
+      features: t("modules.maba.features", {
+        returnObjects: true,
+        defaultValue: [
+          "Cognitive Map (Neo4j)",
+          "Browser Automation",
+          "Element Learning",
+          "Navigation Timeline",
+        ],
+      }),
+    },
   ];
 
   const handleModuleClick = (moduleId) => () => {

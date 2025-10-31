@@ -31,6 +31,7 @@ import ToMEngineDashboard from "./components/tom-engine/ToMEngineDashboard";
 import ImmuneSystemDashboard from "./components/immune-system/ImmuneSystemDashboard";
 import MonitoringDashboard from "./components/monitoring/MonitoringDashboard";
 import PenelopeDashboard from "./components/penelope/PenelopeDashboard";
+import MABADashboard from "./components/maba/MABADashboard";
 
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'cockpit', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
@@ -130,6 +131,11 @@ function App() {
     penelope: (
       <ErrorBoundary context="penelope" title="PENELOPE Dashboard Error">
         <PenelopeDashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    maba: (
+      <ErrorBoundary context="maba" title="MABA Dashboard Error">
+        <MABADashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
     ),
   };
