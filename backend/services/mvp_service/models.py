@@ -12,8 +12,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 # Core module imports
-from services.mvp_service.core.narrative_engine import NarrativeEngine
-from services.mvp_service.core.system_observer import SystemObserver
+from core.narrative_engine import NarrativeEngine
+from core.system_observer import SystemObserver
 from shared.maximus_integration import MaximusIntegrationMixin, RiskLevel, ToolCategory
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)

@@ -13,9 +13,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
-# Core module imports (absolute imports)
-from services.maba_service.core.browser_controller import BrowserController
-from services.maba_service.core.cognitive_map import CognitiveMapEngine
+# Core module imports
+from core.browser_controller import BrowserController
+from core.cognitive_map import CognitiveMapEngine
 from shared.maximus_integration import MaximusIntegrationMixin, RiskLevel, ToolCategory
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)

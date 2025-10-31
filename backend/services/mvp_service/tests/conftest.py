@@ -4,12 +4,18 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
+import sys
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
-from services.mvp_service.api.routes import set_mvp_service
-from services.mvp_service.main import app
+
+# Add parent directory to path for local imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from api.routes import set_mvp_service
+from main import app
 
 
 @pytest.fixture

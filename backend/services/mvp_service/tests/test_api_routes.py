@@ -74,33 +74,20 @@ class TestAudioEndpoints:
 class TestErrorHandling:
     """Test suite for error handling across all endpoints."""
 
-    def test_get_mvp_service_import_error(self, client):
-        """Test get_mvp_service when main import fails (lines 44-45)."""
+    def test_get_mvp_service_import_error(self, client, mock_mvp_service):
+        """Test get_mvp_service() when fallback import fails."""
         import sys
         from unittest.mock import patch
-
-        from services.mvp_service.api.routes import set_mvp_service
-
-        # Set service to None to trigger fallback import
+        from api.routes import set_mvp_service
         set_mvp_service(None)
-
-        # Mock sys.modules to simulate ImportError from main
-        with patch.dict(sys.modules, {"services.mvp_service.main": None}):
-            response = client.post(
-                "/api/v1/narratives",
-                json={"consciousness_snapshot_id": "test-123", "tone": "reflective"},
-            )
-
+        with patch.dict(sys.modules, {"main": None}):
+            response = client.post("/api/v1/narratives", json={"consciousness_snapshot_id": "test-123", "tone": "reflective"})
             assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        set_mvp_service(mock_mvp_service)
 
-        # Restore mock for other tests
-        from services.mvp_service.tests.conftest import _get_mock_mvp_service
-
-        set_mvp_service(_get_mock_mvp_service())
-
-    def test_generate_narrative_service_not_initialized(self, client):
+    def test_generate_narrative_service_not_initialized(self, client, mock_mvp_service):
         """Test narrative generation when service not initialized."""
-        from services.mvp_service.api.routes import set_mvp_service
+        from api.routes import set_mvp_service
 
         set_mvp_service(None)
 
@@ -112,9 +99,7 @@ class TestErrorHandling:
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
 
         # Restore mock for other tests
-        from services.mvp_service.tests.conftest import _get_mock_mvp_service
-
-        set_mvp_service(_get_mock_mvp_service())
+        set_mvp_service(mock_mvp_service)
 
     def test_generate_narrative_service_unhealthy(self, client, mock_mvp_service):
         """Test narrative generation when service is unhealthy."""
@@ -325,9 +310,9 @@ class TestStatusEndpoint:
         assert "status" in data
         assert data["status"] == "operational"
 
-    def test_get_status_service_not_initialized(self, client):
+    def test_get_status_service_not_initialized(self, client, mock_mvp_service):
         """Test get status when service is not initialized."""
-        from services.mvp_service.api.routes import set_mvp_service
+        from api.routes import set_mvp_service
 
         set_mvp_service(None)
 
@@ -338,9 +323,7 @@ class TestStatusEndpoint:
         assert data["status"] == "not_initialized"
 
         # Restore mock for other tests
-        from services.mvp_service.tests.conftest import _get_mock_mvp_service
-
-        set_mvp_service(_get_mock_mvp_service())
+        set_mvp_service(mock_mvp_service)
 
     def test_get_status_generic_error(self, client, mock_mvp_service):
         """Test get status with generic exception."""

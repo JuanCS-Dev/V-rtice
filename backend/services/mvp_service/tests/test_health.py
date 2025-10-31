@@ -21,7 +21,7 @@ class TestHealthEndpoints:
 
     def test_health_check_service_not_initialized(self, client):
         """Test health check fails when service not initialized."""
-        from services.mvp_service.api.routes import set_mvp_service
+        from api.routes import set_mvp_service
 
         set_mvp_service(None)
 

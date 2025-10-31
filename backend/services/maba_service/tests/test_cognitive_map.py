@@ -9,7 +9,7 @@ License: Proprietary
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from services.maba_service.core.cognitive_map import CognitiveMapEngine
+from core.cognitive_map import CognitiveMapEngine
 
 
 class TestCognitiveMapInitialization:

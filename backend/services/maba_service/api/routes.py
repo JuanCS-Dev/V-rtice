@@ -11,7 +11,7 @@ import logging
 import time
 
 from fastapi import APIRouter, Depends, HTTPException
-from services.maba_service.models import (
+from models import (
     BrowserActionResponse,
     BrowserSessionRequest,
     ClickRequest,

@@ -26,14 +26,14 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import start_http_server
-from services.mvp_service.api.routes import (
+from api.routes import (
     get_mvp_service,
     set_mvp_service,
 )
-from services.mvp_service.api.routes import router as mvp_router
+from api.routes import router as mvp_router
 
 # Import MVP service components
-from services.mvp_service.models import MVPService
+from models import MVPService
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)
 from shared.vertice_registry_client import RegistryClient, auto_register_service
@@ -151,6 +151,11 @@ app.add_middleware(
 
 # Include MVP API routes
 app.include_router(mvp_router, prefix="/api/v1")
+
+# Include WebSocket routes
+from websocket_routes import router as websocket_router
+
+app.include_router(websocket_router)
 
 
 @app.get("/health")

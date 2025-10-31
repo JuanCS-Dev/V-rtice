@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-from services.mvp_service.core.system_observer import SystemObserver
+from core.system_observer import SystemObserver
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -54,7 +54,7 @@ class TestSystemObserverInitialization:
         observer = SystemObserver()
 
         with patch(
-            "services.mvp_service.core.system_observer.httpx.AsyncClient"
+            "core.system_observer.httpx.AsyncClient"
         ) as mock_client_class:
             # Mock HTTP client
             mock_client = MagicMock()
@@ -83,7 +83,7 @@ class TestSystemObserverInitialization:
         observer = SystemObserver()
 
         with patch(
-            "services.mvp_service.core.system_observer.httpx.AsyncClient"
+            "core.system_observer.httpx.AsyncClient"
         ) as mock_client_class:
             mock_client = MagicMock()
             mock_client.get = AsyncMock(
@@ -104,7 +104,7 @@ class TestSystemObserverInitialization:
         observer = SystemObserver()
 
         with patch(
-            "services.mvp_service.core.system_observer.httpx.AsyncClient"
+            "core.system_observer.httpx.AsyncClient"
         ) as mock_client_class:
             mock_client_class.side_effect = Exception("Client creation failed")
 
@@ -1010,7 +1010,7 @@ class TestEdgeCases:
         observer = SystemObserver()
 
         with patch(
-            "services.mvp_service.core.system_observer.httpx.AsyncClient"
+            "core.system_observer.httpx.AsyncClient"
         ) as mock_client_class:
             mock_client = MagicMock()
             mock_client.get = AsyncMock(

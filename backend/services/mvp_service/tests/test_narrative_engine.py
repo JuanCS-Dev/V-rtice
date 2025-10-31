@@ -10,7 +10,7 @@ License: Proprietary
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from services.mvp_service.core.narrative_engine import NarrativeEngine
+from core.narrative_engine import NarrativeEngine
 
 
 class TestNarrativeEngineInitialization:
@@ -57,7 +57,7 @@ class TestNarrativeEngineInitialization:
         engine = NarrativeEngine(anthropic_api_key="sk-ant-test-key-123")
 
         with patch(
-            "services.mvp_service.core.narrative_engine.AsyncAnthropic"
+            "core.narrative_engine.AsyncAnthropic"
         ) as mock_anthropic:
             # Mock client
             mock_client = MagicMock()
@@ -78,7 +78,7 @@ class TestNarrativeEngineInitialization:
         engine = NarrativeEngine(anthropic_api_key="sk-ant-invalid-key")
 
         with patch(
-            "services.mvp_service.core.narrative_engine.AsyncAnthropic"
+            "core.narrative_engine.AsyncAnthropic"
         ) as mock_anthropic:
             mock_client = MagicMock()
             mock_client.messages.create = AsyncMock(
@@ -97,7 +97,7 @@ class TestNarrativeEngineInitialization:
         engine = NarrativeEngine(anthropic_api_key="sk-ant-test-key-123")
 
         with patch(
-            "services.mvp_service.core.narrative_engine.AsyncAnthropic"
+            "core.narrative_engine.AsyncAnthropic"
         ) as mock_anthropic:
             mock_anthropic.side_effect = Exception("Client creation failed")
 
@@ -957,7 +957,7 @@ class TestEdgeCases:
         engine = NarrativeEngine(anthropic_api_key="sk-ant-test-key-123")
 
         with patch(
-            "services.mvp_service.core.narrative_engine.AsyncAnthropic"
+            "core.narrative_engine.AsyncAnthropic"
         ) as mock_anthropic:
             mock_client = MagicMock()
             mock_client.messages.create = AsyncMock()

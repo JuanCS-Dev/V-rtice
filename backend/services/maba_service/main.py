@@ -26,14 +26,14 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import start_http_server
-from services.maba_service.api.routes import (
+from api.routes import (
     get_maba_service,
     set_maba_service,
 )
-from services.maba_service.api.routes import router as maba_router
+from api.routes import router as maba_router
 
-# Import MABA service components (absolute imports)
-from services.maba_service.models import MABAService
+# Import MABA service components
+from models import MABAService
 
 # Shared library imports (work when in ~/vertice-dev/backend/services/)
 from shared.vertice_registry_client import RegistryClient, auto_register_service
@@ -156,6 +156,11 @@ app.add_middleware(
 
 # Include MABA API routes
 app.include_router(maba_router, prefix="/api/v1")
+
+# Include WebSocket routes
+from websocket_routes import router as websocket_router
+
+app.include_router(websocket_router)
 
 
 @app.get("/health")

@@ -5,7 +5,7 @@ License: Proprietary
 """
 
 import pytest
-from services.mvp_service.models import (
+from models import (
     MVPService,
     NarrativeRequest,
     NarrativeResponse,
@@ -102,8 +102,8 @@ class TestMVPService:
         service = MVPService(service_name="MVP", service_version="1.0.0")
 
         with (
-            patch("services.mvp_service.models.NarrativeEngine") as mock_engine_cls,
-            patch("services.mvp_service.models.SystemObserver") as mock_observer_cls,
+            patch("models.NarrativeEngine") as mock_engine_cls,
+            patch("models.SystemObserver") as mock_observer_cls,
         ):
 
             # Mock NarrativeEngine
@@ -132,7 +132,7 @@ class TestMVPService:
 
         service = MVPService(service_name="MVP", service_version="1.0.0")
 
-        with patch("services.mvp_service.models.NarrativeEngine") as mock_engine_cls:
+        with patch("models.NarrativeEngine") as mock_engine_cls:
             # Mock NarrativeEngine to raise exception
             mock_engine_cls.side_effect = Exception("Engine init failed")
 

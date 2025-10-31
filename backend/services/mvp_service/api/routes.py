@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 # Import models
-from services.mvp_service.models import (
+from models import (
     NarrativeType,
 )
 
@@ -39,7 +39,7 @@ def get_mvp_service():
     if _mvp_service_instance is None:
         # Fallback to importing from main
         try:
-            from services.mvp_service.main import mvp_service
+            from main import mvp_service
 
             return mvp_service
         except ImportError:

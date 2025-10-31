@@ -6,7 +6,7 @@ License: Proprietary
 
 import pytest
 from pydantic import ValidationError
-from services.maba_service.models import (
+from models import (
     BrowserAction,
     BrowserActionRequest,
     BrowserActionResponse,
