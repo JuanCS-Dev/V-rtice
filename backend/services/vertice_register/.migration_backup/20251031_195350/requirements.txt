@@ -1,0 +1,21 @@
+# Vértice Service Registry - TITANIUM Edition Dependencies
+# Philosophy: SMALL but BLINDADO - only essential packages for 99.99% uptime
+
+# FastAPI + ASGI server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Redis async client with hiredis for performance
+redis[hiredis]==5.0.1
+
+# Prometheus metrics export
+prometheus-client==0.19.0
+
+# Pydantic validation
+pydantic==2.5.3
+
+# System metrics (CPU, memory)
+psutil==5.9.6
+
+# Structured JSON logging (optional but recommended)
+python-json-logger==2.0.7

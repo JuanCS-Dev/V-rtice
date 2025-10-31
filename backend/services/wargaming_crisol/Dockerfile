@@ -25,6 +25,10 @@ RUN mkdir -p /app/logs
 # Expose port
 EXPOSE 8026
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 # Health check (Sprint 6 - Issue #16)
 # Checks /health endpoint + DB/Redis connectivity
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

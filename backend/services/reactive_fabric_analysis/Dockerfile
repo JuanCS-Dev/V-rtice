@@ -18,6 +18,10 @@ COPY . .
 # Expose port
 EXPOSE 8601
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8601/health || exit 1

@@ -5,3 +5,16 @@ pydantic==2.5.0
 python-dotenv==1.0.0
 prometheus-client==0.19.0
 httpx==0.25.2
+
+
+# Constitutional v3.0 dependencies
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+python-json-logger
+structlog

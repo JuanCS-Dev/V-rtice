@@ -22,5 +22,9 @@ CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port
 
 EXPOSE 8000
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8000/health/')" || exit 1

@@ -55,3 +55,15 @@ types-redis==4.6.0.11
 
 # Security
 cryptography>=44.0.0
+
+
+# Constitutional v3.0 dependencies
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+structlog

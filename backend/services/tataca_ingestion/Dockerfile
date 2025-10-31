@@ -15,4 +15,8 @@ COPY --chown=tataca:tataca . .
 USER tataca
 HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8400/health || exit 1
 EXPOSE 8400
+
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8400"]

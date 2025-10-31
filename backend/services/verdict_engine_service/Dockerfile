@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir fastapi uvicorn prometheus-client structlog pydan
 # Expose port
 EXPOSE 8093
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 # Health check
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=3 \
     CMD curl -f http://localhost:8093/health || exit 1

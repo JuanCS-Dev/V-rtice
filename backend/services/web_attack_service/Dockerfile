@@ -15,4 +15,8 @@ COPY --chown=appuser:appuser . .
 USER appuser
 HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:8064/health || exit 1
 EXPOSE 8064
+
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8064"]

@@ -51,3 +51,17 @@ typing-inspection==0.4.2
 uvicorn==0.37.0
     # via ip-intelligence-service (pyproject.toml)
 pydantic-settings>=2.0.0
+
+
+# Constitutional v3.0 dependencies
+prometheus-client
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+python-json-logger
+structlog

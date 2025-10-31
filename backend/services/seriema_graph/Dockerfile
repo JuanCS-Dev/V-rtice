@@ -16,4 +16,8 @@ USER seriema
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8300/health || exit 1
 EXPOSE 8300
+
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8300"]

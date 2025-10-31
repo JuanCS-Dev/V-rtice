@@ -23,6 +23,10 @@ ENV PORT=8010
 
 EXPOSE 8010
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import httpx; httpx.get('http://localhost:8010/health')"

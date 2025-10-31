@@ -71,3 +71,16 @@ watchfiles==1.1.0
     # via uvicorn
 websockets==15.0.1
     # via uvicorn
+
+
+# Constitutional v3.0 dependencies
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-httpx
+opentelemetry-instrumentation-asyncpg
+opentelemetry-instrumentation-redis
+opentelemetry-exporter-jaeger-thrift
+opentelemetry-exporter-otlp-proto-grpc
+python-json-logger
+structlog
