@@ -32,6 +32,7 @@ import ImmuneSystemDashboard from "./components/immune-system/ImmuneSystemDashbo
 import MonitoringDashboard from "./components/monitoring/MonitoringDashboard";
 import PenelopeDashboard from "./components/penelope/PenelopeDashboard";
 import MABADashboard from "./components/maba/MABADashboard";
+import MVPDashboard from "./components/mvp/MVPDashboard";
 
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'cockpit', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
@@ -136,6 +137,11 @@ function App() {
     maba: (
       <ErrorBoundary context="maba" title="MABA Dashboard Error">
         <MABADashboard setCurrentView={setCurrentView} />
+      </ErrorBoundary>
+    ),
+    mvp: (
+      <ErrorBoundary context="mvp" title="MVP Dashboard Error">
+        <MVPDashboard setCurrentView={setCurrentView} />
       </ErrorBoundary>
     ),
   };

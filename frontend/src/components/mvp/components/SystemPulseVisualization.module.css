@@ -1,0 +1,256 @@
+.pulse {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.mainPulse {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(155, 89, 182, 0.2);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+}
+.pulseRing {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+.pulseCircle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: pulsate 2s ease-in-out infinite;
+}
+.pulseCircle.green {
+  border-color: #00ff88;
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+}
+.pulseCircle.yellow {
+  border-color: #ffd700;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+}
+.pulseCircle.orange {
+  border-color: #ffa500;
+  box-shadow: 0 0 40px rgba(255, 165, 0, 0.4);
+}
+.pulseCircle.red {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 40px rgba(255, 107, 107, 0.4);
+}
+@keyframes pulsate {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.pulseValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+.pulseNumber {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.pulseUnit {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+.pulseLabel {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.heartbeat {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.heartbeatLine {
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    currentColor 20%,
+    transparent 40%,
+    transparent 60%,
+    currentColor 80%,
+    transparent 100%
+  );
+  animation: heartbeat 2s ease-in-out infinite;
+}
+.heartbeatLine.green {
+  color: #00ff88;
+}
+.heartbeatLine.yellow {
+  color: #ffd700;
+}
+.heartbeatLine.orange {
+  color: #ffa500;
+}
+.heartbeatLine.red {
+  color: #ff6b6b;
+}
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleX(1.5);
+    opacity: 1;
+  }
+}
+.vitals {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(155, 89, 182, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+}
+.vitalsTitle {
+  font-size: 1.5rem;
+  margin: 0 0 2rem 0;
+  color: #9b59b6;
+}
+.vitalsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.vital {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(155, 89, 182, 0.2);
+  border-radius: 10px;
+}
+.vitalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.vitalIcon {
+  font-size: 1.5rem;
+}
+.vitalName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.vitalValue {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.vitalBar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.vitalFill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+.vitalFill.green {
+  background: #00ff88;
+}
+.vitalFill.yellow {
+  background: #ffd700;
+}
+.vitalFill.orange {
+  background: #ffa500;
+}
+.vitalFill.red {
+  background: #ff6b6b;
+}
+.vitalFill.blue {
+  background: #3498db;
+}
+.statusMessages {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(155, 89, 182, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+}
+.messagesTitle {
+  font-size: 1.3rem;
+  margin: 0 0 1.5rem 0;
+  color: #9b59b6;
+}
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 3px solid #9b59b6;
+  border-radius: 6px;
+}
+.messageTime {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  min-width: 80px;
+}
+.messageText {
+  flex: 1;
+  font-size: 0.95rem;
+}
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(155, 89, 182, 0.2);
+  border-top-color: #9b59b6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 768px) {
+  .vitalsGrid {
+    grid-template-columns: 1fr;
+  }
+  .pulseCircle {
+    width: 160px;
+    height: 160px;
+  }
+  .pulseNumber {
+    font-size: 2.5rem;
+  }
+}

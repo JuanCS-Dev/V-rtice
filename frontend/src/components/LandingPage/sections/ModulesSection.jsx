@@ -167,6 +167,25 @@ export const ModulesSection = ({ setCurrentView }) => {
         ],
       }),
     },
+    {
+      id: "mvp",
+      name: t("modules.mvp.name", "MVP"),
+      description: t(
+        "modules.mvp.description",
+        "Maximus Vision Protocol - Sistema de Narrativas e Observabilidade",
+      ),
+      icon: "📖",
+      color: "purple",
+      features: t("modules.mvp.features", {
+        returnObjects: true,
+        defaultValue: [
+          "Narrative Generation",
+          "Anomaly Detection",
+          "System Pulse",
+          "NQS Tracking",
+        ],
+      }),
+    },
   ];
 
   const handleModuleClick = (moduleId) => () => {
