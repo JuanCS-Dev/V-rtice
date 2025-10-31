@@ -1,0 +1,115 @@
+# Grafana for Vértice Constitutional Observability
+# Pre-configured with Prometheus, Loki, and Jaeger datasources
+#
+# Access Grafana: http://localhost:3000
+# Default credentials: admin/admin (change on first login)
+
+version: '3.8'
+
+services:
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: vertice-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Admin credentials
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=vertice_admin_2025
+
+      # Server config
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+
+      # Anonymous access (read-only dashboards)
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Vértice
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+
+      # Plugins
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+
+      # Provisioning
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      # Provisioning datasources and dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+      # Persistent storage
+      - grafana-data:/var/lib/grafana
+    networks:
+      - vertice-observability
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.vertice.service=grafana"
+      - "com.vertice.component=observability"
+      - "com.vertice.constitution=aletheia"
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: vertice-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus-rules.yml:/etc/prometheus/prometheus-rules.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - vertice-observability
+    labels:
+      - "com.vertice.service=prometheus"
+      - "com.vertice.component=observability"
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: vertice-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    networks:
+      - vertice-observability
+    labels:
+      - "com.vertice.service=alertmanager"
+      - "com.vertice.component=observability"
+
+networks:
+  vertice-observability:
+    name: vertice-observability
+    external: true
+
+volumes:
+  grafana-data:
+    name: vertice-grafana-data
+  prometheus-data:
+    name: vertice-prometheus-data
+  alertmanager-data:
+    name: vertice-alertmanager-data
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

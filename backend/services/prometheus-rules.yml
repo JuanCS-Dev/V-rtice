@@ -1,0 +1,28 @@
+groups:
+  - name: constitutional_compliance
+    interval: 30s
+    rules:
+      - alert: ConstitutionalRuleSatisfactionLow
+        expr: vertice_constitutional_rule_satisfaction < 95
+        for: 5m
+        labels:
+          severity: critical
+          article: "{{ $labels.article }}"
+        annotations:
+          summary: "CRS below 95% for {{ $labels.service }}"
+          description: "Article {{ $labels.article }} compliance is {{ $value }}%"
+
+      - alert: LazyExecutionDetected
+        expr: vertice_lazy_execution_index >= 1.0
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "Lazy execution in {{ $labels.service }}"
+
+      - alert: HallucinationDetected
+        expr: increase(vertice_aletheia_hallucinations_total[5m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: Hallucination in {{ $labels.service }}"

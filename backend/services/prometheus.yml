@@ -1,80 +1,35 @@
-# Prometheus Configuration for HCL Services
-
+# Prometheus Configuration for Vértice Constitutional Metrics
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'hcl-local'
-    environment: 'development'
+    cluster: 'vertice-dev'
+    constitution_version: '3.0'
 
-# Alertmanager configuration (optional)
 alerting:
   alertmanagers:
     - static_configs:
-        - targets: []
+        - targets: ['alertmanager:9093']
 
-# Scrape configurations
+rule_files:
+  - 'prometheus-rules.yml'
+
 scrape_configs:
-  # HCL Monitor Service
-  - job_name: 'hcl-monitor'
-    static_configs:
-      - targets: ['hcl-monitor:8001']
-        labels:
-          service: 'hcl-monitor'
-          component: 'monitor'
-
-  # HCL Analyzer Service
-  - job_name: 'hcl-analyzer'
-    static_configs:
-      - targets: ['hcl-analyzer:8002']
-        labels:
-          service: 'hcl-analyzer'
-          component: 'analyzer'
-
-  # HCL Planner Service
-  - job_name: 'hcl-planner'
-    static_configs:
-      - targets: ['hcl-planner:8003']
-        labels:
-          service: 'hcl-planner'
-          component: 'planner'
-
-  # HCL Executor Service
-  - job_name: 'hcl-executor'
-    static_configs:
-      - targets: ['hcl-executor:8004']
-        labels:
-          service: 'hcl-executor'
-          component: 'executor'
-
-  # HCL Knowledge Base Service
-  - job_name: 'hcl-kb'
-    static_configs:
-      - targets: ['hcl-kb-service:8000']
-        labels:
-          service: 'hcl-kb'
-          component: 'knowledge-base'
-
-  # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
-        labels:
-          service: 'prometheus'
-          component: 'monitoring'
 
-  # Kafka (if metrics endpoint available)
-  - job_name: 'kafka'
+  - job_name: 'penelope'
     static_configs:
-      - targets: ['kafka:9092']
-        labels:
-          service: 'kafka'
-          component: 'messaging'
+      - targets: ['penelope:8154']
+    metrics_path: '/metrics'
 
-  # PostgreSQL (if postgres_exporter is added)
-  # - job_name: 'postgres'
-  #   static_configs:
-  #     - targets: ['postgres-exporter:9187']
-  #       labels:
-  #         service: 'postgres'
-  #         component: 'database'
+  - job_name: 'maba'
+    static_configs:
+      - targets: ['maba:8152']
+    metrics_path: '/metrics'
+
+  - job_name: 'mvp'
+    static_configs:
+      - targets: ['mvp:8153']
+    metrics_path: '/metrics'
