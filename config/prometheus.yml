@@ -1,0 +1,106 @@
+# Prometheus Configuration for Vértice Subordinate Services
+# PENELOPE + MABA + MVP metrics collection
+#
+# Validated: 2025-10-31
+# Services: 3 (PENELOPE, MABA, MVP)
+
+global:
+  scrape_interval: 15s # Scrape metrics every 15 seconds
+  evaluation_interval: 15s # Evaluate rules every 15 seconds
+  external_labels:
+    cluster: 'vertice-platform'
+    environment: 'development'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+# rule_files:
+#   - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          type: 'infrastructure'
+
+  # PENELOPE Service (Wisdom & Healing)
+  - job_name: 'penelope'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['vertice-penelope:9090']
+        labels:
+          service: 'penelope'
+          type: 'subordinate'
+          category: 'wisdom'
+          port: '8154'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'penelope-service'
+
+  # MABA Service (Browser Agent)
+  - job_name: 'maba'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['vertice-maba:9090']
+        labels:
+          service: 'maba'
+          type: 'subordinate'
+          category: 'automation'
+          port: '8152'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'maba-service'
+
+  # MVP Service (Vision Protocol)
+  - job_name: 'mvp'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['vertice-mvp:9090']
+        labels:
+          service: 'mvp'
+          type: 'subordinate'
+          category: 'intelligence'
+          port: '8153'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'mvp-service'
+
+  # Infrastructure Services
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['vertice-postgres:5432']
+        labels:
+          service: 'postgres'
+          type: 'infrastructure'
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['vertice-redis:6379']
+        labels:
+          service: 'redis'
+          type: 'infrastructure'
+
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['vertice-neo4j:7474']
+        labels:
+          service: 'neo4j'
+          type: 'infrastructure'
