@@ -25,9 +25,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8220
 
-# Constitutional v3.0 - Metrics port
-EXPOSE 9090
-
-
 # Run application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8220"]
