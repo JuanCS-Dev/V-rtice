@@ -25,6 +25,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Air Gap 1: AG-RUNTIME-002 - torch Dependency (CRITICAL)
 
 ### Problem
+
 - **Service:** `maximus_core_service`
 - **Error:** `ModuleNotFoundError: No module named 'torch'`
 - **Impact:** Service cannot start, entire consciousness system down
@@ -37,12 +38,14 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 **Implementation Steps:**
 
 1. **Add dependency to requirements.txt**
+
    ```bash
    # File: maximus_core_service/requirements.txt
    torch>=2.0.0
    ```
 
 2. **Modify anomaly_detector.py for lazy import**
+
    ```python
    # File: maximus_core_service/autonomic_core/analyze/anomaly_detector.py
 
@@ -71,6 +74,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 **Testing:**
+
 - Smoke test: `python -c "import torch; print(torch.__version__)"`
 - Service startup: `python main.py` (verify no import errors)
 - Health check: `curl http://localhost:8080/health`
@@ -83,6 +87,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Air Gap 2: AG-RUNTIME-001 - Oráculo Kafka Hard Dependency (CRITICAL)
 
 ### Problem
+
 - **Service:** `maximus_oraculo`
 - **Error:** `KafkaConnectionError: Unable to bootstrap from [('localhost', 9092)]`
 - **Impact:** Service crashes on startup when Kafka unavailable
@@ -95,6 +100,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 **Implementation Steps:**
 
 1. **Create InMemoryAPVQueue fallback**
+
    ```python
    # File: maximus_oraculo/queue/memory_queue.py (NEW FILE)
 
@@ -132,6 +138,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 2. **Modify apv_stream_manager.py for degradation**
+
    ```python
    # File: maximus_oraculo/websocket/apv_stream_manager.py
 
@@ -178,6 +185,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 3. **Modify api.py startup event**
+
    ```python
    # File: maximus_oraculo/api.py (around line 105)
 
@@ -199,6 +207,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 4. **Add health check endpoint**
+
    ```python
    # File: maximus_oraculo/api.py
 
@@ -213,6 +222,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 **Testing:**
+
 - Unit test: Mock Kafka unavailable, verify InMemoryAPVQueue usage
 - Integration test: Start Oráculo with Kafka down, verify no crash
 - Validation: Send APV, verify stored in memory queue
@@ -226,6 +236,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Air Gap 3: AG-KAFKA-005 - DLQ Consumer Missing (HIGH)
 
 ### Problem
+
 - **Topic:** `maximus.adaptive-immunity.dlq`
 - **Impact:** Failed APVs silently lost, no monitoring/alerting
 - **Root Cause:** APV publisher sends failed messages to DLQ, no consumer monitors it
@@ -237,12 +248,14 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 **Implementation Steps:**
 
 1. **Create new service structure**
+
    ```bash
    mkdir -p maximus_dlq_monitor_service/{api,consumers,config}
    cd maximus_dlq_monitor_service
    ```
 
 2. **Create main.py**
+
    ```python
    # File: maximus_dlq_monitor_service/main.py
 
@@ -303,6 +316,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 3. **Create requirements.txt**
+
    ```
    fastapi>=0.104.0
    uvicorn[standard]>=0.24.0
@@ -317,6 +331,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    - Alert: DLQ size > 10 messages
 
 **Testing:**
+
 - Force APV validation failure in Oráculo
 - Verify message arrives in DLQ
 - Verify DLQ monitor logs error
@@ -331,6 +346,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Air Gap 4: AG-KAFKA-009 - agent-communications Producer (HIGH)
 
 ### Problem
+
 - **Topic:** `agent-communications`
 - **Impact:** Narrative Filter feature not working, agent coordination intelligence lost
 - **Root Cause:** Consumer expects messages that never arrive (no producer connected)
@@ -342,6 +358,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 **Implementation Steps:**
 
 1. **Add KafkaProducer to agent_communication_service**
+
    ```python
    # File: agent_communication_service/kafka_producer.py (NEW FILE)
 
@@ -379,6 +396,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 2. **Modify agent communication API**
+
    ```python
    # File: agent_communication_service/api.py
 
@@ -405,6 +423,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 3. **Validate Narrative Filter integration**
+
    ```python
    # File: narrative_filter_service/kafka_consumer.py (VERIFY)
 
@@ -418,6 +437,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 **Testing:**
+
 - End-to-end test: Send agent message via API
 - Verify message published to `agent-communications` topic
 - Verify Narrative Filter consumes and processes message
@@ -431,6 +451,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Air Gap 5: AG-KAFKA-004 - honeypot_status Consumer (MEDIUM)
 
 ### Problem
+
 - **Topic:** `reactive_fabric.honeypot_status`
 - **Impact:** Honeypot intelligence lost, threat pattern learning gap
 - **Root Cause:** Reactive Fabric publishes honeypot status, no consumer utilizes data
@@ -442,6 +463,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 **Implementation Steps:**
 
 1. **Add consumer to active_immune_core**
+
    ```python
    # File: active_immune_core/kafka_consumers.py (MODIFY)
 
@@ -481,6 +503,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    ```
 
 2. **Start consumer in main.py**
+
    ```python
    # File: active_immune_core/main.py
 
@@ -507,6 +530,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
    - Panel 3: Top attacking IPs
 
 **Testing:**
+
 - Simulate honeypot interaction in Reactive Fabric
 - Verify status published to `reactive_fabric.honeypot_status`
 - Verify Active Immune Core consumes message
@@ -521,6 +545,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Implementation Timeline
 
 ### Day 1: Critical Fixes
+
 - **Morning (3h):**
   - AG-RUNTIME-002: Install torch (30 min)
   - AG-RUNTIME-001: Oráculo graceful degradation (2.5h)
@@ -529,6 +554,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
   - AG-KAFKA-005: Create DLQ monitor (2h)
 
 ### Day 2: Feature Enablement
+
 - **Morning (3h):**
   - AG-KAFKA-005: Complete DLQ monitor + testing (1h)
   - AG-KAFKA-009: Agent communications producer (2h)
@@ -537,6 +563,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
   - AG-KAFKA-004: Honeypot status consumer (2h)
 
 ### Day 3: Validation
+
 - **Morning (2h):**
   - AG-KAFKA-004: Complete + testing (1h)
   - End-to-end validation all fixes (1h)
@@ -549,12 +576,14 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Acceptance Criteria
 
 ### AG-RUNTIME-002 ✅
+
 - [ ] `torch>=2.0.0` in requirements.txt
 - [ ] `python -c "import torch; print(torch.__version__)"` succeeds
 - [ ] maximus_core_service starts without errors
 - [ ] Health check endpoint returns 200
 
 ### AG-RUNTIME-001 ✅
+
 - [ ] Oráculo starts successfully with Kafka down
 - [ ] Logs show "DEGRADED MODE" warning
 - [ ] APVs stored in InMemoryAPVQueue
@@ -562,6 +591,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 - [ ] APVs flush to Kafka when available
 
 ### AG-KAFKA-005 ✅
+
 - [ ] maximus_dlq_monitor service running
 - [ ] Consumer connected to `maximus.adaptive-immunity.dlq`
 - [ ] Failed APV logged with error details
@@ -570,6 +600,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 - [ ] Grafana alert triggers if DLQ > 10
 
 ### AG-KAFKA-009 ✅
+
 - [ ] Agent message API publishes to Kafka
 - [ ] Message appears in `agent-communications` topic
 - [ ] Narrative Filter consumes message
@@ -577,6 +608,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 - [ ] End-to-end latency < 2 seconds
 
 ### AG-KAFKA-004 ✅
+
 - [ ] Active Immune Core consumes `reactive_fabric.honeypot_status`
 - [ ] Honeypot interaction processed
 - [ ] Threat pattern added to database
@@ -588,6 +620,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Risk Mitigation
 
 ### Risk 1: Oráculo Degradation Performance
+
 - **Concern:** InMemoryAPVQueue may overflow if Kafka down for extended period
 - **Mitigation:**
   - Set maxlen=1000 (circular buffer)
@@ -595,6 +628,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
   - Alert if queue > 80% full
 
 ### Risk 2: DLQ Monitor High Volume
+
 - **Concern:** DLQ monitor may be overwhelmed by high failure rate
 - **Mitigation:**
   - Implement rate limiting
@@ -602,6 +636,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
   - Circuit breaker pattern
 
 ### Risk 3: Agent Communications Latency
+
 - **Concern:** Kafka adds latency to agent coordination
 - **Mitigation:**
   - Async fire-and-forget publish
@@ -613,6 +648,7 @@ This plan addresses the **5 highest priority Air Gaps** identified in the backen
 ## Monitoring & Observability
 
 ### Prometheus Metrics
+
 ```
 # AG-RUNTIME-001
 oraculo_degraded_mode{status="true|false"}
@@ -633,6 +669,7 @@ threat_patterns_learned_total
 ```
 
 ### Grafana Dashboards
+
 1. **Air Gaps Health Dashboard**
    - Oráculo degradation status
    - DLQ queue size
@@ -650,6 +687,7 @@ threat_patterns_learned_total
 ## Deployment Checklist
 
 ### Pre-Deployment
+
 - [ ] All tests passing
 - [ ] Code review completed
 - [ ] Documentation updated
@@ -657,6 +695,7 @@ threat_patterns_learned_total
 - [ ] Prometheus alerts configured
 
 ### Deployment
+
 - [ ] Deploy torch dependency (AG-RUNTIME-002)
 - [ ] Deploy Oráculo graceful degradation (AG-RUNTIME-001)
 - [ ] Deploy DLQ monitor service (AG-KAFKA-005)
@@ -664,6 +703,7 @@ threat_patterns_learned_total
 - [ ] Deploy honeypot status consumer (AG-KAFKA-004)
 
 ### Post-Deployment
+
 - [ ] Verify all services healthy
 - [ ] Check Prometheus metrics
 - [ ] Validate end-to-end workflows

@@ -93,6 +93,7 @@ Implementação dos dois sistemas finais do Maximus AI 3.0:
 ### Mecanismos Implementados
 
 #### 1. Hippocampal Replay
+
 ```python
 async def hippocampal_replay(self, n_replays: int = 1000) -> List[Experience]:
     # Replay prioritizado de experiências críticas
@@ -101,6 +102,7 @@ async def hippocampal_replay(self, n_replays: int = 1000) -> List[Experience]:
 ```
 
 #### 2. Cortical Consolidation
+
 ```python
 async def cortical_consolidation(self, experiences: List[Experience]) -> int:
     # Transferência hippocampus → neocortex
@@ -109,6 +111,7 @@ async def cortical_consolidation(self, experiences: List[Experience]) -> int:
 ```
 
 #### 3. Pseudo-Rehearsal
+
 ```python
 async def pseudo_rehearsal(self, n_synthetic: int = 500) -> int:
     # Geração de experiências sintéticas
@@ -117,6 +120,7 @@ async def pseudo_rehearsal(self, n_synthetic: int = 500) -> int:
 ```
 
 #### 4. Pattern Extraction
+
 ```python
 async def extract_patterns(self, experiences: List[Experience]) -> List[MemoryPattern]:
     # Identificação de padrões recorrentes
@@ -125,6 +129,7 @@ async def extract_patterns(self, experiences: List[Experience]) -> List[MemoryPa
 ```
 
 #### 5. Memory Pruning
+
 ```python
 async def memory_pruning(self, threshold: float = 0.5) -> int:
     # Poda de memórias redundantes/irrelevantes
@@ -133,6 +138,7 @@ async def memory_pruning(self, threshold: float = 0.5) -> int:
 ```
 
 #### 6. Ciclo de Consolidação Completo
+
 ```python
 async def consolidate(self) -> ConsolidationMetrics:
     # 1. Enter NREM sleep
@@ -289,6 +295,7 @@ async def consolidate(self) -> ConsolidationMetrics:
 ### Mecanismos Implementados
 
 #### 1. Model-Free Learning (Actor-Critic)
+
 ```python
 # Actor: PolicyNetwork (ação)
 action = self.actor.sample_action(state_vec)
@@ -303,6 +310,7 @@ self.actor.update(state_vec, action, td_error)
 ```
 
 #### 2. Model-Based Planning
+
 ```python
 # World model aprende dinâmica
 self.world_model.add_transition(state, action, next_state, reward)
@@ -312,6 +320,7 @@ best_action = self.world_model.plan(state, available_actions, horizon=5)
 ```
 
 #### 3. Arbitration System
+
 ```python
 def _arbitrate(self, state: State) -> LearningMode:
     uncertainty = self.world_model.get_uncertainty(state)
@@ -325,6 +334,7 @@ def _arbitrate(self, state: State) -> LearningMode:
 ```
 
 #### 4. Skill Learning
+
 ```python
 async def learn_skill(self, name, description, primitive_sequence) -> Skill:
     # Criar skill composta
@@ -335,6 +345,7 @@ async def learn_skill(self, name, description, primitive_sequence) -> Skill:
 ```
 
 #### 5. Imitation Learning
+
 ```python
 def get_imitation_action(self, state: State) -> Optional[Action]:
     # Encontrar estado mais similar
@@ -393,6 +404,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 ## 📈 Estatísticas Finais
 
 ### Memory Consolidation Engine
+
 - **Total de Classes:** 10
 - **Total de Métodos:** 45+
 - **Testes Implementados:** 5
@@ -400,6 +412,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 - **Taxa de Sucesso:** 100% (5/5 testes)
 
 ### Hybrid Skill Acquisition System
+
 - **Total de Classes:** 14
 - **Total de Métodos:** 60+
 - **Skill Primitives:** 15
@@ -408,6 +421,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 - **Taxa de Sucesso:** 100% (7/7 testes)
 
 ### Totais Combinados
+
 - **Linhas de Código:** 2.491
 - **Classes:** 24
 - **Testes:** 12
@@ -419,6 +433,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 ## 🧬 Características Biológicas Implementadas
 
 ### Memory Consolidation Engine
+
 1. ✅ **Hippocampal Replay** - Replay de experiências durante sono
 2. ✅ **Cortical Consolidation** - Transferência para memória de longo prazo
 3. ✅ **Sharp-Wave Ripples** - Priorização de experiências salientes
@@ -428,6 +443,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 7. ✅ **Pattern Extraction** - Identificação de esquemas abstratos
 
 ### Hybrid Skill Acquisition System
+
 1. ✅ **Basal Ganglia** - Model-free RL para hábitos rápidos
 2. ✅ **Cerebellum** - Model-based planning para predição
 3. ✅ **Motor Cortex** - Biblioteca de primitivos motores
@@ -441,6 +457,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 ## 🎓 Conceitos Avançados de IA Implementados
 
 ### Reinforcement Learning
+
 - ✅ Actor-Critic Architecture
 - ✅ Temporal Difference Learning
 - ✅ Policy Gradient Methods
@@ -450,6 +467,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 - ✅ Model-Based RL
 
 ### Memory Systems
+
 - ✅ Short-Term Memory (Hippocampus)
 - ✅ Long-Term Memory (Cortex)
 - ✅ Episodic Memory
@@ -457,6 +475,7 @@ def get_imitation_action(self, state: State) -> Optional[Action]:
 - ✅ Working Memory
 
 ### Learning Paradigms
+
 - ✅ Supervised Learning (Imitation)
 - ✅ Reinforcement Learning (Trial-and-error)
 - ✅ Unsupervised Learning (Pattern extraction)
@@ -482,6 +501,7 @@ Estes dois sistemas completam o Maximus AI 3.0, integrando-se com:
 ## 📊 Performance e Métricas
 
 ### Memory Consolidation Engine
+
 ```json
 {
   "replay_buffer_size": 725,
@@ -495,6 +515,7 @@ Estes dois sistemas completam o Maximus AI 3.0, integrando-se com:
 ```
 
 ### Hybrid Skill Acquisition System
+
 ```json
 {
   "total_actions": 30,
@@ -515,6 +536,7 @@ Estes dois sistemas completam o Maximus AI 3.0, integrando-se com:
 ## 🚀 Próximos Passos (Opcional)
 
 ### Melhorias Futuras
+
 1. Integração com bancos de dados persistentes (PostgreSQL)
 2. Visualização de padrões extraídos
 3. Dashboard de consolidação em tempo real
@@ -524,6 +546,7 @@ Estes dois sistemas completam o Maximus AI 3.0, integrando-se com:
 7. Multi-agent skill sharing
 
 ### Extensões Possíveis
+
 1. Curiosity-driven exploration
 2. Hierarchical RL para skills compostos
 3. Meta-RL para adaptação rápida

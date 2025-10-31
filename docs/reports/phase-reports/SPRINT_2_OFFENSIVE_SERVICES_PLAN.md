@@ -1,4 +1,5 @@
 # SPRINT 2: Offensive Services - Coverage Plan
+
 ## FASE III.C Continuation - Test Coverage for HCL/Intel/Recon Services
 
 **Planning Date**: 2025-10-07
@@ -19,16 +20,16 @@ Apply SPRINT 1 proven methodology to achieve **85%+ coverage** on 8 offensive/in
 
 ### Current State: ALL SERVICES AT 0% COVERAGE
 
-| Service | Files | Est. Lines | Complexity | Priority |
-|---------|-------|------------|------------|----------|
-| **hcl_analyzer_service** | 4 | ~370 | Low | P1 - HIGH |
-| **hcl_executor_service** | 4 | ~380 | Medium | P1 - HIGH |
-| **hcl_planner_service** | 4 | ~350 | Medium | P2 - MEDIUM |
-| **hcl_kb_service** | 4 | ~200 | Low | P1 - HIGH |
-| **network_recon_service** | ? | ~800 | High | P3 - LOW |
-| **osint_service** | ? | ~1200 | High | P3 - LOW |
-| **vuln_intel_service** | ? | ~900 | High | P3 - LOW |
-| **web_attack_service** | 5 | ~900 | High | P3 - LOW |
+| Service                   | Files | Est. Lines | Complexity | Priority    |
+| ------------------------- | ----- | ---------- | ---------- | ----------- |
+| **hcl_analyzer_service**  | 4     | ~370       | Low        | P1 - HIGH   |
+| **hcl_executor_service**  | 4     | ~380       | Medium     | P1 - HIGH   |
+| **hcl_planner_service**   | 4     | ~350       | Medium     | P2 - MEDIUM |
+| **hcl_kb_service**        | 4     | ~200       | Low        | P1 - HIGH   |
+| **network_recon_service** | ?     | ~800       | High       | P3 - LOW    |
+| **osint_service**         | ?     | ~1200      | High       | P3 - LOW    |
+| **vuln_intel_service**    | ?     | ~900       | High       | P3 - LOW    |
+| **web_attack_service**    | 5     | ~900       | High       | P3 - LOW    |
 
 **Total**: ~5,100 lines of untested code
 
@@ -49,29 +50,35 @@ Apply SPRINT 1 proven methodology to achieve **85%+ coverage** on 8 offensive/in
 ## 🎯 Strategy: Phased Approach
 
 ### Phase 1: HCL Services (Days 1-2)
+
 **Target**: 85%+ coverage on 4 HCL services
 
 **Services**:
+
 1. ✅ **hcl_kb_service** (~200 lines) - Simplest, warm-up
 2. ✅ **hcl_analyzer_service** (~370 lines) - Core analysis logic
 3. ✅ **hcl_planner_service** (~350 lines) - Planning algorithms
 4. ✅ **hcl_executor_service** (~380 lines) - Execution engine
 
 **Estimated Effort**:
+
 - ~15-20 tests per service
 - ~60-80 tests total
 - ~2 days with SPRINT 1 velocity
 
 ### Phase 2: Intel/Recon Services (Days 3-4)
+
 **Target**: 85%+ coverage on 4 Intel/Recon services
 
 **Services**:
+
 1. ✅ **network_recon_service** (~800 lines) - Network scanning
 2. ✅ **vuln_intel_service** (~900 lines) - Vulnerability intelligence
 3. ✅ **web_attack_service** (~900 lines) - Web attack simulations
 4. ✅ **osint_service** (~1200 lines) - OSINT gathering
 
 **Estimated Effort**:
+
 - ~25-35 tests per service
 - ~100-140 tests total
 - ~2 days (more complex mocking required)
@@ -83,6 +90,7 @@ Apply SPRINT 1 proven methodology to achieve **85%+ coverage** on 8 offensive/in
 For each service:
 
 ### Step 1: Setup (10 min)
+
 ```bash
 cd /home/juan/vertice-dev/backend/services/<service_name>
 mkdir -p tests
@@ -91,12 +99,14 @@ touch tests/test_<service>.py
 ```
 
 ### Step 2: Read Implementation (15 min)
+
 - Identify main modules (main.py, api.py, models.py, etc.)
 - Map API endpoints
 - Identify core business logic
 - Note external dependencies (DB, HTTP, Redis, etc.)
 
 ### Step 3: Design Test Structure (15 min)
+
 ```python
 # ==================== FIXTURES ====================
 @pytest_asyncio.fixture
@@ -119,6 +129,7 @@ class TestErrorHandling: ...
 ```
 
 ### Step 4: Write Tests (1-2 hours)
+
 - Start with health check (quick win)
 - Cover main API endpoints with success paths
 - Add edge cases (empty inputs, invalid data)
@@ -126,13 +137,16 @@ class TestErrorHandling: ...
 - Mock external dependencies (httpx.AsyncClient, asyncpg, redis)
 
 ### Step 5: Verify Coverage (10 min)
+
 ```bash
 pytest tests/test_<service>.py --cov=<module> --cov-report=term-missing
 ```
+
 - Target: 85%+
 - Iterate if needed
 
 ### Step 6: Document & Commit (10 min)
+
 - Update service README if exists
 - Commit with descriptive message
 - Move to next service
@@ -142,6 +156,7 @@ pytest tests/test_<service>.py --cov=<module> --cov-report=term-missing
 ## 🛠️ Testing Tools
 
 ### Required Dependencies (already in environment)
+
 - `pytest==8.4.2`
 - `pytest-asyncio==1.2.0`
 - `pytest-cov==7.0.0`
@@ -149,6 +164,7 @@ pytest tests/test_<service>.py --cov=<module> --cov-report=term-missing
 - `httpx==0.27.0` (for FastAPI testing)
 
 ### Mock Strategy
+
 ```python
 # FastAPI endpoint testing
 from httpx import AsyncClient
@@ -163,6 +179,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 ## 📊 Success Criteria
 
 ### Per-Service Criteria
+
 - ✅ Coverage: 85%+ per service
 - ✅ Tests passing: 100%
 - ✅ No flaky tests
@@ -170,6 +187,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 - ✅ Test execution: <5s per service
 
 ### Overall SPRINT 2 Criteria
+
 - ✅ All 8 services: 85%+ coverage
 - ✅ Total tests: 160-220 tests
 - ✅ Average coverage: 90%+
@@ -180,16 +198,19 @@ from unittest.mock import AsyncMock, MagicMock, patch
 ## 📅 Timeline
 
 ### Day 1 (Today - 2025-10-07)
+
 - ⏰ **Morning (2h)**: HCL KB + HCL Analyzer
 - ⏰ **Afternoon (2h)**: HCL Planner + HCL Executor
 - 🎯 **Goal**: 4 HCL services complete (85%+ each)
 
 ### Day 2 (2025-10-08)
+
 - ⏰ **Morning (3h)**: Network Recon + Vuln Intel
 - ⏰ **Afternoon (3h)**: Web Attack + OSINT
 - 🎯 **Goal**: 4 Intel/Recon services complete (85%+ each)
 
 ### Day 3 (2025-10-09 if needed)
+
 - Buffer day for any services needing iteration
 - Final documentation and achievement report
 
@@ -198,12 +219,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 ## 🎯 Expected Outcomes
 
 ### Quantitative
+
 - **+85pp average** coverage improvement (0% → 85%+)
 - **160-220 new tests** created
 - **~5,100 lines** of code now tested
 - **8 services** production-ready with test coverage
 
 ### Qualitative
+
 - **Defensive Posture**: All offensive services tested for reliability
 - **Regression Prevention**: Future changes won't break functionality
 - **Documentation**: Tests serve as living documentation
@@ -232,6 +255,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 ## 🏆 SPRINT 2 RESULTS - COMPLETE
 
 ### Execution Summary
+
 **Duration**: Single day (2025-10-07)
 **Services Completed**: 8/8 (100%)
 **Total Tests Created**: 203 tests
@@ -240,27 +264,28 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 ### Phase 1: HCL Services - COMPLETE ✅
 
-| Service | Coverage | Tests | Status | Commit |
-|---------|----------|-------|--------|--------|
-| hcl_kb_service | **97%** | 24 | ✅ EXCEEDED (+12pp) | e4406ab |
-| hcl_analyzer_service | **98%** | 26 | ✅ EXCEEDED (+13pp) | b93c631 |
-| hcl_planner_service | **89%** | 20 | ✅ EXCEEDED (+4pp) | 50533d8 |
-| hcl_executor_service | **86%** | 21 | ✅ EXCEEDED (+1pp) | 90e88d7 |
-| **Phase 1 Total** | **92.5%** | **91** | **✅ COMPLETE** | - |
+| Service              | Coverage  | Tests  | Status              | Commit  |
+| -------------------- | --------- | ------ | ------------------- | ------- |
+| hcl_kb_service       | **97%**   | 24     | ✅ EXCEEDED (+12pp) | e4406ab |
+| hcl_analyzer_service | **98%**   | 26     | ✅ EXCEEDED (+13pp) | b93c631 |
+| hcl_planner_service  | **89%**   | 20     | ✅ EXCEEDED (+4pp)  | 50533d8 |
+| hcl_executor_service | **86%**   | 21     | ✅ EXCEEDED (+1pp)  | 90e88d7 |
+| **Phase 1 Total**    | **92.5%** | **91** | **✅ COMPLETE**     | -       |
 
 ### Phase 2: Intel/Recon Services - COMPLETE ✅
 
-| Service | Coverage | Tests | Status | Commit |
-|---------|----------|-------|--------|--------|
-| network_recon_service | **93%** | 26 | ✅ EXCEEDED (+8pp) | eb7a1b4 |
-| vuln_intel_service | **90%** | 23 | ✅ EXCEEDED (+5pp) | 0a43a1a |
-| web_attack_service | **97%** | 35 | ✅ EXCEEDED (+12pp) | ae27a1f |
-| osint_service | **89%** | 28 | ✅ EXCEEDED (+4pp) | 79d325f |
-| **Phase 2 Total** | **92.25%** | **112** | **✅ COMPLETE** | - |
+| Service               | Coverage   | Tests   | Status              | Commit  |
+| --------------------- | ---------- | ------- | ------------------- | ------- |
+| network_recon_service | **93%**    | 26      | ✅ EXCEEDED (+8pp)  | eb7a1b4 |
+| vuln_intel_service    | **90%**    | 23      | ✅ EXCEEDED (+5pp)  | 0a43a1a |
+| web_attack_service    | **97%**    | 35      | ✅ EXCEEDED (+12pp) | ae27a1f |
+| osint_service         | **89%**    | 28      | ✅ EXCEEDED (+4pp)  | 79d325f |
+| **Phase 2 Total**     | **92.25%** | **112** | **✅ COMPLETE**     | -       |
 
 ### Overall Achievement
 
 **📊 Quantitative Results**:
+
 - ✅ Coverage Improvement: +92.125pp (0% → 92.125%)
 - ✅ Tests Created: 203 tests (exceeded estimate of 160-220)
 - ✅ Lines Covered: ~4,700 of ~5,100 lines
@@ -268,6 +293,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 - ✅ All services exceed 85% target
 
 **🎯 Qualitative Achievements**:
+
 - ✅ PAGANI Compliance: 100% (zero production code mocking)
 - ✅ No flaky tests: All tests deterministic
 - ✅ Fast execution: <1s per service average
@@ -275,6 +301,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 - ✅ Regression prevention: All services protected
 
 **⚡ Velocity**:
+
 - Average time per service: ~1.5 hours
 - Total execution time: ~12 hours (single day)
 - Efficiency: Better than planned (2 days → 1 day)

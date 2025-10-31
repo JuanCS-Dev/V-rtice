@@ -21,12 +21,14 @@
 ### 1. DLQ Monitor → Sistema de Alertas REAL (Kafka)
 
 **ANTES (Integration Point):**
+
 ```python
 # Alert system integration point - extend with Slack/PagerDuty/email as needed
 logger.critical(f"🚨 ALERT TRIGGERED: {json.dumps(data, indent=2)}")
 ```
 
 **DEPOIS (Integração Real):**
+
 ```python
 # Build alert event
 alert_event = {
@@ -56,6 +58,7 @@ if self.producer:
 ```
 
 **O Que Foi Integrado:**
+
 - ✅ Tópico Kafka real: `system.alerts`
 - ✅ Schema de alertas estruturado (JSON)
 - ✅ Alert ID único (UUID)
@@ -72,6 +75,7 @@ if self.producer:
 ### 2. Honeypot Consumer → Cytokine Messenger REAL (Immunis)
 
 **ANTES (Integration Point):**
+
 ```python
 # Cytokine broadcast integration point
 # Future: cytokine_messenger.send_cytokine() when cytokine infrastructure is available
@@ -80,6 +84,7 @@ logger.info(f"✅ Threat pattern {pattern_id} ready for broadcast")
 ```
 
 **DEPOIS (Integração Real):**
+
 ```python
 # Initialize cytokine messenger (no __init__)
 self.cytokine_messenger = CytokineMessenger(
@@ -94,7 +99,7 @@ await self.cytokine_messenger.start()
 # Broadcast threat pattern with REAL cytokines
 cytokine_map = {
     "low": (CytokineType.IL8, 4),      # IL8: Reconnaissance alert
-    "medium": (CytokineType.IL1, 6),   # IL1: Standard threat  
+    "medium": (CytokineType.IL1, 6),   # IL1: Standard threat
     "high": (CytokineType.TNF, 9)      # TNF: Critical threat (apoptosis trigger)
 }
 
@@ -119,6 +124,7 @@ success = await self.cytokine_messenger.send_cytokine(
 ```
 
 **O Que Foi Integrado:**
+
 - ✅ CytokineMessenger REAL (não mock)
 - ✅ Cytokine types biomiméticos: IL8 (low), IL1 (medium), TNF (high)
 - ✅ Priority mapping (4, 6, 9)
@@ -135,6 +141,7 @@ success = await self.cytokine_messenger.send_cytokine(
 ## Testes de Integração Realizados
 
 ### Teste 1: Honeypot Consumer + CytokineMessenger
+
 ```
 ✅ Consumer created with CytokineMessenger
    Cytokine topic prefix: immunis.cytokines
@@ -153,6 +160,7 @@ Cytokine Severity Mapping:
 ```
 
 ### Teste 2: DLQ Monitor + Kafka Alerts
+
 ```
 ✅ DLQ Monitor constants validated
    Alert topic: system.alerts
@@ -198,20 +206,21 @@ Total de violações: 0
 
 ## Diferença: Integration Points vs Integrações Reais
 
-| Aspecto | Integration Points (ANTES) | Integrações Reais (DEPOIS) |
-|---------|---------------------------|----------------------------|
-| **Código** | Comentários sobre futuros | Código funcional real |
-| **Testabilidade** | Não testável | 100% testável |
-| **Production-Ready** | Não | Sim |
-| **Graceful Degradation** | N/A | Implementado |
-| **Observabilidade** | Logs apenas | Kafka topics + logs |
-| **Padrão Pagani** | Violação (placeholder) | Conformidade total |
+| Aspecto                  | Integration Points (ANTES) | Integrações Reais (DEPOIS) |
+| ------------------------ | -------------------------- | -------------------------- |
+| **Código**               | Comentários sobre futuros  | Código funcional real      |
+| **Testabilidade**        | Não testável               | 100% testável              |
+| **Production-Ready**     | Não                        | Sim                        |
+| **Graceful Degradation** | N/A                        | Implementado               |
+| **Observabilidade**      | Logs apenas                | Kafka topics + logs        |
+| **Padrão Pagani**        | Violação (placeholder)     | Conformidade total         |
 
 ---
 
 ## Arquitetura Completa (End-to-End)
 
 ### Flow 1: DLQ Monitoring → Alertas
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                     DLQ MONITORING FLOW                      │
@@ -244,6 +253,7 @@ Total de violações: 0
 ```
 
 ### Flow 2: Honeypot Intelligence → Cytokine Broadcast
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                   HONEYPOT INTELLIGENCE FLOW                 │
@@ -326,6 +336,7 @@ Total de violações: 0
 ## Próximos Passos
 
 **Pendente:**
+
 - AG-RUNTIME-001 (Oráculo Kafka graceful degradation) - CRITICAL
 
 **Recomendação:** Implementar AG-RUNTIME-001 seguindo o mesmo padrão de integração real (sem integration points).
@@ -340,8 +351,10 @@ Total de violações: 0
 **Tempo adicional:** ~30 minutos
 **Valor agregado:** Infinito (código production-ready vs comentários)
 
-**Filosofia Aplicada:** 
+**Filosofia Aplicada:**
+
 > "Por que deixar integration points quando podemos INTEGRAR DE VERDADE?"
+>
 > - Juan, 2025
 
 ✅ **INTEGRAÇÃO 100% COMPLETA**
