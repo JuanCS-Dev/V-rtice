@@ -60,6 +60,10 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 EXPOSE 8200
 
+# Constitutional v3.0 - Metrics port
+EXPOSE 9090
+
+
 # Metadata
 LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
 LABEL org.opencontainers.image.description="Active Immune Core with uv"
