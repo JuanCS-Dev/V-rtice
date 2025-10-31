@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vertice-subordinates
+  labels:
+    name: vertice-subordinates
+    environment: production
+    project: vertice-platform
+    managed-by: kubernetes
+  annotations:
+    description: "PENELOPE, MABA, MVP - Subordinate Services"
+
+---
+# ResourceQuota for the namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: subordinates-quota
+  namespace: vertice-subordinates
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "20"
+    limits.memory: 40Gi
+    persistentvolumeclaims: "10"
+    services.loadbalancers: "3"
+
+---
+# LimitRange for pods
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: subordinates-limits
+  namespace: vertice-subordinates
+spec:
+  limits:
+    - max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      type: Container
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

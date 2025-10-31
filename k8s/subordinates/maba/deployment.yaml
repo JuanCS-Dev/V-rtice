@@ -1,0 +1,301 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maba
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+    service: browser-agent
+    tier: subordinate
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: maba
+  template:
+    metadata:
+      labels:
+        app: maba
+        service: browser-agent
+        tier: subordinate
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9092"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: maba
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        # Browser automation requires SYS_ADMIN capability
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "0"
+      containers:
+        - name: maba
+          image: ghcr.io/vertice/maba:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8152
+              name: http
+              protocol: TCP
+            - containerPort: 9092
+              name: metrics
+              protocol: TCP
+          env:
+            # Common config
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: ENVIRONMENT
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: LOG_LEVEL
+            - name: MABA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: MABA_PORT
+
+            # Secrets
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: subordinates-secrets
+                  key: ANTHROPIC_API_KEY
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: subordinates-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: subordinates-secrets
+                  key: POSTGRES_PASSWORD
+            - name: NEO4J_USER
+              valueFrom:
+                secretKeyRef:
+                  name: subordinates-secrets
+                  key: NEO4J_USER
+            - name: NEO4J_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: subordinates-secrets
+                  key: NEO4J_PASSWORD
+
+            # Database
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: POSTGRES_DB
+
+            # Redis
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: REDIS_PORT
+
+            # Neo4j
+            - name: NEO4J_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: NEO4J_URI
+
+            # Browser Configuration
+            - name: BROWSER_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: BROWSER_TYPE
+            - name: BROWSER_HEADLESS
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: BROWSER_HEADLESS
+            - name: MAX_BROWSER_INSTANCES
+              valueFrom:
+                configMapKeyRef:
+                  name: subordinates-config
+                  key: MAX_BROWSER_INSTANCES
+
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN  # Required for browser sandboxing
+            allowPrivilegeEscalation: true
+
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 4Gi
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8152
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8152
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 2
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: browser-cache
+              mountPath: /app/.cache
+            - name: shm
+              mountPath: /dev/shm
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: browser-cache
+          emptyDir: {}
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi  # Browser needs large shared memory
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - maba
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: maba
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maba
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+    service: browser-agent
+spec:
+  type: ClusterIP
+  selector:
+    app: maba
+  ports:
+    - port: 8152
+      targetPort: 8152
+      protocol: TCP
+      name: http
+    - port: 9092
+      targetPort: 9092
+      protocol: TCP
+      name: metrics
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: maba-hpa
+  namespace: vertice-subordinates
+  labels:
+    app: maba
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: maba
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: maba-pdb
+  namespace: vertice-subordinates
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: maba
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

@@ -1,0 +1,83 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: vertice-subordinates
+  annotations:
+    description: "PENELOPE, MABA, MVP - Subordinate Services"
+
+namespace: vertice-subordinates
+
+# Common labels applied to all resources
+commonLabels:
+  project: vertice-platform
+  tier: subordinate
+  managed-by: kustomize
+
+# Common annotations
+commonAnnotations:
+  platform: "Vértice Platform"
+  governance: "7 Biblical Articles"
+  compliance: "Air Gap Compliant"
+
+# Resources in order of deployment
+resources:
+  # 1. Namespace and base config
+  - namespace.yaml
+  - configmap.yaml
+  - secrets.yaml
+
+  # 2. Infrastructure (databases, cache, storage)
+  - infrastructure/postgresql.yaml
+  - infrastructure/redis.yaml
+  - infrastructure/neo4j.yaml
+
+  # 3. Application services
+  - penelope/deployment.yaml
+  - maba/deployment.yaml
+  - mvp/deployment.yaml
+
+  # 4. Networking
+  - ingress.yaml
+
+# ConfigMap generator (for environment-specific overrides)
+configMapGenerator:
+  - name: subordinates-env-overlay
+    literals:
+      - DEPLOYMENT_DATE=2025-10-31
+      - DEPLOYMENT_VERSION=v1.0.0
+      - BIBLICAL_ARTICLES=7
+      - FRUITS_OF_SPIRIT=9
+
+# Secret generator (use with caution - prefer external secrets)
+# secretGenerator:
+#   - name: subordinates-secrets-overlay
+#     literals: []
+
+# Images to use (can be overridden per environment)
+images:
+  - name: ghcr.io/vertice/penelope
+    newTag: latest
+  - name: ghcr.io/vertice/maba
+    newTag: latest
+  - name: ghcr.io/vertice/mvp
+    newTag: latest
+
+# Patches for environment-specific customization
+patchesStrategicMerge: []
+
+# JSON patches (more precise control)
+patchesJson6902: []
+
+# Replicas (can be overridden per environment)
+replicas:
+  - name: penelope
+    count: 3
+  - name: maba
+    count: 2
+  - name: mvp
+    count: 2
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

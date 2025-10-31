@@ -1,0 +1,118 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: subordinates-config
+  namespace: vertice-subordinates
+  labels:
+    app: subordinates
+data:
+  # Common Configuration
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+
+  # Service Ports
+  PENELOPE_PORT: "8154"
+  MABA_PORT: "8152"
+  MVP_PORT: "8153"
+
+  # Infrastructure Endpoints
+  POSTGRES_HOST: "vertice-postgres.vertice-subordinates.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "vertice"
+  REDIS_HOST: "vertice-redis.vertice-subordinates.svc.cluster.local"
+  REDIS_PORT: "6379"
+  NEO4J_URI: "bolt://vertice-neo4j.vertice-subordinates.svc.cluster.local:7687"
+  PROMETHEUS_URL: "http://vertice-prometheus.vertice-subordinates.svc.cluster.local:9090"
+  LOKI_URL: "http://vertice-loki.vertice-subordinates.svc.cluster.local:3100"
+
+  # Service Registry
+  VERTICE_REGISTRY_URL: "http://vertice-register-lb:80"
+
+  # PENELOPE - 7 Biblical Articles
+  SOPHIA_ENABLED: "true"
+  WISDOM_BASE_MIN_CASES: "5"
+  TRANSIENT_FAILURE_WINDOW_MINUTES: "15"
+  INTERVENTION_RISK_THRESHOLD: "0.70"
+
+  PRAOTES_ENABLED: "true"
+  MAX_PATCH_LINES: "25"
+  MIN_REVERSIBILITY_SCORE: "0.90"
+  MAX_FUNCTIONS_MODIFIED: "3"
+  MIN_MANSIDAO_SCORE: "0.70"
+
+  TAPEINOPHROSYNE_ENABLED: "true"
+  CONFIDENCE_THRESHOLD: "0.85"
+  ESCALATION_ENABLED: "true"
+  LEARNING_FROM_FAILURE_ENABLED: "true"
+
+  STEWARDSHIP_ENABLED: "true"
+  PRESERVE_DEVELOPER_INTENT: "true"
+  RESPECT_CODE_STYLE: "true"
+
+  AGAPE_ENABLED: "true"
+  SERVICE_WITH_GENTLENESS: "true"
+
+  SABBATH_ENABLED: "true"
+  SABBATH_DAY: "sunday"
+  SABBATH_TIMEZONE: "America/Sao_Paulo"
+  SABBATH_ALLOW_P0_CRITICAL: "true"
+
+  ALETHEIA_ENABLED: "true"
+  RADICAL_HONESTY: "true"
+  DECLARE_UNCERTAINTY: "true"
+
+  # PENELOPE - Digital Twin
+  DIGITAL_TWIN_ENABLED: "true"
+  DIGITAL_TWIN_VALIDATION_MINUTES: "15"
+  DIGITAL_TWIN_TIMEOUT_SECONDS: "900"
+
+  # MABA - Browser Configuration
+  BROWSER_TYPE: "chromium"
+  BROWSER_HEADLESS: "true"
+  BROWSER_TIMEOUT: "30000"
+  MAX_BROWSER_INSTANCES: "5"
+  BROWSER_POOL_SIZE: "3"
+
+  # MABA - Cognitive Map
+  COGNITIVE_MAP_MAX_PAGES: "10000"
+  MAX_DOM_ELEMENTS: "500"
+  LEARNING_RATE: "0.01"
+  MIN_ELEMENT_IMPORTANCE: "0.3"
+
+  # MVP - Narrative Generation
+  NARRATIVE_TARGET_DURATION: "30"
+  NARRATIVE_WORD_COUNT_TARGET: "250"
+  MIN_NQS_SCORE: "85"
+  MIN_AQS_SCORE: "90"
+  ENABLE_AUDIO_CACHE: "true"
+  MAX_COST_PER_NARRATIVE_USD: "0.50"
+
+  # MVP - Content Moderation
+  ENABLE_PII_DETECTION: "true"
+  ENABLE_PROFANITY_FILTER: "true"
+  ENABLE_LGPD_COMPLIANCE: "true"
+
+  # LLM Configuration
+  LLM_MODEL: "claude-sonnet-4-5-20250929"
+  LLM_MAX_TOKENS: "2000"
+  LLM_TEMPERATURE: "0.7"
+
+  # Performance & Resource Limits
+  PENELOPE_REQUEST_TIMEOUT: "300"
+  MABA_REQUEST_TIMEOUT: "300"
+  MVP_REQUEST_TIMEOUT: "120"
+  WORKER_PROCESSES: "4"
+
+  # Security
+  SANDBOX_ENABLED: "true"
+  MAX_PATCH_ATTEMPTS_PER_HOUR: "10"
+
+  # Monitoring
+  PENELOPE_METRICS_PORT: "9094"
+  MABA_METRICS_PORT: "9092"
+  MVP_METRICS_PORT: "9093"
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
