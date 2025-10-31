@@ -1,0 +1,61 @@
+# Loki Stack for Vértice Constitutional Logging
+# Grafana Loki + Promtail for log aggregation
+#
+# Access Loki: http://localhost:3100
+# Grafana will query Loki as datasource
+
+version: '3.8'
+
+services:
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: vertice-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    networks:
+      - vertice-observability
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "com.vertice.service=loki"
+      - "com.vertice.component=observability"
+      - "com.vertice.constitution=aletheia"
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: vertice-promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - vertice-observability
+    depends_on:
+      - loki
+    labels:
+      - "com.vertice.service=promtail"
+      - "com.vertice.component=observability"
+
+networks:
+  vertice-observability:
+    name: vertice-observability
+    external: true
+
+volumes:
+  loki-data:
+    name: vertice-loki-data
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

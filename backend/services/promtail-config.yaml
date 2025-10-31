@@ -1,0 +1,109 @@
+# Promtail Configuration for Vértice Services
+# Scrapes logs from Docker containers and forwards to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Docker containers scrape
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["com.vertice.service"]
+    relabel_configs:
+      # Service name
+      - source_labels: ['__meta_docker_container_label_com_vertice_service']
+        target_label: 'service'
+
+      # Component (observability, api, etc)
+      - source_labels: ['__meta_docker_container_label_com_vertice_component']
+        target_label: 'component'
+
+      # Constitutional article
+      - source_labels: ['__meta_docker_container_label_com_vertice_constitution']
+        target_label: 'biblical_article'
+
+      # Container name
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+
+      # Container ID
+      - source_labels: ['__meta_docker_container_id']
+        target_label: 'container_id'
+
+    pipeline_stages:
+      # Parse JSON logs from services
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+            version: version
+            constitution_version: constitution_version
+            trace_id: trace_id
+            span_id: span_id
+            biblical_article: biblical_article
+            biblical_principle: biblical_principle
+
+      # Extract timestamp
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+
+      # Set log level label
+      - labels:
+          level:
+          service:
+          constitutional_version:
+          biblical_article:
+
+      # Output formatting
+      - output:
+          source: message
+
+  # PENELOPE service logs
+  - job_name: penelope
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: penelope
+          service: penelope
+          __path__: /var/log/penelope/*.log
+
+  # MABA service logs
+  - job_name: maba
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: maba
+          service: maba
+          __path__: /var/log/maba/*.log
+
+  # MVP service logs
+  - job_name: mvp
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: mvp
+          service: mvp
+          __path__: /var/log/mvp/*.log
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
