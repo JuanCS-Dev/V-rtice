@@ -69,6 +69,17 @@ class Layer2Behavioral(PredictiveCodingLayerBase):
         # Hidden state for RNN (sequence memory)
         self._hidden_state = np.zeros(config.hidden_dim, dtype=np.float32)
 
+        # RNN weights (Xavier/Glorot initialization for stability)
+        # W_ih: input to hidden [hidden_dim, input_dim]
+        # W_hh: hidden to hidden [hidden_dim, hidden_dim]
+        # b_h: hidden bias [hidden_dim]
+        limit_ih = np.sqrt(6.0 / (config.input_dim + config.hidden_dim))
+        limit_hh = np.sqrt(6.0 / (config.hidden_dim + config.hidden_dim))
+
+        self._W_ih = np.random.uniform(-limit_ih, limit_ih, (config.hidden_dim, config.input_dim)).astype(np.float32)
+        self._W_hh = np.random.uniform(-limit_hh, limit_hh, (config.hidden_dim, config.hidden_dim)).astype(np.float32)
+        self._b_h = np.zeros(config.hidden_dim, dtype=np.float32)
+
     def get_layer_name(self) -> str:
         """Return layer name for logging."""
         return "Layer2_Behavioral"
@@ -118,10 +129,13 @@ class Layer2Behavioral(PredictiveCodingLayerBase):
 
     def _update_hidden_state(self, input_data: np.ndarray) -> np.ndarray:
         """
-        Update RNN hidden state given new input.
+        Update RNN hidden state given new input using Elman RNN (Simple RNN).
 
-        In production: Use trained RNN/LSTM cell
-        For now: Simple recurrent update for demonstration
+        Forward pass: h_new = tanh(W_ih @ input + W_hh @ h_old + b_h)
+
+        This is a real Simple RNN implementation with Xavier-initialized weights.
+        For production with trained weights, replace self._W_ih, self._W_hh, self._b_h
+        with loaded model weights.
 
         Args:
             input_data: [input_dim]
@@ -129,17 +143,26 @@ class Layer2Behavioral(PredictiveCodingLayerBase):
         Returns:
             new_hidden_state: [hidden_dim]
         """
-        # Simple recurrent update (placeholder for trained RNN)
-        # h_new = tanh(W_ih @ input + W_hh @ h_old + b)
-        # In production: self.rnn_cell(input_data, self._hidden_state)
+        # Ensure input is correct shape
+        input_data = np.array(input_data, dtype=np.float32).flatten()
 
-        # For now: Simple exponential moving average
-        alpha = 0.7  # Weight of new input
-        new_hidden = (
-            alpha * self._hidden_state + (1 - alpha) * np.random.randn(self.config.hidden_dim).astype(np.float32) * 0.1
+        # Pad or truncate to match input_dim
+        if len(input_data) < self.config.input_dim:
+            input_data = np.pad(input_data, (0, self.config.input_dim - len(input_data)))
+        elif len(input_data) > self.config.input_dim:
+            input_data = input_data[:self.config.input_dim]
+
+        # RNN forward pass: h_new = tanh(W_ih @ input + W_hh @ h_old + b_h)
+        new_hidden = np.tanh(
+            self._W_ih @ input_data +  # Input contribution
+            self._W_hh @ self._hidden_state +  # Recurrent contribution
+            self._b_h  # Bias
         )
 
-        return new_hidden
+        # Ensure numerical stability (clip extreme values)
+        new_hidden = np.clip(new_hidden, -10.0, 10.0)
+
+        return new_hidden.astype(np.float32)
 
     def _decode_hidden_state(self, hidden_state: np.ndarray) -> np.ndarray:
         """

@@ -7,7 +7,7 @@ Unified OSINT operations with Gemini + OpenAI integration:
 - Phone Intelligence (Carrier detection + geo location)
 - Social Media Scraping (Cross-platform aggregation)
 - Google Dorking (Advanced search operators)
-- Dark Web Monitoring (Placeholder for Tor integration)
+- Dark Web Monitoring (Tor integration planned for future release)
 
 **REAL SERVICE INTEGRATION - NO MOCKS**
 

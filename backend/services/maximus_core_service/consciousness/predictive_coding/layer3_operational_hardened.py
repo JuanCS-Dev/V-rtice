@@ -70,6 +70,13 @@ class Layer3Operational(PredictiveCodingLayerBase):
         self._context_window: list[np.ndarray] = []
         self._max_context_length = 10  # Last 10 behavioral patterns
 
+        # Attention weights (Query, Key, Value projections for scaled dot-product attention)
+        # W_q, W_k, W_v: [hidden_dim, input_dim]
+        limit = np.sqrt(6.0 / (config.input_dim + config.hidden_dim))
+        self._W_q = np.random.uniform(-limit, limit, (config.hidden_dim, config.input_dim)).astype(np.float32)
+        self._W_k = np.random.uniform(-limit, limit, (config.hidden_dim, config.input_dim)).astype(np.float32)
+        self._W_v = np.random.uniform(-limit, limit, (config.hidden_dim, config.input_dim)).astype(np.float32)
+
     def get_layer_name(self) -> str:
         """Return layer name for logging."""
         return "Layer3_Operational"
@@ -124,10 +131,12 @@ class Layer3Operational(PredictiveCodingLayerBase):
 
     def _self_attention(self, context: list[np.ndarray]) -> np.ndarray:
         """
-        Apply self-attention over context window.
+        Apply scaled dot-product self-attention over context window.
 
-        In production: Use trained Transformer attention mechanism
-        For now: Simple weighted average for demonstration
+        Implements: Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V
+
+        This is a real self-attention implementation. For production with trained weights,
+        replace self._W_q, self._W_k, self._W_v with loaded model weights.
 
         Args:
             context: List of behavioral patterns
@@ -138,19 +147,43 @@ class Layer3Operational(PredictiveCodingLayerBase):
         if not context:
             return np.zeros(self.config.hidden_dim, dtype=np.float32)
 
-        # Simple attention: Recent patterns get higher weight
-        weights = np.exp(np.linspace(0, 1, len(context)))  # Exponential decay
-        weights = weights / weights.sum()  # Normalize
+        # Ensure all patterns are padded/truncated to input_dim
+        processed_context = []
+        for pattern in context:
+            pattern = np.array(pattern, dtype=np.float32).flatten()
+            if len(pattern) < self.config.input_dim:
+                pattern = np.pad(pattern, (0, self.config.input_dim - len(pattern)))
+            elif len(pattern) > self.config.input_dim:
+                pattern = pattern[:self.config.input_dim]
+            processed_context.append(pattern)
 
-        # Weighted average (placeholder for real attention)
-        # In production: self.transformer_attention(context)
-        attended = np.zeros(self.config.hidden_dim, dtype=np.float32)
-        for i, pattern in enumerate(context):
-            # Project to hidden_dim (in production: learned projection)
-            projected = np.random.randn(self.config.hidden_dim).astype(np.float32) * 0.1
-            attended += weights[i] * projected
+        # Stack context patterns [seq_len, input_dim]
+        context_matrix = np.stack(processed_context, axis=0)  # [seq_len, input_dim]
 
-        return attended
+        # Compute Query, Key, Value projections
+        # Q, K, V: [seq_len, hidden_dim]
+        Q = context_matrix @ self._W_q.T  # [seq_len, hidden_dim]
+        K = context_matrix @ self._W_k.T  # [seq_len, hidden_dim]
+        V = context_matrix @ self._W_v.T  # [seq_len, hidden_dim]
+
+        # Scaled dot-product attention: softmax(QK^T / sqrt(d_k)) V
+        d_k = self.config.hidden_dim
+        scores = Q @ K.T / np.sqrt(d_k)  # [seq_len, seq_len]
+
+        # Softmax over last dimension (attention weights)
+        exp_scores = np.exp(scores - np.max(scores, axis=-1, keepdims=True))  # Numerical stability
+        attention_weights = exp_scores / exp_scores.sum(axis=-1, keepdims=True)  # [seq_len, seq_len]
+
+        # Apply attention to values
+        attended = attention_weights @ V  # [seq_len, hidden_dim]
+
+        # Aggregate attended vectors (mean pooling)
+        attended_context = np.mean(attended, axis=0).astype(np.float32)  # [hidden_dim]
+
+        # Ensure numerical stability
+        attended_context = np.clip(attended_context, -10.0, 10.0)
+
+        return attended_context
 
     def _project_to_output(self, attended_context: np.ndarray) -> np.ndarray:
         """

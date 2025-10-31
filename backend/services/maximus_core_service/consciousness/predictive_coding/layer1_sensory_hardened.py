@@ -66,6 +66,19 @@ class Layer1Sensory(PredictiveCodingLayerBase):
         assert config.layer_id == 1, "Layer1Sensory requires layer_id=1"
         super().__init__(config, kill_switch_callback)
 
+        # VAE Encoder/Decoder weights (Xavier/Glorot initialization)
+        # W_enc: [hidden_dim, input_dim] - encoder projection
+        # b_enc: [hidden_dim] - encoder bias
+        # W_dec: [input_dim, hidden_dim] - decoder projection
+        # b_dec: [input_dim] - decoder bias
+        limit_enc = np.sqrt(6.0 / (config.input_dim + config.hidden_dim))
+        limit_dec = np.sqrt(6.0 / (config.hidden_dim + config.input_dim))
+
+        self._W_enc = np.random.uniform(-limit_enc, limit_enc, (config.hidden_dim, config.input_dim)).astype(np.float32)
+        self._b_enc = np.zeros(config.hidden_dim, dtype=np.float32)
+        self._W_dec = np.random.uniform(-limit_dec, limit_dec, (config.input_dim, config.hidden_dim)).astype(np.float32)
+        self._b_dec = np.zeros(config.input_dim, dtype=np.float32)
+
     def get_layer_name(self) -> str:
         """Return layer name for logging."""
         return "Layer1_Sensory"
@@ -115,10 +128,12 @@ class Layer1Sensory(PredictiveCodingLayerBase):
 
     def _encode(self, input_data: np.ndarray) -> np.ndarray:
         """
-        Encode input to latent space (VAE encoder).
+        Encode input to latent space using linear projection.
 
-        In production: Use trained VAE encoder (PyTorch/TensorFlow model)
-        For now: Simple linear projection for demonstration
+        Forward pass: latent = tanh(W_enc @ input + b_enc)
+
+        This is a simplified VAE encoder. For production with trained weights,
+        replace self._W_enc, self._b_enc with loaded model weights.
 
         Args:
             input_data: [input_dim]
@@ -126,22 +141,31 @@ class Layer1Sensory(PredictiveCodingLayerBase):
         Returns:
             latent: [hidden_dim]
         """
-        # Simple projection (in production: VAE encoder forward pass)
-        # Ensure correct dimensions
-        hidden_dim = self.config.hidden_dim
+        # Ensure input is correct shape
+        input_data = np.array(input_data, dtype=np.float32).flatten()
 
-        # Random projection (placeholder for trained weights)
-        # In production: self.encoder(input_data)
-        latent = np.random.randn(hidden_dim).astype(np.float32) * 0.1
+        # Pad or truncate to match input_dim
+        if len(input_data) < self.config.input_dim:
+            input_data = np.pad(input_data, (0, self.config.input_dim - len(input_data)))
+        elif len(input_data) > self.config.input_dim:
+            input_data = input_data[:self.config.input_dim]
 
-        return latent
+        # Linear projection with tanh activation
+        latent = np.tanh(self._W_enc @ input_data + self._b_enc)
+
+        # Ensure numerical stability
+        latent = np.clip(latent, -10.0, 10.0)
+
+        return latent.astype(np.float32)
 
     def _decode(self, latent: np.ndarray) -> np.ndarray:
         """
-        Decode latent to input space (VAE decoder).
+        Decode latent to input space using linear projection.
 
-        In production: Use trained VAE decoder
-        For now: Simple expansion for demonstration
+        Forward pass: reconstruction = sigmoid(W_dec @ latent + b_dec)
+
+        This is a simplified VAE decoder. For production with trained weights,
+        replace self._W_dec, self._b_dec with loaded model weights.
 
         Args:
             latent: [hidden_dim]
@@ -149,11 +173,19 @@ class Layer1Sensory(PredictiveCodingLayerBase):
         Returns:
             reconstruction: [input_dim]
         """
-        # Simple expansion (in production: VAE decoder forward pass)
-        input_dim = self.config.input_dim
+        # Ensure latent is correct shape
+        latent = np.array(latent, dtype=np.float32).flatten()
 
-        # Random reconstruction (placeholder)
-        # In production: self.decoder(latent)
-        reconstruction = np.random.randn(input_dim).astype(np.float32) * 0.1
+        # Pad or truncate to match hidden_dim
+        if len(latent) < self.config.hidden_dim:
+            latent = np.pad(latent, (0, self.config.hidden_dim - len(latent)))
+        elif len(latent) > self.config.hidden_dim:
+            latent = latent[:self.config.hidden_dim]
+
+        # Linear projection with sigmoid activation (for bounded reconstruction)
+        reconstruction = 1.0 / (1.0 + np.exp(-(self._W_dec @ latent + self._b_dec)))  # Sigmoid
+
+        # Ensure numerical stability
+        reconstruction = np.clip(reconstruction, 0.0, 1.0)
 
         return reconstruction
