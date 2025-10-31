@@ -1,0 +1,53 @@
+# MVP (MAXIMUS Vision Protocol) - Python Dependencies
+# Generated: 2025-10-30
+# Python Version: 3.11+
+
+# Core FastAPI Dependencies
+fastapi==0.118.1
+uvicorn[standard]==0.37.0
+pydantic==2.12.0
+pydantic-core==2.41.1
+
+# HTTP Client
+httpx==0.28.1
+
+# Database & Cache
+asyncpg==0.30.0
+redis==5.0.0
+hiredis==3.2.1
+
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# Monitoring & Observability
+prometheus-client==0.23.1
+
+# Anthropic Claude API (for narrative generation)
+anthropic==0.69.0
+
+# Time Series Data (MVP-specific)
+influxdb-client>=1.40.0
+pandas>=2.2.0
+
+# Visualization & Charts
+plotly>=5.18.0
+matplotlib>=3.8.0
+
+# Async Utilities
+aiofiles==24.1.0
+
+# Logging
+structlog==24.4.0
+
+# Testing
+pytest==8.4.0
+pytest-asyncio==0.26.0
+pytest-cov==7.0.0
+pytest-mock==3.15.1
+
+# Type Checking
+mypy>=1.8.0
+types-redis>=4.6.0
+
+# Code Quality
+ruff>=0.5.0

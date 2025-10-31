@@ -1,0 +1,376 @@
+"""
+WebSocket Gateway - MAXIMUS Real-Time Communication
+
+Centralized WebSocket server for real-time updates across MAXIMUS platform.
+Provides streaming for container status, OSINT, Maximus AI, task execution, and threat alerts.
+
+Built on FastAPI WebSockets with Redis Pub/Sub for distributed scaling.
+"""
+
+import asyncio
+import logging
+from datetime import datetime
+from enum import Enum
+
+import redis.asyncio as aioredis
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
+
+
+class MessageType(str, Enum):
+    """WebSocket message types"""
+
+    # Client → Server
+    PING = "ping"
+    SUBSCRIBE = "subscribe"
+    UNSUBSCRIBE = "unsubscribe"
+
+    # Server → Client
+    PONG = "pong"
+    SUBSCRIBED = "subscribed"
+    UNSUBSCRIBED = "unsubscribed"
+
+    # Data streams
+    CONTAINER_STATUS = "container_status"
+    OSINT_PROGRESS = "osint_progress"
+    MAXIMUS_STREAM = "maximus_stream"
+    TASK_UPDATE = "task_update"
+    THREAT_ALERT = "threat_alert"
+    CONSCIOUSNESS_METRIC = "consciousness_metric"
+
+    # System
+    ERROR = "error"
+    INFO = "info"
+
+
+class Channel(str, Enum):
+    """Pub/Sub channels"""
+
+    CONTAINERS = "maximus:containers"
+    OSINT = "maximus:osint"
+    MAXIMUS_AI = "maximus:ai"
+    TASKS = "maximus:tasks"
+    THREATS = "maximus:threats"
+    CONSCIOUSNESS = "maximus:consciousness"
+    SYSTEM = "maximus:system"
+
+
+class WebSocketMessage(BaseModel):
+    """Standard WebSocket message format"""
+
+    type: MessageType
+    channel: Channel | None = None
+    data: dict | None = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    client_id: str | None = None
+
+
+class ConnectionManager:
+    """
+    Manages WebSocket connections with Redis Pub/Sub integration.
+
+    Handles client connections, subscriptions, and message broadcasting
+    across distributed MAXIMUS instances.
+    """
+
+    def __init__(self, redis_url: str | None = None):
+        self.active_connections: dict[str, WebSocket] = {}
+        self.subscriptions: dict[str, set[Channel]] = {}
+        self.redis_url = redis_url
+        self.redis_client: aioredis.Redis | None = None
+        self.pubsub: aioredis.client.PubSub | None = None
+        self._running = False
+
+    async def start(self):
+        """Initialize Redis connection and start listening"""
+        if self.redis_url:
+            try:
+                self.redis_client = await aioredis.from_url(
+                    self.redis_url, encoding="utf-8", decode_responses=True
+                )
+                self.pubsub = self.redis_client.pubsub()
+
+                # Subscribe to all channels
+                channels = [channel.value for channel in Channel]
+                await self.pubsub.subscribe(*channels)
+
+                # Start background listener
+                self._running = True
+                asyncio.create_task(self._redis_listener())
+
+                logger.info(f"✅ Redis Pub/Sub connected: {len(channels)} channels")
+            except Exception as e:
+                logger.error(f"❌ Redis connection failed: {e}")
+                logger.warning("⚠️  Running in local-only mode")
+
+    async def stop(self):
+        """Cleanup connections"""
+        self._running = False
+
+        if self.pubsub:
+            await self.pubsub.unsubscribe()
+            await self.pubsub.close()
+
+        if self.redis_client:
+            await self.redis_client.close()
+
+    async def connect(self, client_id: str, websocket: WebSocket):
+        """Register new WebSocket connection"""
+        await websocket.accept()
+        self.active_connections[client_id] = websocket
+        self.subscriptions[client_id] = set()
+
+        logger.info(
+            f"🔌 Client connected: {client_id} (total: {len(self.active_connections)})"
+        )
+
+        # Send welcome message
+        await self.send_personal_message(
+            WebSocketMessage(
+                type=MessageType.INFO,
+                data={"message": "Connected to MAXIMUS WebSocket Gateway"},
+            ),
+            client_id,
+        )
+
+    def disconnect(self, client_id: str):
+        """Remove WebSocket connection"""
+        if client_id in self.active_connections:
+            del self.active_connections[client_id]
+        if client_id in self.subscriptions:
+            del self.subscriptions[client_id]
+
+        logger.info(
+            f"🔌 Client disconnected: {client_id} (remaining: {len(self.active_connections)})"
+        )
+
+    async def subscribe(self, client_id: str, channel: Channel):
+        """Subscribe client to channel"""
+        if client_id in self.subscriptions:
+            self.subscriptions[client_id].add(channel)
+
+            await self.send_personal_message(
+                WebSocketMessage(
+                    type=MessageType.SUBSCRIBED,
+                    channel=channel,
+                    data={"channel": channel.value},
+                ),
+                client_id,
+            )
+
+            logger.debug(f"📡 {client_id} subscribed to {channel.value}")
+
+    async def unsubscribe(self, client_id: str, channel: Channel):
+        """Unsubscribe client from channel"""
+        if client_id in self.subscriptions:
+            self.subscriptions[client_id].discard(channel)
+
+            await self.send_personal_message(
+                WebSocketMessage(
+                    type=MessageType.UNSUBSCRIBED,
+                    channel=channel,
+                    data={"channel": channel.value},
+                ),
+                client_id,
+            )
+
+            logger.debug(f"📡 {client_id} unsubscribed from {channel.value}")
+
+    async def send_personal_message(self, message: WebSocketMessage, client_id: str):
+        """Send message to specific client"""
+        if client_id in self.active_connections:
+            try:
+                websocket = self.active_connections[client_id]
+                await websocket.send_json(message.model_dump(mode="json"))
+            except Exception as e:
+                logger.error(f"❌ Failed to send to {client_id}: {e}")
+                raise  # Re-raise to let caller handle cleanup
+
+    async def broadcast_to_channel(self, message: WebSocketMessage, channel: Channel):
+        """Broadcast message to all clients subscribed to channel"""
+        disconnected = []
+
+        # Create snapshot to avoid dict modification during iteration
+        subscriptions_snapshot = list(self.subscriptions.items())
+
+        for client_id, subscribed_channels in subscriptions_snapshot:
+            if channel in subscribed_channels:
+                try:
+                    await self.send_personal_message(message, client_id)
+                except Exception as e:
+                    logger.error(f"❌ Broadcast failed to {client_id}: {e}")
+                    disconnected.append(client_id)
+
+        # Cleanup disconnected clients
+        for client_id in disconnected:
+            self.disconnect(client_id)
+
+    async def publish(self, message: WebSocketMessage, channel: Channel):
+        """Publish message to Redis (for distributed instances)"""
+        message.channel = channel
+
+        if self.redis_client:
+            try:
+                await self.redis_client.publish(
+                    channel.value, message.model_dump_json()
+                )
+            except Exception as e:
+                logger.error(f"❌ Redis publish failed: {e}")
+
+        # Always broadcast locally
+        await self.broadcast_to_channel(message, channel)
+
+    async def _redis_listener(self):
+        """Background task to listen to Redis Pub/Sub"""
+        logger.info("🎧 Redis listener started")
+
+        try:
+            while self._running and self.pubsub:
+                message = await self.pubsub.get_message(
+                    ignore_subscribe_messages=True, timeout=1.0
+                )
+
+                if message and message["type"] == "message":
+                    channel_name = message["channel"]
+                    data = message["data"]
+
+                    try:
+                        ws_message = WebSocketMessage.model_validate_json(data)
+                        channel = Channel(channel_name)
+
+                        # Broadcast to subscribed clients
+                        await self.broadcast_to_channel(ws_message, channel)
+                    except Exception as e:
+                        logger.error(f"❌ Failed to process Redis message: {e}")
+        except Exception as e:
+            logger.error(f"❌ Redis listener error: {e}")
+        finally:
+            logger.info("🎧 Redis listener stopped")
+
+
+# Global connection manager
+manager = ConnectionManager(redis_url="redis://localhost:6379")
+
+
+# FastAPI integration
+def create_websocket_app() -> FastAPI:
+    """Create FastAPI app with WebSocket support"""
+    app = FastAPI(title="MAXIMUS WebSocket Gateway")
+
+    @app.on_event("startup")
+    async def startup():
+        await manager.start()
+
+    @app.on_event("shutdown")
+    async def shutdown():
+        await manager.stop()
+
+    @app.websocket("/ws/{client_id}")
+    async def websocket_endpoint(websocket: WebSocket, client_id: str):
+        """
+        Main WebSocket endpoint.
+
+        Clients should connect to /ws/{unique_client_id} and send messages:
+
+        Ping:
+            {"type": "ping"}
+
+        Subscribe:
+            {"type": "subscribe", "channel": "maximus:containers"}
+
+        Unsubscribe:
+            {"type": "unsubscribe", "channel": "maximus:tasks"}
+        """
+        await manager.connect(client_id, websocket)
+
+        try:
+            while True:
+                # Receive message from client
+                data = await websocket.receive_json()
+                message = WebSocketMessage(**data)
+
+                # Handle client messages
+                if message.type == MessageType.PING:
+                    await manager.send_personal_message(
+                        WebSocketMessage(type=MessageType.PONG), client_id
+                    )
+
+                elif message.type == MessageType.SUBSCRIBE and message.channel:
+                    await manager.subscribe(client_id, message.channel)
+
+                elif message.type == MessageType.UNSUBSCRIBE and message.channel:
+                    await manager.unsubscribe(client_id, message.channel)
+
+                else:
+                    await manager.send_personal_message(
+                        WebSocketMessage(
+                            type=MessageType.ERROR,
+                            data={"error": "Unknown message type"},
+                        ),
+                        client_id,
+                    )
+
+        except WebSocketDisconnect:
+            manager.disconnect(client_id)
+        except Exception as e:
+            logger.error(f"❌ WebSocket error for {client_id}: {e}")
+            manager.disconnect(client_id)
+
+    @app.get("/health")
+    async def health():
+        """Health check endpoint"""
+        return {
+            "status": "healthy",
+            "active_connections": len(manager.active_connections),
+            "redis_connected": manager.redis_client is not None,
+        }
+
+    return app
+
+
+# Helper functions for publishing messages
+async def publish_container_status(data: dict):
+    """Publish container status update"""
+    await manager.publish(
+        WebSocketMessage(type=MessageType.CONTAINER_STATUS, data=data),
+        Channel.CONTAINERS,
+    )
+
+
+async def publish_osint_progress(data: dict):
+    """Publish OSINT scan progress"""
+    await manager.publish(
+        WebSocketMessage(type=MessageType.OSINT_PROGRESS, data=data), Channel.OSINT
+    )
+
+
+async def publish_maximus_stream(data: dict):
+    """Publish Maximus AI streaming response"""
+    await manager.publish(
+        WebSocketMessage(type=MessageType.MAXIMUS_STREAM, data=data), Channel.MAXIMUS_AI
+    )
+
+
+async def publish_task_update(data: dict):
+    """Publish task execution update"""
+    await manager.publish(
+        WebSocketMessage(type=MessageType.TASK_UPDATE, data=data), Channel.TASKS
+    )
+
+
+async def publish_threat_alert(data: dict):
+    """Publish threat alert"""
+    await manager.publish(
+        WebSocketMessage(type=MessageType.THREAT_ALERT, data=data), Channel.THREATS
+    )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    app = create_websocket_app()
+
+    # Run server
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")

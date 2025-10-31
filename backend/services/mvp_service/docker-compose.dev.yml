@@ -1,0 +1,113 @@
+# MVP Development Docker Compose
+# Simplified version for local testing
+# Uses existing Postgres container (vertice-bot-postgres)
+
+version: "3.8"
+
+services:
+  mvp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertice-mvp-dev
+    hostname: vertice-mvp-dev
+    ports:
+      - "8153:8153" # Main service port
+      - "9093:9091" # Prometheus metrics
+    environment:
+      - SERVICE_NAME=mvp
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8153
+      - SERVICE_VERSION=1.0.0
+      - ENVIRONMENT=development
+      - LOG_LEVEL=INFO
+
+      # MAXIMUS Integration (optional for dev)
+      - MAXIMUS_ENDPOINT=http://host.docker.internal:8100
+
+      # Service Registry (optional for dev)
+      - VERTICE_REGISTRY_URL=http://host.docker.internal:8080
+      - VERTICE_REGISTRY_TOKEN=default-dev-token
+      - REGISTRY_HEARTBEAT_INTERVAL=30
+
+      # Database (connect to existing vertice-bot-postgres)
+      - POSTGRES_HOST=vertice-bot-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=vertice_bot
+      - POSTGRES_USER=vertice
+      - POSTGRES_PASSWORD=vertice_dev_password
+      - DATABASE_URL=postgresql://vertice:vertice_dev_password@vertice-bot-postgres:5432/vertice_bot
+
+      # Redis (optional for dev)
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://host.docker.internal:6379
+
+      # Anthropic API (from .env file)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-sk-ant-placeholder}
+
+      # ElevenLabs API (optional for voice narratives)
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY:-placeholder}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID:-placeholder}
+
+      # Azure Storage (optional for narrative storage)
+      - AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT:-placeholder}
+      - AZURE_STORAGE_KEY=${AZURE_STORAGE_KEY:-placeholder}
+      - AZURE_CONTAINER_NAME=mvp-narratives
+
+      # Metrics
+      - METRICS_PORT=9091
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus
+
+      # Performance
+      - REQUEST_TIMEOUT=300
+      - WORKER_PROCESSES=1
+
+      # Python path for shared libs
+      - PYTHONPATH=/app:/app/../../../backend
+
+    volumes:
+      - mvp-dev-narratives:/app/narratives
+      - mvp-dev-logs:/app/logs
+      # Mount shared directory for development
+      - ../../../backend/shared:/app/shared:ro
+      # tmpfs for Prometheus metrics
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 100000000 # 100MB
+
+    env_file:
+      - ../.env.vertice-subordinates
+
+    networks:
+      - discord-bot-vertice_vertice-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8153/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Resource limits (moderate for observability)
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+
+networks:
+  discord-bot-vertice_vertice-network:
+    external: true
+
+volumes:
+  mvp-dev-narratives:
+    name: mvp-dev-narratives
+  mvp-dev-logs:
+    name: mvp-dev-logs
