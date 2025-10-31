@@ -205,9 +205,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include PENELOPE API routes (will be created in api/routes.py)
-# from api.routes import router as penelope_router
-# app.include_router(penelope_router, prefix="/api/v1")
+# Include PENELOPE API routes
+from api.routes import router as penelope_router
+
+app.include_router(penelope_router)
 
 
 @app.get("/health")

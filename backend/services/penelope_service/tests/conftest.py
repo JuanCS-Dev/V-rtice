@@ -75,3 +75,9 @@ def test_client():
     from main import app
 
     return TestClient(app)
+
+
+@pytest.fixture
+def client(test_client):
+    """Alias for test_client for compatibility."""
+    return test_client
