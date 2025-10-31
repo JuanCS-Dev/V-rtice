@@ -1,20 +1,3 @@
-exclude_dirs:
-  - '/tests/'
-  - '/test/'
-  - '/.venv/'
-  - '/venv/'
-  - '/env/'
-  - '/__pycache__/'
-  - '/build/'
-  - '/dist/'
-  - '/.eggs/'
-  - '/LEGADO/'
-  - '/node_modules/'
-  - '/.terraform/'
-  - '/htmlcov/'
-  - '/.git/'
-  - '/frontend/'
-
-skips:
-  - B101
-  - B601
+[bandit]
+exclude_dirs = /tests/,/test/,/.venv/,/venv/,/env/,/__pycache__/,/build/,/dist/,/.eggs/,/LEGADO/,/node_modules/,/.terraform/,/htmlcov/,/.git/,/frontend/
+skips = B101,B601

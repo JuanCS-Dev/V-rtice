@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adesivos - Maxlanche Feliz</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+        }
+
+        .page {
+            width: 21cm;
+            height: 29.7cm;
+            padding: 0.5cm;
+            page-break-after: always;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.3cm;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+            grid-template-rows: repeat(2, 1fr);
+        }
+
+        .sticker {
+            border: 2px dashed #ccc;
+            border-radius: 1cm;
+            padding: 0.3cm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .sticker img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0.8cm;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .sticker {
+                border-color: #999;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Página 1: 9 adesivos -->
+    <div class="page">
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+    </div>
+
+    <!-- Página 2: 6 adesivos -->
+    <div class="page">
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+        <div class="sticker"><img src="file:///home/juan/Downloads/hamburguer.png" alt="Maxlanche Feliz"></div>
+    </div>
+</body>
+</html>
