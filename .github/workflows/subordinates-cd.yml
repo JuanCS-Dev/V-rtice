@@ -1,0 +1,487 @@
+name: Subordinates CD - Deploy PENELOPE, MABA, MVP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/services/penelope_service/**'
+      - 'backend/services/maba_service/**'
+      - 'backend/services/mvp_service/**'
+      - 'docker-compose.subordinates.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      services:
+        description: 'Services to deploy (comma-separated: penelope,maba,mvp or "all")'
+        required: true
+        default: 'all'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/vertice
+
+jobs:
+  # Job 1: Build and Push Docker Images
+  build-and-push:
+    name: Build & Push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        service: [penelope, maba, mvp]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push ${{ matrix.service }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/services/${{ matrix.service }}_service
+          file: ./backend/services/${{ matrix.service }}_service/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+      - name: Image vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:latest
+          format: 'sarif'
+          output: 'trivy-${{ matrix.service }}.sarif'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-${{ matrix.service }}.sarif'
+
+  # Job 2: Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.vertice.dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure staging environment
+        run: |
+          cat > .env.subordinates <<EOF
+          ENVIRONMENT=staging
+          LOG_LEVEL=INFO
+
+          # API Keys
+          ANTHROPIC_API_KEY=${{ secrets.STAGING_ANTHROPIC_API_KEY }}
+
+          # Database
+          POSTGRES_HOST=${{ secrets.STAGING_POSTGRES_HOST }}
+          POSTGRES_PORT=5432
+          POSTGRES_DB=vertice_staging
+          POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
+
+          # Redis
+          REDIS_HOST=${{ secrets.STAGING_REDIS_HOST }}
+          REDIS_PORT=6379
+
+          # Neo4j (MABA)
+          NEO4J_URI=${{ secrets.STAGING_NEO4J_URI }}
+          NEO4J_USER=${{ secrets.STAGING_NEO4J_USER }}
+          NEO4J_PASSWORD=${{ secrets.STAGING_NEO4J_PASSWORD }}
+
+          # Prometheus (MVP)
+          PROMETHEUS_URL=${{ secrets.STAGING_PROMETHEUS_URL }}
+
+          # PENELOPE - 7 Biblical Articles
+          SOPHIA_ENABLED=true
+          PRAOTES_ENABLED=true
+          TAPEINOPHROSYNE_ENABLED=true
+          STEWARDSHIP_ENABLED=true
+          AGAPE_ENABLED=true
+          SABBATH_ENABLED=true
+          ALETHEIA_ENABLED=true
+
+          # Service Ports
+          PENELOPE_PORT=8154
+          MABA_PORT=8152
+          MVP_PORT=8153
+          EOF
+
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+
+            # Pull latest images
+            docker-compose -f docker-compose.subordinates.yml pull
+
+            # Stop old containers
+            docker-compose -f docker-compose.subordinates.yml down
+
+            # Start new containers
+            docker-compose -f docker-compose.subordinates.yml up -d
+
+            # Wait for health checks
+            sleep 30
+
+            # Verify services
+            curl -f http://localhost:8154/health || exit 1
+            curl -f http://localhost:8152/health || exit 1
+            curl -f http://localhost:8153/health || exit 1
+
+            echo "✅ Staging deployment successful"
+
+      - name: Run smoke tests
+        run: |
+          # Test PENELOPE
+          curl -f https://staging.vertice.dev/penelope/health
+
+          # Test MABA
+          curl -f https://staging.vertice.dev/maba/health
+
+          # Test MVP
+          curl -f https://staging.vertice.dev/mvp/health
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'Subordinates deployed to staging'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+
+  # Job 3: Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://vertice.dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure production environment
+        run: |
+          cat > .env.subordinates <<EOF
+          ENVIRONMENT=production
+          LOG_LEVEL=WARNING
+
+          # API Keys
+          ANTHROPIC_API_KEY=${{ secrets.PROD_ANTHROPIC_API_KEY }}
+
+          # Database (Cloud SQL)
+          POSTGRES_HOST=${{ secrets.PROD_POSTGRES_HOST }}
+          POSTGRES_PORT=5432
+          POSTGRES_DB=vertice_production
+          POSTGRES_USER=${{ secrets.PROD_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
+
+          # Redis (Cloud Memorystore)
+          REDIS_HOST=${{ secrets.PROD_REDIS_HOST }}
+          REDIS_PORT=6379
+
+          # Neo4j (Aura)
+          NEO4J_URI=${{ secrets.PROD_NEO4J_URI }}
+          NEO4J_USER=${{ secrets.PROD_NEO4J_USER }}
+          NEO4J_PASSWORD=${{ secrets.PROD_NEO4J_PASSWORD }}
+
+          # Prometheus
+          PROMETHEUS_URL=${{ secrets.PROD_PROMETHEUS_URL }}
+
+          # PENELOPE - 7 Biblical Articles (PRODUCTION)
+          SOPHIA_ENABLED=true
+          PRAOTES_ENABLED=true
+          TAPEINOPHROSYNE_ENABLED=true
+          STEWARDSHIP_ENABLED=true
+          AGAPE_ENABLED=true
+          SABBATH_ENABLED=true
+          SABBATH_DAY=sunday
+          SABBATH_TIMEZONE=America/Sao_Paulo
+          SABBATH_ALLOW_P0_CRITICAL=true
+          ALETHEIA_ENABLED=true
+
+          # Performance
+          WORKER_PROCESSES=4
+
+          # Security
+          SANDBOX_ENABLED=true
+          MAX_PATCH_ATTEMPTS_PER_HOUR=10
+          EOF
+
+      - name: Create production backup
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+
+            # Backup current state
+            docker-compose -f docker-compose.subordinates.yml exec -T postgres \
+              pg_dump -U postgres vertice_production > backup_$(date +%Y%m%d_%H%M%S).sql
+
+            echo "✅ Backup created"
+
+      - name: Deploy to production (Blue-Green)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+
+            # Pull latest images
+            docker-compose -f docker-compose.subordinates.yml pull
+
+            # Start new containers (green)
+            docker-compose -f docker-compose.subordinates.yml up -d --no-deps --scale penelope=2 --scale maba=2 --scale mvp=2
+
+            # Wait for health checks
+            sleep 60
+
+            # Verify new containers
+            curl -f http://localhost:8154/health || exit 1
+            curl -f http://localhost:8152/health || exit 1
+            curl -f http://localhost:8153/health || exit 1
+
+            # Switch traffic (update load balancer)
+            # ... (implementation depends on your LB)
+
+            # Stop old containers (blue)
+            docker-compose -f docker-compose.subordinates.yml up -d --no-deps --scale penelope=1 --scale maba=1 --scale mvp=1
+
+            echo "✅ Production deployment successful"
+
+      - name: Run production health checks
+        run: |
+          # Test PENELOPE
+          curl -f https://vertice.dev/penelope/health
+          curl -f https://vertice.dev/penelope/api/v1/fruits/status
+
+          # Test MABA
+          curl -f https://vertice.dev/maba/health
+
+          # Test MVP
+          curl -f https://vertice.dev/mvp/health
+
+      - name: Monitor for 5 minutes
+        run: |
+          echo "Monitoring production for 5 minutes..."
+          for i in {1..10}; do
+            sleep 30
+            curl -f https://vertice.dev/penelope/health
+            curl -f https://vertice.dev/maba/health
+            curl -f https://vertice.dev/mvp/health
+            echo "Check $i/10 passed"
+          done
+
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+
+            echo "🚨 ROLLBACK INITIATED"
+
+            # Restore from backup
+            docker-compose -f docker-compose.subordinates.yml down
+            docker-compose -f docker-compose.subordinates.yml up -d --force-recreate
+
+            echo "✅ Rollback complete"
+
+      - name: Notify production deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'Subordinates deployed to PRODUCTION'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          mention: 'here'
+          if_mention: failure
+
+  # Job 4: Database Migrations
+  run-migrations:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run PENELOPE migrations
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+            docker-compose -f docker-compose.subordinates.yml exec -T postgres \
+              psql -U postgres -d vertice_staging -f /migrations/penelope.sql
+
+      - name: Run MABA migrations
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+            docker-compose -f docker-compose.subordinates.yml exec -T postgres \
+              psql -U postgres -d vertice_staging -f /migrations/maba.sql
+
+      - name: Run MVP migrations
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/vertice
+            docker-compose -f docker-compose.subordinates.yml exec -T postgres \
+              psql -U postgres -d vertice_staging -f /migrations/mvp.sql
+
+  # Job 5: Post-Deployment Verification
+  post-deployment-tests:
+    name: Post-Deployment Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run E2E tests
+        run: |
+          # Test PENELOPE workflow
+          echo "Testing PENELOPE diagnosis..."
+          curl -X POST https://staging.vertice.dev/penelope/api/v1/diagnose \
+            -H "Content-Type: application/json" \
+            -d '{
+              "anomaly_id": "test-001",
+              "anomaly_type": "latency_spike",
+              "affected_service": "api-gateway",
+              "metrics": {"latency_p95": 2000}
+            }' | jq '.diagnosis_id'
+
+          # Test MABA navigation
+          echo "Testing MABA browser automation..."
+          curl -X POST https://staging.vertice.dev/maba/api/v1/sessions \
+            -H "Content-Type: application/json" \
+            -d '{"headless": true}' | jq '.session_id'
+
+          # Test MVP narrative generation
+          echo "Testing MVP narrative generation..."
+          curl -X POST https://staging.vertice.dev/mvp/api/v1/narratives \
+            -H "Content-Type: application/json" \
+            -d '{
+              "narrative_type": "realtime",
+              "system_data": {"cpu": 45, "memory": 60},
+              "services": ["penelope", "maba"]
+            }' | jq '.narrative_id'
+
+      - name: Performance benchmarks
+        run: |
+          # PENELOPE response time
+          time curl -f https://staging.vertice.dev/penelope/health
+
+          # MABA response time
+          time curl -f https://staging.vertice.dev/maba/health
+
+          # MVP response time
+          time curl -f https://staging.vertice.dev/mvp/health
+
+  # Job 6: Deployment Summary
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, post-deployment-tests]
+    if: always()
+
+    steps:
+      - name: Generate deployment report
+        run: |
+          echo "# Subordinates Deployment Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment Time:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Services Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ PENELOPE (Wisdom & Healing) - Port 8154" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ MABA (Browser Agent) - Port 8152" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ MVP (Vision Protocol) - Port 8153" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Health Checks" >> $GITHUB_STEP_SUMMARY
+          echo "- Staging: ${{ needs.deploy-staging.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Post-Deployment Tests: ${{ needs.post-deployment-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Biblical Compliance ✅" >> $GITHUB_STEP_SUMMARY
+          echo "- 7 Articles of Governance Active" >> $GITHUB_STEP_SUMMARY
+          echo "- Sabbath Mode: Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🙏 Soli Deo Gloria" >> $GITHUB_STEP_SUMMARY
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

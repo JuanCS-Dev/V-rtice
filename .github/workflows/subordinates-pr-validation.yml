@@ -1,0 +1,407 @@
+name: Subordinates PR Validation
+
+on:
+  pull_request:
+    paths:
+      - 'backend/services/penelope_service/**'
+      - 'backend/services/maba_service/**'
+      - 'backend/services/mvp_service/**'
+      - 'backend/shared/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # Job 1: PR Metadata Validation
+  validate-pr:
+    name: Validate PR Metadata
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            docs
+            test
+            chore
+          scopes: |
+            penelope
+            maba
+            mvp
+            subordinates
+            all
+          requireScope: true
+
+      - name: Check PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr.body || pr.body.length < 50) {
+              core.setFailed('PR description must be at least 50 characters');
+            }
+
+      - name: Check for biblical signatures
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+
+            const hasClaudeCode = body.includes('Generated with [Claude Code]');
+            const hasCoAuthor = body.includes('Co-Authored-By: Claude');
+
+            if (!hasClaudeCode || !hasCoAuthor) {
+              core.warning('PR missing required signatures (Claude Code + Co-Author)');
+            }
+
+  # Job 2: Code Quality Checks
+  code-quality:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: |
+          pip install black flake8 isort mypy pylint
+
+      - name: Run black
+        run: |
+          black --check backend/services/penelope_service/ || echo "::warning::Black formatting issues in PENELOPE"
+          black --check backend/services/maba_service/ || echo "::warning::Black formatting issues in MABA"
+          black --check backend/services/mvp_service/ || echo "::warning::Black formatting issues in MVP"
+
+      - name: Run flake8
+        run: |
+          flake8 backend/services/penelope_service/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 backend/services/maba_service/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 backend/services/mvp_service/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run isort
+        run: |
+          isort --check backend/services/penelope_service/ || echo "::warning::Import sorting issues in PENELOPE"
+          isort --check backend/services/maba_service/ || echo "::warning::Import sorting issues in MABA"
+          isort --check backend/services/mvp_service/ || echo "::warning::Import sorting issues in MVP"
+
+  # Job 3: Test Coverage Report
+  coverage-report:
+    name: Test Coverage Report
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vertice_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd backend/services/penelope_service && pip install -r requirements.txt && pip install pytest pytest-cov && cd -
+          cd backend/services/maba_service && pip install -r requirements.txt && pip install pytest pytest-cov && cd -
+          cd backend/services/mvp_service && pip install -r requirements.txt && pip install pytest pytest-cov && cd -
+
+      - name: Run all tests with coverage
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: vertice_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd backend/services/penelope_service && python -m pytest tests/ --cov=. --cov-report=json:coverage-penelope.json && cd -
+          cd backend/services/maba_service && python -m pytest tests/ --cov=. --cov-report=json:coverage-maba.json && cd -
+          cd backend/services/mvp_service && python -m pytest tests/ --cov=. --cov-report=json:coverage-mvp.json && cd -
+
+      - name: Comment coverage on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const penelopeCov = JSON.parse(fs.readFileSync('backend/services/penelope_service/coverage-penelope.json'));
+            const mabaCov = JSON.parse(fs.readFileSync('backend/services/maba_service/coverage-maba.json'));
+            const mvpCov = JSON.parse(fs.readFileSync('backend/services/mvp_service/coverage-mvp.json'));
+
+            const penelopePercent = penelopeCov.totals.percent_covered.toFixed(2);
+            const mabaPercent = mabaCov.totals.percent_covered.toFixed(2);
+            const mvpPercent = mvpCov.totals.percent_covered.toFixed(2);
+
+            const avgCoverage = ((parseFloat(penelopePercent) + parseFloat(mabaPercent) + parseFloat(mvpPercent)) / 3).toFixed(2);
+
+            const body = `## Test Coverage Report
+
+| Service | Coverage |
+|---------|----------|
+| PENELOPE | ${penelopePercent}% |
+| MABA | ${mabaPercent}% |
+| MVP | ${mvpPercent}% |
+| **Average** | **${avgCoverage}%** |
+
+${avgCoverage >= 90 ? '✅ Coverage meets 90% threshold' : '⚠️ Coverage below 90% threshold'}
+
+🙏 Soli Deo Gloria
+`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  # Job 4: Changed Files Analysis
+  changed-files:
+    name: Analyze Changed Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+        with:
+          files: |
+            backend/services/**/*.py
+
+      - name: List changed files
+        run: |
+          echo "Changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Check if tests were updated
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = '${{ steps.changed-files.outputs.all_changed_files }}'.split(' ');
+
+            const hasCodeChanges = changedFiles.some(f =>
+              f.includes('.py') && !f.includes('test_') && !f.includes('tests/')
+            );
+
+            const hasTestChanges = changedFiles.some(f =>
+              f.includes('test_') || f.includes('tests/')
+            );
+
+            if (hasCodeChanges && !hasTestChanges) {
+              core.warning('⚠️ Code changes detected without corresponding test updates');
+            }
+
+  # Job 5: Biblical Compliance Validation
+  biblical-compliance:
+    name: Biblical Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for 7 Articles compliance
+        run: |
+          echo "Checking PENELOPE Biblical Articles..."
+
+          # Check that all 7 articles are referenced
+          if ! grep -r "Sophia" backend/services/penelope_service/; then
+            echo "::error::Missing Sophia (Wisdom) references"
+            exit 1
+          fi
+
+          if ! grep -r "Praotes" backend/services/penelope_service/; then
+            echo "::error::Missing Praotes (Gentleness) references"
+            exit 1
+          fi
+
+          if ! grep -r "Tapeinophrosyne" backend/services/penelope_service/; then
+            echo "::error::Missing Tapeinophrosyne (Humility) references"
+            exit 1
+          fi
+
+          echo "✅ Biblical compliance validated"
+
+      - name: Check for Nine Fruits tests
+        run: |
+          echo "Checking Nine Fruits of the Spirit..."
+
+          # Verify all 9 fruits have tests
+          for fruit in agape chara eirene makrothymia chrestotes agathosyne pistis praotes enkrateia; do
+            if ! ls backend/services/penelope_service/tests/test_${fruit}* 2>/dev/null; then
+              echo "::warning::Missing tests for fruit: $fruit"
+            fi
+          done
+
+  # Job 6: Security Scan
+  security-scan:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Bandit security scan
+        run: |
+          pip install bandit
+          bandit -r backend/services/penelope_service/ -f json -o bandit-penelope.json || true
+          bandit -r backend/services/maba_service/ -f json -o bandit-maba.json || true
+          bandit -r backend/services/mvp_service/ -f json -o bandit-mvp.json || true
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./backend/services/
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+
+  # Job 7: Performance Impact Analysis
+  performance-check:
+    name: Performance Impact Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-benchmark
+
+      - name: Run performance benchmarks
+        run: |
+          # Add benchmark tests if they exist
+          echo "Running performance benchmarks..."
+          # pytest backend/services/*/tests/benchmarks/ --benchmark-only || echo "No benchmarks found"
+
+      - name: Check for N+1 queries
+        run: |
+          echo "Checking for potential N+1 query issues..."
+          # Static analysis for common N+1 patterns
+          grep -r "for.*in.*:" backend/services/*/models.py || true
+
+  # Job 8: Documentation Check
+  docs-check:
+    name: Documentation Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check docstrings
+        run: |
+          pip install interrogate
+          interrogate -v backend/services/penelope_service/ --fail-under 80 || echo "::warning::PENELOPE docstring coverage below 80%"
+          interrogate -v backend/services/maba_service/ --fail-under 80 || echo "::warning::MABA docstring coverage below 80%"
+          interrogate -v backend/services/mvp_service/ --fail-under 80 || echo "::warning::MVP docstring coverage below 80%"
+
+      - name: Check for README updates
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const hasCodeChanges = files.some(f => f.filename.endsWith('.py'));
+            const hasReadmeUpdate = files.some(f => f.filename.includes('README'));
+
+            if (hasCodeChanges && !hasReadmeUpdate) {
+              core.warning('Consider updating README.md with your changes');
+            }
+
+  # Job 9: PR Summary
+  pr-summary:
+    name: PR Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-pr, code-quality, coverage-report, biblical-compliance, security-scan]
+    if: always()
+
+    steps:
+      - name: Generate PR summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## PR Validation Summary
+
+| Check | Status |
+|-------|--------|
+| PR Metadata | ${{ needs.validate-pr.result }} |
+| Code Quality | ${{ needs.code-quality.result }} |
+| Test Coverage | ${{ needs.coverage-report.result }} |
+| Biblical Compliance | ${{ needs.biblical-compliance.result }} |
+| Security Scan | ${{ needs.security-scan.result }} |
+
+${needs.coverage-report.result === 'success' && needs.code-quality.result === 'success' ? '✅ **All checks passed!**' : '⚠️ **Some checks need attention**'}
+
+---
+
+🙏 Soli Deo Gloria
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>

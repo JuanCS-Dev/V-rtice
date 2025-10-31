@@ -1,0 +1,473 @@
+name: Subordinates CI - PENELOPE, MABA, MVP
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/services/penelope_service/**'
+      - 'backend/services/maba_service/**'
+      - 'backend/services/mvp_service/**'
+      - 'backend/shared/**'
+      - '.github/workflows/subordinates-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/services/penelope_service/**'
+      - 'backend/services/maba_service/**'
+      - 'backend/services/mvp_service/**'
+      - 'backend/shared/**'
+
+env:
+  PYTHON_VERSION: '3.11'
+  POETRY_VERSION: '1.6.1'
+
+jobs:
+  # Job 1: PENELOPE Tests
+  penelope-tests:
+    name: PENELOPE - Wisdom & Healing Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vertice_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend/services/penelope_service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run PENELOPE tests
+        working-directory: backend/services/penelope_service
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: vertice_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ENVIRONMENT: test
+        run: |
+          python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+
+      - name: Upload PENELOPE coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/services/penelope_service/coverage.xml
+          flags: penelope
+          name: PENELOPE Coverage
+          fail_ci_if_error: false
+
+      - name: Check PENELOPE coverage threshold
+        working-directory: backend/services/penelope_service
+        run: |
+          coverage report --fail-under=90
+
+  # Job 2: MABA Tests
+  maba-tests:
+    name: MABA - Browser Agent Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vertice_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      neo4j:
+        image: neo4j:5.28-community
+        env:
+          NEO4J_AUTH: neo4j/vertice-test-password
+          NEO4J_PLUGINS: '["apoc"]'
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p vertice-test-password 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 7687:7687
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Playwright dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libnspr4 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libdbus-1-3 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libgbm1 \
+            libpango-1.0-0 \
+            libcairo2 \
+            libasound2
+
+      - name: Install dependencies
+        working-directory: backend/services/maba_service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+          playwright install chromium
+
+      - name: Run MABA tests
+        working-directory: backend/services/maba_service
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: vertice_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: vertice-test-password
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BROWSER_TYPE: chromium
+          BROWSER_HEADLESS: true
+          ENVIRONMENT: test
+        run: |
+          python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+
+      - name: Upload MABA coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/services/maba_service/coverage.xml
+          flags: maba
+          name: MABA Coverage
+          fail_ci_if_error: false
+
+      - name: Check MABA coverage threshold
+        working-directory: backend/services/maba_service
+        run: |
+          coverage report --fail-under=90
+
+  # Job 3: MVP Tests
+  mvp-tests:
+    name: MVP - Vision Protocol Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vertice_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      prometheus:
+        image: prom/prometheus:v2.47.0
+        ports:
+          - 9090:9090
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend/services/mvp_service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run MVP tests
+        working-directory: backend/services/mvp_service
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: vertice_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          PROMETHEUS_URL: http://localhost:9090
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ENVIRONMENT: test
+        run: |
+          python -m pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+
+      - name: Upload MVP coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/services/mvp_service/coverage.xml
+          flags: mvp
+          name: MVP Coverage
+          fail_ci_if_error: false
+
+      - name: Check MVP coverage threshold
+        working-directory: backend/services/mvp_service
+        run: |
+          coverage report --fail-under=90
+
+  # Job 4: Integration Tests
+  integration-tests:
+    name: Integration Tests - All Services
+    runs-on: ubuntu-latest
+    needs: [penelope-tests, maba-tests, mvp-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start all subordinate services
+        run: |
+          cp .env.subordinates.example .env.subordinates
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env.subordinates
+          docker-compose -f docker-compose.subordinates.yml up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for PENELOPE..."
+          timeout 120 bash -c 'until curl -f http://localhost:8154/health; do sleep 5; done'
+          echo "Waiting for MABA..."
+          timeout 120 bash -c 'until curl -f http://localhost:8152/health; do sleep 5; done'
+          echo "Waiting for MVP..."
+          timeout 120 bash -c 'until curl -f http://localhost:8153/health; do sleep 5; done'
+
+      - name: Run integration tests
+        run: |
+          # Test PENELOPE health
+          curl -f http://localhost:8154/health | jq '.status'
+
+          # Test MABA health
+          curl -f http://localhost:8152/health | jq '.status'
+
+          # Test MVP health
+          curl -f http://localhost:8153/health | jq '.status'
+
+          # Test PENELOPE API
+          curl -f http://localhost:8154/api/v1/fruits/status | jq '.overall_score'
+
+          # Test MABA stats
+          curl -f http://localhost:8152/api/v1/stats | jq '.active_sessions'
+
+          # Test MVP status
+          curl -f http://localhost:8153/api/v1/status | jq '.status'
+
+      - name: Check service logs
+        if: failure()
+        run: |
+          docker-compose -f docker-compose.subordinates.yml logs penelope
+          docker-compose -f docker-compose.subordinates.yml logs maba
+          docker-compose -f docker-compose.subordinates.yml logs mvp
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f docker-compose.subordinates.yml down -v
+
+  # Job 5: Build Docker Images
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [penelope-tests, maba-tests, mvp-tests]
+
+    strategy:
+      matrix:
+        service: [penelope, maba, mvp]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.service }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/services/${{ matrix.service }}_service
+          file: ./backend/services/${{ matrix.service }}_service/Dockerfile
+          push: false
+          tags: vertice-${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test ${{ matrix.service }} image
+        run: |
+          docker run --rm vertice-${{ matrix.service }}:latest python --version
+
+  # Job 6: Biblical Compliance Check
+  biblical-compliance:
+    name: Biblical Compliance - 7 Articles
+    runs-on: ubuntu-latest
+    needs: [penelope-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check PENELOPE 7 Biblical Articles
+        run: |
+          echo "Checking compliance with 7 Biblical Articles..."
+
+          # Article I - Sophia (Wisdom)
+          grep -r "SOPHIA_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article II - Praótes (Gentleness)
+          grep -r "PRAOTES_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article III - Tapeinophrosynē (Humility)
+          grep -r "TAPEINOPHROSYNE_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article IV - Stewardship
+          grep -r "STEWARDSHIP_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article V - Agape (Love)
+          grep -r "AGAPE_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article VI - Sabbath
+          grep -r "SABBATH_ENABLED" backend/services/penelope_service/ || exit 1
+
+          # Article VII - Aletheia (Truth)
+          grep -r "ALETHEIA_ENABLED" backend/services/penelope_service/ || exit 1
+
+          echo "✅ All 7 Biblical Articles present"
+
+  # Job 7: Security Scan
+  security-scan:
+    name: Security Scan - Subordinates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './backend/services/'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Job 8: Summary Report
+  summary:
+    name: CI Summary Report
+    runs-on: ubuntu-latest
+    needs: [penelope-tests, maba-tests, mvp-tests, integration-tests, build-images, biblical-compliance]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# Subordinates CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- PENELOPE: ${{ needs.penelope-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- MABA: ${{ needs.maba-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- MVP: ${{ needs.mvp-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Integration Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Docker Builds" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ${{ needs.build-images.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Biblical Compliance" >> $GITHUB_STEP_SUMMARY
+          echo "- 7 Articles: ${{ needs.biblical-compliance.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🙏 Soli Deo Gloria" >> $GITHUB_STEP_SUMMARY
+
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
