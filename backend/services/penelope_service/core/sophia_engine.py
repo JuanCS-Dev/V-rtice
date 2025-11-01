@@ -546,3 +546,109 @@ class SophiaEngine:
         except Exception as e:
             logger.error(f"Failed to get test coverage for {service}: {e}")
             return 0.0
+
+    async def validate_patch_in_twin(self, service: str, patch: str) -> dict[str, Any]:
+        """
+        Validate patch using digital twin before production.
+
+        Creates isolated Docker container, applies patch, runs tests,
+        monitors metrics. Only approves if all checks pass.
+
+        Args:
+            service: Service name (e.g., "penelope_service")
+            patch: Git-style patch content
+
+        Returns:
+            validation_result: Dict with success, test_results, metrics
+        """
+        from core.digital_twin import DigitalTwinEnvironment
+
+        twin_env = DigitalTwinEnvironment()
+        twin_id = None
+
+        try:
+            # Step 1: Create digital twin
+            logger.info(f"Creating digital twin for {service}...")
+            twin_id = await twin_env.create_twin(service)
+
+            # Step 2: Apply patch
+            logger.info(f"Applying patch to twin {twin_id}...")
+            patch_applied = await twin_env.apply_patch(twin_id, patch)
+
+            if not patch_applied:
+                return {
+                    "success": False,
+                    "reason": "Patch failed to apply cleanly",
+                    "twin_id": twin_id,
+                }
+
+            # Step 3: Run tests
+            logger.info(f"Running tests in twin {twin_id}...")
+            test_results = await twin_env.run_tests(twin_id)
+
+            if test_results["tests_failed"] > 0:
+                return {
+                    "success": False,
+                    "reason": f"{test_results['tests_failed']} tests failed",
+                    "test_results": test_results,
+                    "twin_id": twin_id,
+                }
+
+            # Step 4: Check coverage didn't drop significantly
+            original_coverage = await self._get_test_coverage(service)
+            new_coverage = test_results["coverage"]
+
+            if new_coverage < original_coverage - 5.0:  # Allow 5% drop
+                return {
+                    "success": False,
+                    "reason": f"Coverage dropped from {original_coverage:.1f}% to {new_coverage:.1f}%",
+                    "test_results": test_results,
+                    "twin_id": twin_id,
+                }
+
+            # Step 5: Monitor for regressions
+            logger.info(f"Monitoring twin {twin_id} for regressions (120s)...")
+            metrics = await twin_env.monitor_metrics(twin_id, duration_seconds=120)
+
+            if metrics["cpu_avg"] > 80.0:
+                return {
+                    "success": False,
+                    "reason": f"High CPU usage: {metrics['cpu_avg']:.1f}%",
+                    "metrics": metrics,
+                    "test_results": test_results,
+                    "twin_id": twin_id,
+                }
+
+            # All checks passed!
+            logger.info(f"✅ Patch validation successful for {service}")
+            return {
+                "success": True,
+                "test_results": test_results,
+                "metrics": metrics,
+                "twin_id": twin_id,
+                "validation_summary": {
+                    "tests_passed": test_results["tests_passed"],
+                    "tests_failed": test_results["tests_failed"],
+                    "coverage": new_coverage,
+                    "cpu_avg": metrics["cpu_avg"],
+                    "memory_avg": metrics["memory_avg"],
+                },
+            }
+
+        except Exception as e:
+            logger.error(f"Digital twin validation failed: {e}")
+            return {
+                "success": False,
+                "reason": f"Validation error: {str(e)}",
+                "error": str(e),
+                "twin_id": twin_id,
+            }
+
+        finally:
+            # Always clean up twin
+            if twin_id:
+                try:
+                    logger.info(f"Destroying twin {twin_id}...")
+                    await twin_env.destroy_twin(twin_id)
+                except Exception as e:
+                    logger.error(f"Failed to destroy twin {twin_id}: {e}")
