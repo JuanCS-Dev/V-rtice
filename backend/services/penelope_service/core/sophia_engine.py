@@ -10,6 +10,7 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
+import asyncio
 from datetime import datetime, timedelta
 import json
 import logging
@@ -652,3 +653,254 @@ class SophiaEngine:
                     await twin_env.destroy_twin(twin_id)
                 except Exception as e:
                     logger.error(f"Failed to destroy twin {twin_id}: {e}")
+
+    async def apply_patch_with_rollback(
+        self, service: str, patch: str, anomaly_id: str
+    ) -> dict[str, Any]:
+        """Apply patch with automatic rollback on failure.
+
+        Applies patch to production service, monitors for regressions,
+        and automatically rolls back if problems detected.
+
+        Workflow:
+        1. Save patch to history
+        2. Get baseline metrics
+        3. Apply patch to production
+        4. Restart service
+        5. Monitor for 5 minutes
+        6. Auto-rollback if errors spike or service crashes
+
+        Args:
+            service: Service name (e.g., "penelope_service")
+            patch: Git-style patch content
+            anomaly_id: Anomaly identifier for tracking
+
+        Returns:
+            result: Dict with success, patch_id, metrics
+        """
+        from core.patch_history import PatchHistory
+
+        patch_history = PatchHistory()
+        patch_id = None
+
+        try:
+            # Step 1: Save to history
+            logger.info(f"Saving patch to history for {service}...")
+            patch_id = await patch_history.save_patch(
+                service,
+                patch,
+                anomaly_id,
+                metadata={
+                    "applied_at": datetime.utcnow().isoformat(),
+                    "applied_by": "penelope",
+                    "anomaly_id": anomaly_id,
+                },
+            )
+
+            # Step 2: Get baseline metrics
+            logger.info(f"Getting baseline metrics for {service}...")
+            baseline = await self._get_service_metrics(service)
+
+            # Step 3: Apply patch to production
+            logger.info(f"Applying patch {patch_id[:8]} to production {service}...")
+            service_path = Path(f"/home/juan/vertice-dev/backend/services/{service}")
+
+            result = subprocess.run(
+                ["patch", "-p1"],
+                input=patch.encode(),
+                cwd=str(service_path),
+                capture_output=True,
+            )
+
+            if result.returncode != 0:
+                error_msg = result.stderr.decode(errors="ignore")
+                logger.error(f"Patch application failed: {error_msg}")
+                return {
+                    "success": False,
+                    "patch_id": patch_id,
+                    "error": f"Patch failed to apply: {error_msg}",
+                    "rolled_back": False,
+                }
+
+            # Step 4: Restart service (if applicable)
+            logger.info(f"Patch applied, restarting {service}...")
+            await self._restart_service(service)
+
+            # Step 5: Monitor for 5 minutes
+            logger.info(f"Monitoring {service} for regressions (5 min)...")
+            monitoring_duration = 300  # 5 minutes
+            check_interval = 10  # Check every 10 seconds
+            checks = monitoring_duration // check_interval
+
+            for i in range(checks):
+                await asyncio.sleep(check_interval)
+
+                current_metrics = await self._get_service_metrics(service)
+
+                # Check for regressions
+                if (
+                    current_metrics.get("error_rate", 0)
+                    > baseline.get("error_rate", 0) * 2.0
+                ):
+                    error_rate_baseline = baseline.get("error_rate", 0)
+                    error_rate_current = current_metrics.get("error_rate", 0)
+
+                    logger.error(
+                        f"🚨 Error rate doubled: {error_rate_baseline:.2f} → {error_rate_current:.2f}"
+                    )
+
+                    # Auto-rollback
+                    logger.warning(
+                        f"Initiating automatic rollback for patch {patch_id[:8]}"
+                    )
+                    rollback_success = await patch_history.rollback_patch(
+                        service, patch_id
+                    )
+
+                    if rollback_success:
+                        await self._restart_service(service)
+                        return {
+                            "success": False,
+                            "patch_id": patch_id,
+                            "error": f"Error rate doubled: {error_rate_baseline:.2f} → {error_rate_current:.2f}",
+                            "rolled_back": True,
+                            "baseline_metrics": baseline,
+                            "final_metrics": current_metrics,
+                        }
+                    else:
+                        # Rollback failed - CRITICAL
+                        await self._alert_human(
+                            service=service,
+                            severity="CRITICAL",
+                            message=f"Patch {patch_id[:8]} caused errors AND rollback failed",
+                            patch_id=patch_id,
+                            error="Auto-rollback failure",
+                        )
+                        return {
+                            "success": False,
+                            "patch_id": patch_id,
+                            "error": "Error rate doubled and rollback failed",
+                            "rolled_back": False,
+                            "alert_sent": True,
+                        }
+
+                if not current_metrics.get("healthy", True):
+                    logger.error(f"🚨 Service {service} became unhealthy")
+
+                    # Auto-rollback
+                    logger.warning(
+                        f"Initiating automatic rollback for patch {patch_id[:8]}"
+                    )
+                    rollback_success = await patch_history.rollback_patch(
+                        service, patch_id
+                    )
+
+                    if rollback_success:
+                        await self._restart_service(service)
+                        return {
+                            "success": False,
+                            "patch_id": patch_id,
+                            "error": "Service became unhealthy",
+                            "rolled_back": True,
+                        }
+
+                logger.debug(
+                    f"Health check {i+1}/{checks}: "
+                    f"error_rate={current_metrics.get('error_rate', 0):.3f}, "
+                    f"healthy={current_metrics.get('healthy', True)}"
+                )
+
+            # All checks passed!
+            final_metrics = await self._get_service_metrics(service)
+            logger.info(f"✅ Patch {patch_id[:8]} stable after {monitoring_duration}s")
+
+            return {
+                "success": True,
+                "patch_id": patch_id,
+                "monitoring_duration_seconds": monitoring_duration,
+                "baseline_metrics": baseline,
+                "final_metrics": final_metrics,
+                "rolled_back": False,
+            }
+
+        except Exception as e:
+            logger.error(f"Patch application failed with exception: {e}")
+
+            # Attempt rollback
+            if patch_id:
+                logger.warning(f"Attempting rollback due to exception")
+                rollback_success = await patch_history.rollback_patch(service, patch_id)
+
+                if rollback_success:
+                    await self._restart_service(service)
+                    return {
+                        "success": False,
+                        "patch_id": patch_id,
+                        "error": str(e),
+                        "rolled_back": True,
+                    }
+
+            return {
+                "success": False,
+                "patch_id": patch_id,
+                "error": str(e),
+                "rolled_back": False,
+            }
+
+    async def _get_service_metrics(self, service: str) -> dict[str, Any]:
+        """Get current service metrics.
+
+        Stub implementation - should query Prometheus/observability.
+
+        Args:
+            service: Service name
+
+        Returns:
+            metrics: Dict with error_rate, healthy, etc.
+        """
+        # TODO: Implement real Prometheus query
+        # For now, return conservative defaults
+        return {
+            "error_rate": 0.01,  # 1% error rate
+            "healthy": True,
+            "cpu_usage": 0.5,
+            "memory_usage": 0.6,
+        }
+
+    async def _restart_service(self, service: str) -> bool:
+        """Restart a service.
+
+        Stub implementation - should use docker-compose or k8s.
+
+        Args:
+            service: Service name
+
+        Returns:
+            success: True if restart succeeded
+        """
+        # TODO: Implement real service restart
+        # docker-compose restart {service} or kubectl rollout restart
+        logger.info(f"Would restart service: {service}")
+        return True
+
+    async def _alert_human(
+        self, service: str, severity: str, message: str, **kwargs
+    ) -> bool:
+        """Alert human operator.
+
+        Stub implementation - should send to Slack/PagerDuty.
+
+        Args:
+            service: Service name
+            severity: Alert severity (CRITICAL, WARNING, etc.)
+            message: Alert message
+            **kwargs: Additional context
+
+        Returns:
+            success: True if alert sent
+        """
+        # TODO: Implement real alerting (Slack, PagerDuty, etc.)
+        logger.critical(
+            f"🚨 HUMAN ALERT [{severity}] for {service}: {message} | Context: {kwargs}"
+        )
+        return True
