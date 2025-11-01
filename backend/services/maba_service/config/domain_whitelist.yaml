@@ -1,0 +1,123 @@
+# MABA Service - Domain Whitelist Configuration
+#
+# This file defines which domains MABA is allowed to navigate to.
+# Security Policy enforces this whitelist to prevent unauthorized access
+# to internal networks and malicious sites.
+#
+# Wildcard patterns:
+#   - "*" matches all domains (NOT recommended for production)
+#   - "*.example.com" matches any subdomain of example.com
+#   - "example.com" matches exactly example.com
+#
+# Blacklist (always blocked, regardless of whitelist):
+#   - localhost, 127.0.0.1
+#   - Private networks: 10.*, 172.16.* - 172.31.*, 192.168.*
+#   - Link-local: 169.254.*
+#   - Internal domains: *.internal, *.local, *.localhost
+#
+# Biblical Foundation: Proverbs 4:23 - "Guard your heart above all else"
+#
+# Author: Vértice Platform Team
+# License: Proprietary
+
+# Allowed domains for MABA to navigate
+allowed_domains:
+  # Public documentation and resources
+  - "*.wikipedia.org"
+  - "*.github.com"
+  - "github.com"
+  - "*.stackoverflow.com"
+  - "stackoverflow.com"
+
+  # Search engines
+  - "google.com"
+  - "*.google.com"
+  - "bing.com"
+  - "*.bing.com"
+  - "duckduckgo.com"
+
+  # Development and testing
+  - "*.example.com"
+  - "example.com"
+  - "*.example.org"
+  - "example.org"
+  - "httpbin.org"
+  - "*.httpbin.org"
+
+  # Add your production domains here:
+  # - "*.yourcompany.com"
+  # - "api.partner.com"
+
+# Security settings
+security:
+  # Maximum navigation depth to prevent infinite loops
+  max_navigation_depth: 50
+
+  # Maximum session duration in minutes
+  max_session_duration_minutes: 60
+
+  # Maximum HTTP requests per session
+  max_requests_per_session: 1000
+
+  # Blocked file types (downloads)
+  blocked_file_types:
+    - ".exe"
+    - ".dll"
+    - ".dmg"
+    - ".pkg"
+    - ".msi"
+    - ".bat"
+    - ".sh"
+    - ".ps1"
+
+  # Blocked URL schemes
+  blocked_schemes:
+    - "file://"
+    - "ftp://"
+    - "ftps://"
+    - "data://"
+    - "javascript:"
+
+# Rate limiting (per session)
+rate_limiting:
+  # Maximum navigation requests per minute
+  max_navigations_per_minute: 30
+
+  # Maximum click actions per minute
+  max_clicks_per_minute: 60
+
+  # Maximum form submissions per minute
+  max_submissions_per_minute: 10
+
+# Browser isolation settings
+isolation:
+  # Enable network isolation (Docker/iptables)
+  enabled: true
+
+  # Allow external network access (set false for complete isolation)
+  allow_external: true
+
+  # DNS servers to use (empty = use system default)
+  dns_servers: []
+
+# Monitoring and alerting
+monitoring:
+  # Log all blocked navigation attempts
+  log_blocked_attempts: true
+
+  # Alert on repeated blocked attempts (threshold)
+  alert_threshold: 10
+
+  # Metrics collection enabled
+  metrics_enabled: true
+
+# Compliance and audit
+compliance:
+  # Audit log all navigation (for compliance)
+  audit_enabled: true
+
+  # Audit log path
+  audit_log_path: "/var/log/maba/navigation_audit.log"
+
+  # Retention period (days)
+  audit_retention_days: 90
