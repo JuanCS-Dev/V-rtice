@@ -9,16 +9,19 @@ Key Features:
 - Navigation and interaction
 - Screenshot capture
 - Resource optimization
+- Security policy enforcement (domain whitelist)
 
 Author: Vértice Platform Team
 License: Proprietary
 """
 
 import logging
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from playwright.async_api import Browser, BrowserContext, Page, async_playwright
+from core.security_policy import SecurityPolicy
+from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from prometheus_client import Counter, Gauge, Histogram
 
 logger = logging.getLogger(__name__)
@@ -61,6 +64,8 @@ class BrowserController:
         browser_type: str = "chromium",
         headless: bool = True,
         max_instances: int = 5,
+        security_policy: SecurityPolicy | None = None,
+        whitelist_path: Path | str | None = None,
     ):
         """
         Initialize browser controller.
@@ -69,10 +74,23 @@ class BrowserController:
             browser_type: Browser type (chromium, firefox, webkit)
             headless: Run in headless mode
             max_instances: Max concurrent instances
+            security_policy: SecurityPolicy instance (optional, creates default if None)
+            whitelist_path: Path to domain whitelist config (if security_policy is None)
         """
         self.browser_type = browser_type
         self.headless = headless
         self.max_instances = max_instances
+
+        # Initialize security policy
+        if security_policy:
+            self.security_policy = security_policy
+        else:
+            # Create default security policy
+            if whitelist_path:
+                self.security_policy = SecurityPolicy(whitelist_path=whitelist_path)
+            else:
+                # Use default path
+                self.security_policy = SecurityPolicy()
 
         self._playwright = None
         self._browser: Browser | None = None
@@ -81,7 +99,8 @@ class BrowserController:
 
         logger.info(
             f"Browser controller initialized: {browser_type} "
-            f"(headless={headless}, max_instances={max_instances})"
+            f"(headless={headless}, max_instances={max_instances}, "
+            f"security_policy={'custom' if security_policy else 'default'})"
         )
 
     async def initialize(self) -> bool:
@@ -257,7 +276,7 @@ class BrowserController:
         timeout_ms: int = 30000,
     ) -> dict[str, Any]:
         """
-        Navigate to a URL.
+        Navigate to a URL (with security policy enforcement).
 
         Args:
             session_id: Session ID
@@ -266,9 +285,26 @@ class BrowserController:
             timeout_ms: Navigation timeout
 
         Returns:
-            Navigation result dict
+            Navigation result dict with status, url, title, etc.
+            If blocked by security policy, status="blocked" with error message
         """
         with self.action_duration.labels(action_type="navigate").time():
+            # Security check FIRST (before any network activity)
+            allowed, reason = self.security_policy.is_allowed(url)
+            if not allowed:
+                self.actions_total.labels(
+                    action_type="navigate", status="blocked"
+                ).inc()
+
+                logger.warning(f"🚫 Blocked navigation to {url}: {reason}")
+
+                return {
+                    "status": "blocked",
+                    "url": url,
+                    "error": f"Security policy violation: {reason}",
+                }
+
+            # Security check passed, proceed with navigation
             try:
                 page = await self.get_page(session_id)
                 response = await page.goto(
@@ -289,7 +325,7 @@ class BrowserController:
             except Exception as e:
                 self.actions_total.labels(action_type="navigate", status="failed").inc()
                 logger.error(f"Navigation failed: {e}")
-                return {"status": "failed", "error": str(e)}
+                return {"status": "failed", "url": url, "error": str(e)}
 
     async def click(
         self, session_id: str, selector: str, timeout_ms: int = 30000
