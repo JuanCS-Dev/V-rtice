@@ -10,9 +10,15 @@ Author: Vértice Platform Team
 License: Proprietary
 """
 
-import logging
 from datetime import datetime, timedelta
+import json
+import logging
+from pathlib import Path
+import re
+import subprocess
 from typing import Any
+
+import yaml
 
 from models import Anomaly, InterventionDecision, InterventionLevel, Severity
 
@@ -284,48 +290,259 @@ class SophiaEngine:
 
     async def _get_service_complexity(self, service: str) -> float:
         """
-        Obtém score de complexidade do serviço.
+        Calcula complexidade real do serviço usando radon.
 
-        FASE 1: Retorna valor padrão conservador (0.5).
-        FASE 2: Implementar análise real (LOC, cyclomatic complexity, etc.).
+        Usa cyclomatic complexity como métrica principal.
+        Normaliza para escala 0.0-1.0 (complexidade >15 = muito alta).
+
+        Args:
+            service: Nome do serviço (e.g., "penelope_service")
 
         Returns:
             Score de complexidade (0.0 - 1.0)
         """
-        return 0.5
+        try:
+            service_path = f"backend/services/{service}"
+
+            # Run radon cc (cyclomatic complexity)
+            result = subprocess.run(
+                ["radon", "cc", "-a", "-j", service_path],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd="/home/juan/vertice-dev",
+            )
+
+            if result.returncode != 0:
+                logger.warning(
+                    f"Radon failed for {service}: {result.stderr}. Using default complexity."
+                )
+                return 0.5
+
+            # Parse JSON output
+            data = json.loads(result.stdout)
+
+            # Calculate weighted complexity
+            total_complexity = 0
+            total_functions = 0
+
+            for file_data in data.values():
+                for item in file_data:
+                    total_complexity += item.get("complexity", 0)
+                    total_functions += 1
+
+            if total_functions == 0:
+                logger.info(
+                    f"No functions found in {service}, using default complexity"
+                )
+                return 0.5
+
+            avg_complexity = total_complexity / total_functions
+
+            # Normalize to 0-1 scale (complexity >15 is very high)
+            normalized = min(avg_complexity / 15.0, 1.0)
+
+            logger.info(
+                f"Service {service} complexity: {normalized:.2f} "
+                f"(avg cyclomatic: {avg_complexity:.1f}, functions: {total_functions})"
+            )
+            return normalized
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Radon timeout for {service}")
+            return 0.5
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse radon output for {service}: {e}")
+            return 0.5
+        except Exception as e:
+            logger.error(f"Failed to calculate complexity for {service}: {e}")
+            return 0.5  # Conservative fallback
 
     async def _get_service_dependencies(self, service: str) -> list[str]:
         """
-        Obtém lista de dependências do serviço.
+        Obtém dependências reais do serviço analisando imports e docker-compose.
 
-        FASE 1: Retorna lista vazia (sem análise de dependências).
-        FASE 2: Implementar análise real de dependency graph.
+        Analisa:
+        1. Imports Python (from X_service import ...)
+        2. docker-compose.yml (depends_on)
+        3. Service Registry (runtime dependencies)
+
+        Args:
+            service: Nome do serviço (e.g., "penelope_service")
 
         Returns:
-            Lista de serviços dependentes
+            Lista de serviços dependentes (unique)
         """
-        return []
+        try:
+            dependencies = set()
+            service_path = Path(f"/home/juan/vertice-dev/backend/services/{service}")
 
-    async def _get_recent_changes(self, service: str, hours: int) -> int:
+            if not service_path.exists():
+                logger.warning(f"Service path not found: {service_path}")
+                return []
+
+            # 1. Parse Python imports
+            for py_file in service_path.rglob("*.py"):
+                try:
+                    content = py_file.read_text()
+
+                    # Find internal service imports
+                    # Pattern: from X_service import ... or import X_service
+                    import_pattern = (
+                        r"from\s+(\w+_service)\s+import|import\s+(\w+_service)"
+                    )
+                    matches = re.findall(import_pattern, content)
+
+                    for match in matches:
+                        dep = match[0] or match[1]
+                        if dep and dep != service:
+                            dependencies.add(dep)
+                except Exception as e:
+                    logger.debug(f"Failed to parse {py_file}: {e}")
+                    continue
+
+            # 2. Parse docker-compose.yml
+            compose_file = service_path / "docker-compose.yml"
+            if compose_file.exists():
+                try:
+                    compose_data = yaml.safe_load(compose_file.read_text())
+
+                    for svc_name, svc_config in compose_data.get(
+                        "services", {}
+                    ).items():
+                        depends_on = svc_config.get("depends_on", [])
+
+                        # depends_on can be list or dict
+                        if isinstance(depends_on, list):
+                            dependencies.update(depends_on)
+                        elif isinstance(depends_on, dict):
+                            dependencies.update(depends_on.keys())
+                except Exception as e:
+                    logger.debug(f"Failed to parse docker-compose.yml: {e}")
+
+            # 3. Query Service Registry (if available)
+            # TODO: Implement when Service Registry client is available
+            # registry_deps = await self._query_registry_dependencies(service)
+            # dependencies.update(registry_deps)
+
+            result = sorted(list(dependencies))
+            logger.info(f"Service {service} has {len(result)} dependencies: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Failed to get dependencies for {service}: {e}")
+            return []
+
+    async def _get_recent_changes(self, service: str, hours: int = 24) -> int:
         """
-        Obtém número de mudanças recentes no serviço.
+        Obtém número real de commits recentes usando git log.
 
-        FASE 1: Retorna 0 (sem análise de git log).
-        FASE 2: Implementar query de git log.
+        Conta commits no diretório do serviço nas últimas N horas.
+
+        Args:
+            service: Nome do serviço (e.g., "penelope_service")
+            hours: Janela de tempo em horas (padrão: 24)
 
         Returns:
             Número de commits recentes
         """
-        return 0
+        try:
+            service_path = f"backend/services/{service}"
+            since_time = f"{hours} hours ago"
+
+            result = subprocess.run(
+                [
+                    "git",
+                    "log",
+                    "--oneline",
+                    f"--since={since_time}",
+                    "--",
+                    service_path,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                cwd="/home/juan/vertice-dev",
+            )
+
+            if result.returncode != 0:
+                logger.warning(f"Git log failed for {service}: {result.stderr}")
+                return 0
+
+            # Count non-empty lines
+            commit_count = len(
+                [line for line in result.stdout.split("\n") if line.strip()]
+            )
+
+            logger.info(
+                f"Service {service} had {commit_count} commits in last {hours}h"
+            )
+            return commit_count
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Git log timeout for {service}")
+            return 0
+        except Exception as e:
+            logger.error(f"Failed to get recent changes for {service}: {e}")
+            return 0
 
     async def _get_test_coverage(self, service: str) -> float:
         """
-        Obtém coverage de testes do serviço.
+        Obtém coverage real de testes usando pytest-cov.
 
-        FASE 1: Retorna valor otimista (0.90) assumindo boas práticas.
-        FASE 2: Implementar integração com pytest-cov.
+        Executa pytest com coverage no diretório do serviço e extrai
+        o percentual de cobertura do coverage.json gerado.
+
+        Args:
+            service: Nome do serviço (e.g., "penelope_service")
 
         Returns:
             Coverage (0.0 - 1.0)
         """
-        return 0.90
+        try:
+            service_path = Path(f"/home/juan/vertice-dev/backend/services/{service}")
+
+            if not service_path.exists():
+                logger.warning(f"Service path not found: {service_path}")
+                return 0.0
+
+            # Run pytest with coverage
+            result = subprocess.run(
+                ["pytest", "--cov=.", "--cov-report=json", "-q", "--tb=no"],
+                capture_output=True,
+                text=True,
+                timeout=120,  # 2 minutes timeout
+                cwd=str(service_path),
+            )
+
+            # Check if coverage.json was generated
+            coverage_file = service_path / "coverage.json"
+            if not coverage_file.exists():
+                logger.warning(
+                    f"No coverage.json for {service}. "
+                    f"Tests may have failed or no tests exist."
+                )
+                return 0.0
+
+            # Read coverage.json
+            coverage_data = json.loads(coverage_file.read_text())
+            coverage_pct = coverage_data["totals"]["percent_covered"] / 100.0
+
+            logger.info(
+                f"Service {service} coverage: {coverage_pct:.1%} "
+                f"({coverage_data['totals']['covered_lines']}/{coverage_data['totals']['num_statements']} statements)"
+            )
+            return coverage_pct
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Pytest timeout for {service} (>120s)")
+            return 0.0
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse coverage.json for {service}: {e}")
+            return 0.0
+        except KeyError as e:
+            logger.error(f"Invalid coverage.json format for {service}: {e}")
+            return 0.0
+        except Exception as e:
+            logger.error(f"Failed to get test coverage for {service}: {e}")
+            return 0.0

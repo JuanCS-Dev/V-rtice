@@ -17,6 +17,7 @@ redis==5.0.0
 
 # Environment & Configuration
 python-dotenv==1.0.0
+pyyaml==6.0.1  # YAML parsing for docker-compose analysis
 
 # Monitoring & Observability (Sophia + Tapeinophrosyne)
 prometheus-client==0.19.0
@@ -49,6 +50,7 @@ mypy>=1.8.0
 
 # Code Quality
 ruff>=0.1.0
+radon==6.0.1  # Cyclomatic complexity analysis for risk assessment
 
 # Async Utilities
 aiofiles==24.1.0

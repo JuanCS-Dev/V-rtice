@@ -1,0 +1,73 @@
+name: Constitutional Gate
+
+on:
+  pull_request:
+    paths:
+      - "backend/services/**"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "backend/services/**"
+
+jobs:
+  constitutional-compliance:
+    name: Constitutional Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+
+      - name: Detect changed services
+        id: changed-services
+        run: |
+          # Get list of changed services
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'backend/services/' || true)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No services changed"
+            echo "services=" >> $GITHUB_OUTPUT
+          else
+            SERVICES=$(echo "$CHANGED_FILES" | cut -d'/' -f3 | sort -u | tr '\n' ' ')
+            echo "Changed services: $SERVICES"
+            echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Constitutional Gate
+        run: |
+          SERVICES="${{ steps.changed-services.outputs.services }}"
+          if [ -z "$SERVICES" ]; then
+            echo "No services to check"
+            exit 0
+          fi
+
+          FAILED=0
+          for SERVICE in $SERVICES; do
+            echo "Checking $SERVICE..."
+            python scripts/constitutional_gate.py "$SERVICE" || FAILED=1
+          done
+
+          exit $FAILED
+
+      - name: Comment PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **Constitutional Gate FAILED**\n\nYour changes do not meet Constituição Vértice v3.0 requirements.\n\nPlease ensure:\n- ✅ Constitutional observability (metrics, tracing, health checks)\n- ✅ Test coverage >= 90%\n- ✅ No P1 violations (TODOs, NotImplementedError, placeholders)\n- ✅ Dockerfile best practices\n\nRun locally: `python scripts/constitutional_gate.py <service_name>`'
+            })

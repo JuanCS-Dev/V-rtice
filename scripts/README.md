@@ -60,14 +60,53 @@ Automated cleanup using Gemini AI.
 
 ## 🧪 Testing Scripts
 
-**[diagnose-all.sh](./testing/diagnose-all.sh)**  
+**[diagnose-all.sh](./testing/diagnose-all.sh)**
 Comprehensive system diagnostics.
 
-**[validate-maximus.sh](./testing/validate-maximus.sh)**  
+**[validate-maximus.sh](./testing/validate-maximus.sh)**
 MAXIMUS system validation suite.
 
-**[verify-ethical-ai.sh](./testing/verify-ethical-ai.sh)**  
+**[verify-ethical-ai.sh](./testing/verify-ethical-ai.sh)**
 Ethical AI framework verification.
+
+---
+
+## 🏛️ Constitutional Migration Scripts (v3.0)
+
+**[migrate_to_constitutional.py](./migrate_to_constitutional.py)** ⭐ NEW
+Automate service migration to Constitutional v3.0 compliance.
+- ✅ Atomic operations with rollback support
+- ✅ Copies 5 constitutional libraries
+- ✅ Updates main.py, Dockerfile, requirements.txt
+- ✅ Generates test templates
+- 🧪 Supports dry-run mode
+
+**[constitutional_gate.py](./constitutional_gate.py)** ⭐ NEW
+CI/CD validator for constitutional compliance.
+- ✅ Validates observability (metrics, tracing, health)
+- ✅ Checks test coverage >=90%
+- ✅ Detects P1 violations (TODOs, NotImplementedError)
+- ✅ Dockerfile best practices
+- 📊 JSON output for CI/CD integration
+
+**Quick Start:**
+```bash
+# Migrate a service
+python scripts/migrate_to_constitutional.py <service_name> --dry-run
+python scripts/migrate_to_constitutional.py <service_name>
+
+# Validate compliance
+python scripts/constitutional_gate.py <service_name>
+python scripts/constitutional_gate.py --all --json
+```
+
+**Documentation:**
+- 📚 [Complete Documentation](../docs/CONSTITUTIONAL_SCRIPTS_DOCUMENTATION.md)
+- 🚀 [Quick Start Guide](../docs/CONSTITUTIONAL_MIGRATION_QUICK_START.md)
+- 📋 [Migration Plan](../CONSTITUTIONAL_MIGRATION_PLAN.md)
+
+**Status:** ✅ Production Ready | **Phase:** FASE 0 Complete
+**Target:** Migrate 96 services to Constitutional v3.0 (10-week plan)
 
 ---
 
@@ -143,5 +182,5 @@ Scripts themselves are documentation of processes.
 
 ---
 
-**Status**: 🟢 Active | **Total**: 13 scripts  
+**Status**: 🟢 Active | **Total**: 15 scripts (13 bash + 2 Python constitutional)
 **Philosophy**: Automation with safety, clarity with power 🔧

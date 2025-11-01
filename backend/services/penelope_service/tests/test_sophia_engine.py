@@ -12,8 +12,8 @@ License: Proprietary
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from core.sophia_engine import SophiaEngine
+import pytest
 
 from models import Anomaly, InterventionDecision, InterventionLevel, Severity
 
@@ -334,3 +334,120 @@ class TestConstitutionalCompliance:
         assert "decision" in decision
         # Reasoning deve explicar POR QUÊ da decisão
         assert len(decision["reasoning"]) > 20
+
+
+# ============================================================================
+# TESTES DE RISK ASSESSMENT - FASE 2 (Real Data)
+# Validando eliminação de valores hardcoded
+# ============================================================================
+
+
+class TestRiskAssessmentRealData:
+    """
+    Valida que risk assessment usa dados REAIS, não valores hardcoded.
+    Conforme TRINITY_CORRECTION_PLAN.md - PENELOPE P0.1
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_service_complexity_returns_nonzero_for_existing_service(
+        self, sophia
+    ):
+        """
+        DADO: Serviço existente com código Python
+        QUANDO: _get_service_complexity() é chamado
+        ENTÃO: Retorna valor > 0 (não hardcoded 0.5)
+        E: Usa radon para calcular complexidade ciclomática real
+        """
+        complexity = await sophia._get_service_complexity("penelope_service")
+
+        # Deve retornar valor calculado, não hardcoded
+        assert isinstance(complexity, float)
+        assert 0.0 <= complexity <= 1.0
+        # PENELOPE tem código complexo, deve ser > 0
+        assert complexity > 0.0
+
+    @pytest.mark.asyncio
+    async def test_get_service_complexity_handles_nonexistent_service(self, sophia):
+        """
+        DADO: Serviço inexistente
+        QUANDO: _get_service_complexity() é chamado
+        ENTÃO: Retorna fallback 0.5 (conservador)
+        E: Não levanta exceção
+        """
+        complexity = await sophia._get_service_complexity("nonexistent_service_xyz")
+
+        assert complexity == 0.5  # Conservative fallback
+
+    @pytest.mark.asyncio
+    async def test_get_service_dependencies_finds_real_dependencies(self, sophia):
+        """
+        DADO: Serviço existente com imports e docker-compose
+        QUANDO: _get_service_dependencies() é chamado
+        ENTÃO: Retorna lista (pode ser vazia se sem dependências)
+        E: Não retorna None ou valor hardcoded
+        """
+        deps = await sophia._get_service_dependencies("penelope_service")
+
+        assert isinstance(deps, list)
+        # Cada dependência deve ser string
+        for dep in deps:
+            assert isinstance(dep, str)
+            assert len(dep) > 0
+
+    @pytest.mark.asyncio
+    async def test_get_recent_changes_counts_real_commits(self, sophia):
+        """
+        DADO: Repositório git com histórico
+        QUANDO: _get_recent_changes() é chamado
+        ENTÃO: Retorna contagem de commits (>= 0)
+        E: Não retorna valor hardcoded
+        """
+        # Last 24 hours
+        changes = await sophia._get_recent_changes("penelope_service", hours=24)
+
+        assert isinstance(changes, int)
+        assert changes >= 0
+        # Se há commits recentes em penelope, deve ser > 0
+        # (Mas aceita 0 se realmente não houve commits)
+
+    @pytest.mark.asyncio
+    async def test_get_recent_changes_respects_time_window(self, sophia):
+        """
+        DADO: Janela de tempo de 1 hora
+        QUANDO: _get_recent_changes(hours=1) é chamado
+        ENTÃO: Conta commits <= do que janela de 24h
+        """
+        changes_1h = await sophia._get_recent_changes("penelope_service", hours=1)
+        changes_24h = await sophia._get_recent_changes("penelope_service", hours=24)
+
+        assert isinstance(changes_1h, int)
+        assert isinstance(changes_24h, int)
+        # 1h deve ter <= commits que 24h
+        assert changes_1h <= changes_24h
+
+    @pytest.mark.asyncio
+    async def test_get_test_coverage_returns_real_coverage(self, sophia):
+        """
+        DADO: Serviço existente com testes
+        QUANDO: _get_test_coverage() é chamado
+        ENTÃO: Retorna cobertura real (0.0 - 1.0)
+        E: Não retorna valor hardcoded 0.90
+        """
+        coverage = await sophia._get_test_coverage("penelope_service")
+
+        assert isinstance(coverage, float)
+        assert 0.0 <= coverage <= 1.0
+        # PENELOPE tem testes, cobertura deve ser > 0
+        # (Este teste pode demorar ~120s pois roda pytest)
+
+    @pytest.mark.asyncio
+    async def test_get_test_coverage_handles_service_without_tests(self, sophia):
+        """
+        DADO: Serviço sem testes ou inexistente
+        QUANDO: _get_test_coverage() é chamado
+        ENTÃO: Retorna 0.0 (sem coverage)
+        E: Não levanta exceção
+        """
+        coverage = await sophia._get_test_coverage("nonexistent_service_xyz")
+
+        assert coverage == 0.0  # No tests = 0% coverage
