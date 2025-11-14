@@ -1,4 +1,5 @@
 /**
+import logger from "@/utils/logger";
  * useWebSocket - Custom hook for WebSocket connection to HITL API.
  *
  * Manages WebSocket connection, subscriptions, and message handling.
@@ -78,7 +79,7 @@ export const useWebSocket = ({
       wsRef.current.send(JSON.stringify(message));
       return true;
     }
-    console.warn('[useWebSocket] Cannot send message: WebSocket not connected');
+    logger.warn('[useWebSocket] Cannot send message: WebSocket not connected');
     return false;
   }, []);
 
@@ -177,12 +178,12 @@ export const useWebSocket = ({
             onMessage(message);
           }
         } catch (error) {
-          console.error('[useWebSocket] Failed to parse message:', error);
+          logger.error('[useWebSocket] Failed to parse message:', error);
         }
       };
 
       ws.onerror = (error) => {
-        console.error('[useWebSocket] Error:', error);
+        logger.error('[useWebSocket] Error:', error);
         setStatus(WebSocketStatus.ERROR);
       };
 
@@ -204,14 +205,14 @@ export const useWebSocket = ({
             connect();
           }, reconnectInterval);
         } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-          console.error('[useWebSocket] Max reconnection attempts reached');
+          logger.error('[useWebSocket] Max reconnection attempts reached');
           setStatus(WebSocketStatus.ERROR);
         }
       };
 
       wsRef.current = ws;
     } catch (error) {
-      console.error('[useWebSocket] Failed to create WebSocket:', error);
+      logger.error('[useWebSocket] Failed to create WebSocket:', error);
       setStatus(WebSocketStatus.ERROR);
     }
   }, [url, channels, onMessage, subscribe, reconnectInterval, maxReconnectAttempts]);

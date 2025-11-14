@@ -17,8 +17,11 @@
  */
 
 import React from 'react';
+import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
+import logger from "@/utils/logger";
 import { useTranslation } from 'react-i18next';
+import logger from "@/utils/logger";
 import './WidgetErrorBoundary.css';
 
 class WidgetErrorBoundaryComponent extends React.Component {
@@ -40,7 +43,7 @@ class WidgetErrorBoundaryComponent extends React.Component {
     this.setState({ errorInfo });
 
     // Log to console
-    console.error(`Widget "${this.props.widgetName}" error:`, error, errorInfo);
+    logger.error(`Widget "${this.props.widgetName}" error:`, error, errorInfo);
   }
 
   handleRetry = () => {

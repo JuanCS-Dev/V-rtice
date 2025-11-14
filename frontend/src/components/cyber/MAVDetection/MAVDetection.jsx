@@ -30,10 +30,15 @@
  */
 
 import React, { useState, useEffect } from "react";
+import logger from "@/utils/logger";
 import { useTranslation } from "react-i18next";
+import logger from "@/utils/logger";
 import { getOffensiveService } from "@/services/offensive/OffensiveService";
+import logger from "@/utils/logger";
 import { formatDateTime } from "@/utils/dateHelpers";
+import logger from "@/utils/logger";
 import styles from "./MAVDetection.module.css";
+import logger from "@/utils/logger";
 
 export const MAVDetection = () => {
   const { t } = useTranslation();
@@ -62,7 +67,7 @@ export const MAVDetection = () => {
         setMetrics(response.data || response);
       }
     } catch (err) {
-      console.warn("[MAVDetection] Failed to load metrics:", err);
+      logger.warn("[MAVDetection] Failed to load metrics:", err);
     }
   };
 
