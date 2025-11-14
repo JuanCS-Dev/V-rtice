@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"time"
 
 	"github.com/dgraph-io/badger/v4"
@@ -82,7 +83,7 @@ func (c *Cache) Set(key string, value interface{}, ttl time.Duration) error {
 		return fmt.Errorf("failed to set cache entry: %w", err)
 	}
 
-	c.size++
+	atomic.AddInt64(&c.size, 1)
 	return nil
 }
 
@@ -102,17 +103,17 @@ func (c *Cache) Get(key string, dest interface{}) error {
 	})
 
 	if err == badger.ErrKeyNotFound {
-		c.misses++
+		atomic.AddInt64(&c.misses, 1)
 		return ErrCacheMiss
 	}
 	if err != nil {
-		c.misses++
+		atomic.AddInt64(&c.misses, 1)
 		return fmt.Errorf("failed to get cache entry: %w", err)
 	}
 
 	// Check if expired (double-check, BadgerDB should handle this)
 	if time.Now().After(entry.ExpiresAt) {
-		c.misses++
+		atomic.AddInt64(&c.misses, 1)
 		return ErrCacheExpired
 	}
 
@@ -126,7 +127,7 @@ func (c *Cache) Get(key string, dest interface{}) error {
 		return fmt.Errorf("failed to unmarshal into destination: %w", err)
 	}
 
-	c.hits++
+	atomic.AddInt64(&c.hits, 1)
 	return nil
 }
 
@@ -140,7 +141,7 @@ func (c *Cache) Delete(key string) error {
 		return fmt.Errorf("failed to delete cache entry: %w", err)
 	}
 
-	c.size--
+	atomic.AddInt64(&c.size, -1)
 	return nil
 }
 
@@ -184,11 +185,15 @@ func (c *Cache) Clear() error {
 
 // GetMetrics returns cache hit/miss metrics
 func (c *Cache) GetMetrics() (hits, misses, size int64, hitRate float64) {
-	total := c.hits + c.misses
+	hits = atomic.LoadInt64(&c.hits)
+	misses = atomic.LoadInt64(&c.misses)
+	size = atomic.LoadInt64(&c.size)
+
+	total := hits + misses
 	if total > 0 {
-		hitRate = float64(c.hits) / float64(total) * 100
+		hitRate = float64(hits) / float64(total) * 100
 	}
-	return c.hits, c.misses, c.size, hitRate
+	return hits, misses, size, hitRate
 }
 
 // ListKeys returns all keys in the cache
