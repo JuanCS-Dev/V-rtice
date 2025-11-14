@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/verticedev/vcli-go/internal/plugins"
@@ -48,7 +49,7 @@ func (pmw *PluginManagerWrapper) LoadPluginCmd(path string) tea.Cmd {
 		return PluginLoadedMsg{
 			PluginName: path,
 			Success:    false,
-			Error:      plugins.NewPluginError(path, "plugin loaded but not found in list", nil),
+			Error:      fmt.Errorf("plugin '%s' loaded but not found in list", path),
 		}
 	}
 }
