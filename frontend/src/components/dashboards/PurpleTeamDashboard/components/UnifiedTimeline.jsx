@@ -3,25 +3,27 @@
  * Shows attacks and detections on a unified timeline with correlations
  */
 
-import React from 'react';
-import styles from './UnifiedTimeline.module.css';
+import React from "react";
+import { getTimestamp, formatDateTime } from "@/utils/dateHelpers";
+import styles from "./UnifiedTimeline.module.css";
 
 export const UnifiedTimeline = ({ events, correlations, loading }) => {
   // Sort events by timestamp
-  const sortedEvents = [...events].sort((a, b) =>
-    new Date(b.timestamp) - new Date(a.timestamp)
+  const sortedEvents = [...events].sort(
+    (a, b) =>
+      (getTimestamp(b.timestamp) || 0) - (getTimestamp(a.timestamp) || 0),
   );
 
   const getEventType = (event) => {
-    return event.eventType || (event.technique ? 'attack' : 'detection');
+    return event.eventType || (event.technique ? "attack" : "detection");
   };
 
   const getCorrelation = (event) => {
     const type = getEventType(event);
-    if (type === 'attack') {
-      return correlations.find(c => c.attackId === event.id);
+    if (type === "attack") {
+      return correlations.find((c) => c.attackId === event.id);
     } else {
-      return correlations.find(c => c.detectionId === event.id);
+      return correlations.find((c) => c.detectionId === event.id);
     }
   };
 
@@ -60,17 +62,17 @@ export const UnifiedTimeline = ({ events, correlations, loading }) => {
           sortedEvents.map((event, index) => {
             const eventType = getEventType(event);
             const correlation = getCorrelation(event);
-            const isAttack = eventType === 'attack';
+            const isAttack = eventType === "attack";
 
             return (
               <div
                 key={event.id || index}
                 className={`${styles.timelineEvent} ${
                   isAttack ? styles.attackEvent : styles.detectionEvent
-                } ${correlation ? styles.correlated : ''}`}
+                } ${correlation ? styles.correlated : ""}`}
               >
                 <div className={styles.eventTimestamp}>
-                  {new Date(event.timestamp).toLocaleString()}
+                  {formatDateTime(event.timestamp)}
                 </div>
 
                 <div className={styles.eventMarker}>
@@ -82,10 +84,10 @@ export const UnifiedTimeline = ({ events, correlations, loading }) => {
                   <div className={styles.eventHeader}>
                     <div className={styles.eventType}>
                       <span className={styles.eventIcon}>
-                        {isAttack ? '⚔️' : '🛡️'}
+                        {isAttack ? "⚔️" : "🛡️"}
                       </span>
                       <span className={styles.eventLabel}>
-                        {isAttack ? 'RED TEAM' : 'BLUE TEAM'}
+                        {isAttack ? "RED TEAM" : "BLUE TEAM"}
                       </span>
                     </div>
                     <span className={styles.eventBadge}>
@@ -98,30 +100,42 @@ export const UnifiedTimeline = ({ events, correlations, loading }) => {
                       <>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Target:</span>
-                          <span className={styles.fieldValue}>{event.target}</span>
+                          <span className={styles.fieldValue}>
+                            {event.target}
+                          </span>
                         </div>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Technique:</span>
-                          <span className={styles.fieldValue}>{event.technique}</span>
+                          <span className={styles.fieldValue}>
+                            {event.technique}
+                          </span>
                         </div>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Status:</span>
-                          <span className={styles.fieldValue}>{event.status}</span>
+                          <span className={styles.fieldValue}>
+                            {event.status}
+                          </span>
                         </div>
                       </>
                     ) : (
                       <>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Source:</span>
-                          <span className={styles.fieldValue}>{event.source}</span>
+                          <span className={styles.fieldValue}>
+                            {event.source}
+                          </span>
                         </div>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Rule:</span>
-                          <span className={styles.fieldValue}>{event.rule}</span>
+                          <span className={styles.fieldValue}>
+                            {event.rule}
+                          </span>
                         </div>
                         <div className={styles.eventField}>
                           <span className={styles.fieldLabel}>Severity:</span>
-                          <span className={`${styles.severity} ${styles[event.severity]}`}>
+                          <span
+                            className={`${styles.severity} ${styles[event.severity]}`}
+                          >
                             {event.severity}
                           </span>
                         </div>
@@ -132,7 +146,9 @@ export const UnifiedTimeline = ({ events, correlations, loading }) => {
                   {correlation && (
                     <div className={styles.correlationBanner}>
                       🟣 CORRELATED EVENT
-                      {isAttack ? ' - DETECTED BY BLUE TEAM' : ' - LINKED TO RED TEAM ATTACK'}
+                      {isAttack
+                        ? " - DETECTED BY BLUE TEAM"
+                        : " - LINKED TO RED TEAM ATTACK"}
                     </div>
                   )}
                 </div>

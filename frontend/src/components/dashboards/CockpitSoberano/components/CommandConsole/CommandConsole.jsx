@@ -1,41 +1,60 @@
 /**
  * CommandConsole - Sovereign C2L Command Interface
- * 
+ *
  * @version 1.0.0
  */
 
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import { useCommandBus } from '../../hooks/useCommandBus';
-import styles from './CommandConsole.module.css';
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import { formatTime } from "@/utils/dateHelpers";
+import { useCommandBus } from "../../hooks/useCommandBus";
+import styles from "./CommandConsole.module.css";
 
 const COMMAND_TYPES = [
-  { id: 'MUTE', label: 'MUTE', icon: '🔇', description: 'Silenciar agente temporariamente', severity: 'low' },
-  { id: 'ISOLATE', label: 'ISOLATE', icon: '🚧', description: 'Isolar agente da rede', severity: 'medium' },
-  { id: 'TERMINATE', label: 'TERMINATE', icon: '☠️', description: 'Terminar agente permanentemente', severity: 'critical' }
+  {
+    id: "MUTE",
+    label: "MUTE",
+    icon: "🔇",
+    description: "Silenciar agente temporariamente",
+    severity: "low",
+  },
+  {
+    id: "ISOLATE",
+    label: "ISOLATE",
+    icon: "🚧",
+    description: "Isolar agente da rede",
+    severity: "medium",
+  },
+  {
+    id: "TERMINATE",
+    label: "TERMINATE",
+    icon: "☠️",
+    description: "Terminar agente permanentemente",
+    severity: "critical",
+  },
 ];
 
 export const CommandConsole = ({ availableAgents = [] }) => {
   const { t } = useTranslation();
   const { sendCommand, loading, error, lastCommand } = useCommandBus();
-  
+
   const [selectedCommand, setSelectedCommand] = useState(null);
   const [selectedAgents, setSelectedAgents] = useState([]);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [muteDuration, setMuteDuration] = useState(300);
 
   const handleAgentToggle = (agentId) => {
-    setSelectedAgents(prev => 
-      prev.includes(agentId) 
-        ? prev.filter(id => id !== agentId)
-        : [...prev, agentId]
+    setSelectedAgents((prev) =>
+      prev.includes(agentId)
+        ? prev.filter((id) => id !== agentId)
+        : [...prev, agentId],
     );
   };
 
   const handleCommandSelect = (commandType) => {
     setSelectedCommand(commandType);
-    if (commandType === 'TERMINATE') {
+    if (commandType === "TERMINATE") {
       setConfirmDialogOpen(true);
     }
   };
@@ -44,17 +63,16 @@ export const CommandConsole = ({ availableAgents = [] }) => {
     if (!selectedCommand || selectedAgents.length === 0) return;
 
     try {
-      const params = selectedCommand === 'MUTE' 
-        ? { duration_seconds: muteDuration }
-        : {};
+      const params =
+        selectedCommand === "MUTE" ? { duration_seconds: muteDuration } : {};
 
       await sendCommand(selectedCommand, selectedAgents, params);
-      
+
       setSelectedCommand(null);
       setSelectedAgents([]);
       setConfirmDialogOpen(false);
     } catch (err) {
-      console.error('[CommandConsole] Command failed:', err);
+      console.error("[CommandConsole] Command failed:", err);
     }
   };
 
@@ -65,12 +83,12 @@ export const CommandConsole = ({ availableAgents = [] }) => {
       <div className={styles.consoleHeader}>
         <h3>
           <span className={styles.headerIcon}>⚡</span>
-          {t('cockpit.commands.title', 'Console de Comando')}
+          {t("cockpit.commands.title", "Console de Comando")}
         </h3>
         {lastCommand && (
           <div className={styles.lastCommandStatus}>
             <span className={styles.statusDot}></span>
-            Último: {lastCommand.type} ({new Date(lastCommand.timestamp).toLocaleTimeString()})
+            Último: {lastCommand.type} ({formatTime(lastCommand.timestamp)})
           </div>
         )}
       </div>
@@ -84,13 +102,13 @@ export const CommandConsole = ({ availableAgents = [] }) => {
 
       <div className={styles.commandSelector}>
         <label className={styles.sectionLabel}>
-          {t('cockpit.commands.selectCommand', 'Selecionar Comando')}
+          {t("cockpit.commands.selectCommand", "Selecionar Comando")}
         </label>
         <div className={styles.commandGrid}>
-          {COMMAND_TYPES.map(cmd => (
+          {COMMAND_TYPES.map((cmd) => (
             <button
               key={cmd.id}
-              className={`${styles.commandButton} ${styles[`severity-${cmd.severity}`]} ${selectedCommand === cmd.id ? styles.selected : ''}`}
+              className={`${styles.commandButton} ${styles[`severity-${cmd.severity}`]} ${selectedCommand === cmd.id ? styles.selected : ""}`}
               onClick={() => handleCommandSelect(cmd.id)}
               disabled={loading}
             >
@@ -102,11 +120,9 @@ export const CommandConsole = ({ availableAgents = [] }) => {
         </div>
       </div>
 
-      {selectedCommand === 'MUTE' && (
+      {selectedCommand === "MUTE" && (
         <div className={styles.parameterSection}>
-          <label className={styles.sectionLabel}>
-            Duração (segundos)
-          </label>
+          <label className={styles.sectionLabel}>Duração (segundos)</label>
           <input
             type="number"
             value={muteDuration}
@@ -120,18 +136,19 @@ export const CommandConsole = ({ availableAgents = [] }) => {
 
       <div className={styles.agentSelector}>
         <label className={styles.sectionLabel}>
-          {t('cockpit.commands.selectAgents', 'Selecionar Agentes')} ({selectedAgents.length})
+          {t("cockpit.commands.selectAgents", "Selecionar Agentes")} (
+          {selectedAgents.length})
         </label>
         <div className={styles.agentList}>
           {availableAgents.length === 0 ? (
             <div className={styles.emptyState}>
-              {t('cockpit.commands.noAgents', 'Nenhum agente disponível')}
+              {t("cockpit.commands.noAgents", "Nenhum agente disponível")}
             </div>
           ) : (
-            availableAgents.map(agent => (
+            availableAgents.map((agent) => (
               <div
                 key={agent.id}
-                className={`${styles.agentItem} ${selectedAgents.includes(agent.id) ? styles.selected : ''}`}
+                className={`${styles.agentItem} ${selectedAgents.includes(agent.id) ? styles.selected : ""}`}
                 onClick={() => handleAgentToggle(agent.id)}
               >
                 <input
@@ -141,8 +158,12 @@ export const CommandConsole = ({ availableAgents = [] }) => {
                   className={styles.agentCheckbox}
                 />
                 <div className={styles.agentInfo}>
-                  <span className={styles.agentName}>{agent.name || agent.id}</span>
-                  <span className={styles.agentStatus}>{agent.status || 'ACTIVE'}</span>
+                  <span className={styles.agentName}>
+                    {agent.name || agent.id}
+                  </span>
+                  <span className={styles.agentStatus}>
+                    {agent.status || "ACTIVE"}
+                  </span>
                 </div>
               </div>
             ))
@@ -159,27 +180,30 @@ export const CommandConsole = ({ availableAgents = [] }) => {
           {loading ? (
             <>
               <span className={styles.spinner}></span>
-              {t('common.executing', 'Executando')}...
+              {t("common.executing", "Executando")}...
             </>
           ) : (
             <>
               <span>⚡</span>
-              {t('cockpit.commands.execute', 'Executar Comando')}
+              {t("cockpit.commands.execute", "Executar Comando")}
             </>
           )}
         </button>
       </div>
 
-      {confirmDialogOpen && selectedCommand === 'TERMINATE' && (
+      {confirmDialogOpen && selectedCommand === "TERMINATE" && (
         <div className={styles.confirmDialog}>
           <div className={styles.dialogContent}>
             <div className={styles.dialogHeader}>
               <span className={styles.warningIcon}>⚠️</span>
-              <h3>{t('cockpit.commands.confirmTerminate', 'Confirmar Terminação')}</h3>
+              <h3>
+                {t("cockpit.commands.confirmTerminate", "Confirmar Terminação")}
+              </h3>
             </div>
             <p className={styles.dialogText}>
-              Você está prestes a <strong>TERMINAR</strong> {selectedAgents.length} agente(s).
-              Esta ação é <strong>IRREVERSÍVEL</strong>.
+              Você está prestes a <strong>TERMINAR</strong>{" "}
+              {selectedAgents.length} agente(s). Esta ação é{" "}
+              <strong>IRREVERSÍVEL</strong>.
             </p>
             <div className={styles.dialogActions}>
               <button
@@ -189,13 +213,10 @@ export const CommandConsole = ({ availableAgents = [] }) => {
                   setSelectedCommand(null);
                 }}
               >
-                {t('common.cancel', 'Cancelar')}
+                {t("common.cancel", "Cancelar")}
               </button>
-              <button
-                className={styles.confirmButton}
-                onClick={executeCommand}
-              >
-                {t('cockpit.commands.confirmAction', 'Confirmar Terminação')}
+              <button className={styles.confirmButton} onClick={executeCommand}>
+                {t("cockpit.commands.confirmAction", "Confirmar Terminação")}
               </button>
             </div>
           </div>
@@ -206,11 +227,13 @@ export const CommandConsole = ({ availableAgents = [] }) => {
 };
 
 CommandConsole.propTypes = {
-  availableAgents: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string,
-    status: PropTypes.string
-  }))
+  availableAgents: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string,
+      status: PropTypes.string,
+    }),
+  ),
 };
 
 // defaultProps migrated to default parameters (React 18 compatible)

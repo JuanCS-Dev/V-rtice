@@ -8,43 +8,53 @@
  * Governed by: Constituição Vértice v2.5 - Phase 3 Optimizations
  */
 
-import React, { useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import VirtualList from '../../../shared/VirtualList';
-import styles from './VirtualizedExecutionsList.module.css';
+import React, { useMemo, useCallback } from "react";
+import PropTypes from "prop-types";
+import VirtualList from "../../../shared/VirtualList";
+import { formatDateTime } from "@/utils/dateHelpers";
+import styles from "./VirtualizedExecutionsList.module.css";
 
 /**
  * Single execution row component (memoized)
  */
 const ExecutionRow = React.memo(({ execution, style }) => {
-  const statusClass = `status-${execution.status || 'unknown'}`;
-  const typeClass = `type-${execution.type?.replace('_', '-') || 'default'}`;
+  const statusClass = `status-${execution.status || "unknown"}`;
+  const typeClass = `type-${execution.type?.replace("_", "-") || "default"}`;
 
   return (
-    <div className={`${styles.executionRow} ${styles[statusClass]} ${styles[typeClass]}`} style={style}>
+    <div
+      className={`${styles.executionRow} ${styles[statusClass]} ${styles[typeClass]}`}
+      style={style}
+    >
       <div className={styles.executionHeader}>
-        <span className={styles.executionType}>{execution.type?.replace('_', ' ').toUpperCase()}</span>
+        <span className={styles.executionType}>
+          {execution.type?.replace("_", " ").toUpperCase()}
+        </span>
         <span className={`${styles.statusBadge} ${styles[statusClass]}`}>
-          {execution.status?.toUpperCase() || 'UNKNOWN'}
+          {execution.status?.toUpperCase() || "UNKNOWN"}
         </span>
       </div>
       <div className={styles.executionTarget}>
         <span className={styles.targetLabel}>Target:</span>
-        <span className={styles.targetValue}>{execution.target || 'N/A'}</span>
+        <span className={styles.targetValue}>{execution.target || "N/A"}</span>
       </div>
       {execution.results && (
         <div className={styles.executionResults}>
           {execution.results.ports_found && (
-            <span className={styles.result}>Ports: {execution.results.ports_found}</span>
+            <span className={styles.result}>
+              Ports: {execution.results.ports_found}
+            </span>
           )}
           {execution.results.vulnerabilities && (
-            <span className={styles.result}>Vulns: {execution.results.vulnerabilities}</span>
+            <span className={styles.result}>
+              Vulns: {execution.results.vulnerabilities}
+            </span>
           )}
         </div>
       )}
       <div className={styles.executionFooter}>
         <span className={styles.timestamp}>
-          {new Date(execution.timestamp).toLocaleString()}
+          {formatDateTime(execution.timestamp)}
         </span>
         {execution.id && (
           <span className={styles.executionId}>
@@ -56,7 +66,7 @@ const ExecutionRow = React.memo(({ execution, style }) => {
   );
 });
 
-ExecutionRow.displayName = 'ExecutionRow';
+ExecutionRow.displayName = "ExecutionRow";
 
 ExecutionRow.propTypes = {
   execution: PropTypes.shape({
@@ -81,7 +91,7 @@ export const VirtualizedExecutionsList = ({
 }) => {
   // SAFE GUARD: Ensure executions is always an array
   const safeExecutions = Array.isArray(executions) ? executions : [];
-  
+
   // Filter executions
   const filteredExecutions = useMemo(() => {
     let filtered = safeExecutions;
@@ -107,19 +117,28 @@ export const VirtualizedExecutionsList = ({
       };
 
       return (
-        <div onClick={handleClick} style={{ cursor: onExecutionClick ? 'pointer' : 'default' }}>
+        <div
+          onClick={handleClick}
+          style={{ cursor: onExecutionClick ? "pointer" : "default" }}
+        >
           <ExecutionRow execution={execution} style={style} />
         </div>
       );
     },
-    [onExecutionClick]
+    [onExecutionClick],
   );
 
   // Statistics
   const stats = useMemo(() => {
-    const running = filteredExecutions.filter((e) => e.status === 'running').length;
-    const completed = filteredExecutions.filter((e) => e.status === 'completed').length;
-    const failed = filteredExecutions.filter((e) => e.status === 'failed').length;
+    const running = filteredExecutions.filter(
+      (e) => e.status === "running",
+    ).length;
+    const completed = filteredExecutions.filter(
+      (e) => e.status === "completed",
+    ).length;
+    const failed = filteredExecutions.filter(
+      (e) => e.status === "failed",
+    ).length;
 
     return { running, completed, failed, total: filteredExecutions.length };
   }, [filteredExecutions]);
@@ -168,10 +187,10 @@ VirtualizedExecutionsList.propTypes = {
       target: PropTypes.string,
       timestamp: PropTypes.string.isRequired,
       results: PropTypes.object,
-    })
+    }),
   ).isRequired,
   onExecutionClick: PropTypes.func,
-  filterStatus: PropTypes.oneOf(['running', 'completed', 'failed', 'queued']),
+  filterStatus: PropTypes.oneOf(["running", "completed", "failed", "queued"]),
   filterType: PropTypes.string,
 };
 
