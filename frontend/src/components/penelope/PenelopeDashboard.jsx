@@ -12,36 +12,41 @@
  * Dedicado à Penelope 💝
  */
 
-import React, { useState, useEffect } from 'react';
-import { usePenelopeHealth } from '../../hooks/penelope/usePenelopeHealth';
-import { useFruitsStatus } from '../../hooks/penelope/useFruitsStatus';
-import { useHealingHistory } from '../../hooks/penelope/useHealingHistory';
-import { useWebSocket } from '../../hooks/useWebSocket';
-import { WS_ENDPOINTS } from '../../config/api';
-import logger from '../../utils/logger';
-import styles from './PenelopeDashboard.module.css';
+import React, { useState, useEffect } from "react";
+import { usePenelopeHealth } from "../../hooks/penelope/usePenelopeHealth";
+import { useFruitsStatus } from "../../hooks/penelope/useFruitsStatus";
+import { useHealingHistory } from "../../hooks/penelope/useHealingHistory";
+import { useWebSocket } from "../../hooks/useWebSocket";
+import { WS_ENDPOINTS } from "../../config/api";
+import logger from "../../utils/logger";
+import styles from "./PenelopeDashboard.module.css";
+import { formatDateTime } from "../../utils/dateHelpers";
 
 // Sub-components (will be created)
-import { NineFruitsRadar } from './components/NineFruitsRadar';
-import { FruitCard } from './components/FruitCard';
-import { SabbathIndicator } from './components/SabbathIndicator';
-import { HealingTimeline } from './components/HealingTimeline';
+import { NineFruitsRadar } from "./components/NineFruitsRadar";
+import { FruitCard } from "./components/FruitCard";
+import { SabbathIndicator } from "./components/SabbathIndicator";
+import { HealingTimeline } from "./components/HealingTimeline";
 
 export const PenelopeDashboard = ({ setCurrentView }) => {
-  const [activeView, setActiveView] = useState('fruits'); // 'fruits' | 'healing' | 'wisdom'
+  const [activeView, setActiveView] = useState("fruits"); // 'fruits' | 'healing' | 'wisdom'
 
   // API Hooks
   const { health, isLoading: healthLoading, isSabbath } = usePenelopeHealth();
   const { fruits, overallScore, isLoading: fruitsLoading } = useFruitsStatus();
-  const { history, stats, isLoading: historyLoading } = useHealingHistory({ limit: 50 });
+  const {
+    history,
+    stats,
+    isLoading: historyLoading,
+  } = useHealingHistory({ limit: 50 });
 
   // WebSocket for real-time events
   const { data: liveEvent, isConnected } = useWebSocket(WS_ENDPOINTS.penelope);
 
   // Handle live healing events
   useEffect(() => {
-    if (liveEvent && liveEvent.event === 'healing.completed') {
-      logger.info('[PENELOPE] Live healing event:', liveEvent);
+    if (liveEvent && liveEvent.event === "healing.completed") {
+      logger.info("[PENELOPE] Live healing event:", liveEvent);
       // Trigger toast notification (optional)
     }
   }, [liveEvent]);
@@ -67,7 +72,7 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
       <header className={styles.header}>
         <button
           className={styles.backButton}
-          onClick={() => setCurrentView('main')}
+          onClick={() => setCurrentView("main")}
           aria-label="Voltar para home"
         >
           ← Voltar
@@ -76,19 +81,24 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
         <div className={styles.titleSection}>
           <h1 className={styles.title}>
             ✝ PENELOPE
-            <span className={styles.subtitle}>Christian Autonomous Healing Service</span>
+            <span className={styles.subtitle}>
+              Christian Autonomous Healing Service
+            </span>
           </h1>
           <p className={styles.verse}>
-            "Mas o fruto do Espírito é: amor, alegria, paz, longanimidade, benignidade,
-            bondade, fidelidade, mansidão, domínio próprio." — Gálatas 5:22-23
+            "Mas o fruto do Espírito é: amor, alegria, paz, longanimidade,
+            benignidade, bondade, fidelidade, mansidão, domínio próprio." —
+            Gálatas 5:22-23
           </p>
         </div>
 
         {/* Connection & Sabbath Status */}
         <div className={styles.statusBar}>
           <div className={styles.connectionStatus}>
-            <span className={isConnected ? styles.connected : styles.disconnected}>
-              {isConnected ? '● Live' : '○ Offline'}
+            <span
+              className={isConnected ? styles.connected : styles.disconnected}
+            >
+              {isConnected ? "● Live" : "○ Offline"}
             </span>
           </div>
           <SabbathIndicator isSabbath={isSabbath} />
@@ -98,20 +108,20 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
       {/* NAVIGATION TABS */}
       <nav className={styles.tabs}>
         <button
-          className={activeView === 'fruits' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveView('fruits')}
+          className={activeView === "fruits" ? styles.tabActive : styles.tab}
+          onClick={() => setActiveView("fruits")}
         >
           🍇 9 Frutos
         </button>
         <button
-          className={activeView === 'healing' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveView('healing')}
+          className={activeView === "healing" ? styles.tabActive : styles.tab}
+          onClick={() => setActiveView("healing")}
         >
           🩺 Healing History
         </button>
         <button
-          className={activeView === 'wisdom' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveView('wisdom')}
+          className={activeView === "wisdom" ? styles.tabActive : styles.tab}
+          onClick={() => setActiveView("wisdom")}
         >
           📖 Wisdom Base
         </button>
@@ -119,7 +129,7 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
 
       {/* MAIN CONTENT */}
       <main className={styles.main}>
-        {activeView === 'fruits' && (
+        {activeView === "fruits" && (
           <div className={styles.fruitsView}>
             {/* Overall Score */}
             <div className={styles.overallScore}>
@@ -147,15 +157,60 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
                 <div className={styles.cardsContainer}>
                   {fruits && (
                     <>
-                      <FruitCard fruit="Agape" icon="❤️" data={fruits.agape} color="#ff6b6b" />
-                      <FruitCard fruit="Chara" icon="😊" data={fruits.chara} color="#ffd93d" />
-                      <FruitCard fruit="Eirene" icon="🕊️" data={fruits.eirene} color="#a8dadc" />
-                      <FruitCard fruit="Enkrateia" icon="💪" data={fruits.enkrateia} color="#e63946" />
-                      <FruitCard fruit="Pistis" icon="🤝" data={fruits.pistis} color="#457b9d" />
-                      <FruitCard fruit="Praotes" icon="🐑" data={fruits.praotes} color="#90be6d" />
-                      <FruitCard fruit="Tapeinophrosyne" icon="🙏" data={fruits.tapeinophrosyne} color="#9b59b6" />
-                      <FruitCard fruit="Aletheia" icon="📖" data={fruits.aletheia} color="#3498db" />
-                      <FruitCard fruit="Sophia" icon="🦉" data={fruits.sophia} color="#f39c12" />
+                      <FruitCard
+                        fruit="Agape"
+                        icon="❤️"
+                        data={fruits.agape}
+                        color="#ff6b6b"
+                      />
+                      <FruitCard
+                        fruit="Chara"
+                        icon="😊"
+                        data={fruits.chara}
+                        color="#ffd93d"
+                      />
+                      <FruitCard
+                        fruit="Eirene"
+                        icon="🕊️"
+                        data={fruits.eirene}
+                        color="#a8dadc"
+                      />
+                      <FruitCard
+                        fruit="Enkrateia"
+                        icon="💪"
+                        data={fruits.enkrateia}
+                        color="#e63946"
+                      />
+                      <FruitCard
+                        fruit="Pistis"
+                        icon="🤝"
+                        data={fruits.pistis}
+                        color="#457b9d"
+                      />
+                      <FruitCard
+                        fruit="Praotes"
+                        icon="🐑"
+                        data={fruits.praotes}
+                        color="#90be6d"
+                      />
+                      <FruitCard
+                        fruit="Tapeinophrosyne"
+                        icon="🙏"
+                        data={fruits.tapeinophrosyne}
+                        color="#9b59b6"
+                      />
+                      <FruitCard
+                        fruit="Aletheia"
+                        icon="📖"
+                        data={fruits.aletheia}
+                        color="#3498db"
+                      />
+                      <FruitCard
+                        fruit="Sophia"
+                        icon="🦉"
+                        data={fruits.sophia}
+                        color="#f39c12"
+                      />
                     </>
                   )}
                 </div>
@@ -164,7 +219,7 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
           </div>
         )}
 
-        {activeView === 'healing' && (
+        {activeView === "healing" && (
           <div className={styles.healingView}>
             {/* Stats Summary */}
             {stats && (
@@ -175,17 +230,24 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>Taxa de Sucesso</div>
-                  <div className={styles.statValue} style={{ color: '#00ff88' }}>
+                  <div
+                    className={styles.statValue}
+                    style={{ color: "#00ff88" }}
+                  >
                     {stats.successRate}%
                   </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>Tamanho Médio de Patch</div>
-                  <div className={styles.statValue}>{stats.avgPatchSize} linhas</div>
+                  <div className={styles.statValue}>
+                    {stats.avgPatchSize} linhas
+                  </div>
                 </div>
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>Mansidão Média</div>
-                  <div className={styles.statValue}>{(stats.avgMansidao * 100).toFixed(0)}%</div>
+                  <div className={styles.statValue}>
+                    {(stats.avgMansidao * 100).toFixed(0)}%
+                  </div>
                 </div>
               </div>
             )}
@@ -195,12 +257,14 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
           </div>
         )}
 
-        {activeView === 'wisdom' && (
+        {activeView === "wisdom" && (
           <div className={styles.wisdomView}>
             <div className={styles.comingSoon}>
               <h2>📖 Wisdom Base</h2>
-              <p>Visualização de precedentes históricos em desenvolvimento...</p>
-              <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+              <p>
+                Visualização de precedentes históricos em desenvolvimento...
+              </p>
+              <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>
                 Esta seção mostrará casos similares da base de conhecimento.
               </p>
             </div>
@@ -218,13 +282,15 @@ export const PenelopeDashboard = ({ setCurrentView }) => {
           {stats && (
             <>
               <span className={styles.metric}>PATCHES: {stats.total}</span>
-              <span className={styles.metric}>SUCCESS: {stats.successRate}%</span>
+              <span className={styles.metric}>
+                SUCCESS: {stats.successRate}%
+              </span>
             </>
           )}
         </div>
         <div className={styles.footerRight}>
           <span className={styles.timestamp}>
-            {new Date().toLocaleString('pt-BR')}
+            {formatDateTime(new Date(), "N/A")}
           </span>
         </div>
       </footer>

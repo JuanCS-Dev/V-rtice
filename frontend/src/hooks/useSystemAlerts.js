@@ -8,7 +8,8 @@
  * @returns {Array} systemAlerts - Array of system alerts (max 10)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { formatTime } from "../utils/dateHelpers";
 
 const ALERT_INTERVAL = 15000; // 15s
 const ALERT_PROBABILITY = 0.9; // 90% threshold
@@ -19,21 +20,38 @@ export const useSystemAlerts = (t) => {
 
   useEffect(() => {
     const alertTypes = [
-      { type: 'INFO', message: t('dashboard.admin.alerts.backup'), severity: 'info' },
-      { type: 'WARNING', message: t('dashboard.admin.alerts.cpu'), severity: 'medium' },
-      { type: 'ERROR', message: t('dashboard.admin.alerts.apiError'), severity: 'high' },
-      { type: 'SECURITY', message: t('dashboard.admin.alerts.security'), severity: 'critical' }
+      {
+        type: "INFO",
+        message: t("dashboard.admin.alerts.backup"),
+        severity: "info",
+      },
+      {
+        type: "WARNING",
+        message: t("dashboard.admin.alerts.cpu"),
+        severity: "medium",
+      },
+      {
+        type: "ERROR",
+        message: t("dashboard.admin.alerts.apiError"),
+        severity: "high",
+      },
+      {
+        type: "SECURITY",
+        message: t("dashboard.admin.alerts.security"),
+        severity: "critical",
+      },
     ];
 
     const alertTimer = setInterval(() => {
       if (Math.random() > ALERT_PROBABILITY) {
-        const randomAlert = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+        const randomAlert =
+          alertTypes[Math.floor(Math.random() * alertTypes.length)];
         const newAlert = {
           id: Date.now(),
           ...randomAlert,
-          timestamp: new Date().toLocaleTimeString()
+          timestamp: formatTime(new Date(), "--:--"),
         };
-        setSystemAlerts(prev => [newAlert, ...prev.slice(0, MAX_ALERTS - 1)]);
+        setSystemAlerts((prev) => [newAlert, ...prev.slice(0, MAX_ALERTS - 1)]);
       }
     }, ALERT_INTERVAL);
 
