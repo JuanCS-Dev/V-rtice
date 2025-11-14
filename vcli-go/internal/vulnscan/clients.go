@@ -3,6 +3,7 @@ package vulnscan
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/httpclient"
@@ -23,7 +24,7 @@ func NewVulnScanClient(endpoint string) *VulnScanClient {
 	}
 
 	clientConfig := httpclient.DefaultClientConfig(endpoint)
-	clientConfig.Timeout = 120 // Vulnerability scans may take longer
+	clientConfig.Timeout = 120 * time.Second // Vulnerability scans may take longer
 	return &VulnScanClient{
 		httpClient: httpclient.NewClient(clientConfig),
 		endpoint:   endpoint,
