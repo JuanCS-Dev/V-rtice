@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -141,10 +142,10 @@ func handleK8sDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	if kubeconfigPath == "" {
-		// Use default kubeconfig path
-		home, err := os.UserHomeDir()
-		if err == nil {
-			kubeconfigPath = home + "/.kube/config"
+		// Use default kubeconfig path with proper error handling
+		kubeconfigPath, err = vcliFs.GetKubeconfigPath()
+		if err != nil {
+			return fmt.Errorf("failed to get kubeconfig path: %w", err)
 		}
 		// Check KUBECONFIG env var
 		if envPath := os.Getenv("KUBECONFIG"); envPath != "" {

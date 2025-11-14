@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/nlp"
 	"github.com/verticedev/vcli-go/internal/nlp/learning"
 	nlptypes "github.com/verticedev/vcli-go/pkg/nlp"
@@ -38,12 +39,13 @@ func main() {
 	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
 	fmt.Printf("%s\n", colorReset)
 
-	// Create learning database path
-	homeDir, err := os.UserHomeDir()
+	// Create learning database path using fs helper
+	configDir, err := vcliFs.GetVCLIConfigDir()
 	if err != nil {
-		homeDir = "/tmp"
+		fmt.Fprintf(os.Stderr, "Warning: Failed to get config directory: %v\n", err)
+		configDir = "/tmp/.vcli" // Fallback
 	}
-	dbPath := filepath.Join(homeDir, ".vcli", "nlp-learning.db")
+	dbPath := filepath.Join(configDir, "nlp-learning.db")
 
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {

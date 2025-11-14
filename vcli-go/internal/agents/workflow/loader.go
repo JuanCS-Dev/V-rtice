@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/verticedev/vcli-go/internal/agents"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,14 +37,14 @@ func LoadWorkflow(workflowName string) (*agents.Workflow, error) {
 		// Direct file path provided
 		workflowPath = workflowName
 	} else {
-		// Workflow name - check standard locations
-		home, err := os.UserHomeDir()
+		// Workflow name - check standard locations using fs helper
+		workflowDir, err := vcliFs.GetVCLIWorkflowsDir()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get user home directory: %w", err)
+			return nil, fmt.Errorf("failed to get workflows directory: %w", err)
 		}
 
 		// Try ~/.vcli/workflows/<name>.yaml
-		workflowPath = filepath.Join(home, ".vcli", "workflows", workflowName+".yaml")
+		workflowPath = filepath.Join(workflowDir, workflowName+".yaml")
 
 		// Check if file exists
 		if _, err := os.Stat(workflowPath); os.IsNotExist(err) {
@@ -160,10 +161,9 @@ func parseAgentType(agentStr string) (agents.AgentType, error) {
 func ListWorkflows() ([]WorkflowInfo, error) {
 	workflows := make([]WorkflowInfo, 0)
 
-	// Check ~/.vcli/workflows/
-	home, err := os.UserHomeDir()
+	// Check ~/.vcli/workflows/ using fs helper
+	workflowDir, err := vcliFs.GetVCLIWorkflowsDir()
 	if err == nil {
-		workflowDir := filepath.Join(home, ".vcli", "workflows")
 		if entries, err := os.ReadDir(workflowDir); err == nil {
 			for _, entry := range entries {
 				if !entry.IsDir() && (filepath.Ext(entry.Name()) == ".yaml" || filepath.Ext(entry.Name()) == ".yml") {

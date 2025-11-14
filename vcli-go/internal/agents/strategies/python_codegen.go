@@ -10,6 +10,7 @@ import (
 	"github.com/verticedev/vcli-go/internal/agents"
 	"github.com/verticedev/vcli-go/internal/agents/language"
 	"github.com/verticedev/vcli-go/internal/agents/oraculo"
+	"github.com/verticedev/vcli-go/internal/tools"
 )
 
 // PythonCodeGenStrategy implements code generation for Python
@@ -159,24 +160,43 @@ func (s *PythonCodeGenStrategy) getOutputFilePath(task string, contextData map[s
 }
 
 // FormatCode formats Python code using black or autopep8
+// Uses tool availability checking for graceful degradation
 func (s *PythonCodeGenStrategy) FormatCode(code string) (string, error) {
+	// Check tool availability before attempting to use them
+	blackAvailable := tools.DefaultRegistry.IsAvailable("black")
+	autopep8Available := tools.DefaultRegistry.IsAvailable("autopep8")
+
 	// Try black first (preferred)
-	cmd := exec.Command("black", "--quiet", "--code", code)
-	output, err := cmd.CombinedOutput()
-	if err == nil && len(output) > 0 {
-		return string(output), nil
+	if blackAvailable {
+		cmd := exec.Command("black", "--quiet", "--code", code)
+		output, err := cmd.CombinedOutput()
+		if err == nil && len(output) > 0 {
+			return string(output), nil
+		}
+		// If black is available but failed, log and try autopep8
+		fmt.Fprintf(os.Stderr, "⚠️  black formatting failed: %v\n", err)
 	}
 
 	// Fallback to autopep8
-	cmd = exec.Command("autopep8", "--aggressive", "--aggressive", "-")
-	cmd.Stdin = strings.NewReader(code)
-	output, err = cmd.CombinedOutput()
-	if err == nil {
-		return string(output), nil
+	if autopep8Available {
+		cmd := exec.Command("autopep8", "--aggressive", "--aggressive", "-")
+		cmd.Stdin = strings.NewReader(code)
+		output, err := cmd.CombinedOutput()
+		if err == nil {
+			return string(output), nil
+		}
+		// If autopep8 is available but failed, log it
+		fmt.Fprintf(os.Stderr, "⚠️  autopep8 formatting failed: %v\n", err)
 	}
 
-	// If both fail, return original code
-	return code, fmt.Errorf("formatting failed, using original code")
+	// Graceful degradation: return original code with informative message
+	if !blackAvailable && !autopep8Available {
+		fmt.Fprintf(os.Stderr, "ℹ️  No Python formatters available (black/autopep8), using unformatted code\n")
+		fmt.Fprintf(os.Stderr, "   Install formatters:\n")
+		fmt.Fprintf(os.Stderr, "     pip3 install black autopep8\n")
+	}
+
+	return code, fmt.Errorf("formatting unavailable or failed, using original code")
 }
 
 // ValidateSyntax validates Python syntax

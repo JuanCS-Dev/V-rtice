@@ -3,8 +3,8 @@ package bubbletea
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/k8s"
 )
 
@@ -47,13 +47,12 @@ func getKubeconfigPath() string {
 		return kubeconfig
 	}
 
-	// Default to ~/.kube/config
-	home, err := os.UserHomeDir()
+	// Default to ~/.kube/config using fs helper
+	kubeconfigPath, err := vcliFs.GetKubeconfigPath()
 	if err != nil {
+		// Non-fatal: return empty string
 		return ""
 	}
-
-	kubeconfigPath := filepath.Join(home, ".kube", "config")
 
 	// Check if file exists
 	if _, err := os.Stat(kubeconfigPath); err != nil {

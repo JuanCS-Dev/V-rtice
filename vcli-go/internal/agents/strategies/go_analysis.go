@@ -3,11 +3,13 @@ package strategies
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/verticedev/vcli-go/internal/agents"
 	"github.com/verticedev/vcli-go/internal/agents/language"
+	"github.com/verticedev/vcli-go/internal/tools"
 )
 
 // GoAnalysisStrategy implements analysis for Go code
@@ -79,8 +81,17 @@ func (s *GoAnalysisStrategy) runGoVet(ctx context.Context, targets []string, res
 	return nil
 }
 
-// runLinter runs golangci-lint
+// runLinter runs golangci-lint with graceful degradation
+// Uses tool availability checking to avoid hard dependency
 func (s *GoAnalysisStrategy) runLinter(ctx context.Context, targets []string, result *agents.DiagnosticResult) error {
+	// Check tool availability before attempting to use it
+	if !tools.DefaultRegistry.IsAvailable("golangci-lint") {
+		fmt.Fprintf(os.Stderr, "ℹ️  golangci-lint not available, skipping lint checks\n")
+		fmt.Fprintf(os.Stderr, "   Install golangci-lint:\n")
+		fmt.Fprintf(os.Stderr, "     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin\n")
+		return nil // Graceful degradation - not a fatal error
+	}
+
 	cmd := exec.CommandContext(ctx, "golangci-lint", "run", "--timeout", "5m", "./...")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -95,8 +106,17 @@ func (s *GoAnalysisStrategy) runLinter(ctx context.Context, targets []string, re
 	return nil
 }
 
-// runSecurityScan runs gosec security scanner
+// runSecurityScan runs gosec security scanner with graceful degradation
+// Uses tool availability checking to avoid hard dependency
 func (s *GoAnalysisStrategy) runSecurityScan(ctx context.Context, targets []string, result *agents.DiagnosticResult) error {
+	// Check tool availability before attempting to use it
+	if !tools.DefaultRegistry.IsAvailable("gosec") {
+		fmt.Fprintf(os.Stderr, "ℹ️  gosec not available, skipping security scan\n")
+		fmt.Fprintf(os.Stderr, "   Install gosec:\n")
+		fmt.Fprintf(os.Stderr, "     go install github.com/securego/gosec/v2/cmd/gosec@latest\n")
+		return nil // Graceful degradation - not a fatal error
+	}
+
 	cmd := exec.CommandContext(ctx, "gosec", "-fmt=json", "./...")
 	output, err := cmd.CombinedOutput()
 

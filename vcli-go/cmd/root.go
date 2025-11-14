@@ -1,14 +1,13 @@
-package main
+package cmd
 
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
-	"github.com/verticedev/vcli-go/internal/config"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/shell"
 	"github.com/verticedev/vcli-go/internal/visual/banner"
 	"github.com/verticedev/vcli-go/internal/workspace"
@@ -29,9 +28,6 @@ var (
 	offline     bool
 	noTelemetry bool
 	backend     string // Backend type: http or grpc
-
-	// Global config manager
-	globalConfig *config.Manager
 )
 
 // showBanner displays the epic V12 turbo banner with gradient colors
@@ -163,36 +159,22 @@ func initConfig() {
 	// Determine config path
 	configPath := configFile
 	if configPath == "" {
-		home, err := os.UserHomeDir()
-		if err == nil {
-			configPath = filepath.Join(home, ".vcli", "config.yaml")
+		// Use fs helper for proper error handling
+		var err error
+		configPath, err = vcliFs.GetVCLIConfigFile()
+		if err != nil {
+			// Non-fatal: continue with empty config path
+			configPath = ""
 		}
 	}
 
-	// Initialize config manager
-	var err error
-	globalConfig, err = config.NewManager(configPath)
-	if err != nil {
-		// Config file not found is OK - will use defaults
-		if !os.IsNotExist(err) {
-			if debug || os.Getenv("VCLI_DEBUG") == "true" {
-				fmt.Fprintf(os.Stderr, "[DEBUG] Config load warning: %v (using defaults)\n", err)
-			}
-		}
-	} else if debug || os.Getenv("VCLI_DEBUG") == "true" {
-		fmt.Fprintf(os.Stderr, "[DEBUG] Config loaded from: %s\n", configPath)
+	// Initialize config system
+	// Config is loaded automatically on first use via config.Get()
+	if debug || os.Getenv("VCLI_DEBUG") == "true" {
+		fmt.Fprintf(os.Stderr, "[DEBUG] Config system initialized\n")
 	}
 
-	// Apply flag overrides to global config
-	if debug {
-		// Sync debug flag to config
-		cfg := globalConfig.Get()
-		cfg.Global.Debug = true
-	}
-	if offline {
-		cfg := globalConfig.Get()
-		cfg.Global.Offline = true
-	}
+	// Flag overrides are handled directly by commands
 }
 
 func init() {
@@ -212,6 +194,20 @@ func init() {
 	rootCmd.AddCommand(workspaceCmd)
 	rootCmd.AddCommand(offlineCmd)
 
+	// New commands - Production launch ready
+	rootCmd.AddCommand(offensiveCmd)
+	rootCmd.AddCommand(streamsCmd)
+	rootCmd.AddCommand(specializedCmd)
+	rootCmd.AddCommand(configCmd)
+	rootCmd.AddCommand(architectCmd)
+	rootCmd.AddCommand(behaviorCmd)
+	rootCmd.AddCommand(edgeCmd)
+	rootCmd.AddCommand(homeostasisCmd)
+	rootCmd.AddCommand(huntingCmd)
+	rootCmd.AddCommand(immunityCmd)
+	rootCmd.AddCommand(integrationCmd)
+	rootCmd.AddCommand(neuroCmd)
+
 	// Workspace subcommands
 	workspaceCmd.AddCommand(workspaceListCmd)
 	workspaceCmd.AddCommand(workspaceLaunchCmd)
@@ -220,6 +216,33 @@ func init() {
 	offlineCmd.AddCommand(offlineStatusCmd)
 	offlineCmd.AddCommand(offlineSyncCmd)
 	offlineCmd.AddCommand(offlineClearCmd)
+
+	// Offensive subcommands
+	offensiveCmd.AddCommand(offensiveToolsCmd)
+	offensiveToolsCmd.AddCommand(offensiveToolsListCmd)
+	offensiveCmd.AddCommand(offensiveC2Cmd)
+	offensiveC2Cmd.AddCommand(offensiveC2LaunchCmd)
+	offensiveCmd.AddCommand(offensiveSocialEngCmd)
+	offensiveSocialEngCmd.AddCommand(offensiveSocialEngCampaignCmd)
+	offensiveCmd.AddCommand(offensiveMalwareCmd)
+	offensiveMalwareCmd.AddCommand(offensiveMalwareAnalyzeCmd)
+	offensiveCmd.AddCommand(offensiveWargameCmd)
+	offensiveWargameCmd.AddCommand(offensiveWargameStartCmd)
+	offensiveCmd.AddCommand(offensiveGatewayCmd)
+	offensiveGatewayCmd.AddCommand(offensiveGatewayStatusCmd)
+	offensiveCmd.AddCommand(offensiveOrchestratorCmd)
+	offensiveOrchestratorCmd.AddCommand(offensiveOrchestratorWorkflowCmd)
+
+	// Streams subcommands
+	streamsCmd.AddCommand(streamsTopicCmd)
+	streamsTopicCmd.AddCommand(streamsTopicListCmd)
+	streamsTopicCmd.AddCommand(streamsTopicCreateCmd)
+	streamsTopicCmd.AddCommand(streamsTopicDescribeCmd)
+	streamsCmd.AddCommand(streamsProduceCmd)
+	streamsCmd.AddCommand(streamsConsumeCmd)
+	streamsCmd.AddCommand(streamsConsumerCmd)
+	streamsConsumerCmd.AddCommand(streamsConsumerListCmd)
+	streamsConsumerCmd.AddCommand(streamsConsumerLagCmd)
 }
 
 // launchTUI initializes and launches the TUI with workspaces
@@ -251,15 +274,7 @@ func GetRootCommand() *cobra.Command {
 	return rootCmd
 }
 
-// GetConfig returns the global config manager
-// This is used by other command files to access configuration
-func GetConfig() *config.Manager {
-	return globalConfig
-}
-
-func main() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+// Execute is the main entry point for the CLI, called from main.go
+func Execute() error {
+	return rootCmd.Execute()
 }

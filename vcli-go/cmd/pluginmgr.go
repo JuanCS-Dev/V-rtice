@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/plugins"
 )
 
@@ -77,12 +78,11 @@ func runPluginExec(cmd *cobra.Command, args []string) error {
 }
 
 func getPluginManager() (*plugins.Manager, error) {
-	home, err := os.UserHomeDir()
+	// Use fs helper for proper error handling
+	pluginsPath, err := vcliFs.GetVCLIPluginsDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get home directory: %w", err)
+		return nil, fmt.Errorf("failed to get plugins directory: %w", err)
 	}
-
-	pluginsPath := fmt.Sprintf("%s/.vcli/plugins", home)
 	mgr := plugins.NewManager(pluginsPath, []string{})
 
 	if err := mgr.LoadAll(); err != nil {

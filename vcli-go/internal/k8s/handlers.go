@@ -3,9 +3,9 @@ package k8s
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/visual/components"
 )
 
@@ -33,12 +33,13 @@ func getDefaultKubeconfigPath() string {
 	if kubeconfig := os.Getenv("KUBECONFIG"); kubeconfig != "" {
 		return kubeconfig
 	}
-	// Default to ~/.kube/config
-	home, err := os.UserHomeDir()
+	// Default to ~/.kube/config using fs helper
+	kubeconfigPath, err := vcliFs.GetKubeconfigPath()
 	if err != nil {
+		// Non-fatal: return empty string
 		return ""
 	}
-	return filepath.Join(home, ".kube", "config")
+	return kubeconfigPath
 }
 
 // parseCommonFlags extracts common flags from a command

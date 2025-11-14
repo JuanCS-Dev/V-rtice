@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 	"github.com/verticedev/vcli-go/internal/k8s"
 )
 
@@ -495,12 +496,12 @@ func getKubeconfigPath(cmd *cobra.Command) (string, error) {
 	}
 
 	if kubeconfigPath == "" {
-		// Use default kubeconfig path
-		home, err := os.UserHomeDir()
-		if err == nil {
-			kubeconfigPath = home + "/.kube/config"
+		// Use default kubeconfig path with proper error handling
+		kubeconfigPath, err = vcliFs.GetKubeconfigPath()
+		if err != nil {
+			return "", fmt.Errorf("failed to get kubeconfig path: %w", err)
 		}
-		// Check KUBECONFIG env var
+		// Check KUBECONFIG env var (takes precedence)
 		if envPath := os.Getenv("KUBECONFIG"); envPath != "" {
 			kubeconfigPath = envPath
 		}

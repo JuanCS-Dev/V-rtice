@@ -1,15 +1,15 @@
-package main
+package cmd
 
 import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/cache"
+	vcliFs "github.com/verticedev/vcli-go/internal/fs"
 )
 
 // Sync command flags
@@ -353,13 +353,13 @@ func runSyncGC(cmd *cobra.Command, args []string) error {
 // ============================================================
 
 func openCache() (*cache.Cache, error) {
-	// Default cache path
+	// Default cache path using fs helper
 	if syncCachePath == "" {
-		home, err := os.UserHomeDir()
+		var err error
+		syncCachePath, err = vcliFs.GetVCLIConfigDir()
 		if err != nil {
-			return nil, fmt.Errorf("failed to get home directory: %w", err)
+			return nil, fmt.Errorf("failed to get vcli config directory: %w", err)
 		}
-		syncCachePath = filepath.Join(home, ".vcli")
 	}
 
 	c, err := cache.NewCache(syncCachePath)
