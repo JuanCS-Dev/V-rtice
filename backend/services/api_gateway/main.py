@@ -622,6 +622,62 @@ async def threat_intel_check_adapter(request: Request):
             )
 
 
+@app.post("/api/ip/analyze")
+async def ip_analyze_adapter(request: Request):
+    """
+    Adapter: IP Analysis Gateway → IP Intelligence Service.
+
+    Translates frontend format to microservice format:
+    - Frontend sends: { ip: "8.8.8.8" }
+    - Microservice expects: { ip_address: "8.8.8.8" }
+
+    Constitutional: Respects Lei Zero (human oversight required for blocking actions)
+    """
+    body = await request.json()
+
+    # Schema translation
+    adapted_body = {
+        "ip_address": body.get("ip", "")
+    }
+
+    # Validate IP address
+    if not adapted_body["ip_address"]:
+        raise HTTPException(status_code=400, detail="IP address required")
+
+    try:
+        service_url = await get_service_url("ip_intelligence_service")
+    except ServiceNotFoundError as exc:
+        logger.error(f"IP Intelligence service unavailable: {exc}")
+        raise HTTPException(
+            status_code=503,
+            detail="IP Intelligence service temporarily unavailable"
+        ) from exc
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(
+                f"{service_url}/query_ip",
+                json=adapted_body
+            )
+            response.raise_for_status()
+            return JSONResponse(
+                content=response.json(),
+                status_code=response.status_code
+            )
+        except httpx.RequestError as e:
+            logger.error(f"IP Intelligence request failed: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail=f"IP Intelligence service error: {str(e)}"
+            )
+        except httpx.HTTPStatusError as e:
+            logger.error(f"IP Intelligence HTTP error: {e.response.status_code}")
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=e.response.text
+            )
+
+
 # ============================================================================
 # FRONTEND-COMPATIBLE ROUTES (/api/* prefix)
 # Added to fix air gaps detected in E2E validation
