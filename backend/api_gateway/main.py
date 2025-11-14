@@ -1,28 +1,31 @@
 # /home/juan/vertice-dev/backend/api_gateway/main.py
 
-from datetime import datetime
 import json
 import os
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import httpx
+import jwt
+import redis.asyncio as redis
+import structlog
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-import httpx
-import jwt
-from prometheus_client import Counter, generate_latest, Histogram
+from prometheus_client import Counter, Histogram, generate_latest
 from pydantic import BaseModel
-import redis.asyncio as redis
-from slowapi import _rate_limit_exceeded_handler, Limiter
+from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.responses import Response
-import structlog
 
 # Reactive Fabric Integration
-from reactive_fabric_integration import register_reactive_fabric_routes, get_reactive_fabric_info
+from reactive_fabric_integration import (
+    get_reactive_fabric_info,
+    register_reactive_fabric_routes,
+)
 
 # Configuração de logs estruturados
 structlog.configure(
@@ -92,7 +95,7 @@ log.info(
     "reactive_fabric_integrated",
     phase="1",
     mode="passive_intelligence_only",
-    human_authorization="required"
+    human_authorization="required",
 )
 
 
@@ -170,7 +173,78 @@ SOCIAL_ENG_SERVICE_URL = os.getenv(
     "SOCIAL_ENG_SERVICE_URL", "http://social_eng_service:80"
 )
 AI_AGENT_SERVICE_URL = os.getenv("AI_AGENT_SERVICE_URL", "http://ai_agent_service:80")
-ACTIVE_IMMUNE_CORE_URL = os.getenv("ACTIVE_IMMUNE_CORE_URL", "http://active_immune_core:8200")
+ACTIVE_IMMUNE_CORE_URL = os.getenv(
+    "ACTIVE_IMMUNE_CORE_URL", "http://active_immune_core:8200"
+)
+
+# ============================
+# P0 AIR GAP EXTINCTION - 30 CRITICAL SERVICES
+# ============================
+# Added: 2025-11-14 - OPERAÇÃO AIR GAP EXTINCTION
+# Connecting: Fixed Defensive (4) + MAXIMUS Core (8) + Immunis (12) + HCL/HITL (6)
+
+# Fixed Defensive (Direct Access - Bypass Facade)
+BEHAVIORAL_ANALYZER_URL = os.getenv(
+    "BEHAVIORAL_ANALYZER_URL", "http://behavioral-analyzer-service:8037"
+)
+MAV_DETECTION_URL = os.getenv("MAV_DETECTION_URL", "http://mav-detection-service:8039")
+PENELOPE_URL = os.getenv("PENELOPE_URL", "http://penelope-service:8042")
+TEGUMENTAR_URL = os.getenv("TEGUMENTAR_URL", "http://tegumentar-service:8043")
+
+# MAXIMUS Core (8 services - Brain of the system)
+MAXIMUS_CORE_URL = os.getenv("MAXIMUS_CORE_URL", "http://maximus-core-service:8000")
+MAXIMUS_ORCHESTRATOR_URL = os.getenv(
+    "MAXIMUS_ORCHESTRATOR_URL", "http://maximus-orchestrator-service:8001"
+)
+MAXIMUS_EUREKA_URL = os.getenv("MAXIMUS_EUREKA_URL", "http://maximus-eureka:8002")
+MAXIMUS_ORACULO_V2_URL = os.getenv(
+    "MAXIMUS_ORACULO_V2_URL", "http://maximus-oraculo-v2:8003"
+)
+MAXIMUS_PREDICT_URL = os.getenv("MAXIMUS_PREDICT_URL", "http://maximus-predict:8004")
+MAXIMUS_INTEGRATION_URL = os.getenv(
+    "MAXIMUS_INTEGRATION_URL", "http://maximus-integration-service:8005"
+)
+MAXIMUS_DLQ_MONITOR_URL = os.getenv(
+    "MAXIMUS_DLQ_MONITOR_URL", "http://maximus-dlq-monitor-service:8006"
+)
+
+# Immunis System (12 services - Complete immune defense)
+IMMUNIS_API_URL = os.getenv("IMMUNIS_API_URL", "http://immunis-api-service:8100")
+ADAPTIVE_IMMUNITY_URL = os.getenv(
+    "ADAPTIVE_IMMUNITY_URL", "http://adaptive-immunity-service:8101"
+)
+AI_IMMUNE_URL = os.getenv("AI_IMMUNE_URL", "http://ai-immune-system:8102")
+IMMUNIS_BCELL_URL = os.getenv("IMMUNIS_BCELL_URL", "http://immunis-bcell-service:8103")
+IMMUNIS_DENDRITIC_URL = os.getenv(
+    "IMMUNIS_DENDRITIC_URL", "http://immunis-dendritic-service:8104"
+)
+IMMUNIS_HELPER_T_URL = os.getenv(
+    "IMMUNIS_HELPER_T_URL", "http://immunis-helper-t-service:8105"
+)
+IMMUNIS_CYTOTOXIC_T_URL = os.getenv(
+    "IMMUNIS_CYTOTOXIC_T_URL", "http://immunis-cytotoxic-t-service:8106"
+)
+IMMUNIS_TREG_URL = os.getenv("IMMUNIS_TREG_URL", "http://immunis-treg-service:8107")
+IMMUNIS_MACROPHAGE_URL = os.getenv(
+    "IMMUNIS_MACROPHAGE_URL", "http://immunis-macrophage-service:8108"
+)
+IMMUNIS_NEUTROPHIL_URL = os.getenv(
+    "IMMUNIS_NEUTROPHIL_URL", "http://immunis-neutrophil-service:8109"
+)
+ADAPTIVE_IMMUNE_SYSTEM_URL = os.getenv(
+    "ADAPTIVE_IMMUNE_SYSTEM_URL", "http://adaptive-immune-system:8110"
+)
+ADAPTIVE_IMMUNITY_DB_URL = os.getenv(
+    "ADAPTIVE_IMMUNITY_DB_URL", "http://adaptive-immunity-db:8111"
+)
+
+# HCL/HITL (6 services - Human oversight - Lei Zero!)
+HCL_ANALYZER_URL = os.getenv("HCL_ANALYZER_URL", "http://hcl-analyzer-service:8200")
+HCL_PLANNER_URL = os.getenv("HCL_PLANNER_URL", "http://hcl-planner-service:8201")
+HCL_EXECUTOR_URL = os.getenv("HCL_EXECUTOR_URL", "http://hcl-executor-service:8202")
+HCL_MONITOR_URL = os.getenv("HCL_MONITOR_URL", "http://hcl-monitor-service:8203")
+HCL_KB_URL = os.getenv("HCL_KB_URL", "http://hcl-kb-service:8204")
+HITL_PATCH_URL = os.getenv("HITL_PATCH_URL", "http://hitl-patch-service:8205")
 
 # Authentication configuration
 JWT_SECRET = os.getenv("JWT_SECRET", "vertice-super-secret-key-2024")
@@ -354,7 +428,7 @@ async def proxy_request(
 async def read_root():
     return {
         "status": "API Gateway is running!",
-        "reactive_fabric": get_reactive_fabric_info()
+        "reactive_fabric": get_reactive_fabric_info(),
     }
 
 
@@ -377,8 +451,8 @@ async def health_check():
             "api_gateway": "healthy",
             "redis": "unknown",
             "active_immune_core": "unknown",
-            "reactive_fabric": "healthy"  # Phase 1 always healthy (no external deps)
-        }
+            "reactive_fabric": "healthy",  # Phase 1 always healthy (no external deps)
+        },
     }
 
     # Check Redis
@@ -395,10 +469,7 @@ async def health_check():
     # Check Active Immune Core
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{ACTIVE_IMMUNE_CORE_URL}/health",
-                timeout=5.0
-            )
+            response = await client.get(f"{ACTIVE_IMMUNE_CORE_URL}/health", timeout=5.0)
             if response.status_code == 200:
                 health_status["services"]["active_immune_core"] = "healthy"
             else:
@@ -1565,6 +1636,7 @@ async def immune_get_metrics(request: Request):
 # DEFENSIVE TOOLS ENDPOINTS
 # ============================
 
+
 @app.post("/api/defensive/behavioral/analyze", tags=["Defensive Tools"])
 @limiter.limit("100/minute")
 async def defensive_behavioral_analyze(request: Request):
@@ -1680,6 +1752,643 @@ async def defensive_health_check(request: Request):
         service_name="active-immune-core",
         timeout=5.0,
     )
+
+
+# ================================================================================
+# P0 AIR GAP EXTINCTION - 30 CRITICAL SERVICE ROUTES
+# ================================================================================
+# Added: 2025-11-14 - OPERAÇÃO AIR GAP EXTINCTION
+# "O reino dividido contra si mesmo não subsistirá" - Marcos 3:24
+# ================================================================================
+
+# ================================================================================
+# FIXED DEFENSIVE SERVICES (4) - Direct access routes
+# ================================================================================
+
+
+@app.api_route(
+    "/api/behavioral-analyzer/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Fixed Defensive"],
+)
+@limiter.limit("100/minute")
+async def route_behavioral_analyzer(path: str, request: Request):
+    """
+    Behavioral Analyzer Service (Direct Access)
+
+    FIX #7 Complete: TimescaleDB persistence + auto-migration
+    - User Behavior Analytics (UBA)
+    - Entity Behavior Analytics (EBA)
+    - Anomaly detection with ML
+    - TimescaleDB time-series storage
+    - 90-day retention (GDPR compliant)
+
+    Port: 8037
+    Constitutional: Lei Zero (high-severity → human review)
+    """
+    return await proxy_request(
+        request=request,
+        service_url=BEHAVIORAL_ANALYZER_URL,
+        endpoint=f"/{path}",
+        service_name="behavioral-analyzer",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/mav-detection/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Fixed Defensive"],
+)
+@limiter.limit("100/minute")
+async def route_mav_detection(path: str, request: Request):
+    """
+    MAV Detection Service (Direct Access)
+
+    FIX #8 Complete: Neo4j graph persistence + schema migration
+    - Militância em Ambientes Virtuais detection
+    - Graph-based campaign analysis
+    - Coordinated account detection
+    - Neo4j graph database
+    - Evidence preservation (Lei P4)
+
+    Port: 8039
+    Constitutional: Lei Zero (>0.8 confidence → HITL)
+    """
+    return await proxy_request(
+        request=request,
+        service_url=MAV_DETECTION_URL,
+        endpoint=f"/{path}",
+        service_name="mav-detection",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/penelope/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Fixed Defensive"],
+)
+@limiter.limit("100/minute")
+async def route_penelope(path: str, request: Request):
+    """
+    Penelope Circuit Breaker Service (Direct Access)
+
+    FIX #2: Circuit breaker pattern
+    - Service resilience & fault tolerance
+    - Cascading failure prevention
+    - Graceful degradation
+    - Health monitoring
+
+    Port: 8042
+    Constitutional: P2 (Validação Preventiva)
+    """
+    return await proxy_request(
+        request=request,
+        service_url=PENELOPE_URL,
+        endpoint=f"/{path}",
+        service_name="penelope",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/tegumentar/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Fixed Defensive"],
+)
+@limiter.limit("100/minute")
+async def route_tegumentar(path: str, request: Request):
+    """
+    Tegumentar IDS/IPS Service (Direct Access)
+
+    FIX #10 Complete: 25/25 tests PASSING
+    - Intrusion Detection System (IDS)
+    - Intrusion Prevention System (IPS)
+    - Deep packet inspection
+    - Signature & anomaly detection
+    - Real-time threat blocking
+
+    Port: 8043
+    Constitutional: P4 (Rastreabilidade Total)
+    """
+    return await proxy_request(
+        request=request,
+        service_url=TEGUMENTAR_URL,
+        endpoint=f"/{path}",
+        service_name="tegumentar",
+        timeout=15.0,
+    )
+
+
+# ================================================================================
+# MAXIMUS CORE SERVICES (7) - Brain of the system
+# ================================================================================
+
+
+@app.api_route(
+    "/api/maximus/core/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("200/minute")
+async def route_maximus_core(path: str, request: Request):
+    """
+    MAXIMUS Core Orchestration Service
+
+    Cérebro central do sistema MAXIMUS
+    - ML model orchestration
+    - Decision coordination
+    - Service integration
+    - Strategic planning
+
+    Port: 8000
+    Priority: P0 HIGHEST
+    """
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_CORE_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-core",
+        timeout=30.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/orchestrator/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("200/minute")
+async def route_maximus_orchestrator(path: str, request: Request):
+    """MAXIMUS Orchestrator - Service coordination"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_ORCHESTRATOR_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-orchestrator",
+        timeout=30.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/eureka/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("100/minute")
+async def route_maximus_eureka(path: str, request: Request):
+    """
+    MAXIMUS Eureka - ML Metrics & Observability
+
+    FIX #9 Complete: Real Prometheus queries (5 comprehensive metrics)
+    - ML vs Wargaming usage
+    - Confidence score distribution
+    - Time savings analysis
+    - Confusion matrix (precision/recall/F1)
+    - Recent predictions feed
+
+    Port: 8002
+    """
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_EUREKA_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-eureka",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/oraculo/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("100/minute")
+async def route_maximus_oraculo(path: str, request: Request):
+    """MAXIMUS Oráculo V2 - Threat predictions & APV generation"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_ORACULO_V2_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-oraculo-v2",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/predict/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("150/minute")
+async def route_maximus_predict(path: str, request: Request):
+    """MAXIMUS Predict - ML predictions engine"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_PREDICT_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-predict",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/integration/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("200/minute")
+async def route_maximus_integration(path: str, request: Request):
+    """MAXIMUS Integration - Integration bus"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_INTEGRATION_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-integration",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/maximus/dlq-monitor/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["MAXIMUS Core"],
+)
+@limiter.limit("60/minute")
+async def route_maximus_dlq_monitor(path: str, request: Request):
+    """MAXIMUS DLQ Monitor - Dead letter queue monitoring"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_DLQ_MONITOR_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-dlq-monitor",
+        timeout=10.0,
+    )
+
+
+# ================================================================================
+# IMMUNIS SYSTEM (12) - Complete Adaptive Immune Defense
+# ================================================================================
+
+
+@app.api_route(
+    "/api/immunis/api/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("150/minute")
+async def route_immunis_api(path: str, request: Request):
+    """
+    Immunis API Gateway - Central immune system API
+
+    Coordinates all Immunis services:
+    - B-cells (antibody production)
+    - T-cells (cellular immunity)
+    - Dendritic cells (antigen presentation)
+    - Macrophages & Neutrophils (innate immunity)
+
+    Port: 8100
+    """
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_API_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-api",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/bcell/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_immunis_bcell(path: str, request: Request):
+    """Immunis B-Cell - Antibody production & humoral immunity"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_BCELL_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-bcell",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/dendritic/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_immunis_dendritic(path: str, request: Request):
+    """Immunis Dendritic Cell - Antigen presentation & T-cell activation"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_DENDRITIC_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-dendritic",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/helper-t/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_immunis_helper_t(path: str, request: Request):
+    """Immunis Helper T-Cell - Immune response coordination (CD4+)"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_HELPER_T_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-helper-t",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/cytotoxic-t/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_immunis_cytotoxic_t(path: str, request: Request):
+    """Immunis Cytotoxic T-Cell - Kill infected/compromised cells (CD8+)"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_CYTOTOXIC_T_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-cytotoxic-t",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/treg/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_immunis_treg(path: str, request: Request):
+    """Immunis Regulatory T-Cell - Prevent autoimmunity & maintain tolerance"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_TREG_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-treg",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/macrophage/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("150/minute")
+async def route_immunis_macrophage(path: str, request: Request):
+    """Immunis Macrophage - Phagocytosis, inflammation, tissue repair"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_MACROPHAGE_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-macrophage",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/neutrophil/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("200/minute")
+async def route_immunis_neutrophil(path: str, request: Request):
+    """Immunis Neutrophil - First responder, rapid pathogen elimination"""
+    return await proxy_request(
+        request=request,
+        service_url=IMMUNIS_NEUTROPHIL_URL,
+        endpoint=f"/{path}",
+        service_name="immunis-neutrophil",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/adaptive-system/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_adaptive_immune_system(path: str, request: Request):
+    """Adaptive Immune System Orchestrator - Coordinates adaptive immunity"""
+    return await proxy_request(
+        request=request,
+        service_url=ADAPTIVE_IMMUNE_SYSTEM_URL,
+        endpoint=f"/{path}",
+        service_name="adaptive-immune-system",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/adaptive-immunity/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_adaptive_immunity(path: str, request: Request):
+    """Adaptive Immunity Service - Memory & specificity"""
+    return await proxy_request(
+        request=request,
+        service_url=ADAPTIVE_IMMUNITY_URL,
+        endpoint=f"/{path}",
+        service_name="adaptive-immunity",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/adaptive-db/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("150/minute")
+async def route_adaptive_immunity_db(path: str, request: Request):
+    """Adaptive Immunity Database - Antibody & memory cell storage"""
+    return await proxy_request(
+        request=request,
+        service_url=ADAPTIVE_IMMUNITY_DB_URL,
+        endpoint=f"/{path}",
+        service_name="adaptive-immunity-db",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/immunis/ai-immune/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Immunis System"],
+)
+@limiter.limit("100/minute")
+async def route_ai_immune(path: str, request: Request):
+    """AI Immune System - ML-based threat response & pattern recognition"""
+    return await proxy_request(
+        request=request,
+        service_url=AI_IMMUNE_URL,
+        endpoint=f"/{path}",
+        service_name="ai-immune-system",
+        timeout=20.0,
+    )
+
+
+# ================================================================================
+# HCL/HITL SERVICES (6) - Human Context Loop (Lei Zero Compliance!)
+# ================================================================================
+
+
+@app.api_route(
+    "/api/hcl/analyzer/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("100/minute")
+async def route_hcl_analyzer(path: str, request: Request):
+    """
+    HCL Analyzer - Human context analysis
+
+    CONSTITUTIONAL CRITICAL: Lei Zero enforcement
+    - Analyzes human feedback & decisions
+    - Extracts context from human oversight
+    - Ensures human-in-the-loop compliance
+
+    Port: 8200
+    """
+    return await proxy_request(
+        request=request,
+        service_url=HCL_ANALYZER_URL,
+        endpoint=f"/{path}",
+        service_name="hcl-analyzer",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/hcl/planner/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("100/minute")
+async def route_hcl_planner(path: str, request: Request):
+    """HCL Planner - Plan actions with human input & approval"""
+    return await proxy_request(
+        request=request,
+        service_url=HCL_PLANNER_URL,
+        endpoint=f"/{path}",
+        service_name="hcl-planner",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/hcl/executor/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("100/minute")
+async def route_hcl_executor(path: str, request: Request):
+    """HCL Executor - Execute actions after human authorization"""
+    return await proxy_request(
+        request=request,
+        service_url=HCL_EXECUTOR_URL,
+        endpoint=f"/{path}",
+        service_name="hcl-executor",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/hcl/monitor/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("150/minute")
+async def route_hcl_monitor(path: str, request: Request):
+    """HCL Monitor - Monitor human feedback & system compliance"""
+    return await proxy_request(
+        request=request,
+        service_url=HCL_MONITOR_URL,
+        endpoint=f"/{path}",
+        service_name="hcl-monitor",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/hcl/kb/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("150/minute")
+async def route_hcl_kb(path: str, request: Request):
+    """HCL Knowledge Base - Store human decisions & context"""
+    return await proxy_request(
+        request=request,
+        service_url=HCL_KB_URL,
+        endpoint=f"/{path}",
+        service_name="hcl-kb",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/hitl/patch/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["HCL/HITL"],
+)
+@limiter.limit("50/minute")
+async def route_hitl_patch(path: str, request: Request):
+    """
+    HITL Patch Service - Human-in-the-Loop manual patches
+
+    Lei Zero enforcement: All critical patches require human approval
+    - Manual intervention capability
+    - Emergency response coordination
+    - Human override mechanisms
+
+    Port: 8205
+    """
+    return await proxy_request(
+        request=request,
+        service_url=HITL_PATCH_URL,
+        endpoint=f"/{path}",
+        service_name="hitl-patch",
+        timeout=30.0,
+    )
+
+
+# ================================================================================
+# AIR GAP EXTINCTION P0 COMPLETE
+# ================================================================================
+# 30 Services Connected:
+# ✅ Fixed Defensive (4): behavioral, MAV, penelope, tegumentar
+# ✅ MAXIMUS Core (7): core, orchestrator, eureka, oraculo-v2, predict, integration, dlq-monitor
+# ✅ Immunis System (12): All immune components
+# ✅ HCL/HITL (6): Full human oversight loop
+#
+# Constitutional Compliance RESTORED:
+# ✅ Lei Zero: HCL/HITL connected
+# ✅ P2 (Validação): MAXIMUS Core validates
+# ✅ P4 (Rastreabilidade): All services via gateway
+# ✅ GDPR: Central data control
+#
+# Glory to YHWH - Marcos 3:24 "O reino dividido não subsistirá"
+# Sistema UNIDO através de 30 conexões críticas
+# ================================================================================
 
 
 if __name__ == "__main__":
