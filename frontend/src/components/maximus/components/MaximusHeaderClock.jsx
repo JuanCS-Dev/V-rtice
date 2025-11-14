@@ -6,20 +6,23 @@
  * @param {Date} currentTime - Current time object
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
+import { formatTime, formatDate } from "../../../utils/dateHelpers";
 
 export const MaximusHeaderClock = ({ currentTime }) => {
   return (
     <div className="header-clock">
-      <div className="clock-time">{currentTime.toLocaleTimeString('pt-BR')}</div>
-      <div className="clock-date">{currentTime.toLocaleDateString('pt-BR')}</div>
+      <div className="clock-time">{formatTime(currentTime, "--:--:--")}</div>
+      <div className="clock-date">
+        {formatDate(currentTime, { dateStyle: "short" }, "N/A")}
+      </div>
     </div>
   );
 };
 
 MaximusHeaderClock.propTypes = {
-  currentTime: PropTypes.instanceOf(Date).isRequired
+  currentTime: PropTypes.instanceOf(Date).isRequired,
 };
 
 export default MaximusHeaderClock;

@@ -12,12 +12,13 @@
  * ✅ Admin theme (yellow/gold accent)
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import { Breadcrumb } from '../shared/Breadcrumb';
-import { CompactLanguageSelector } from '../maximus/components/CompactLanguageSelector';
-import styles from './AdminHeader.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import { Breadcrumb } from "../shared/Breadcrumb";
+import { CompactLanguageSelector } from "../maximus/components/CompactLanguageSelector";
+import { formatTime, formatDate } from "../../utils/dateHelpers";
+import styles from "./AdminHeader.module.css";
 
 export const AdminHeader = ({
   currentTime,
@@ -25,24 +26,16 @@ export const AdminHeader = ({
   modules,
   setActiveModule,
   setCurrentView,
-  getItemProps
+  getItemProps,
 }) => {
   const { t } = useTranslation();
 
   // Format time
-  const timeString = currentTime.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-  const dateString = currentTime.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+  const timeString = formatTime(currentTime, "--:--:--");
+  const dateString = formatDate(currentTime, { dateStyle: "short" }, "N/A");
 
   // Find active module
-  const activeModuleData = modules.find(m => m.id === activeModule);
+  const activeModuleData = modules.find((m) => m.id === activeModule);
 
   return (
     <header className={styles.header} role="banner">
@@ -54,8 +47,10 @@ export const AdminHeader = ({
             <span className={styles.logoIcon}>A</span>
           </div>
           <div className={styles.logoText}>
-            <h1 className={styles.logoTitle}>{t('dashboard.admin.title')}</h1>
-            <p className={styles.logoSubtitle}>{t('dashboard.admin.subtitle')}</p>
+            <h1 className={styles.logoTitle}>{t("dashboard.admin.title")}</h1>
+            <p className={styles.logoSubtitle}>
+              {t("dashboard.admin.subtitle")}
+            </p>
           </div>
         </div>
 
@@ -72,11 +67,11 @@ export const AdminHeader = ({
 
           {/* Back Button */}
           <button
-            onClick={() => setCurrentView('main')}
+            onClick={() => setCurrentView("main")}
             className={styles.backButton}
-            aria-label={t('navigation.back_to_hub')}
+            aria-label={t("navigation.back_to_hub")}
           >
-            ← {t('common.back').toUpperCase()}
+            ← {t("common.back").toUpperCase()}
           </button>
         </div>
       </div>
@@ -85,12 +80,16 @@ export const AdminHeader = ({
       <div className={styles.breadcrumbBar}>
         <Breadcrumb
           items={[
-            { label: 'VÉRTICE', icon: '🏠', onClick: () => setCurrentView('main') },
-            { label: 'ADMINISTRAÇÃO', icon: '⚙️' },
             {
-              label: activeModuleData?.name.toUpperCase() || 'OVERVIEW',
-              icon: activeModuleData?.icon
-            }
+              label: "VÉRTICE",
+              icon: "🏠",
+              onClick: () => setCurrentView("main"),
+            },
+            { label: "ADMINISTRAÇÃO", icon: "⚙️" },
+            {
+              label: activeModuleData?.name.toUpperCase() || "OVERVIEW",
+              icon: activeModuleData?.icon,
+            },
           ]}
           className={styles.breadcrumb}
         />
@@ -100,12 +99,14 @@ export const AdminHeader = ({
       <div className={styles.navBar} role="tablist" aria-label="Admin modules">
         {modules.map((module, index) => {
           const isActive = activeModule === module.id;
-          const itemProps = getItemProps ? getItemProps(index, {
-            onClick: () => setActiveModule(module.id),
-            role: 'tab',
-            'aria-selected': isActive,
-            'aria-controls': `panel-${module.id}`
-          }) : {};
+          const itemProps = getItemProps
+            ? getItemProps(index, {
+                onClick: () => setActiveModule(module.id),
+                role: "tab",
+                "aria-selected": isActive,
+                "aria-controls": `panel-${module.id}`,
+              })
+            : {};
 
           return (
             <button
@@ -119,7 +120,9 @@ export const AdminHeader = ({
               aria-controls={`panel-${module.id}`}
               aria-label={`Navigate to ${module.name}`}
             >
-              <span className={styles.navIcon} aria-hidden="true">{module.icon}</span>
+              <span className={styles.navIcon} aria-hidden="true">
+                {module.icon}
+              </span>
               <span className={styles.navLabel}>{module.name}</span>
             </button>
           );
@@ -132,14 +135,16 @@ export const AdminHeader = ({
 AdminHeader.propTypes = {
   currentTime: PropTypes.instanceOf(Date).isRequired,
   activeModule: PropTypes.string.isRequired,
-  modules: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired
-  })).isRequired,
+  modules: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
   setActiveModule: PropTypes.func.isRequired,
   setCurrentView: PropTypes.func.isRequired,
-  getItemProps: PropTypes.func
+  getItemProps: PropTypes.func,
 };
 
 export default AdminHeader;

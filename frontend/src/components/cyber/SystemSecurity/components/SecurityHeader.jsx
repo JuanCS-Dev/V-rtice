@@ -1,6 +1,7 @@
-import React from 'react';
-import { Button } from '../../../shared';
-import styles from './SecurityHeader.module.css';
+import React from "react";
+import { Button } from "../../../shared";
+import { formatTime } from "../../../../utils/dateHelpers";
+import styles from "./SecurityHeader.module.css";
 
 export const SecurityHeader = ({ lastUpdate, onRefresh }) => {
   return (
@@ -8,7 +9,9 @@ export const SecurityHeader = ({ lastUpdate, onRefresh }) => {
       <div className={styles.content}>
         <div className={styles.info}>
           <h2 className={styles.title}>SYSTEM SECURITY ANALYSIS</h2>
-          <p className={styles.description}>Análise completa de segurança do sistema</p>
+          <p className={styles.description}>
+            Análise completa de segurança do sistema
+          </p>
         </div>
 
         <Button
@@ -23,7 +26,7 @@ export const SecurityHeader = ({ lastUpdate, onRefresh }) => {
 
       {lastUpdate && (
         <div className={styles.update}>
-          Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+          Última atualização: {formatTime(lastUpdate, "--:--:--")}
         </div>
       )}
     </div>
