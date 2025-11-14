@@ -74,7 +74,7 @@ func DefaultConfig() *Config {
 		Endpoints: map[string]string{
 			"maximus":      "http://localhost:8000",
 			"immune":       "http://localhost:8001",
-			"maba":         "http://localhost:9700",
+			"maba":         "http://localhost:8152", // Real MABA service port
 			"nis":          "http://localhost:9800",
 			"rte":          "http://localhost:9900",
 			"architect":    "http://localhost:10000",
