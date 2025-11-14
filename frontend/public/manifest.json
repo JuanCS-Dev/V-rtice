@@ -1,0 +1,46 @@
+{
+  "name": "Vértice - Cybersecurity Operations Platform",
+  "short_name": "Vértice",
+  "description": "Advanced AI-powered cybersecurity platform with autonomous threat detection, MAXIMUS AI, and military-grade defense systems",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#00ff41",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["security", "productivity", "utilities", "business"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Offensive Dashboard",
+      "short_name": "Offensive",
+      "description": "Red Team Operations",
+      "url": "/?view=offensive",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Defensive Dashboard",
+      "short_name": "Defensive",
+      "description": "Blue Team Operations",
+      "url": "/?view=defensive",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "MAXIMUS AI",
+      "short_name": "MAXIMUS",
+      "description": "AI Command Center",
+      "url": "/?view=maximus",
+      "icons": [{ "src": "/vite.svg", "sizes": "96x96" }]
+    }
+  ]
+}
