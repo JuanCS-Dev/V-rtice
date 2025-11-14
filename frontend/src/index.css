@@ -13,6 +13,9 @@
  */
 @import './styles/claude-design-green.css';
 
+/* Claude.ai Animations & Micro-interactions - Verde accent */
+@import './styles/claude-animations.css';
+
 /* Import Theme System - must come before Tailwind directives */
 @import './styles/themes.css';
 

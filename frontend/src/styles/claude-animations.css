@@ -1,0 +1,769 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CLAUDE.AI ANIMATIONS & MICRO-INTERACTIONS - VERDE
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Animações sutis, smooth, elegantes
+ * Baseado em: Claude.ai aesthetic (calm, focused, não dramático)
+ *
+ * Características:
+ * - Verde accent (#10b981)
+ * - Timing functions natural (cubic-bezier)
+ * - Durations: 150ms (fast) → 500ms (slow)
+ * - GPU-accelerated (transform, opacity)
+ * - Reduced motion support
+ */
+
+/* ============================================================================
+   KEYFRAMES - CORE ANIMATIONS
+   ============================================================================ */
+
+/**
+ * Fade In - Suave, sutil
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/**
+ * Slide Animations - Direcionais, smooth
+ */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/**
+ * Scale - Zoom sutil
+ */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/**
+ * Shimmer - Loading effect com VERDE
+ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/**
+ * Pulse - Breathing effect com VERDE
+ */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulseGreen {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+/**
+ * Spin - Loading spinner
+ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * Bounce - Subtle bounce (não dramático)
+ */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/**
+ * Glow - Verde glow effect
+ */
+@keyframes glowGreen {
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+  }
+}
+
+/**
+ * Progress - Loading bar
+ */
+@keyframes progressIndeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/**
+ * Shake - Error feedback (sutil)
+ */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+/**
+ * Wiggle - Attention grabber (muito sutil)
+ */
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-1deg);
+  }
+  75% {
+    transform: rotate(1deg);
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES - ANIMATIONS
+   ============================================================================ */
+
+/**
+ * Fade
+ */
+.animate-fade-in {
+  animation: fadeIn 300ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 300ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+/**
+ * Slide
+ */
+.animate-slide-up {
+  animation: slideUp 350ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 350ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+.animate-slide-left {
+  animation: slideLeft 350ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+.animate-slide-right {
+  animation: slideRight 350ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+/**
+ * Scale
+ */
+.animate-scale-in {
+  animation: scaleIn 250ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 250ms var(--transition-timing, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+/**
+ * Loading States
+ */
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(
+    90deg,
+    var(--background) 0%,
+    rgba(16, 185, 129, 0.08) 50%,
+    var(--background) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-green {
+  animation: pulseGreen 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-glow-green {
+  animation: glowGreen 2s ease-in-out infinite;
+}
+
+/**
+ * Feedback
+ */
+.animate-shake {
+  animation: shake 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-wiggle {
+  animation: wiggle 500ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* ============================================================================
+   MICRO-INTERACTIONS - HOVER & FOCUS
+   ============================================================================ */
+
+/**
+ * Lift on Hover - Cards, buttons
+ */
+.hover-lift {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.hover-lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/**
+ * Grow on Hover - Icons, small elements
+ */
+.hover-grow {
+  transition: transform var(--transition-fast);
+}
+
+.hover-grow:hover {
+  transform: scale(1.05);
+}
+
+.hover-grow:active {
+  transform: scale(0.98);
+}
+
+/**
+ * Glow on Hover - Verde accent
+ */
+.hover-glow-green {
+  transition: box-shadow var(--transition-normal);
+}
+
+.hover-glow-green:hover {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.hover-glow-green:focus-visible {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+/**
+ * Border Highlight on Hover - Verde
+ */
+.hover-border-green {
+  transition: border-color var(--transition-fast);
+}
+
+.hover-border-green:hover {
+  border-color: var(--primary);
+}
+
+/**
+ * Background Highlight on Hover - Sutil verde
+ */
+.hover-bg-green {
+  transition: background-color var(--transition-fast);
+}
+
+.hover-bg-green:hover {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* ============================================================================
+   PAGE TRANSITIONS
+   ============================================================================ */
+
+/**
+ * Page Enter/Exit - Para SPA routing
+ */
+.page-enter {
+  animation: fadeIn 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page-exit {
+  animation: fadeOut 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page-slide-enter {
+  animation: slideUp 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page-slide-exit {
+  animation: slideDown 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/**
+ * Modal Transitions
+ */
+.modal-backdrop-enter {
+  animation: fadeIn 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-backdrop-exit {
+  animation: fadeOut 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-content-enter {
+  animation: scaleIn 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.modal-content-exit {
+  animation: scaleOut 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/**
+ * Dropdown Transitions
+ */
+.dropdown-enter {
+  animation: slideDown 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.dropdown-exit {
+  animation: slideUp 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ============================================================================
+   SCROLL ANIMATIONS
+   ============================================================================ */
+
+/**
+ * Fade in on scroll - Requires IntersectionObserver
+ */
+.scroll-fade-in {
+  opacity: 0;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-fade-in.is-visible {
+  opacity: 1;
+}
+
+/**
+ * Slide up on scroll
+ */
+.scroll-slide-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-slide-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/**
+ * Stagger delay - Para sequential animations
+ */
+.stagger-1 {
+  animation-delay: 50ms;
+}
+
+.stagger-2 {
+  animation-delay: 100ms;
+}
+
+.stagger-3 {
+  animation-delay: 150ms;
+}
+
+.stagger-4 {
+  animation-delay: 200ms;
+}
+
+.stagger-5 {
+  animation-delay: 250ms;
+}
+
+/* ============================================================================
+   GESTURE ANIMATIONS
+   ============================================================================ */
+
+/**
+ * Ripple Effect - Material-inspired, verde
+ */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/**
+ * Press Effect - Visual feedback
+ */
+.press-effect {
+  transition: transform var(--transition-fast);
+}
+
+.press-effect:active {
+  transform: scale(0.97);
+}
+
+/* ============================================================================
+   LOADING STATES - ADVANCED
+   ============================================================================ */
+
+/**
+ * Progress Bar - Indeterminate, verde
+ */
+.progress-indeterminate {
+  position: relative;
+  overflow: hidden;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 9999px;
+  height: 4px;
+}
+
+.progress-indeterminate::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--primary) 50%,
+    transparent 100%
+  );
+  animation: progressIndeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/**
+ * Skeleton Shimmer - Verde accent
+ */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    rgba(16, 185, 129, 0.1) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/**
+ * Typing Indicator - Chat style, verde
+ */
+.typing-indicator {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: bounce 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ============================================================================
+   REDUCED MOTION SUPPORT
+   ============================================================================ */
+
+/**
+ * Respect user preferences for reduced motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .scroll-fade-in,
+  .scroll-slide-up {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   FOCUS ANIMATIONS - ACCESSIBILITY
+   ============================================================================ */
+
+/**
+ * Focus Ring - Verde, smooth
+ */
+.focus-ring-green {
+  transition: box-shadow var(--transition-fast), outline var(--transition-fast);
+}
+
+.focus-ring-green:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+/**
+ * Focus Glow - Mais sutil
+ */
+.focus-glow-green {
+  transition: box-shadow var(--transition-normal);
+}
+
+.focus-glow-green:focus-visible {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+/* ============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================ */
+
+/**
+ * GPU Acceleration - Para transforms e opacity
+ */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/**
+ * Smooth Rendering
+ */
+.smooth-rendering {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================================
+   COMPOSABLE UTILITIES
+   ============================================================================ */
+
+/**
+ * Transition All - Smooth
+ */
+.transition-all {
+  transition: all var(--transition-normal);
+}
+
+.transition-colors {
+  transition: color var(--transition-fast), background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.transition-transform {
+  transition: transform var(--transition-normal);
+}
+
+.transition-opacity {
+  transition: opacity var(--transition-normal);
+}
+
+/**
+ * Timing Functions
+ */
+.ease-smooth {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ease-bounce {
+  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ============================================================================
+   EXEMPLO DE USO
+   ============================================================================ */
+
+/*
+BASIC USAGE:
+
+// Fade in on mount
+<div className="animate-fade-in">Content</div>
+
+// Lift card on hover
+<Card className="hover-lift">...</Card>
+
+// Verde glow on focus
+<Button className="focus-ring-green">Click</Button>
+
+// Loading spinner
+<div className="animate-spin">⭕</div>
+
+// Shimmer skeleton
+<div className="skeleton-shimmer h-4 w-full"></div>
+
+// Scroll reveal
+<div className="scroll-slide-up">
+  Content that fades in on scroll
+</div>
+
+// Staggered list items
+<li className="animate-slide-up stagger-1">Item 1</li>
+<li className="animate-slide-up stagger-2">Item 2</li>
+<li className="animate-slide-up stagger-3">Item 3</li>
+
+ADVANCED:
+
+// Page transition (React Router)
+<motion.div className="page-slide-enter">
+  <YourPage />
+</motion.div>
+
+// Modal with backdrop
+<div className="modal-backdrop-enter">
+  <div className="modal-content-enter">
+    Modal content
+  </div>
+</div>
+
+*/

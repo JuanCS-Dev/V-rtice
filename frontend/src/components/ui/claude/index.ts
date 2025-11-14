@@ -126,13 +126,72 @@ export {
   ChartContainer,
 } from './chart-config'
 
+// ============================================================================
+// ANIMATIONS & TRANSITIONS
+// ============================================================================
+
+// Page Transitions
+export {
+  PageTransition,
+  ScrollReveal,
+  StaggerContainer,
+  ModalTransition,
+} from './page-transition'
+export type {
+  PageTransitionProps,
+  ScrollRevealProps,
+  StaggerContainerProps,
+  ModalTransitionProps,
+} from './page-transition'
+
+// Advanced Loading
+export {
+  ProgressBar,
+  CircularProgress,
+  PulseLoader,
+  TypingIndicator,
+  SkeletonPulse,
+  LoadingDots,
+  RippleLoader,
+} from './advanced-loading'
+export type {
+  ProgressBarProps,
+  CircularProgressProps,
+  PulseLoaderProps,
+  TypingIndicatorProps,
+  SkeletonPulseProps,
+  LoadingDotsProps,
+  RippleLoaderProps,
+} from './advanced-loading'
+
+// Animation Hooks
+export {
+  useInView,
+  useScrollReveal,
+  useStaggerAnimation,
+  useHoverAnimation,
+  useGesture,
+  useReducedMotion,
+  useAnimationFrame,
+} from './use-animations'
+export type {
+  UseInViewOptions,
+  UseScrollRevealOptions,
+  ScrollRevealResult,
+  UseStaggerAnimationOptions,
+  UseHoverAnimationResult,
+  GestureState,
+  UseGestureOptions,
+} from './use-animations'
+
 /**
  * Design System Tokens
  *
  * CRITICAL: Certifique-se de importar o CSS do design system:
  * @import '../../../styles/claude-design-green.css'
+ * @import '../../../styles/claude-animations.css'
  *
- * Total Components: 21+
+ * Total Components: 35+
  *
  * CORE (12):
  * - Button, Input, Textarea, Label
@@ -153,4 +212,13 @@ export {
  * - StatCard, MetricCard
  * - DataTable
  * - Chart Config (verde theme)
+ *
+ * ANIMATIONS (11+):
+ * - PageTransition, ScrollReveal, StaggerContainer, ModalTransition
+ * - ProgressBar, CircularProgress, PulseLoader, TypingIndicator
+ * - SkeletonPulse, LoadingDots, RippleLoader
+ *
+ * HOOKS (7):
+ * - useInView, useScrollReveal, useStaggerAnimation
+ * - useHoverAnimation, useGesture, useReducedMotion, useAnimationFrame
  */
