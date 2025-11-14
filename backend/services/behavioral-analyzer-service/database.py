@@ -10,7 +10,7 @@ replacing in-memory dictionaries with production-grade persistent storage.
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import asyncpg
 from asyncpg import Pool
@@ -18,7 +18,7 @@ from asyncpg import Pool
 logger = logging.getLogger(__name__)
 
 # Global connection pool
-_pool: Optional[Pool] = None
+_pool: Pool | None = None
 
 
 async def init_db_pool() -> Pool:
@@ -39,29 +39,22 @@ async def init_db_pool() -> Pool:
         return _pool
 
     db_url = os.getenv(
-        "TIMESCALE_URL",
-        "postgresql://maximus:password@timescaledb:5432/behavioral_analyzer"
+        "DATABASE_URL",
+        "postgresql://vertice:vertice_secure_password@timescaledb:5432/behavioral_analysis",
     )
 
     try:
         _pool = await asyncpg.create_pool(
-            db_url,
-            min_size=5,
-            max_size=20,
-            command_timeout=60,
-            timeout=30
+            db_url, min_size=5, max_size=20, command_timeout=60, timeout=30
         )
         logger.info(
             "✅ TimescaleDB connection pool initialized",
-            extra={"db_url": db_url.split("@")[1] if "@" in db_url else "***"}
+            extra={"db_url": db_url.split("@")[1] if "@" in db_url else "***"},
         )
         return _pool
 
     except Exception as e:
-        logger.error(
-            f"❌ Failed to initialize TimescaleDB pool: {e}",
-            exc_info=True
-        )
+        logger.error(f"❌ Failed to initialize TimescaleDB pool: {e}", exc_info=True)
         raise ConnectionError(f"Database unavailable: {e}") from e
 
 
@@ -74,7 +67,7 @@ async def close_db_pool():
         logger.info("✅ TimescaleDB connection pool closed")
 
 
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Check database health.
 
@@ -95,7 +88,7 @@ async def health_check() -> Dict[str, Any]:
                 "postgres_version": version.split(",")[0],
                 "timescaledb_version": timescale_version,
                 "pool_size": _pool.get_size(),
-                "pool_free": _pool.get_idle_size()
+                "pool_free": _pool.get_idle_size(),
             }
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
@@ -109,10 +102,10 @@ async def health_check() -> Dict[str, Any]:
 
 async def create_user_profile(
     user_id: str,
-    baseline_metrics: Dict[str, Any],
-    fingerprint: Dict[str, Any],
+    baseline_metrics: dict[str, Any],
+    fingerprint: dict[str, Any],
     consent_given: bool = False,
-    data_retention_days: int = 90
+    data_retention_days: int = 90,
 ) -> None:
     """
     Create or update user profile.
@@ -146,12 +139,12 @@ async def create_user_profile(
             fingerprint,
             consent_given,
             data_retention_days,
-            datetime.utcnow() if consent_given else None
+            datetime.utcnow() if consent_given else None,
         )
         logger.debug(f"✅ User profile created/updated: {user_id}")
 
 
-async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
+async def get_user_profile(user_id: str) -> dict[str, Any] | None:
     """
     Get user profile by ID.
 
@@ -171,7 +164,7 @@ async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
             FROM user_profiles
             WHERE user_id = $1
             """,
-            user_id
+            user_id,
         )
 
         if not row:
@@ -189,14 +182,12 @@ async def get_user_profile(user_id: str) -> Optional[Dict[str, Any]]:
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
             "data_retention_days": row["data_retention_days"],
-            "consent_given": row["consent_given"]
+            "consent_given": row["consent_given"],
         }
 
 
 async def update_user_risk_score(
-    user_id: str,
-    risk_score: float,
-    risk_level: str = None
+    user_id: str, risk_score: float, risk_level: str = None
 ) -> None:
     """
     Update user's risk score.
@@ -224,15 +215,16 @@ async def update_user_risk_score(
             SET risk_score = $2, risk_level = $3, updated_at = NOW()
             WHERE user_id = $1
             """,
-            user_id, risk_score, risk_level
+            user_id,
+            risk_score,
+            risk_level,
         )
         logger.debug(f"✅ Risk score updated: {user_id} → {risk_score} ({risk_level})")
 
 
 async def list_high_risk_users(
-    min_risk_score: float = 0.7,
-    limit: int = 50
-) -> List[Dict[str, Any]]:
+    min_risk_score: float = 0.7, limit: int = 50
+) -> list[dict[str, Any]]:
     """
     List users with high risk scores.
 
@@ -254,7 +246,8 @@ async def list_high_risk_users(
             ORDER BY risk_score DESC, updated_at DESC
             LIMIT $2
             """,
-            min_risk_score, limit
+            min_risk_score,
+            limit,
         )
 
         return [
@@ -264,7 +257,7 @@ async def list_high_risk_users(
                 "risk_level": row["risk_level"],
                 "anomaly_count": row["anomaly_count"],
                 "last_seen": row["last_seen"],
-                "updated_at": row["updated_at"]
+                "updated_at": row["updated_at"],
             }
             for row in rows
         ]
@@ -279,15 +272,15 @@ async def log_behavioral_event(
     event_id: str,
     user_id: str,
     event_type: str,
-    resource: Optional[str],
-    action: Optional[str],
-    ip_address: Optional[str],
-    user_agent: Optional[str],
-    risk_score: Optional[float],
+    resource: str | None,
+    action: str | None,
+    ip_address: str | None,
+    user_agent: str | None,
+    risk_score: float | None,
     anomaly_detected: bool,
-    anomaly_reason: Optional[str] = None,
+    anomaly_reason: str | None = None,
     blocked: bool = False,
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     """
     Log a behavioral event.
@@ -318,9 +311,18 @@ async def log_behavioral_event(
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             ON CONFLICT (event_id) DO NOTHING
             """,
-            event_id, user_id, event_type, resource, action,
-            ip_address, user_agent, risk_score, anomaly_detected,
-            anomaly_reason, blocked, metadata or {}
+            event_id,
+            user_id,
+            event_type,
+            resource,
+            action,
+            ip_address,
+            user_agent,
+            risk_score,
+            anomaly_detected,
+            anomaly_reason,
+            blocked,
+            metadata or {},
         )
         logger.debug(
             f"✅ Event logged: {event_id} (user={user_id}, type={event_type}, "
@@ -329,10 +331,8 @@ async def log_behavioral_event(
 
 
 async def get_recent_events(
-    user_id: str,
-    limit: int = 100,
-    event_type: Optional[str] = None
-) -> List[Dict[str, Any]]:
+    user_id: str, limit: int = 100, event_type: str | None = None
+) -> list[dict[str, Any]]:
     """
     Get recent events for user.
 
@@ -377,17 +377,15 @@ async def get_recent_events(
                 "anomaly_detected": row["anomaly_detected"],
                 "anomaly_reason": row["anomaly_reason"],
                 "blocked": row["blocked"],
-                "metadata": row["metadata"]
+                "metadata": row["metadata"],
             }
             for row in rows
         ]
 
 
 async def get_anomalous_events(
-    hours_back: int = 24,
-    min_risk_score: float = 0.5,
-    limit: int = 100
-) -> List[Dict[str, Any]]:
+    hours_back: int = 24, min_risk_score: float = 0.5, limit: int = 100
+) -> list[dict[str, Any]]:
     """
     Get recent anomalous events across all users.
 
@@ -413,7 +411,9 @@ async def get_anomalous_events(
             ORDER BY risk_score DESC, timestamp DESC
             LIMIT $3
             """,
-            hours_back, min_risk_score, limit
+            hours_back,
+            min_risk_score,
+            limit,
         )
 
         return [
@@ -427,7 +427,7 @@ async def get_anomalous_events(
                 "ip_address": str(row["ip_address"]) if row["ip_address"] else None,
                 "risk_score": row["risk_score"],
                 "anomaly_reason": row["anomaly_reason"],
-                "blocked": row["blocked"]
+                "blocked": row["blocked"],
             }
             for row in rows
         ]
@@ -446,9 +446,9 @@ async def create_anomaly(
     confidence: float,
     title: str,
     description: str,
-    evidence: Dict[str, Any],
-    related_events: Optional[List[str]] = None,
-    baseline_deviation: Optional[float] = None
+    evidence: dict[str, Any],
+    related_events: list[str] | None = None,
+    baseline_deviation: float | None = None,
 ) -> None:
     """
     Record detected anomaly.
@@ -481,9 +481,17 @@ async def create_anomaly(
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ON CONFLICT (anomaly_id) DO NOTHING
             """,
-            anomaly_id, user_id, anomaly_type, severity, confidence,
-            title, description, evidence, related_events or [],
-            baseline_deviation, priority
+            anomaly_id,
+            user_id,
+            anomaly_type,
+            severity,
+            confidence,
+            title,
+            description,
+            evidence,
+            related_events or [],
+            baseline_deviation,
+            priority,
         )
         logger.info(
             f"🚨 Anomaly created: {anomaly_id} (user={user_id}, "
@@ -492,9 +500,8 @@ async def create_anomaly(
 
 
 async def get_open_anomalies(
-    severity: Optional[str] = None,
-    limit: int = 50
-) -> List[Dict[str, Any]]:
+    severity: str | None = None, limit: int = 50
+) -> list[dict[str, Any]]:
     """
     Get open anomalies requiring investigation.
 
@@ -537,7 +544,7 @@ async def get_open_anomalies(
                 "description": row["description"],
                 "evidence": row["evidence"],
                 "priority": row["priority"],
-                "status": row["status"]
+                "status": row["status"],
             }
             for row in rows
         ]
@@ -546,8 +553,8 @@ async def get_open_anomalies(
 async def update_anomaly_status(
     anomaly_id: str,
     status: str,
-    resolution: Optional[str] = None,
-    false_positive: Optional[bool] = None
+    resolution: str | None = None,
+    false_positive: bool | None = None,
 ) -> None:
     """
     Update anomaly investigation status.
@@ -574,7 +581,11 @@ async def update_anomaly_status(
                 END
             WHERE anomaly_id = $1
             """,
-            anomaly_id, status, resolution, false_positive, resolved_at
+            anomaly_id,
+            status,
+            resolution,
+            false_positive,
+            resolved_at,
         )
         logger.info(f"✅ Anomaly status updated: {anomaly_id} → {status}")
 
@@ -584,7 +595,7 @@ async def update_anomaly_status(
 # ============================================================================
 
 
-async def get_user_statistics(user_id: str) -> Dict[str, Any]:
+async def get_user_statistics(user_id: str) -> dict[str, Any]:
     """
     Get comprehensive user statistics.
 
@@ -597,8 +608,7 @@ async def get_user_statistics(user_id: str) -> Dict[str, Any]:
     async with _pool.acquire() as conn:
         # Get profile
         profile = await conn.fetchrow(
-            "SELECT * FROM user_profiles WHERE user_id = $1",
-            user_id
+            "SELECT * FROM user_profiles WHERE user_id = $1", user_id
         )
 
         if not profile:
@@ -618,7 +628,7 @@ async def get_user_statistics(user_id: str) -> Dict[str, Any]:
             WHERE user_id = $1
               AND timestamp > NOW() - INTERVAL '30 days'
             """,
-            user_id
+            user_id,
         )
 
         # Get open anomalies
@@ -628,7 +638,7 @@ async def get_user_statistics(user_id: str) -> Dict[str, Any]:
             FROM anomalies
             WHERE user_id = $1 AND status IN ('open', 'investigating')
             """,
-            user_id
+            user_id,
         )
 
         return {
@@ -640,14 +650,22 @@ async def get_user_statistics(user_id: str) -> Dict[str, Any]:
             "anomaly_count": event_stats["anomaly_events"],
             "unique_event_types": event_stats["unique_event_types"],
             "unique_ips": event_stats["unique_ips"],
-            "avg_risk_score": float(event_stats["avg_risk_score"]) if event_stats["avg_risk_score"] else 0.0,
-            "max_risk_score": float(event_stats["max_risk_score"]) if event_stats["max_risk_score"] else 0.0,
+            "avg_risk_score": (
+                float(event_stats["avg_risk_score"])
+                if event_stats["avg_risk_score"]
+                else 0.0
+            ),
+            "max_risk_score": (
+                float(event_stats["max_risk_score"])
+                if event_stats["max_risk_score"]
+                else 0.0
+            ),
             "open_anomalies": open_anomalies,
-            "last_seen": profile["last_seen"]
+            "last_seen": profile["last_seen"],
         }
 
 
-async def get_system_statistics() -> Dict[str, Any]:
+async def get_system_statistics() -> dict[str, Any]:
     """
     Get system-wide statistics.
 
@@ -672,5 +690,5 @@ async def get_system_statistics() -> Dict[str, Any]:
             "events_last_24h": stats["events_24h"],
             "anomalies_last_24h": stats["anomalies_24h"],
             "open_investigations": stats["open_investigations"],
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.utcnow(),
         }
