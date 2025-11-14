@@ -25,6 +25,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { networkScannerService, toolRegistryService } from '../../../api/offensiveToolsServices';
 import styles from './NetworkScanner.module.css';
 
@@ -307,7 +308,7 @@ export const NetworkScanner = () => {
             )}
 
             <div className={styles.timestamp}>
-              Scanned at: {new Date(result.timestamp).toLocaleString()}
+              Scanned at: {formatDateTime(result.timestamp)}
             </div>
           </div>
         </section>

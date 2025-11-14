@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * MaximusCore.jsx - AI Chat & Tool Execution Interface
  * ====================================================
  *
@@ -14,6 +13,8 @@ import logger from '@/utils/logger';
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import logger from '@/utils/logger';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import {
   chatWithMaximus,
   getAIMemory,
@@ -194,7 +195,7 @@ export const MaximusCore = () => {
             {isUser ? '👤 You' : isTool ? `🔧 ${msg.tool_name}` : '🤖 Maximus AI'}
           </span>
           <span className={styles.messageTime}>
-            {new Date(msg.timestamp).toLocaleTimeString()}
+            {formatTime(msg.timestamp)}
           </span>
         </div>
 

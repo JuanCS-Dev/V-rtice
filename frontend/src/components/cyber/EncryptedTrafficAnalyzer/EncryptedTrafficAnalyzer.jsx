@@ -24,6 +24,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { encryptedTrafficService } from '../../../api/defensiveToolsServices';
 import styles from './EncryptedTrafficAnalyzer.module.css';
 
@@ -352,7 +353,7 @@ export const EncryptedTrafficAnalyzer = () => {
               <div className={styles.flowDetail}>
                 <span className={styles.label}>Timestamp:</span>
                 <span className={styles.value}>
-                  {new Date(result.timestamp).toLocaleString()}
+                  {formatDateTime(result.timestamp)}
                 </span>
               </div>
             </div>

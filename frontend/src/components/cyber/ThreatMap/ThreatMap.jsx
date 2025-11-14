@@ -34,6 +34,7 @@
 import React, { useState, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { Card, Badge, LoadingSpinner } from '../../shared';
 import AskMaximusButton from '../../shared/AskMaximusButton';
 import { ThreatFilters } from './components/ThreatFilters';
@@ -207,7 +208,7 @@ export const ThreatMap = () => {
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Time:</span>
                 <span className={styles.detailValue}>
-                  {new Date(selectedThreat.timestamp).toLocaleString()}
+                  {formatDateTime(selectedThreat.timestamp)}
                 </span>
               </div>
             </div>

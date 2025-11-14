@@ -12,6 +12,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import styles from './ReactiveFabricDashboard.module.css';
 import { DashboardFooter } from '../shared/DashboardFooter';
 import DecoyBayouMap from './DecoyBayouMap';
@@ -164,7 +165,7 @@ const ReactiveFabricDashboard = () => {
           </div>
           {lastUpdate && (
             <span className={styles.lastUpdate}>
-              Updated: {new Date(lastUpdate).toLocaleTimeString()}
+              Updated: {formatTime(lastUpdate)}
             </span>
           )}
         </div>

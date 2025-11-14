@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { getThreatColor, getThreatIcon } from '../utils/threatUtils';
 
 // OTIMIZADO: Cache de ícones para evitar recriação
@@ -124,7 +125,7 @@ const ThreatMarkers = ({ threats, onThreatClick }) => {
             ` : ''}
 
             <hr style="margin: 4px 0; border-color: #333;"/>
-            <small style="display: block; color: #888;">${new Date(threat.timestamp).toLocaleString()}</small>
+            <small style="display: block; color: #888;">${formatDateTime(threat.timestamp)}</small>
           </div>
         `;
 

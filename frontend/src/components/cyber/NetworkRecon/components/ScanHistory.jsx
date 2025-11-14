@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 
 /**
  * ScanHistory - Histórico de scans completos
@@ -124,7 +125,7 @@ export const ScanHistory = ({ scans, onSelectScan }) => {
                     </span>
                   </div>
                   <div className="text-xs text-gray-400 font-mono">
-                    {new Date(scan.completed_at || scan.started_at).toLocaleString()}
+                    {formatDateTime(scan.completed_at || scan.started_at)}
                   </div>
                 </div>
               </div>

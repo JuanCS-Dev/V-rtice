@@ -12,6 +12,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import styles from './IntelligenceFusionPanel.module.css';
 
 const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
@@ -84,7 +85,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
     const CLUSTER_WINDOW = 5 * 60 * 1000; // 5 minutes
     
     sorted.forEach(event => {
-      const time = new Date(event.timestamp).getTime();
+      const time = getTimestamp(event.timestamp);
       
       if (!currentCluster || time - currentCluster.end > CLUSTER_WINDOW) {
         currentCluster = {
@@ -269,7 +270,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
               <div className={styles.list}>
                 {clusters.slice(0, 5).map((cluster, idx) => {
                   const duration = (cluster.end - cluster.start) / 1000;
-                  const startTime = new Date(cluster.start).toLocaleTimeString();
+                  const startTime = formatTime(cluster.start);
                   
                   return (
                     <div key={idx} className={styles.clusterItem}>

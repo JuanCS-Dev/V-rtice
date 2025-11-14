@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 
 /**
  * ActiveScans - Lista de scans em andamento
@@ -109,7 +110,7 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
 
           {/* Started At */}
           <div className="mt-4 text-center text-orange-400/50 text-xs">
-            Started: {new Date(scan.started_at).toLocaleString()}
+            Started: {formatDateTime(scan.started_at)}
           </div>
         </div>
       ))}

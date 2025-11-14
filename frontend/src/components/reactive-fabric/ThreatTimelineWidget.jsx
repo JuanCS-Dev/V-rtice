@@ -10,6 +10,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import styles from './ThreatTimelineWidget.module.css';
 
 const ThreatTimelineWidget = ({ events = [], compact = false }) => {
@@ -41,11 +42,11 @@ const ThreatTimelineWidget = ({ events = [], compact = false }) => {
       'last-day': [],
       'older': []
     };
-    
+
     const now = Date.now();
-    
+
     filteredEvents.forEach(event => {
-      const time = new Date(event.timestamp).getTime();
+      const time = getTimestamp(event.timestamp);
       const diff = now - time;
       
       if (diff < 60000) {
@@ -81,7 +82,7 @@ const ThreatTimelineWidget = ({ events = [], compact = false }) => {
    */
   const getRelativeTime = (timestamp) => {
     const now = Date.now();
-    const time = new Date(timestamp).getTime();
+    const time = getTimestamp(timestamp);
     const diff = now - time;
     
     if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;

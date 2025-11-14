@@ -10,6 +10,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import styles from './HoneypotStatusGrid.module.css';
 
 const HoneypotStatusGrid = ({ honeypots = [] }) => {
@@ -209,8 +210,8 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
                 {/* Footer */}
                 <div className={styles.cardFooter}>
                   <span className={styles.footerText}>
-                    Last seen: {honeypot.last_seen ? 
-                      new Date(honeypot.last_seen).toLocaleTimeString() : 
+                    Last seen: {honeypot.last_seen ?
+                      formatTime(honeypot.last_seen) :
                       'Never'}
                   </span>
                 </div>

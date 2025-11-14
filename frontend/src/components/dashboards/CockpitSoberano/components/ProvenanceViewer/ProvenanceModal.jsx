@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import styles from './ProvenanceModal.module.css';
 
 export const ProvenanceModal = ({ verdict, onClose }) => {
@@ -62,7 +63,7 @@ export const ProvenanceModal = ({ verdict, onClose }) => {
                       </div>
                       {evidence.timestamp && (
                         <time className={styles.evidenceTime}>
-                          {new Date(evidence.timestamp).toLocaleString()}
+                          {formatDateTime(evidence.timestamp)}
                         </time>
                       )}
                     </div>

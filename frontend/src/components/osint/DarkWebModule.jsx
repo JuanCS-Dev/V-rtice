@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { monitorDarkWeb } from '@/api/worldClassTools';
 import logger from '@/utils/logger';
 
@@ -215,7 +216,7 @@ const DarkWebModule = () => {
                             </span>
                           </div>
                           <div className="text-xs text-red-400/60">
-                            Source: {finding.source} | Discovered: {new Date(finding.discovered_at).toLocaleString()}
+                            Source: {finding.source} | Discovered: {formatDateTime(finding.discovered_at)}
                           </div>
                         </div>
                         {finding.severity && (

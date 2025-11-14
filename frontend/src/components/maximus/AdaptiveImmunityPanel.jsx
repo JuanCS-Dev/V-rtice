@@ -30,6 +30,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import {
@@ -517,7 +518,7 @@ export const AdaptiveImmunityPanel = ({ aiStatus, setAiStatus }) => {
                 {recentPredictions.map((pred, i) => (
                   <tr key={i} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
                     <td className="p-3 text-gray-300 font-mono text-xs">
-                      {new Date(pred.timestamp).toLocaleTimeString()}
+                      {formatTime(pred.timestamp)}
                     </td>
                     <td className="p-3">
                       <code className="text-red-400 text-xs bg-red-900/30 px-2 py-1 rounded">

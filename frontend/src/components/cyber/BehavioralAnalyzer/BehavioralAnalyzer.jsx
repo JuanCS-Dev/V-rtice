@@ -24,6 +24,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
 import { behavioralAnalyzerService } from '../../../api/defensiveToolsServices';
 import styles from './BehavioralAnalyzer.module.css';
 
@@ -244,7 +245,7 @@ export const BehavioralAnalyzer = () => {
             <div className={styles.resultRow}>
               <span className={styles.label}>Timestamp:</span>
               <span className={styles.value}>
-                {new Date(result.timestamp).toLocaleString()}
+                {formatDateTime(result.timestamp)}
               </span>
             </div>
           </div>
