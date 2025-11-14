@@ -563,9 +563,10 @@ def _generate_mock_metrics(
     timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
 ) -> MLMetricsResponse:
     """
-    Generate mock metrics for testing.
+    Generate mock metrics for testing/fallback.
 
-    TODO: Replace with actual database queries in Phase 5.5.2.
+    Note: Real database queries implemented in _query_metrics_from_db() (FIX #9 COMPLETE).
+    This function serves as graceful fallback when Prometheus is unavailable.
 
     Args:
         timeframe: Requested timeframe
