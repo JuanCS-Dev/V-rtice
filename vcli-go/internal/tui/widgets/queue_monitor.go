@@ -2,7 +2,6 @@ package widgets
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/maximus"
