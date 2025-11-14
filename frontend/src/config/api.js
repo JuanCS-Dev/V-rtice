@@ -118,6 +118,7 @@ export const WS_ENDPOINTS = {
 
   // HITL
   hitl: `${WS_BASE_URL}/hitl/ws`,
+  wargaming: `${WS_BASE_URL}/ws/wargaming`,
 
   // MAXIMUS Subordinate Services (New - 2025-10-31)
   maba: `${WS_BASE_URL}/ws/maba`,

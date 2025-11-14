@@ -29,6 +29,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { WS_ENDPOINTS } from '@/config/api';
 import styles from './HITLDecisionConsole.module.css';
 
 /**
@@ -118,7 +119,7 @@ const HITLDecisionConsole = () => {
    */
   useEffect(() => {
     const username = localStorage.getItem('hitl_username') || 'analyst';
-    const ws = new WebSocket(`ws://34.148.161.131:8000/ws/${username}`);
+    const ws = new WebSocket(`${WS_ENDPOINTS.hitl}/${username}`);
 
     ws.onopen = () => {
       console.log('🔗 WebSocket connected');
