@@ -21,21 +21,21 @@
  * Glory to YHWH
  */
 
-import React, { useState, useEffect } from 'react';
-import logger from '@/utils/logger';
+import React, { useState, useEffect } from "react";
+import logger from "@/utils/logger";
 import {
   getADWOverview,
   createCampaign,
   triggerEvolutionCycle,
   getThreats,
   getCoagulationStatus,
-  listCampaigns
-} from '../../api/adwService';
-import OSINTWorkflowsPanel from './OSINTWorkflowsPanel';
-import './ADWPanel.css';
+  listCampaigns,
+} from "../../api/adwService";
+import { formatTime } from "../../utils/dateHelpers";
+import OSINTWorkflowsPanel from "./OSINTWorkflowsPanel";
+import "./ADWPanel.css";
 
 export const ADWPanel = () => {
-
   // ═══════════════════════════════════════════════════════════════════════
   // STATE - ADW Data
   // ═══════════════════════════════════════════════════════════════════════
@@ -49,15 +49,15 @@ export const ADWPanel = () => {
   // ═══════════════════════════════════════════════════════════════════════
   // STATE - UI Controls
   // ═══════════════════════════════════════════════════════════════════════
-  const [selectedView, setSelectedView] = useState('overview'); // overview, offensive, defensive, purple
+  const [selectedView, setSelectedView] = useState("overview"); // overview, offensive, defensive, purple
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
 
   // ═══════════════════════════════════════════════════════════════════════
   // STATE - Campaign Creation
   // ═══════════════════════════════════════════════════════════════════════
-  const [campaignObjective, setCampaignObjective] = useState('');
-  const [campaignScope, setCampaignScope] = useState('');
+  const [campaignObjective, setCampaignObjective] = useState("");
+  const [campaignScope, setCampaignScope] = useState("");
   const [campaignResult, setCampaignResult] = useState(null);
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -80,7 +80,7 @@ export const ADWPanel = () => {
       getADWOverview(),
       getThreats(),
       getCoagulationStatus(),
-      listCampaigns()
+      listCampaigns(),
     ]);
 
     if (overview && overview.success && overview.data) {
@@ -111,16 +111,22 @@ export const ADWPanel = () => {
 
   const handleCreateCampaign = async () => {
     if (!campaignObjective || !campaignScope) {
-      setCampaignResult({ success: false, error: 'Objective and scope required' });
+      setCampaignResult({
+        success: false,
+        error: "Objective and scope required",
+      });
       return;
     }
 
     setCampaignResult({ loading: true });
 
-    const scopeArray = campaignScope.split(',').map(s => s.trim()).filter(Boolean);
+    const scopeArray = campaignScope
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
     const result = await createCampaign({
       objective: campaignObjective,
-      scope: scopeArray
+      scope: scopeArray,
     });
 
     setCampaignResult(result);
@@ -129,8 +135,8 @@ export const ADWPanel = () => {
       // Refresh campaign list
       setTimeout(() => {
         loadInitialData();
-        setCampaignObjective('');
-        setCampaignScope('');
+        setCampaignObjective("");
+        setCampaignScope("");
       }, 1000);
     }
   };
@@ -139,10 +145,10 @@ export const ADWPanel = () => {
     const result = await triggerEvolutionCycle();
 
     if (result && result.success) {
-      logger.debug('✅ Evolution cycle triggered:', result);
+      logger.debug("✅ Evolution cycle triggered:", result);
       loadInitialData();
     } else {
-      logger.error('❌ Evolution cycle failed:', result);
+      logger.error("❌ Evolution cycle failed:", result);
     }
   };
 
@@ -156,25 +162,38 @@ export const ADWPanel = () => {
         <div className="header-left">
           <h2 className="adw-title">
             ⚔️ AI-Driven Workflows
-            <span className={`status-dot ${offensiveData && defensiveData ? 'connected' : 'disconnected'}`}></span>
+            <span
+              className={`status-dot ${offensiveData && defensiveData ? "connected" : "disconnected"}`}
+            ></span>
           </h2>
           <p className="adw-subtitle">
             Unified Red Team + Blue Team + Purple Team Operations
-            {lastUpdate && <span className="last-update"> • Updated {lastUpdate.toLocaleTimeString()}</span>}
+            {lastUpdate && (
+              <span className="last-update">
+                {" "}
+                • Updated {formatTime(lastUpdate, "--:--:--")}
+              </span>
+            )}
           </p>
         </div>
 
         <div className="header-right">
           <div className="system-status-grid">
-            <div className={`status-badge red-team ${offensiveData?.status === 'operational' ? 'active' : 'inactive'}`}>
+            <div
+              className={`status-badge red-team ${offensiveData?.status === "operational" ? "active" : "inactive"}`}
+            >
               <span className="badge-icon">🔴</span>
               <span className="badge-label">Red Team</span>
             </div>
-            <div className={`status-badge blue-team ${defensiveData?.status === 'active' ? 'active' : 'inactive'}`}>
+            <div
+              className={`status-badge blue-team ${defensiveData?.status === "active" ? "active" : "inactive"}`}
+            >
               <span className="badge-icon">🔵</span>
               <span className="badge-label">Blue Team</span>
             </div>
-            <div className={`status-badge purple-team ${purpleData?.status === 'monitoring' ? 'active' : 'inactive'}`}>
+            <div
+              className={`status-badge purple-team ${purpleData?.status === "monitoring" ? "active" : "inactive"}`}
+            >
               <span className="badge-icon">🟣</span>
               <span className="badge-label">Purple Team</span>
             </div>
@@ -186,19 +205,19 @@ export const ADWPanel = () => {
 
   const renderTabs = () => {
     const tabs = [
-      { id: 'overview', label: 'Overview', icon: '📊' },
-      { id: 'offensive', label: 'Red Team', icon: '🔴' },
-      { id: 'defensive', label: 'Blue Team', icon: '🔵' },
-      { id: 'purple', label: 'Purple Team', icon: '🟣' },
-      { id: 'osint', label: 'OSINT Workflows', icon: '🔍' }
+      { id: "overview", label: "Overview", icon: "📊" },
+      { id: "offensive", label: "Red Team", icon: "🔴" },
+      { id: "defensive", label: "Blue Team", icon: "🔵" },
+      { id: "purple", label: "Purple Team", icon: "🟣" },
+      { id: "osint", label: "OSINT Workflows", icon: "🔍" },
     ];
 
     return (
       <div className="adw-tabs">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`tab-button ${selectedView === tab.id ? 'active' : ''}`}
+            className={`tab-button ${selectedView === tab.id ? "active" : ""}`}
             onClick={() => setSelectedView(tab.id)}
           >
             <span className="tab-icon">{tab.icon}</span>
@@ -220,16 +239,20 @@ export const ADWPanel = () => {
               <div className="metric-item">
                 <div className="metric-label">Status</div>
                 <div className={`metric-value status-${offensiveData?.status}`}>
-                  {(offensiveData?.status || 'offline').toUpperCase()}
+                  {(offensiveData?.status || "offline").toUpperCase()}
                 </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Active Campaigns</div>
-                <div className="metric-value">{offensiveData?.active_campaigns || 0}</div>
+                <div className="metric-value">
+                  {offensiveData?.active_campaigns || 0}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Total Exploits</div>
-                <div className="metric-value">{offensiveData?.total_exploits || 0}</div>
+                <div className="metric-value">
+                  {offensiveData?.total_exploits || 0}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Success Rate</div>
@@ -247,31 +270,45 @@ export const ADWPanel = () => {
               <div className="metric-item">
                 <div className="metric-label">Status</div>
                 <div className={`metric-value status-${defensiveData?.status}`}>
-                  {(defensiveData?.status || 'offline').toUpperCase()}
+                  {(defensiveData?.status || "offline").toUpperCase()}
                 </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Active Agents</div>
-                <div className="metric-value">{defensiveData?.active_agents || 0}/{defensiveData?.total_agents || 8}</div>
+                <div className="metric-value">
+                  {defensiveData?.active_agents || 0}/
+                  {defensiveData?.total_agents || 8}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Threats Detected</div>
-                <div className="metric-value">{defensiveData?.threats_detected || 0}</div>
+                <div className="metric-value">
+                  {defensiveData?.threats_detected || 0}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Threats Mitigated</div>
-                <div className="metric-value">{defensiveData?.threats_mitigated || 0}</div>
+                <div className="metric-value">
+                  {defensiveData?.threats_mitigated || 0}
+                </div>
               </div>
             </div>
 
             {/* Agent Status Grid */}
             {defensiveData?.agents && (
               <div className="agents-grid">
-                {Object.entries(defensiveData.agents).map(([agentName, agentData]) => (
-                  <div key={agentName} className={`agent-chip ${agentData.status}`}>
-                    <span className="agent-name">{agentName.replace('_', ' ')}</span>
-                  </div>
-                ))}
+                {Object.entries(defensiveData.agents).map(
+                  ([agentName, agentData]) => (
+                    <div
+                      key={agentName}
+                      className={`agent-chip ${agentData.status}`}
+                    >
+                      <span className="agent-name">
+                        {agentName.replace("_", " ")}
+                      </span>
+                    </div>
+                  ),
+                )}
               </div>
             )}
           </div>
@@ -283,34 +320,44 @@ export const ADWPanel = () => {
               <div className="metric-item">
                 <div className="metric-label">Status</div>
                 <div className={`metric-value status-${purpleData?.status}`}>
-                  {(purpleData?.status || 'offline').toUpperCase()}
+                  {(purpleData?.status || "offline").toUpperCase()}
                 </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Red Score</div>
-                <div className="metric-value">{(purpleData?.red_team_score || 0).toFixed(2)}</div>
+                <div className="metric-value">
+                  {(purpleData?.red_team_score || 0).toFixed(2)}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Blue Score</div>
-                <div className="metric-value">{(purpleData?.blue_team_score || 0).toFixed(2)}</div>
+                <div className="metric-value">
+                  {(purpleData?.blue_team_score || 0).toFixed(2)}
+                </div>
               </div>
               <div className="metric-item">
                 <div className="metric-label">Cycles Completed</div>
-                <div className="metric-value">{purpleData?.cycles_completed || 0}</div>
+                <div className="metric-value">
+                  {purpleData?.cycles_completed || 0}
+                </div>
               </div>
             </div>
 
             <div className="evolution-trends">
               <div className="trend-item">
                 <span className="trend-label">Red Trend:</span>
-                <span className={`trend-value ${purpleData?.improvement_trend?.red}`}>
-                  {purpleData?.improvement_trend?.red || 'stable'}
+                <span
+                  className={`trend-value ${purpleData?.improvement_trend?.red}`}
+                >
+                  {purpleData?.improvement_trend?.red || "stable"}
                 </span>
               </div>
               <div className="trend-item">
                 <span className="trend-label">Blue Trend:</span>
-                <span className={`trend-value ${purpleData?.improvement_trend?.blue}`}>
-                  {purpleData?.improvement_trend?.blue || 'stable'}
+                <span
+                  className={`trend-value ${purpleData?.improvement_trend?.blue}`}
+                >
+                  {purpleData?.improvement_trend?.blue || "stable"}
                 </span>
               </div>
             </div>
@@ -323,21 +370,29 @@ export const ADWPanel = () => {
               <div className="metrics-grid">
                 <div className="metric-item">
                   <div className="metric-label">Status</div>
-                  <div className={`metric-value status-${coagulationData?.status}`}>
-                    {(coagulationData?.status || 'offline').toUpperCase()}
+                  <div
+                    className={`metric-value status-${coagulationData?.status}`}
+                  >
+                    {(coagulationData?.status || "offline").toUpperCase()}
                   </div>
                 </div>
                 <div className="metric-item">
                   <div className="metric-label">Cascades Completed</div>
-                  <div className="metric-value">{coagulationData?.cascades_completed || 0}</div>
+                  <div className="metric-value">
+                    {coagulationData?.cascades_completed || 0}
+                  </div>
                 </div>
                 <div className="metric-item">
                   <div className="metric-label">Active Containments</div>
-                  <div className="metric-value">{coagulationData?.active_containments || 0}</div>
+                  <div className="metric-value">
+                    {coagulationData?.active_containments || 0}
+                  </div>
                 </div>
                 <div className="metric-item">
                   <div className="metric-label">Restoration Cycles</div>
-                  <div className="metric-value">{coagulationData?.restoration_cycles || 0}</div>
+                  <div className="metric-value">
+                    {coagulationData?.restoration_cycles || 0}
+                  </div>
                 </div>
               </div>
             </div>
@@ -360,7 +415,9 @@ export const ADWPanel = () => {
 
             <div className="control-inputs">
               <div className="input-group">
-                <label htmlFor="campaign-objective" className="input-label">Objective</label>
+                <label htmlFor="campaign-objective" className="input-label">
+                  Objective
+                </label>
                 <input
                   id="campaign-objective"
                   type="text"
@@ -372,7 +429,9 @@ export const ADWPanel = () => {
               </div>
 
               <div className="input-group">
-                <label htmlFor="campaign-scope" className="input-label">Scope (comma-separated)</label>
+                <label htmlFor="campaign-scope" className="input-label">
+                  Scope (comma-separated)
+                </label>
                 <input
                   id="campaign-scope"
                   type="text"
@@ -389,24 +448,28 @@ export const ADWPanel = () => {
               onClick={handleCreateCampaign}
               disabled={campaignResult?.loading}
             >
-              {campaignResult?.loading ? '⏳ Creating...' : '🚀 Launch Campaign'}
+              {campaignResult?.loading
+                ? "⏳ Creating..."
+                : "🚀 Launch Campaign"}
             </button>
 
             {campaignResult && !campaignResult.loading && (
-              <div className={`campaign-result ${campaignResult.success ? 'success' : 'error'}`}>
+              <div
+                className={`campaign-result ${campaignResult.success ? "success" : "error"}`}
+              >
                 {campaignResult.success ? (
                   <>
                     <div>✅ Campaign created successfully</div>
                     <div className="result-details">
-                      ID: {campaignResult.data?.campaign_id} |
-                      Status: {campaignResult.data?.status}
+                      ID: {campaignResult.data?.campaign_id} | Status:{" "}
+                      {campaignResult.data?.status}
                     </div>
                   </>
                 ) : (
                   <>
                     <div>❌ Campaign creation failed</div>
                     <div className="result-details">
-                      Error: {campaignResult.error || 'Unknown'}
+                      Error: {campaignResult.error || "Unknown"}
                     </div>
                   </>
                 )}
@@ -424,14 +487,21 @@ export const ADWPanel = () => {
             ) : (
               <div className="campaigns-list">
                 {campaignList.map((campaign, index) => (
-                  <div key={campaign.campaign_id || index} className="campaign-item">
+                  <div
+                    key={campaign.campaign_id || index}
+                    className="campaign-item"
+                  >
                     <div className="campaign-header">
-                      <span className="campaign-id">{campaign.campaign_id}</span>
+                      <span className="campaign-id">
+                        {campaign.campaign_id}
+                      </span>
                       <span className={`campaign-status ${campaign.status}`}>
                         {campaign.status}
                       </span>
                     </div>
-                    <div className="campaign-objective">{campaign.objective}</div>
+                    <div className="campaign-objective">
+                      {campaign.objective}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -451,24 +521,36 @@ export const ADWPanel = () => {
             <div className="control-card agents-detail-card">
               <h3>🦠 Immune System Agents</h3>
               <div className="agents-detail-grid">
-                {Object.entries(defensiveData.agents).map(([agentName, agentData]) => (
-                  <div key={agentName} className="agent-detail-card">
-                    <div className="agent-header">
-                      <span className="agent-name">{agentName.replace('_', ' ').toUpperCase()}</span>
-                      <span className={`agent-status-badge ${agentData.status}`}>
-                        {agentData.status}
-                      </span>
+                {Object.entries(defensiveData.agents).map(
+                  ([agentName, agentData]) => (
+                    <div key={agentName} className="agent-detail-card">
+                      <div className="agent-header">
+                        <span className="agent-name">
+                          {agentName.replace("_", " ").toUpperCase()}
+                        </span>
+                        <span
+                          className={`agent-status-badge ${agentData.status}`}
+                        >
+                          {agentData.status}
+                        </span>
+                      </div>
+                      <div className="agent-metrics">
+                        {Object.entries(agentData)
+                          .filter(([key]) => key !== "status")
+                          .map(([key, value]) => (
+                            <div key={key} className="agent-metric">
+                              <span className="agent-metric-label">
+                                {key.replace("_", " ")}:
+                              </span>
+                              <span className="agent-metric-value">
+                                {value}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
                     </div>
-                    <div className="agent-metrics">
-                      {Object.entries(agentData).filter(([key]) => key !== 'status').map(([key, value]) => (
-                        <div key={key} className="agent-metric">
-                          <span className="agent-metric-label">{key.replace('_', ' ')}:</span>
-                          <span className="agent-metric-value">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
           )}
@@ -482,20 +564,26 @@ export const ADWPanel = () => {
               </div>
             ) : (
               <div className="threats-list">
-                {Array.isArray(threatData) && threatData.map((threat, index) => (
-                  <div key={threat.threat_id || index} className={`threat-item severity-${threat.threat_level}`}>
-                    <div className="threat-header">
-                      <span className="threat-type">{threat.threat_type}</span>
-                      <span className={`threat-level ${threat.threat_level}`}>
-                        {threat.threat_level?.toUpperCase()}
-                      </span>
+                {Array.isArray(threatData) &&
+                  threatData.map((threat, index) => (
+                    <div
+                      key={threat.threat_id || index}
+                      className={`threat-item severity-${threat.threat_level}`}
+                    >
+                      <div className="threat-header">
+                        <span className="threat-type">
+                          {threat.threat_type}
+                        </span>
+                        <span className={`threat-level ${threat.threat_level}`}>
+                          {threat.threat_level?.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="threat-details">
+                        <span>Detected by: {threat.detected_by}</span>
+                        <span>Status: {threat.mitigation_status}</span>
+                      </div>
                     </div>
-                    <div className="threat-details">
-                      <span>Detected by: {threat.detected_by}</span>
-                      <span>Status: {threat.mitigation_status}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
@@ -525,11 +613,15 @@ export const ADWPanel = () => {
             <div className="evolution-info">
               <div className="info-item">
                 <span className="info-label">Last Cycle:</span>
-                <span className="info-value">{purpleData?.last_cycle || 'Never'}</span>
+                <span className="info-value">
+                  {purpleData?.last_cycle || "Never"}
+                </span>
               </div>
               <div className="info-item">
                 <span className="info-label">Total Cycles:</span>
-                <span className="info-value">{purpleData?.cycles_completed || 0}</span>
+                <span className="info-value">
+                  {purpleData?.cycles_completed || 0}
+                </span>
               </div>
             </div>
           </div>
@@ -540,22 +632,30 @@ export const ADWPanel = () => {
             <div className="scores-grid">
               <div className="score-item red">
                 <div className="score-label">🔴 Red Team</div>
-                <div className="score-value">{(purpleData?.red_team_score || 0).toFixed(3)}</div>
+                <div className="score-value">
+                  {(purpleData?.red_team_score || 0).toFixed(3)}
+                </div>
                 <div className="score-bar">
                   <div
                     className="score-fill red"
-                    style={{ width: `${(purpleData?.red_team_score || 0) * 100}%` }}
+                    style={{
+                      width: `${(purpleData?.red_team_score || 0) * 100}%`,
+                    }}
                   />
                 </div>
               </div>
 
               <div className="score-item blue">
                 <div className="score-label">🔵 Blue Team</div>
-                <div className="score-value">{(purpleData?.blue_team_score || 0).toFixed(3)}</div>
+                <div className="score-value">
+                  {(purpleData?.blue_team_score || 0).toFixed(3)}
+                </div>
                 <div className="score-bar">
                   <div
                     className="score-fill blue"
-                    style={{ width: `${(purpleData?.blue_team_score || 0) * 100}%` }}
+                    style={{
+                      width: `${(purpleData?.blue_team_score || 0) * 100}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -587,11 +687,11 @@ export const ADWPanel = () => {
       {renderTabs()}
 
       <div className="adw-content">
-        {selectedView === 'overview' && renderOverview()}
-        {selectedView === 'offensive' && renderOffensive()}
-        {selectedView === 'defensive' && renderDefensive()}
-        {selectedView === 'purple' && renderPurple()}
-        {selectedView === 'osint' && <OSINTWorkflowsPanel />}
+        {selectedView === "overview" && renderOverview()}
+        {selectedView === "offensive" && renderOffensive()}
+        {selectedView === "defensive" && renderDefensive()}
+        {selectedView === "purple" && renderPurple()}
+        {selectedView === "osint" && <OSINTWorkflowsPanel />}
       </div>
     </div>
   );

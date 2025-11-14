@@ -1,5 +1,6 @@
-import React from 'react';
-import styles from './ExecutionTimeline.module.css';
+import React from "react";
+import styles from "./ExecutionTimeline.module.css";
+import { formatTime } from "../../../../utils/dateHelpers";
 
 export const ExecutionTimeline = ({ analysisSteps }) => {
   return (
@@ -18,16 +19,16 @@ export const ExecutionTimeline = ({ analysisSteps }) => {
           {analysisSteps.map((step, idx) => (
             <div key={idx} className={styles.step}>
               <div className={styles.stepIcon}>
-                {step.status === 'running' && (
+                {step.status === "running" && (
                   <div className={styles.spinner}></div>
                 )}
-                {step.status === 'completed' && (
+                {step.status === "completed" && (
                   <span className={styles.iconCompleted}>✅</span>
                 )}
-                {step.status === 'warning' && (
+                {step.status === "warning" && (
                   <span className={styles.iconWarning}>⚠️</span>
                 )}
-                {step.status === 'failed' && (
+                {step.status === "failed" && (
                   <span className={styles.iconFailed}>❌</span>
                 )}
               </div>
@@ -36,7 +37,7 @@ export const ExecutionTimeline = ({ analysisSteps }) => {
                   {step.message}
                 </div>
                 <div className={styles.timestamp}>
-                  {step.timestamp.toLocaleTimeString()}
+                  {formatTime(step.timestamp, "--:--:--")}
                 </div>
                 {step.result && (
                   <div className={styles.result}>
