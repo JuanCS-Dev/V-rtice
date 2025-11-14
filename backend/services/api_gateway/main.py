@@ -688,7 +688,11 @@ async def ip_analyze_adapter(request: Request):
 @app.api_route(
     "/api/maximus/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_maximus_route(path: str, request: Request):
+async def api_maximus_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/maximus/* → /core/*"""
     # Alias: /status → /health (Maximus only has /health endpoint)
     if path == "status":
@@ -699,7 +703,11 @@ async def api_maximus_route(path: str, request: Request):
 @app.api_route(
     "/api/eureka/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_eureka_route(path: str, request: Request):
+async def api_eureka_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/eureka/* → /eureka/*"""
     return await _proxy_request(EUREKA_SERVICE_URL, path, request)
 
@@ -707,7 +715,11 @@ async def api_eureka_route(path: str, request: Request):
 @app.api_route(
     "/api/oraculo/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_oraculo_route(path: str, request: Request):
+async def api_oraculo_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/oraculo/* → /oraculo/*"""
     return await _proxy_request(ORACULO_SERVICE_URL, path, request)
 
@@ -716,7 +728,11 @@ async def api_oraculo_route(path: str, request: Request):
 @app.api_route(
     "/api/network-recon/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_network_recon_route(path: str, request: Request):
+async def api_network_recon_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/network-recon/* → network-recon-service"""
     return await _proxy_request(NETWORK_RECON_SERVICE_URL, path, request)
 
@@ -724,13 +740,21 @@ async def api_network_recon_route(path: str, request: Request):
 @app.api_route(
     "/api/bas/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_bas_route(path: str, request: Request):
+async def api_bas_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/bas/* → bas-service"""
     return await _proxy_request(BAS_SERVICE_URL, path, request)
 
 
 @app.api_route("/api/c2/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
-async def api_c2_route(path: str, request: Request):
+async def api_c2_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/c2/* → c2-orchestration-service"""
     return await _proxy_request(C2_ORCHESTRATION_SERVICE_URL, path, request)
 
@@ -738,7 +762,11 @@ async def api_c2_route(path: str, request: Request):
 @app.api_route(
     "/api/web-attack/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_web_attack_route(path: str, request: Request):
+async def api_web_attack_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/web-attack/* → web-attack-service"""
     return await _proxy_request(WEB_ATTACK_SERVICE_URL, path, request)
 
@@ -746,7 +774,11 @@ async def api_web_attack_route(path: str, request: Request):
 @app.api_route(
     "/api/vuln-intel/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_vuln_intel_route(path: str, request: Request):
+async def api_vuln_intel_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/vuln-intel/* → vuln-intel-service"""
     return await _proxy_request(VULN_INTEL_SERVICE_URL, path, request)
 
@@ -755,7 +787,11 @@ async def api_vuln_intel_route(path: str, request: Request):
 @app.api_route(
     "/api/behavioral/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_behavioral_route(path: str, request: Request):
+async def api_behavioral_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/behavioral/* → behavioral-analyzer-service"""
     return await _proxy_request(BEHAVIORAL_ANALYZER_SERVICE_URL, path, request)
 
@@ -763,7 +799,11 @@ async def api_behavioral_route(path: str, request: Request):
 @app.api_route(
     "/api/traffic/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_traffic_route(path: str, request: Request):
+async def api_traffic_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/traffic/* → traffic-analyzer-service"""
     return await _proxy_request(TRAFFIC_ANALYZER_SERVICE_URL, path, request)
 
@@ -771,7 +811,11 @@ async def api_traffic_route(path: str, request: Request):
 @app.api_route(
     "/api/mav/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_mav_route(path: str, request: Request):
+async def api_mav_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/mav/* → mav-detection-service"""
     return await _proxy_request(MAV_DETECTION_SERVICE_URL, path, request)
 
@@ -780,7 +824,11 @@ async def api_mav_route(path: str, request: Request):
 @app.api_route(
     "/api/osint/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_osint_route(path: str, request: Request):
+async def api_osint_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/osint/* → osint-service:8049"""
     return await _proxy_request(OSINT_SERVICE_URL, path, request)
 
@@ -788,13 +836,21 @@ async def api_osint_route(path: str, request: Request):
 @app.api_route(
     "/api/domain/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_domain_route(path: str, request: Request):
+async def api_domain_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/domain/* → domain-service:8014"""
     return await _proxy_request(DOMAIN_SERVICE_URL, path, request)
 
 
 @app.api_route("/api/ip/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
-async def api_ip_route(path: str, request: Request):
+async def api_ip_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/ip/* → ip-intelligence-service:8034"""
     return await _proxy_request(IP_INTELLIGENCE_SERVICE_URL, path, request)
 
@@ -802,7 +858,11 @@ async def api_ip_route(path: str, request: Request):
 @app.api_route(
     "/api/threat-intel/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_threat_intel_route(path: str, request: Request):
+async def api_threat_intel_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/threat-intel/* → threat-intel-service:8059"""
     return await _proxy_request(THREAT_INTEL_SERVICE_URL, path, request)
 
@@ -810,7 +870,11 @@ async def api_threat_intel_route(path: str, request: Request):
 @app.api_route(
     "/api/nmap/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_nmap_route(path: str, request: Request):
+async def api_nmap_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/nmap/* → nmap-service:8047"""
     return await _proxy_request(NMAP_SERVICE_URL, path, request)
 
@@ -819,7 +883,11 @@ async def api_nmap_route(path: str, request: Request):
 @app.api_route(
     "/api/consciousness/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_consciousness_route(path: str, request: Request):
+async def api_consciousness_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/consciousness/* → maximus-core-service
     Note: Consciousness endpoints are exposed by Maximus Core Service"""
     return await _proxy_request(MAXIMUS_CORE_SERVICE_URL, path, request)
@@ -829,7 +897,11 @@ async def api_consciousness_route(path: str, request: Request):
     "/api/reactive-fabric/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
 )
-async def api_reactive_fabric_route(path: str, request: Request):
+async def api_reactive_fabric_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/reactive-fabric/* → reactive-fabric-core:8600"""
     return await _proxy_request(REACTIVE_FABRIC_SERVICE_URL, path, request)
 
@@ -837,7 +909,11 @@ async def api_reactive_fabric_route(path: str, request: Request):
 @app.api_route(
     "/api/immune/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_immune_route(path: str, request: Request):
+async def api_immune_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/immune/* → ai-immune-system:8073"""
     return await _proxy_request(AI_IMMUNE_SYSTEM_SERVICE_URL, path, request)
 
@@ -845,7 +921,11 @@ async def api_immune_route(path: str, request: Request):
 @app.api_route(
     "/api/tegumentar/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_tegumentar_route(path: str, request: Request):
+async def api_tegumentar_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/tegumentar/* → tegumentar-service:8085"""
     return await _proxy_request(TEGUMENTAR_SERVICE_URL, path, request)
 
@@ -853,7 +933,11 @@ async def api_tegumentar_route(path: str, request: Request):
 @app.api_route(
     "/api/visual-cortex/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_visual_cortex_route(path: str, request: Request):
+async def api_visual_cortex_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/visual-cortex/* → visual-cortex-service"""
     return await _proxy_request(VISUAL_CORTEX_SERVICE_URL, path, request)
 
@@ -862,7 +946,11 @@ async def api_visual_cortex_route(path: str, request: Request):
     "/api/auditory-cortex/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
 )
-async def api_auditory_cortex_route(path: str, request: Request):
+async def api_auditory_cortex_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/auditory-cortex/* → auditory-cortex-service"""
     return await _proxy_request(AUDITORY_CORTEX_SERVICE_URL, path, request)
 
@@ -870,7 +958,11 @@ async def api_auditory_cortex_route(path: str, request: Request):
 @app.api_route(
     "/api/somatosensory/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"]
 )
-async def api_somatosensory_route(path: str, request: Request):
+async def api_somatosensory_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/somatosensory/* → somatosensory-service"""
     return await _proxy_request(SOMATOSENSORY_SERVICE_URL, path, request)
 
@@ -879,7 +971,11 @@ async def api_somatosensory_route(path: str, request: Request):
     "/api/chemical-sensing/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
 )
-async def api_chemical_sensing_route(path: str, request: Request):
+async def api_chemical_sensing_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/chemical-sensing/* → chemical-sensing-service"""
     return await _proxy_request(CHEMICAL_SENSING_SERVICE_URL, path, request)
 
@@ -889,7 +985,11 @@ async def api_chemical_sensing_route(path: str, request: Request):
     "/api/adaptive-immunity/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
 )
-async def api_adaptive_immunity_route(path: str, request: Request):
+async def api_adaptive_immunity_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/adaptive-immunity/* → adaptive-immunity-service:8300
 
     Adaptive Immunity Service handles biological-inspired adaptive learning:
@@ -907,7 +1007,11 @@ async def api_adaptive_immunity_route(path: str, request: Request):
     "/api/adaptive-immune-system/{path:path}",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
 )
-async def api_adaptive_immune_system_route(path: str, request: Request):
+async def api_adaptive_immune_system_route(
+    path: str,
+    request: Request,
+    api_key: str = Depends(verify_api_key)
+):
     """Frontend-compatible route: /api/adaptive-immune-system/* → adaptive-immune-system:8280
 
     Adaptive Immune System (FASE 2 Complete) handles CVE detection and remediation:
