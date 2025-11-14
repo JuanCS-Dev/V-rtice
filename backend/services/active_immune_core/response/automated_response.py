@@ -457,8 +457,55 @@ class AutomatedResponseEngine:
                             await self._rollback_actions(action_results, context)
                             break
             else:
-                # Parallel execution (TODO: implement with asyncio.gather)
-                pass
+                # Parallel execution - Execute all actions concurrently
+                logger.info(
+                    f"Executing {len(actions)} actions in parallel "
+                    f"(max_parallel={playbook.max_parallel})"
+                )
+
+                # Create tasks for all actions
+                tasks = [
+                    self._execute_action(action, context)
+                    for action in actions
+                ]
+
+                # Execute all tasks concurrently with asyncio.gather
+                # return_exceptions=True ensures one failure doesn't stop others
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                # Process results
+                for idx, result in enumerate(results):
+                    if isinstance(result, Exception):
+                        # Task raised an exception
+                        logger.error(
+                            f"Parallel action {actions[idx].action_id} failed with exception: {result}",
+                            exc_info=result
+                        )
+                        action_results.append({
+                            "action_id": actions[idx].action_id,
+                            "status": ActionStatus.FAILED.value,
+                            "error": str(result),
+                            "timestamp": datetime.utcnow().isoformat()
+                        })
+                        failed += 1
+                        errors.append(str(result))
+                    else:
+                        # Task completed successfully (or returned a result dict)
+                        action_results.append(result)
+
+                        if result["status"] == ActionStatus.SUCCESS.value:
+                            executed += 1
+                        elif result["status"] == ActionStatus.HOTL_REQUIRED.value:
+                            pending_hotl += 1
+                        elif result["status"] == ActionStatus.FAILED.value:
+                            failed += 1
+                            errors.append(result.get("error", "Unknown error"))
+
+                # Log parallel execution summary
+                logger.info(
+                    f"Parallel execution complete: {executed} successful, "
+                    f"{failed} failed, {pending_hotl} pending HOTL"
+                )
 
             # Calculate status
             if failed > 0 and executed == 0:
