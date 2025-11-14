@@ -47,6 +47,54 @@ export const setTokenRefreshHandler = (handler) => {
 };
 
 /**
+ * CORS Preflight cache (to avoid redundant OPTIONS requests)
+ * Boris Cherny Pattern: Performance optimization with safety
+ */
+const corsPreflightCache = new Map();
+const PREFLIGHT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Check CORS preflight (OPTIONS) for an endpoint
+ * Phase 1.5: Detect CORS issues before actual requests fail
+ */
+const checkCORSPreflight = async (endpoint) => {
+  // Check cache first
+  const cached = corsPreflightCache.get(endpoint);
+  if (cached && Date.now() - cached.timestamp < PREFLIGHT_CACHE_TTL) {
+    return cached.allowed;
+  }
+
+  try {
+    const url = `${API_BASE}${endpoint}`;
+    const response = await fetch(url, {
+      method: "OPTIONS",
+      headers: {
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type,x-api-key,x-csrf-token",
+      },
+    });
+
+    const allowed = response.ok || response.status === 204;
+
+    // Cache result
+    corsPreflightCache.set(endpoint, {
+      allowed,
+      timestamp: Date.now(),
+    });
+
+    if (!allowed) {
+      logger.warn(`CORS preflight failed for ${endpoint}: ${response.status}`);
+    }
+
+    return allowed;
+  } catch (error) {
+    logger.warn(`CORS preflight check failed for ${endpoint}:`, error);
+    // Don't block the request - let it proceed and fail naturally if CORS is really broken
+    return true;
+  }
+};
+
+/**
  * Internal request function with auth interceptor
  * Boris Cherny Pattern: Single Responsibility - handles HTTP only
  */
@@ -83,6 +131,12 @@ const request = async (endpoint, options = {}, isRetry = false) => {
         throw error;
       }
       throw error;
+    }
+
+    // Phase 1.5: Check CORS preflight (non-blocking)
+    // This helps identify CORS issues proactively but won't block requests
+    if (!isRetry && options.method === "POST") {
+      await checkCORSPreflight(endpoint);
     }
 
     const response = await makeRequest(url, options);

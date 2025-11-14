@@ -11,6 +11,7 @@ import React, {
 import logger from "@/utils/logger";
 import { safeJSONParse } from "@/utils/security";
 import { setTokenRefreshHandler } from "@/api/client";
+import secureTokenStore from "@/utils/SecureTokenStore";
 
 const AuthContext = createContext();
 
@@ -95,10 +96,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const clearAuthData = () => {
+    // Clear from SecureTokenStore (memory + sessionStorage)
+    secureTokenStore.removeToken("access_token");
+    secureTokenStore.removeToken("refresh_token");
+
+    // Legacy cleanup: Remove from localStorage (migration path)
     localStorage.removeItem("vertice_auth_token");
     localStorage.removeItem("vertice_user");
     localStorage.removeItem("vertice_token_expiry");
     localStorage.removeItem("vertice_refresh_token");
+
     setToken(null);
     setUser(null);
 
@@ -107,6 +114,8 @@ export const AuthProvider = ({ children }) => {
       clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = null;
     }
+
+    logger.info("Auth data cleared from all storage mechanisms");
   };
 
   /**
@@ -146,10 +155,11 @@ export const AuthProvider = ({ children }) => {
     isRefreshingRef.current = true;
 
     try {
-      const refreshToken = localStorage.getItem("vertice_refresh_token");
+      // Get refresh token from SecureTokenStore
+      const refreshToken = secureTokenStore.getToken("refresh_token");
 
       if (!refreshToken) {
-        logger.warn("No refresh token available");
+        logger.warn("No refresh token available in SecureTokenStore");
         isRefreshingRef.current = false;
         return false;
       }
@@ -179,14 +189,22 @@ export const AuthProvider = ({ children }) => {
       const newToken = data.access_token;
       const expiresIn = data.expires_in || 3600;
 
-      localStorage.setItem("vertice_auth_token", newToken);
+      // Store in SecureTokenStore (memory + sessionStorage)
+      secureTokenStore.setToken("access_token", newToken, expiresIn);
 
+      // Legacy: Also update localStorage for gradual migration
+      localStorage.setItem("vertice_auth_token", newToken);
       const expiryDate = new Date();
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
       localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
 
       // Update refresh token if provided
       if (data.refresh_token) {
+        secureTokenStore.setToken(
+          "refresh_token",
+          data.refresh_token,
+          30 * 24 * 3600,
+        ); // 30 days
         localStorage.setItem("vertice_refresh_token", data.refresh_token);
       }
 
@@ -195,7 +213,7 @@ export const AuthProvider = ({ children }) => {
       // Schedule next refresh
       scheduleTokenRefresh(expiresIn);
 
-      logger.info("Token refreshed successfully");
+      logger.info("Token refreshed successfully and stored securely");
       isRefreshingRef.current = false;
       return true;
     } catch (error) {
@@ -245,9 +263,18 @@ export const AuthProvider = ({ children }) => {
         const authToken = `ya29.mock_token_for_${email}`;
         const mockRefreshToken = `refresh.mock_${email}`;
         const expiresIn = 3600; // 1 hour
+
+        // Store in SecureTokenStore (memory + sessionStorage)
+        secureTokenStore.setToken("access_token", authToken, expiresIn);
+        secureTokenStore.setToken(
+          "refresh_token",
+          mockRefreshToken,
+          30 * 24 * 3600,
+        ); // 30 days
+
+        // Legacy: Also store in localStorage for gradual migration
         const expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 1);
-
         localStorage.setItem("vertice_auth_token", authToken);
         localStorage.setItem("vertice_user", JSON.stringify(userData));
         localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
@@ -258,6 +285,8 @@ export const AuthProvider = ({ children }) => {
 
         // Schedule automatic token refresh
         scheduleTokenRefresh(expiresIn);
+
+        logger.info("Mock login successful, tokens stored securely");
 
         return { success: true, user: userData };
       }
@@ -299,14 +328,25 @@ export const AuthProvider = ({ children }) => {
 
       const authToken = data.access_token;
       const expiresIn = data.expires_in || 3600;
+
+      // Store in SecureTokenStore (memory + sessionStorage)
+      secureTokenStore.setToken("access_token", authToken, expiresIn);
+
+      // Store refresh token if provided
+      if (data.refresh_token) {
+        secureTokenStore.setToken(
+          "refresh_token",
+          data.refresh_token,
+          30 * 24 * 3600,
+        ); // 30 days
+      }
+
+      // Legacy: Also store in localStorage for gradual migration
       const expiryDate = new Date();
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
-
       localStorage.setItem("vertice_auth_token", authToken);
       localStorage.setItem("vertice_user", JSON.stringify(userData));
       localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
-
-      // Store refresh token if provided
       if (data.refresh_token) {
         localStorage.setItem("vertice_refresh_token", data.refresh_token);
       }
@@ -317,7 +357,9 @@ export const AuthProvider = ({ children }) => {
       // Schedule automatic token refresh
       scheduleTokenRefresh(expiresIn);
 
-      logger.info("Login successful, token refresh scheduled");
+      logger.info(
+        "OAuth2 login successful, tokens stored securely, refresh scheduled",
+      );
 
       return { success: true, user: userData };
     } catch (error) {

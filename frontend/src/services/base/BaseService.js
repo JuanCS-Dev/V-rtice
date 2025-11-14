@@ -25,8 +25,8 @@
  * └─────────────────┘
  */
 
-import { apiClient } from '../../api/client';
-import logger from '../../utils/logger';
+import { apiClient } from "../../api/client";
+import logger from "../../utils/logger";
 
 export class BaseService {
   /**
@@ -44,7 +44,7 @@ export class BaseService {
    * @param {Object} options - Request options
    * @returns {Promise<any>} Response data
    */
-  async get(path = '', options = {}) {
+  async get(path = "", options = {}) {
     const endpoint = this.buildEndpoint(path);
 
     try {
@@ -52,7 +52,7 @@ export class BaseService {
       const response = await this.client.get(endpoint, options);
       return this.transformResponse(response);
     } catch (error) {
-      return this.handleError(error, 'GET', endpoint);
+      return this.handleError(error, "GET", endpoint);
     }
   }
 
@@ -63,7 +63,7 @@ export class BaseService {
    * @param {Object} options - Request options
    * @returns {Promise<any>} Response data
    */
-  async post(path = '', data = {}, options = {}) {
+  async post(path = "", data = {}, options = {}) {
     const endpoint = this.buildEndpoint(path);
 
     try {
@@ -74,7 +74,7 @@ export class BaseService {
       const response = await this.client.post(endpoint, data, options);
       return this.transformResponse(response);
     } catch (error) {
-      return this.handleError(error, 'POST', endpoint);
+      return this.handleError(error, "POST", endpoint);
     }
   }
 
@@ -85,7 +85,7 @@ export class BaseService {
    * @param {Object} options - Request options
    * @returns {Promise<any>} Response data
    */
-  async put(path = '', data = {}, options = {}) {
+  async put(path = "", data = {}, options = {}) {
     const endpoint = this.buildEndpoint(path);
 
     try {
@@ -95,7 +95,7 @@ export class BaseService {
       const response = await this.client.put(endpoint, data, options);
       return this.transformResponse(response);
     } catch (error) {
-      return this.handleError(error, 'PUT', endpoint);
+      return this.handleError(error, "PUT", endpoint);
     }
   }
 
@@ -105,7 +105,7 @@ export class BaseService {
    * @param {Object} options - Request options
    * @returns {Promise<any>} Response data
    */
-  async delete(path = '', options = {}) {
+  async delete(path = "", options = {}) {
     const endpoint = this.buildEndpoint(path);
 
     try {
@@ -113,7 +113,7 @@ export class BaseService {
       const response = await this.client.delete(endpoint, options);
       return this.transformResponse(response);
     } catch (error) {
-      return this.handleError(error, 'DELETE', endpoint);
+      return this.handleError(error, "DELETE", endpoint);
     }
   }
 
@@ -125,20 +125,47 @@ export class BaseService {
    */
   buildEndpoint(path) {
     if (!path) return this.baseEndpoint;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
     return `${this.baseEndpoint}${cleanPath}`;
   }
 
   /**
    * Validates request data before sending
    * Override in subclasses for specific validation
+   *
+   * Boris Cherny Pattern: Fail fast with clear error messages
+   *
    * @param {Object} data - Request data
    * @throws {Error} If validation fails
    * @protected
    */
   validateRequest(data) {
-    // Base implementation: no validation
-    // Subclasses should override this
+    // Phase 1.4: Add basic validation enforcement
+    if (data === null || data === undefined) {
+      throw new Error("Request data cannot be null or undefined");
+    }
+
+    // Enforce non-empty objects for POST/PUT requests
+    if (typeof data === "object" && !Array.isArray(data)) {
+      const keys = Object.keys(data);
+      if (keys.length === 0) {
+        logger.warn(
+          `${this.constructor.name}: Sending empty object. Consider if this is intentional.`,
+        );
+      }
+    }
+
+    // Check payload size (prevent accidental large payloads)
+    const payloadSize = JSON.stringify(data).length;
+    const MAX_PAYLOAD_SIZE = 5 * 1024 * 1024; // 5MB
+
+    if (payloadSize > MAX_PAYLOAD_SIZE) {
+      throw new Error(
+        `Request payload too large: ${(payloadSize / 1024 / 1024).toFixed(2)}MB (max: 5MB)`,
+      );
+    }
+
+    // Subclasses should override for specific validation
     return true;
   }
 
@@ -164,11 +191,14 @@ export class BaseService {
    * @protected
    */
   handleError(error, method, endpoint) {
-    logger.error(`[${this.constructor.name}] ${method} ${endpoint} failed:`, error);
+    logger.error(
+      `[${this.constructor.name}] ${method} ${endpoint} failed:`,
+      error,
+    );
 
     // Enhanced error with context
     const enhancedError = new Error(
-      error.message || `${method} request to ${endpoint} failed`
+      error.message || `${method} request to ${endpoint} failed`,
     );
     enhancedError.originalError = error;
     enhancedError.method = method;
@@ -185,11 +215,11 @@ export class BaseService {
    * @protected
    */
   extractErrorMessage(error) {
-    if (typeof error === 'string') return error;
+    if (typeof error === "string") return error;
     if (error.message) return error.message;
     if (error.detail) return error.detail;
     if (error.error) return error.error;
-    return 'Unknown error occurred';
+    return "Unknown error occurred";
   }
 
   /**
@@ -212,9 +242,9 @@ export class BaseService {
         if (attempt < maxRetries - 1) {
           const delay = baseDelay * Math.pow(2, attempt);
           logger.warn(
-            `[${this.constructor.name}] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`
+            `[${this.constructor.name}] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`,
           );
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -228,7 +258,7 @@ export class BaseService {
    */
   async healthCheck() {
     try {
-      await this.get('/health');
+      await this.get("/health");
       return true;
     } catch (error) {
       logger.error(`[${this.constructor.name}] Health check failed:`, error);
