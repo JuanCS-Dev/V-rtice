@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     docker.io \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -33,6 +34,9 @@ EXPOSE 9090
 # Checks /health endpoint + DB/Redis connectivity
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8026/health || exit 1
+
+# Entrypoint script (runs migrations before starting service)
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Run application
 CMD ["python", "main.py"]

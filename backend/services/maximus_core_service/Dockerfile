@@ -46,6 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     libpq5 \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar virtual environment do builder
@@ -62,6 +63,7 @@ RUN mkdir -p /app/models /app/logs /app/snapshots && \
     chown -R maximus:maximus /app
 
 # Copiar código da aplicação (DEPOIS das deps para cache)
+# Includes migrations/ and docker-entrypoint.sh
 COPY --chown=maximus:maximus . .
 
 # Configurar Python para produção
@@ -83,6 +85,9 @@ EXPOSE 8150 9090
 LABEL org.opencontainers.image.source="https://github.com/vertice-dev/vertice"
 LABEL org.opencontainers.image.description="MAXIMUS Core Service with uv package manager"
 LABEL org.opencontainers.image.licenses="Proprietary"
+
+# Entrypoint script (runs migrations before starting service)
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Comando de produção (1 worker para estabilidade - MAXIMUS é pesado na inicialização)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8150", "--workers", "1", "--timeout-keep-alive", "75"]
