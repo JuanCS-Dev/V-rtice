@@ -623,7 +623,7 @@ async def threat_intel_check_adapter(request: Request):
 
 
 @app.post("/api/ip/analyze")
-async def ip_analyze_adapter(request: Request):
+async def ip_analyze_adapter(request: Request, api_key: str = Depends(verify_api_key)):
     """
     Adapter: IP Analysis Gateway → IP Intelligence Service.
 
