@@ -16,6 +16,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
+import { formatDateTime } from "../../../utils/dateHelpers";
 import styles from "./CognitiveMapViewer.module.css";
 
 export const CognitiveMapViewer = ({ graph, isLoading }) => {
@@ -279,9 +280,7 @@ export const CognitiveMapViewer = ({ graph, isLoading }) => {
             <div className={styles.detailItem}>
               <span className={styles.detailLabel}>Visitado em:</span>
               <span className={styles.detailValue}>
-                {selectedNode.visited_at
-                  ? new Date(selectedNode.visited_at).toLocaleString("pt-BR")
-                  : "N/A"}
+                {formatDateTime(selectedNode.visited_at, "N/A")}
               </span>
             </div>
 

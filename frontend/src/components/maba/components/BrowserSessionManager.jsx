@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from "react";
+import { formatDateTime } from "../../../utils/dateHelpers";
 import styles from "./BrowserSessionManager.module.css";
 
 export const BrowserSessionManager = ({
@@ -37,13 +38,7 @@ export const BrowserSessionManager = ({
   };
 
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatDateTime(timestamp, "N/A");
   };
 
   const getStatusColor = (status) => {
