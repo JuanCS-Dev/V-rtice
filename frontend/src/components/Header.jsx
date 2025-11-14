@@ -1,69 +1,85 @@
-import React from 'react';
-import { ThemeSelector } from './shared/ThemeSelector/ThemeSelector';
+import React from "react";
+import { ThemeSelector } from "./shared/ThemeSelector/ThemeSelector";
+import { formatTime, formatDate } from "../utils/dateHelpers";
 
-const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKeyPress, searchHistory, setCurrentView, currentView }) => {
+const Header = ({
+  currentTime,
+  placa,
+  setPlaca,
+  loading,
+  handleSearch,
+  handleKeyPress,
+  searchHistory,
+  setCurrentView,
+  currentView,
+}) => {
   const navigationModules = [
-    { 
-      id: 'main', 
-      label: 'OPERAÇÕES GERAIS', 
-      icon: '🏠', 
-      description: 'Consultas Veiculares e Mapa Tático',
-      color: 'green'
-    },
-    { 
-      id: 'cyber', 
-      label: 'CYBER SECURITY', 
-      icon: '🛡️', 
-      description: 'Análise de Redes e Ameaças Digitais',
-      color: 'cyan'
-    },
-    { 
-      id: 'osint', 
-      label: 'INTELIGÊNCIA SOCIAL', 
-      icon: '🕵️', 
-      description: 'Investigação em Mídias Sociais',
-      color: 'purple'
+    {
+      id: "main",
+      label: "OPERAÇÕES GERAIS",
+      icon: "🏠",
+      description: "Consultas Veiculares e Mapa Tático",
+      color: "green",
     },
     {
-      id: 'terminal',
-      label: 'TERMINAL CLI',
-      icon: '💻',
-      description: 'Console Avançado para Especialistas',
-      color: 'orange'
+      id: "cyber",
+      label: "CYBER SECURITY",
+      icon: "🛡️",
+      description: "Análise de Redes e Ameaças Digitais",
+      color: "cyan",
     },
     {
-      id: 'admin',
-      label: 'ADMINISTRAÇÃO',
-      icon: '⚙️',
-      description: 'Monitoramento e Configurações',
-      color: 'yellow'
-    }
+      id: "osint",
+      label: "INTELIGÊNCIA SOCIAL",
+      icon: "🕵️",
+      description: "Investigação em Mídias Sociais",
+      color: "purple",
+    },
+    {
+      id: "terminal",
+      label: "TERMINAL CLI",
+      icon: "💻",
+      description: "Console Avançado para Especialistas",
+      color: "orange",
+    },
+    {
+      id: "admin",
+      label: "ADMINISTRAÇÃO",
+      icon: "⚙️",
+      description: "Monitoramento e Configurações",
+      color: "yellow",
+    },
   ];
 
   const getColorClasses = (color, isActive) => {
     const colors = {
       green: {
-        active: 'bg-green-500 text-black border-green-400',
-        inactive: 'bg-green-500/10 text-green-400 border-green-400/30 hover:bg-green-500/20 hover:border-green-400'
+        active: "bg-green-500 text-black border-green-400",
+        inactive:
+          "bg-green-500/10 text-green-400 border-green-400/30 hover:bg-green-500/20 hover:border-green-400",
       },
       cyan: {
-        active: 'bg-red-500 text-black border-red-400',
-        inactive: 'bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400'
+        active: "bg-red-500 text-black border-red-400",
+        inactive:
+          "bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400",
       },
       purple: {
-        active: 'bg-red-500 text-white border-red-400',
-        inactive: 'bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400'
+        active: "bg-red-500 text-white border-red-400",
+        inactive:
+          "bg-red-500/10 text-red-400 border-red-400/30 hover:bg-red-500/20 hover:border-red-400",
       },
       orange: {
-        active: 'bg-orange-500 text-white border-orange-400',
-        inactive: 'bg-orange-500/10 text-orange-400 border-orange-400/30 hover:bg-orange-500/20 hover:border-orange-400'
+        active: "bg-orange-500 text-white border-orange-400",
+        inactive:
+          "bg-orange-500/10 text-orange-400 border-orange-400/30 hover:bg-orange-500/20 hover:border-orange-400",
       },
       yellow: {
-        active: 'bg-yellow-500 text-black border-yellow-400',
-        inactive: 'bg-yellow-500/10 text-yellow-400 border-yellow-400/30 hover:bg-yellow-500/20 hover:border-yellow-400'
-      }
+        active: "bg-yellow-500 text-black border-yellow-400",
+        inactive:
+          "bg-yellow-500/10 text-yellow-400 border-yellow-400/30 hover:bg-yellow-500/20 hover:border-yellow-400",
+      },
     };
-    return colors[color][isActive ? 'active' : 'inactive'];
+    return colors[color][isActive ? "active" : "inactive"];
   };
 
   return (
@@ -78,7 +94,9 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
             <h1 className="text-2xl font-bold text-green-400 tracking-wider">
               PROJETO VÉRTICE
             </h1>
-            <p className="text-green-400/70 text-sm tracking-widest">SISTEMA DE INTELIGÊNCIA CRIMINAL</p>
+            <p className="text-green-400/70 text-sm tracking-widest">
+              SISTEMA DE INTELIGÊNCIA CRIMINAL
+            </p>
           </div>
         </div>
 
@@ -89,24 +107,26 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
           {/* Clock */}
           <div className="text-right">
             <div className="text-green-400 font-bold text-lg">
-              {currentTime.toLocaleTimeString()}
+              {formatTime(currentTime, "--:--:--")}
             </div>
             <div className="text-green-400/70 text-sm">
-              {currentTime.toLocaleDateString('pt-BR')}
+              {formatDate(currentTime, { dateStyle: "short" }, "N/A")}
             </div>
           </div>
         </div>
       </div>
 
       {/* Navegação Principal dos Módulos */}
-      <nav 
+      <nav
         className="px-4 py-3 bg-gradient-to-r from-gray-900/50 to-black/50 border-t border-green-400/20"
         role="navigation"
         aria-label="Módulos do Sistema"
       >
         <div className="flex items-center justify-center space-x-3 flex-wrap gap-y-2">
-          <span className="text-green-400/70 text-xs font-bold tracking-widest mr-4">MÓDULOS DO SISTEMA:</span>
-          {navigationModules.map(module => (
+          <span className="text-green-400/70 text-xs font-bold tracking-widest mr-4">
+            MÓDULOS DO SISTEMA:
+          </span>
+          {navigationModules.map((module) => (
             <button
               key={module.id}
               onClick={() => setCurrentView(module.id)}
@@ -114,16 +134,22 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
                 flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all duration-300 transform
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black
                 ${getColorClasses(module.color, currentView === module.id)}
-                ${currentView === module.id ? 'scale-105 shadow-lg focus:ring-current' : 'hover:scale-102 focus:ring-white/50'}
+                ${currentView === module.id ? "scale-105 shadow-lg focus:ring-current" : "hover:scale-102 focus:ring-white/50"}
               `}
               title={module.description}
               aria-label={`${module.label}: ${module.description}`}
-              aria-current={currentView === module.id ? 'page' : undefined}
+              aria-current={currentView === module.id ? "page" : undefined}
             >
-              <span className="text-lg" aria-hidden="true">{module.icon}</span>
+              <span className="text-lg" aria-hidden="true">
+                {module.icon}
+              </span>
               <div className="text-left">
-                <div className="font-bold text-xs tracking-wider">{module.label}</div>
-                <div className="text-xs opacity-80 leading-tight hidden sm:block">{module.description}</div>
+                <div className="font-bold text-xs tracking-wider">
+                  {module.label}
+                </div>
+                <div className="text-xs opacity-80 leading-tight hidden sm:block">
+                  {module.description}
+                </div>
               </div>
             </button>
           ))}
@@ -131,7 +157,7 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
       </nav>
 
       {/* Barra de Consulta (apenas no módulo principal) */}
-      {currentView === 'main' && (
+      {currentView === "main" && (
         <div className="p-4 bg-gradient-to-r from-green-900/20 to-orange-900/20">
           <div className="flex items-center space-x-4">
             <div className="flex-1 relative">
@@ -150,13 +176,13 @@ const Header = ({ currentTime, placa, setPlaca, loading, handleSearch, handleKey
                 )}
               </div>
             </div>
-            
+
             <button
               onClick={handleSearch}
               disabled={loading || !placa.trim()}
               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 disabled:from-gray-600 disabled:to-gray-700 text-black font-bold px-8 py-3 rounded-lg transition-all duration-200"
             >
-              {loading ? 'PROCESSANDO...' : 'EXECUTAR CONSULTA'}
+              {loading ? "PROCESSANDO..." : "EXECUTAR CONSULTA"}
             </button>
           </div>
 
