@@ -22,6 +22,7 @@ import { API_ENDPOINTS } from '@/config/api';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from '@/utils/logger';
+import { formatDateTime } from '@/utils/dateHelpers';
 import './Panels.css';
 
 export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
@@ -98,7 +99,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
     fetchStats();
     fetchFeedsHealth();
     fetchAPVs();
-    
+
     const statsInterval = setInterval(fetchStats, 10000);
     const feedsInterval = setInterval(fetchFeedsHealth, 30000);
     const apvsInterval = setInterval(fetchAPVs, 15000);
@@ -141,7 +142,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
       setIsScanning(false);
       setAiStatus(prev => ({
         ...prev,
-        oraculo: { ...prev.oraculo, status: 'idle', lastRun: new Date().toLocaleTimeString() }
+        oraculo: { ...prev.oraculo, status: 'idle', lastRun: formatDateTime(new Date(), '--:--:--') }
       }));
     }
   };
@@ -182,15 +183,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
   };
 
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return 'N/A';
-    const date = new Date(timestamp);
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatDateTime(timestamp, 'N/A');
   };
 
   // === RENDER ===
@@ -706,14 +699,14 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
               <div className="analogy-section">
                 <span className="analogy-icon">🔬</span>
                 <div className="analogy-text">
-                  <strong>Biologia:</strong> Células dendríticas patrulham tecidos periféricos, 
+                  <strong>Biologia:</strong> Células dendríticas patrulham tecidos periféricos,
                   capturando antígenos (patógenos), processando-os e apresentando a células T.
                 </div>
               </div>
               <div className="analogy-section">
                 <span className="analogy-icon">💻</span>
                 <div className="analogy-text">
-                  <strong>Digital:</strong> Oráculo ingere CVEs (antígenos digitais) de múltiplos 
+                  <strong>Digital:</strong> Oráculo ingere CVEs (antígenos digitais) de múltiplos
                   feeds, enriquece dados (CVSS, CWE), filtra relevância e gera APVs para o Eureka.
                 </div>
               </div>
