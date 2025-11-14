@@ -1,8 +1,16 @@
 import { API_BASE_URL } from "@/config/api";
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import logger from "@/utils/logger";
 import { safeJSONParse } from "@/utils/security";
+import { setTokenRefreshHandler } from "@/api/client";
 
 const AuthContext = createContext();
 
@@ -17,6 +25,8 @@ export const useAuth = () => {
 /**
  * AuthProvider - Sistema de autenticação integrado com vertice-terminal
  * Usa o sistema de roles do CLI (super_admin, admin, analyst, viewer)
+ *
+ * Boris Cherny Pattern: Automatic token refresh with secure storage
  */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,6 +34,10 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(
     localStorage.getItem("vertice_auth_token"),
   );
+
+  // Refs for auto-refresh timer (doesn't trigger re-renders)
+  const refreshTimerRef = useRef(null);
+  const isRefreshingRef = useRef(false);
 
   // Super Admin do sistema - configurado via environment variable
   const SUPER_ADMIN = import.meta.env.VITE_SUPER_ADMIN_EMAIL || "";
