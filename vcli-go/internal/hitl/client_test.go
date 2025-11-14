@@ -68,7 +68,8 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 	err := client.Login("wrong", "password")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "login failed with status 401")
+	// Error now uses ContextualError format: [HITL Console] AUTH Invalid credentials
+	assert.Contains(t, err.Error(), "AUTH")
 	assert.Contains(t, err.Error(), "Invalid credentials")
 	assert.Empty(t, client.accessToken)
 }
@@ -418,7 +419,8 @@ func TestLogin_NetworkError(t *testing.T) {
 	err := client.Login("user", "pass")
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to execute request")
+	// Error now uses ConnectionError format: [HITL Console] CONNECTION Failed to connect
+	assert.Contains(t, err.Error(), "CONNECTION")
 }
 
 // Edge case: Decode errors

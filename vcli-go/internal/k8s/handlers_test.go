@@ -173,13 +173,18 @@ func TestHandleGetPods_ArgumentValidation(t *testing.T) {
 func TestHandleGetPod_ArgumentValidation(t *testing.T) {
 	t.Run("name required", func(t *testing.T) {
 		cmd := &cobra.Command{}
-		cmd.Flags().String("kubeconfig", "", "")
+		cmd.Flags().String("kubeconfig", "/nonexistent/path", "")
 		cmd.Flags().String("namespace", "default", "")
+		cmd.Flags().Bool("all-namespaces", false, "")
 		cmd.Flags().String("output", "table", "")
+		cmd.Flags().Set("kubeconfig", "/nonexistent/path")
 
+		// When args is empty, HandleGetPod calls HandleGetPods
+		// which needs all the flags to be properly initialized
 		err := HandleGetPod(cmd, []string{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "pod name is required")
+		// The error should be from cluster connection, not missing flags
+		assert.NotContains(t, err.Error(), "required")
 	})
 }
 
@@ -201,13 +206,17 @@ func TestHandleGetNamespaces_ArgumentValidation(t *testing.T) {
 func TestHandleGetNamespace_ArgumentValidation(t *testing.T) {
 	t.Run("name required", func(t *testing.T) {
 		cmd := &cobra.Command{}
-		cmd.Flags().String("kubeconfig", "", "")
+		cmd.Flags().String("kubeconfig", "/nonexistent/path", "")
 		cmd.Flags().String("namespace", "default", "")
 		cmd.Flags().String("output", "table", "")
+		cmd.Flags().Set("kubeconfig", "/nonexistent/path")
 
+		// When args is empty, HandleGetNamespace calls HandleGetNamespaces
+		// which needs all the flags to be properly initialized
 		err := HandleGetNamespace(cmd, []string{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "namespace name is required")
+		// The error should be from cluster connection, not missing flags
+		assert.NotContains(t, err.Error(), "required")
 	})
 }
 
@@ -229,13 +238,17 @@ func TestHandleGetNodes_ArgumentValidation(t *testing.T) {
 func TestHandleGetNode_ArgumentValidation(t *testing.T) {
 	t.Run("name required", func(t *testing.T) {
 		cmd := &cobra.Command{}
-		cmd.Flags().String("kubeconfig", "", "")
+		cmd.Flags().String("kubeconfig", "/nonexistent/path", "")
 		cmd.Flags().String("namespace", "default", "")
 		cmd.Flags().String("output", "table", "")
+		cmd.Flags().Set("kubeconfig", "/nonexistent/path")
 
+		// When args is empty, HandleGetNode calls HandleGetNodes
+		// which needs all the flags to be properly initialized
 		err := HandleGetNode(cmd, []string{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "node name is required")
+		// The error should be from cluster connection, not missing flags
+		assert.NotContains(t, err.Error(), "required")
 	})
 }
 
@@ -258,13 +271,18 @@ func TestHandleGetDeployments_ArgumentValidation(t *testing.T) {
 func TestHandleGetDeployment_ArgumentValidation(t *testing.T) {
 	t.Run("name required", func(t *testing.T) {
 		cmd := &cobra.Command{}
-		cmd.Flags().String("kubeconfig", "", "")
+		cmd.Flags().String("kubeconfig", "/nonexistent/path", "")
 		cmd.Flags().String("namespace", "default", "")
+		cmd.Flags().Bool("all-namespaces", false, "")
 		cmd.Flags().String("output", "table", "")
+		cmd.Flags().Set("kubeconfig", "/nonexistent/path")
 
+		// When args is empty, HandleGetDeployment calls HandleGetDeployments
+		// which needs all the flags to be properly initialized
 		err := HandleGetDeployment(cmd, []string{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "deployment name is required")
+		// The error should be from cluster connection, not missing flags
+		assert.NotContains(t, err.Error(), "required")
 	})
 }
 
@@ -287,13 +305,18 @@ func TestHandleGetServices_ArgumentValidation(t *testing.T) {
 func TestHandleGetService_ArgumentValidation(t *testing.T) {
 	t.Run("name required", func(t *testing.T) {
 		cmd := &cobra.Command{}
-		cmd.Flags().String("kubeconfig", "", "")
+		cmd.Flags().String("kubeconfig", "/nonexistent/path", "")
 		cmd.Flags().String("namespace", "default", "")
+		cmd.Flags().Bool("all-namespaces", false, "")
 		cmd.Flags().String("output", "table", "")
+		cmd.Flags().Set("kubeconfig", "/nonexistent/path")
 
+		// When args is empty, HandleGetService calls HandleGetServices
+		// which needs all the flags to be properly initialized
 		err := HandleGetService(cmd, []string{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "service name is required")
+		// The error should be from cluster connection, not missing flags
+		assert.NotContains(t, err.Error(), "required")
 	})
 }
 

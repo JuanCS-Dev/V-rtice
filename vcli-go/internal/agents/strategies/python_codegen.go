@@ -202,8 +202,20 @@ func (s *PythonCodeGenStrategy) FormatCode(code string) (string, error) {
 // ValidateSyntax validates Python syntax
 func (s *PythonCodeGenStrategy) ValidateSyntax(code string) error {
 	// Use Python's compile to check syntax
-	cmd := exec.Command("python3", "-m", "py_compile", "-")
-	cmd.Stdin = strings.NewReader(code)
+	// py_compile expects a file path, not stdin, so we need to create a temp file
+	tmpFile, err := os.CreateTemp("", "validate-*.py")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+
+	if _, err := tmpFile.WriteString(code); err != nil {
+		return fmt.Errorf("failed to write temp file: %w", err)
+	}
+	tmpFile.Close() // Close before running py_compile
+
+	cmd := exec.Command("python3", "-m", "py_compile", tmpFile.Name())
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
