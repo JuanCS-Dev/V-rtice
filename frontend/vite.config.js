@@ -36,17 +36,34 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendor chunks - separate React libs for better caching
-          "vendor-react": ["react", "react-dom"],
+          // Core React (always needed)
+          "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
+
+          // State Management
           "vendor-query": ["@tanstack/react-query"],
-          "vendor-maps": ["leaflet", "react-leaflet", "d3"],
+          "vendor-store": ["zustand"],
+
+          // Visualization Libraries (HEAVY - lazy load)
+          "vendor-maps": ["leaflet", "react-leaflet"],
+          "vendor-d3": ["d3"],
+          "vendor-charts": ["recharts"],
+
+          // Terminal Emulator (HEAVY - only for MAXIMUS dashboard)
+          "vendor-terminal": ["@xterm/xterm", "@xterm/addon-fit", "@xterm/addon-search", "@xterm/addon-web-links"],
+
+          // UI Components (frequently used)
           "vendor-ui": [
             "@radix-ui/react-toast",
             "@radix-ui/react-switch",
             "@radix-ui/react-label",
             "@radix-ui/react-slot",
           ],
-          "vendor-charts": ["recharts"],
+
+          // i18n (always needed)
+          "vendor-i18n": ["i18next", "react-i18next", "i18next-browser-languagedetector"],
+
+          // Utilities
+          "vendor-utils": ["axios", "clsx", "tailwind-merge"],
         },
       },
     },
