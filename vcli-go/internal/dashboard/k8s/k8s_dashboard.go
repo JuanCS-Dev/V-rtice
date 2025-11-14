@@ -7,8 +7,6 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/NimbleMarkets/ntcharts/barchart"
-	"github.com/NimbleMarkets/ntcharts/linechart"
 	"github.com/verticedev/vcli-go/internal/dashboard"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -18,7 +16,7 @@ import (
 
 // K8sDashboard displays Kubernetes cluster metrics
 type K8sDashboard struct {
-	id       string
+	id     string
 	focused  bool
 	width    int
 	height   int
@@ -26,8 +24,6 @@ type K8sDashboard struct {
 	config   *rest.Config
 	styles   dashboard.DashboardStyles
 	data     *K8sData
-	podChart *barchart.BarChart
-	cpuChart *linechart.LineChart
 }
 
 // K8sData holds dashboard data
@@ -83,10 +79,6 @@ func (d *K8sDashboard) Init() tea.Cmd {
 			}
 		}
 	}
-
-	// Initialize charts
-	d.podChart = barchart.New(d.width-4, d.height/3)
-	d.cpuChart = linechart.New(d.width-4, d.height/3)
 
 	// Start refresh ticker
 	return d.refresh()
@@ -265,10 +257,4 @@ func (d *K8sDashboard) IsFocused() bool { return d.focused }
 func (d *K8sDashboard) Resize(width, height int) {
 	d.width = width
 	d.height = height
-	if d.podChart != nil {
-		d.podChart = barchart.New(width-4, height/3)
-	}
-	if d.cpuChart != nil {
-		d.cpuChart = linechart.New(width-4, height/3)
-	}
 }
