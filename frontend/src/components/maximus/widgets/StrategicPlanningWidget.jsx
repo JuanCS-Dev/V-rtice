@@ -422,8 +422,7 @@ export const StrategicPlanningWidget = ({ systemHealth: _systemHealth }) => {
                   </span>
                 </div>
                 <div className="approval-submitted">
-                  Submitted:{" "}
-                  {new Date(approval.submitted_at).toLocaleString("pt-BR")}
+                  Submitted: {formatDateTime(approval.submitted_at, "N/A")}
                 </div>
               </div>
             </div>
