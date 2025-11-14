@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import logger from "@/utils/logger";
 
 const WS_URL = import.meta.env.VITE_VERDICT_ENGINE_WS || 'ws://34.148.161.131:8000/ws/verdicts';
 const RECONNECT_DELAY = 3000;
@@ -55,12 +56,12 @@ export const useVerdictStream = () => {
             activeLow: prev.activeLow + (verdict.severity === 'LOW' ? 1 : 0)
           }));
         } catch (err) {
-          console.error('[VerdictStream] Failed to parse verdict:', err);
+          logger.error('[VerdictStream] Failed to parse verdict:', err);
         }
       };
 
       ws.onerror = (err) => {
-        console.error('[VerdictStream] WebSocket error:', err);
+        logger.error('[VerdictStream] WebSocket error:', err);
         setError('Connection error');
       };
 
@@ -75,7 +76,7 @@ export const useVerdictStream = () => {
 
       wsRef.current = ws;
     } catch (err) {
-      console.error('[VerdictStream] Failed to connect:', err);
+      logger.error('[VerdictStream] Failed to connect:', err);
       setError(err.message);
     }
   }, []);

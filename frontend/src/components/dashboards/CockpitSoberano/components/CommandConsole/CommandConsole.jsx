@@ -5,11 +5,17 @@
  */
 
 import React, { useState } from "react";
+import logger from "@/utils/logger";
 import PropTypes from "prop-types";
+import logger from "@/utils/logger";
 import { useTranslation } from "react-i18next";
+import logger from "@/utils/logger";
 import { formatTime } from "@/utils/dateHelpers";
+import logger from "@/utils/logger";
 import { useCommandBus } from "../../hooks/useCommandBus";
+import logger from "@/utils/logger";
 import styles from "./CommandConsole.module.css";
+import logger from "@/utils/logger";
 
 const COMMAND_TYPES = [
   {
@@ -72,7 +78,7 @@ export const CommandConsole = ({ availableAgents = [] }) => {
       setSelectedAgents([]);
       setConfirmDialogOpen(false);
     } catch (err) {
-      console.error("[CommandConsole] Command failed:", err);
+      logger.error("[CommandConsole] Command failed:", err);
     }
   };
 
