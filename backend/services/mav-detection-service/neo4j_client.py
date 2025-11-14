@@ -9,14 +9,14 @@ campaign detection, replacing in-memory dictionaries with persistent graph stora
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from neo4j import AsyncGraphDatabase, AsyncDriver
+from neo4j import AsyncDriver, AsyncGraphDatabase
 
 logger = logging.getLogger(__name__)
 
 # Global driver
-_driver: Optional[AsyncDriver] = None
+_driver: AsyncDriver | None = None
 
 
 async def init_neo4j_driver() -> AsyncDriver:
@@ -42,17 +42,13 @@ async def init_neo4j_driver() -> AsyncDriver:
 
     try:
         _driver = AsyncGraphDatabase.driver(
-            neo4j_uri,
-            auth=(neo4j_user, neo4j_password)
+            neo4j_uri, auth=(neo4j_user, neo4j_password)
         )
 
         # Verify connectivity
         await _driver.verify_connectivity()
 
-        logger.info(
-            "✅ Neo4j driver initialized",
-            extra={"uri": neo4j_uri}
-        )
+        logger.info("✅ Neo4j driver initialized", extra={"uri": neo4j_uri})
         return _driver
 
     except Exception as e:
@@ -69,7 +65,7 @@ async def close_neo4j_driver():
         logger.info("✅ Neo4j driver closed")
 
 
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Check Neo4j health.
 
@@ -81,13 +77,15 @@ async def health_check() -> Dict[str, Any]:
 
     try:
         async with _driver.session() as session:
-            result = await session.run("CALL dbms.components() YIELD name, versions RETURN name, versions")
+            result = await session.run(
+                "CALL dbms.components() YIELD name, versions RETURN name, versions"
+            )
             record = await result.single()
 
             return {
                 "healthy": True,
                 "component": record["name"],
-                "version": record["versions"][0]
+                "version": record["versions"][0],
             }
     except Exception as e:
         logger.error(f"Neo4j health check failed: {e}")
@@ -105,7 +103,7 @@ async def create_campaign(
     target_entity: str,
     start_time: str,
     confidence_score: float,
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any],
 ) -> None:
     """
     Create MAV campaign node.
@@ -134,12 +132,12 @@ async def create_campaign(
             target_entity=target_entity,
             start_time=start_time,
             confidence_score=confidence_score,
-            metadata=metadata
+            metadata=metadata,
         )
         logger.info(f"✅ Campaign created: {campaign_id}")
 
 
-async def get_campaign(campaign_id: str) -> Optional[Dict[str, Any]]:
+async def get_campaign(campaign_id: str) -> dict[str, Any] | None:
     """Get campaign by ID."""
     async with _driver.session() as session:
         result = await session.run(
@@ -150,7 +148,7 @@ async def get_campaign(campaign_id: str) -> Optional[Dict[str, Any]]:
                    c.confidence_score as confidence_score,
                    c.metadata as metadata
             """,
-            campaign_id=campaign_id
+            campaign_id=campaign_id,
         )
         record = await result.single()
 
@@ -160,7 +158,7 @@ async def get_campaign(campaign_id: str) -> Optional[Dict[str, Any]]:
         return dict(record)
 
 
-async def list_campaigns(limit: int = 100) -> List[Dict[str, Any]]:
+async def list_campaigns(limit: int = 100) -> list[dict[str, Any]]:
     """List all campaigns."""
     async with _driver.session() as session:
         result = await session.run(
@@ -172,7 +170,7 @@ async def list_campaigns(limit: int = 100) -> List[Dict[str, Any]]:
             ORDER BY c.start_time DESC
             LIMIT $limit
             """,
-            limit=limit
+            limit=limit,
         )
         records = await result.values()
 
@@ -182,7 +180,7 @@ async def list_campaigns(limit: int = 100) -> List[Dict[str, Any]]:
                 "type": r[1],
                 "target": r[2],
                 "start_time": r[3],
-                "confidence_score": r[4]
+                "confidence_score": r[4],
             }
             for r in records
         ]
@@ -198,7 +196,7 @@ async def create_account(
     username: str,
     platform: str,
     creation_date: str,
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any],
 ) -> None:
     """Create social media account node."""
     async with _driver.session() as session:
@@ -215,11 +213,13 @@ async def create_account(
             username=username,
             platform=platform,
             creation_date=creation_date,
-            metadata=metadata
+            metadata=metadata,
         )
 
 
-async def link_account_to_campaign(account_id: str, campaign_id: str, role: str) -> None:
+async def link_account_to_campaign(
+    account_id: str, campaign_id: str, role: str
+) -> None:
     """Link account to campaign with role."""
     async with _driver.session() as session:
         await session.run(
@@ -231,7 +231,7 @@ async def link_account_to_campaign(account_id: str, campaign_id: str, role: str)
             """,
             account_id=account_id,
             campaign_id=campaign_id,
-            role=role
+            role=role,
         )
 
 
@@ -243,10 +243,10 @@ async def link_account_to_campaign(account_id: str, campaign_id: str, role: str)
 async def create_post(
     post_id: str,
     account_id: str,
-    campaign_id: Optional[str],
+    campaign_id: str | None,
     content: str,
     timestamp: str,
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any],
 ) -> None:
     """Create social media post node."""
     async with _driver.session() as session:
@@ -262,7 +262,7 @@ async def create_post(
             post_id=post_id,
             content=content,
             timestamp=timestamp,
-            metadata=metadata
+            metadata=metadata,
         )
 
         # Link to account
@@ -273,7 +273,7 @@ async def create_post(
             MERGE (a)-[:POSTED]->(p)
             """,
             post_id=post_id,
-            account_id=account_id
+            account_id=account_id,
         )
 
         # Link to campaign if provided
@@ -285,7 +285,7 @@ async def create_post(
                 MERGE (p)-[:PART_OF]->(c)
                 """,
                 post_id=post_id,
-                campaign_id=campaign_id
+                campaign_id=campaign_id,
             )
 
 
@@ -294,7 +294,7 @@ async def create_post(
 # ============================================================================
 
 
-async def detect_coordinated_accounts(campaign_id: str) -> List[Dict[str, Any]]:
+async def detect_coordinated_accounts(campaign_id: str) -> list[dict[str, Any]]:
     """
     Detect coordinated accounts in a campaign using graph analysis.
 
@@ -312,22 +312,17 @@ async def detect_coordinated_accounts(campaign_id: str) -> List[Dict[str, Any]]:
                    a.platform as platform, post_count
             ORDER BY post_count DESC
             """,
-            campaign_id=campaign_id
+            campaign_id=campaign_id,
         )
         records = await result.values()
 
         return [
-            {
-                "account_id": r[0],
-                "username": r[1],
-                "platform": r[2],
-                "post_count": r[3]
-            }
+            {"account_id": r[0], "username": r[1], "platform": r[2], "post_count": r[3]}
             for r in records
         ]
 
 
-async def find_campaign_network(campaign_id: str) -> Dict[str, Any]:
+async def find_campaign_network(campaign_id: str) -> dict[str, Any]:
     """
     Get complete network for a campaign.
 
@@ -343,7 +338,7 @@ async def find_campaign_network(campaign_id: str) -> Dict[str, Any]:
             OPTIONAL MATCH (a)-[:POSTED]->(p:Post)-[:PART_OF]->(c)
             RETURN c, collect(DISTINCT a) as accounts, collect(DISTINCT p) as posts
             """,
-            campaign_id=campaign_id
+            campaign_id=campaign_id,
         )
         record = await result.single()
 
@@ -355,44 +350,50 @@ async def find_campaign_network(campaign_id: str) -> Dict[str, Any]:
 
         # Add campaign node
         campaign = record["c"]
-        nodes.append({
-            "id": campaign["id"],
-            "type": "campaign",
-            "label": campaign.get("target", "Unknown")
-        })
+        nodes.append(
+            {
+                "id": campaign["id"],
+                "type": "campaign",
+                "label": campaign.get("target", "Unknown"),
+            }
+        )
 
         # Add account nodes and edges
         for account in record["accounts"]:
             if account:
-                nodes.append({
-                    "id": account["id"],
-                    "type": "account",
-                    "label": account.get("username", "Unknown")
-                })
-                edges.append({
-                    "source": account["id"],
-                    "target": campaign["id"],
-                    "type": "PARTICIPATES_IN"
-                })
+                nodes.append(
+                    {
+                        "id": account["id"],
+                        "type": "account",
+                        "label": account.get("username", "Unknown"),
+                    }
+                )
+                edges.append(
+                    {
+                        "source": account["id"],
+                        "target": campaign["id"],
+                        "type": "PARTICIPATES_IN",
+                    }
+                )
 
         # Add post nodes
         for post in record["posts"]:
             if post:
-                nodes.append({
-                    "id": post["id"],
-                    "type": "post",
-                    "label": post.get("content", "")[:50]
-                })
-                edges.append({
-                    "source": post["id"],
-                    "target": campaign["id"],
-                    "type": "PART_OF"
-                })
+                nodes.append(
+                    {
+                        "id": post["id"],
+                        "type": "post",
+                        "label": post.get("content", "")[:50],
+                    }
+                )
+                edges.append(
+                    {"source": post["id"], "target": campaign["id"], "type": "PART_OF"}
+                )
 
         return {"nodes": nodes, "edges": edges}
 
 
-async def get_statistics() -> Dict[str, Any]:
+async def get_statistics() -> dict[str, Any]:
     """Get system-wide statistics."""
     async with _driver.session() as session:
         result = await session.run(
@@ -408,5 +409,5 @@ async def get_statistics() -> Dict[str, Any]:
         return {
             "total_campaigns": record["campaigns"],
             "total_accounts": record["accounts"],
-            "total_posts": record["posts"]
+            "total_posts": record["posts"],
         }

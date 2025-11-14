@@ -81,22 +81,22 @@ Glory to YHWH - Protecting the innocent from coordinated digital attacks
 """
 
 import asyncio
-import uuid
-from datetime import datetime, UTC, timedelta
-from enum import Enum
-from typing import Annotated, Optional
 from collections import defaultdict
+from datetime import datetime, timedelta, UTC
+from enum import Enum
 import statistics
+from typing import Annotated, Optional
+import uuid
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Security
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from opentelemetry import trace
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGISTRY
-from pydantic import BaseModel, Field
 
 # Neo4j graph database client
 import neo4j_client
+from opentelemetry import trace
+from prometheus_client import Counter, Gauge, generate_latest, Histogram, REGISTRY
+from pydantic import BaseModel, Field
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
@@ -977,14 +977,6 @@ async def get_coordinated_accounts(
 
 if __name__ == "__main__":
     import uvicorn
-
-# Constitutional v3.0 imports
-from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
-from shared.constitutional_tracing import create_constitutional_tracer
-from shared.constitutional_logging import configure_constitutional_logging
-from shared.health_checks import ConstitutionalHealthCheck
-
-
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
