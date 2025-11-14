@@ -8,6 +8,7 @@
 
 import React, { useMemo } from "react";
 import styles from "./AnomalyHeatmap.module.css";
+import { formatDateTime } from "../../../utils/dateHelpers";
 
 export const AnomalyHeatmap = ({ anomalies, timeline, isLoading }) => {
   // Generate calendar data (last 12 weeks)
@@ -178,7 +179,7 @@ export const AnomalyHeatmap = ({ anomalies, timeline, isLoading }) => {
                     {anomaly.severity.toUpperCase()}
                   </span>
                   <span className={styles.timestamp}>
-                    {new Date(anomaly.detected_at).toLocaleString("pt-BR")}
+                    {formatDateTime(anomaly.detected_at, "Data indisponível")}
                   </span>
                 </div>
                 <div className={styles.anomalyContent}>

@@ -8,6 +8,7 @@
 
 import React from "react";
 import styles from "./SystemPulseVisualization.module.css";
+import { formatTime } from "../../../utils/dateHelpers";
 
 export const SystemPulseVisualization = ({ pulse, metrics, isLoading }) => {
   if (isLoading) {
@@ -182,7 +183,7 @@ export const SystemPulseVisualization = ({ pulse, metrics, isLoading }) => {
             {pulse.status_messages.map((msg, index) => (
               <div key={index} className={styles.message}>
                 <span className={styles.messageTime}>
-                  {new Date(msg.timestamp).toLocaleTimeString("pt-BR")}
+                  {formatTime(msg.timestamp, "--:--")}
                 </span>
                 <span className={styles.messageText}>{msg.message}</span>
               </div>
