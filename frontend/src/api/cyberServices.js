@@ -144,6 +144,7 @@ export const getMyIP = async () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-API-Key": localStorage.getItem("api_key") || "",
         },
       },
     );
