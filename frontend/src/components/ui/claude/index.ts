@@ -83,13 +83,58 @@ export type { SpinnerProps, LoadingOverlayProps } from './spinner'
 // Skeleton
 export { Skeleton, CardSkeleton, ListSkeleton } from './skeleton'
 
+// ============================================================================
+// LAYOUT COMPONENTS
+// ============================================================================
+
+// Navbar
+export { Navbar, NavItemComponent, MobileNavItem } from './navbar'
+export type { NavbarProps, NavItem } from './navbar'
+
+// Sidebar
+export { Sidebar, SidebarItemComponent } from './sidebar'
+export type { SidebarProps, SidebarItem } from './sidebar'
+
+// Container & Grid
+export { Container, Grid, Stack, Inline, Section } from './container'
+export { containerVariants, gridVariants } from './container'
+export type { ContainerProps, GridProps, StackProps, InlineProps, SectionProps } from './container'
+
+// ============================================================================
+// WIDGET COMPONENTS
+// ============================================================================
+
+// Stat Cards
+export { StatCard, MetricCard } from './stat-card'
+export type { StatCardProps, MetricCardProps } from './stat-card'
+
+// Data Table
+export { DataTable } from './data-table'
+export type { DataTableProps, Column } from './data-table'
+
+// Chart Config
+export {
+  chartColors,
+  chartTheme,
+  defaultChartProps,
+  lineChartConfig,
+  barChartConfig,
+  areaChartConfig,
+  pieChartConfig,
+  getGradientId,
+  getChartColor,
+  ChartContainer,
+} from './chart-config'
+
 /**
  * Design System Tokens
  *
  * CRITICAL: Certifique-se de importar o CSS do design system:
  * @import '../../../styles/claude-design-green.css'
  *
- * Total Components: 12
+ * Total Components: 21+
+ *
+ * CORE (12):
  * - Button, Input, Textarea, Label
  * - Card (+ 5 subcomponents)
  * - Badge
@@ -98,4 +143,14 @@ export { Skeleton, CardSkeleton, ListSkeleton } from './skeleton'
  * - Alert (+ 2 subcomponents)
  * - Spinner, LoadingOverlay
  * - Skeleton, CardSkeleton, ListSkeleton
+ *
+ * LAYOUT (9+):
+ * - Navbar (+ 2 subcomponents)
+ * - Sidebar (+ 1 subcomponent)
+ * - Container, Grid, Stack, Inline, Section
+ *
+ * WIDGETS (3+):
+ * - StatCard, MetricCard
+ * - DataTable
+ * - Chart Config (verde theme)
  */
