@@ -19,28 +19,28 @@
  * return <div ref={trapRef}>...</div>;
  */
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from "react";
 
 const FOCUSABLE_SELECTORS = [
-  'a[href]',
-  'area[href]',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  'button:not([disabled])',
-  'iframe',
-  'object',
-  'embed',
-  '[contenteditable]',
-  '[tabindex]:not([tabindex^="-"])'
-].join(',');
+  "a[href]",
+  "area[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "button:not([disabled])",
+  "iframe",
+  "object",
+  "embed",
+  "[contenteditable]",
+  '[tabindex]:not([tabindex^="-"])',
+].join(",");
 
 export const useFocusTrap = ({
   active = true,
   autoFocus = true,
   returnFocus = true,
   onEscape = null,
-  allowOutsideClick = false
+  allowOutsideClick = false,
 }) => {
   const containerRef = useRef(null);
   const previousActiveElement = useRef(null);
@@ -50,61 +50,67 @@ export const useFocusTrap = ({
     if (!containerRef.current) return [];
 
     const elements = Array.from(
-      containerRef.current.querySelectorAll(FOCUSABLE_SELECTORS)
+      containerRef.current.querySelectorAll(FOCUSABLE_SELECTORS),
     );
 
-    return elements.filter(el => {
+    return elements.filter((el) => {
       return (
         el.offsetWidth > 0 &&
         el.offsetHeight > 0 &&
-        !el.hasAttribute('disabled') &&
-        !el.hasAttribute('hidden')
+        !el.hasAttribute("disabled") &&
+        !el.hasAttribute("hidden")
       );
     });
   }, []);
 
   // Handle Tab key navigation
-  const handleKeyDown = useCallback((event) => {
-    if (event.key === 'Escape' && onEscape) {
-      event.preventDefault();
-      onEscape();
-      return;
-    }
-
-    if (event.key !== 'Tab') return;
-
-    const focusableElements = getFocusableElements();
-    if (focusableElements.length === 0) return;
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
-
-    // Shift + Tab (backwards)
-    if (event.shiftKey) {
-      if (document.activeElement === firstElement) {
+  const handleKeyDown = useCallback(
+    (event) => {
+      if (event.key === "Escape" && onEscape) {
         event.preventDefault();
-        lastElement.focus();
+        onEscape();
+        return;
       }
-    }
-    // Tab (forwards)
-    else {
-      if (document.activeElement === lastElement) {
-        event.preventDefault();
-        firstElement.focus();
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      // Shift + Tab (backwards)
+      if (event.shiftKey) {
+        if (document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
       }
-    }
-  }, [getFocusableElements, onEscape]);
+      // Tab (forwards)
+      else {
+        if (document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    },
+    [getFocusableElements, onEscape],
+  );
 
   // Handle outside clicks
-  const handleClickOutside = useCallback((event) => {
-    if (
-      allowOutsideClick &&
-      containerRef.current &&
-      !containerRef.current.contains(event.target)
-    ) {
-      if (onEscape) onEscape();
-    }
-  }, [allowOutsideClick, onEscape]);
+  const handleClickOutside = useCallback(
+    (event) => {
+      if (
+        allowOutsideClick &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        if (onEscape) onEscape();
+      }
+    },
+    [allowOutsideClick, onEscape],
+  );
 
   // Activate trap
   useEffect(() => {
@@ -114,27 +120,29 @@ export const useFocusTrap = ({
     previousActiveElement.current = document.activeElement;
 
     // Auto-focus first element
+    let timeoutId;
     if (autoFocus) {
       const focusableElements = getFocusableElements();
       if (focusableElements.length > 0) {
         // Small delay to ensure DOM is ready
-        setTimeout(() => {
-          focusableElements[0].focus();
+        timeoutId = setTimeout(() => {
+          focusableElements[0]?.focus();
         }, 10);
       }
     }
 
     // Add event listeners
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     if (allowOutsideClick) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     // Cleanup
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutId) clearTimeout(timeoutId);
+      document.removeEventListener("keydown", handleKeyDown);
       if (allowOutsideClick) {
-        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener("mousedown", handleClickOutside);
       }
 
       // Return focus
@@ -149,7 +157,7 @@ export const useFocusTrap = ({
     allowOutsideClick,
     handleKeyDown,
     handleClickOutside,
-    getFocusableElements
+    getFocusableElements,
   ]);
 
   return containerRef;

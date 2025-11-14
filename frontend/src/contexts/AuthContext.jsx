@@ -1,14 +1,15 @@
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL } from "@/config/api";
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import logger from '@/utils/logger';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import logger from "@/utils/logger";
+import { safeJSONParse } from "@/utils/security";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -20,44 +21,51 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('vertice_auth_token'));
+  const [token, setToken] = useState(
+    localStorage.getItem("vertice_auth_token"),
+  );
 
   // Super Admin do sistema - configurado via environment variable
-  const SUPER_ADMIN = import.meta.env.VITE_SUPER_ADMIN_EMAIL || '';
+  const SUPER_ADMIN = import.meta.env.VITE_SUPER_ADMIN_EMAIL || "";
 
   // Roles e permissões (sincronizado com vertice-terminal)
   const ROLES = {
     super_admin: {
       email: SUPER_ADMIN,
-      permissions: ['*'], // Todas as permissões
-      level: 100
+      permissions: ["*"], // Todas as permissões
+      level: 100,
     },
     admin: {
-      permissions: ['read', 'write', 'execute', 'manage_users', 'offensive'],
-      level: 80
+      permissions: ["read", "write", "execute", "manage_users", "offensive"],
+      level: 80,
     },
     analyst: {
-      permissions: ['read', 'write', 'execute'],
-      level: 50
+      permissions: ["read", "write", "execute"],
+      level: 50,
     },
     viewer: {
-      permissions: ['read'],
-      level: 10
-    }
+      permissions: ["read"],
+      level: 10,
+    },
   };
 
   // Check if user is authenticated on app start
   useEffect(() => {
     const checkAuth = () => {
-      const storedUser = localStorage.getItem('vertice_user');
-      const storedToken = localStorage.getItem('vertice_auth_token');
-      const tokenExpiry = localStorage.getItem('vertice_token_expiry');
+      const storedUser = localStorage.getItem("vertice_user");
+      const storedToken = localStorage.getItem("vertice_auth_token");
+      const tokenExpiry = localStorage.getItem("vertice_token_expiry");
 
       if (storedToken && storedUser && tokenExpiry) {
         const expiryDate = new Date(tokenExpiry);
 
         if (new Date() < expiryDate) {
-          const userData = JSON.parse(storedUser);
+          const userData = safeJSONParse(storedUser);
+          if (!userData) {
+            clearAuthData();
+            setLoading(false);
+            return;
+          }
           setUser(userData);
           setToken(storedToken);
         } else {
@@ -73,9 +81,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const clearAuthData = () => {
-    localStorage.removeItem('vertice_auth_token');
-    localStorage.removeItem('vertice_user');
-    localStorage.removeItem('vertice_token_expiry');
+    localStorage.removeItem("vertice_auth_token");
+    localStorage.removeItem("vertice_user");
+    localStorage.removeItem("vertice_token_expiry");
     setToken(null);
     setUser(null);
   };
@@ -88,24 +96,26 @@ export const AuthProvider = ({ children }) => {
     try {
       // Se explicitamente usar mock (desenvolvimento)
       if (useMock) {
-        const role = email === SUPER_ADMIN ? 'super_admin' : 'analyst';
+        const role = email === SUPER_ADMIN ? "super_admin" : "analyst";
         const userData = {
           email: email,
-          name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-          picture: '',
+          name:
+            email.split("@")[0].charAt(0).toUpperCase() +
+            email.split("@")[0].slice(1),
+          picture: "",
           role: role,
           authenticated_at: new Date().toISOString(),
           permissions: ROLES[role].permissions,
-          level: ROLES[role].level
+          level: ROLES[role].level,
         };
 
         const authToken = `ya29.mock_token_for_${email}`;
         const expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 1);
 
-        localStorage.setItem('vertice_auth_token', authToken);
-        localStorage.setItem('vertice_user', JSON.stringify(userData));
-        localStorage.setItem('vertice_token_expiry', expiryDate.toISOString());
+        localStorage.setItem("vertice_auth_token", authToken);
+        localStorage.setItem("vertice_user", JSON.stringify(userData));
+        localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
 
         setToken(authToken);
         setUser(userData);
@@ -114,57 +124,64 @@ export const AuthProvider = ({ children }) => {
       }
 
       // OAuth2 REAL via auth_service
-      const AUTH_SERVICE_URL = import.meta.env.VITE_AUTH_SERVICE_URL || API_BASE_URL;
+      const AUTH_SERVICE_URL =
+        import.meta.env.VITE_AUTH_SERVICE_URL || API_BASE_URL;
 
       // Simula Google OAuth flow (em produção, usar Google Sign-In SDK)
       const response = await fetch(`${AUTH_SERVICE_URL}/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email }),
       });
 
       if (!response.ok) {
-        throw new Error('Authentication failed');
+        throw new Error("Authentication failed");
       }
 
       const data = await response.json();
 
       // Determinar role baseado no email
-      const role = email === SUPER_ADMIN ? 'super_admin' :
-                   data.user_info?.role || 'analyst';
+      const role =
+        email === SUPER_ADMIN
+          ? "super_admin"
+          : data.user_info?.role || "analyst";
 
       const userData = {
         email: data.user_info.email,
-        name: data.user_info.name || email.split('@')[0],
-        picture: data.user_info.picture || '',
+        name: data.user_info.name || email.split("@")[0],
+        picture: data.user_info.picture || "",
         role: role,
         authenticated_at: new Date().toISOString(),
         permissions: ROLES[role].permissions,
-        level: ROLES[role].level
+        level: ROLES[role].level,
       };
 
       const authToken = data.access_token;
       const expiryDate = new Date();
-      expiryDate.setSeconds(expiryDate.getSeconds() + (data.expires_in || 3600));
+      expiryDate.setSeconds(
+        expiryDate.getSeconds() + (data.expires_in || 3600),
+      );
 
-      localStorage.setItem('vertice_auth_token', authToken);
-      localStorage.setItem('vertice_user', JSON.stringify(userData));
-      localStorage.setItem('vertice_token_expiry', expiryDate.toISOString());
+      localStorage.setItem("vertice_auth_token", authToken);
+      localStorage.setItem("vertice_user", JSON.stringify(userData));
+      localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
 
       setToken(authToken);
       setUser(userData);
 
       return { success: true, user: userData };
     } catch (error) {
-      logger.error('Login failed:', error);
+      logger.error("Login failed:", error);
 
       // REGRA DE OURO: No fallback to mock in production
       // Return error instead - UI should show appropriate error message
       return {
         success: false,
-        error: error.message || 'Authentication service unavailable. Please try again later.'
+        error:
+          error.message ||
+          "Authentication service unavailable. Please try again later.",
       };
     }
   };
@@ -181,7 +198,7 @@ export const AuthProvider = ({ children }) => {
    * Get user role
    */
   const getUserRole = () => {
-    return user?.role || 'viewer';
+    return user?.role || "viewer";
   };
 
   /**
@@ -193,7 +210,7 @@ export const AuthProvider = ({ children }) => {
     const userPermissions = user.permissions || [];
 
     // Super admin tem tudo
-    if (userPermissions.includes('*')) {
+    if (userPermissions.includes("*")) {
       return true;
     }
 
@@ -204,7 +221,7 @@ export const AuthProvider = ({ children }) => {
    * Check offensive permission
    */
   const canAccessOffensive = () => {
-    return hasPermission('offensive') || user?.email === SUPER_ADMIN;
+    return hasPermission("offensive") || user?.email === SUPER_ADMIN;
   };
 
   /**
@@ -234,14 +251,10 @@ export const AuthProvider = ({ children }) => {
     getAuthToken,
     isAuthenticated: !!user,
     SUPER_ADMIN,
-    ROLES
+    ROLES,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export { AuthContext };
