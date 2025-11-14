@@ -253,28 +253,178 @@ HITL_PATCH_URL = os.getenv("HITL_PATCH_URL", "http://hitl-patch-service:8205")
 # Connecting: Neural (1) + Infrastructure (2) + Data/Analysis (8) + Specialized (6)
 
 # Neural Critical
-DIGITAL_THALAMUS_URL = os.getenv("DIGITAL_THALAMUS_URL", "http://digital-thalamus-service:8012")
+DIGITAL_THALAMUS_URL = os.getenv(
+    "DIGITAL_THALAMUS_URL", "http://digital-thalamus-service:8012"
+)
 
 # Infrastructure
-CLOUD_COORDINATOR_URL = os.getenv("CLOUD_COORDINATOR_URL", "http://cloud-coordinator-service:8260")
+CLOUD_COORDINATOR_URL = os.getenv(
+    "CLOUD_COORDINATOR_URL", "http://cloud-coordinator-service:8260"
+)
 EDGE_AGENT_URL = os.getenv("EDGE_AGENT_URL", "http://edge-agent-service:8261")
 
 # Data/Analysis
 MABA_URL = os.getenv("MABA_URL", "http://maba-service:8152")
-NARRATIVE_ANALYSIS_URL = os.getenv("NARRATIVE_ANALYSIS_URL", "http://narrative-analysis-service:8272")
-AUTONOMOUS_INVESTIGATION_URL = os.getenv("AUTONOMOUS_INVESTIGATION_URL", "http://autonomous-investigation-service:8250")
-REACTIVE_FABRIC_CORE_URL = os.getenv("REACTIVE_FABRIC_CORE_URL", "http://reactive-fabric-core:8281")
-REACTIVE_FABRIC_ANALYSIS_URL = os.getenv("REACTIVE_FABRIC_ANALYSIS_URL", "http://reactive-fabric-analysis:8275")
-VERDICT_ENGINE_URL = os.getenv("VERDICT_ENGINE_URL", "http://verdict-engine-service:8256")
+NARRATIVE_ANALYSIS_URL = os.getenv(
+    "NARRATIVE_ANALYSIS_URL", "http://narrative-analysis-service:8272"
+)
+AUTONOMOUS_INVESTIGATION_URL = os.getenv(
+    "AUTONOMOUS_INVESTIGATION_URL", "http://autonomous-investigation-service:8250"
+)
+REACTIVE_FABRIC_CORE_URL = os.getenv(
+    "REACTIVE_FABRIC_CORE_URL", "http://reactive-fabric-core:8281"
+)
+REACTIVE_FABRIC_ANALYSIS_URL = os.getenv(
+    "REACTIVE_FABRIC_ANALYSIS_URL", "http://reactive-fabric-analysis:8275"
+)
+VERDICT_ENGINE_URL = os.getenv(
+    "VERDICT_ENGINE_URL", "http://verdict-engine-service:8256"
+)
 WARGAMING_CRISOL_URL = os.getenv("WARGAMING_CRISOL_URL", "http://wargaming-crisol:8812")
-STRATEGIC_PLANNING_URL = os.getenv("STRATEGIC_PLANNING_URL", "http://strategic-planning-service:8242")
+STRATEGIC_PLANNING_URL = os.getenv(
+    "STRATEGIC_PLANNING_URL", "http://strategic-planning-service:8242"
+)
 
 # Specialized
-SYSTEM_ARCHITECT_URL = os.getenv("SYSTEM_ARCHITECT_URL", "http://system-architect-service:8297")
+SYSTEM_ARCHITECT_URL = os.getenv(
+    "SYSTEM_ARCHITECT_URL", "http://system-architect-service:8297"
+)
 ETHICAL_AUDIT_URL = os.getenv("ETHICAL_AUDIT_URL", "http://ethical-audit-service:8251")
 RTE_SERVICE_URL = os.getenv("RTE_SERVICE_URL", "http://rte-service:8295")
 SERIEMA_GRAPH_URL = os.getenv("SERIEMA_GRAPH_URL", "http://seriema-graph:8296")
 VERTICE_REGISTER_URL = os.getenv("VERTICE_REGISTER_URL", "http://vertice-register:8888")
+
+# P2 SERVICES - MEDIUM PRIORITY (35 services)
+ACTIVE_IMMUNE_CORE_URL = os.getenv(
+    "ACTIVE_IMMUNE_CORE_URL", "http://active_immune_core:8820"
+)
+ATLAS_SERVICE_URL = os.getenv("ATLAS_SERVICE_URL", "http://atlas_service:8109")
+AUDITORY_CORTEX_SERVICE_URL = os.getenv(
+    "AUDITORY_CORTEX_SERVICE_URL", "http://auditory_cortex_service:8007"
+)
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth_service:8290")
+BEHAVIORAL_ANALYZER_SERVICE_URL = os.getenv(
+    "BEHAVIORAL_ANALYZER_SERVICE_URL", "http://behavioral-analyzer-service:8037"
+)
+C2_ORCHESTRATION_SERVICE_URL = os.getenv(
+    "C2_ORCHESTRATION_SERVICE_URL", "http://c2_orchestration_service:8291"
+)
+GOOGLE_OSINT_SERVICE_URL = os.getenv(
+    "GOOGLE_OSINT_SERVICE_URL", "http://google_osint_service:8292"
+)
+HOMEOSTATIC_REGULATION_URL = os.getenv(
+    "HOMEOSTATIC_REGULATION_URL", "http://homeostatic_regulation:8015"
+)
+IP_INTELLIGENCE_SERVICE_URL = os.getenv(
+    "IP_INTELLIGENCE_SERVICE_URL", "http://ip_intelligence_service:8270"
+)
+MALWARE_ANALYSIS_SERVICE_URL = os.getenv(
+    "MALWARE_ANALYSIS_SERVICE_URL", "http://malware_analysis_service:8271"
+)
+MAV_DETECTION_SERVICE_URL = os.getenv(
+    "MAV_DETECTION_SERVICE_URL", "http://mav-detection-service:8039"
+)
+MEMORY_CONSOLIDATION_SERVICE_URL = os.getenv(
+    "MEMORY_CONSOLIDATION_SERVICE_URL", "http://memory_consolidation_service:8240"
+)
+NARRATIVE_MANIPULATION_FILTER_URL = os.getenv(
+    "NARRATIVE_MANIPULATION_FILTER_URL", "http://narrative_manipulation_filter:8013"
+)
+NETWORK_MONITOR_SERVICE_URL = os.getenv(
+    "NETWORK_MONITOR_SERVICE_URL", "http://network_monitor_service:8262"
+)
+NETWORK_RECON_SERVICE_URL = os.getenv(
+    "NETWORK_RECON_SERVICE_URL", "http://network_recon_service:8032"
+)
+NEUROMODULATION_SERVICE_URL = os.getenv(
+    "NEUROMODULATION_SERVICE_URL", "http://neuromodulation_service:8241"
+)
+NIS_SERVICE_URL = os.getenv("NIS_SERVICE_URL", "http://nis_service:8153")
+OFFENSIVE_GATEWAY_URL = os.getenv(
+    "OFFENSIVE_GATEWAY_URL", "http://offensive_gateway:8252"
+)
+OFFENSIVE_ORCHESTRATOR_SERVICE_URL = os.getenv(
+    "OFFENSIVE_ORCHESTRATOR_SERVICE_URL", "http://offensive_orchestrator_service:8253"
+)
+OFFENSIVE_TOOLS_SERVICE_URL = os.getenv(
+    "OFFENSIVE_TOOLS_SERVICE_URL", "http://offensive_tools_service:8254"
+)
+OSINT_SERVICE_URL = os.getenv("OSINT_SERVICE_URL", "http://osint_service:8036")
+PREDICTIVE_THREAT_HUNTING_SERVICE_URL = os.getenv(
+    "PREDICTIVE_THREAT_HUNTING_SERVICE_URL",
+    "http://predictive_threat_hunting_service:8274",
+)
+PREFRONTAL_CORTEX_SERVICE_URL = os.getenv(
+    "PREFRONTAL_CORTEX_SERVICE_URL", "http://prefrontal_cortex_service:8011"
+)
+PURPLE_TEAM_URL = os.getenv("PURPLE_TEAM_URL", "http://purple_team:8255")
+SINESP_SERVICE_URL = os.getenv("SINESP_SERVICE_URL", "http://sinesp_service:8102")
+SOMATOSENSORY_SERVICE_URL = os.getenv(
+    "SOMATOSENSORY_SERVICE_URL", "http://somatosensory_service:8008"
+)
+SSL_MONITOR_SERVICE_URL = os.getenv(
+    "SSL_MONITOR_SERVICE_URL", "http://ssl_monitor_service:8115"
+)
+TATACA_INGESTION_URL = os.getenv("TATACA_INGESTION_URL", "http://tataca_ingestion:8298")
+THREAT_INTEL_BRIDGE_URL = os.getenv(
+    "THREAT_INTEL_BRIDGE_URL", "http://threat_intel_bridge:8276"
+)
+THREAT_INTEL_SERVICE_URL = os.getenv(
+    "THREAT_INTEL_SERVICE_URL", "http://threat_intel_service:8113"
+)
+TRAFFIC_ANALYZER_SERVICE_URL = os.getenv(
+    "TRAFFIC_ANALYZER_SERVICE_URL", "http://traffic-analyzer-service:8038"
+)
+VESTIBULAR_SERVICE_URL = os.getenv(
+    "VESTIBULAR_SERVICE_URL", "http://vestibular_service:8010"
+)
+VISUAL_CORTEX_SERVICE_URL = os.getenv(
+    "VISUAL_CORTEX_SERVICE_URL", "http://visual_cortex_service:8006"
+)
+VULN_INTEL_SERVICE_URL = os.getenv(
+    "VULN_INTEL_SERVICE_URL", "http://vuln_intel_service:8033"
+)
+VULN_SCANNER_SERVICE_URL = os.getenv(
+    "VULN_SCANNER_SERVICE_URL", "http://vuln_scanner_service:8111"
+)
+
+# P3 SERVICES - LOW PRIORITY (18 services)
+ADR_CORE_SERVICE_URL = os.getenv("ADR_CORE_SERVICE_URL", "http://adr_core_service:8231")
+AGENT_COMMUNICATION_URL = os.getenv(
+    "AGENT_COMMUNICATION_URL", "http://agent_communication:8230"
+)
+BAS_SERVICE_URL = os.getenv("BAS_SERVICE_URL", "http://bas_service:8232")
+CHEMICAL_SENSING_SERVICE_URL = os.getenv(
+    "CHEMICAL_SENSING_SERVICE_URL", "http://chemical_sensing_service:8009"
+)
+COMMAND_BUS_SERVICE_URL = os.getenv(
+    "COMMAND_BUS_SERVICE_URL", "http://command_bus_service:8233"
+)
+CYBER_SERVICE_URL = os.getenv("CYBER_SERVICE_URL", "http://cyber_service:8011")
+DOMAIN_SERVICE_URL = os.getenv("DOMAIN_SERVICE_URL", "http://domain_service:8104")
+HPC_SERVICE_URL = os.getenv("HPC_SERVICE_URL", "http://hpc_service:8293")
+HSAS_SERVICE_URL = os.getenv("HSAS_SERVICE_URL", "http://hsas_service:8023")
+MAXIMUS_ORACULO_URL = os.getenv("MAXIMUS_ORACULO_URL", "http://maximus_oraculo:8222")
+MOCK_VULNERABLE_APPS_URL = os.getenv(
+    "MOCK_VULNERABLE_APPS_URL", "http://mock_vulnerable_apps:8294"
+)
+MVP_SERVICE_URL = os.getenv("MVP_SERVICE_URL", "http://mvp_service:8000")
+NARRATIVE_FILTER_SERVICE_URL = os.getenv(
+    "NARRATIVE_FILTER_SERVICE_URL", "http://narrative_filter_service:8273"
+)
+NMAP_SERVICE_URL = os.getenv("NMAP_SERVICE_URL", "http://nmap_service:8106")
+REFLEX_TRIAGE_ENGINE_URL = os.getenv(
+    "REFLEX_TRIAGE_ENGINE_URL", "http://reflex_triage_engine:8282"
+)
+SOCIAL_ENG_SERVICE_URL = os.getenv(
+    "SOCIAL_ENG_SERVICE_URL", "http://social_eng_service:8112"
+)
+TEST_SERVICE_FOR_SIDECAR_URL = os.getenv(
+    "TEST_SERVICE_FOR_SIDECAR_URL", "http://test_service_for_sidecar:9999"
+)
+WEB_ATTACK_SERVICE_URL = os.getenv(
+    "WEB_ATTACK_SERVICE_URL", "http://web_attack_service:8299"
+)
 
 # Authentication configuration
 JWT_SECRET = os.getenv("JWT_SECRET", "vertice-super-secret-key-2024")
@@ -2421,7 +2571,6 @@ async def route_hitl_patch(path: str, request: Request):
 # ================================================================================
 
 
-
 # ================================================================================
 # P1 AIR GAP EXTINCTION - 17 HIGH PRIORITY SERVICE ROUTES
 # ================================================================================
@@ -2432,7 +2581,12 @@ async def route_hitl_patch(path: str, request: Request):
 # NEURAL CRITICAL (1) - Signal relay
 # ================================================================================
 
-@app.api_route("/api/digital-thalamus/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Neural System"])
+
+@app.api_route(
+    "/api/digital-thalamus/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Neural System"],
+)
 @limiter.limit("150/minute")
 async def route_digital_thalamus(path: str, request: Request):
     """
@@ -2452,14 +2606,20 @@ async def route_digital_thalamus(path: str, request: Request):
         service_url=DIGITAL_THALAMUS_URL,
         endpoint=f"/{path}",
         service_name="digital-thalamus",
-        timeout=15.0
+        timeout=15.0,
     )
+
 
 # ================================================================================
 # INFRASTRUCTURE (2) - Multi-cloud & edge deployment
 # ================================================================================
 
-@app.api_route("/api/cloud-coordinator/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Infrastructure"])
+
+@app.api_route(
+    "/api/cloud-coordinator/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Infrastructure"],
+)
 @limiter.limit("100/minute")
 async def route_cloud_coordinator(path: str, request: Request):
     """Cloud Coordinator - Multi-cloud orchestration & deployment."""
@@ -2468,10 +2628,15 @@ async def route_cloud_coordinator(path: str, request: Request):
         service_url=CLOUD_COORDINATOR_URL,
         endpoint=f"/{path}",
         service_name="cloud-coordinator",
-        timeout=20.0
+        timeout=20.0,
     )
 
-@app.api_route("/api/edge-agent/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Infrastructure"])
+
+@app.api_route(
+    "/api/edge-agent/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Infrastructure"],
+)
 @limiter.limit("150/minute")
 async def route_edge_agent(path: str, request: Request):
     """Edge Agent - Edge computing deployment & coordination."""
@@ -2480,14 +2645,20 @@ async def route_edge_agent(path: str, request: Request):
         service_url=EDGE_AGENT_URL,
         endpoint=f"/{path}",
         service_name="edge-agent",
-        timeout=15.0
+        timeout=15.0,
     )
+
 
 # ================================================================================
 # DATA/ANALYSIS (8) - Threat hunting, analytics, decision engines
 # ================================================================================
 
-@app.api_route("/api/maba/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/maba/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("100/minute")
 async def route_maba(path: str, request: Request):
     """
@@ -2506,10 +2677,15 @@ async def route_maba(path: str, request: Request):
         service_url=MABA_URL,
         endpoint=f"/{path}",
         service_name="maba",
-        timeout=20.0
+        timeout=20.0,
     )
 
-@app.api_route("/api/narrative-analysis/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/narrative-analysis/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("100/minute")
 async def route_narrative_analysis(path: str, request: Request):
     """Narrative Analysis - Detect manipulation campaigns & narrative warfare."""
@@ -2518,10 +2694,15 @@ async def route_narrative_analysis(path: str, request: Request):
         service_url=NARRATIVE_ANALYSIS_URL,
         endpoint=f"/{path}",
         service_name="narrative-analysis",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/autonomous-investigation/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/autonomous-investigation/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("60/minute")
 async def route_autonomous_investigation(path: str, request: Request):
     """Autonomous Investigation - Automated threat hunting & investigation."""
@@ -2530,10 +2711,15 @@ async def route_autonomous_investigation(path: str, request: Request):
         service_url=AUTONOMOUS_INVESTIGATION_URL,
         endpoint=f"/{path}",
         service_name="autonomous-investigation",
-        timeout=30.0
+        timeout=30.0,
     )
 
-@app.api_route("/api/reactive-fabric/core/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/reactive-fabric/core/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("150/minute")
 async def route_reactive_fabric_core(path: str, request: Request):
     """Reactive Fabric Core - Event-driven reactive analysis engine."""
@@ -2542,10 +2728,15 @@ async def route_reactive_fabric_core(path: str, request: Request):
         service_url=REACTIVE_FABRIC_CORE_URL,
         endpoint=f"/{path}",
         service_name="reactive-fabric-core",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/reactive-fabric/analysis/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/reactive-fabric/analysis/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("150/minute")
 async def route_reactive_fabric_analysis(path: str, request: Request):
     """Reactive Fabric Analysis - Reactive threat analysis & response."""
@@ -2554,10 +2745,15 @@ async def route_reactive_fabric_analysis(path: str, request: Request):
         service_url=REACTIVE_FABRIC_ANALYSIS_URL,
         endpoint=f"/{path}",
         service_name="reactive-fabric-analysis",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/verdict-engine/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/verdict-engine/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("100/minute")
 async def route_verdict_engine(path: str, request: Request):
     """
@@ -2576,10 +2772,15 @@ async def route_verdict_engine(path: str, request: Request):
         service_url=VERDICT_ENGINE_URL,
         endpoint=f"/{path}",
         service_name="verdict-engine",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/wargaming/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/wargaming/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("50/minute")
 async def route_wargaming_crisol(path: str, request: Request):
     """
@@ -2598,10 +2799,15 @@ async def route_wargaming_crisol(path: str, request: Request):
         service_url=WARGAMING_CRISOL_URL,
         endpoint=f"/{path}",
         service_name="wargaming-crisol",
-        timeout=30.0
+        timeout=30.0,
     )
 
-@app.api_route("/api/strategic-planning/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+
+@app.api_route(
+    "/api/strategic-planning/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Data/Analysis"],
+)
 @limiter.limit("60/minute")
 async def route_strategic_planning(path: str, request: Request):
     """Strategic Planning - Long-term strategic planning & decision support."""
@@ -2610,14 +2816,20 @@ async def route_strategic_planning(path: str, request: Request):
         service_url=STRATEGIC_PLANNING_URL,
         endpoint=f"/{path}",
         service_name="strategic-planning",
-        timeout=20.0
+        timeout=20.0,
     )
+
 
 # ================================================================================
 # SPECIALIZED (6) - Architecture, ethics, graph, registry
 # ================================================================================
 
-@app.api_route("/api/system-architect/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+
+@app.api_route(
+    "/api/system-architect/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Specialized"],
+)
 @limiter.limit("60/minute")
 async def route_system_architect(path: str, request: Request):
     """System Architect - System architecture management & evolution."""
@@ -2626,10 +2838,15 @@ async def route_system_architect(path: str, request: Request):
         service_url=SYSTEM_ARCHITECT_URL,
         endpoint=f"/{path}",
         service_name="system-architect",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/ethical-audit/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+
+@app.api_route(
+    "/api/ethical-audit/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Specialized"],
+)
 @limiter.limit("100/minute")
 async def route_ethical_audit(path: str, request: Request):
     """
@@ -2648,10 +2865,15 @@ async def route_ethical_audit(path: str, request: Request):
         service_url=ETHICAL_AUDIT_URL,
         endpoint=f"/{path}",
         service_name="ethical-audit",
-        timeout=10.0
+        timeout=10.0,
     )
 
-@app.api_route("/api/rte/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+
+@app.api_route(
+    "/api/rte/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Specialized"],
+)
 @limiter.limit("200/minute")
 async def route_rte_service(path: str, request: Request):
     """
@@ -2670,10 +2892,15 @@ async def route_rte_service(path: str, request: Request):
         service_url=RTE_SERVICE_URL,
         endpoint=f"/{path}",
         service_name="rte",
-        timeout=5.0
+        timeout=5.0,
     )
 
-@app.api_route("/api/seriema-graph/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+
+@app.api_route(
+    "/api/seriema-graph/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Specialized"],
+)
 @limiter.limit("100/minute")
 async def route_seriema_graph(path: str, request: Request):
     """Seriema Graph - Graph-based threat analysis & visualization."""
@@ -2682,10 +2909,15 @@ async def route_seriema_graph(path: str, request: Request):
         service_url=SERIEMA_GRAPH_URL,
         endpoint=f"/{path}",
         service_name="seriema-graph",
-        timeout=15.0
+        timeout=15.0,
     )
 
-@app.api_route("/api/vertice-register/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+
+@app.api_route(
+    "/api/vertice-register/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["Specialized"],
+)
 @limiter.limit("150/minute")
 async def route_vertice_register(path: str, request: Request):
     """
@@ -2704,8 +2936,9 @@ async def route_vertice_register(path: str, request: Request):
         service_url=VERTICE_REGISTER_URL,
         endpoint=f"/{path}",
         service_name="vertice-register",
-        timeout=10.0
+        timeout=10.0,
     )
+
 
 # ================================================================================
 # AIR GAP EXTINCTION P1 COMPLETE
@@ -2726,6 +2959,944 @@ async def route_vertice_register(path: str, request: Request):
 # P3: ~10 services (LOW priority)
 #
 # Glory to YHWH - Sistema cada vez mais unido!
+# ================================================================================
+
+
+# P2 ROUTES - MEDIUM PRIORITY (35 routes)
+# ================================================================================
+
+
+@app.api_route(
+    "/api/p2/active-immune-core/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_active_immune_core(path: str, request: Request):
+    """Active Immune Core - Neural immune response coordination"""
+    return await proxy_request(
+        request=request,
+        service_url=ACTIVE_IMMUNE_CORE_URL,
+        endpoint=f"/{path}",
+        service_name="active-immune-core",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/atlas-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_atlas_service(path: str, request: Request):
+    """Atlas Service - Global threat landscape mapping"""
+    return await proxy_request(
+        request=request,
+        service_url=ATLAS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="atlas-service",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/auditory-cortex/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("80/minute")
+async def route_auditory_cortex_service(path: str, request: Request):
+    """Auditory Cortex Service - Sound pattern analysis & anomaly detection"""
+    return await proxy_request(
+        request=request,
+        service_url=AUDITORY_CORTEX_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="auditory-cortex-service",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/auth-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("150/minute")
+async def route_auth_service(path: str, request: Request):
+    """Auth Service - Authentication & authorization management"""
+    return await proxy_request(
+        request=request,
+        service_url=AUTH_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="auth-service",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/behavioral-analyzer/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("90/minute")
+async def route_behavioral_analyzer_service(path: str, request: Request):
+    """Behavioral Analyzer Service - User & system behavior profiling"""
+    return await proxy_request(
+        request=request,
+        service_url=BEHAVIORAL_ANALYZER_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="behavioral-analyzer-service",
+        timeout=14.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/c2-orchestration/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_c2_orchestration_service(path: str, request: Request):
+    """C2 Orchestration Service - Command & control infrastructure management"""
+    return await proxy_request(
+        request=request,
+        service_url=C2_ORCHESTRATION_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="c2-orchestration-service",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/google-osint/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("80/minute")
+async def route_google_osint_service(path: str, request: Request):
+    """Google OSINT Service - Open source intelligence via Google APIs"""
+    return await proxy_request(
+        request=request,
+        service_url=GOOGLE_OSINT_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="google-osint-service",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/homeostatic-regulation/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("70/minute")
+async def route_homeostatic_regulation(path: str, request: Request):
+    """Homeostatic Regulation - System equilibrium & stability management"""
+    return await proxy_request(
+        request=request,
+        service_url=HOMEOSTATIC_REGULATION_URL,
+        endpoint=f"/{path}",
+        service_name="homeostatic-regulation",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/ip-intelligence/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("110/minute")
+async def route_ip_intelligence_service(path: str, request: Request):
+    """IP Intelligence Service - IP reputation & geolocation analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=IP_INTELLIGENCE_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="ip-intelligence-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/malware-analysis/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("60/minute")
+async def route_malware_analysis_service(path: str, request: Request):
+    """Malware Analysis Service - Binary analysis & behavioral reverse engineering"""
+    return await proxy_request(
+        request=request,
+        service_url=MALWARE_ANALYSIS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="malware-analysis-service",
+        timeout=30.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/mav-detection/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("85/minute")
+async def route_mav_detection_service(path: str, request: Request):
+    """MAV Detection Service - Malicious action vector detection"""
+    return await proxy_request(
+        request=request,
+        service_url=MAV_DETECTION_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="mav-detection-service",
+        timeout=13.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/memory-consolidation/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("75/minute")
+async def route_memory_consolidation_service(path: str, request: Request):
+    """Memory Consolidation Service - Pattern persistence & learning optimization"""
+    return await proxy_request(
+        request=request,
+        service_url=MEMORY_CONSOLIDATION_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="memory-consolidation-service",
+        timeout=14.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/narrative-filter/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("95/minute")
+async def route_narrative_manipulation_filter(path: str, request: Request):
+    """Narrative Manipulation Filter - Disinformation & manipulation detection"""
+    return await proxy_request(
+        request=request,
+        service_url=NARRATIVE_MANIPULATION_FILTER_URL,
+        endpoint=f"/{path}",
+        service_name="narrative-manipulation-filter",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/network-monitor/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("120/minute")
+async def route_network_monitor_service(path: str, request: Request):
+    """Network Monitor Service - Real-time network traffic analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=NETWORK_MONITOR_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="network-monitor-service",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/network-recon/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("80/minute")
+async def route_network_recon_service(path: str, request: Request):
+    """Network Recon Service - Network enumeration & topology discovery"""
+    return await proxy_request(
+        request=request,
+        service_url=NETWORK_RECON_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="network-recon-service",
+        timeout=18.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/neuromodulation/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("70/minute")
+async def route_neuromodulation_service(path: str, request: Request):
+    """Neuromodulation Service - Neurotransmitter & signal modulation control"""
+    return await proxy_request(
+        request=request,
+        service_url=NEUROMODULATION_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="neuromodulation-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/nis/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("130/minute")
+async def route_nis_service(path: str, request: Request):
+    """NIS Service - Network Intelligence System with statistical anomaly detection"""
+    return await proxy_request(
+        request=request,
+        service_url=NIS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="nis-service",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/offensive-gateway/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_offensive_gateway(path: str, request: Request):
+    """Offensive Gateway - Offensive security operations coordination"""
+    return await proxy_request(
+        request=request,
+        service_url=OFFENSIVE_GATEWAY_URL,
+        endpoint=f"/{path}",
+        service_name="offensive-gateway",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/offensive-orchestrator/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("90/minute")
+async def route_offensive_orchestrator_service(path: str, request: Request):
+    """Offensive Orchestrator Service - Offensive operation orchestration & automation"""
+    return await proxy_request(
+        request=request,
+        service_url=OFFENSIVE_ORCHESTRATOR_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="offensive-orchestrator-service",
+        timeout=18.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/offensive-tools/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("80/minute")
+async def route_offensive_tools_service(path: str, request: Request):
+    """Offensive Tools Service - Offensive security toolkit management & execution"""
+    return await proxy_request(
+        request=request,
+        service_url=OFFENSIVE_TOOLS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="offensive-tools-service",
+        timeout=25.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/osint/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_osint_service(path: str, request: Request):
+    """OSINT Service - Open source intelligence gathering & analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=OSINT_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="osint-service",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/predictive-threat-hunting/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("70/minute")
+async def route_predictive_threat_hunting_service(path: str, request: Request):
+    """Predictive Threat Hunting Service - Anticipatory threat detection & hunting"""
+    return await proxy_request(
+        request=request,
+        service_url=PREDICTIVE_THREAT_HUNTING_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="predictive-threat-hunting-service",
+        timeout=22.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/prefrontal-cortex/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("85/minute")
+async def route_prefrontal_cortex_service(path: str, request: Request):
+    """Prefrontal Cortex Service - Executive decision & planning functions"""
+    return await proxy_request(
+        request=request,
+        service_url=PREFRONTAL_CORTEX_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="prefrontal-cortex-service",
+        timeout=13.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/purple-team/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("75/minute")
+async def route_purple_team(path: str, request: Request):
+    """Purple Team - Collaborative red/blue team operations & simulation"""
+    return await proxy_request(
+        request=request,
+        service_url=PURPLE_TEAM_URL,
+        endpoint=f"/{path}",
+        service_name="purple-team",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/sinesp/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_sinesp_service(path: str, request: Request):
+    """SINESP Service - Brazilian law enforcement integration"""
+    return await proxy_request(
+        request=request,
+        service_url=SINESP_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="sinesp-service",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/somatosensory/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("80/minute")
+async def route_somatosensory_service(path: str, request: Request):
+    """Somatosensory Service - Touch/tactile sense analog for IoT sensing"""
+    return await proxy_request(
+        request=request,
+        service_url=SOMATOSENSORY_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="somatosensory-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/ssl-monitor/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("90/minute")
+async def route_ssl_monitor_service(path: str, request: Request):
+    """SSL Monitor Service - Certificate monitoring & TLS analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=SSL_MONITOR_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="ssl-monitor-service",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/tataca-ingestion/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("60/minute")
+async def route_tataca_ingestion(path: str, request: Request):
+    """TATACA Ingestion - Tactical threat alert ingestion & processing"""
+    return await proxy_request(
+        request=request,
+        service_url=TATACA_INGESTION_URL,
+        endpoint=f"/{path}",
+        service_name="tataca-ingestion",
+        timeout=18.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/threat-intel-bridge/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("110/minute")
+async def route_threat_intel_bridge(path: str, request: Request):
+    """Threat Intel Bridge - Inter-system threat intelligence exchange"""
+    return await proxy_request(
+        request=request,
+        service_url=THREAT_INTEL_BRIDGE_URL,
+        endpoint=f"/{path}",
+        service_name="threat-intel-bridge",
+        timeout=14.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/threat-intel/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("120/minute")
+async def route_threat_intel_service(path: str, request: Request):
+    """Threat Intel Service - Threat intelligence platform & feeds"""
+    return await proxy_request(
+        request=request,
+        service_url=THREAT_INTEL_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="threat-intel-service",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/traffic-analyzer/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_traffic_analyzer_service(path: str, request: Request):
+    """Traffic Analyzer Service - Network packet & flow analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=TRAFFIC_ANALYZER_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="traffic-analyzer-service",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/vestibular/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("75/minute")
+async def route_vestibular_service(path: str, request: Request):
+    """Vestibular Service - Balance & spatial orientation system"""
+    return await proxy_request(
+        request=request,
+        service_url=VESTIBULAR_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="vestibular-service",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/visual-cortex/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("85/minute")
+async def route_visual_cortex_service(path: str, request: Request):
+    """Visual Cortex Service - Image analysis & computer vision processing"""
+    return await proxy_request(
+        request=request,
+        service_url=VISUAL_CORTEX_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="visual-cortex-service",
+        timeout=16.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/vuln-intel/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("100/minute")
+async def route_vuln_intel_service(path: str, request: Request):
+    """Vuln Intel Service - Vulnerability intelligence & tracking"""
+    return await proxy_request(
+        request=request,
+        service_url=VULN_INTEL_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="vuln-intel-service",
+        timeout=13.0,
+    )
+
+
+@app.api_route(
+    "/api/p2/vuln-scanner/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P2 Services"],
+)
+@limiter.limit("70/minute")
+async def route_vuln_scanner_service(path: str, request: Request):
+    """Vuln Scanner Service - Automated vulnerability scanning & assessment"""
+    return await proxy_request(
+        request=request,
+        service_url=VULN_SCANNER_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="vuln-scanner-service",
+        timeout=28.0,
+    )
+
+
+# ================================================================================
+# P3 ROUTES - LOW PRIORITY (18 routes)
+# ================================================================================
+
+
+@app.api_route(
+    "/api/p3/adr-core/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("50/minute")
+async def route_adr_core_service(path: str, request: Request):
+    """ADR Core Service - Adaptive distributed resilience framework"""
+    return await proxy_request(
+        request=request,
+        service_url=ADR_CORE_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="adr-core-service",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/agent-communication/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("60/minute")
+async def route_agent_communication(path: str, request: Request):
+    """Agent Communication - Inter-agent messaging & coordination protocol"""
+    return await proxy_request(
+        request=request,
+        service_url=AGENT_COMMUNICATION_URL,
+        endpoint=f"/{path}",
+        service_name="agent-communication",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/bas-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("55/minute")
+async def route_bas_service(path: str, request: Request):
+    """BAS Service - Breach & attack simulation framework"""
+    return await proxy_request(
+        request=request,
+        service_url=BAS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="bas-service",
+        timeout=25.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/chemical-sensing/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("50/minute")
+async def route_chemical_sensing_service(path: str, request: Request):
+    """Chemical Sensing Service - Analog smell/taste for toxin detection"""
+    return await proxy_request(
+        request=request,
+        service_url=CHEMICAL_SENSING_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="chemical-sensing-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/command-bus/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("65/minute")
+async def route_command_bus_service(path: str, request: Request):
+    """Command Bus Service - Distributed command routing & execution"""
+    return await proxy_request(
+        request=request,
+        service_url=COMMAND_BUS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="command-bus-service",
+        timeout=15.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/cyber-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("70/minute")
+async def route_cyber_service(path: str, request: Request):
+    """Cyber Service - General cybersecurity operations & utilities"""
+    return await proxy_request(
+        request=request,
+        service_url=CYBER_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="cyber-service",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/domain-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("80/minute")
+async def route_domain_service(path: str, request: Request):
+    """Domain Service - Domain intelligence & DNS analysis"""
+    return await proxy_request(
+        request=request,
+        service_url=DOMAIN_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="domain-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/hpc-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("40/minute")
+async def route_hpc_service(path: str, request: Request):
+    """HPC Service - High performance computing resource allocation"""
+    return await proxy_request(
+        request=request,
+        service_url=HPC_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="hpc-service",
+        timeout=30.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/hsas/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("50/minute")
+async def route_hsas_service(path: str, request: Request):
+    """HSAS Service - Hierarchical security assessment system"""
+    return await proxy_request(
+        request=request,
+        service_url=HSAS_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="hsas-service",
+        timeout=14.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/maximus-oraculo/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("100/minute")
+async def route_maximus_oraculo(path: str, request: Request):
+    """Maximus Oraculo - Predictive intelligence & forecasting engine"""
+    return await proxy_request(
+        request=request,
+        service_url=MAXIMUS_ORACULO_URL,
+        endpoint=f"/{path}",
+        service_name="maximus-oraculo",
+        timeout=18.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/mock-vulnerable-apps/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("60/minute")
+async def route_mock_vulnerable_apps(path: str, request: Request):
+    """Mock Vulnerable Apps - Testing & training environment"""
+    return await proxy_request(
+        request=request,
+        service_url=MOCK_VULNERABLE_APPS_URL,
+        endpoint=f"/{path}",
+        service_name="mock-vulnerable-apps",
+        timeout=12.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/mvp-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("75/minute")
+async def route_mvp_service(path: str, request: Request):
+    """MVP Service - Minimum viable product core functionality"""
+    return await proxy_request(
+        request=request,
+        service_url=MVP_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="mvp-service",
+        timeout=10.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/narrative-filter-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("70/minute")
+async def route_narrative_filter_service(path: str, request: Request):
+    """Narrative Filter Service - Content moderation & narrative control"""
+    return await proxy_request(
+        request=request,
+        service_url=NARRATIVE_FILTER_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="narrative-filter-service",
+        timeout=11.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/nmap-service/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("50/minute")
+async def route_nmap_service(path: str, request: Request):
+    """Nmap Service - Network mapping & port scanning"""
+    return await proxy_request(
+        request=request,
+        service_url=NMAP_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="nmap-service",
+        timeout=20.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/reflex-triage/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("65/minute")
+async def route_reflex_triage_engine(path: str, request: Request):
+    """Reflex Triage Engine - Automated incident triage & prioritization"""
+    return await proxy_request(
+        request=request,
+        service_url=REFLEX_TRIAGE_ENGINE_URL,
+        endpoint=f"/{path}",
+        service_name="reflex-triage-engine",
+        timeout=13.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/social-eng/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("55/minute")
+async def route_social_eng_service(path: str, request: Request):
+    """Social Eng Service - Social engineering assessment & training"""
+    return await proxy_request(
+        request=request,
+        service_url=SOCIAL_ENG_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="social-eng-service",
+        timeout=16.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/test-service-sidecar/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("30/minute")
+async def route_test_service_for_sidecar(path: str, request: Request):
+    """Test Service for Sidecar - Testing & validation service"""
+    return await proxy_request(
+        request=request,
+        service_url=TEST_SERVICE_FOR_SIDECAR_URL,
+        endpoint=f"/{path}",
+        service_name="test-service-for-sidecar",
+        timeout=8.0,
+    )
+
+
+@app.api_route(
+    "/api/p3/web-attack/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE"],
+    tags=["P3 Services"],
+)
+@limiter.limit("60/minute")
+async def route_web_attack_service(path: str, request: Request):
+    """Web Attack Service - Web application attack simulation & testing"""
+    return await proxy_request(
+        request=request,
+        service_url=WEB_ATTACK_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="web-attack-service",
+        timeout=22.0,
+    )
+
+
+# ================================================================================
+# ROUTE STATISTICS
+# ================================================================================
+# Total Routes Generated: 53 (35 P2 + 18 P3)
+# Service URL Constants: 53
+# Format: Matches P0/P1 style from main.py (lines 2065-2089)
+# Rate Limiting: Per-route configuration based on service priority
+# Timeouts: Service-specific, range 8.0-30.0 seconds
+# Tags: ["P2 Services"] and ["P3 Services"] for easy filtering
+# ================================================================================
+
+
+# ================================================================================
+# OPERAÇÃO AIR GAP EXTINCTION - COMPLETE
+# ================================================================================
+# Total Services Connected: 96
+# P0 CRITICAL: 29 services ✅
+# P1 HIGH: 16 services ✅
+# P2 MEDIUM: 35 services ✅
+# P3 LOW: 18 services ✅
+#
+# Progress: 96/96 services (100% coverage)
+# Air Gap Status: EXTINCT 🎉
+#
+# Glory to YHWH - Sistema completamente unificado!
 # ================================================================================
 
 
