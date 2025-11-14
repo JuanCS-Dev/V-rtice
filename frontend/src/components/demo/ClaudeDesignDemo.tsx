@@ -21,6 +21,8 @@ import React from 'react'
 import {
   Button,
   Input,
+  Textarea,
+  Label,
   Card,
   CardHeader,
   CardTitle,
@@ -28,6 +30,21 @@ import {
   CardContent,
   CardFooter,
   Badge,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Switch,
+  Checkbox,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  Spinner,
+  LoadingOverlay,
+  Skeleton,
+  CardSkeleton,
+  ListSkeleton,
 } from '../ui/claude'
 
 export function ClaudeDesignDemo() {
@@ -350,6 +367,144 @@ export function ClaudeDesignDemo() {
           </CardContent>
         </Card>
 
+        {/* NEW: Form Components */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Form Components - Complete Set</CardTitle>
+            <CardDescription>
+              All form elements with verde accents
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" placeholder="Enter your name" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="email@example.com" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="message">Message</Label>
+              <Textarea id="message" placeholder="Type your message here..." rows={4} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Select>
+                <SelectTrigger id="country">
+                  <SelectValue placeholder="Select a country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="us">United States 🇺🇸</SelectItem>
+                  <SelectItem value="br">Brazil 🇧🇷</SelectItem>
+                  <SelectItem value="uk">United Kingdom 🇬🇧</SelectItem>
+                  <SelectItem value="jp">Japan 🇯🇵</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch id="airplane-mode" />
+              <Label htmlFor="airplane-mode">Airplane Mode</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox id="terms" />
+              <Label htmlFor="terms">Accept terms and conditions</Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* NEW: Alerts */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Alerts - Semantic Feedback</CardTitle>
+            <CardDescription>
+              Clean notifications with verde success
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert variant="success">
+              <AlertTitle>Success! 💚</AlertTitle>
+              <AlertDescription>
+                Your changes have been saved successfully.
+              </AlertDescription>
+            </Alert>
+
+            <Alert variant="info">
+              <AlertTitle>Information</AlertTitle>
+              <AlertDescription>
+                This is an informational message.
+              </AlertDescription>
+            </Alert>
+
+            <Alert variant="warning">
+              <AlertTitle>Warning</AlertTitle>
+              <AlertDescription>
+                Please review your inputs before continuing.
+              </AlertDescription>
+            </Alert>
+
+            <Alert variant="destructive" dismissible onDismiss={() => console.log('Dismissed')}>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                Something went wrong. Please try again.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+
+        {/* NEW: Loading States */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading States - Spinners & Skeletons</CardTitle>
+            <CardDescription>
+              Clean loading indicators with verde accent
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <p className="text-sm font-medium mb-3">Spinners</p>
+              <div className="flex flex-wrap items-center gap-6">
+                <Spinner size="sm" />
+                <Spinner />
+                <Spinner size="lg" />
+                <Spinner label="Loading..." />
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-3">Skeleton Loaders</p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-3">Card Skeleton</p>
+              <CardSkeleton />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-3">List Skeleton</p>
+              <ListSkeleton items={3} />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Footer */}
         <Card>
           <CardContent className="py-6">
@@ -360,8 +515,25 @@ export function ClaudeDesignDemo() {
               <p className="text-muted-foreground">
                 Clean, Calm, Focused - VERDE (#10b981) 💚
               </p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
+                12 COMPONENTES COMPLETOS | ZERO LARANJA | 100% VERDE
+              </p>
+              <div className="flex justify-center gap-2 flex-wrap">
+                <Badge>Button ✅</Badge>
+                <Badge>Input ✅</Badge>
+                <Badge>Textarea ✅</Badge>
+                <Badge>Label ✅</Badge>
+                <Badge>Card ✅</Badge>
+                <Badge>Badge ✅</Badge>
+                <Badge>Select ✅</Badge>
+                <Badge>Switch ✅</Badge>
+                <Badge>Checkbox ✅</Badge>
+                <Badge>Alert ✅</Badge>
+                <Badge>Spinner ✅</Badge>
+                <Badge>Skeleton ✅</Badge>
+              </div>
               <p className="text-sm text-muted-foreground">
-                ZERO LARANJA | 100% VERDE | SOLI DEO GLORIA
+                SOLI DEO GLORIA
               </p>
             </div>
           </CardContent>
