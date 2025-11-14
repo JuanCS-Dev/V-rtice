@@ -11,12 +11,18 @@ is crucial for accelerating development cycles, automating operational tasks,
 and enhancing the AI's self-modification and self-improvement capabilities.
 """
 
-import asyncio
+import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from llm.openai_client import OpenAICodeGenerator, CodeGenerationResult, OPENAI_AVAILABLE
+from llm.openai_client import (
+    OPENAI_AVAILABLE,
+    CodeGenerationResult,
+    OpenAICodeGenerator,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class AutoImplementer:
@@ -56,7 +62,9 @@ class AutoImplementer:
                 print(f"[AutoImplementer] LLM initialization failed: {e}")
                 self.llm_enabled = False
         else:
-            print("[AutoImplementer] LLM disabled (openai package not installed or ENABLE_LLM_CODEGEN=false)")
+            print(
+                "[AutoImplementer] LLM disabled (openai package not installed or ENABLE_LLM_CODEGEN=false)"
+            )
 
     async def implement_code(
         self,
@@ -74,7 +82,9 @@ class AutoImplementer:
         Returns:
             Dict[str, Any]: A dictionary containing the generated code and implementation details.
         """
-        print(f"[AutoImplementer] Implementing code for task: {task_description} in {target_language}")
+        print(
+            f"[AutoImplementer] Implementing code for task: {task_description} in {target_language}"
+        )
 
         generated_code: str
         implementation_details: Dict[str, Any]
@@ -100,7 +110,9 @@ class AutoImplementer:
                     "cost_usd": result.cost_usd,
                     "latency_ms": result.latency_ms,
                 }
-                print(f"[AutoImplementer] LLM generation successful: {result.tokens_used} tokens, ${result.cost_usd:.4f}")
+                print(
+                    f"[AutoImplementer] LLM generation successful: {result.tokens_used} tokens, ${result.cost_usd:.4f}"
+                )
             else:
                 print(f"[AutoImplementer] LLM generation failed: {result.error}")
                 print("[AutoImplementer] Falling back to template generation...")
@@ -159,8 +171,11 @@ Framework: standard
 
 def main():
     """Main function for {task_description}"""
-    # Implementation stub: requires LLM or manual completion
-    raise NotImplementedError("Template requires LLM generation or manual implementation")
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning("⚠️ AUTO-IMPLEMENTER: Template code generated. Manual implementation required.")
+    print("TODO: Implement {task_description}")
+    print("This is a template. Configure OPENAI_API_KEY for LLM-based code generation.")
 
 
 if __name__ == "__main__":
@@ -171,7 +186,11 @@ if __name__ == "__main__":
 
 def main():
     # Implementation stub: requires LLM generation or manual completion
-    raise NotImplementedError("Template requires LLM generation or manual implementation")
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning("⚠️ AUTO-IMPLEMENTER: Template code generated. Manual implementation required.")
+    print("TODO: {task_description}")
+    print("Configure OPENAI_API_KEY for LLM-based code generation.")
 """
 
         implementation_details = {
@@ -194,6 +213,8 @@ def main():
             "status": self.current_status,
             "total_implementations": len(self.implementation_history),
             "last_implementation": (
-                self.last_implementation_time.isoformat() if self.last_implementation_time else "N/A"
+                self.last_implementation_time.isoformat()
+                if self.last_implementation_time
+                else "N/A"
             ),
         }

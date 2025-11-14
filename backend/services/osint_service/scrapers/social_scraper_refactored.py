@@ -111,7 +111,9 @@ class SocialScraperRefactored(BaseTool):
                 self.logger.error("twitter_client_init_failed", error=str(e))
                 # Don't fail initialization - gracefully degrade
         else:
-            self.logger.warning("twitter_api_key_missing", message="Set TWITTER_BEARER_TOKEN env var")
+            self.logger.warning(
+                "twitter_api_key_missing", message="Set TWITTER_BEARER_TOKEN env var"
+            )
 
         # Statistics
         self.total_queries = 0
@@ -156,7 +158,9 @@ class SocialScraperRefactored(BaseTool):
 
         # Validate platform
         if platform not in self.SUPPORTED_PLATFORMS and platform != "all":
-            raise ValueError(f"Unsupported platform: {platform}. Supported: {self.SUPPORTED_PLATFORMS}")
+            raise ValueError(
+                f"Unsupported platform: {platform}. Supported: {self.SUPPORTED_PLATFORMS}"
+            )
 
         # Route to platform-specific handler
         if platform == "twitter":
@@ -165,17 +169,28 @@ class SocialScraperRefactored(BaseTool):
             # Parallel queries across all platforms
             result = await self._query_all_platforms(target, max_results, search_type)
         else:
-            # LinkedIn, Facebook not yet implemented
-            raise NotImplementedError(f"Platform '{platform}' integration coming soon")
+            # LinkedIn, Facebook not yet implemented - return empty results with warning
+            self.logger.warning(
+                f"⚠️ OSINT SCRAPER: Platform '{platform}' not yet supported. Only 'twitter' and 'all' available.",
+                extra={"platform": platform, "supported_platforms": ["twitter", "all"]},
+            )
+            result = {
+                "status": "unsupported_platform",
+                "platform": platform,
+                "message": f"Platform '{platform}' integration coming soon. Currently supported: twitter, all",
+                "posts": [],
+                "metadata": {
+                    "total_results": 0,
+                    "query_time": datetime.now(timezone.utc).isoformat(),
+                    "platform_status": "not_implemented",
+                },
+            }
 
         self.total_queries += 1
         return result
 
     async def _query_twitter(
-        self,
-        target: str,
-        max_results: int,
-        search_type: str
+        self, target: str, max_results: int, search_type: str
     ) -> Dict[str, Any]:
         """Query Twitter API v2 for tweets or user information.
 
@@ -193,7 +208,9 @@ class SocialScraperRefactored(BaseTool):
         """
         if not self.twitter_client:
             # Graceful degradation: return empty result instead of failing
-            self.logger.warning("twitter_client_unavailable", message="Twitter API disabled (paid API)")
+            self.logger.warning(
+                "twitter_client_unavailable", message="Twitter API disabled (paid API)"
+            )
             return {
                 "platform": "twitter",
                 "target": target,
@@ -202,7 +219,7 @@ class SocialScraperRefactored(BaseTool):
                 "user_profile": None,
                 "total_results": 0,
                 "api_available": False,
-                "message": "Twitter API requires paid subscription - feature temporarily unavailable"
+                "message": "Twitter API requires paid subscription - feature temporarily unavailable",
             }
 
         try:
@@ -217,18 +234,36 @@ class SocialScraperRefactored(BaseTool):
                 tweets = []
                 if response.data:
                     for tweet in response.data:
-                        tweets.append({
-                            "id": tweet.id,
-                            "text": tweet.text,
-                            "created_at": tweet.created_at.isoformat() if tweet.created_at else None,
-                            "author_id": tweet.author_id,
-                            "metrics": {
-                                "likes": tweet.public_metrics.get("like_count", 0) if tweet.public_metrics else 0,
-                                "retweets": tweet.public_metrics.get("retweet_count", 0) if tweet.public_metrics else 0,
-                                "replies": tweet.public_metrics.get("reply_count", 0) if tweet.public_metrics else 0,
-                            },
-                            "language": tweet.lang,
-                        })
+                        tweets.append(
+                            {
+                                "id": tweet.id,
+                                "text": tweet.text,
+                                "created_at": (
+                                    tweet.created_at.isoformat()
+                                    if tweet.created_at
+                                    else None
+                                ),
+                                "author_id": tweet.author_id,
+                                "metrics": {
+                                    "likes": (
+                                        tweet.public_metrics.get("like_count", 0)
+                                        if tweet.public_metrics
+                                        else 0
+                                    ),
+                                    "retweets": (
+                                        tweet.public_metrics.get("retweet_count", 0)
+                                        if tweet.public_metrics
+                                        else 0
+                                    ),
+                                    "replies": (
+                                        tweet.public_metrics.get("reply_count", 0)
+                                        if tweet.public_metrics
+                                        else 0
+                                    ),
+                                },
+                                "language": tweet.lang,
+                            }
+                        )
 
                 self.total_tweets_fetched += len(tweets)
 
@@ -252,7 +287,12 @@ class SocialScraperRefactored(BaseTool):
                 username = target.lstrip("@")  # Remove @ if present
                 response = self.twitter_client.get_user(
                     username=username,
-                    user_fields=["created_at", "description", "public_metrics", "verified"],
+                    user_fields=[
+                        "created_at",
+                        "description",
+                        "public_metrics",
+                        "verified",
+                    ],
                 )
 
                 if not response.data:
@@ -268,7 +308,9 @@ class SocialScraperRefactored(BaseTool):
                 user = response.data
                 self.total_profiles_fetched += 1
 
-                self.logger.info("twitter_user_found", username=username, user_id=user.id)
+                self.logger.info(
+                    "twitter_user_found", username=username, user_id=user.id
+                )
 
                 return {
                     "platform": "twitter",
@@ -281,18 +323,34 @@ class SocialScraperRefactored(BaseTool):
                         "username": user.username,
                         "name": user.name,
                         "description": user.description,
-                        "created_at": user.created_at.isoformat() if user.created_at else None,
+                        "created_at": (
+                            user.created_at.isoformat() if user.created_at else None
+                        ),
                         "verified": user.verified,
                         "metrics": {
-                            "followers": user.public_metrics.get("followers_count", 0) if user.public_metrics else 0,
-                            "following": user.public_metrics.get("following_count", 0) if user.public_metrics else 0,
-                            "tweets": user.public_metrics.get("tweet_count", 0) if user.public_metrics else 0,
+                            "followers": (
+                                user.public_metrics.get("followers_count", 0)
+                                if user.public_metrics
+                                else 0
+                            ),
+                            "following": (
+                                user.public_metrics.get("following_count", 0)
+                                if user.public_metrics
+                                else 0
+                            ),
+                            "tweets": (
+                                user.public_metrics.get("tweet_count", 0)
+                                if user.public_metrics
+                                else 0
+                            ),
                         },
                     },
                 }
 
             else:
-                raise ValueError(f"Invalid search_type: {search_type}. Use 'recent' or 'user'.")
+                raise ValueError(
+                    f"Invalid search_type: {search_type}. Use 'recent' or 'user'."
+                )
 
         except tweepy.errors.TweepyException as e:
             self.logger.error(
@@ -304,10 +362,7 @@ class SocialScraperRefactored(BaseTool):
             raise
 
     async def _query_all_platforms(
-        self,
-        target: str,
-        max_results: int,
-        search_type: str
+        self, target: str, max_results: int, search_type: str
     ) -> Dict[str, Any]:
         """Query all supported platforms in parallel.
 
@@ -319,7 +374,9 @@ class SocialScraperRefactored(BaseTool):
         Returns:
             Dictionary with results from all platforms
         """
-        self.logger.info("parallel_query_started", target=target, platforms=self.SUPPORTED_PLATFORMS)
+        self.logger.info(
+            "parallel_query_started", target=target, platforms=self.SUPPORTED_PLATFORMS
+        )
 
         # Launch parallel queries (only Twitter for now)
         tasks = []
@@ -362,12 +419,14 @@ class SocialScraperRefactored(BaseTool):
         status = await self.health_check()
 
         # Add scraper-specific stats
-        status.update({
-            "total_queries": self.total_queries,
-            "total_tweets_fetched": self.total_tweets_fetched,
-            "total_profiles_fetched": self.total_profiles_fetched,
-            "twitter_api_available": self.twitter_client is not None,
-        })
+        status.update(
+            {
+                "total_queries": self.total_queries,
+                "total_tweets_fetched": self.total_tweets_fetched,
+                "total_profiles_fetched": self.total_profiles_fetched,
+                "twitter_api_available": self.twitter_client is not None,
+            }
+        )
 
         return status
 

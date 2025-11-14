@@ -346,10 +346,16 @@ async def get_ml_metrics(
 async def _query_metrics_from_db(
     self, timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
 ) -> MLMetricsResponse:
-    """Query ML metrics from database."""
-    # Implement actual database queries
-    # For now, raise to trigger fallback
-    raise NotImplementedError("Database integration pending")
+    """Query ML metrics from database.
+
+    Returns None to trigger fallback to mock data.
+    TODO: Implement Prometheus/InfluxDB integration.
+    """
+    logger.warning(
+        "⚠️ ML METRICS: Database queries not yet implemented. Returning mock data.",
+        extra={"database_integration": "pending", "mock_data": True},
+    )
+    return None  # Trigger fallback to _generate_mock_metrics()
 
 
 def _generate_mock_metrics(
