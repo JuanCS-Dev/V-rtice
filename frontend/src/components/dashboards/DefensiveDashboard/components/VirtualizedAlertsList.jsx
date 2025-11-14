@@ -13,30 +13,32 @@
  * Governed by: Constituição Vértice v2.5 - Phase 3 Optimizations
  */
 
-import React, { useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import VirtualList from '../../../shared/VirtualList';
-import styles from './VirtualizedAlertsList.module.css';
+import React, { useMemo, useCallback } from "react";
+import PropTypes from "prop-types";
+import VirtualList from "../../../shared/VirtualList";
+import { formatTime } from "@/utils/dateHelpers";
+import styles from "./VirtualizedAlertsList.module.css";
 
 /**
  * Single alert row component (memoized for performance)
  */
 const AlertRow = React.memo(({ alert, style }) => {
-  const severityClass = `severity-${alert.severity || 'medium'}`;
-  const statusClass = alert.status === 'resolved' ? 'resolved' : 'active';
+  const severityClass = `severity-${alert.severity || "medium"}`;
+  const statusClass = alert.status === "resolved" ? "resolved" : "active";
 
   return (
-    <div className={`${styles.alertRow} ${styles[severityClass]} ${styles[statusClass]}`} style={style}>
+    <div
+      className={`${styles.alertRow} ${styles[severityClass]} ${styles[statusClass]}`}
+      style={style}
+    >
       <div className={styles.alertHeader}>
         <span className={styles.alertType}>{alert.type}</span>
-        <span className={styles.alertTime}>
-          {new Date(alert.timestamp).toLocaleTimeString()}
-        </span>
+        <span className={styles.alertTime}>{formatTime(alert.timestamp)}</span>
       </div>
       <div className={styles.alertMessage}>{alert.message}</div>
       <div className={styles.alertFooter}>
         <span className={`${styles.severityBadge} ${styles[severityClass]}`}>
-          {alert.severity?.toUpperCase() || 'MEDIUM'}
+          {alert.severity?.toUpperCase() || "MEDIUM"}
         </span>
         {alert.source && <span className={styles.source}>{alert.source}</span>}
       </div>
@@ -44,7 +46,7 @@ const AlertRow = React.memo(({ alert, style }) => {
   );
 });
 
-AlertRow.displayName = 'AlertRow';
+AlertRow.displayName = "AlertRow";
 
 AlertRow.propTypes = {
   alert: PropTypes.shape({
@@ -76,7 +78,7 @@ export const VirtualizedAlertsList = ({
 }) => {
   // SAFE GUARD: Ensure alerts is always an array
   const safeAlerts = Array.isArray(alerts) ? alerts : [];
-  
+
   // Filter alerts based on props
   const filteredAlerts = useMemo(() => {
     let filtered = safeAlerts;
@@ -102,20 +104,23 @@ export const VirtualizedAlertsList = ({
       };
 
       return (
-        <div onClick={handleClick} style={{ cursor: onAlertClick ? 'pointer' : 'default' }}>
+        <div
+          onClick={handleClick}
+          style={{ cursor: onAlertClick ? "pointer" : "default" }}
+        >
           <AlertRow alert={alert} style={style} />
         </div>
       );
     },
-    [onAlertClick]
+    [onAlertClick],
   );
 
   // Statistics
   const stats = useMemo(() => {
-    const high = filteredAlerts.filter((a) => a.severity === 'high').length;
-    const medium = filteredAlerts.filter((a) => a.severity === 'medium').length;
-    const low = filteredAlerts.filter((a) => a.severity === 'low').length;
-    const active = filteredAlerts.filter((a) => a.status !== 'resolved').length;
+    const high = filteredAlerts.filter((a) => a.severity === "high").length;
+    const medium = filteredAlerts.filter((a) => a.severity === "medium").length;
+    const low = filteredAlerts.filter((a) => a.severity === "low").length;
+    const active = filteredAlerts.filter((a) => a.status !== "resolved").length;
 
     return { high, medium, low, active, total: filteredAlerts.length };
   }, [filteredAlerts]);
@@ -169,11 +174,11 @@ VirtualizedAlertsList.propTypes = {
       timestamp: PropTypes.string.isRequired,
       source: PropTypes.string,
       status: PropTypes.string,
-    })
+    }),
   ).isRequired,
   onAlertClick: PropTypes.func,
-  filterSeverity: PropTypes.oneOf(['high', 'medium', 'low']),
-  filterStatus: PropTypes.oneOf(['active', 'resolved']),
+  filterSeverity: PropTypes.oneOf(["high", "medium", "low"]),
+  filterStatus: PropTypes.oneOf(["active", "resolved"]),
 };
 
 export default VirtualizedAlertsList;

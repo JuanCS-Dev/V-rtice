@@ -14,6 +14,19 @@ import { API_BASE_URL } from "@/config/api";
 
 import logger from "../utils/logger";
 
+/**
+ * Safely get API key from localStorage with sanitization
+ * @returns {string} Sanitized API key or empty string
+ */
+const getApiKey = () => {
+  try {
+    const key = localStorage.getItem("api_key");
+    return key ? String(key).trim() : "";
+  } catch {
+    return "";
+  }
+};
+
 const API_ENDPOINTS = {
   IP_INTELLIGENCE: `${API_BASE_URL}/api/ip`,
   THREAT_INTEL: `${API_BASE_URL}/api/threat-intel`,
@@ -144,7 +157,7 @@ export const getMyIP = async () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": localStorage.getItem("api_key") || "",
+          "X-API-Key": getApiKey(),
         },
       },
     );

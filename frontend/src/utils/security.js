@@ -19,9 +19,9 @@
  * @returns {string} Sanitized HTML
  */
 export const sanitizeHTML = (html) => {
-  if (typeof html !== 'string') return '';
+  if (typeof html !== "string") return "";
 
-  const temp = document.createElement('div');
+  const temp = document.createElement("div");
   temp.textContent = html;
   return temp.innerHTML;
 };
@@ -33,15 +33,15 @@ export const sanitizeHTML = (html) => {
  * @returns {string} Escaped string
  */
 export const escapeHTML = (str) => {
-  if (typeof str !== 'string') return '';
+  if (typeof str !== "string") return "";
 
   const htmlEscapeMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#x27;',
-    '/': '&#x2F;'
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#x27;",
+    "/": "&#x2F;",
   };
 
   return str.replace(/[&<>"'/]/g, (char) => htmlEscapeMap[char]);
@@ -54,7 +54,7 @@ export const escapeHTML = (str) => {
  * @returns {boolean} Valid or not
  */
 export const isValidEmail = (email) => {
-  if (typeof email !== 'string') return false;
+  if (typeof email !== "string") return false;
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) && email.length <= 254;
@@ -67,12 +67,12 @@ export const isValidEmail = (email) => {
  * @param {Array<string>} allowedProtocols - Allowed protocols (default: http, https)
  * @returns {boolean} Valid or not
  */
-export const isValidURL = (url, allowedProtocols = ['http', 'https']) => {
-  if (typeof url !== 'string') return false;
+export const isValidURL = (url, allowedProtocols = ["http", "https"]) => {
+  if (typeof url !== "string") return false;
 
   try {
     const parsed = new URL(url);
-    return allowedProtocols.includes(parsed.protocol.replace(':', ''));
+    return allowedProtocols.includes(parsed.protocol.replace(":", ""));
   } catch {
     return false;
   }
@@ -85,14 +85,15 @@ export const isValidURL = (url, allowedProtocols = ['http', 'https']) => {
  * @returns {boolean} Valid or not
  */
 export const isValidIPv4 = (ip) => {
-  if (typeof ip !== 'string') return false;
+  if (typeof ip !== "string") return false;
 
   const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
   if (!ipv4Regex.test(ip)) return false;
 
-  const parts = ip.split('.');
-  return parts.every(part => {
+  const parts = ip.split(".");
+  return parts.every((part) => {
     const num = parseInt(part, 10);
+    if (isNaN(num)) return false;
     return num >= 0 && num <= 255;
   });
 };
@@ -104,9 +105,10 @@ export const isValidIPv4 = (ip) => {
  * @returns {boolean} Valid or not
  */
 export const isValidDomain = (domain) => {
-  if (typeof domain !== 'string') return false;
+  if (typeof domain !== "string") return false;
 
-  const domainRegex = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+  const domainRegex =
+    /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
   return domainRegex.test(domain) && domain.length <= 253;
 };
 
@@ -117,19 +119,19 @@ export const isValidDomain = (domain) => {
  * @returns {string} Sanitized input
  */
 export const sanitizeSQLInput = (input) => {
-  if (typeof input !== 'string') return '';
+  if (typeof input !== "string") return "";
 
   // Remove common SQL injection patterns
   return input
-    .replace(/['";]/g, '')
-    .replace(/--/g, '')
-    .replace(/\/\*/g, '')
-    .replace(/\*\//g, '')
-    .replace(/xp_/gi, '')
-    .replace(/exec/gi, '')
-    .replace(/execute/gi, '')
-    .replace(/drop/gi, '')
-    .replace(/union/gi, '');
+    .replace(/['";]/g, "")
+    .replace(/--/g, "")
+    .replace(/\/\*/g, "")
+    .replace(/\*\//g, "")
+    .replace(/xp_/gi, "")
+    .replace(/exec/gi, "")
+    .replace(/execute/gi, "")
+    .replace(/drop/gi, "")
+    .replace(/union/gi, "");
 };
 
 /**
@@ -139,7 +141,7 @@ export const sanitizeSQLInput = (input) => {
  * @returns {string|null} Valid CVE ID or null
  */
 export const sanitizeCVEId = (cveId) => {
-  if (typeof cveId !== 'string') return null;
+  if (typeof cveId !== "string") return null;
 
   const cveRegex = /^CVE-\d{4}-\d{4,}$/i;
   const sanitized = cveId.trim().toUpperCase();
@@ -156,7 +158,7 @@ export const sanitizeCVEId = (cveId) => {
  * @returns {boolean} Valid or not
  */
 export const isValidLength = (input, min = 0, max = Infinity) => {
-  if (typeof input !== 'string') return false;
+  if (typeof input !== "string") return false;
   const length = input.trim().length;
   return length >= min && length <= max;
 };
@@ -168,11 +170,11 @@ export const isValidLength = (input, min = 0, max = Infinity) => {
  * @returns {string} Sanitized filename
  */
 export const sanitizeFilename = (filename) => {
-  if (typeof filename !== 'string') return '';
+  if (typeof filename !== "string") return "";
 
   return filename
-    .replace(/[^a-zA-Z0-9._-]/g, '_')
-    .replace(/\.{2,}/g, '.')
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/\.{2,}/g, ".")
     .substring(0, 255);
 };
 
@@ -183,8 +185,8 @@ export const sanitizeFilename = (filename) => {
  * Governed by: Constituição Vértice v2.5 - ADR-002 (Security Fixes)
  */
 
-const CSRF_TOKEN_KEY = 'vrtc_csrf_token';
-const CSRF_TOKEN_EXPIRY = 'vrtc_csrf_expiry';
+const CSRF_TOKEN_KEY = "vrtc_csrf_token";
+const CSRF_TOKEN_EXPIRY = "vrtc_csrf_expiry";
 const TOKEN_VALIDITY_MS = 60 * 60 * 1000; // 1 hour
 
 /**
@@ -195,7 +197,9 @@ const TOKEN_VALIDITY_MS = 60 * 60 * 1000; // 1 hour
 export const generateCSRFToken = () => {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
 };
 
 /**
@@ -206,7 +210,10 @@ export const generateCSRFToken = () => {
 export const storeCSRFToken = (token) => {
   const now = Date.now();
   sessionStorage.setItem(CSRF_TOKEN_KEY, token);
-  sessionStorage.setItem(CSRF_TOKEN_EXPIRY, (now + TOKEN_VALIDITY_MS).toString());
+  sessionStorage.setItem(
+    CSRF_TOKEN_EXPIRY,
+    (now + TOKEN_VALIDITY_MS).toString(),
+  );
 };
 
 /**
@@ -216,7 +223,14 @@ export const storeCSRFToken = (token) => {
  */
 export const getCSRFToken = () => {
   const now = Date.now();
-  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || '0', 10);
+  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || "0", 10);
+  if (isNaN(expiry)) {
+    // If expiry is corrupted, generate new token
+    const token = generateCSRFToken();
+    storeCSRFToken(token);
+    return token;
+  }
+
   let token = sessionStorage.getItem(CSRF_TOKEN_KEY);
 
   // Generate new token if expired or missing
@@ -236,7 +250,8 @@ export const getCSRFToken = () => {
  */
 export const validateCSRFToken = (token) => {
   const storedToken = sessionStorage.getItem(CSRF_TOKEN_KEY);
-  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || '0', 10);
+  const expiry = parseInt(sessionStorage.getItem(CSRF_TOKEN_EXPIRY) || "0", 10);
+  if (isNaN(expiry)) return false;
   const now = Date.now();
 
   return storedToken !== null && storedToken === token && now < expiry;
@@ -264,13 +279,13 @@ const rateLimitStore = new Map();
  */
 const RATE_LIMITS = {
   // Strict limits for mutations
-  '/api/scans': { maxRequests: 5, windowMs: 60000 }, // 5 req/min
-  '/api/attacks': { maxRequests: 3, windowMs: 60000 }, // 3 req/min
-  '/offensive': { maxRequests: 10, windowMs: 60000 }, // 10 req/min
+  "/api/scans": { maxRequests: 5, windowMs: 60000 }, // 5 req/min
+  "/api/attacks": { maxRequests: 3, windowMs: 60000 }, // 3 req/min
+  "/offensive": { maxRequests: 10, windowMs: 60000 }, // 10 req/min
 
   // Moderate limits for queries
-  '/api/metrics': { maxRequests: 30, windowMs: 60000 }, // 30 req/min
-  '/api/': { maxRequests: 60, windowMs: 60000 }, // 60 req/min (default)
+  "/api/metrics": { maxRequests: 30, windowMs: 60000 }, // 30 req/min
+  "/api/": { maxRequests: 60, windowMs: 60000 }, // 60 req/min (default)
 };
 
 /**
@@ -291,7 +306,7 @@ function getRateLimitConfig(endpoint) {
 export class RateLimitError extends Error {
   constructor(message, retryAfter) {
     super(message);
-    this.name = 'RateLimitError';
+    this.name = "RateLimitError";
     this.retryAfter = retryAfter;
   }
 }
@@ -310,15 +325,19 @@ export function checkRateLimit(endpoint) {
   }
 
   const requests = rateLimitStore.get(key);
-  const validRequests = requests.filter(timestamp => now - timestamp < config.windowMs);
+  const validRequests = requests.filter(
+    (timestamp) => now - timestamp < config.windowMs,
+  );
 
   if (validRequests.length >= config.maxRequests) {
     const oldestRequest = Math.min(...validRequests);
-    const retryAfter = Math.ceil((oldestRequest + config.windowMs - now) / 1000);
+    const retryAfter = Math.ceil(
+      (oldestRequest + config.windowMs - now) / 1000,
+    );
 
     throw new RateLimitError(
       `Rate limit exceeded for ${endpoint}. Retry after ${retryAfter}s`,
-      retryAfter
+      retryAfter,
     );
   }
 
@@ -348,22 +367,22 @@ export const generateRateLimitKey = (action, identifier) => {
  */
 export const generateCSP = (options = {}) => {
   const defaults = {
-    'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'"],
-    'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'https:'],
-    'font-src': ["'self'", 'data:'],
-    'connect-src': ["'self'", 'ws:', 'wss:'],
-    'frame-ancestors': ["'none'"],
-    'base-uri': ["'self'"],
-    'form-action': ["'self'"]
+    "default-src": ["'self'"],
+    "script-src": ["'self'", "'unsafe-inline'"],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": ["'self'", "data:", "https:"],
+    "font-src": ["'self'", "data:"],
+    "connect-src": ["'self'", "ws:", "wss:"],
+    "frame-ancestors": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
   };
 
   const csp = { ...defaults, ...options };
 
   return Object.entries(csp)
-    .map(([directive, sources]) => `${directive} ${sources.join(' ')}`)
-    .join('; ');
+    .map(([directive, sources]) => `${directive} ${sources.join(" ")}`)
+    .join("; ");
 };
 
 /**
@@ -373,12 +392,12 @@ export const generateCSP = (options = {}) => {
  */
 export const getSecurityHeaders = () => {
   return {
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
-    'Content-Security-Policy': generateCSP()
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+    "Content-Security-Policy": generateCSP(),
   };
 };
 
@@ -389,7 +408,7 @@ export const getSecurityHeaders = () => {
  * @returns {Object|null} Parsed JSON or null
  */
 export const safeJSONParse = (json) => {
-  if (typeof json !== 'string') return null;
+  if (typeof json !== "string") return null;
 
   try {
     return JSON.parse(json);
@@ -405,7 +424,7 @@ export const safeJSONParse = (json) => {
  * @returns {boolean} Alphanumeric or not
  */
 export const isAlphanumeric = (str) => {
-  if (typeof str !== 'string') return false;
+  if (typeof str !== "string") return false;
   return /^[a-zA-Z0-9]+$/.test(str);
 };
 
@@ -416,8 +435,11 @@ export const isAlphanumeric = (str) => {
  * @returns {string} Cleaned HTML
  */
 export const removeScriptTags = (html) => {
-  if (typeof html !== 'string') return '';
-  return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  if (typeof html !== "string") return "";
+  return html.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
 };
 
 /**
@@ -435,10 +457,10 @@ export const OWASP = {
    * A3: Sensitive Data Exposure Prevention
    */
   maskSensitiveData: (data, visibleChars = 4) => {
-    if (typeof data !== 'string') return '';
+    if (typeof data !== "string") return "";
     const length = data.length;
-    if (length <= visibleChars) return '*'.repeat(length);
-    return '*'.repeat(length - visibleChars) + data.slice(-visibleChars);
+    if (length <= visibleChars) return "*".repeat(length);
+    return "*".repeat(length - visibleChars) + data.slice(-visibleChars);
   },
 
   /**
@@ -453,5 +475,5 @@ export const OWASP = {
    */
   safeDeserialize: (json) => {
     return safeJSONParse(json);
-  }
+  },
 };
