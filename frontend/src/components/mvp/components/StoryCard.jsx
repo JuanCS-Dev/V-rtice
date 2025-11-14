@@ -7,6 +7,7 @@
 
 import React, { useState } from "react";
 import styles from "./StoryCard.module.css";
+import { formatDate } from "@/utils/dateHelpers";
 
 export const StoryCard = ({ narrative }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -49,11 +50,15 @@ export const StoryCard = ({ narrative }) => {
     if (diffHours < 24) return `${diffHours}h atrás`;
     if (diffDays < 7) return `${diffDays}d atrás`;
 
-    return date.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return formatDate(
+      timestamp,
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      },
+      "N/A",
+    );
   };
 
   const toneColor = getToneColor(narrative.tone);
