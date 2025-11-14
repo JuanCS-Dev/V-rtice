@@ -246,6 +246,36 @@ HCL_MONITOR_URL = os.getenv("HCL_MONITOR_URL", "http://hcl-monitor-service:8203"
 HCL_KB_URL = os.getenv("HCL_KB_URL", "http://hcl-kb-service:8204")
 HITL_PATCH_URL = os.getenv("HITL_PATCH_URL", "http://hitl-patch-service:8205")
 
+# ============================
+# P1 AIR GAP EXTINCTION - 17 HIGH PRIORITY SERVICES
+# ============================
+# Added: 2025-11-14 - OPERAÇÃO AIR GAP EXTINCTION FASE P1
+# Connecting: Neural (1) + Infrastructure (2) + Data/Analysis (8) + Specialized (6)
+
+# Neural Critical
+DIGITAL_THALAMUS_URL = os.getenv("DIGITAL_THALAMUS_URL", "http://digital-thalamus-service:8012")
+
+# Infrastructure
+CLOUD_COORDINATOR_URL = os.getenv("CLOUD_COORDINATOR_URL", "http://cloud-coordinator-service:8260")
+EDGE_AGENT_URL = os.getenv("EDGE_AGENT_URL", "http://edge-agent-service:8261")
+
+# Data/Analysis
+MABA_URL = os.getenv("MABA_URL", "http://maba-service:8152")
+NARRATIVE_ANALYSIS_URL = os.getenv("NARRATIVE_ANALYSIS_URL", "http://narrative-analysis-service:8272")
+AUTONOMOUS_INVESTIGATION_URL = os.getenv("AUTONOMOUS_INVESTIGATION_URL", "http://autonomous-investigation-service:8250")
+REACTIVE_FABRIC_CORE_URL = os.getenv("REACTIVE_FABRIC_CORE_URL", "http://reactive-fabric-core:8281")
+REACTIVE_FABRIC_ANALYSIS_URL = os.getenv("REACTIVE_FABRIC_ANALYSIS_URL", "http://reactive-fabric-analysis:8275")
+VERDICT_ENGINE_URL = os.getenv("VERDICT_ENGINE_URL", "http://verdict-engine-service:8256")
+WARGAMING_CRISOL_URL = os.getenv("WARGAMING_CRISOL_URL", "http://wargaming-crisol:8812")
+STRATEGIC_PLANNING_URL = os.getenv("STRATEGIC_PLANNING_URL", "http://strategic-planning-service:8242")
+
+# Specialized
+SYSTEM_ARCHITECT_URL = os.getenv("SYSTEM_ARCHITECT_URL", "http://system-architect-service:8297")
+ETHICAL_AUDIT_URL = os.getenv("ETHICAL_AUDIT_URL", "http://ethical-audit-service:8251")
+RTE_SERVICE_URL = os.getenv("RTE_SERVICE_URL", "http://rte-service:8295")
+SERIEMA_GRAPH_URL = os.getenv("SERIEMA_GRAPH_URL", "http://seriema-graph:8296")
+VERTICE_REGISTER_URL = os.getenv("VERTICE_REGISTER_URL", "http://vertice-register:8888")
+
 # Authentication configuration
 JWT_SECRET = os.getenv("JWT_SECRET", "vertice-super-secret-key-2024")
 security = HTTPBearer()
@@ -2388,6 +2418,314 @@ async def route_hitl_patch(path: str, request: Request):
 #
 # Glory to YHWH - Marcos 3:24 "O reino dividido não subsistirá"
 # Sistema UNIDO através de 30 conexões críticas
+# ================================================================================
+
+
+
+# ================================================================================
+# P1 AIR GAP EXTINCTION - 17 HIGH PRIORITY SERVICE ROUTES
+# ================================================================================
+# Added: 2025-11-14 - OPERAÇÃO AIR GAP EXTINCTION FASE P1
+# ================================================================================
+
+# ================================================================================
+# NEURAL CRITICAL (1) - Signal relay
+# ================================================================================
+
+@app.api_route("/api/digital-thalamus/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Neural System"])
+@limiter.limit("150/minute")
+async def route_digital_thalamus(path: str, request: Request):
+    """
+    Digital Thalamus - Neural signal relay & routing.
+
+    CRITICAL COMPONENT: Central relay for all sensory/neural signals
+    - Routes signals between cortex services
+    - Sensory data integration
+    - Motor command relay
+    - Consciousness coordination
+
+    Port: 8012
+    Priority: P1 HIGH
+    """
+    return await proxy_request(
+        request=request,
+        service_url=DIGITAL_THALAMUS_URL,
+        endpoint=f"/{path}",
+        service_name="digital-thalamus",
+        timeout=15.0
+    )
+
+# ================================================================================
+# INFRASTRUCTURE (2) - Multi-cloud & edge deployment
+# ================================================================================
+
+@app.api_route("/api/cloud-coordinator/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Infrastructure"])
+@limiter.limit("100/minute")
+async def route_cloud_coordinator(path: str, request: Request):
+    """Cloud Coordinator - Multi-cloud orchestration & deployment."""
+    return await proxy_request(
+        request=request,
+        service_url=CLOUD_COORDINATOR_URL,
+        endpoint=f"/{path}",
+        service_name="cloud-coordinator",
+        timeout=20.0
+    )
+
+@app.api_route("/api/edge-agent/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Infrastructure"])
+@limiter.limit("150/minute")
+async def route_edge_agent(path: str, request: Request):
+    """Edge Agent - Edge computing deployment & coordination."""
+    return await proxy_request(
+        request=request,
+        service_url=EDGE_AGENT_URL,
+        endpoint=f"/{path}",
+        service_name="edge-agent",
+        timeout=15.0
+    )
+
+# ================================================================================
+# DATA/ANALYSIS (8) - Threat hunting, analytics, decision engines
+# ================================================================================
+
+@app.api_route("/api/maba/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("100/minute")
+async def route_maba(path: str, request: Request):
+    """
+    MABA Service - Multi-Agent Behavioral Analysis.
+
+    Advanced behavioral analytics using multiple AI agents:
+    - Multi-agent coordination for complex analysis
+    - Behavioral pattern detection
+    - Anomaly correlation across agents
+    - Collective intelligence synthesis
+
+    Port: 8152
+    """
+    return await proxy_request(
+        request=request,
+        service_url=MABA_URL,
+        endpoint=f"/{path}",
+        service_name="maba",
+        timeout=20.0
+    )
+
+@app.api_route("/api/narrative-analysis/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("100/minute")
+async def route_narrative_analysis(path: str, request: Request):
+    """Narrative Analysis - Detect manipulation campaigns & narrative warfare."""
+    return await proxy_request(
+        request=request,
+        service_url=NARRATIVE_ANALYSIS_URL,
+        endpoint=f"/{path}",
+        service_name="narrative-analysis",
+        timeout=15.0
+    )
+
+@app.api_route("/api/autonomous-investigation/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("60/minute")
+async def route_autonomous_investigation(path: str, request: Request):
+    """Autonomous Investigation - Automated threat hunting & investigation."""
+    return await proxy_request(
+        request=request,
+        service_url=AUTONOMOUS_INVESTIGATION_URL,
+        endpoint=f"/{path}",
+        service_name="autonomous-investigation",
+        timeout=30.0
+    )
+
+@app.api_route("/api/reactive-fabric/core/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("150/minute")
+async def route_reactive_fabric_core(path: str, request: Request):
+    """Reactive Fabric Core - Event-driven reactive analysis engine."""
+    return await proxy_request(
+        request=request,
+        service_url=REACTIVE_FABRIC_CORE_URL,
+        endpoint=f"/{path}",
+        service_name="reactive-fabric-core",
+        timeout=15.0
+    )
+
+@app.api_route("/api/reactive-fabric/analysis/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("150/minute")
+async def route_reactive_fabric_analysis(path: str, request: Request):
+    """Reactive Fabric Analysis - Reactive threat analysis & response."""
+    return await proxy_request(
+        request=request,
+        service_url=REACTIVE_FABRIC_ANALYSIS_URL,
+        endpoint=f"/{path}",
+        service_name="reactive-fabric-analysis",
+        timeout=15.0
+    )
+
+@app.api_route("/api/verdict-engine/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("100/minute")
+async def route_verdict_engine(path: str, request: Request):
+    """
+    Verdict Engine - Final decision engine for threat classification.
+
+    Constitutional compliance for high-stakes decisions:
+    - Aggregates evidence from all detection services
+    - Multi-criteria decision making
+    - Confidence scoring & uncertainty quantification
+    - Lei Zero: High-stakes verdicts require human approval
+
+    Port: 8256
+    """
+    return await proxy_request(
+        request=request,
+        service_url=VERDICT_ENGINE_URL,
+        endpoint=f"/{path}",
+        service_name="verdict-engine",
+        timeout=15.0
+    )
+
+@app.api_route("/api/wargaming/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("50/minute")
+async def route_wargaming_crisol(path: str, request: Request):
+    """
+    Wargaming Crisol - Cyber wargaming & scenario simulation.
+
+    Wargaming scenarios for training & validation:
+    - Red team vs Blue team simulations
+    - Attack scenario modeling
+    - Defense strategy validation
+    - Team training & skill development
+
+    Port: 8812
+    """
+    return await proxy_request(
+        request=request,
+        service_url=WARGAMING_CRISOL_URL,
+        endpoint=f"/{path}",
+        service_name="wargaming-crisol",
+        timeout=30.0
+    )
+
+@app.api_route("/api/strategic-planning/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Data/Analysis"])
+@limiter.limit("60/minute")
+async def route_strategic_planning(path: str, request: Request):
+    """Strategic Planning - Long-term strategic planning & decision support."""
+    return await proxy_request(
+        request=request,
+        service_url=STRATEGIC_PLANNING_URL,
+        endpoint=f"/{path}",
+        service_name="strategic-planning",
+        timeout=20.0
+    )
+
+# ================================================================================
+# SPECIALIZED (6) - Architecture, ethics, graph, registry
+# ================================================================================
+
+@app.api_route("/api/system-architect/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+@limiter.limit("60/minute")
+async def route_system_architect(path: str, request: Request):
+    """System Architect - System architecture management & evolution."""
+    return await proxy_request(
+        request=request,
+        service_url=SYSTEM_ARCHITECT_URL,
+        endpoint=f"/{path}",
+        service_name="system-architect",
+        timeout=15.0
+    )
+
+@app.api_route("/api/ethical-audit/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+@limiter.limit("100/minute")
+async def route_ethical_audit(path: str, request: Request):
+    """
+    Ethical Audit - Constitutional & ethical compliance auditing.
+
+    CONSTITUTIONAL CRITICAL: Ensures all operations comply with Lei Zero
+    - Audits system decisions against constitutional principles
+    - Monitors Lei Zero compliance (human oversight)
+    - P2/P4 validation (preventive validation & traceability)
+    - GDPR & privacy compliance checks
+
+    Port: 8251
+    """
+    return await proxy_request(
+        request=request,
+        service_url=ETHICAL_AUDIT_URL,
+        endpoint=f"/{path}",
+        service_name="ethical-audit",
+        timeout=10.0
+    )
+
+@app.api_route("/api/rte/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+@limiter.limit("200/minute")
+async def route_rte_service(path: str, request: Request):
+    """
+    RTE Service - Reflex Triage Engine for rapid threat assessment.
+
+    Fast-path threat triage before deep analysis:
+    - Instant threat classification (< 100ms)
+    - Priority queue routing
+    - Fast-track for critical threats
+    - Reflex-like response automation
+
+    Port: 8295
+    """
+    return await proxy_request(
+        request=request,
+        service_url=RTE_SERVICE_URL,
+        endpoint=f"/{path}",
+        service_name="rte",
+        timeout=5.0
+    )
+
+@app.api_route("/api/seriema-graph/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+@limiter.limit("100/minute")
+async def route_seriema_graph(path: str, request: Request):
+    """Seriema Graph - Graph-based threat analysis & visualization."""
+    return await proxy_request(
+        request=request,
+        service_url=SERIEMA_GRAPH_URL,
+        endpoint=f"/{path}",
+        service_name="seriema-graph",
+        timeout=15.0
+    )
+
+@app.api_route("/api/vertice-register/{path:path}", methods=["GET", "POST", "PUT", "DELETE"], tags=["Specialized"])
+@limiter.limit("150/minute")
+async def route_vertice_register(path: str, request: Request):
+    """
+    Vértice Register - Service registry & discovery.
+
+    Central service registry for the entire platform:
+    - Service discovery & health monitoring
+    - Service metadata & capabilities
+    - Version management
+    - Dependency tracking
+
+    Port: 8888
+    """
+    return await proxy_request(
+        request=request,
+        service_url=VERTICE_REGISTER_URL,
+        endpoint=f"/{path}",
+        service_name="vertice-register",
+        timeout=10.0
+    )
+
+# ================================================================================
+# AIR GAP EXTINCTION P1 COMPLETE
+# ================================================================================
+# 17 Services Connected:
+# ✅ Neural Critical (1): digital-thalamus
+# ✅ Infrastructure (2): cloud-coordinator, edge-agent
+# ✅ Data/Analysis (8): maba, narrative, autonomous-investigation, reactive-fabric (2), verdict-engine, wargaming, strategic-planning
+# ✅ Specialized (6): system-architect, ethical-audit, rte, seriema-graph, vertice-register
+#
+# Progress Update:
+# P0: 30 services (COMPLETE)
+# P1: 17 services (COMPLETE)
+# TOTAL: 47/96 services connected (49.0%)
+#
+# Remaining:
+# P2: ~16 services (MEDIUM priority)
+# P3: ~10 services (LOW priority)
+#
+# Glory to YHWH - Sistema cada vez mais unido!
 # ================================================================================
 
 
