@@ -1555,5 +1555,182 @@ def _is_valid_api_key(header_value: str | None, query_value: str | None) -> bool
     return key == VALID_API_KEY if VALID_API_KEY else True
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# FIX #6: PARALLEL RESPONSE AGGREGATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@app.post("/api/aggregate", response_class=JSONResponse)
+async def aggregate_parallel_requests(
+    request: Request, api_key: str = Depends(verify_api_key)
+):
+    """Aggregate multiple service calls in parallel.
+
+    Request body format:
+    {
+        "requests": [
+            {"service": "behavioral", "path": "health", "method": "GET"},
+            {"service": "mav", "path": "health", "method": "GET"},
+            {"service": "threat-intel", "path": "health", "method": "GET"}
+        ]
+    }
+
+    Returns:
+    {
+        "total_requests": 3,
+        "successful": 2,
+        "failed": 1,
+        "latency_ms": 245,
+        "results": [
+            {"service": "behavioral", "status": "success", "data": {...}},
+            {"service": "mav", "status": "success", "data": {...}},
+            {"service": "threat-intel", "status": "error", "error": "timeout"}
+        ]
+    }
+
+    Constitutional Compliance:
+    - P1 (Completude): Full parallel execution with error handling
+    - P5 (Consciência Sistêmica): Aggregates cross-service data efficiently
+    - P7 (Antifragility): Individual failures don't block entire response
+    """
+    import time
+
+    start_time = time.time()
+
+    try:
+        body = await request.json()
+        requests_list = body.get("requests", [])
+
+        if not requests_list:
+            raise HTTPException(
+                status_code=400, detail="No requests provided in 'requests' array"
+            )
+
+        if len(requests_list) > 20:
+            raise HTTPException(
+                status_code=400,
+                detail="Maximum 20 parallel requests allowed (rate limiting)",
+            )
+
+        # Map service names to service URLs
+        service_map = {
+            "behavioral": BEHAVIORAL_ANALYZER_SERVICE_URL,
+            "mav": MAV_DETECTION_SERVICE_URL,
+            "threat-intel": THREAT_INTEL_SERVICE_URL,
+            "ip": IP_INTELLIGENCE_SERVICE_URL,
+            "osint": OSINT_SERVICE_URL,
+            "domain": DOMAIN_INTEL_SERVICE_URL,
+            "nmap": NMAP_SERVICE_URL,
+            "maximus": MAXIMUS_CORE_SERVICE_URL,
+            "eureka": EUREKA_SERVICE_URL,
+            "oraculo": ORACULO_SERVICE_URL,
+            "adaptive-immunity": ADAPTIVE_IMMUNITY_SERVICE_URL,
+            "network-recon": NETWORK_RECON_SERVICE_URL,
+            "bas": BAS_SERVICE_URL,
+            "c2": C2_SERVICE_URL,
+            "web-attack": WEB_ATTACK_SERVICE_URL,
+            "vuln-intel": VULN_INTEL_SERVICE_URL,
+            "traffic": TRAFFIC_ANALYSIS_SERVICE_URL,
+        }
+
+        async def execute_request(req_spec: dict) -> dict:
+            """Execute a single request with error handling."""
+            service_name = req_spec.get("service")
+            path = req_spec.get("path", "")
+            method = req_spec.get("method", "GET").upper()
+            body_data = req_spec.get("body")
+
+            if service_name not in service_map:
+                return {
+                    "service": service_name,
+                    "status": "error",
+                    "error": f"Unknown service '{service_name}'",
+                }
+
+            service_url = service_map[service_name]
+            full_url = f"{service_url}/{path}".rstrip("/")
+
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    if method == "GET":
+                        response = await client.get(full_url)
+                    elif method == "POST":
+                        response = await client.post(full_url, json=body_data or {})
+                    elif method == "PUT":
+                        response = await client.put(full_url, json=body_data or {})
+                    elif method == "DELETE":
+                        response = await client.delete(full_url)
+                    else:
+                        return {
+                            "service": service_name,
+                            "status": "error",
+                            "error": f"Unsupported method '{method}'",
+                        }
+
+                    response.raise_for_status()
+                    return {
+                        "service": service_name,
+                        "path": path,
+                        "status": "success",
+                        "status_code": response.status_code,
+                        "data": response.json() if response.content else {},
+                    }
+
+            except httpx.TimeoutException:
+                return {
+                    "service": service_name,
+                    "path": path,
+                    "status": "error",
+                    "error": "Request timeout (10s)",
+                }
+            except httpx.HTTPStatusError as e:
+                return {
+                    "service": service_name,
+                    "path": path,
+                    "status": "error",
+                    "status_code": e.response.status_code,
+                    "error": f"HTTP {e.response.status_code}: {e.response.text[:200]}",
+                }
+            except Exception as e:
+                return {
+                    "service": service_name,
+                    "path": path,
+                    "status": "error",
+                    "error": str(e)[:200],
+                }
+
+        # Execute all requests in parallel
+        results = await asyncio.gather(
+            *[execute_request(req) for req in requests_list], return_exceptions=False
+        )
+
+        # Calculate metrics
+        successful = sum(1 for r in results if r.get("status") == "success")
+        failed = len(results) - successful
+        latency_ms = int((time.time() - start_time) * 1000)
+
+        logger.info(
+            f"Parallel aggregation complete: {successful}/{len(results)} successful, {latency_ms}ms"
+        )
+
+        return JSONResponse(
+            content={
+                "total_requests": len(results),
+                "successful": successful,
+                "failed": failed,
+                "latency_ms": latency_ms,
+                "results": results,
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Parallel aggregation failed: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Aggregation failed: {str(e)[:200]}"
+        )
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
