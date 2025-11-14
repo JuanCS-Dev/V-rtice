@@ -3,6 +3,7 @@ package purple
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/httpclient"
@@ -23,7 +24,7 @@ func NewPurpleClient(endpoint string) *PurpleClient {
 	}
 
 	clientConfig := httpclient.DefaultClientConfig(endpoint)
-	clientConfig.Timeout = 60 // Purple team exercises may take longer
+	clientConfig.Timeout = 60 * time.Second // Purple team exercises may take longer
 	return &PurpleClient{
 		httpClient: httpclient.NewClient(clientConfig),
 		endpoint:   endpoint,
