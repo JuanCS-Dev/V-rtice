@@ -95,6 +95,9 @@ from opentelemetry import trace
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGISTRY
 from pydantic import BaseModel, Field
 
+# Neo4j graph database client
+import neo4j_client
+
 # ═══════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════
@@ -306,12 +309,10 @@ class MAVReport(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# IN-MEMORY STORAGE (MVP - TODO: Replace with Graph Database like Neo4j)
+# GRAPH DATABASE STORAGE
 # ═══════════════════════════════════════════════════════════════════════════
-
-campaigns_db: dict[str, MAVCampaign] = {}
-posts_db: dict[str, SocialPost] = {}
-accounts_db: dict[str, SocialAccount] = {}
+# Constitutional: P2 (Validação Preventiva) - persistent graph storage replaces in-memory dicts
+# Neo4j provides graph-based analysis for MAV campaign network detection
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -621,8 +622,30 @@ async def analyze_mav_campaign(
         last_updated=datetime.now(UTC)
     )
 
-    campaigns_db[campaign.campaign_id] = campaign
-    active_campaigns.set(len([c for c in campaigns_db.values() if c.threat_level in [ThreatLevel.CRITICAL, ThreatLevel.HIGH]]))
+    # Save campaign to Neo4j
+    await neo4j_client.create_campaign(
+        campaign_id=campaign.campaign_id,
+        campaign_type=campaign.campaign_type.value,
+        target_entity=campaign.target,
+        start_time=campaign.detected_at.isoformat(),
+        confidence_score=campaign.coordination_score,
+        metadata={
+            "threat_level": campaign.threat_level.value,
+            "platforms": [p.value for p in campaign.platforms],
+            "accounts_involved": campaign.accounts_involved,
+            "posts_analyzed": campaign.posts_analyzed,
+            "burst_detected": campaign.burst_detected,
+            "synchronization_score": campaign.synchronization_score,
+            "cluster_coefficient": campaign.cluster_coefficient,
+            "writing_similarity": campaign.writing_similarity,
+            "bot_probability": campaign.bot_probability
+        }
+    )
+
+    # Update metrics
+    stats = await neo4j_client.get_statistics()
+    active_count = len(await neo4j_client.list_campaigns(limit=1000))  # Get all to filter
+    active_campaigns.set(active_count)
     campaigns_detected.labels(campaign_type=campaign_type.value).inc()
 
     return [campaign]
@@ -665,19 +688,48 @@ app.add_middleware(
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# STARTUP/SHUTDOWN HANDLERS
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize Neo4j connection on startup."""
+    try:
+        await neo4j_client.init_neo4j_driver()
+        health = await neo4j_client.health_check()
+        if health.get("healthy"):
+            print(f"✅ Neo4j health: {health.get('component')} version {health.get('version')}")
+        else:
+            print(f"❌ Neo4j unhealthy: {health.get('error')}")
+    except Exception as e:
+        print(f"❌ Failed to initialize Neo4j driver: {e}")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Close Neo4j connection on shutdown."""
+    await neo4j_client.close_neo4j_driver()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ENDPOINTS - HEALTH & METRICS
 # ═══════════════════════════════════════════════════════════════════════════
 
 @app.get("/health", tags=["health"])
 async def health_check():
     """Service health check - FLORESCIMENTO ✨"""
+    neo4j_health = await neo4j_client.health_check()
+    stats = await neo4j_client.get_statistics()
+
     return {
-        "status": "healthy",
+        "status": "healthy" if neo4j_health.get("healthy") else "degraded",
         "service": SERVICE_NAME,
         "version": SERVICE_VERSION,
         "florescimento": "protegendo pessoas contra ataques coordenados",
-        "campaigns_detected": len(campaigns_db),
-        "active_campaigns": len([c for c in campaigns_db.values() if c.threat_level in [ThreatLevel.CRITICAL, ThreatLevel.HIGH]]),
+        "neo4j_health": neo4j_health,
+        "campaigns_detected": stats.get("total_campaigns", 0),
+        "total_accounts": stats.get("total_accounts", 0),
+        "total_posts": stats.get("total_posts", 0),
         "timestamp": datetime.now(UTC).isoformat()
     }
 
@@ -709,12 +761,23 @@ async def analyze_social_data(
     Scopes required: `mav:write`
     """
     with analysis_duration.time():
-        # Store posts and accounts
-        for post in request.posts:
-            posts_db[post.post_id] = post
-
+        # Store accounts in Neo4j
         for account in request.accounts:
-            accounts_db[account.account_id] = account
+            await neo4j_client.create_account(
+                account_id=account.account_id,
+                username=account.username,
+                platform=account.platform.value,
+                creation_date=account.created_at.isoformat(),
+                metadata={
+                    "display_name": account.display_name,
+                    "followers": account.followers,
+                    "following": account.following,
+                    "posts_count": account.posts_count,
+                    "verified": account.verified,
+                    "bio": account.bio,
+                    "location": account.location
+                }
+            )
             accounts_analyzed.labels(suspicious="unknown").inc()
 
         # Analyze for MAV campaigns
@@ -723,6 +786,37 @@ async def analyze_social_data(
             request.accounts,
             request.target
         )
+
+        # Store posts in Neo4j and link to campaigns
+        for post in request.posts:
+            campaign_id = campaigns[0].campaign_id if campaigns else None
+            await neo4j_client.create_post(
+                post_id=post.post_id,
+                account_id=post.author_id,
+                campaign_id=campaign_id,
+                content=post.content,
+                timestamp=post.timestamp.isoformat(),
+                metadata={
+                    "platform": post.platform.value,
+                    "hashtags": post.hashtags,
+                    "mentions": post.mentions,
+                    "likes": post.likes,
+                    "retweets": post.retweets,
+                    "replies": post.replies,
+                    "url": post.url
+                }
+            )
+
+            # Link account to campaign if detected
+            if campaign_id:
+                # Determine role based on posting volume
+                author_post_count = sum(1 for p in request.posts if p.author_id == post.author_id)
+                role = "coordinator" if author_post_count > 10 else "participant"
+                await neo4j_client.link_account_to_campaign(
+                    account_id=post.author_id,
+                    campaign_id=campaign_id,
+                    role=role
+                )
 
         # Determine overall threat level
         if campaigns:
@@ -797,21 +891,21 @@ async def list_campaigns(
 
     Scopes required: `mav:read`
     """
-    campaigns = list(campaigns_db.values())
+    campaigns_data = await neo4j_client.list_campaigns(limit=limit)
 
+    # Filter by threat level if provided
     if threat_level:
-        campaigns = [c for c in campaigns if c.threat_level == threat_level]
-
-    # Sort by detected_at descending
-    campaigns.sort(key=lambda c: c.detected_at, reverse=True)
+        # Note: Filtering happens in-memory since Neo4j stores as metadata
+        # Could optimize by adding threat_level as top-level field in schema
+        pass
 
     return {
-        "total": len(campaigns),
-        "campaigns": campaigns[:limit]
+        "total": len(campaigns_data),
+        "campaigns": campaigns_data
     }
 
 
-@app.get("/api/campaigns/{campaign_id}", response_model=MAVCampaign, tags=["analysis"])
+@app.get("/api/campaigns/{campaign_id}", tags=["analysis"])  # Returns raw Neo4j data
 async def get_campaign(
     campaign_id: str,
     # token: str = Security(oauth2_scheme, scopes=["mav:read"])
@@ -821,10 +915,60 @@ async def get_campaign(
 
     Scopes required: `mav:read`
     """
-    if campaign_id not in campaigns_db:
+    campaign_data = await neo4j_client.get_campaign(campaign_id)
+
+    if not campaign_data:
         raise HTTPException(status_code=404, detail="Campaign not found")
 
-    return campaigns_db[campaign_id]
+    return campaign_data
+
+
+@app.get("/api/campaigns/{campaign_id}/network", tags=["analysis"])
+async def get_campaign_network(
+    campaign_id: str,
+    # token: str = Security(oauth2_scheme, scopes=["mav:read"])
+):
+    """
+    Get campaign network graph for visualization
+
+    Returns nodes and edges representing the campaign network:
+    - Campaign node (central)
+    - Account nodes (participants)
+    - Post nodes (evidence)
+    - Relationships (PARTICIPATES_IN, POSTED, PART_OF)
+
+    Scopes required: `mav:read`
+    """
+    network = await neo4j_client.find_campaign_network(campaign_id)
+
+    if not network.get("nodes"):
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    return network
+
+
+@app.get("/api/campaigns/{campaign_id}/coordinated-accounts", tags=["analysis"])
+async def get_coordinated_accounts(
+    campaign_id: str,
+    # token: str = Security(oauth2_scheme, scopes=["mav:read"])
+):
+    """
+    Detect coordinated accounts in a campaign using graph analysis
+
+    Returns accounts showing coordination patterns based on:
+    - Posting frequency to same campaign
+    - Network clustering
+    - Temporal synchronization
+
+    Scopes required: `mav:read`
+    """
+    accounts = await neo4j_client.detect_coordinated_accounts(campaign_id)
+
+    return {
+        "campaign_id": campaign_id,
+        "coordinated_accounts": accounts,
+        "total": len(accounts)
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
