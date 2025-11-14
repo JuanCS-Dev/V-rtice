@@ -24,9 +24,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import logger from "@/utils/logger";
 import { useNavigate } from 'react-router-dom';
+import logger from "@/utils/logger";
 import { API_ENDPOINTS } from '@/config/api';
+import logger from "@/utils/logger";
 import styles from './HITLAuthPage.module.css';
+import logger from "@/utils/logger";
 
 const HITLAuthPage = ({ onAuthSuccess }) => {
   const [step, setStep] = useState('login'); // 'login' | '2fa' | 'success'
@@ -86,7 +90,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
         }, 1500);
       }
     } catch (err) {
-      console.error('Login failed:', err);
+      logger.error('Login failed:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -134,7 +138,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
         }
       }, 1500);
     } catch (err) {
-      console.error('2FA verification failed:', err);
+      logger.error('2FA verification failed:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);

@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
+import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎭 MAXIMUS ORCHESTRATOR API CLIENT
@@ -118,7 +119,7 @@ const withRetry = async (fn, maxRetries = MAX_RETRIES) => {
       }
 
       const delay = getRetryDelay(attempt);
-      console.warn(
+      logger.warn(
         `🔄 Orchestrator API retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`,
         error.message
       );
@@ -241,7 +242,7 @@ export const orchestratorAPI = {
         if (!response.ok) {
           // Endpoint not implemented yet - return empty array
           if (response.status === 404) {
-            console.warn('⚠️  /workflows endpoint not implemented yet');
+            logger.warn('⚠️  /workflows endpoint not implemented yet');
             return [];
           }
           throw new Error(`Failed to list workflows: ${response.statusText}`);
@@ -250,7 +251,7 @@ export const orchestratorAPI = {
         return await response.json();
       });
     } catch (error) {
-      console.warn('⚠️  Failed to list workflows:', error.message);
+      logger.warn('⚠️  Failed to list workflows:', error.message);
       return []; // Graceful degradation
     }
   },
@@ -293,7 +294,7 @@ export const orchestratorAPI = {
 
         if (!response.ok) {
           if (response.status === 404) {
-            console.warn('⚠️  /cancel endpoint not implemented yet');
+            logger.warn('⚠️  /cancel endpoint not implemented yet');
             return { success: false, message: 'Cancel not supported' };
           }
           throw new Error(`Failed to cancel workflow: ${response.statusText}`);
@@ -302,7 +303,7 @@ export const orchestratorAPI = {
         return await response.json();
       });
     } catch (error) {
-      console.warn('⚠️  Failed to cancel workflow:', error.message);
+      logger.warn('⚠️  Failed to cancel workflow:', error.message);
       return { success: false, message: error.message };
     }
   },
