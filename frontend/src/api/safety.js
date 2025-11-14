@@ -1,5 +1,6 @@
-import { API_BASE_URL } from '@/config/api';
-import logger from '@/utils/logger';
+import { API_BASE_URL } from "@/config/api";
+import logger from "@/utils/logger";
+import { formatDateTime } from "@/utils/dateHelpers";
 /**
  * Safety Protocol - API Client
  * ===============================
@@ -21,7 +22,9 @@ import logger from '@/utils/logger';
  */
 
 const SAFETY_BASE_URL = `${API_BASE_URL}/api/consciousness/safety`;
-const WS_BASE_URL = API_BASE_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/api/consciousness';
+const WS_BASE_URL =
+  API_BASE_URL.replace("https://", "wss://").replace("http://", "ws://") +
+  "/api/consciousness";
 
 /**
  * ============================================================================
@@ -42,7 +45,7 @@ export const getSafetyStatus = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting safety status:', error);
+    logger.error("❌ Error getting safety status:", error);
     return { success: false, error: error.message };
   }
 };
@@ -59,7 +62,9 @@ export const getSafetyStatus = async () => {
  */
 export const getSafetyViolations = async (limit = 100) => {
   try {
-    const response = await fetch(`${SAFETY_BASE_URL}/violations?limit=${limit}`);
+    const response = await fetch(
+      `${SAFETY_BASE_URL}/violations?limit=${limit}`,
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get safety violations: ${response.status}`);
@@ -67,7 +72,7 @@ export const getSafetyViolations = async (limit = 100) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting safety violations:', error);
+    logger.error("❌ Error getting safety violations:", error);
     return [];
   }
 };
@@ -83,25 +88,30 @@ export const getSafetyViolations = async (limit = 100) => {
  * @param {string} reason - Motivo do shutdown (mínimo 10 caracteres)
  * @param {boolean} allowOverride - Permitir override HITL (default: true)
  */
-export const executeEmergencyShutdown = async (reason, allowOverride = true) => {
+export const executeEmergencyShutdown = async (
+  reason,
+  allowOverride = true,
+) => {
   try {
     const response = await fetch(`${SAFETY_BASE_URL}/emergency-shutdown`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         reason: reason,
-        allow_override: allowOverride
+        allow_override: allowOverride,
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || `Failed to execute shutdown: ${response.status}`);
+      throw new Error(
+        errorData.detail || `Failed to execute shutdown: ${response.status}`,
+      );
     }
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error executing emergency shutdown:', error);
+    logger.error("❌ Error executing emergency shutdown:", error);
     return { success: false, error: error.message };
   }
 };
@@ -122,7 +132,7 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
     const ws = new WebSocket(`${WS_BASE_URL}/ws`);
 
     ws.onopen = () => {
-      logger.debug('🔌 Safety WebSocket connected');
+      logger.debug("🔌 Safety WebSocket connected");
     };
 
     ws.onmessage = (event) => {
@@ -130,27 +140,27 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
         const data = JSON.parse(event.data);
         onMessage(data);
       } catch (error) {
-        logger.error('❌ Error parsing WebSocket message:', error);
+        logger.error("❌ Error parsing WebSocket message:", error);
       }
     };
 
     ws.onerror = (error) => {
-      logger.error('❌ WebSocket error:', error);
+      logger.error("❌ WebSocket error:", error);
       if (onError) onError(error);
     };
 
     ws.onclose = () => {
-      logger.debug('🔌 Safety WebSocket disconnected');
+      logger.debug("🔌 Safety WebSocket disconnected");
       // Auto-reconnect after 5 seconds
       setTimeout(() => {
-        logger.debug('🔄 Reconnecting Safety WebSocket...');
+        logger.debug("🔄 Reconnecting Safety WebSocket...");
         connectSafetyWebSocket(onMessage, onError);
       }, 5000);
     };
 
     return ws;
   } catch (error) {
-    logger.error('❌ Error creating WebSocket connection:', error);
+    logger.error("❌ Error creating WebSocket connection:", error);
     if (onError) onError(error);
     return null;
   }
@@ -168,13 +178,40 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
  */
 export const formatSeverity = (severity) => {
   const severityMap = {
-    normal: { label: 'Normal', color: '#4ade80', className: 'text-success', borderClass: 'border-success' },
-    warning: { label: 'Warning', color: '#fbbf24', className: 'text-warning', borderClass: 'border-warning' },
-    critical: { label: 'Critical', color: '#f97316', className: 'text-high', borderClass: 'border-high' },
-    emergency: { label: 'EMERGENCY', color: '#ef4444', className: 'text-critical', borderClass: 'border-critical' }
+    normal: {
+      label: "Normal",
+      color: "#4ade80",
+      className: "text-success",
+      borderClass: "border-success",
+    },
+    warning: {
+      label: "Warning",
+      color: "#fbbf24",
+      className: "text-warning",
+      borderClass: "border-warning",
+    },
+    critical: {
+      label: "Critical",
+      color: "#f97316",
+      className: "text-high",
+      borderClass: "border-high",
+    },
+    emergency: {
+      label: "EMERGENCY",
+      color: "#ef4444",
+      className: "text-critical",
+      borderClass: "border-critical",
+    },
   };
 
-  return severityMap[severity.toLowerCase()] || { label: severity, color: '#6b7280', className: 'text-muted', borderClass: 'border-low' };
+  return (
+    severityMap[severity.toLowerCase()] || {
+      label: severity,
+      color: "#6b7280",
+      className: "text-muted",
+      borderClass: "border-low",
+    }
+  );
 };
 
 /**
@@ -183,16 +220,18 @@ export const formatSeverity = (severity) => {
  */
 export const formatViolationType = (violationType) => {
   const typeMap = {
-    esgt_frequency_exceeded: 'ESGT Frequency Exceeded',
-    arousal_sustained_high: 'Arousal Sustained High',
-    unexpected_goals: 'Unexpected Goals',
-    self_modification: 'SELF-MODIFICATION ATTEMPT',
-    memory_usage_exceeded: 'Memory Usage Exceeded',
-    cpu_usage_exceeded: 'CPU Usage Exceeded',
-    ethical_violation: 'Ethical Violation'
+    esgt_frequency_exceeded: "ESGT Frequency Exceeded",
+    arousal_sustained_high: "Arousal Sustained High",
+    unexpected_goals: "Unexpected Goals",
+    self_modification: "SELF-MODIFICATION ATTEMPT",
+    memory_usage_exceeded: "Memory Usage Exceeded",
+    cpu_usage_exceeded: "CPU Usage Exceeded",
+    ethical_violation: "Ethical Violation",
   };
 
-  return typeMap[violationType] || violationType.replace(/_/g, ' ').toUpperCase();
+  return (
+    typeMap[violationType] || violationType.replace(/_/g, " ").toUpperCase()
+  );
 };
 
 /**
@@ -200,19 +239,7 @@ export const formatViolationType = (violationType) => {
  * @param {string} timestamp - ISO timestamp
  */
 export const formatTimestamp = (timestamp) => {
-  try {
-    const date = new Date(timestamp);
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  } catch (error) {
-    return timestamp;
-  }
+  return formatDateTime(timestamp, timestamp);
 };
 
 /**
@@ -234,7 +261,7 @@ export const formatRelativeTime = (timestamp) => {
     if (diffHour < 24) return `${diffHour}h ago`;
     return `${diffDay}d ago`;
   } catch (error) {
-    return 'unknown';
+    return "unknown";
   }
 };
 
@@ -282,7 +309,7 @@ export const getLastViolation = (violations) => {
     formattedType: formatViolationType(latest.violation_type),
     formattedSeverity: formatSeverity(latest.severity),
     formattedTimestamp: formatTimestamp(latest.timestamp),
-    relativeTime: formatRelativeTime(latest.timestamp)
+    relativeTime: formatRelativeTime(latest.timestamp),
   };
 };
 
@@ -302,7 +329,7 @@ export const formatUptime = (uptimeSeconds) => {
   if (minutes > 0) parts.push(`${minutes}m`);
   if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
 
-  return parts.join(' ');
+  return parts.join(" ");
 };
 
 /**
@@ -316,16 +343,16 @@ export const formatUptime = (uptimeSeconds) => {
  * @param {string} reason - Razão do shutdown
  */
 export const validateShutdownReason = (reason) => {
-  if (!reason || typeof reason !== 'string') {
-    return { valid: false, error: 'Reason is required' };
+  if (!reason || typeof reason !== "string") {
+    return { valid: false, error: "Reason is required" };
   }
 
   if (reason.length < 10) {
-    return { valid: false, error: 'Reason must be at least 10 characters' };
+    return { valid: false, error: "Reason must be at least 10 characters" };
   }
 
   if (reason.length > 500) {
-    return { valid: false, error: 'Reason must be less than 500 characters' };
+    return { valid: false, error: "Reason must be less than 500 characters" };
   }
 
   return { valid: true };
@@ -356,5 +383,5 @@ export default {
   formatUptime,
 
   // Validation
-  validateShutdownReason
+  validateShutdownReason,
 };

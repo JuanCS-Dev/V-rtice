@@ -1,5 +1,6 @@
-import logger from '@/utils/logger';
-import { ServiceEndpoints, AuthConfig } from '../config/endpoints';
+import logger from "@/utils/logger";
+import { formatTime } from "@/utils/dateHelpers";
+import { ServiceEndpoints, AuthConfig } from "../config/endpoints";
 
 /**
  * Consciousness System - API Client
@@ -23,7 +24,12 @@ import { ServiceEndpoints, AuthConfig } from '../config/endpoints';
 const CONSCIOUSNESS_BASE_URL = `${ServiceEndpoints.maximus.core}/api/consciousness`;
 const CONSCIOUSNESS_GATEWAY_URL = ServiceEndpoints.apiGateway;
 
-const getApiKey = () => AuthConfig.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('MAXIMUS_API_KEY') : '') || '';
+const getApiKey = () =>
+  AuthConfig.apiKey ||
+  (typeof localStorage !== "undefined"
+    ? localStorage.getItem("MAXIMUS_API_KEY")
+    : "") ||
+  "";
 
 /**
  * ============================================================================
@@ -44,7 +50,7 @@ export const getConsciousnessState = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting consciousness state:', error);
+    logger.error("❌ Error getting consciousness state:", error);
     return { success: false, error: error.message };
   }
 };
@@ -61,7 +67,9 @@ export const getConsciousnessState = async () => {
  */
 export const getESGTEvents = async (limit = 20) => {
   try {
-    const response = await fetch(`${CONSCIOUSNESS_BASE_URL}/esgt/events?limit=${limit}`);
+    const response = await fetch(
+      `${CONSCIOUSNESS_BASE_URL}/esgt/events?limit=${limit}`,
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to get ESGT events: ${response.status}`);
@@ -69,7 +77,7 @@ export const getESGTEvents = async (limit = 20) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting ESGT events:', error);
+    logger.error("❌ Error getting ESGT events:", error);
     return [];
   }
 };
@@ -81,8 +89,8 @@ export const getESGTEvents = async (limit = 20) => {
 export const triggerESGT = async (salience) => {
   try {
     const response = await fetch(`${CONSCIOUSNESS_BASE_URL}/esgt/trigger`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(salience),
     });
 
@@ -92,7 +100,7 @@ export const triggerESGT = async (salience) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error triggering ESGT:', error);
+    logger.error("❌ Error triggering ESGT:", error);
     return { success: false, error: error.message };
   }
 };
@@ -116,7 +124,7 @@ export const getArousalState = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting arousal state:', error);
+    logger.error("❌ Error getting arousal state:", error);
     return { success: false, error: error.message };
   }
 };
@@ -127,11 +135,15 @@ export const getArousalState = async () => {
  * @param {number} duration - Duração em segundos (0.1 a 60)
  * @param {string} source - Identificador da fonte
  */
-export const adjustArousal = async (delta, duration = 5.0, source = 'manual') => {
+export const adjustArousal = async (
+  delta,
+  duration = 5.0,
+  source = "manual",
+) => {
   try {
     const response = await fetch(`${CONSCIOUSNESS_BASE_URL}/arousal/adjust`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta, duration_seconds: duration, source }),
     });
 
@@ -141,7 +153,7 @@ export const adjustArousal = async (delta, duration = 5.0, source = 'manual') =>
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error adjusting arousal:', error);
+    logger.error("❌ Error adjusting arousal:", error);
     return { success: false, error: error.message };
   }
 };
@@ -165,7 +177,7 @@ export const getConsciousnessMetrics = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('❌ Error getting consciousness metrics:', error);
+    logger.error("❌ Error getting consciousness metrics:", error);
     return { success: false, error: error.message };
   }
 };
@@ -184,14 +196,14 @@ export const getConsciousnessMetrics = async () => {
  */
 export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
   const apiKey = getApiKey();
-  const wsBase = CONSCIOUSNESS_GATEWAY_URL.replace(/^http/, 'ws');
-  const wsUrl = `${wsBase}/stream/consciousness/ws${apiKey ? `?api_key=${apiKey}` : ''}`;
+  const wsBase = CONSCIOUSNESS_GATEWAY_URL.replace(/^http/, "ws");
+  const wsUrl = `${wsBase}/stream/consciousness/ws${apiKey ? `?api_key=${apiKey}` : ""}`;
 
   try {
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      logger.debug('🧠 Consciousness WebSocket connected');
+      logger.debug("🧠 Consciousness WebSocket connected");
     };
 
     ws.onmessage = (event) => {
@@ -199,18 +211,18 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
         const message = JSON.parse(event.data);
         onMessage(message);
       } catch (error) {
-        logger.error('❌ Error parsing WebSocket message:', error);
+        logger.error("❌ Error parsing WebSocket message:", error);
       }
     };
 
     ws.onerror = (error) => {
-      logger.error('❌ WebSocket error:', error);
+      logger.error("❌ WebSocket error:", error);
       if (onError) onError(error);
     };
 
     return ws;
   } catch (error) {
-    logger.error('❌ Error creating WebSocket:', error);
+    logger.error("❌ Error creating WebSocket:", error);
     if (onError) onError(error);
     return null;
   }
@@ -228,14 +240,52 @@ export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
  */
 export const formatArousalLevel = (level) => {
   const levels = {
-    'SLEEPY': { emoji: '😴', color: '#64748B', className: 'text-muted', borderClass: 'border-low', label: 'Sleepy' },
-    'CALM': { emoji: '😌', color: '#06B6D4', className: 'text-info', borderClass: 'border-info', label: 'Calm' },
-    'RELAXED': { emoji: '😊', color: '#10B981', className: 'text-success', borderClass: 'border-success', label: 'Relaxed' },
-    'ALERT': { emoji: '😃', color: '#F59E0B', className: 'text-warning', borderClass: 'border-warning', label: 'Alert' },
-    'EXCITED': { emoji: '🤩', color: '#EF4444', className: 'text-critical', borderClass: 'border-critical', label: 'Excited' }
+    SLEEPY: {
+      emoji: "😴",
+      color: "#64748B",
+      className: "text-muted",
+      borderClass: "border-low",
+      label: "Sleepy",
+    },
+    CALM: {
+      emoji: "😌",
+      color: "#06B6D4",
+      className: "text-info",
+      borderClass: "border-info",
+      label: "Calm",
+    },
+    RELAXED: {
+      emoji: "😊",
+      color: "#10B981",
+      className: "text-success",
+      borderClass: "border-success",
+      label: "Relaxed",
+    },
+    ALERT: {
+      emoji: "😃",
+      color: "#F59E0B",
+      className: "text-warning",
+      borderClass: "border-warning",
+      label: "Alert",
+    },
+    EXCITED: {
+      emoji: "🤩",
+      color: "#EF4444",
+      className: "text-critical",
+      borderClass: "border-critical",
+      label: "Excited",
+    },
   };
 
-  return levels[level] || { emoji: '❓', color: '#6B7280', className: 'text-muted', borderClass: 'border-low', label: 'Unknown' };
+  return (
+    levels[level] || {
+      emoji: "❓",
+      color: "#6B7280",
+      className: "text-muted",
+      borderClass: "border-low",
+      label: "Unknown",
+    }
+  );
 };
 
 /**
@@ -253,5 +303,5 @@ export const formatEventTime = (timestamp) => {
   if (diffSec < 60) return `${diffSec}s ago`;
   if (diffMin < 60) return `${diffMin}m ago`;
   if (diffHour < 24) return `${diffHour}h ago`;
-  return date.toLocaleTimeString();
+  return formatTime(date, "N/A");
 };
