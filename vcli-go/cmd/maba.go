@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/maba"
@@ -9,12 +11,11 @@ import (
 )
 
 var (
-	mabaServer string
-	mabaURL    string
-	mabaAction string
-	mabaQuery  string
-	mabaData   string
-	mabaWait   bool
+	mabaServer   string
+	mabaURL      string
+	mabaSelector string
+	mabaWait     bool
+	mabaHeadless bool
 )
 
 var mabaCmd = &cobra.Command{
@@ -26,46 +27,115 @@ form automation, and cognitive map learning.`,
 }
 
 // ============================================================================
-// BROWSER OPERATIONS
+// SESSION MANAGEMENT
 // ============================================================================
 
-var mabaBrowserCmd = &cobra.Command{
-	Use:   "browser",
-	Short: "Browser automation operations",
-	Long:  `Control browser sessions, navigate websites, and execute actions`,
+var mabaSessionCmd = &cobra.Command{
+	Use:   "session",
+	Short: "Browser session management",
+	Long:  `Create, list, and close browser sessions`,
 }
 
-var mabaBrowserNavigateCmd = &cobra.Command{
-	Use:   "navigate [url]",
-	Short: "Navigate to a URL",
-	Long:  `Autonomously navigate to a URL with intelligent interaction`,
-	Args:  cobra.MinimumNArgs(1),
-	RunE:  runMabaBrowserNavigate,
+var mabaSessionCreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create a new browser session",
+	Long:  `Create a new browser session with specified viewport and options`,
+	RunE:  runMabaSessionCreate,
 }
 
-func runMabaBrowserNavigate(cmd *cobra.Command, args []string) error {
+func runMabaSessionCreate(cmd *cobra.Command, args []string) error {
 	client := maba.NewMABAClient(getMABAServer())
-	req := &maba.NavigateRequest{
-		URL:    args[0],
-		Action: mabaAction,
-		Wait:   mabaWait,
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := &maba.SessionRequest{
+		Headless:       mabaHeadless,
+		ViewportWidth:  1920,
+		ViewportHeight: 1080,
 	}
 
-	result, err := client.Navigate(req)
+	result, err := client.CreateSession(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to create session: %w", err)
+	}
+
+	styles := visual.DefaultStyles()
+	fmt.Printf("%s MABA Browser Session Created\n\n", styles.Accent.Render("🌐"))
+	fmt.Printf("%s %s\n", styles.Muted.Render("Session ID:"), result.SessionID)
+	fmt.Printf("%s %s\n", styles.Muted.Render("Status:"), getStatusIcon(result.Status))
+	fmt.Printf("\n%s Use this session ID for browser operations\n", styles.Info.Render("ℹ️"))
+	fmt.Printf("%s vcli maba navigate --session %s https://example.com\n", styles.Muted.Render("Example:"), result.SessionID)
+
+	return nil
+}
+
+var mabaSessionCloseCmd = &cobra.Command{
+	Use:   "close [session-id]",
+	Short: "Close a browser session",
+	Long:  `Close and cleanup an existing browser session`,
+	Args:  cobra.ExactArgs(1),
+	RunE:  runMabaSessionClose,
+}
+
+func runMabaSessionClose(cmd *cobra.Command, args []string) error {
+	client := maba.NewMABAClient(getMABAServer())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	sessionID := args[0]
+	err := client.CloseSession(ctx, sessionID)
+	if err != nil {
+		return fmt.Errorf("failed to close session: %w", err)
+	}
+
+	styles := visual.DefaultStyles()
+	fmt.Printf("%s Session %s closed successfully\n", styles.Success.Render("✓"), sessionID)
+
+	return nil
+}
+
+// ============================================================================
+// NAVIGATION
+// ============================================================================
+
+var mabaNavigateCmd = &cobra.Command{
+	Use:   "navigate [url] --session [session-id]",
+	Short: "Navigate to a URL",
+	Long:  `Navigate to a URL in an existing browser session`,
+	Args:  cobra.ExactArgs(1),
+	RunE:  runMabaNavigate,
+}
+
+var mabaSessionID string
+
+func runMabaNavigate(cmd *cobra.Command, args []string) error {
+	if mabaSessionID == "" {
+		return fmt.Errorf("session-id is required (use --session flag or create a session first)")
+	}
+
+	client := maba.NewMABAClient(getMABAServer())
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	req := &maba.NavigateRequest{
+		URL:       args[0],
+		WaitUntil: "networkidle",
+		TimeoutMs: 30000,
+	}
+
+	result, err := client.Navigate(ctx, mabaSessionID, req)
 	if err != nil {
 		return fmt.Errorf("navigation failed: %w", err)
 	}
 
 	styles := visual.DefaultStyles()
 	fmt.Printf("%s MABA Browser Navigation\n\n", styles.Accent.Render("🌐"))
-	fmt.Printf("%s %s\n", styles.Muted.Render("URL:"), result.URL)
-	fmt.Printf("%s %s\n", styles.Muted.Render("Title:"), result.Title)
-	fmt.Printf("%s %d\n", styles.Muted.Render("Load Time:"), result.LoadTime)
-	fmt.Printf("%s %s\n\n", styles.Muted.Render("Status:"), getStatusIcon(result.Status))
+	fmt.Printf("%s %s\n", styles.Muted.Render("Status:"), getStatusIcon(result.Status))
+	fmt.Printf("%s %.2f ms\n", styles.Muted.Render("Execution Time:"), result.ExecutionTimeMs)
 
-	if len(result.ExtractedData) > 0 {
-		fmt.Printf("%s\n", styles.Info.Render("Extracted Data:"))
-		for key, value := range result.ExtractedData {
+	if result.Result != nil && len(result.Result) > 0 {
+		fmt.Printf("\n%s\n", styles.Info.Render("Result:"))
+		for key, value := range result.Result {
 			fmt.Printf("  %s: %v\n", styles.Muted.Render(key), value)
 		}
 	}
@@ -73,66 +143,94 @@ func runMabaBrowserNavigate(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-var mabaBrowserExtractCmd = &cobra.Command{
-	Use:   "extract [url]",
-	Short: "Extract data from a webpage",
-	Long:  `Intelligently extract structured data from a webpage`,
-	Args:  cobra.MinimumNArgs(1),
-	RunE:  runMabaBrowserExtract,
+// ============================================================================
+// DATA EXTRACTION
+// ============================================================================
+
+var mabaExtractCmd = &cobra.Command{
+	Use:   "extract --session [session-id] --selector [css-selector]",
+	Short: "Extract data from current page",
+	Long:  `Extract data from the current page using CSS selectors`,
+	RunE:  runMabaExtract,
 }
 
-func runMabaBrowserExtract(cmd *cobra.Command, args []string) error {
-	client := maba.NewMABAClient(getMABAServer())
-	req := &maba.ExtractRequest{
-		URL:   args[0],
-		Query: mabaQuery,
+func runMabaExtract(cmd *cobra.Command, args []string) error {
+	if mabaSessionID == "" {
+		return fmt.Errorf("session-id is required (use --session flag)")
+	}
+	if mabaSelector == "" {
+		return fmt.Errorf("selector is required (use --selector flag)")
 	}
 
-	result, err := client.Extract(req)
+	client := maba.NewMABAClient(getMABAServer())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := &maba.ExtractRequest{
+		Selectors: map[string]string{
+			"data": mabaSelector,
+		},
+		ExtractAll: false,
+	}
+
+	result, err := client.Extract(ctx, mabaSessionID, req)
 	if err != nil {
 		return fmt.Errorf("extraction failed: %w", err)
 	}
 
 	styles := visual.DefaultStyles()
 	fmt.Printf("%s MABA Data Extraction\n\n", styles.Accent.Render("📊"))
-	fmt.Printf("%s %s\n", styles.Muted.Render("URL:"), result.URL)
-	fmt.Printf("%s %d items\n\n", styles.Muted.Render("Extracted:"), len(result.Data))
+	fmt.Printf("%s %s\n", styles.Muted.Render("Status:"), getStatusIcon(result.Status))
+	fmt.Printf("%s %.2f ms\n\n", styles.Muted.Render("Execution Time:"), result.ExecutionTimeMs)
 
-	for i, item := range result.Data {
-		fmt.Printf("%s Item %d\n", styles.Info.Render("📄"), i+1)
-		for key, value := range item {
+	if result.Result != nil && len(result.Result) > 0 {
+		fmt.Printf("%s\n", styles.Info.Render("Extracted Data:"))
+		for key, value := range result.Result {
 			fmt.Printf("  %s: %v\n", styles.Muted.Render(key), value)
 		}
-		fmt.Println()
 	}
 
 	return nil
 }
 
-var mabaBrowserSessionsCmd = &cobra.Command{
-	Use:   "sessions",
-	Short: "List active browser sessions",
-	Long:  `Display all active browser sessions and their status`,
-	RunE:  runMabaBrowserSessions,
+// ============================================================================
+// BROWSER ACTIONS
+// ============================================================================
+
+var mabaClickCmd = &cobra.Command{
+	Use:   "click --session [session-id] --selector [css-selector]",
+	Short: "Click an element on the page",
+	Long:  `Click an element specified by CSS selector`,
+	RunE:  runMabaClick,
 }
 
-func runMabaBrowserSessions(cmd *cobra.Command, args []string) error {
+func runMabaClick(cmd *cobra.Command, args []string) error {
+	if mabaSessionID == "" {
+		return fmt.Errorf("session-id is required (use --session flag)")
+	}
+	if mabaSelector == "" {
+		return fmt.Errorf("selector is required (use --selector flag)")
+	}
+
 	client := maba.NewMABAClient(getMABAServer())
-	result, err := client.ListSessions()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := &maba.ClickRequest{
+		Selector:   mabaSelector,
+		Button:     "left",
+		ClickCount: 1,
+		TimeoutMs:  30000,
+	}
+
+	result, err := client.Click(ctx, mabaSessionID, req)
 	if err != nil {
-		return fmt.Errorf("failed to list sessions: %w", err)
+		return fmt.Errorf("click failed: %w", err)
 	}
 
 	styles := visual.DefaultStyles()
-	fmt.Printf("%s MABA Browser Sessions\n\n", styles.Accent.Render("🖥️"))
-	fmt.Printf("%s %d active sessions\n\n", styles.Muted.Render("Total:"), len(result.Sessions))
-
-	for _, session := range result.Sessions {
-		fmt.Printf("%s Session %s\n", getStatusIcon(session.Status), session.ID)
-		fmt.Printf("  %s %s\n", styles.Muted.Render("URL:"), session.CurrentURL)
-		fmt.Printf("  %s %d seconds\n", styles.Muted.Render("Duration:"), session.Duration)
-		fmt.Printf("  %s %d%%\n\n", styles.Muted.Render("Resource:"), session.ResourceUsage)
-	}
+	fmt.Printf("%s Element clicked successfully\n", styles.Success.Render("✓"))
+	fmt.Printf("%s %s\n", styles.Muted.Render("Status:"), result.Status)
 
 	return nil
 }
@@ -144,127 +242,92 @@ func runMabaBrowserSessions(cmd *cobra.Command, args []string) error {
 var mabaMapCmd = &cobra.Command{
 	Use:   "map",
 	Short: "Cognitive map operations",
-	Long:  `View and manage the learned website structure graph`,
+	Long:  `Query the cognitive map for learned patterns`,
 }
 
 var mabaMapQueryCmd = &cobra.Command{
-	Use:   "query [domain]",
-	Short: "Query cognitive map for a domain",
-	Long:  `Retrieve learned navigation patterns for a domain`,
-	Args:  cobra.MinimumNArgs(1),
+	Use:   "query",
+	Short: "Query cognitive map",
+	Long:  `Query the cognitive map for navigation patterns`,
 	RunE:  runMabaMapQuery,
 }
 
+var mapQueryType string
+var mapFromURL string
+var mapToURL string
+
 func runMabaMapQuery(cmd *cobra.Command, args []string) error {
 	client := maba.NewMABAClient(getMABAServer())
-	req := &maba.MapQueryRequest{
-		Domain: args[0],
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req := &maba.CognitiveMapQueryRequest{
+		QueryType: mapQueryType,
+		Parameters: map[string]interface{}{
+			"from_url": mapFromURL,
+			"to_url":   mapToURL,
+		},
 	}
 
-	result, err := client.QueryMap(req)
+	result, err := client.QueryCognitiveMap(ctx, req)
 	if err != nil {
 		return fmt.Errorf("map query failed: %w", err)
 	}
 
 	styles := visual.DefaultStyles()
-	fmt.Printf("%s Cognitive Map - %s\n\n", styles.Accent.Render("🧠"), result.Domain)
-	fmt.Printf("%s %d pages\n", styles.Muted.Render("Known Pages:"), result.PageCount)
-	fmt.Printf("%s %d paths\n", styles.Muted.Render("Navigation Paths:"), result.PathCount)
+	fmt.Printf("%s Cognitive Map Query\n\n", styles.Accent.Render("🧠"))
+	fmt.Printf("%s %v\n", styles.Muted.Render("Found:"), result.Found)
 	fmt.Printf("%s %.1f%%\n\n", styles.Muted.Render("Confidence:"), result.Confidence*100)
 
-	if len(result.CommonPaths) > 0 {
-		fmt.Printf("%s\n", styles.Info.Render("Common Navigation Paths:"))
-		for i, path := range result.CommonPaths {
-			fmt.Printf("  %d. %s (used %d times)\n", i+1, path.Path, path.Usage)
+	if result.Result != nil && len(result.Result) > 0 {
+		fmt.Printf("%s\n", styles.Info.Render("Result:"))
+		for key, value := range result.Result {
+			fmt.Printf("  %s: %v\n", styles.Muted.Render(key), value)
 		}
 	}
 
 	return nil
 }
 
-var mabaMapStatsCmd = &cobra.Command{
+// ============================================================================
+// STATS & HEALTH
+// ============================================================================
+
+var mabaStatsCmd = &cobra.Command{
 	Use:   "stats",
-	Short: "Cognitive map statistics",
-	Long:  `Display overall statistics for the cognitive map`,
-	RunE:  runMabaMapStats,
+	Short: "MABA service statistics",
+	Long:  `Display current statistics and health of MABA service`,
+	RunE:  runMabaStats,
 }
 
-func runMabaMapStats(cmd *cobra.Command, args []string) error {
+func runMabaStats(cmd *cobra.Command, args []string) error {
 	client := maba.NewMABAClient(getMABAServer())
-	result, err := client.MapStats()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := client.GetStats(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get stats: %w", err)
 	}
 
 	styles := visual.DefaultStyles()
-	fmt.Printf("%s Cognitive Map Statistics\n\n", styles.Accent.Render("📈"))
-	fmt.Printf("%s %d domains\n", styles.Muted.Render("Total Domains:"), result.TotalDomains)
-	fmt.Printf("%s %d pages\n", styles.Muted.Render("Total Pages:"), result.TotalPages)
-	fmt.Printf("%s %d paths\n", styles.Muted.Render("Total Paths:"), result.TotalPaths)
-	fmt.Printf("%s %d interactions\n\n", styles.Muted.Render("Total Interactions:"), result.TotalInteractions)
+	fmt.Printf("%s MABA Service Statistics\n\n", styles.Accent.Render("📈"))
+	fmt.Printf("%s %.1f seconds\n\n", styles.Muted.Render("Uptime:"), result.UptimeSeconds)
 
-	if len(result.TopDomains) > 0 {
-		fmt.Printf("%s\n", styles.Info.Render("Most Visited Domains:"))
-		for i, domain := range result.TopDomains {
-			fmt.Printf("  %d. %s (%d visits)\n", i+1, domain.Domain, domain.Visits)
+	if result.CognitiveMap != nil && len(result.CognitiveMap) > 0 {
+		fmt.Printf("%s\n", styles.Info.Render("Cognitive Map:"))
+		for key, value := range result.CognitiveMap {
+			fmt.Printf("  %s: %v\n", styles.Muted.Render(key), value)
+		}
+		fmt.Println()
+	}
+
+	if result.Browser != nil && len(result.Browser) > 0 {
+		fmt.Printf("%s\n", styles.Info.Render("Browser:"))
+		for key, value := range result.Browser {
+			fmt.Printf("  %s: %v\n", styles.Muted.Render(key), value)
 		}
 	}
-
-	return nil
-}
-
-// ============================================================================
-// TOOLS & STATUS
-// ============================================================================
-
-var mabaToolsCmd = &cobra.Command{
-	Use:   "tools",
-	Short: "List registered MAXIMUS tools",
-	Long:  `Display all browser tools registered with MAXIMUS Core`,
-	RunE:  runMabaTools,
-}
-
-func runMabaTools(cmd *cobra.Command, args []string) error {
-	client := maba.NewMABAClient(getMABAServer())
-	result, err := client.ListTools()
-	if err != nil {
-		return fmt.Errorf("failed to list tools: %w", err)
-	}
-
-	styles := visual.DefaultStyles()
-	fmt.Printf("%s MABA Tools\n\n", styles.Accent.Render("🔧"))
-	fmt.Printf("%s %d tools registered\n\n", styles.Muted.Render("Total:"), len(result.Tools))
-
-	for _, tool := range result.Tools {
-		fmt.Printf("%s %s\n", getStatusIcon(tool.Status), tool.Name)
-		fmt.Printf("  %s %s\n", styles.Muted.Render("Description:"), tool.Description)
-		fmt.Printf("  %s %d times\n\n", styles.Muted.Render("Usage:"), tool.UsageCount)
-	}
-
-	return nil
-}
-
-var mabaStatusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "MABA service status",
-	Long:  `Display current status and health of MABA service`,
-	RunE:  runMabaStatus,
-}
-
-func runMabaStatus(cmd *cobra.Command, args []string) error {
-	client := maba.NewMABAClient(getMABAServer())
-	result, err := client.GetStatus()
-	if err != nil {
-		return fmt.Errorf("failed to get status: %w", err)
-	}
-
-	styles := visual.DefaultStyles()
-	fmt.Printf("%s MABA Service Status\n\n", styles.Accent.Render("🚀"))
-	fmt.Printf("%s %s\n", styles.Muted.Render("Status:"), getStatusIcon(result.Status))
-	fmt.Printf("%s %d active\n", styles.Muted.Render("Browser Sessions:"), result.ActiveSessions)
-	fmt.Printf("%s %d pages\n", styles.Muted.Render("Cognitive Map:"), result.MapSize)
-	fmt.Printf("%s %.1f%%\n", styles.Muted.Render("Resource Usage:"), result.ResourceUsage)
-	fmt.Printf("%s %d\n", styles.Muted.Render("Tools Registered:"), result.ToolsRegistered)
 
 	return nil
 }
@@ -283,26 +346,41 @@ func getMABAServer() string {
 func init() {
 	rootCmd.AddCommand(mabaCmd)
 
-	// Browser operations
-	mabaCmd.AddCommand(mabaBrowserCmd)
-	mabaBrowserCmd.AddCommand(mabaBrowserNavigateCmd)
-	mabaBrowserCmd.AddCommand(mabaBrowserExtractCmd)
-	mabaBrowserCmd.AddCommand(mabaBrowserSessionsCmd)
+	// Session management
+	mabaCmd.AddCommand(mabaSessionCmd)
+	mabaSessionCmd.AddCommand(mabaSessionCreateCmd)
+	mabaSessionCmd.AddCommand(mabaSessionCloseCmd)
+	mabaSessionCreateCmd.Flags().BoolVar(&mabaHeadless, "headless", true, "Run browser in headless mode")
+
+	// Navigation
+	mabaCmd.AddCommand(mabaNavigateCmd)
+	mabaNavigateCmd.Flags().StringVar(&mabaSessionID, "session", "", "Browser session ID (required)")
+	mabaNavigateCmd.MarkFlagRequired("session")
+
+	// Extraction
+	mabaCmd.AddCommand(mabaExtractCmd)
+	mabaExtractCmd.Flags().StringVar(&mabaSessionID, "session", "", "Browser session ID (required)")
+	mabaExtractCmd.Flags().StringVar(&mabaSelector, "selector", "", "CSS selector (required)")
+	mabaExtractCmd.MarkFlagRequired("session")
+	mabaExtractCmd.MarkFlagRequired("selector")
+
+	// Browser actions
+	mabaCmd.AddCommand(mabaClickCmd)
+	mabaClickCmd.Flags().StringVar(&mabaSessionID, "session", "", "Browser session ID (required)")
+	mabaClickCmd.Flags().StringVar(&mabaSelector, "selector", "", "CSS selector (required)")
+	mabaClickCmd.MarkFlagRequired("session")
+	mabaClickCmd.MarkFlagRequired("selector")
 
 	// Cognitive map
 	mabaCmd.AddCommand(mabaMapCmd)
 	mabaMapCmd.AddCommand(mabaMapQueryCmd)
-	mabaMapCmd.AddCommand(mabaMapStatsCmd)
+	mabaMapQueryCmd.Flags().StringVar(&mapQueryType, "type", "get_path", "Query type (find_element, get_path)")
+	mabaMapQueryCmd.Flags().StringVar(&mapFromURL, "from", "", "From URL")
+	mabaMapQueryCmd.Flags().StringVar(&mapToURL, "to", "", "To URL")
 
-	// Tools & status
-	mabaCmd.AddCommand(mabaToolsCmd)
-	mabaCmd.AddCommand(mabaStatusCmd)
+	// Stats
+	mabaCmd.AddCommand(mabaStatsCmd)
 
-	// Flags
+	// Global flags
 	mabaCmd.PersistentFlags().StringVarP(&mabaServer, "server", "s", "", "MABA server endpoint")
-
-	mabaBrowserNavigateCmd.Flags().StringVar(&mabaAction, "action", "", "Action to perform (click, fill, submit)")
-	mabaBrowserNavigateCmd.Flags().BoolVar(&mabaWait, "wait", false, "Wait for page load")
-
-	mabaBrowserExtractCmd.Flags().StringVarP(&mabaQuery, "query", "q", "", "Extraction query/selector")
 }
