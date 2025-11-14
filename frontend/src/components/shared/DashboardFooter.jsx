@@ -10,47 +10,45 @@
  * @version 2.0.0
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import styles from './DashboardFooter.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import styles from "./DashboardFooter.module.css";
+import { formatTime } from "../../utils/dateHelpers";
 
 export const DashboardFooter = ({
-  moduleName = 'VÉRTICE',
-  classification = 'CONFIDENCIAL',
+  moduleName = "VÉRTICE",
+  classification = "CONFIDENCIAL",
   statusItems = [],
   metricsItems = [],
-  showTimestamp = false
+  showTimestamp = false,
 }) => {
   const { t } = useTranslation();
 
   // Default status items se não fornecido
   const defaultStatusItems = [
-    { label: 'CONNECTION', value: 'SECURE', online: true },
-    { label: 'SYSTEM', value: 'ONLINE', online: true }
+    { label: "CONNECTION", value: "SECURE", online: true },
+    { label: "SYSTEM", value: "ONLINE", online: true },
   ];
 
-  const effectiveStatusItems = statusItems.length > 0 ? statusItems : defaultStatusItems;
+  const effectiveStatusItems =
+    statusItems.length > 0 ? statusItems : defaultStatusItems;
 
-  const currentTime = new Date().toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
+  const currentTime = formatTime(new Date(), "--:--:--");
 
   return (
     <footer
       className={styles.footer}
       role="contentinfo"
-      aria-label={t('accessibility.dashboardFooter', 'Dashboard footer')}
+      aria-label={t("accessibility.dashboardFooter", "Dashboard footer")}
     >
       {/* Left Section - Status Indicators */}
       <div className={styles.statusContainer}>
         {effectiveStatusItems.map((item, index) => (
           <div key={index} className={styles.statusItem}>
             <span
-              className={`${styles.statusDot} ${item.online === false ? styles.offline : ''}`}
-              aria-label={item.online === false ? 'Offline' : 'Online'}
+              className={`${styles.statusDot} ${item.online === false ? styles.offline : ""}`}
+              aria-label={item.online === false ? "Offline" : "Online"}
             />
             <span className={styles.label}>{item.label}:</span>
             <span className={styles.value}>{item.value}</span>
@@ -89,16 +87,17 @@ DashboardFooter.propTypes = {
     PropTypes.shape({
       label: PropTypes.string.isRequired,
       value: PropTypes.string.isRequired,
-      online: PropTypes.bool
-    })
+      online: PropTypes.bool,
+    }),
   ),
   metricsItems: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string.isRequired,
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
-    })
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        .isRequired,
+    }),
   ),
-  showTimestamp: PropTypes.bool
+  showTimestamp: PropTypes.bool,
 };
 
 export default DashboardFooter;

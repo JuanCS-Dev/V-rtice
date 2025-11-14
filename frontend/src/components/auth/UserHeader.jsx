@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import logger from '@/utils/logger';
-import { useAuth } from '../../contexts/AuthContext';
-import { handleKeyboardClick } from '../../utils/accessibility';
+import React, { useState, useEffect } from "react";
+import logger from "@/utils/logger";
+import { useAuth } from "../../contexts/AuthContext";
+import { handleKeyboardClick } from "../../utils/accessibility";
+import { formatDateTime } from "../../utils/dateHelpers";
 
 const UserHeader = () => {
   const { user, logout, canAccessOffensive } = useAuth();
@@ -14,7 +15,7 @@ const UserHeader = () => {
         const hasOffensive = await canAccessOffensive();
         setHasOffensiveAccess(hasOffensive);
       } catch (error) {
-        logger.error('Failed to check permissions:', error);
+        logger.error("Failed to check permissions:", error);
       }
     };
 
@@ -28,7 +29,7 @@ const UserHeader = () => {
       await logout();
       window.location.reload();
     } catch (error) {
-      logger.error('Logout failed:', error);
+      logger.error("Logout failed:", error);
     }
   };
 
@@ -38,17 +39,22 @@ const UserHeader = () => {
 
   // Build permissions list from user data
   const permissions = [];
-  if (user.role === 'admin') permissions.push('admin');
-  if (hasOffensiveAccess) permissions.push('offensive');
-  permissions.push('write', 'read'); // Default permissions
+  if (user.role === "admin") permissions.push("admin");
+  if (hasOffensiveAccess) permissions.push("offensive");
+  permissions.push("write", "read"); // Default permissions
 
   const getPermissionBadgeColor = (permission) => {
     switch (permission) {
-      case 'admin': return 'bg-red-400/20 text-red-400 border-red-400/50';
-      case 'offensive': return 'bg-orange-400/20 text-orange-400 border-orange-400/50';
-      case 'write': return 'bg-yellow-400/20 text-yellow-400 border-yellow-400/50';
-      case 'read': return 'bg-green-400/20 text-green-400 border-green-400/50';
-      default: return 'bg-red-400/20 text-red-400 border-red-400/50';
+      case "admin":
+        return "bg-red-400/20 text-red-400 border-red-400/50";
+      case "offensive":
+        return "bg-orange-400/20 text-orange-400 border-orange-400/50";
+      case "write":
+        return "bg-yellow-400/20 text-yellow-400 border-yellow-400/50";
+      case "read":
+        return "bg-green-400/20 text-green-400 border-green-400/50";
+      default:
+        return "bg-red-400/20 text-red-400 border-red-400/50";
     }
   };
 
@@ -87,22 +93,29 @@ const UserHeader = () => {
               className="flex items-center space-x-3 bg-red-400/10 hover:bg-red-400/20 border border-red-400/30 rounded-lg px-3 py-2 transition-all"
             >
               <img
-                src={user.picture || '/default-avatar.png'}
+                src={user.picture || "/default-avatar.png"}
                 alt={user.name}
                 className="w-8 h-8 rounded-full"
               />
               <div className="text-left">
-                <div className="text-red-400 text-sm font-medium">{user.name}</div>
+                <div className="text-red-400 text-sm font-medium">
+                  {user.name}
+                </div>
                 <div className="text-red-400/70 text-xs">{user.email}</div>
               </div>
               <div className="text-red-400">
                 <svg
-                  className={`w-4 h-4 transform transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 transform transition-transform ${showDropdown ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </button>
@@ -115,20 +128,26 @@ const UserHeader = () => {
                   <div className="border-b border-red-400/30 pb-3 mb-3">
                     <div className="flex items-center space-x-3">
                       <img
-                        src={user.picture || '/default-avatar.png'}
+                        src={user.picture || "/default-avatar.png"}
                         alt={user.name}
                         className="w-12 h-12 rounded-full"
                       />
                       <div>
-                        <div className="text-red-400 font-medium">{user.name}</div>
-                        <div className="text-red-400/70 text-sm">{user.email}</div>
+                        <div className="text-red-400 font-medium">
+                          {user.name}
+                        </div>
+                        <div className="text-red-400/70 text-sm">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Permissions */}
                   <div className="mb-3">
-                    <div className="text-red-400 text-xs font-bold mb-2">PERMISSÕES:</div>
+                    <div className="text-red-400 text-xs font-bold mb-2">
+                      PERMISSÕES:
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       {permissions.map((permission) => (
                         <span
@@ -144,8 +163,10 @@ const UserHeader = () => {
                   {/* Session info */}
                   <div className="border-t border-red-400/30 pt-3 mb-3">
                     <div className="text-red-400/50 text-xs">
-                      🔒 Sessão autenticada<br/>
-                      🕒 {new Date().toLocaleString('pt-BR')}<br/>
+                      🔒 Sessão autenticada
+                      <br />
+                      🕒 {formatDateTime(new Date(), "N/A")}
+                      <br />
                       📍 IP: {window.location.hostname}
                     </div>
                   </div>

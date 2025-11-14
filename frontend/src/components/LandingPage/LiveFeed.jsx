@@ -10,7 +10,8 @@
  * - Dados cinematográficos mas VERDADEIROS
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { formatTime } from "../../utils/dateHelpers";
 
 export const LiveFeed = ({ realThreats = [] }) => {
   const [activities, setActivities] = useState([]);
@@ -26,50 +27,49 @@ export const LiveFeed = ({ realThreats = [] }) => {
     const newActivity = {
       id: latestThreat.id,
       timestamp: latestThreat.timestamp,
-      ...generateActivityFromThreat(latestThreat)
+      ...generateActivityFromThreat(latestThreat),
     };
 
-    setActivities(prev => [newActivity, ...prev].slice(0, 15));
-
+    setActivities((prev) => [newActivity, ...prev].slice(0, 15));
   }, [realThreats]);
 
   // Gera atividade formatada baseada na ameaça real
   const generateActivityFromThreat = (threat) => {
     if (threat.isMalicious) {
       return {
-        type: 'threat',
-        icon: '🚨',
-        text: 'AMEAÇA CRÍTICA detectada',
+        type: "threat",
+        icon: "🚨",
+        text: "AMEAÇA CRÍTICA detectada",
         target: threat.ip,
-        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
-        severity: 'critical'
+        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || "Unknown"}`,
+        severity: "critical",
       };
-    } else if (threat.severity === 'suspicious') {
+    } else if (threat.severity === "suspicious") {
       return {
-        type: 'alert',
-        icon: '⚠️',
-        text: 'Atividade suspeita em',
+        type: "alert",
+        icon: "⚠️",
+        text: "Atividade suspeita em",
         target: threat.ip,
-        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
-        severity: 'high'
+        detail: `Score: ${threat.threatScore}/100 | ${threat.geolocation?.country || "Unknown"}`,
+        severity: "high",
       };
-    } else if (threat.severity === 'questionable') {
+    } else if (threat.severity === "questionable") {
       return {
-        type: 'scan',
-        icon: '🔍',
-        text: 'Scan detectou comportamento questionável',
+        type: "scan",
+        icon: "🔍",
+        text: "Scan detectou comportamento questionável",
         target: threat.ip,
         detail: `Score: ${threat.threatScore}/100`,
-        severity: 'medium'
+        severity: "medium",
       };
     } else {
       return {
-        type: 'success',
-        icon: '✅',
-        text: 'IP verificado - limpo',
+        type: "success",
+        icon: "✅",
+        text: "IP verificado - limpo",
         target: threat.ip,
         detail: `Score: ${threat.threatScore}/100`,
-        severity: 'low'
+        severity: "low",
       };
     }
   };
@@ -77,22 +77,55 @@ export const LiveFeed = ({ realThreats = [] }) => {
   // Gerar atividades de background (simulação de atividade do sistema)
   useEffect(() => {
     const backgroundActivities = [
-      { type: 'scan', icon: '📡', text: 'Scan de rede iniciado', target: '192.168.0.0/24', severity: 'low' },
-      { type: 'success', icon: '🔐', text: 'SSL certificate renewed', target: 'api.vertice.com', severity: 'low' },
-      { type: 'info', icon: '📊', text: 'Database backup completed', target: 'prod-db-01', severity: 'low' },
-      { type: 'scan', icon: '🔍', text: 'Port scan completed', target: '10.0.0.0/8', severity: 'low' },
-      { type: 'success', icon: '🛡️', text: 'Firewall rules updated', target: 'fw-edge-01', severity: 'low' }
+      {
+        type: "scan",
+        icon: "📡",
+        text: "Scan de rede iniciado",
+        target: "192.168.0.0/24",
+        severity: "low",
+      },
+      {
+        type: "success",
+        icon: "🔐",
+        text: "SSL certificate renewed",
+        target: "api.vertice.com",
+        severity: "low",
+      },
+      {
+        type: "info",
+        icon: "📊",
+        text: "Database backup completed",
+        target: "prod-db-01",
+        severity: "low",
+      },
+      {
+        type: "scan",
+        icon: "🔍",
+        text: "Port scan completed",
+        target: "10.0.0.0/8",
+        severity: "low",
+      },
+      {
+        type: "success",
+        icon: "🛡️",
+        text: "Firewall rules updated",
+        target: "fw-edge-01",
+        severity: "low",
+      },
     ];
 
     const interval = setInterval(() => {
-      const randomActivity = backgroundActivities[Math.floor(Math.random() * backgroundActivities.length)];
+      const randomActivity =
+        backgroundActivities[
+          Math.floor(Math.random() * backgroundActivities.length)
+        ];
       const newActivity = {
         ...randomActivity,
         id: Date.now(),
-        timestamp: new Date().toLocaleTimeString('pt-BR'),
+        timestamp: formatTime(new Date(), "--:--"),
       };
 
-      setActivities(prev => [newActivity, ...prev].slice(0, 15));
+      setActivities((prev) => [newActivity, ...prev].slice(0, 15));
     }, 8000); // A cada 8 segundos
 
     return () => clearInterval(interval);
@@ -118,7 +151,10 @@ export const LiveFeed = ({ realThreats = [] }) => {
           </div>
         ) : (
           activities.map((activity) => (
-            <div key={activity.id} className={`feed-item feed-${activity.type}`}>
+            <div
+              key={activity.id}
+              className={`feed-item feed-${activity.type}`}
+            >
               <span className="feed-icon">{activity.icon}</span>
               <div className="feed-content">
                 <span className="feed-text">{activity.text}</span>

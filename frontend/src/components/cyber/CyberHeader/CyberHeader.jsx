@@ -1,7 +1,8 @@
-import React from 'react';
-import { Button } from '../../shared';
-import { ModuleNav } from './components/ModuleNav';
-import styles from './CyberHeader.module.css';
+import React from "react";
+import { Button } from "../../shared";
+import { ModuleNav } from "./components/ModuleNav";
+import styles from "./CyberHeader.module.css";
+import { formatTime, formatDate } from "../../../utils/dateHelpers";
 
 /**
  * CyberHeader - Header do módulo Cyber Security
@@ -11,7 +12,7 @@ export const CyberHeader = ({
   currentTime,
   setCurrentView,
   activeModule,
-  setActiveModule
+  setActiveModule,
 }) => {
   return (
     <header className={styles.header}>
@@ -31,7 +32,7 @@ export const CyberHeader = ({
           <Button
             variant="success"
             size="sm"
-            onClick={() => setCurrentView('main')}
+            onClick={() => setCurrentView("main")}
             icon="fas fa-arrow-left"
           >
             VOLTAR VÉRTICE
@@ -39,20 +40,17 @@ export const CyberHeader = ({
 
           <div className={styles.clock}>
             <div className={styles.time}>
-              {currentTime.toLocaleTimeString()}
+              {formatTime(currentTime, "--:--:--")}
             </div>
             <div className={styles.date}>
-              {currentTime.toLocaleDateString('pt-BR')}
+              {formatDate(currentTime, { dateStyle: "short" }, "N/A")}
             </div>
           </div>
         </div>
       </div>
 
       {/* Module Navigation */}
-      <ModuleNav
-        activeModule={activeModule}
-        onModuleChange={setActiveModule}
-      />
+      <ModuleNav activeModule={activeModule} onModuleChange={setActiveModule} />
     </header>
   );
 };
