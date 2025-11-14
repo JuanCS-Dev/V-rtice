@@ -1,6 +1,6 @@
 // /home/juan/vertice-dev/frontend/src/App.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { LandingPage } from "./components/LandingPage";
@@ -17,22 +17,47 @@ import "./i18n/config"; // Initialize i18n
 import "./styles/tokens/transitions.css";
 import "./styles/micro-interactions.css";
 
-// Import dashboards directly (fix for lazy loading issues)
-import AdminDashboard from "./components/AdminDashboard";
-import DefensiveDashboard from "./components/dashboards/DefensiveDashboard/DefensiveDashboard";
-import OffensiveDashboard from "./components/dashboards/OffensiveDashboard/OffensiveDashboard";
-import PurpleTeamDashboard from "./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard";
-import CockpitSoberano from "./components/dashboards/CockpitSoberano/CockpitSoberano";
-import OSINTDashboard from "./components/OSINTDashboard";
-import MaximusDashboard from "./components/maximus/MaximusDashboard";
-import ReactiveFabricDashboard from "./components/reactive-fabric/ReactiveFabricDashboard";
-import HITLDecisionConsole from "./components/reactive-fabric/HITLDecisionConsole";
-import ToMEngineDashboard from "./components/tom-engine/ToMEngineDashboard";
-import ImmuneSystemDashboard from "./components/immune-system/ImmuneSystemDashboard";
-import MonitoringDashboard from "./components/monitoring/MonitoringDashboard";
-import PenelopeDashboard from "./components/penelope/PenelopeDashboard";
-import MABADashboard from "./components/maba/MABADashboard";
-import MVPDashboard from "./components/mvp/MVPDashboard";
+// Lazy load all dashboards for optimal performance (code splitting)
+const AdminDashboard = React.lazy(() => import("./components/AdminDashboard"));
+const DefensiveDashboard = React.lazy(
+  () => import("./components/dashboards/DefensiveDashboard/DefensiveDashboard"),
+);
+const OffensiveDashboard = React.lazy(
+  () => import("./components/dashboards/OffensiveDashboard/OffensiveDashboard"),
+);
+const PurpleTeamDashboard = React.lazy(
+  () =>
+    import("./components/dashboards/PurpleTeamDashboard/PurpleTeamDashboard"),
+);
+const CockpitSoberano = React.lazy(
+  () => import("./components/dashboards/CockpitSoberano/CockpitSoberano"),
+);
+const OSINTDashboard = React.lazy(() => import("./components/OSINTDashboard"));
+const MaximusDashboard = React.lazy(
+  () => import("./components/maximus/MaximusDashboard"),
+);
+const ReactiveFabricDashboard = React.lazy(
+  () => import("./components/reactive-fabric/ReactiveFabricDashboard"),
+);
+const HITLDecisionConsole = React.lazy(
+  () => import("./components/reactive-fabric/HITLDecisionConsole"),
+);
+const ToMEngineDashboard = React.lazy(
+  () => import("./components/tom-engine/ToMEngineDashboard"),
+);
+const ImmuneSystemDashboard = React.lazy(
+  () => import("./components/immune-system/ImmuneSystemDashboard"),
+);
+const MonitoringDashboard = React.lazy(
+  () => import("./components/monitoring/MonitoringDashboard"),
+);
+const PenelopeDashboard = React.lazy(
+  () => import("./components/penelope/PenelopeDashboard"),
+);
+const MABADashboard = React.lazy(
+  () => import("./components/maba/MABADashboard"),
+);
+const MVPDashboard = React.lazy(() => import("./components/mvp/MVPDashboard"));
 
 function App() {
   // 'main', 'admin', 'defensive', 'offensive', 'purple', 'cockpit', 'osint', 'maximus', 'reactive-fabric', 'hitl-console'
@@ -159,14 +184,16 @@ function App() {
             {currentView === "main" ? (
               <LandingPage setCurrentView={setCurrentView} />
             ) : (
-              views[currentView] || (
-                <ErrorBoundary
-                  context="unknown-view"
-                  title="Unknown View Error"
-                >
-                  <div>View not found: {currentView}</div>
-                </ErrorBoundary>
-              )
+              <Suspense fallback={<DashboardLoader />}>
+                {views[currentView] || (
+                  <ErrorBoundary
+                    context="unknown-view"
+                    title="Unknown View Error"
+                  >
+                    <div>View not found: {currentView}</div>
+                  </ErrorBoundary>
+                )}
+              </Suspense>
             )}
           </main>
         </ErrorBoundary>

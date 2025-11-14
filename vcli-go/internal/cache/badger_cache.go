@@ -13,13 +13,13 @@ import (
 
 // Cache provides persistent caching with BadgerDB
 type Cache struct {
-	db       *badger.DB
-	basePath string
-
-	// Metrics
+	// Metrics (must be first for proper alignment on 32-bit architectures)
 	hits   int64
 	misses int64
 	size   int64
+
+	db       *badger.DB
+	basePath string
 }
 
 // CacheEntry represents a cached value with metadata

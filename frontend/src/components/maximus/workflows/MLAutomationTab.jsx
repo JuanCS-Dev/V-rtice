@@ -31,14 +31,20 @@
  * Glory to YHWH - Designer of Autonomous Intelligence
  */
 
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import logger from '@/utils/logger';
-import { orchestratorAPI, pollWorkflowStatus } from '../../../api/orchestrator';
-import { eurekaAPI } from '../../../api/eureka';
-import './MLAutomationTab.css';
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import { Card } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import logger from "@/utils/logger";
+import { orchestratorAPI, pollWorkflowStatus } from "../../../api/orchestrator";
+import { eurekaAPI } from "../../../api/eureka";
+import "./MLAutomationTab.css";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // WORKFLOW TEMPLATES
@@ -46,67 +52,110 @@ import './MLAutomationTab.css';
 
 const WORKFLOW_TEMPLATES = [
   {
-    id: 'threat_hunting',
-    name: 'Threat Hunting (Automated)',
-    description: 'Oráculo → Eureka → Wargaming → HITL Review',
-    longDescription: 'Full threat intelligence pipeline: CVE detection, malware analysis, wargaming validation, and human-in-the-loop review for critical decisions.',
-    icon: '🎯',
-    estimatedTime: '5-8 min',
-    services: ['oraculo', 'eureka', 'wargaming', 'hitl'],
-    color: 'red',
+    id: "threat_hunting",
+    name: "Threat Hunting (Automated)",
+    description: "Oráculo → Eureka → Wargaming → HITL Review",
+    longDescription:
+      "Full threat intelligence pipeline: CVE detection, malware analysis, wargaming validation, and human-in-the-loop review for critical decisions.",
+    icon: "🎯",
+    estimatedTime: "5-8 min",
+    services: ["oraculo", "eureka", "wargaming", "hitl"],
+    color: "red",
     requiresTarget: true,
-    targetPlaceholder: '192.168.1.0/24 or domain.com',
+    targetPlaceholder: "192.168.1.0/24 or domain.com",
     parameters: {
-      auto_approve: { type: 'boolean', default: false, label: 'Auto-approve patches (confidence >95%)' },
-      deep_scan: { type: 'boolean', default: true, label: 'Enable deep malware analysis' },
+      auto_approve: {
+        type: "boolean",
+        default: false,
+        label: "Auto-approve patches (confidence >95%)",
+      },
+      deep_scan: {
+        type: "boolean",
+        default: true,
+        label: "Enable deep malware analysis",
+      },
     },
   },
   {
-    id: 'vuln_assessment',
-    name: 'Vulnerability Assessment',
-    description: 'Network Scan → Vuln Intel → Eureka Analysis → Prioritization',
-    longDescription: 'Comprehensive vulnerability assessment: network reconnaissance, CVE correlation, risk scoring, and automated patch recommendations.',
-    icon: '🔍',
-    estimatedTime: '10-15 min',
-    services: ['network_recon', 'vuln_intel', 'eureka', 'ml'],
-    color: 'orange',
+    id: "vuln_assessment",
+    name: "Vulnerability Assessment",
+    description: "Network Scan → Vuln Intel → Eureka Analysis → Prioritization",
+    longDescription:
+      "Comprehensive vulnerability assessment: network reconnaissance, CVE correlation, risk scoring, and automated patch recommendations.",
+    icon: "🔍",
+    estimatedTime: "10-15 min",
+    services: ["network_recon", "vuln_intel", "eureka", "ml"],
+    color: "orange",
     requiresTarget: true,
-    targetPlaceholder: '10.0.0.0/8 or specific host',
+    targetPlaceholder: "10.0.0.0/8 or specific host",
     parameters: {
-      scan_speed: { type: 'select', options: ['stealth', 'normal', 'aggressive'], default: 'normal', label: 'Scan Speed' },
-      include_web: { type: 'boolean', default: true, label: 'Include web vulnerabilities' },
+      scan_speed: {
+        type: "select",
+        options: ["stealth", "normal", "aggressive"],
+        default: "normal",
+        label: "Scan Speed",
+      },
+      include_web: {
+        type: "boolean",
+        default: true,
+        label: "Include web vulnerabilities",
+      },
     },
   },
   {
-    id: 'patch_validation',
-    name: 'Patch Validation Pipeline',
-    description: 'Eureka → Wargaming → ML Predict → HITL',
-    longDescription: 'Automated patch validation: malware analysis, wargaming simulation, ML confidence scoring, and human approval workflow.',
-    icon: '🛡️',
-    estimatedTime: '3-5 min',
-    services: ['eureka', 'wargaming', 'ml', 'hitl'],
-    color: 'green',
+    id: "patch_validation",
+    name: "Patch Validation Pipeline",
+    description: "Eureka → Wargaming → ML Predict → HITL",
+    longDescription:
+      "Automated patch validation: malware analysis, wargaming simulation, ML confidence scoring, and human approval workflow.",
+    icon: "🛡️",
+    estimatedTime: "3-5 min",
+    services: ["eureka", "wargaming", "ml", "hitl"],
+    color: "green",
     requiresTarget: true,
-    targetPlaceholder: 'CVE-2024-1234 or patch file path',
+    targetPlaceholder: "CVE-2024-1234 or patch file path",
     parameters: {
-      confidence_threshold: { type: 'number', min: 0.5, max: 1.0, step: 0.05, default: 0.85, label: 'Auto-approve threshold' },
-      wargaming_iterations: { type: 'number', min: 1, max: 10, default: 3, label: 'Wargaming iterations' },
+      confidence_threshold: {
+        type: "number",
+        min: 0.5,
+        max: 1.0,
+        step: 0.05,
+        default: 0.85,
+        label: "Auto-approve threshold",
+      },
+      wargaming_iterations: {
+        type: "number",
+        min: 1,
+        max: 10,
+        default: 3,
+        label: "Wargaming iterations",
+      },
     },
   },
   {
-    id: 'incident_response',
-    name: 'Incident Response (Auto)',
-    description: 'Detect → Analyze → Contain → Remediate → Report',
-    longDescription: 'Automated incident response workflow: threat detection, root cause analysis, containment strategy, remediation execution, and comprehensive reporting.',
-    icon: '🚨',
-    estimatedTime: '2-4 min',
-    services: ['adr', 'eureka', 'immunis', 'reporting'],
-    color: 'purple',
+    id: "incident_response",
+    name: "Incident Response (Auto)",
+    description: "Detect → Analyze → Contain → Remediate → Report",
+    longDescription:
+      "Automated incident response workflow: threat detection, root cause analysis, containment strategy, remediation execution, and comprehensive reporting.",
+    icon: "🚨",
+    estimatedTime: "2-4 min",
+    services: ["adr", "eureka", "immunis", "reporting"],
+    color: "purple",
     requiresTarget: false,
     targetPlaceholder: null,
     parameters: {
-      severity_filter: { type: 'select', options: ['critical', 'high', 'medium', 'all'], default: 'high', label: 'Severity Filter' },
-      auto_remediate: { type: 'boolean', default: false, label: 'Auto-remediate (High Risk!)' },
+      severity_filter: {
+        type: "select",
+        options: ["critical", "high", "medium", "all"],
+        default: "high",
+        label: "Severity Filter",
+      },
+      auto_remediate: {
+        type: "boolean",
+        default: false,
+        label: "Auto-remediate (High Risk!)",
+      },
     },
   },
 ];
@@ -115,9 +164,9 @@ const WORKFLOW_TEMPLATES = [
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const MLAutomationTab = ({ timeRange = '24h' }) => {
+export const MLAutomationTab = ({ timeRange = "24h" }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [target, setTarget] = useState('');
+  const [target, setTarget] = useState("");
   const [parameters, setParameters] = useState({});
   const [activeWorkflow, setActiveWorkflow] = useState(null);
   const [workflowHistory, setWorkflowHistory] = useState([]);
@@ -125,11 +174,18 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
 
   const _queryClient = useQueryClient();
 
-  logger.debug('🎯 MLAutomationTab rendering', { selectedTemplate, activeWorkflow });
+  logger.debug("🎯 MLAutomationTab rendering", {
+    selectedTemplate,
+    activeWorkflow,
+  });
 
   // Fetch Eureka ML metrics
-  const { data: mlMetrics, isLoading: metricsLoading, error: metricsError } = useQuery({
-    queryKey: ['eureka-ml-metrics', timeRange],
+  const {
+    data: mlMetrics,
+    isLoading: metricsLoading,
+    error: metricsError,
+  } = useQuery({
+    queryKey: ["eureka-ml-metrics", timeRange],
     queryFn: () => eurekaAPI.getMLMetrics(timeRange),
     refetchInterval: 30000, // 30s
     retry: 2,
@@ -138,7 +194,7 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
 
   // Check orchestrator health
   const { data: orchestratorHealth } = useQuery({
-    queryKey: ['orchestrator-health'],
+    queryKey: ["orchestrator-health"],
     queryFn: () => orchestratorAPI.healthCheck(),
     refetchInterval: 60000, // 1 min
     retry: 1,
@@ -147,7 +203,7 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
   // Start workflow mutation
   const startWorkflowMutation = useMutation({
     mutationFn: async ({ template, target, params }) => {
-      logger.info('🚀 Starting workflow:', template.id, { target, params });
+      logger.info("🚀 Starting workflow:", template.id, { target, params });
 
       const workflow = await orchestratorAPI.startWorkflow(
         template.id,
@@ -155,20 +211,24 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
           target: target || undefined,
           ...params,
         },
-        8 // High priority
+        8, // High priority
       );
 
-      return { ...workflow, template: template.id, startedAt: new Date().toISOString() };
+      return {
+        ...workflow,
+        template: template.id,
+        startedAt: new Date().toISOString(),
+      };
     },
     onSuccess: (workflow) => {
-      logger.success('✅ Workflow started:', workflow.workflow_id);
+      logger.success("✅ Workflow started:", workflow.workflow_id);
       setActiveWorkflow(workflow);
 
       // Start polling status
       pollStatus(workflow.workflow_id);
     },
     onError: (error) => {
-      logger.error('❌ Failed to start workflow:', error);
+      logger.error("❌ Failed to start workflow:", error);
       alert(`Failed to start workflow: ${error.message}`);
     },
   });
@@ -179,18 +239,18 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
       await pollWorkflowStatus(
         workflowId,
         (status) => {
-          logger.debug('📊 Workflow status update:', status);
+          logger.debug("📊 Workflow status update:", status);
           setActiveWorkflow((prev) => ({
             ...prev,
             ...status,
           }));
         },
         3000, // Poll every 3s
-        600000 // Max 10 minutes
+        600000, // Max 10 minutes
       );
 
       // Workflow completed
-      logger.success('✅ Workflow completed:', workflowId);
+      logger.success("✅ Workflow completed:", workflowId);
 
       // Add to history
       setWorkflowHistory((prev) => [
@@ -203,10 +263,10 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
 
       setActiveWorkflow(null);
     } catch (error) {
-      logger.error('❌ Workflow polling error:', error);
+      logger.error("❌ Workflow polling error:", error);
       setActiveWorkflow((prev) => ({
         ...prev,
-        status: 'failed',
+        status: "failed",
         error: error.message,
       }));
     }
@@ -215,29 +275,29 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
   // Handle template selection
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
-    setTarget('');
+    setTarget("");
     setParameters(
       Object.entries(template.parameters || {}).reduce((acc, [key, config]) => {
         acc[key] = config.default;
         return acc;
-      }, {})
+      }, {}),
     );
   };
 
   // Handle workflow start
   const handleStartWorkflow = () => {
     if (!selectedTemplate) {
-      alert('Please select a workflow template');
+      alert("Please select a workflow template");
       return;
     }
 
     if (selectedTemplate.requiresTarget && !target.trim()) {
-      alert('Please provide a target');
+      alert("Please provide a target");
       return;
     }
 
     if (activeWorkflow) {
-      alert('A workflow is already running. Please wait for completion.');
+      alert("A workflow is already running. Please wait for completion.");
       return;
     }
 
@@ -267,13 +327,14 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
         <div>
           <h2 className="tab-title">🎯 ML-Powered Workflows</h2>
           <p className="tab-subtitle">
-            Automated multi-service orchestration with ML predictions and HITL oversight
+            Automated multi-service orchestration with ML predictions and HITL
+            oversight
           </p>
         </div>
 
         {/* Orchestrator Status */}
         <div className="orchestrator-status">
-          {orchestratorHealth?.status === 'healthy' ? (
+          {orchestratorHealth?.status === "healthy" ? (
             <Badge className="badge-success">✅ Orchestrator Online</Badge>
           ) : (
             <Badge className="badge-error">❌ Orchestrator Offline</Badge>
@@ -289,8 +350,8 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
             <Card
               key={template.id}
               className={`template-card template-${template.color} ${
-                selectedTemplate?.id === template.id ? 'selected' : ''
-              } ${activeWorkflow ? 'disabled' : ''}`}
+                selectedTemplate?.id === template.id ? "selected" : ""
+              } ${activeWorkflow ? "disabled" : ""}`}
               onClick={() => !activeWorkflow && handleTemplateSelect(template)}
             >
               <div className="template-icon">{template.icon}</div>
@@ -302,7 +363,9 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
                 {template.services.map((service, idx) => (
                   <React.Fragment key={service}>
                     <span className="service-badge">{service}</span>
-                    {idx < template.services.length - 1 && <span className="arrow">→</span>}
+                    {idx < template.services.length - 1 && (
+                      <span className="arrow">→</span>
+                    )}
                   </React.Fragment>
                 ))}
               </div>
@@ -321,15 +384,21 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
           <Card className="config-card">
             <div className="config-header">
               <div>
-                <h4>{selectedTemplate.icon} {selectedTemplate.name}</h4>
-                <p className="config-description">{selectedTemplate.longDescription}</p>
+                <h4>
+                  {selectedTemplate.icon} {selectedTemplate.name}
+                </h4>
+                <p className="config-description">
+                  {selectedTemplate.longDescription}
+                </p>
               </div>
             </div>
 
             {/* Target Input */}
             {selectedTemplate.requiresTarget && (
               <div className="form-group">
-                <label htmlFor="workflow-target" className="form-label">Target</label>
+                <label htmlFor="workflow-target" className="form-label">
+                  Target
+                </label>
                 <input
                   id="workflow-target"
                   type="text"
@@ -343,57 +412,67 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
             )}
 
             {/* Parameters */}
-            {Object.entries(selectedTemplate.parameters || {}).map(([key, config]) => {
-              const inputId = `workflow-param-${key}`;
-              return (
-                <div key={key} className="form-group">
-                  <label htmlFor={inputId} className="form-label">{config.label}</label>
+            {Object.entries(selectedTemplate.parameters || {}).map(
+              ([key, config]) => {
+                const inputId = `workflow-param-${key}`;
+                return (
+                  <div key={key} className="form-group">
+                    <label htmlFor={inputId} className="form-label">
+                      {config.label}
+                    </label>
 
-                  {config.type === 'boolean' && (
-                    <label className="checkbox-label">
+                    {config.type === "boolean" && (
+                      <label className="checkbox-label">
+                        <input
+                          id={inputId}
+                          type="checkbox"
+                          checked={parameters[key] || false}
+                          onChange={(e) =>
+                            handleParameterChange(key, e.target.checked)
+                          }
+                          disabled={!!activeWorkflow}
+                        />
+                        <span>Enable</span>
+                      </label>
+                    )}
+
+                    {config.type === "select" && (
+                      <select
+                        id={inputId}
+                        className="form-select"
+                        value={parameters[key] || config.default}
+                        onChange={(e) =>
+                          handleParameterChange(key, e.target.value)
+                        }
+                        disabled={!!activeWorkflow}
+                      >
+                        {config.options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {config.type === "number" && (
                       <input
                         id={inputId}
-                        type="checkbox"
-                        checked={parameters[key] || false}
-                        onChange={(e) => handleParameterChange(key, e.target.checked)}
+                        type="number"
+                        className="form-input"
+                        min={config.min}
+                        max={config.max}
+                        step={config.step}
+                        value={parameters[key] || config.default}
+                        onChange={(e) =>
+                          handleParameterChange(key, parseFloat(e.target.value))
+                        }
                         disabled={!!activeWorkflow}
                       />
-                      <span>Enable</span>
-                    </label>
-                  )}
-
-                  {config.type === 'select' && (
-                    <select
-                      id={inputId}
-                      className="form-select"
-                      value={parameters[key] || config.default}
-                      onChange={(e) => handleParameterChange(key, e.target.value)}
-                      disabled={!!activeWorkflow}
-                    >
-                      {config.options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {config.type === 'number' && (
-                    <input
-                      id={inputId}
-                      type="number"
-                      className="form-input"
-                      min={config.min}
-                      max={config.max}
-                      step={config.step}
-                      value={parameters[key] || config.default}
-                      onChange={(e) => handleParameterChange(key, parseFloat(e.target.value))}
-                      disabled={!!activeWorkflow}
-                    />
-                  )}
-                </div>
-              );
-            })}
+                    )}
+                  </div>
+                );
+              },
+            )}
 
             {/* Start Button */}
             <button
@@ -401,7 +480,9 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
               onClick={handleStartWorkflow}
               disabled={!!activeWorkflow || startWorkflowMutation.isLoading}
             >
-              {startWorkflowMutation.isLoading ? '🔄 Starting...' : '▶️ Start Workflow'}
+              {startWorkflowMutation.isLoading
+                ? "🔄 Starting..."
+                : "▶️ Start Workflow"}
             </button>
           </Card>
         </section>
@@ -413,7 +494,13 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
           <h3 className="section-title">⚡ Active Workflow</h3>
           <Card className="workflow-status-card">
             <div className="status-header">
-              <h4>{WORKFLOW_TEMPLATES.find((t) => t.id === activeWorkflow.template)?.name}</h4>
+              <h4>
+                {
+                  WORKFLOW_TEMPLATES.find(
+                    (t) => t.id === activeWorkflow.template,
+                  )?.name
+                }
+              </h4>
               <Badge className={`status-badge status-${activeWorkflow.status}`}>
                 {activeWorkflow.status}
               </Badge>
@@ -434,7 +521,9 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
             {activeWorkflow.current_step && (
               <div className="current-step">
                 <span className="step-label">Current Step:</span>
-                <span className="step-value">{activeWorkflow.current_step}</span>
+                <span className="step-value">
+                  {activeWorkflow.current_step}
+                </span>
               </div>
             )}
 
@@ -472,7 +561,9 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
               <div className="metric-label">ML Usage Rate</div>
               <div className="metric-details">
                 <span>ML: {mlMetrics.usage_breakdown.ml_count}</span>
-                <span>Wargaming: {mlMetrics.usage_breakdown.wargaming_count}</span>
+                <span>
+                  Wargaming: {mlMetrics.usage_breakdown.wargaming_count}
+                </span>
               </div>
             </Card>
 
@@ -483,7 +574,7 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
                 {(mlMetrics.avg_confidence * 100).toFixed(1)}%
               </div>
               <div className="metric-label">
-                Trend: {mlMetrics.confidence_trend > 0 ? '📈' : '📉'}{' '}
+                Trend: {mlMetrics.confidence_trend > 0 ? "📈" : "📉"}{" "}
                 {mlMetrics.confidence_trend.toFixed(1)}%
               </div>
             </Card>
@@ -495,7 +586,8 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
                 {mlMetrics.time_savings_percent.toFixed(0)}%
               </div>
               <div className="metric-label">
-                {(mlMetrics.time_savings_absolute_minutes / 60).toFixed(1)}h saved
+                {(mlMetrics.time_savings_absolute_minutes / 60).toFixed(1)}h
+                saved
               </div>
             </Card>
 
@@ -535,15 +627,21 @@ export const MLAutomationTab = ({ timeRange = '24h' }) => {
               <Card key={idx} className="history-card">
                 <div className="history-header">
                   <span className="history-template">
-                    {WORKFLOW_TEMPLATES.find((t) => t.id === workflow.template)?.icon}{' '}
-                    {WORKFLOW_TEMPLATES.find((t) => t.id === workflow.template)?.name}
+                    {
+                      WORKFLOW_TEMPLATES.find((t) => t.id === workflow.template)
+                        ?.icon
+                    }{" "}
+                    {
+                      WORKFLOW_TEMPLATES.find((t) => t.id === workflow.template)
+                        ?.name
+                    }
                   </span>
                   <Badge className={`status-badge status-${workflow.status}`}>
                     {workflow.status}
                   </Badge>
                 </div>
                 <div className="history-time">
-                  {new Date(workflow.startedAt).toLocaleString()}
+                  {formatDateTime(workflow.startedAt)}
                 </div>
               </Card>
             ))}
