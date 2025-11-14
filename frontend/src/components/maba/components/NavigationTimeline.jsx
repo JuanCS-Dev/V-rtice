@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useState } from "react";
+import { formatDateTime } from "../../../utils/dateHelpers";
 import styles from "./NavigationTimeline.module.css";
 
 export const NavigationTimeline = ({ sessions, isLoading }) => {
@@ -39,15 +40,7 @@ export const NavigationTimeline = ({ sessions, isLoading }) => {
   }, [navigations, filter]);
 
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
+    return formatDateTime(timestamp, "N/A");
   };
 
   const getNavigationType = (nav) => {

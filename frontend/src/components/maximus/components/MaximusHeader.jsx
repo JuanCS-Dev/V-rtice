@@ -11,12 +11,13 @@
  * ✅ Sem truncamento
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import { CompactEffectSelector } from './CompactEffectSelector';
-import { CompactLanguageSelector } from './CompactLanguageSelector';
-import styles from './MaximusHeader.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import { CompactEffectSelector } from "./CompactEffectSelector";
+import { CompactLanguageSelector } from "./CompactLanguageSelector";
+import { formatTime, formatDate } from "../../../utils/dateHelpers";
+import styles from "./MaximusHeader.module.css";
 
 export const MaximusHeader = ({
   aiStatus,
@@ -27,21 +28,13 @@ export const MaximusHeader = ({
   setCurrentView,
   getItemProps,
   backgroundEffect,
-  onEffectChange
+  onEffectChange,
 }) => {
   const { t: _t } = useTranslation();
 
   // Format time
-  const timeString = currentTime.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-  const dateString = currentTime.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+  const timeString = formatTime(currentTime, "--:--:--");
+  const dateString = formatDate(currentTime, { dateStyle: "short" }, "N/A");
 
   return (
     <header className={styles.header}>
@@ -55,7 +48,9 @@ export const MaximusHeader = ({
           </div>
           <div className={styles.logoText}>
             <h1 className={styles.logoTitle}>MAXIMUS AI</h1>
-            <p className={styles.logoSubtitle}>Autonomous Intelligence Platform</p>
+            <p className={styles.logoSubtitle}>
+              Autonomous Intelligence Platform
+            </p>
           </div>
         </div>
 
@@ -63,31 +58,52 @@ export const MaximusHeader = ({
         <div className={styles.statusIndicators}>
           {/* CORE */}
           <div className={styles.statusCard}>
-            <div className={`${styles.statusTop} ${styles[aiStatus.core.status]}`}></div>
+            <div
+              className={`${styles.statusTop} ${styles[aiStatus.core.status]}`}
+            ></div>
             <span className={styles.statusLabel}>CORE</span>
-            <span className={`${styles.statusValue} ${styles[aiStatus.core.status]}`}>
-              {aiStatus.core.status === 'online' ? 'ONLINE' :
-               aiStatus.core.status === 'offline' ? 'OFFLINE' : 'IDLE'}
+            <span
+              className={`${styles.statusValue} ${styles[aiStatus.core.status]}`}
+            >
+              {aiStatus.core.status === "online"
+                ? "ONLINE"
+                : aiStatus.core.status === "offline"
+                  ? "OFFLINE"
+                  : "IDLE"}
             </span>
           </div>
 
           {/* ORACLE */}
           <div className={styles.statusCard}>
-            <div className={`${styles.statusTop} ${styles[aiStatus.oraculo.status]}`}></div>
+            <div
+              className={`${styles.statusTop} ${styles[aiStatus.oraculo.status]}`}
+            ></div>
             <span className={styles.statusLabel}>ORACLE</span>
-            <span className={`${styles.statusValue} ${styles[aiStatus.oraculo.status]}`}>
-              {aiStatus.oraculo.status === 'online' ? 'IDLE' :
-               aiStatus.oraculo.status === 'offline' ? 'OFFLINE' : 'IDLE'}
+            <span
+              className={`${styles.statusValue} ${styles[aiStatus.oraculo.status]}`}
+            >
+              {aiStatus.oraculo.status === "online"
+                ? "IDLE"
+                : aiStatus.oraculo.status === "offline"
+                  ? "OFFLINE"
+                  : "IDLE"}
             </span>
           </div>
 
           {/* EUREKA */}
           <div className={styles.statusCard}>
-            <div className={`${styles.statusTop} ${styles[aiStatus.eureka.status]}`}></div>
+            <div
+              className={`${styles.statusTop} ${styles[aiStatus.eureka.status]}`}
+            ></div>
             <span className={styles.statusLabel}>EUREKA</span>
-            <span className={`${styles.statusValue} ${styles[aiStatus.eureka.status]}`}>
-              {aiStatus.eureka.status === 'online' ? 'IDLE' :
-               aiStatus.eureka.status === 'offline' ? 'OFFLINE' : 'IDLE'}
+            <span
+              className={`${styles.statusValue} ${styles[aiStatus.eureka.status]}`}
+            >
+              {aiStatus.eureka.status === "online"
+                ? "IDLE"
+                : aiStatus.eureka.status === "offline"
+                  ? "OFFLINE"
+                  : "IDLE"}
             </span>
           </div>
         </div>
@@ -111,7 +127,7 @@ export const MaximusHeader = ({
 
           {/* Back Button */}
           <button
-            onClick={() => setCurrentView('main')}
+            onClick={() => setCurrentView("main")}
             className={styles.backButton}
             aria-label="Back to main view"
           >
@@ -133,7 +149,7 @@ export const MaximusHeader = ({
               {...itemProps}
               className={`${styles.navButton} ${isActive ? styles.active : styles.inactive}`}
               aria-label={`Navigate to ${panel.name}`}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
             >
               {isActive && <div className={styles.navUnderline}></div>}
               <span className={styles.navIcon}>{panel.icon}</span>
@@ -155,7 +171,7 @@ MaximusHeader.propTypes = {
   setCurrentView: PropTypes.func.isRequired,
   getItemProps: PropTypes.func.isRequired,
   backgroundEffect: PropTypes.string,
-  onEffectChange: PropTypes.func
+  onEffectChange: PropTypes.func,
 };
 
 export default MaximusHeader;

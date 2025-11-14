@@ -58,15 +58,17 @@
 
 ### Coverage Sprint Results (2025-11-14)
 
-| Package       | Starting | Final | Gain       | Test File                             | Status      |
-| ------------- | -------- | ----- | ---------- | ------------------------------------- | ----------- |
-| investigation | 2.6%     | 83.3% | +80.7      | investigation tests (5 files)         | ✅ Complete |
-| governance    | 0.0%     | 50.3% | +50.3      | manager + http_client tests           | ✅ Complete |
-| maximus       | 0.0%     | 29.0% | +29.0      | governance + consciousness tests      | ✅ Complete |
-| data          | 0.0%     | 81.5% | +81.5      | ingestion_client_test.go (639 lines)  | ✅ Complete |
-| ethical       | 0.0%     | 53.0% | +53.0      | audit_client_test.go (553 lines)      | ✅ Complete |
-| immunis       | 0.0%     | 29.6% | +29.6      | macrophage_client_test.go (459 lines) | ✅ Complete |
-| **TOTAL**     | -        | -     | **+324.1** | **~6,000 lines**                      | 🚀          |
+| Package       | Starting | Final  | Gain       | Test File                             | Status      |
+| ------------- | -------- | ------ | ---------- | ------------------------------------- | ----------- |
+| investigation | 2.6%     | 83.3%  | +80.7      | investigation tests (5 files)         | ✅ Complete |
+| governance    | 0.0%     | 50.3%  | +50.3      | manager + http_client tests           | ✅ Complete |
+| maximus       | 0.0%     | 29.0%  | +29.0      | governance + consciousness tests      | ✅ Complete |
+| data          | 0.0%     | 81.5%  | +81.5      | ingestion_client_test.go (639 lines)  | ✅ Complete |
+| ethical       | 0.0%     | 53.0%  | +53.0      | audit_client_test.go (553 lines)      | ✅ Complete |
+| immunis       | 0.0%     | 29.6%  | +29.6      | macrophage_client_test.go (459 lines) | ✅ Complete |
+| threat        | 0.0%     | 100.0% | +100.0     | intel + vuln client tests (575 lines) | ✅ Complete |
+| narrative     | 0.0%     | 20.9%  | +20.9      | narrative_client_test.go (503 lines)  | ✅ Complete |
+| **TOTAL**     | -        | -      | **+445.0** | **~7,078 lines**                      | 🚀          |
 
 ### ROI Analysis
 
@@ -76,12 +78,14 @@
 
 ### Next High-ROI Targets
 
-| Package   | File                 | Lines | Expected ROI | Status     |
-| --------- | -------------------- | ----- | ------------ | ---------- |
-| threat    | analyzer_client.go   | ~400  | 12-20 points | ⏸️ Pending |
-| intel     | osint_client.go      | ~350  | 10-18 points | ⏸️ Pending |
-| neuro     | prediction_client.go | ~300  | 10-15 points | ⏸️ Pending |
-| offensive | payload_client.go    | ~350  | 10-18 points | ⏸️ Pending |
+| Package   | File                   | Lines | Expected ROI | Status      |
+| --------- | ---------------------- | ----- | ------------ | ----------- |
+| threat    | intel + vuln clients   | ~180  | 12-20 points | ✅ Complete |
+| narrative | filter_client.go       | ~200  | 10-15 points | ⏸️ Pending  |
+| streaming | sse_client.go          | ~378  | 15-25 points | ⏸️ Pending  |
+| streaming | kafka_client.go        | ~214  | 10-15 points | ⏸️ Pending  |
+| grpc      | immune_client.go       | ~412  | 15-25 points | ⏸️ Pending  |
+| security  | audit/authz/behavioral | ~1730 | 30-50 points | ⏸️ Pending  |
 
 ### Testing Patterns Established
 
