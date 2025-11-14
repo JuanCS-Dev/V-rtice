@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
+import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎭 HITL API Client - Backend Communication Layer
@@ -62,7 +63,7 @@ async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES) {
     // Server errors (5xx) - retry
     if (response.status >= 500 && retries > 0) {
       const delay = RETRY_DELAY_BASE * Math.pow(2, MAX_RETRIES - retries);
-      console.warn(`Server error ${response.status}, retrying in ${delay}ms... (${retries} retries left)`);
+      logger.warn(`Server error ${response.status}, retrying in ${delay}ms... (${retries} retries left)`);
       await sleep(delay);
       return fetchWithRetry(url, options, retries - 1);
     }
@@ -76,7 +77,7 @@ async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES) {
     // Timeout or network error - retry
     if ((error.name === 'AbortError' || error.message.includes('fetch')) && retries > 0) {
       const delay = RETRY_DELAY_BASE * Math.pow(2, MAX_RETRIES - retries);
-      console.warn(`Request failed (${error.message}), retrying in ${delay}ms... (${retries} retries left)`);
+      logger.warn(`Request failed (${error.message}), retrying in ${delay}ms... (${retries} retries left)`);
       await sleep(delay);
       return fetchWithRetry(url, options, retries - 1);
     }

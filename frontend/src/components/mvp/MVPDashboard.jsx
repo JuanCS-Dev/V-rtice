@@ -20,20 +20,31 @@
  */
 
 import React, { useState } from "react";
+import logger from "@/utils/logger";
 import { useMVPNarratives } from "../../hooks/mvp/useMVPNarratives";
+import logger from "@/utils/logger";
 import { useAnomalies } from "../../hooks/mvp/useAnomalies";
+import logger from "@/utils/logger";
 import { useSystemMetrics } from "../../hooks/mvp/useSystemMetrics";
+import logger from "@/utils/logger";
 import { useWebSocket } from "../../hooks/useWebSocket";
+import logger from "@/utils/logger";
 import { WS_ENDPOINTS } from "../../config/api";
+import logger from "@/utils/logger";
 
 // Components
 import { NarrativeFeed } from "./components/NarrativeFeed";
+import logger from "@/utils/logger";
 import { AnomalyHeatmap } from "./components/AnomalyHeatmap";
+import logger from "@/utils/logger";
 import { SystemPulseVisualization } from "./components/SystemPulseVisualization";
+import logger from "@/utils/logger";
 import { StatsOverview } from "./components/StatsOverview";
+import logger from "@/utils/logger";
 
 // Styles
 import styles from "./MVPDashboard.module.css";
+import logger from "@/utils/logger";
 
 export const MVPDashboard = ({ setCurrentView }) => {
   const [activeView, setActiveView] = useState("narratives"); // narratives, anomalies, pulse
@@ -80,7 +91,7 @@ export const MVPDashboard = ({ setCurrentView }) => {
         max_length: 500,
       });
     } catch (error) {
-      console.error("Failed to generate narrative:", error);
+      logger.error("Failed to generate narrative:", error);
     }
   };
 

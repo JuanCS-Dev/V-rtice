@@ -8,8 +8,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import logger from "@/utils/logger";
 import axios from 'axios';
+import logger from "@/utils/logger";
 import { API_ENDPOINTS } from '@/config/api';
+import logger from "@/utils/logger";
 
 const NARRATIVE_FILTER_API = API_ENDPOINTS.narrativeFilter;
 const VERDICT_ENGINE_API = API_ENDPOINTS.verdictEngine;
@@ -49,7 +52,7 @@ export const useCockpitMetrics = () => {
 
       setError(null);
     } catch (err) {
-      console.error('[CockpitMetrics] Failed to fetch:', err);
+      logger.error('[CockpitMetrics] Failed to fetch:', err);
       setError(err.message);
     } finally {
       setLoading(false);

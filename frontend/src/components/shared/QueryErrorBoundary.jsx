@@ -14,9 +14,13 @@
  */
 
 import React from 'react';
+import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
+import logger from "@/utils/logger";
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
+import logger from "@/utils/logger";
 import { withTranslation } from 'react-i18next';
+import logger from "@/utils/logger";
 import './QueryErrorBoundary.css';
 
 class QueryErrorBoundaryComponent extends React.Component {
@@ -39,9 +43,9 @@ class QueryErrorBoundaryComponent extends React.Component {
     // Log error to monitoring service
     // Error tracking service can be integrated here if needed
     if (process.env.NODE_ENV === 'production') {
-      console.error('QueryErrorBoundary caught:', error, errorInfo);
+      logger.error('QueryErrorBoundary caught:', error, errorInfo);
     } else {
-      console.error('QueryErrorBoundary caught:', error, errorInfo);
+      logger.error('QueryErrorBoundary caught:', error, errorInfo);
     }
   }
 

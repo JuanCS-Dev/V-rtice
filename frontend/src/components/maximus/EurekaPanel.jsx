@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
+import { WS_ENDPOINTS } from "@/config/api";
 import logger from "@/utils/logger";
 import { formatDateTime } from "@/utils/dateHelpers";
 import { useAPVStream } from "../../hooks/useAPVStream";
@@ -146,7 +147,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
     const connect = () => {
       try {
-        ws = new WebSocket("ws://34.148.161.131:8000/ws/wargaming");
+        ws = new WebSocket(WS_ENDPOINTS.wargaming);
         ws.onopen = () => logger.info("[Eureka] WebSocket connected");
         ws.onmessage = (event) => {
           const msg = JSON.parse(event.data);

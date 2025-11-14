@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
 import { useDecisionSubmit } from '../hooks/useDecisionSubmit';
 import styles from './DecisionPanel.module.css';
@@ -30,7 +31,7 @@ const DecisionPanel = ({ review, apvSelected, onSuccess }) => {
       if (onSuccess) onSuccess();
       setJustification('');
     } catch (err) {
-      console.error('Decision failed:', err);
+      logger.error('Decision failed:', err);
     }
   };
 

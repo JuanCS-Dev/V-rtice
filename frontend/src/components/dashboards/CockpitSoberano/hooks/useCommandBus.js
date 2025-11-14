@@ -8,8 +8,11 @@
  */
 
 import { useState, useCallback } from 'react';
+import logger from "@/utils/logger";
 import axios from 'axios';
+import logger from "@/utils/logger";
 import { API_ENDPOINTS } from '@/config/api';
+import logger from "@/utils/logger";
 
 const API_URL = API_ENDPOINTS.commandBus;
 
@@ -80,7 +83,7 @@ export const useCommandBus = () => {
       const response = await axios.get(`${API_URL}/commands/${commandId}`);
       return response.data;
     } catch (err) {
-      console.error('[CommandBus] Failed to get status:', err);
+      logger.error('[CommandBus] Failed to get status:', err);
       throw err;
     }
   }, []);

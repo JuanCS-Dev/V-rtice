@@ -29,7 +29,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import logger from "@/utils/logger";
+import { WS_ENDPOINTS } from '@/config/api';
+import logger from "@/utils/logger";
 import styles from './HITLDecisionConsole.module.css';
+import logger from "@/utils/logger";
 
 /**
  * Priority levels with tactical color coding
@@ -93,7 +97,7 @@ const HITLDecisionConsole = () => {
       setPendingDecisions(data || []);
       setError(null);
     } catch (err) {
-      console.error('Failed to fetch pending decisions:', err);
+      logger.error('Failed to fetch pending decisions:', err);
       setError(err.message);
     }
   }, [filterPriority]);
@@ -109,7 +113,7 @@ const HITLDecisionConsole = () => {
       const data = await response.json();
       setStats(data);
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      logger.error('Failed to fetch stats:', err);
     }
   }, []);
 
@@ -118,7 +122,7 @@ const HITLDecisionConsole = () => {
    */
   useEffect(() => {
     const username = localStorage.getItem('hitl_username') || 'analyst';
-    const ws = new WebSocket(`ws://34.148.161.131:8000/ws/${username}`);
+    const ws = new WebSocket(`${WS_ENDPOINTS.hitl}/${username}`);
 
     ws.onopen = () => {
       console.log('🔗 WebSocket connected');
@@ -142,7 +146,7 @@ const HITLDecisionConsole = () => {
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      logger.error('WebSocket error:', error);
       setWsConnected(false);
     };
 
@@ -238,7 +242,7 @@ const HITLDecisionConsole = () => {
       setDecisionNotes('');
       setShowApprovalModal(false);
     } catch (err) {
-      console.error('Failed to approve decision:', err);
+      logger.error('Failed to approve decision:', err);
       alert(`Failed to approve: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -277,7 +281,7 @@ const HITLDecisionConsole = () => {
       setRejectionReason('');
       setShowRejectionModal(false);
     } catch (err) {
-      console.error('Failed to reject decision:', err);
+      logger.error('Failed to reject decision:', err);
       alert(`Failed to reject: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -312,7 +316,7 @@ const HITLDecisionConsole = () => {
       setSelectedDecision(null);
       setDecisionNotes('');
     } catch (err) {
-      console.error('Failed to escalate decision:', err);
+      logger.error('Failed to escalate decision:', err);
       alert(`Failed to escalate: ${err.message}`);
     } finally {
       setIsSubmitting(false);

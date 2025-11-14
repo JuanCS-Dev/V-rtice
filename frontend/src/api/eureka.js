@@ -1,4 +1,5 @@
 import { ServiceEndpoints } from '../config/endpoints';
+import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * 🧬 EUREKA ML METRICS API CLIENT
@@ -83,7 +84,7 @@ const withRetry = async (fn, maxRetries = MAX_RETRIES) => {
       if (attempt === maxRetries - 1) break;
 
       const delay = getRetryDelay(attempt);
-      console.warn(
+      logger.warn(
         `🔄 Eureka API retry ${attempt + 1}/${maxRetries} after ${delay}ms`,
         error.message
       );
