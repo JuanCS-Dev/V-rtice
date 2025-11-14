@@ -98,9 +98,128 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("vertice_auth_token");
     localStorage.removeItem("vertice_user");
     localStorage.removeItem("vertice_token_expiry");
+    localStorage.removeItem("vertice_refresh_token");
     setToken(null);
     setUser(null);
+
+    // Clear refresh timer
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
   };
+
+  /**
+   * Setup auto-refresh timer
+   * Refreshes token 5 minutes before expiry (Boris Cherny pattern)
+   */
+  const scheduleTokenRefresh = useCallback((expiresIn) => {
+    // Clear existing timer
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+
+    // Schedule refresh 5 minutes (300s) before expiry
+    const refreshDelay = Math.max((expiresIn - 300) * 1000, 60000); // Min 1 minute
+
+    logger.info(
+      `Token refresh scheduled in ${Math.floor(refreshDelay / 1000)}s`,
+    );
+
+    refreshTimerRef.current = setTimeout(async () => {
+      logger.info("Auto-refresh timer triggered");
+      await refreshAuthToken();
+    }, refreshDelay);
+  }, []);
+
+  /**
+   * Refresh authentication token
+   * Boris Cherny Pattern: Idempotent, concurrency-safe
+   */
+  const refreshAuthToken = useCallback(async () => {
+    // Prevent concurrent refreshes
+    if (isRefreshingRef.current) {
+      logger.info("Token refresh already in progress");
+      return false;
+    }
+
+    isRefreshingRef.current = true;
+
+    try {
+      const refreshToken = localStorage.getItem("vertice_refresh_token");
+
+      if (!refreshToken) {
+        logger.warn("No refresh token available");
+        isRefreshingRef.current = false;
+        return false;
+      }
+
+      const AUTH_SERVICE_URL =
+        import.meta.env.VITE_AUTH_SERVICE_URL || API_BASE_URL;
+
+      logger.info("Attempting token refresh...");
+      const response = await fetch(`${AUTH_SERVICE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (!response.ok) {
+        logger.error("Token refresh failed:", response.status);
+        clearAuthData();
+        isRefreshingRef.current = false;
+        return false;
+      }
+
+      const data = await response.json();
+
+      // Update token and expiry
+      const newToken = data.access_token;
+      const expiresIn = data.expires_in || 3600;
+
+      localStorage.setItem("vertice_auth_token", newToken);
+
+      const expiryDate = new Date();
+      expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
+      localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+
+      // Update refresh token if provided
+      if (data.refresh_token) {
+        localStorage.setItem("vertice_refresh_token", data.refresh_token);
+      }
+
+      setToken(newToken);
+
+      // Schedule next refresh
+      scheduleTokenRefresh(expiresIn);
+
+      logger.info("Token refreshed successfully");
+      isRefreshingRef.current = false;
+      return true;
+    } catch (error) {
+      logger.error("Token refresh error:", error);
+      clearAuthData();
+      isRefreshingRef.current = false;
+      return false;
+    }
+  }, [scheduleTokenRefresh]);
+
+  /**
+   * Register refresh handler with API client on mount
+   * Boris Cherny Pattern: Loose coupling via dependency injection
+   */
+  useEffect(() => {
+    setTokenRefreshHandler(refreshAuthToken);
+
+    return () => {
+      setTokenRefreshHandler(null);
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, [refreshAuthToken]);
 
   /**
    * Login usando Google OAuth2
@@ -124,15 +243,21 @@ export const AuthProvider = ({ children }) => {
         };
 
         const authToken = `ya29.mock_token_for_${email}`;
+        const mockRefreshToken = `refresh.mock_${email}`;
+        const expiresIn = 3600; // 1 hour
         const expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 1);
 
         localStorage.setItem("vertice_auth_token", authToken);
         localStorage.setItem("vertice_user", JSON.stringify(userData));
         localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+        localStorage.setItem("vertice_refresh_token", mockRefreshToken);
 
         setToken(authToken);
         setUser(userData);
+
+        // Schedule automatic token refresh
+        scheduleTokenRefresh(expiresIn);
 
         return { success: true, user: userData };
       }
@@ -173,17 +298,26 @@ export const AuthProvider = ({ children }) => {
       };
 
       const authToken = data.access_token;
+      const expiresIn = data.expires_in || 3600;
       const expiryDate = new Date();
-      expiryDate.setSeconds(
-        expiryDate.getSeconds() + (data.expires_in || 3600),
-      );
+      expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
 
       localStorage.setItem("vertice_auth_token", authToken);
       localStorage.setItem("vertice_user", JSON.stringify(userData));
       localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
 
+      // Store refresh token if provided
+      if (data.refresh_token) {
+        localStorage.setItem("vertice_refresh_token", data.refresh_token);
+      }
+
       setToken(authToken);
       setUser(userData);
+
+      // Schedule automatic token refresh
+      scheduleTokenRefresh(expiresIn);
+
+      logger.info("Login successful, token refresh scheduled");
 
       return { success: true, user: userData };
     } catch (error) {
