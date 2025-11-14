@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -165,7 +165,7 @@ func runStreamKafka(cmd *cobra.Command, args []string) error {
 		} else {
 			// Pretty formatted output
 			timestamp := msg.Timestamp.AsTime().Format("15:04:05.000")
-			severityIcon := getSeverityIcon(msg.Severity)
+			severityIcon := getSeverityIcon(int(msg.Severity))
 
 			fmt.Printf("[%s] %s %s (partition:%d offset:%d)\n",
 				timestamp,
@@ -457,4 +457,16 @@ func init() {
 
 	streamCmd.AddCommand(streamTopicInfoCmd)
 	streamTopicInfoCmd.Flags().StringVar(&streamServer, "server", "localhost:50053", "Kafka proxy gRPC server")
+}
+
+// TODO: Implement severity icon helper
+func getSeverityIcon(severity int) string {
+	if severity >= 8 {
+		return "🔴"
+	} else if severity >= 5 {
+		return "🟠"
+	} else if severity >= 3 {
+		return "🟡"
+	}
+	return "🟢"
 }

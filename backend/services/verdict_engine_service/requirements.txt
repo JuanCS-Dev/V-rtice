@@ -5,6 +5,7 @@ pydantic>=2.10.6
 pydantic-settings>=2.7.1
 httpx>=0.28.1
 python-dotenv>=1.0.0
+asyncpg>=0.29.0
 
 
 # Constitutional v3.0 dependencies

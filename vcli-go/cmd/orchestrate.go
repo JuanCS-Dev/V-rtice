@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -203,8 +203,8 @@ var (
 	orchestrateToken string
 
 	// Offensive flags
-	offensiveTarget        string
-	offensiveTargetType    string
+	orchestrateTarget        string
+	orchestrateTargetType    string
 	offensiveReconScope    string
 	offensiveEnableOSINT   bool
 	offensiveEnableVulnScan bool
@@ -281,8 +281,8 @@ func init() {
 	orchestrateCmd.PersistentFlags().StringVar(&orchestrateToken, "token", "", "Authentication token")
 
 	// Offensive: Assess Target flags
-	assessTargetCmd.Flags().StringVar(&offensiveTarget, "target", "", "Target IP, domain, or CIDR (required)")
-	assessTargetCmd.Flags().StringVar(&offensiveTargetType, "type", "ip", "Target type: ip, domain, cidr")
+	assessTargetCmd.Flags().StringVar(&orchestrateTarget, "target", "", "Target IP, domain, or CIDR (required)")
+	assessTargetCmd.Flags().StringVar(&orchestrateTargetType, "type", "ip", "Target type: ip, domain, cidr")
 	assessTargetCmd.Flags().StringVar(&offensiveReconScope, "scope", "standard", "Recon scope: quick, standard, deep")
 	assessTargetCmd.Flags().BoolVar(&offensiveEnableOSINT, "osint", true, "Enable OSINT investigation")
 	assessTargetCmd.Flags().BoolVar(&offensiveEnableVulnScan, "vuln-scan", true, "Enable vulnerability scanning")
@@ -348,8 +348,8 @@ func init() {
 
 func runAssessTarget(cmd *cobra.Command, args []string) error {
 	options := offensive.TargetAssessmentOptions{
-		Target:          offensiveTarget,
-		TargetType:      offensiveTargetType,
+		Target:          orchestrateTarget,
+		TargetType:      orchestrateTargetType,
 		ReconScope:      offensiveReconScope,
 		EnableOSINT:     offensiveEnableOSINT,
 		EnableVulnScan:  offensiveEnableVulnScan,

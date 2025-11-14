@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -492,10 +492,12 @@ func runReconStart(cmd *cobra.Command, args []string) error {
 
 	var params map[string]interface{}
 	if reconParamsFile != "" {
-		var err error
-		params, err = readJSONFile(reconParamsFile)
+		paramsRaw, err := readJSONFile(reconParamsFile)
 		if err != nil {
 			return fmt.Errorf("failed to read params file: %w", err)
+		}
+		if paramsRaw != nil {
+			params = paramsRaw.(map[string]interface{})
 		}
 	}
 
@@ -565,10 +567,12 @@ func runOSINTStart(cmd *cobra.Command, args []string) error {
 
 	var params map[string]interface{}
 	if osintParamsFile != "" {
-		var err error
-		params, err = readJSONFile(osintParamsFile)
+		paramsRaw, err := readJSONFile(osintParamsFile)
 		if err != nil {
 			return fmt.Errorf("failed to read params file: %w", err)
+		}
+		if paramsRaw != nil {
+			params = paramsRaw.(map[string]interface{})
 		}
 	}
 

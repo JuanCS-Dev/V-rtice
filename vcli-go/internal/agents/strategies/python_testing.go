@@ -3,7 +3,10 @@ package strategies
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/verticedev/vcli-go/internal/agents"
 	"github.com/verticedev/vcli-go/internal/agents/language"
@@ -49,13 +52,22 @@ func (s *PythonTestStrategy) RunTests(ctx context.Context, targets []string) (*a
 		Coverage: agents.CoverageResult{},
 	}
 
+	// Create temp directory for test reports
+	tempDir, err := os.MkdirTemp("", "vcli-pytest-*")
+	if err != nil {
+		return result, fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	reportFile := filepath.Join(tempDir, "pytest-report.json")
+
 	for _, target := range targets {
-		// Run pytest with JSON report
-		cmd := exec.CommandContext(ctx, "pytest", "-v", "--json-report", "--json-report-file=/tmp/pytest-report.json", target)
+		// Run pytest with JSON report in temp directory
+		cmd := exec.CommandContext(ctx, "pytest", "-v", "--json-report", fmt.Sprintf("--json-report-file=%s", reportFile), target)
 		output, err := cmd.CombinedOutput()
 
 		// Parse pytest JSON report if available
-		if err := s.parsePytestReport(result); err == nil {
+		if parseErr := s.parsePytestReportFromFile(reportFile, result); parseErr == nil {
 			// Report parsed successfully
 		} else {
 			// Fallback: parse text output
@@ -79,13 +91,22 @@ func (s *PythonTestStrategy) AnalyzeCoverage(ctx context.Context, targets []stri
 		UncoveredFiles: make([]string, 0),
 	}
 
+	// Create temp directory for coverage reports
+	tempDir, err := os.MkdirTemp("", "vcli-coverage-*")
+	if err != nil {
+		return result, fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	coverageFile := filepath.Join(tempDir, "coverage.json")
+
 	for _, target := range targets {
-		// Run pytest with coverage
-		cmd := exec.CommandContext(ctx, "pytest", "--cov=.", "--cov-report=json:/tmp/coverage.json", target)
+		// Run pytest with coverage in temp directory
+		cmd := exec.CommandContext(ctx, "pytest", "--cov=.", fmt.Sprintf("--cov-report=json:%s", coverageFile), target)
 		_, err := cmd.CombinedOutput()
 
-		// Parse coverage JSON
-		if err := s.parseCoverageReport(result); err != nil {
+		// Parse coverage JSON from temp file
+		if parseErr := s.parseCoverageReportFromFile(coverageFile, result); parseErr != nil {
 			// Non-fatal
 			continue
 		}
@@ -99,10 +120,15 @@ func (s *PythonTestStrategy) AnalyzeCoverage(ctx context.Context, targets []stri
 	return result, nil
 }
 
-// parsePytestReport parses pytest JSON report
+// parsePytestReport parses pytest JSON report from /tmp (DEPRECATED - kept for backward compatibility)
 func (s *PythonTestStrategy) parsePytestReport(result *agents.TestResult) error {
-	// Read pytest JSON report
-	data, err := exec.Command("cat", "/tmp/pytest-report.json").Output()
+	return s.parsePytestReportFromFile("/tmp/pytest-report.json", result)
+}
+
+// parsePytestReportFromFile parses pytest JSON report from specified file
+func (s *PythonTestStrategy) parsePytestReportFromFile(filePath string, result *agents.TestResult) error {
+	// Read pytest JSON report from specified path
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
@@ -125,10 +151,15 @@ func (s *PythonTestStrategy) parseTextOutput(output string, result *agents.TestR
 	_ = result
 }
 
-// parseCoverageReport parses coverage.py JSON report
+// parseCoverageReport parses coverage.py JSON report from /tmp (DEPRECATED - kept for backward compatibility)
 func (s *PythonTestStrategy) parseCoverageReport(result *agents.CoverageResult) error {
-	// Read coverage JSON
-	data, err := exec.Command("cat", "/tmp/coverage.json").Output()
+	return s.parseCoverageReportFromFile("/tmp/coverage.json", result)
+}
+
+// parseCoverageReportFromFile parses coverage.py JSON report from specified file
+func (s *PythonTestStrategy) parseCoverageReportFromFile(filePath string, result *agents.CoverageResult) error {
+	// Read coverage JSON from specified path
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}

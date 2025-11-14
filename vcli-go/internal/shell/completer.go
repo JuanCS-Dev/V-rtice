@@ -87,6 +87,54 @@ func (c *Completer) CompleteText(text string) []prompt.Suggest {
 			return c.limitSuggestions(results, 10)
 		}
 
+		// Neuro cortex suggestions
+		if firstWord == "neuro" && len(args) == 2 {
+			results := c.getNeuroSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Behavioral analysis suggestions
+		if firstWord == "behavior" && len(args) == 2 {
+			results := c.getBehaviorSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Intelligence operations suggestions
+		if firstWord == "intops" && len(args) == 2 {
+			results := c.getIntopsSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Offensive security suggestions
+		if firstWord == "offensive" && len(args) == 2 {
+			results := c.getOffensiveSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Immunity suggestions
+		if firstWord == "immunity" && len(args) == 2 {
+			results := c.getImmunitySubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Hunting suggestions
+		if firstWord == "hunting" && len(args) == 2 {
+			results := c.getHuntingSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Streams suggestions
+		if firstWord == "streams" && len(args) == 2 {
+			results := c.getStreamsSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
+		// Specialized suggestions
+		if firstWord == "specialized" && len(args) == 2 {
+			results := c.getSpecializedSubcommands(lastWord)
+			return c.limitSuggestions(results, 10)
+		}
+
 		// Flag suggestions
 		if strings.HasPrefix(lastWord, "-") {
 			results := c.getFlagSuggestions(lastWord)
@@ -144,6 +192,205 @@ func (c *Completer) getOrchestrateCategories(prefix string) []prompt.Suggest {
 		}
 	}
 	return c.filterSuggestions(prefix, orchestrateSuggestions)
+}
+
+// getNeuroSubcommands returns neuro cortex suggestions
+func (c *Completer) getNeuroSubcommands(prefix string) []prompt.Suggest {
+	var neuroSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "neuro ") {
+			neuroSuggestions = append(neuroSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, neuroSuggestions)
+}
+
+// getBehaviorSubcommands returns behavioral analysis suggestions
+func (c *Completer) getBehaviorSubcommands(prefix string) []prompt.Suggest {
+	var behaviorSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "behavior ") {
+			behaviorSuggestions = append(behaviorSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, behaviorSuggestions)
+}
+
+// getIntopsSubcommands returns intelligence operations suggestions
+func (c *Completer) getIntopsSubcommands(prefix string) []prompt.Suggest {
+	var intopsSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "intops ") {
+			intopsSuggestions = append(intopsSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, intopsSuggestions)
+}
+
+// getOffensiveSubcommands returns offensive security suggestions
+func (c *Completer) getOffensiveSubcommands(prefix string) []prompt.Suggest {
+	var offensiveSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "offensive ") {
+			offensiveSuggestions = append(offensiveSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, offensiveSuggestions)
+}
+
+// getImmunitySubcommands returns immunity suggestions
+func (c *Completer) getImmunitySubcommands(prefix string) []prompt.Suggest {
+	var immunitySuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "immunity ") {
+			immunitySuggestions = append(immunitySuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, immunitySuggestions)
+}
+
+// getHuntingSubcommands returns hunting suggestions
+func (c *Completer) getHuntingSubcommands(prefix string) []prompt.Suggest {
+	var huntingSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "hunting ") {
+			huntingSuggestions = append(huntingSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, huntingSuggestions)
+}
+
+// getStreamsSubcommands returns streams suggestions
+func (c *Completer) getStreamsSubcommands(prefix string) []prompt.Suggest {
+	var streamsSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "streams ") {
+			streamsSuggestions = append(streamsSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, streamsSuggestions)
+}
+
+// getSpecializedSubcommands returns specialized suggestions
+func (c *Completer) getSpecializedSubcommands(prefix string) []prompt.Suggest {
+	var specializedSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "specialized ") {
+			specializedSuggestions = append(specializedSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, specializedSuggestions)
+}
+
+// SHELL-9 command helpers
+func (c *Completer) getMabaSubcommands(prefix string) []prompt.Suggest {
+	var mabaSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "maba ") {
+			mabaSuggestions = append(mabaSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, mabaSuggestions)
+}
+
+func (c *Completer) getNisSubcommands(prefix string) []prompt.Suggest {
+	var nisSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "nis ") {
+			nisSuggestions = append(nisSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, nisSuggestions)
+}
+
+func (c *Completer) getRteSubcommands(prefix string) []prompt.Suggest {
+	var rteSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "rte ") {
+			rteSuggestions = append(rteSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, rteSuggestions)
+}
+
+func (c *Completer) getArchitectSubcommands(prefix string) []prompt.Suggest {
+	var architectSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "architect ") {
+			architectSuggestions = append(architectSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, architectSuggestions)
+}
+
+func (c *Completer) getPipelineSubcommands(prefix string) []prompt.Suggest {
+	var pipelineSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "pipeline ") {
+			pipelineSuggestions = append(pipelineSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, pipelineSuggestions)
+}
+
+func (c *Completer) getRegistrySubcommands(prefix string) []prompt.Suggest {
+	var registrySuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "registry ") {
+			registrySuggestions = append(registrySuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, registrySuggestions)
+}
+
+func (c *Completer) getEdgeSubcommands(prefix string) []prompt.Suggest {
+	var edgeSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "edge ") {
+			edgeSuggestions = append(edgeSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, edgeSuggestions)
+}
+
+func (c *Completer) getIntegrationSubcommands(prefix string) []prompt.Suggest {
+	var integrationSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "integration ") {
+			integrationSuggestions = append(integrationSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, integrationSuggestions)
+}
+
+func (c *Completer) getHomeostasisSubcommands(prefix string) []prompt.Suggest {
+	var homeostasisSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "homeostasis ") {
+			homeostasisSuggestions = append(homeostasisSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, homeostasisSuggestions)
+}
+
+func (c *Completer) getPurpleSubcommands(prefix string) []prompt.Suggest {
+	var purpleSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "purple ") {
+			purpleSuggestions = append(purpleSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, purpleSuggestions)
+}
+
+func (c *Completer) getVulnscanSubcommands(prefix string) []prompt.Suggest {
+	var vulnscanSuggestions []prompt.Suggest
+	for _, s := range c.suggestions {
+		if strings.HasPrefix(s.Text, "vulnscan ") {
+			vulnscanSuggestions = append(vulnscanSuggestions, s)
+		}
+	}
+	return c.filterSuggestions(prefix, vulnscanSuggestions)
 }
 
 // getFlagSuggestions returns flag suggestions
@@ -276,6 +523,153 @@ func (c *Completer) buildSuggestions() {
 		{Text: "narrative info", Description: "Get service info"},
 		{Text: "narrative stats cache", Description: "Cache statistics"},
 		{Text: "narrative stats database", Description: "Database statistics"},
+
+		// Neuro-Inspired System Commands
+		{Text: "neuro auditory listen", Description: "Listen to auditory cortex events"},
+		{Text: "neuro thalamus route", Description: "Route sensory input via thalamus"},
+		{Text: "neuro memory consolidate", Description: "Consolidate threat patterns in memory"},
+		{Text: "neuro cortex plan", Description: "Generate strategic response plan"},
+		{Text: "neuro visual analyze", Description: "Analyze visual feed for threats"},
+		{Text: "neuro somatosensory status", Description: "Check somatosensory sensor status"},
+		{Text: "neuro tegumentar shield", Description: "Activate protective shield for zone"},
+		{Text: "neuro vestibular balance", Description: "Balance system workload"},
+		{Text: "neuro chemical sense", Description: "Sense chemical/bio threats"},
+
+		// Offensive Security Commands
+		{Text: "offensive tools list", Description: "List available offensive tools"},
+		{Text: "offensive c2 deploy", Description: "Deploy C2 infrastructure"},
+		{Text: "offensive social-eng phishing", Description: "Launch phishing campaign"},
+		{Text: "offensive malware develop", Description: "Develop custom malware"},
+		{Text: "offensive wargame start", Description: "Start offensive wargame"},
+		{Text: "offensive gateway status", Description: "Check offensive gateway status"},
+		{Text: "offensive orchestrator plan", Description: "Plan multi-stage attack"},
+
+		// Behavioral Analysis Commands
+		{Text: "behavior analyze --user", Description: "Analyze user behavior patterns"},
+		{Text: "behavior bas detect-anomaly", Description: "Detect behavioral anomalies"},
+		{Text: "behavior mav scan", Description: "Scan for malicious activity vectors"},
+		{Text: "behavior traffic analyze", Description: "Analyze network traffic patterns"},
+		{Text: "behavior fabric status", Description: "Check reactive fabric status"},
+
+		// Intelligence Operations Commands
+		{Text: "intops google search", Description: "Perform Google OSINT search"},
+		{Text: "intops google dork", Description: "Execute Google dork query"},
+		{Text: "intops ip lookup", Description: "Lookup IP intelligence"},
+		{Text: "intops ip geo", Description: "Get IP geolocation"},
+		{Text: "intops sinesp plate", Description: "Lookup vehicle plate (Brazil)"},
+		{Text: "intops sinesp document", Description: "Lookup document (Brazil)"},
+		{Text: "intops ssl check", Description: "Check SSL certificate"},
+		{Text: "intops ssl monitor", Description: "Monitor SSL certificates"},
+		{Text: "intops narrative analyze", Description: "Analyze narrative manipulation"},
+		{Text: "intops narrative detect", Description: "Detect narrative manipulation"},
+
+		// Adaptive Immunity Commands
+		{Text: "immunity core status", Description: "Get immune system status"},
+		{Text: "immunity core activate", Description: "Activate immune response"},
+		{Text: "immunity scan --target", Description: "Run Immunis security scan"},
+		{Text: "immunity vaccine deploy", Description: "Deploy vaccine/patch"},
+		{Text: "immunity vaccine list", Description: "List available vaccines"},
+		{Text: "immunity antibody generate", Description: "Generate antibody response"},
+		{Text: "immunity antibody list", Description: "List active antibodies"},
+
+		// Threat Hunting & Prediction Commands
+		{Text: "hunting apt predict", Description: "Predict APT threats"},
+		{Text: "hunting apt profile", Description: "Profile APT actor"},
+		{Text: "hunting hunt start", Description: "Start threat hunt"},
+		{Text: "hunting hunt results", Description: "Get hunt results"},
+		{Text: "hunting predict --target", Description: "Predict anomalies"},
+		{Text: "hunting surface analyze", Description: "Analyze attack surface"},
+		{Text: "hunting surface map", Description: "Map attack surface"},
+
+		// Kafka Streams Commands
+		{Text: "streams topic list", Description: "List Kafka topics"},
+		{Text: "streams topic create", Description: "Create Kafka topic"},
+		{Text: "streams topic describe", Description: "Describe Kafka topic"},
+		{Text: "streams produce --topic", Description: "Produce message to topic"},
+		{Text: "streams consume --topic", Description: "Consume messages from topic"},
+		{Text: "streams consumer list", Description: "List consumer groups"},
+		{Text: "streams consumer lag", Description: "Check consumer lag"},
+
+		// Specialized Services Commands
+		{Text: "specialized aether --query", Description: "Query distributed consciousness"},
+		{Text: "specialized babel --text", Description: "Multi-language translation"},
+		{Text: "specialized cerberus --tenant", Description: "Multi-head authentication"},
+		{Text: "specialized chimera --query", Description: "Hybrid threat detection"},
+		{Text: "specialized chronos --metric", Description: "Time-series analysis"},
+		{Text: "specialized echo --event", Description: "Event replay / time-travel"},
+		{Text: "specialized hydra --tenant", Description: "Multi-tenancy status"},
+		{Text: "specialized iris --image", Description: "Visual recognition"},
+		{Text: "specialized janus --query", Description: "Bidirectional sync"},
+		{Text: "specialized phoenix status", Description: "Self-healing status"},
+
+		// SHELL-9: MABA Commands
+		{Text: "maba browser navigate", Description: "Navigate to URL autonomously"},
+		{Text: "maba browser extract", Description: "Extract data from webpage"},
+		{Text: "maba browser sessions", Description: "List active browser sessions"},
+		{Text: "maba map query", Description: "Query cognitive map"},
+		{Text: "maba map stats", Description: "Cognitive map statistics"},
+		{Text: "maba tools", Description: "List registered MAXIMUS tools"},
+		{Text: "maba status", Description: "MABA service status"},
+
+		// SHELL-9: NIS Commands
+		{Text: "nis narrative generate", Description: "Generate AI narrative from metrics"},
+		{Text: "nis narrative list", Description: "List recent narratives"},
+		{Text: "nis anomaly detect", Description: "Detect statistical anomalies"},
+		{Text: "nis anomaly baseline", Description: "Show baseline statistics"},
+		{Text: "nis cost status", Description: "Cost tracking status"},
+		{Text: "nis cost history", Description: "Cost history"},
+		{Text: "nis ratelimit", Description: "Rate limit status"},
+		{Text: "nis status", Description: "NIS service status"},
+
+		// SHELL-9: RTE Commands
+		{Text: "rte triage", Description: "Real-time alert triage"},
+		{Text: "rte fusion correlate", Description: "Correlate event data"},
+		{Text: "rte predict", Description: "Fast ML prediction"},
+		{Text: "rte match", Description: "Hyperscan pattern matching"},
+		{Text: "rte playbooks", Description: "List available playbooks"},
+		{Text: "rte status", Description: "RTE service status"},
+
+		// SHELL-9: Architect Commands
+		{Text: "architect analyze", Description: "Analyze platform architecture"},
+		{Text: "architect blueprint", Description: "Generate service blueprint"},
+		{Text: "architect status", Description: "System Architect status"},
+
+		// SHELL-9: Pipeline Commands
+		{Text: "pipeline tataca ingest", Description: "Ingest data from source"},
+		{Text: "pipeline seriema query", Description: "Execute Cypher query"},
+		{Text: "pipeline seriema visualize", Description: "Visualize entity relationships"},
+		{Text: "pipeline bus publish", Description: "Publish command to bus"},
+		{Text: "pipeline bus list", Description: "List command topics"},
+		{Text: "pipeline status", Description: "Pipeline service status"},
+
+		// SHELL-9: Registry Commands
+		{Text: "registry list", Description: "List registered services"},
+		{Text: "registry health", Description: "Check service health"},
+		{Text: "registry status", Description: "Registry service status"},
+
+		// SHELL-9: Edge Commands
+		{Text: "edge deploy", Description: "Deploy edge agent"},
+		{Text: "edge list", Description: "List edge agents"},
+		{Text: "edge status", Description: "Edge service status"},
+
+		// SHELL-9: Integration Commands
+		{Text: "integration list", Description: "List all integrations"},
+		{Text: "integration test", Description: "Test integration"},
+		{Text: "integration status", Description: "Integration service status"},
+
+		// SHELL-9: Homeostasis Commands
+		{Text: "homeostasis status", Description: "Homeostatic status"},
+		{Text: "homeostasis adjust", Description: "Adjust homeostatic parameter"},
+
+		// SHELL-9: Purple Team Commands
+		{Text: "purple exercise", Description: "Run purple team exercise"},
+		{Text: "purple report", Description: "Get exercise report"},
+		{Text: "purple status", Description: "Purple team service status"},
+
+		// SHELL-9: VulnScan Commands
+		{Text: "vulnscan scan", Description: "Scan target for vulnerabilities"},
+		{Text: "vulnscan report", Description: "Get scan report"},
+		{Text: "vulnscan status", Description: "Vulnerability scanner status"},
 	}...)
 
 	// Add Kubernetes commands explicitly

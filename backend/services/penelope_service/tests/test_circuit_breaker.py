@@ -11,8 +11,8 @@ License: Proprietary
 import asyncio
 import time
 
-from core.circuit_breaker import HealingCircuitBreaker
 import pytest
+from core.circuit_breaker import HealingCircuitBreaker
 
 # ============================================================================
 # FIXTURES

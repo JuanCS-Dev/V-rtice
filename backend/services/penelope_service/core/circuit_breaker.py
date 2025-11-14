@@ -15,7 +15,7 @@ import logging
 import time
 from typing import Any
 
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import Counter, Gauge
 
 logger = logging.getLogger(__name__)
 

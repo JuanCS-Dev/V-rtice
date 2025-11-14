@@ -1,0 +1,1442 @@
+[
+  {
+    "name": "active_immune_core",
+    "py_files": 106,
+    "test_files": 458,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 1,
+      "placeholders": 1
+    },
+    "compliance_score": 71.0
+  },
+  {
+    "name": "adaptive_immune_system",
+    "py_files": 77,
+    "test_files": 25,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 2
+    },
+    "compliance_score": 71.0
+  },
+  {
+    "name": "adaptive_immunity_db",
+    "py_files": 2,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "adaptive_immunity_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "adr_core_service",
+    "py_files": 20,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "agent_communication",
+    "py_files": 6,
+    "test_files": 7,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "ai_immune_system",
+    "py_files": 6,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "api_gateway",
+    "py_files": 5,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "atlas_service",
+    "py_files": 2,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "auditory_cortex_service",
+    "py_files": 7,
+    "test_files": 623,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 4
+    },
+    "compliance_score": 67.0
+  },
+  {
+    "name": "auth_service",
+    "py_files": 4,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "autonomous_investigation_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "bas_service",
+    "py_files": 9,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "behavioral-analyzer-service",
+    "py_files": 1,
+    "test_files": 0,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 1,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 58.0
+  },
+  {
+    "name": "c2_orchestration_service",
+    "py_files": 9,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "chemical_sensing_service",
+    "py_files": 5,
+    "test_files": 6,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "cloud_coordinator_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "command_bus_service",
+    "py_files": 10,
+    "test_files": 11,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "cyber_service",
+    "py_files": 2,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "digital_thalamus_service",
+    "py_files": 7,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "domain_service",
+    "py_files": 3,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "edge_agent_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 1
+    },
+    "compliance_score": 73.0
+  },
+  {
+    "name": "ethical_audit_service",
+    "py_files": 6,
+    "test_files": 6,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "google_osint_service",
+    "py_files": 3,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hcl_analyzer_service",
+    "py_files": 4,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hcl_executor_service",
+    "py_files": 5,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hcl_kb_service",
+    "py_files": 5,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hcl_monitor_service",
+    "py_files": 4,
+    "test_files": 23,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hcl_planner_service",
+    "py_files": 5,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hitl_patch_service",
+    "py_files": 7,
+    "test_files": 2,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "homeostatic_regulation",
+    "py_files": 5,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hpc_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "hsas_service",
+    "py_files": 9,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_api_service",
+    "py_files": 3,
+    "test_files": 623,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_bcell_service",
+    "py_files": 4,
+    "test_files": 7,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_cytotoxic_t_service",
+    "py_files": 4,
+    "test_files": 7,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_dendritic_service",
+    "py_files": 4,
+    "test_files": 9,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_helper_t_service",
+    "py_files": 4,
+    "test_files": 9,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_macrophage_service",
+    "py_files": 4,
+    "test_files": 7,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_neutrophil_service",
+    "py_files": 4,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "immunis_treg_service",
+    "py_files": 4,
+    "test_files": 587,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "ip_intelligence_service",
+    "py_files": 6,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "maba_service",
+    "py_files": 50,
+    "test_files": 17,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": true,
+    "has_constitutional_tracing": true,
+    "has_health_checks": true,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 100.0
+  },
+  {
+    "name": "malware_analysis_service",
+    "py_files": 3,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "mav-detection-service",
+    "py_files": 1,
+    "test_files": 0,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 3,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 54.0
+  },
+  {
+    "name": "maximus_core_service",
+    "py_files": 326,
+    "test_files": 4742,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 4
+    },
+    "compliance_score": 67.0
+  },
+  {
+    "name": "maximus_dlq_monitor_service",
+    "py_files": 1,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "maximus_eureka",
+    "py_files": 48,
+    "test_files": 41,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 1,
+      "placeholders": 2
+    },
+    "compliance_score": 69.0
+  },
+  {
+    "name": "maximus_integration_service",
+    "py_files": 2,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "maximus_oraculo",
+    "py_files": 28,
+    "test_files": 22,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 2,
+      "placeholders": 0
+    },
+    "compliance_score": 71.0
+  },
+  {
+    "name": "maximus_oraculo_v2",
+    "py_files": 5,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "maximus_orchestrator_service",
+    "py_files": 2,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "maximus_predict",
+    "py_files": 4,
+    "test_files": 2066,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "memory_consolidation_service",
+    "py_files": 5,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "mock_vulnerable_apps",
+    "py_files": 7,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "mvp_service",
+    "py_files": 50,
+    "test_files": 17,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": true,
+    "has_constitutional_tracing": true,
+    "has_health_checks": true,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 100.0
+  },
+  {
+    "name": "narrative_analysis_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "narrative_filter_service",
+    "py_files": 15,
+    "test_files": 15,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "narrative_manipulation_filter",
+    "py_files": 48,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "network_monitor_service",
+    "py_files": 3,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "network_recon_service",
+    "py_files": 9,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "neuromodulation_service",
+    "py_files": 8,
+    "test_files": 622,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "nmap_service",
+    "py_files": 3,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "offensive_gateway",
+    "py_files": 7,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "offensive_orchestrator_service",
+    "py_files": 26,
+    "test_files": 22,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "offensive_tools_service",
+    "py_files": 2,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "osint_service",
+    "py_files": 45,
+    "test_files": 662,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 1,
+      "placeholders": 0
+    },
+    "compliance_score": 73.0
+  },
+  {
+    "name": "penelope_service",
+    "py_files": 52,
+    "test_files": 24,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": true,
+    "has_constitutional_tracing": true,
+    "has_health_checks": true,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 100.0
+  },
+  {
+    "name": "predictive_threat_hunting_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "prefrontal_cortex_service",
+    "py_files": 6,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "purple_team",
+    "py_files": 3,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "reactive_fabric_analysis",
+    "py_files": 7,
+    "test_files": 8,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "reactive_fabric_core",
+    "py_files": 43,
+    "test_files": 28,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "reflex_triage_engine",
+    "py_files": 7,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "rte_service",
+    "py_files": 7,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "seriema_graph",
+    "py_files": 7,
+    "test_files": 252,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "sinesp_service",
+    "py_files": 7,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "social_eng_service",
+    "py_files": 6,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "somatosensory_service",
+    "py_files": 7,
+    "test_files": 627,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "ssl_monitor_service",
+    "py_files": 2,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "strategic_planning_service",
+    "py_files": 5,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "system_architect_service",
+    "py_files": 12,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "tataca_ingestion",
+    "py_files": 14,
+    "test_files": 41,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "tegumentar_service",
+    "py_files": 4,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "threat_intel_bridge",
+    "py_files": 2,
+    "test_files": 2,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "threat_intel_service",
+    "py_files": 3,
+    "test_files": 3,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "traffic-analyzer-service",
+    "py_files": 1,
+    "test_files": 0,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 1,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 58.0
+  },
+  {
+    "name": "verdict_engine_service",
+    "py_files": 9,
+    "test_files": 10,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 2,
+      "placeholders": 0
+    },
+    "compliance_score": 71.0
+  },
+  {
+    "name": "vertice_register",
+    "py_files": 7,
+    "test_files": 0,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 60.0
+  },
+  {
+    "name": "vertice_registry_sidecar",
+    "py_files": 1,
+    "test_files": 0,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 60.0
+  },
+  {
+    "name": "vestibular_service",
+    "py_files": 5,
+    "test_files": 625,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "visual_cortex_service",
+    "py_files": 7,
+    "test_files": 623,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 4
+    },
+    "compliance_score": 67.0
+  },
+  {
+    "name": "vuln_intel_service",
+    "py_files": 7,
+    "test_files": 4,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "vuln_scanner_service",
+    "py_files": 9,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "wargaming_crisol",
+    "py_files": 29,
+    "test_files": 18,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  },
+  {
+    "name": "web_attack_service",
+    "py_files": 8,
+    "test_files": 5,
+    "has_dockerfile": true,
+    "has_constitutional_metrics": false,
+    "has_constitutional_tracing": false,
+    "has_health_checks": false,
+    "violations_p1": {
+      "todos": 0,
+      "not_impl": 0,
+      "placeholders": 0
+    },
+    "compliance_score": 75.0
+  }
+]

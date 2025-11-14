@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/plugins"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,43 +44,23 @@ func NewPlugin() plugins.Plugin {
 	}
 }
 
-// Metadata returns plugin metadata
-func (k *KubernetesPlugin) Metadata() plugins.Metadata {
-	return plugins.Metadata{
-		Name:        "kubernetes",
-		Version:     "1.0.0",
-		Description: "Kubernetes cluster management and monitoring",
-		Author:      "vCLI Team",
-		License:     "MIT",
-		Homepage:    "https://github.com/verticedev/vcli-go/plugins/kubernetes",
-		Tags:        []string{"kubernetes", "k8s", "orchestration", "containers"},
-		Dependencies: []plugins.Dependency{
-			{
-				Name:       "kubectl",
-				MinVersion: "1.28.0",
-				Optional:   false,
-			},
-		},
-		MinVCLIVersion: "0.1.0",
-		LoadTime:       time.Now(),
-	}
+// Name returns plugin name
+func (k *KubernetesPlugin) Name() string {
+	return "kubernetes"
 }
 
-// Initialize initializes the plugin and connects to Kubernetes cluster
-func (k *KubernetesPlugin) Initialize(ctx context.Context, config map[string]interface{}) error {
-	// Load configuration
-	if kubeconfig, ok := config["kubeconfig"].(string); ok {
-		k.kubeconfig = kubeconfig
-	}
+// Version returns plugin version
+func (k *KubernetesPlugin) Version() string {
+	return "1.0.0"
+}
 
-	if namespace, ok := config["namespace"].(string); ok {
-		k.namespace = namespace
-	}
+// Description returns plugin description
+func (k *KubernetesPlugin) Description() string {
+	return "Kubernetes cluster management and monitoring"
+}
 
-	if contextName, ok := config["context"].(string); ok {
-		k.context = contextName
-	}
-
+// Init initializes the plugin
+func (k *KubernetesPlugin) Init() error {
 	// Build Kubernetes client configuration
 	var err error
 	k.config, err = k.buildConfig()
@@ -102,6 +79,7 @@ func (k *KubernetesPlugin) Initialize(ctx context.Context, config map[string]int
 	}
 
 	// Verify connectivity by listing namespaces
+	ctx := context.Background()
 	_, err = k.clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{Limit: 1})
 	if err != nil {
 		k.lastError = fmt.Errorf("failed to connect to K8s cluster: %w", err)
@@ -114,6 +92,109 @@ func (k *KubernetesPlugin) Initialize(ctx context.Context, config map[string]int
 	k.lastError = nil
 
 	return nil
+}
+
+// Execute executes plugin commands
+func (k *KubernetesPlugin) Execute(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("no command specified")
+	}
+
+	switch args[0] {
+	case "pods":
+		return k.listPods()
+	case "nodes":
+		return k.listNodes()
+	case "deployments":
+		return k.listDeployments()
+	case "services":
+		return k.listServices()
+	default:
+		return fmt.Errorf("unknown command: %s", args[0])
+	}
+}
+
+// Helper functions for Execute command
+
+func (k *KubernetesPlugin) listPods() error {
+	if !k.initialized {
+		return fmt.Errorf("plugin not initialized")
+	}
+
+	ctx := context.Background()
+	pods, err := k.clientset.CoreV1().Pods(k.namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list pods: %w", err)
+	}
+
+	fmt.Printf("Pods in namespace %s:\n", k.namespace)
+	for _, pod := range pods.Items {
+		fmt.Printf("  - %s (%s)\n", pod.Name, pod.Status.Phase)
+	}
+	return nil
+}
+
+func (k *KubernetesPlugin) listNodes() error {
+	if !k.initialized {
+		return fmt.Errorf("plugin not initialized")
+	}
+
+	ctx := context.Background()
+	nodes, err := k.clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list nodes: %w", err)
+	}
+
+	fmt.Println("Cluster Nodes:")
+	for _, node := range nodes.Items {
+		fmt.Printf("  - %s (Ready: %v)\n", node.Name, isNodeReady(&node))
+	}
+	return nil
+}
+
+func (k *KubernetesPlugin) listDeployments() error {
+	if !k.initialized {
+		return fmt.Errorf("plugin not initialized")
+	}
+
+	ctx := context.Background()
+	deployments, err := k.clientset.AppsV1().Deployments(k.namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list deployments: %w", err)
+	}
+
+	fmt.Printf("Deployments in namespace %s:\n", k.namespace)
+	for _, dep := range deployments.Items {
+		fmt.Printf("  - %s (%d/%d replicas)\n", dep.Name, dep.Status.ReadyReplicas, dep.Status.Replicas)
+	}
+	return nil
+}
+
+func (k *KubernetesPlugin) listServices() error {
+	if !k.initialized {
+		return fmt.Errorf("plugin not initialized")
+	}
+
+	ctx := context.Background()
+	services, err := k.clientset.CoreV1().Services(k.namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list services: %w", err)
+	}
+
+	fmt.Printf("Services in namespace %s:\n", k.namespace)
+	for _, svc := range services.Items {
+		fmt.Printf("  - %s (%s)\n", svc.Name, svc.Spec.Type)
+	}
+	return nil
+}
+
+func isNodeReady(node *corev1.Node) bool {
+	for _, cond := range node.Status.Conditions {
+		if cond.Type == corev1.NodeReady {
+			return cond.Status == corev1.ConditionTrue
+		}
+	}
+	return false
 }
 
 // buildConfig builds Kubernetes client configuration
@@ -138,6 +219,14 @@ func (k *KubernetesPlugin) buildConfig() (*rest.Config, error) {
 	return nil, fmt.Errorf("no kubeconfig found")
 }
 
+// NOTE: Advanced plugin features commented out - not yet supported by plugin system
+// These will be re-enabled when the plugin system adds support for:
+// - plugins.Command type
+// - plugins.Capability type
+// - plugins.HealthStatus.LastCheck and .Metrics fields
+// - View system
+
+/*
 // Start starts the plugin
 func (k *KubernetesPlugin) Start(ctx context.Context) error {
 	if !k.initialized {
@@ -226,6 +315,10 @@ func (k *KubernetesPlugin) Capabilities() []plugins.Capability {
 		plugins.CapabilityCLI,         // Provide CLI commands
 	}
 }
+*/
+
+/*
+// COMMENTED: These functions support advanced features not yet in plugin system
 
 // monitorCluster monitors the Kubernetes cluster and updates metrics
 func (k *KubernetesPlugin) monitorCluster(ctx context.Context) {
@@ -674,6 +767,7 @@ func (kv *KubernetesView) Blur() {
 func (kv *KubernetesView) IsFocused() bool {
 	return kv.focused
 }
+*/
 
 // This allows the plugin to be built as a .so file:
 // go build -buildmode=plugin -o kubernetes.so kubernetes.go

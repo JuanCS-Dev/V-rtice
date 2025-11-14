@@ -14,13 +14,13 @@ COVERAGE_FILE=coverage.out
 build:
 	@echo "🔨 Building $(BINARY_NAME)..."
 	@mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/$(BINARY_NAME) -ldflags="-X main.Version=$(VERSION)" ./cmd
+	go build -o $(BUILD_DIR)/$(BINARY_NAME) -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION)" .
 	@echo "✅ Built: $(BUILD_DIR)/$(BINARY_NAME)"
 
 ## install: Install the binary to $GOPATH/bin
 install:
 	@echo "📦 Installing $(BINARY_NAME)..."
-	go install -ldflags="-X main.Version=$(VERSION)" ./cmd/root.go
+	go install -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION)" .
 	@echo "✅ Installed to $$(go env GOPATH)/bin/$(BINARY_NAME)"
 
 ## test: Run all tests
@@ -133,11 +133,11 @@ ci: lint test security
 release:
 	@echo "🚀 Building release binaries..."
 	@mkdir -p $(BUILD_DIR)/release
-	GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-linux-amd64 -ldflags="-X main.Version=$(VERSION) -s -w" ./cmd/root.go
-	GOOS=linux GOARCH=arm64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-linux-arm64 -ldflags="-X main.Version=$(VERSION) -s -w" ./cmd/root.go
-	GOOS=darwin GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-darwin-amd64 -ldflags="-X main.Version=$(VERSION) -s -w" ./cmd/root.go
-	GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-darwin-arm64 -ldflags="-X main.Version=$(VERSION) -s -w" ./cmd/root.go
-	GOOS=windows GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-windows-amd64.exe -ldflags="-X main.Version=$(VERSION) -s -w" ./cmd/root.go
+	GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-linux-amd64 -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION) -s -w" .
+	GOOS=linux GOARCH=arm64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-linux-arm64 -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION) -s -w" .
+	GOOS=darwin GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-darwin-amd64 -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION) -s -w" .
+	GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-darwin-arm64 -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION) -s -w" .
+	GOOS=windows GOARCH=amd64 go build -o $(BUILD_DIR)/release/$(BINARY_NAME)-windows-amd64.exe -ldflags="-X github.com/verticedev/vcli-go/cmd.version=$(VERSION) -s -w" .
 	@echo "✅ Release binaries built in $(BUILD_DIR)/release/"
 	@ls -lh $(BUILD_DIR)/release/
 

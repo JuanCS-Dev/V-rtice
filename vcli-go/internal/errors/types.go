@@ -33,6 +33,9 @@ const (
 	ErrorTypeClient ErrorType = "CLIENT"
 	ErrorTypeConfig ErrorType = "CONFIG"
 	ErrorTypeInput  ErrorType = "INPUT"
+
+	// Circuit breaker errors
+	ErrorTypeCircuitOpen ErrorType = "CIRCUIT_OPEN"
 )
 
 // VCLIError represents a structured error with context
@@ -197,4 +200,26 @@ func NewConfigError(message string) *VCLIError {
 		Message:   message,
 		Retryable: false,
 	}
+}
+
+// NewHTTPError creates an HTTP error with status code
+func NewHTTPError(statusCode int, body string) *VCLIError {
+	return &VCLIError{
+		Type:       ErrorTypeServer,
+		Message:    fmt.Sprintf("HTTP %d", statusCode),
+		Details:    body,
+		StatusCode: statusCode,
+		Retryable:  statusCode >= 500 || statusCode == 429,
+	}
+}
+
+// IsRetryable checks if an error can be retried
+func IsRetryable(err error) bool {
+	if err == nil {
+		return false
+	}
+	if vcliErr, ok := err.(*VCLIError); ok {
+		return vcliErr.Retryable
+	}
+	return false
 }

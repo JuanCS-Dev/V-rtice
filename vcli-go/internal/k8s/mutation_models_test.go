@@ -112,15 +112,21 @@ opts.Replicas = 3
 // ========================================================================
 
 func TestNewPatchOptions(t *testing.T) {
-	patchData := []byte(`{"spec":{"replicas":3}}`)
-	opts := NewPatchOptions(PatchTypeMerge, patchData)
+	opts := NewPatchOptions()
 
 	assert.NotNil(t, opts)
-	assert.Equal(t, PatchTypeMerge, opts.PatchType)
-	assert.Equal(t, patchData, opts.Patch)
+	assert.Equal(t, PatchTypeStrategic, opts.PatchType) // default is Strategic
+	assert.Nil(t, opts.Patch)
 	assert.Equal(t, DryRunNone, opts.DryRun)
 	assert.False(t, opts.Force)
 	assert.Equal(t, 30*time.Second, opts.Timeout)
+
+	// Test setting values
+	patchData := []byte(`{"spec":{"replicas":3}}`)
+	opts.PatchType = PatchTypeMerge
+	opts.Patch = patchData
+	assert.Equal(t, PatchTypeMerge, opts.PatchType)
+	assert.Equal(t, patchData, opts.Patch)
 }
 
 func TestPatchOptions_AllPatchTypes(t *testing.T) {
@@ -135,7 +141,9 @@ func TestPatchOptions_AllPatchTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			opts := NewPatchOptions(tt.patchType, []byte("{}"))
+			opts := NewPatchOptions()
+			opts.PatchType = tt.patchType
+			opts.Patch = []byte("{}")
 			assert.Equal(t, tt.patchType, opts.PatchType)
 		})
 	}
@@ -418,32 +426,37 @@ func TestApplyResult(t *testing.T) {
 
 func TestDeleteResult(t *testing.T) {
 	result := &DeleteResult{
-		ResourceIdentifier: "Pod/test-pod",
-		Success:            true,
-		Message:            "deleted successfully",
-		DryRun:             false,
+		Name:      "test-pod",
+		Namespace: "default",
+		Kind:      "Pod",
+		Status:    DeleteStatusDeleted,
+		Message:   "deleted successfully",
+		DryRun:    false,
 	}
 
-	assert.Equal(t, "Pod/test-pod", result.ResourceIdentifier)
-	assert.True(t, result.Success)
+	assert.Equal(t, "test-pod", result.Name)
+	assert.Equal(t, "Pod", result.Kind)
+	assert.Equal(t, DeleteStatusDeleted, result.Status)
 	assert.NotEmpty(t, result.Message)
 }
 
 func TestScaleResult(t *testing.T) {
 	result := &ScaleResult{
-		ResourceIdentifier: "Deployment/nginx",
-		PreviousReplicas:   2,
-		DesiredReplicas:    5,
-		CurrentReplicas:    5,
-		ReadyReplicas:      5,
-		Success:            true,
-		Message:            "scaled successfully",
+		Kind:             "Deployment",
+		Name:             "nginx",
+		Namespace:        "default",
+		PreviousReplicas: 2,
+		DesiredReplicas:  5,
+		CurrentReplicas:  5,
+		Status:           ScaleStatusScaled,
+		Message:          "scaled successfully",
 	}
 
-	assert.Equal(t, "Deployment/nginx", result.ResourceIdentifier)
+	assert.Equal(t, "Deployment", result.Kind)
+	assert.Equal(t, "nginx", result.Name)
 	assert.Equal(t, int32(2), result.PreviousReplicas)
 	assert.Equal(t, int32(5), result.DesiredReplicas)
-	assert.True(t, result.Success)
+	assert.Equal(t, ScaleStatusScaled, result.Status)
 }
 
 func TestPatchResult(t *testing.T) {
@@ -451,16 +464,18 @@ func TestPatchResult(t *testing.T) {
 	obj.SetName("test-pod")
 
 	result := &PatchResult{
-		Object:             obj,
-		ResourceIdentifier: "Pod/test-pod",
-		Success:            true,
-		Message:            "patched successfully",
-		DryRun:             false,
+		Object:    obj,
+		PatchType: PatchTypeMerge,
+		Applied:   true,
+		Message:   "patched successfully",
+		Duration:  100 * time.Millisecond,
+		DryRun:    false,
 	}
 
 	assert.NotNil(t, result.Object)
-	assert.True(t, result.Success)
-	assert.Equal(t, "Pod/test-pod", result.ResourceIdentifier)
+	assert.True(t, result.Applied)
+	assert.Equal(t, PatchTypeMerge, result.PatchType)
+	assert.Equal(t, "test-pod", result.Object.GetName())
 }
 
 func TestBatchResult(t *testing.T) {

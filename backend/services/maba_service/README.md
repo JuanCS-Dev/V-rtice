@@ -335,6 +335,392 @@ kubectl apply -f k8s/deployment.yaml
 - **Neo4j**: Allocate 2GB heap for cognitive map with 10K+ pages
 - **Network**: Browser automation generates significant traffic
 
+## Advanced Features
+
+### Cognitive Map Learning
+
+MABA's cognitive map learns website structures automatically, enabling faster and more reliable automation over time.
+
+#### Learning Process
+
+1. **First Visit**: Browser navigates using Claude AI decision-making
+2. **Pattern Extraction**: MABA identifies page elements, forms, and navigation paths
+3. **Graph Storage**: Patterns stored as nodes/edges in Neo4j
+4. **Pattern Matching**: Subsequent visits use learned patterns (70-90% success rate)
+5. **Continuous Learning**: Updates patterns when pages change
+
+#### Example: Login Form Learning
+
+```python
+# First visit - AI-powered
+session_id = await maba.create_session()
+await maba.navigate(session_id, "https://example.com/login")
+# Claude AI identifies: username field, password field, submit button
+await maba.fill_form(session_id, {
+    "username": "user@example.com",
+    "password": "secret123"
+})
+await maba.click(session_id, "submit button")
+
+# Subsequent visits - Pattern-based (10x faster)
+session_id = await maba.create_session()
+await maba.navigate(session_id, "https://example.com/login")
+# Cognitive map knows: input[name='email'], input[type='password'], button#login-submit
+await maba.fill_form(session_id, {...})  # Direct element access
+```
+
+#### Cognitive Map Query Examples
+
+```bash
+# Find all login pages learned
+curl -X POST https://maba.vertice.ai/api/v1/cognitive-map/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query_type": "find_pages_by_type",
+    "parameters": {"page_type": "login"}
+  }'
+
+# Find navigation path between pages
+curl -X POST https://maba.vertice.ai/api/v1/cognitive-map/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query_type": "find_path",
+    "parameters": {
+      "from": "https://example.com/",
+      "to": "https://example.com/checkout"
+    }
+  }'
+
+# Find similar pages across domains
+curl -X POST https://maba.vertice.ai/api/v1/cognitive-map/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query_type": "find_similar_pages",
+    "parameters": {
+      "reference_url": "https://site-a.com/product/123",
+      "min_similarity": 0.75
+    }
+  }'
+```
+
+### Session Management
+
+MABA manages browser sessions with intelligent pooling and lifecycle management.
+
+#### Session Lifecycle
+
+```
+[Create Session] → [Active] → [Idle] → [Cleanup]
+                       ↓
+                  [Navigate]
+                  [Interact]
+                  [Extract]
+```
+
+#### Session Pooling Benefits
+
+- **Reduced Startup Time**: Reuse existing browsers (3-5s → <100ms)
+- **Memory Efficiency**: Pool maintains optimal instance count
+- **Cost Optimization**: Fewer browser launches = lower CPU usage
+
+#### Advanced Session Configuration
+
+```python
+# Create session with custom configuration
+session = await maba.create_session({
+    "headless": True,
+    "viewport": {"width": 1920, "height": 1080},
+    "user_agent": "Custom User Agent",
+    "locale": "en-US",
+    "timezone": "America/New_York",
+    "permissions": ["geolocation", "notifications"],
+    "geolocation": {"latitude": 40.7128, "longitude": -74.0060},
+    "extra_http_headers": {
+        "X-Custom-Header": "value"
+    },
+    "proxy": {
+        "server": "http://proxy.example.com:8080",
+        "username": "proxyuser",
+        "password": "proxypass"
+    }
+})
+```
+
+### Visual Understanding
+
+MABA can analyze screenshots to understand page layout and identify elements.
+
+#### Screenshot Analysis
+
+```python
+# Take screenshot
+screenshot = await maba.screenshot(session_id, {
+    "full_page": True,
+    "format": "png",
+    "quality": 85
+})
+
+# Analyze with Claude Vision
+analysis = await maba.analyze_screenshot(session_id, {
+    "task": "identify_interactive_elements",
+    "filters": ["buttons", "links", "forms"]
+})
+
+# Result:
+# {
+#   "elements": [
+#     {"type": "button", "text": "Sign Up", "location": {"x": 100, "y": 200}},
+#     {"type": "link", "text": "Forgot Password", "location": {"x": 150, "y": 250}},
+#     {"type": "form", "fields": ["email", "password"], "location": {"x": 50, "y": 150}}
+#   ]
+# }
+```
+
+### Form Automation
+
+MABA intelligently fills forms based on field semantics and learned patterns.
+
+#### Intelligent Form Filling
+
+```python
+# MABA identifies field types automatically
+await maba.fill_form(session_id, {
+    "form_data": {
+        "email": "user@example.com",
+        "password": "secret123",
+        "phone": "+1-555-0123",
+        "date_of_birth": "1990-01-15",
+        "address": {
+            "street": "123 Main St",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10001"
+        }
+    },
+    "submit": True,  # Auto-submit after filling
+    "validate": True  # Validate fields before submit
+})
+```
+
+#### Form Field Recognition
+
+MABA uses multiple strategies to identify form fields:
+
+1. **Label Association**: `<label for="email">Email</label>` → `<input id="email">`
+2. **Placeholder Text**: `<input placeholder="Enter your email">`
+3. **Name Attribute**: `<input name="email">`
+4. **ARIA Labels**: `<input aria-label="Email address">`
+5. **Visual Analysis**: Claude Vision identifies field purpose from screenshot
+6. **Cognitive Map**: Previously learned field mappings
+
+### Data Extraction
+
+Extract structured data from web pages with flexible selectors.
+
+#### Basic Extraction
+
+```python
+# Extract with CSS selectors
+data = await maba.extract(session_id, {
+    "selectors": {
+        "title": "h1.product-title",
+        "price": "span.price",
+        "description": "div.description",
+        "images": "img.product-image",  # Returns array
+        "availability": "span.stock-status"
+    }
+})
+
+# Result:
+# {
+#   "title": "Premium Laptop",
+#   "price": "$1,299.99",
+#   "description": "High-performance laptop...",
+#   "images": ["img1.jpg", "img2.jpg", "img3.jpg"],
+#   "availability": "In Stock"
+# }
+```
+
+#### Advanced Extraction with XPath
+
+```python
+# Extract with XPath
+data = await maba.extract(session_id, {
+    "selectors": {
+        "rating": "//div[@class='rating']//span[@class='stars']",
+        "reviews": "//div[@id='reviews']//article",
+        "seller_info": "//div[contains(@class, 'seller')]//text()"
+    },
+    "selector_type": "xpath"
+})
+```
+
+#### Structured Data Extraction
+
+```python
+# Extract table data
+table_data = await maba.extract_table(session_id, {
+    "table_selector": "table#products",
+    "headers": True,  # First row is header
+    "extract_links": True  # Extract href from cells
+})
+
+# Result:
+# {
+#   "headers": ["Product", "Price", "Quantity", "Total"],
+#   "rows": [
+#     {"Product": "Item A", "Price": "$10.00", "Quantity": "2", "Total": "$20.00"},
+#     {"Product": "Item B", "Price": "$15.00", "Quantity": "1", "Total": "$15.00"}
+#   ]
+# }
+```
+
+### Security and Safety
+
+MABA includes multiple security layers to protect against malicious sites and prevent abuse.
+
+#### Security Policy Configuration
+
+```bash
+# Configure security policy
+curl -X PUT https://maba.vertice.ai/api/v1/security-policy \
+  -H "Content-Type: application/json" \
+  -d '{
+    "blocked_domains": [
+      "*.malicious-site.com",
+      "*.phishing-domain.org"
+    ],
+    "allowed_protocols": ["https", "http"],
+    "max_redirects": 5,
+    "max_page_size_mb": 50,
+    "javascript_enabled": true,
+    "allow_downloads": false,
+    "allow_popups": false,
+    "content_security_policy": "strict"
+  }'
+```
+
+#### Safety Features
+
+1. **Domain Blocklist**: Prevent navigation to known malicious sites
+2. **Protocol Filtering**: Restrict to HTTPS/HTTP only
+3. **Redirect Limits**: Prevent redirect loops
+4. **Size Limits**: Block excessively large pages
+5. **Download Control**: Disable automatic downloads
+6. **Popup Blocking**: Block popup windows
+7. **CSP Enforcement**: Content Security Policy compliance
+
+### Performance Optimization
+
+MABA includes several performance optimizations for faster automation.
+
+#### Browser Instance Pooling
+
+```bash
+# Configure browser pool
+export MABA_MIN_BROWSER_INSTANCES=2
+export MABA_MAX_BROWSER_INSTANCES=10
+export MABA_BROWSER_POOL_WARMUP=true  # Pre-start browsers
+export MABA_BROWSER_RECYCLING_ENABLED=true  # Recycle after N uses
+export MABA_BROWSER_RECYCLING_THRESHOLD=50  # Recycle after 50 sessions
+```
+
+#### Network Optimization
+
+```bash
+# Disable unnecessary resources
+export MABA_BLOCK_IMAGES=false  # Keep images (needed for vision)
+export MABA_BLOCK_FONTS=true  # Block web fonts (30% faster)
+export MABA_BLOCK_MEDIA=true  # Block video/audio (50% bandwidth)
+export MABA_BLOCK_ADS=true  # Block ad networks (40% faster)
+export MABA_BLOCK_TRACKING=true  # Block analytics (20% faster)
+```
+
+#### Caching Strategy
+
+```bash
+# Enable aggressive caching
+export MABA_CACHE_ENABLED=true
+export MABA_CACHE_COGNITIVE_MAP=true  # Cache Neo4j queries
+export MABA_CACHE_SCREENSHOTS=false  # Don't cache screenshots (large)
+export MABA_CACHE_TTL_SECONDS=300  # 5 minutes
+```
+
+### Integration Examples
+
+#### MAXIMUS Core Integration
+
+```python
+# MAXIMUS Core calls MABA as a tool
+tools = [
+    {
+        "name": "navigate_web",
+        "description": "Navigate to a URL and return page content",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string"},
+                "extract_selectors": {"type": "object"}
+            }
+        }
+    }
+]
+
+# User query: "Check the price of premium laptops on example.com"
+# MAXIMUS decides to use MABA
+result = await maximus.use_tool("navigate_web", {
+    "url": "https://example.com/laptops/premium",
+    "extract_selectors": {
+        "products": "div.product",
+        "prices": "span.price"
+    }
+})
+```
+
+#### Python SDK Example
+
+```python
+from maba_client import MABAClient
+
+# Initialize client
+maba = MABAClient(
+    base_url="https://maba.vertice.ai",
+    api_key="your-api-key"
+)
+
+# Create session
+session_id = await maba.create_session(headless=True)
+
+try:
+    # Navigate
+    await maba.navigate(session_id, "https://example.com/login")
+
+    # Fill form
+    await maba.fill_form(session_id, {
+        "username": "user@example.com",
+        "password": "secret123"
+    })
+
+    # Click submit
+    await maba.click(session_id, "button[type='submit']")
+
+    # Wait for navigation
+    await maba.wait_for_navigation(session_id)
+
+    # Extract data
+    data = await maba.extract(session_id, {
+        "user_name": "span.user-name",
+        "balance": "div.account-balance"
+    })
+
+    print(f"Logged in as: {data['user_name']}")
+    print(f"Balance: {data['balance']}")
+
+finally:
+    # Cleanup
+    await maba.close_session(session_id)
+```
+
 ## Troubleshooting
 
 ### Common Issues

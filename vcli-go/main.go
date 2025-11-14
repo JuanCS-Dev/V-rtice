@@ -5,7 +5,19 @@
 //
 // This is the main entry point for the Vértice CLI 2.0.
 // All command implementations are in the cmd/ directory.
-// This file just provides the build entry point.
+// This file provides the build entry point and main() function.
 package main
 
-// main function is in cmd/root.go
+import (
+	"fmt"
+	"os"
+
+	"github.com/verticedev/vcli-go/cmd"
+)
+
+func main() {
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}

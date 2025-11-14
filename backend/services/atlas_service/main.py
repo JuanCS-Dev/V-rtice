@@ -11,6 +11,8 @@ understand the operational environment.
 """
 
 import asyncio
+import logging
+import os
 from datetime import datetime
 from typing import Any, Dict, Optional
 from collections import defaultdict
@@ -72,6 +74,11 @@ async def startup_event():  # pragma: no cover
     global metrics_exporter, constitutional_tracer, health_checker
     service_version = os.getenv("SERVICE_VERSION", "1.0.0")
 
+    # Initialize as None to avoid NameError if exception occurs
+    metrics_exporter = None
+    constitutional_tracer = None
+    health_checker = None
+
     try:
         # Logging
         configure_constitutional_logging(
@@ -79,6 +86,7 @@ async def startup_event():  # pragma: no cover
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             json_logs=True
         )
+        logger = logging.getLogger(__name__)
 
         # Metrics
         metrics_exporter = MetricsExporter(

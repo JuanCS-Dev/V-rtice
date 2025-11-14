@@ -1,0 +1,183 @@
+# Prometheus Configuration for Vertice AI Platform
+# Constitutional: Lei Zero - Monitoring respects privacy boundaries
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'vertice-ai'
+    environment: 'production'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # ============================================================================
+  # PROMETHEUS SELF-MONITORING
+  # ============================================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ============================================================================
+  # ML PREDICTION SERVICES - Export ML metrics
+  # ============================================================================
+  - job_name: 'maximus_predict'
+    static_configs:
+      - targets: ['maximus_predict:8008']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'maximus_core_service'
+    static_configs:
+      - targets: ['maximus_core_service:8002']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'maximus_eureka'
+    static_configs:
+      - targets: ['maximus_eureka:8030']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  - job_name: 'wargaming_crisol'
+    static_configs:
+      - targets: ['wargaming_crisol:8079']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ============================================================================
+  # GATEWAY & ORCHESTRATION
+  # ============================================================================
+  - job_name: 'api_gateway'
+    static_configs:
+      - targets: ['api_gateway:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  - job_name: 'maximus_orchestrator'
+    static_configs:
+      - targets: ['maximus_orchestrator_service:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # ============================================================================
+  # BEHAVIORAL ANALYSIS & MAV DETECTION
+  # ============================================================================
+  - job_name: 'behavioral-analyzer'
+    static_configs:
+      - targets: ['behavioral-analyzer-service:8090']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  - job_name: 'mav-detection'
+    static_configs:
+      - targets: ['mav-detection-service:8091']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # ============================================================================
+  # SECURITY & VULNERABILITY SERVICES
+  # ============================================================================
+  - job_name: 'vuln_scanner'
+    static_configs:
+      - targets: ['vuln_scanner_service:8005']
+    metrics_path: '/metrics'
+
+  - job_name: 'threat_intel'
+    static_configs:
+      - targets: ['threat_intel_service:8012']
+    metrics_path: '/metrics'
+
+  - job_name: 'bas_service'
+    static_configs:
+      - targets: ['bas_service:8025']
+    metrics_path: '/metrics'
+
+  # ============================================================================
+  # IMMUNITY SYSTEM
+  # ============================================================================
+  - job_name: 'immunis_api'
+    static_configs:
+      - targets: ['immunis_api_service:8080']
+    metrics_path: '/metrics'
+
+  - job_name: 'adaptive_immune_system'
+    static_configs:
+      - targets: ['adaptive_immune_system:8074']
+    metrics_path: '/metrics'
+
+  - job_name: 'reactive_fabric_core'
+    static_configs:
+      - targets: ['reactive_fabric_core:8071']
+    metrics_path: '/metrics'
+
+  # ============================================================================
+  # DATABASES & INFRASTRUCTURE
+  # ============================================================================
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+
+  - job_name: 'neo4j'
+    static_configs:
+      - targets: ['neo4j:7474']
+    metrics_path: '/metrics'
+
+  # ============================================================================
+  # MESSAGE BROKERS
+  # ============================================================================
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['hcl-kafka:9092']
+    metrics_path: '/metrics'
+
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
+    metrics_path: '/metrics'
+
+  - job_name: 'nats'
+    static_configs:
+      - targets: ['nats-jetstream:8222']
+    metrics_path: '/metrics'
+
+  # ============================================================================
+  # OFFENSIVE SECURITY TOOLS
+  # ============================================================================
+  - job_name: 'offensive_tools'
+    static_configs:
+      - targets: ['offensive_tools_service:8003']
+    metrics_path: '/metrics'
+
+  - job_name: 'network_recon'
+    static_configs:
+      - targets: ['network_recon_service:8019']
+    metrics_path: '/metrics'
+
+  # ============================================================================
+  # CONTAINER MONITORING (cAdvisor)
+  # ============================================================================
+  # Uncomment if cAdvisor is deployed
+  # - job_name: 'cadvisor'
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+
+  # ============================================================================
+  # NODE EXPORTER (Host Metrics)
+  # ============================================================================
+  # Uncomment if node_exporter is deployed
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']

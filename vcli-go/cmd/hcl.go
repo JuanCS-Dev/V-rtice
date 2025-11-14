@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -209,7 +209,11 @@ func runPlannerGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to read goals: %w", err)
 	}
 
-	result, err := client.GeneratePlan(analysisData, stateData, goalsData)
+	result, err := client.GeneratePlan(
+		analysisData.(map[string]interface{}),
+		stateData.(map[string]interface{}),
+		goalsData.(map[string]interface{}),
+	)
 	if err != nil {
 		return fmt.Errorf("failed to generate plan: %w", err)
 	}
@@ -245,11 +249,12 @@ func runPlannerHealth(cmd *cobra.Command, args []string) error {
 func runExecutorExecute(cmd *cobra.Command, args []string) error {
 	client := hcl.NewExecutorClient(executorEndpoint, hclToken)
 
-	planData, err := readJSONFile(planFile)
+	planDataRaw, err := readJSONFile(planFile)
 	if err != nil {
 		return fmt.Errorf("failed to read plan: %w", err)
 	}
 
+	planData := planDataRaw.(map[string]interface{})
 	planID, _ := planData["plan_id"].(string)
 	actions, _ := planData["actions"].([]interface{})
 

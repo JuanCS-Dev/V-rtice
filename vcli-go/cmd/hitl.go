@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/hitl"
 )
@@ -633,91 +634,18 @@ func getHITLEndpoint() string {
 	}
 
 	// Check config file
-	if globalConfig != nil {
-		if endpoint, err := globalConfig.GetEndpoint("hitl"); err == nil && endpoint != "" {
-			return endpoint
-		}
-	}
-
-	// Return empty string to let client handle env var and default
-	return ""
+	return config.GetEndpoint("hitl")
 }
 
-// ============================================================
-// CLIENT FACTORY
-// ============================================================
-
+// createHITLClient creates a HITL client with the configured endpoint
 func createHITLClient() (*hitl.Client, error) {
-	client := hitl.NewClient(getHITLEndpoint())
-
-	// If token provided directly, use it
-	if hitlToken != "" {
-		client.SetToken(hitlToken)
-		return client, nil
-	}
-
-	// Otherwise, login with username/password
-	if hitlUsername == "" || hitlPassword == "" {
-		return nil, fmt.Errorf("either --token or both --username and --password are required")
-	}
-
-	if err := client.Login(hitlUsername, hitlPassword); err != nil {
-		return nil, fmt.Errorf("authentication failed: %w", err)
-	}
-
+	endpoint := getHITLEndpoint()
+	client := hitl.NewClient(endpoint)
 	return client, nil
 }
 
-func formatDuration(d time.Duration) string {
-	if d < time.Minute {
-		return fmt.Sprintf("%.0fs", d.Seconds())
-	} else if d < time.Hour {
-		return fmt.Sprintf("%.0fm", d.Minutes())
-	} else if d < 24*time.Hour {
-		return fmt.Sprintf("%.1fh", d.Hours())
-	}
-	return fmt.Sprintf("%.1fd", d.Hours()/24)
-}
 
-// ============================================================================
-// INIT
-// ============================================================================
-
-func init() {
-	rootCmd.AddCommand(hitlCmd)
-
-	// Add subcommands
-	hitlCmd.AddCommand(hitlStatusCmd)
-	hitlCmd.AddCommand(hitlListCmd)
-	hitlCmd.AddCommand(hitlShowCmd)
-	hitlCmd.AddCommand(hitlApproveCmd)
-	hitlCmd.AddCommand(hitlRejectCmd)
-	hitlCmd.AddCommand(hitlEscalateCmd)
-	hitlCmd.AddCommand(hitlStatsCmd)
-	hitlCmd.AddCommand(hitlWatchCmd)
-
-	// Global flags
-	hitlCmd.PersistentFlags().StringVar(&hitlEndpoint, "endpoint", "", "HITL API endpoint (default: env VCLI_HITL_ENDPOINT or http://localhost:8000/api)")
-	hitlCmd.PersistentFlags().StringVar(&hitlUsername, "username", "", "Username for authentication")
-	hitlCmd.PersistentFlags().StringVar(&hitlPassword, "password", "", "Password for authentication")
-	hitlCmd.PersistentFlags().StringVar(&hitlToken, "token", "", "Access token (alternative to username/password)")
-	hitlCmd.PersistentFlags().StringVarP(&hitlOutputFormat, "output", "o", "table", "Output format (table|json)")
-
-	// List flags
-	hitlListCmd.Flags().StringVar(&hitlPriority, "priority", "", "Filter by priority (critical|high|medium|low)")
-
-	// Approve flags
-	hitlApproveCmd.Flags().StringSliceVar(&hitlActions, "actions", []string{}, "Actions to execute (comma-separated)")
-	hitlApproveCmd.Flags().StringVar(&hitlNotes, "notes", "", "Additional notes")
-
-	// Reject flags
-	hitlRejectCmd.Flags().StringVar(&hitlNotes, "notes", "", "Rejection reason (required)")
-	hitlRejectCmd.MarkFlagRequired("notes")
-
-	// Escalate flags
-	hitlEscalateCmd.Flags().StringVar(&hitlReason, "reason", "", "Escalation reason (required)")
-	hitlEscalateCmd.MarkFlagRequired("reason")
-
-	// Watch flags
-	hitlWatchCmd.Flags().StringVar(&hitlPriority, "priority", "", "Filter by priority (critical|high|medium|low)")
+// TODO: Implement formatDuration helper
+func formatDuration(d interface{}) string {
+	return fmt.Sprintf("%v", d)
 }

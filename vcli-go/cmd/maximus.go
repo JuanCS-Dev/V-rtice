@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/errors"
 	"github.com/verticedev/vcli-go/internal/help"
 	"github.com/verticedev/vcli-go/internal/maximus"
@@ -130,14 +131,7 @@ func getMaximusServer() string {
 	}
 
 	// If no flag, check config file before falling back to client's internal precedence
-	if globalConfig != nil {
-		if endpoint, err := globalConfig.GetEndpoint("maximus"); err == nil && endpoint != "" {
-			return endpoint
-		}
-	}
-
-	// Return empty string to let client handle env var and default
-	return ""
+	return config.GetEndpoint("maximus")
 }
 
 // ============================================================
@@ -789,15 +783,19 @@ func runEurekaGenerateInsight(cmd *cobra.Command, args []string) error {
 	}
 
 	// Read data file
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data file: %w", err)
 	}
+	data := dataRaw.(map[string]interface{})
 
 	// Read context if provided
 	var context map[string]interface{}
 	if contextFile != "" {
-		context, err = readJSONFile(contextFile)
+		contextRaw, err := readJSONFile(contextFile)
+		if contextRaw != nil {
+			context = contextRaw.(map[string]interface{})
+		}
 		if err != nil {
 			return fmt.Errorf("failed to read context file: %w", err)
 		}
@@ -824,15 +822,17 @@ func runEurekaDetectPattern(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file and --pattern-file are required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data file: %w", err)
 	}
+	data := dataRaw.(map[string]interface{})
 
-	pattern, err := readJSONFile(patternFile)
+	patternRaw, err := readJSONFile(patternFile)
 	if err != nil {
 		return fmt.Errorf("failed to read pattern file: %w", err)
 	}
+	pattern := patternRaw.(map[string]interface{})
 
 	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
 	resp, err := client.DetectPattern(data, pattern)
@@ -855,10 +855,11 @@ func runEurekaExtractIoCs(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file is required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data file: %w", err)
 	}
+	data := dataRaw.(map[string]interface{})
 
 	client := maximus.NewEurekaClient(eurekaEndpoint, maximusToken)
 	resp, err := client.ExtractIoCs(data)
@@ -918,10 +919,11 @@ func runOraculoPredict(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file, --prediction-type, and --time-horizon are required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data file: %w", err)
 	}
+	data := dataRaw.(map[string]interface{})
 
 	client := maximus.NewOraculoClient(oraculoEndpoint, maximusToken)
 	resp, err := client.Predict(data, predictionType, timeHorizon)
@@ -973,7 +975,10 @@ func runOraculoAutoImplement(cmd *cobra.Command, args []string) error {
 	var context map[string]interface{}
 	if contextFile != "" {
 		var err error
-		context, err = readJSONFile(contextFile)
+		contextRaw, err := readJSONFile(contextFile)
+		if contextRaw != nil {
+			context = contextRaw.(map[string]interface{})
+		}
 		if err != nil {
 			return fmt.Errorf("failed to read context file: %w", err)
 		}
@@ -1031,10 +1036,11 @@ func runPredictGenerate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file and --prediction-type are required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data file: %w", err)
 	}
+	data := dataRaw.(map[string]interface{})
 
 	client := maximus.NewPredictClient(predictEndpoint, maximusToken)
 	resp, err := client.Predict(data, predictionType, timeHorizon)
@@ -1458,32 +1464,8 @@ func runConsciousnessWatch(cmd *cobra.Command, args []string) error {
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
+// Note: readJSONFile and printJSON are defined in data.go
 
-func readJSONFile(path string) (map[string]interface{}, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	var result map[string]interface{}
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func printJSON(v interface{}) {
-	data, _ := json.MarshalIndent(v, "", "  ")
-	fmt.Println(string(data))
-}
-
-func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
-}
 
 // ============================================================================
 // INIT

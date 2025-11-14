@@ -9,6 +9,9 @@ and manages the lifecycle of the Maximus AI, ensuring it can receive requests,
 process them, and return intelligent responses.
 """
 
+import logging
+import os
+from datetime import datetime
 from typing import Any
 
 import uvicorn
@@ -28,6 +31,12 @@ from adw_router import router as adw_router
 
 # HITL imports for Governance SSE
 from hitl import DecisionQueue, HITLConfig, HITLDecisionFramework, OperatorInterface, SLAConfig
+
+# Constitutional v3.0 imports
+from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
+from shared.constitutional_tracing import create_constitutional_tracer
+from shared.constitutional_logging import configure_constitutional_logging
+from shared.health_checks import ConstitutionalHealthCheck
 
 # Import Service Registry client
 try:
@@ -85,6 +94,11 @@ async def startup_event():
     global metrics_exporter, constitutional_tracer, health_checker
     service_version = os.getenv("SERVICE_VERSION", "1.0.0")
 
+    # Initialize as None to avoid NameError if exception occurs
+    metrics_exporter = None
+    constitutional_tracer = None
+    health_checker = None
+
     try:
         # Logging
         configure_constitutional_logging(
@@ -92,6 +106,7 @@ async def startup_event():
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             json_logs=True
         )
+        logger = logging.getLogger(__name__)
 
         # Metrics
         metrics_exporter = MetricsExporter(
@@ -414,12 +429,6 @@ if __name__ == "__main__":
 
     # Start Prometheus metrics server
     from prometheus_client import start_http_server
-
-# Constitutional v3.0 imports
-from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
-from shared.constitutional_tracing import create_constitutional_tracer
-from shared.constitutional_logging import configure_constitutional_logging
-from shared.health_checks import ConstitutionalHealthCheck
 
     start_http_server(8001)
     print("📈 Prometheus metrics server started on port 8001")

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
+	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/immune"
 )
 
@@ -137,14 +138,7 @@ func getImmuneServer() string {
 	}
 
 	// Check config file
-	if globalConfig != nil {
-		if endpoint, err := globalConfig.GetEndpoint("immune"); err == nil && endpoint != "" {
-			return endpoint
-		}
-	}
-
-	// Return empty string to let client handle env var and default
-	return ""
+	return config.GetEndpoint("immunity")
 }
 
 // ============================================================
@@ -776,16 +770,6 @@ func stateToString(s pb.AgentState) string {
 	}
 }
 
-func getSeverityIcon(severity int32) string {
-	if severity >= 9 {
-		return "🔴"
-	} else if severity >= 7 {
-		return "🟠"
-	} else if severity >= 4 {
-		return "🟡"
-	}
-	return "🟢"
-}
 
 func getHealthIcon(status pb.SystemHealthResponse_OverallStatus) string {
 	switch status {
@@ -806,16 +790,6 @@ func getHealthIcon(status pb.SystemHealthResponse_OverallStatus) string {
 // ============================================================
 
 // getSeverityIcon returns an icon based on severity level (used by stream.go)
-func getSeverityIcon(severity int32) string {
-	if severity >= 9 {
-		return "🔴"
-	} else if severity >= 7 {
-		return "🟠"
-	} else if severity >= 4 {
-		return "🟡"
-	}
-	return "🟢"
-}
 
 // ============================================================
 // INIT

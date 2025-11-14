@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -304,10 +304,12 @@ func runHSASExplain(cmd *cobra.Command, args []string) error {
 
 	var context map[string]interface{}
 	if contextFile2 != "" {
-		var err error
-		context, err = readJSONFile(contextFile2)
+		data, err := readJSONFile(contextFile2)
 		if err != nil {
 			return fmt.Errorf("failed to read context: %w", err)
+		}
+		if data != nil {
+			context = data.(map[string]interface{})
 		}
 	}
 

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -106,10 +106,11 @@ func runMacrophagePresentAntigen(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--artifact is required")
 	}
 
-	artifact, err := readJSONFile(artifactFile)
+	artifactRaw, err := readJSONFile(artifactFile)
 	if err != nil {
 		return fmt.Errorf("failed to read artifact: %w", err)
 	}
+	artifact := artifactRaw.(map[string]interface{})
 
 	client := immunis.NewMacrophageClient(macrophageEndpoint, immunisToken)
 	resp, err := client.PresentAntigen(artifact)
@@ -236,16 +237,22 @@ func runBCellProcess(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file is required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data: %w", err)
 	}
 
+
+	data := dataRaw.(map[string]interface{})
+
 	var context map[string]interface{}
 	if contextFile != "" {
-		context, err = readJSONFile(contextFile)
+		contextRaw, err := readJSONFile(contextFile)
 		if err != nil {
 			return fmt.Errorf("failed to read context: %w", err)
+		}
+		if contextRaw != nil {
+			context = contextRaw.(map[string]interface{})
 		}
 	}
 
@@ -320,16 +327,22 @@ func runHelperTProcess(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file is required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data: %w", err)
 	}
 
+
+	data := dataRaw.(map[string]interface{})
+
 	var context map[string]interface{}
 	if contextFile != "" {
-		context, err = readJSONFile(contextFile)
+		contextRaw, err := readJSONFile(contextFile)
 		if err != nil {
 			return fmt.Errorf("failed to read context: %w", err)
+		}
+		if contextRaw != nil {
+			context = contextRaw.(map[string]interface{})
 		}
 	}
 
@@ -404,16 +417,22 @@ func runCytotoxicTProcess(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("--data-file is required")
 	}
 
-	data, err := readJSONFile(dataFile)
+	dataRaw, err := readJSONFile(dataFile)
 	if err != nil {
 		return fmt.Errorf("failed to read data: %w", err)
 	}
 
+
+	data := dataRaw.(map[string]interface{})
+
 	var context map[string]interface{}
 	if contextFile != "" {
-		context, err = readJSONFile(contextFile)
+		contextRaw, err := readJSONFile(contextFile)
 		if err != nil {
 			return fmt.Errorf("failed to read context: %w", err)
+		}
+		if contextRaw != nil {
+			context = contextRaw.(map[string]interface{})
 		}
 	}
 

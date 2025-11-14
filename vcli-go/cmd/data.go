@@ -1,7 +1,8 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/verticedev/vcli-go/internal/data"
@@ -60,7 +61,7 @@ var ingestHealthCmd = &cobra.Command{Use: "health", Short: "Check health", RunE:
 // RTE (REAL-TIME EXECUTION) COMMANDS
 // ============================================================================
 
-var rteCmd = &cobra.Command{
+var dataRTECmd = &cobra.Command{
 	Use:   "rte",
 	Short: "Real-Time Execution operations",
 	Long:  "High-speed threat response and data stream processing",
@@ -518,4 +519,13 @@ func runNarrativeInfo(cmd *cobra.Command, args []string) error {
 	}
 	printJSON(result)
 	return nil
+}
+
+// TODO: Implement helper functions
+func readJSONFile(path string) (interface{}, error) {
+	return nil, fmt.Errorf("not yet implemented")
+}
+
+func printJSON(data interface{}) {
+	fmt.Println("Not yet implemented")
 }

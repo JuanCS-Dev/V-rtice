@@ -34,7 +34,7 @@ from fastapi import WebSocket
 from pydantic import ValidationError
 
 from models.apv import APV
-from queue.memory_queue import InMemoryAPVQueue
+from oraculo_queue.memory_queue import InMemoryAPVQueue
 
 
 logger = logging.getLogger(__name__)

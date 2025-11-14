@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -117,10 +117,12 @@ func runAttackLaunch(cmd *cobra.Command, args []string) error {
 
 	var params map[string]interface{}
 	if paramsFile != "" {
-		var err error
-		params, err = readJSONFile(paramsFile)
+		paramsRaw, err := readJSONFile(paramsFile)
 		if err != nil {
 			return err
+		}
+		if paramsRaw != nil {
+			params = paramsRaw.(map[string]interface{})
 		}
 	}
 

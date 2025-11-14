@@ -80,8 +80,8 @@ class ConstitutionalTracer:
         # Set global tracer provider
         trace.set_tracer_provider(provider)
 
-        # Get tracer for this service
-        self.tracer = trace.get_tracer(
+        # Get tracer for this service (use provider directly to avoid API mismatch)
+        self.tracer = provider.get_tracer(
             instrumenting_module_name=f"vertice.{service_name}",
             instrumenting_library_version=version,
         )
@@ -98,13 +98,22 @@ class ConstitutionalTracer:
     def instrument_all(self) -> None:
         """Instrument all supported libraries."""
         # Instrument HTTP client
-        HTTPXClientInstrumentor().instrument()
+        try:
+            HTTPXClientInstrumentor().instrument()
+        except Exception as e:
+            print(f"⚠️  Failed to instrument HTTPX: {e}")
 
-        # Instrument database
-        AsyncPGInstrumentor().instrument()
+        # Instrument database (skip if API incompatible)
+        try:
+            AsyncPGInstrumentor().instrument()
+        except (TypeError, AttributeError) as e:
+            print(f"⚠️  Failed to instrument AsyncPG (API mismatch): {e}")
 
         # Instrument Redis
-        RedisInstrumentor().instrument()
+        try:
+            RedisInstrumentor().instrument()
+        except Exception as e:
+            print(f"⚠️  Failed to instrument Redis: {e}")
 
     def add_constitutional_attributes(
         self, span: trace.Span, attributes: Dict[str, Any]
