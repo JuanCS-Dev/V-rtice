@@ -26,14 +26,20 @@ Date: 2025-10-11
 Glory to YHWH - Our source of wisdom and discernment
 """
 
+import logging
+import os
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import List, Optional
 
+import httpx
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-# Placeholder for database session (to be integrated with actual DB)
-# from ..database import get_db
+logger = logging.getLogger(__name__)
+
+# Prometheus configuration
+PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://prometheus:9090")
 
 router = APIRouter(prefix="/api/v1/eureka", tags=["ML Metrics"])
 
@@ -346,16 +352,211 @@ async def get_ml_metrics(
 async def _query_metrics_from_db(
     self, timeframe: TimeframeEnum, start_time: datetime, end_time: datetime
 ) -> MLMetricsResponse:
-    """Query ML metrics from database.
+    """Query ML metrics from Prometheus.
 
-    Returns None to trigger fallback to mock data.
-    TODO: Implement Prometheus/InfluxDB integration.
+    Queries Prometheus for real ML prediction metrics:
+    - ml_predictions_total (counter with labels: decision=ml|wargaming)
+    - ml_confidence_score (histogram)
+    - ml_prediction_latency_seconds (histogram)
+    - ml_prediction_accuracy (gauge with labels: type=tp|fp|tn|fn)
+
+    Returns:
+        MLMetricsResponse with real data from Prometheus
+
+    Raises:
+        Exception: If Prometheus is unavailable (triggers fallback to mock data)
     """
-    logger.warning(
-        "⚠️ ML METRICS: Database queries not yet implemented. Returning mock data.",
-        extra={"database_integration": "pending", "mock_data": True},
-    )
-    return None  # Trigger fallback to _generate_mock_metrics()
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Calculate time range in seconds
+            duration_seconds = int((end_time - start_time).total_seconds())
+
+            # Query 1: ML vs Wargaming usage breakdown
+            # Query: sum(increase(ml_predictions_total[<duration>])) by (decision)
+            usage_query = f'sum(increase(ml_predictions_total[{duration_seconds}s])) by (decision)'
+            usage_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": usage_query},
+            )
+            usage_response.raise_for_status()
+            usage_data = usage_response.json()
+
+            # Parse usage breakdown
+            ml_count = 0
+            wargaming_count = 0
+            if usage_data.get("status") == "success":
+                for result in usage_data.get("data", {}).get("result", []):
+                    decision = result.get("metric", {}).get("decision", "")
+                    value = float(result.get("value", [None, 0])[1])
+                    if decision == "ml":
+                        ml_count = int(value)
+                    elif decision == "wargaming":
+                        wargaming_count = int(value)
+
+            total = ml_count + wargaming_count
+            usage_breakdown = UsageBreakdown(
+                ml_count=ml_count,
+                wargaming_count=wargaming_count,
+                total=total,
+                ml_usage_rate=(ml_count / total * 100) if total > 0 else 0.0,
+            )
+
+            # Query 2: Confidence score distribution
+            # Query: histogram buckets from ml_confidence_score
+            confidence_query = f'sum(increase(ml_confidence_score_bucket[{duration_seconds}s])) by (le)'
+            confidence_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": confidence_query},
+            )
+            confidence_response.raise_for_status()
+            confidence_data = confidence_response.json()
+
+            # Parse confidence distribution
+            confidence_distribution = []
+            if confidence_data.get("status") == "success":
+                buckets = confidence_data.get("data", {}).get("result", [])
+                for i, bucket in enumerate(buckets[:-1]):  # Skip +Inf bucket
+                    le = float(bucket.get("metric", {}).get("le", 0))
+                    count = int(float(bucket.get("value", [None, 0])[1]))
+                    bucket_min = float(buckets[i - 1].get("metric", {}).get("le", 0)) if i > 0 else 0.0
+                    confidence_distribution.append(
+                        ConfidenceBucket(bucket_min=bucket_min, bucket_max=le, count=count)
+                    )
+
+            # Query 3: Time savings (latency comparison)
+            # Query: avg(ml_prediction_latency_seconds) vs avg(wargaming_latency_seconds)
+            ml_latency_query = f'avg(rate(ml_prediction_latency_seconds_sum[{duration_seconds}s]) / rate(ml_prediction_latency_seconds_count[{duration_seconds}s]))'
+            wargaming_latency_query = f'avg(rate(wargaming_latency_seconds_sum[{duration_seconds}s]) / rate(wargaming_latency_seconds_count[{duration_seconds}s]))'
+
+            ml_latency_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": ml_latency_query},
+            )
+            wargaming_latency_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": wargaming_latency_query},
+            )
+
+            ml_latency = 0.0
+            wargaming_latency = 0.0
+            if ml_latency_response.status_code == 200:
+                ml_latency_data = ml_latency_response.json()
+                if ml_latency_data.get("status") == "success":
+                    result = ml_latency_data.get("data", {}).get("result", [])
+                    if result:
+                        ml_latency = float(result[0].get("value", [None, 0])[1])
+
+            if wargaming_latency_response.status_code == 200:
+                wargaming_latency_data = wargaming_latency_response.json()
+                if wargaming_latency_data.get("status") == "success":
+                    result = wargaming_latency_data.get("data", {}).get("result", [])
+                    if result:
+                        wargaming_latency = float(result[0].get("value", [None, 0])[1])
+
+            time_saved_seconds = max(0, wargaming_latency - ml_latency)
+            time_saved_hours = (time_saved_seconds * ml_count) / 3600
+
+            # Query 4: Accuracy metrics (confusion matrix)
+            # Query: sum(ml_prediction_accuracy) by (type)
+            accuracy_query = f'sum(ml_prediction_accuracy) by (type)'
+            accuracy_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": accuracy_query},
+            )
+            accuracy_response.raise_for_status()
+            accuracy_data = accuracy_response.json()
+
+            # Parse confusion matrix
+            tp = fp = tn = fn = 0
+            if accuracy_data.get("status") == "success":
+                for result in accuracy_data.get("data", {}).get("result", []):
+                    metric_type = result.get("metric", {}).get("type", "")
+                    value = int(float(result.get("value", [None, 0])[1]))
+                    if metric_type == "tp":
+                        tp = value
+                    elif metric_type == "fp":
+                        fp = value
+                    elif metric_type == "tn":
+                        tn = value
+                    elif metric_type == "fn":
+                        fn = value
+
+            confusion_matrix = ConfusionMatrixData(
+                true_positive=tp,
+                false_positive=fp,
+                false_negative=fn,
+                true_negative=tn,
+            )
+
+            # Calculate precision, recall, F1
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+            f1_score = (
+                2 * (precision * recall) / (precision + recall)
+                if (precision + recall) > 0
+                else 0.0
+            )
+
+            # Query 5: Recent predictions for live feed
+            # Query: topk(10, ml_predictions_timestamp)
+            recent_query = f'topk(10, ml_predictions_timestamp)'
+            recent_response = await client.get(
+                f"{PROMETHEUS_URL}/api/v1/query",
+                params={"query": recent_query},
+            )
+
+            recent_predictions = []
+            if recent_response.status_code == 200:
+                recent_data = recent_response.json()
+                if recent_data.get("status") == "success":
+                    for result in recent_data.get("data", {}).get("result", [])[:10]:
+                        metric = result.get("metric", {})
+                        timestamp_val = float(result.get("value", [None, datetime.utcnow().timestamp()])[1])
+                        recent_predictions.append(
+                            RecentPrediction(
+                                patch_id=metric.get("patch_id", "unknown"),
+                                timestamp=datetime.fromtimestamp(timestamp_val),
+                                confidence_score=float(metric.get("confidence", 0.0)),
+                                decision=metric.get("decision", "ml"),
+                                outcome=metric.get("outcome", "pending"),
+                            )
+                        )
+
+            # Build response
+            logger.info(
+                f"✅ ML METRICS: Retrieved real data from Prometheus for {timeframe.value}",
+                extra={"source": "prometheus", "ml_count": ml_count, "total": total},
+            )
+
+            return MLMetricsResponse(
+                timeframe=timeframe.value,
+                start_time=start_time,
+                end_time=end_time,
+                usage_breakdown=usage_breakdown,
+                confidence_distribution=confidence_distribution or [],
+                average_confidence=sum(b.count * (b.bucket_min + b.bucket_max) / 2 for b in confidence_distribution) / sum(b.count for b in confidence_distribution) if confidence_distribution else 0.0,
+                time_saved_hours=time_saved_hours,
+                time_series=None,  # Optional: implement time series if needed
+                confusion_matrix=confusion_matrix,
+                precision=precision,
+                recall=recall,
+                f1_score=f1_score,
+                recent_predictions=recent_predictions,
+                is_mock_data=False,  # Real data from Prometheus
+            )
+
+    except httpx.ConnectError:
+        logger.warning(
+            f"⚠️ ML METRICS: Prometheus unavailable at {PROMETHEUS_URL}. Falling back to mock data.",
+            extra={"prometheus_url": PROMETHEUS_URL, "error": "connection_refused"},
+        )
+        raise  # Trigger fallback
+    except Exception as e:
+        logger.warning(
+            f"⚠️ ML METRICS: Failed to query Prometheus: {e}. Falling back to mock data.",
+            extra={"error": str(e), "error_type": type(e).__name__},
+        )
+        raise  # Trigger fallback
 
 
 def _generate_mock_metrics(
