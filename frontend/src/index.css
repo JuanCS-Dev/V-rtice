@@ -3,6 +3,16 @@
 /* Import Design Tokens - PAGANI Level Design System */
 @import './styles/design-tokens.css';
 
+/* ═══════════════════════════════════════════════════════════════════════
+ * CLAUDE.AI GREEN DESIGN SYSTEM - Nova Paleta Verde
+ * ═══════════════════════════════════════════════════════════════════════
+ * CRITICAL: Este design system SOBRESCREVE variáveis do sistema antigo
+ * Cores: VERDE (#10b981) ao invés de Vermelho/Laranja
+ * Estilo: Claude.ai - Clean, Calm, Focused
+ * OKLCH color space para consistência visual
+ */
+@import './styles/claude-design-green.css';
+
 /* Import Theme System - must come before Tailwind directives */
 @import './styles/themes.css';
 

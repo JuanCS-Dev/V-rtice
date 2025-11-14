@@ -1,0 +1,502 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CLAUDE.AI DESIGN SYSTEM - GREEN VARIANT
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Design Philosophy: Claude.ai Style - Clean, Calm, Focused
+ * Color Variant: GREEN (instead of Terra Cotta/Orange)
+ * Color Model: OKLCH (perceptually uniform)
+ * Typography: Serif-based, elegant, readable
+ *
+ * Projeto: VÉRTICE-MAXIMUS
+ * Data: 2025-11-14
+ * Migração: Design System Completo - ZERO Atalhos
+ *
+ * CRITICAL: Este é um design system NOVO, não uma adaptação.
+ * Cada token foi RECRIADO do zero baseado no Claude.ai original.
+ *
+ * VERDE, NÃO LARANJA - SOLI DEO GLORIA
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════
+   * CORE BRAND COLORS - Claude.ai Green Variant
+   * ═══════════════════════════════════════════════════════════════════════
+   *
+   * IMPORTANT: Verde ao invés de Terra Cotta/Orange
+   * Mantém a estética limpa e calma do Claude.ai
+   * Hue ~145-160° (verde) ao invés de ~39° (laranja)
+   */
+
+  /* Primary Green (substitui Terra Cotta) */
+  --brand-green-primary: #10b981;        /* Verde principal - emerald-500 */
+  --brand-green-hover: #059669;          /* Verde hover - emerald-600 */
+  --brand-green-active: #047857;         /* Verde active - emerald-700 */
+  --brand-green-light: #34d399;          /* Verde light - emerald-400 */
+  --brand-green-dark: #065f46;           /* Verde dark - emerald-800 */
+
+  /* Supporting Neutrals (Claude.ai style) */
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+  --brand-cream: #f4f3ee;                /* Background claro - mantém do Claude */
+  --brand-warm-gray: #b1ada1;            /* Gray neutro - mantém do Claude */
+  --brand-dark-text: #3d3929;            /* Text escuro - mantém do Claude */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * LIGHT MODE - OKLCH Color Space
+   * ═══════════════════════════════════════════════════════════════════════
+   * Baseado no shadcn Claude theme, mas com verde
+   */
+
+  /* Backgrounds */
+  --background: oklch(0.98 0.01 95.10);              /* Quase branco, warm */
+  --foreground: oklch(0.34 0.03 95.72);              /* Text dark */
+
+  /* Cards & Elevated Surfaces */
+  --card: oklch(0.98 0.01 95.10);                    /* Card background */
+  --card-foreground: oklch(0.19 0.00 106.59);        /* Card text */
+
+  /* Popovers & Overlays */
+  --popover: oklch(1.00 0 0);                        /* Pure white */
+  --popover-foreground: oklch(0.27 0.02 98.94);      /* Popover text */
+
+  /* PRIMARY - VERDE (ao invés de laranja) */
+  --primary: oklch(0.62 0.14 155.00);                /* Verde - hue ~155° */
+  --primary-foreground: oklch(1.00 0 0);             /* White text on green */
+
+  /* Secondary */
+  --secondary: oklch(0.92 0.01 92.99);               /* Light gray */
+  --secondary-foreground: oklch(0.43 0.02 98.60);    /* Secondary text */
+
+  /* Muted */
+  --muted: oklch(0.93 0.02 90.24);                   /* Muted background */
+  --muted-foreground: oklch(0.61 0.01 97.42);        /* Muted text */
+
+  /* Accent - VERDE */
+  --accent: oklch(0.67 0.13 150.00);                 /* Accent verde */
+  --accent-foreground: oklch(0.27 0.02 98.94);       /* Accent text */
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.22 25.00);             /* Red for errors */
+  --destructive-foreground: oklch(1.00 0 0);         /* White on red */
+
+  /* Borders & Inputs */
+  --border: oklch(0.88 0.01 97.36);                  /* Subtle border */
+  --input: oklch(0.76 0.02 98.35);                   /* Input border */
+  --ring: oklch(0.59 0.17 155.00);                   /* Focus ring - VERDE */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * DARK MODE - OKLCH Color Space
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+}
+
+[data-theme="dark"],
+.dark {
+  /* Backgrounds */
+  --background: oklch(0.27 0.00 106.64);             /* Dark background */
+  --foreground: oklch(0.81 0.01 93.01);              /* Light text */
+
+  /* Cards */
+  --card: oklch(0.27 0.00 106.64);                   /* Dark card */
+  --card-foreground: oklch(0.98 0.01 95.10);         /* Light text */
+
+  /* Popovers */
+  --popover: oklch(0.31 0.00 106.60);                /* Dark popover */
+  --popover-foreground: oklch(0.92 0.00 106.48);     /* Light text */
+
+  /* PRIMARY - VERDE (dark mode) */
+  --primary: oklch(0.67 0.13 155.00);                /* Verde mais claro */
+  --primary-foreground: oklch(1.00 0 0);             /* White */
+
+  /* Secondary */
+  --secondary: oklch(0.98 0.01 95.10);               /* Light */
+  --secondary-foreground: oklch(0.31 0.00 106.60);   /* Dark */
+
+  /* Muted */
+  --muted: oklch(0.22 0.00 106.71);                  /* Dark muted */
+  --muted-foreground: oklch(0.77 0.02 99.07);        /* Light muted text */
+
+  /* Accent - VERDE */
+  --accent: oklch(0.72 0.15 150.00);                 /* Accent verde claro */
+  --accent-foreground: oklch(0.27 0.02 98.94);       /* Dark text */
+
+  /* Destructive */
+  --destructive: oklch(0.64 0.21 25.33);             /* Red */
+  --destructive-foreground: oklch(1.00 0 0);         /* White */
+
+  /* Borders */
+  --border: oklch(0.36 0.01 106.89);                 /* Dark border */
+  --input: oklch(0.43 0.01 100.22);                  /* Dark input */
+  --ring: oklch(0.67 0.15 155.00);                   /* Focus ring verde */
+}
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SEMANTIC COLORS - Theme Agnostic
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+
+  /* Success - VERDE (já é verde naturalmente) */
+  --color-success: #10b981;
+  --color-success-hover: #059669;
+  --color-success-light: rgba(16, 185, 129, 0.1);
+  --color-success-text: #34d399;
+
+  /* Warning - Amber */
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-warning-light: rgba(245, 158, 11, 0.1);
+  --color-warning-text: #fbbf24;
+
+  /* Danger - Red */
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-light: rgba(239, 68, 68, 0.1);
+  --color-danger-text: #f87171;
+
+  /* Info - Blue */
+  --color-info: #3b82f6;
+  --color-info-hover: #2563eb;
+  --color-info-light: rgba(59, 130, 246, 0.1);
+  --color-info-text: #60a5fa;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * TYPOGRAPHY - Claude.ai Style
+   * ═══════════════════════════════════════════════════════════════════════
+   * Serif-based, elegant, readable
+   */
+
+  /* Font Families */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
+
+  /* CRITICAL: Claude.ai usa serif para body text */
+  --font-primary: var(--font-serif);
+  --font-display: var(--font-serif);
+  --font-code: var(--font-mono);
+
+  /* Font Sizes - Modular Scale */
+  --text-xs: 0.75rem;        /* 12px */
+  --text-sm: 0.875rem;       /* 14px */
+  --text-base: 1rem;         /* 16px */
+  --text-lg: 1.125rem;       /* 18px */
+  --text-xl: 1.25rem;        /* 20px */
+  --text-2xl: 1.5rem;        /* 24px */
+  --text-3xl: 1.875rem;      /* 30px */
+  --text-4xl: 2.25rem;       /* 36px */
+  --text-5xl: 3rem;          /* 48px */
+  --text-6xl: 3.75rem;       /* 60px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SPACING - Claude.ai Clean Spacing
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 0.125rem;     /* 2px */
+  --space-1: 0.25rem;        /* 4px */
+  --space-1-5: 0.375rem;     /* 6px */
+  --space-2: 0.5rem;         /* 8px */
+  --space-2-5: 0.625rem;     /* 10px */
+  --space-3: 0.75rem;        /* 12px */
+  --space-3-5: 0.875rem;     /* 14px */
+  --space-4: 1rem;           /* 16px */
+  --space-5: 1.25rem;        /* 20px */
+  --space-6: 1.5rem;         /* 24px */
+  --space-7: 1.75rem;        /* 28px */
+  --space-8: 2rem;           /* 32px */
+  --space-10: 2.5rem;        /* 40px */
+  --space-12: 3rem;          /* 48px */
+  --space-16: 4rem;          /* 64px */
+  --space-20: 5rem;          /* 80px */
+  --space-24: 6rem;          /* 96px */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * BORDER RADIUS - Claude.ai Style
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;      /* 4px */
+  --radius-md: 0.375rem;     /* 6px */
+  --radius-default: 0.5rem;  /* 8px - Claude.ai padrão */
+  --radius-lg: 0.75rem;      /* 12px */
+  --radius-xl: 1rem;         /* 16px */
+  --radius-2xl: 1.5rem;      /* 24px */
+  --radius-full: 9999px;     /* Circular */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SHADOWS - Subtle Claude.ai Style
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Glow Effects - VERDE */
+  --shadow-glow-green: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
+  --shadow-glow-green-soft: 0 0 15px rgba(16, 185, 129, 0.3);
+
+  /* Inner Shadow */
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * TRANSITIONS - Smooth Claude.ai Animations
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slower: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Specialized Easings */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * Z-INDEX SCALE
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+  --z-toast: 1700;
+  --z-max: 9999;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * SIDEBAR - Claude.ai Chat Style
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --sidebar-background: oklch(0.97 0.01 98.88);
+  --sidebar-foreground: oklch(0.36 0.01 106.65);
+  --sidebar-primary: oklch(0.62 0.14 155.00);        /* VERDE */
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.01 92.99);
+  --sidebar-accent-foreground: oklch(0.33 0 0);
+  --sidebar-border: oklch(0.94 0 0);
+  --sidebar-ring: oklch(0.77 0 0);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * CHART COLORS - Verde Theme
+   * ═══════════════════════════════════════════════════════════════════════
+   */
+  --chart-1: oklch(0.62 0.14 155.00);                /* Verde principal */
+  --chart-2: oklch(0.69 0.16 290.41);                /* Purple */
+  --chart-3: oklch(0.88 0.03 93.13);                 /* Cream */
+  --chart-4: oklch(0.88 0.04 298.18);                /* Pink */
+  --chart-5: oklch(0.56 0.13 42.06);                 /* Orange accent */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * BASE STYLES - Claude.ai Clean Reset
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--foreground);
+  background-color: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * ANIMATION KEYFRAMES - Claude.ai Style
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Skeleton loading - Claude.ai style */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * UTILITY CLASSES - Claude.ai Patterns
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
+.claude-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.claude-card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius-default);
+  border: 1px solid var(--border);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.claude-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.claude-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--primary-foreground);
+  background-color: var(--primary);
+  border: none;
+  border-radius: var(--radius-default);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.claude-button-primary:hover {
+  background-color: var(--brand-green-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.claude-button-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.claude-text-muted {
+  color: var(--muted-foreground);
+}
+
+.claude-text-primary {
+  color: var(--primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * END OF CLAUDE.AI GREEN DESIGN SYSTEM
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * "Clean, calm, focused - com verde ao invés de laranja"
+ * SOLI DEO GLORIA
+ */
