@@ -7,8 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/NimbleMarkets/ntcharts/barchart"
-	"github.com/NimbleMarkets/ntcharts/linechart"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/dashboard"
 )
 
@@ -20,8 +19,6 @@ type ThreatDashboard struct {
 	height           int
 	styles           dashboard.DashboardStyles
 	data             *ThreatData
-	severityChart    *barchart.BarChart
-	timelineChart    *linechart.LineChart
 	refreshTicker    *time.Ticker
 }
 
@@ -123,10 +120,6 @@ func New() *ThreatDashboard {
 
 // Init initializes the dashboard
 func (d *ThreatDashboard) Init() tea.Cmd {
-	// Initialize charts
-	d.severityChart = barchart.New(d.width/2-4, d.height/3)
-	d.timelineChart = linechart.New(d.width-4, d.height/4)
-
 	// Start refresh ticker (every 10 seconds for threat intel)
 	d.refreshTicker = time.NewTicker(10 * time.Second)
 
@@ -412,20 +405,7 @@ func (d *ThreatDashboard) renderIOCs() string {
 
 // updateCharts updates chart data
 func (d *ThreatDashboard) updateCharts() {
-	if d.severityChart != nil {
-		d.severityChart.Clear()
-		d.severityChart.Push("Critical", float64(d.data.ThreatsByLevel[ThreatLevelCritical]))
-		d.severityChart.Push("High", float64(d.data.ThreatsByLevel[ThreatLevelHigh]))
-		d.severityChart.Push("Medium", float64(d.data.ThreatsByLevel[ThreatLevelMedium]))
-		d.severityChart.Push("Low", float64(d.data.ThreatsByLevel[ThreatLevelLow]))
-	}
-
-	if d.timelineChart != nil && len(d.data.ThreatTrend) > 0 {
-		d.timelineChart.Clear()
-		for _, val := range d.data.ThreatTrend {
-			d.timelineChart.Push(val)
-		}
-	}
+	// Charts removed - no-op for now
 }
 
 // refresh fetches new threat intelligence data
@@ -535,16 +515,16 @@ func (d *ThreatDashboard) fetchThreatData(ctx context.Context) *ThreatData {
 
 // Helper functions
 
-func (d *ThreatDashboard) getLevelStyle(level ThreatLevel) dashboard.DashboardStyles {
+func (d *ThreatDashboard) getLevelStyle(level ThreatLevel) lipgloss.Style {
 	switch level {
 	case ThreatLevelCritical:
-		return d.styles
+		return d.styles.Error
 	case ThreatLevelHigh:
-		return d.styles
+		return d.styles.Warning
 	case ThreatLevelMedium:
-		return d.styles
+		return d.styles.Warning
 	default:
-		return d.styles
+		return d.styles.Value
 	}
 }
 
@@ -592,10 +572,4 @@ func (d *ThreatDashboard) IsFocused() bool { return d.focused }
 func (d *ThreatDashboard) Resize(width, height int) {
 	d.width = width
 	d.height = height
-	if d.severityChart != nil {
-		d.severityChart = barchart.New(width/2-4, height/3)
-	}
-	if d.timelineChart != nil {
-		d.timelineChart = linechart.New(width-4, height/4)
-	}
 }

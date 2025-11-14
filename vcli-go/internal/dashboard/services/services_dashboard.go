@@ -7,8 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/NimbleMarkets/ntcharts/linechart"
-	"github.com/NimbleMarkets/ntcharts/sparkline"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/config"
 	"github.com/verticedev/vcli-go/internal/dashboard"
 )
@@ -21,8 +20,6 @@ type ServicesDashboard struct {
 	height        int
 	styles        dashboard.DashboardStyles
 	data          *ServicesData
-	responseChart *linechart.LineChart
-	sparklines    map[string]*sparkline.SparkLine
 	refreshTicker *time.Ticker
 }
 
@@ -62,9 +59,8 @@ const (
 // New creates a new services health dashboard
 func New() *ServicesDashboard {
 	return &ServicesDashboard{
-		id:         "services-dashboard",
-		styles:     dashboard.DefaultStyles(),
-		sparklines: make(map[string]*sparkline.SparkLine),
+		id:     "services-dashboard",
+		styles: dashboard.DefaultStyles(),
 		data: &ServicesData{
 			Services: make([]ServiceHealth, 0),
 		},
@@ -73,9 +69,6 @@ func New() *ServicesDashboard {
 
 // Init initializes the dashboard
 func (d *ServicesDashboard) Init() tea.Cmd {
-	// Initialize response time chart
-	d.responseChart = linechart.New(d.width-4, d.height/4)
-
 	// Start refresh ticker (every 5 seconds)
 	d.refreshTicker = time.NewTicker(5 * time.Second)
 
@@ -97,7 +90,6 @@ func (d *ServicesDashboard) Update(msg tea.Msg) (dashboard.Dashboard, tea.Cmd) {
 		if msg.DashboardID == d.id {
 			if data, ok := msg.Data.(*ServicesData); ok {
 				d.data = data
-				d.updateCharts()
 			}
 		}
 
@@ -207,7 +199,7 @@ func (d *ServicesDashboard) renderServiceGrid() string {
 		}
 
 		// Sparkline for response time trend
-		sparklineStr := d.renderSparkline(svc.Name, svc.ResponseHistory)
+		sparklineStr := d.renderSparkline(svc.ResponseHistory)
 
 		// Build row
 		b.WriteString(statusStyle.Render(icon))
@@ -230,25 +222,49 @@ func (d *ServicesDashboard) renderServiceGrid() string {
 	return b.String()
 }
 
-// renderSparkline renders sparkline for response time history
-func (d *ServicesDashboard) renderSparkline(serviceName string, history []float64) string {
+// renderSparkline renders simple ASCII sparkline for response time history
+func (d *ServicesDashboard) renderSparkline(history []float64) string {
 	if len(history) == 0 {
 		return strings.Repeat("─", 10)
 	}
 
-	// Get or create sparkline
-	if _, exists := d.sparklines[serviceName]; !exists {
-		d.sparklines[serviceName] = sparkline.New(10, 1)
+	// Simple ASCII sparkline using Unicode block characters
+	chars := []rune{'▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'}
+
+	// Find min/max for normalization
+	min, max := history[0], history[0]
+	for _, v := range history {
+		if v < min {
+			min = v
+		}
+		if v > max {
+			max = v
+		}
 	}
 
-	spark := d.sparklines[serviceName]
-	spark.Clear()
-
-	for _, val := range history {
-		spark.Push(val)
+	// Build sparkline
+	var b strings.Builder
+	for i := 0; i < 10 && i < len(history); i++ {
+		normalized := 0.0
+		if max > min {
+			normalized = (history[i] - min) / (max - min)
+		}
+		idx := int(normalized * float64(len(chars)-1))
+		if idx < 0 {
+			idx = 0
+		}
+		if idx >= len(chars) {
+			idx = len(chars) - 1
+		}
+		b.WriteRune(chars[idx])
 	}
 
-	return spark.View()
+	// Pad if needed
+	for b.Len() < 10 {
+		b.WriteRune('─')
+	}
+
+	return b.String()
 }
 
 // getStatusIcon returns icon for status
@@ -265,43 +281,20 @@ func (d *ServicesDashboard) getStatusIcon(status HealthStatus) string {
 	}
 }
 
-// getStatusStyle returns style for status
-func (d *ServicesDashboard) getStatusStyle(status HealthStatus) dashboard.DashboardStyles {
+// getStatusStyle returns lipgloss.Style for status
+func (d *ServicesDashboard) getStatusStyle(status HealthStatus) lipgloss.Style {
 	switch status {
 	case HealthStatusHealthy:
-		return d.styles
+		return d.styles.Success
 	case HealthStatusDegraded:
-		return d.styles
+		return d.styles.Warning
 	case HealthStatusUnhealthy:
-		return d.styles
+		return d.styles.Error
 	default:
-		return d.styles
+		return d.styles.Value
 	}
 }
 
-// updateCharts updates chart data
-func (d *ServicesDashboard) updateCharts() {
-	if d.responseChart == nil {
-		return
-	}
-
-	// Update response time chart with average response times
-	avgResponseTimes := make([]float64, 0)
-	for _, svc := range d.data.Services {
-		if len(svc.ResponseHistory) > 0 {
-			sum := 0.0
-			for _, rt := range svc.ResponseHistory {
-				sum += rt
-			}
-			avgResponseTimes = append(avgResponseTimes, sum/float64(len(svc.ResponseHistory)))
-		}
-	}
-
-	d.responseChart.Clear()
-	for _, val := range avgResponseTimes {
-		d.responseChart.Push(val)
-	}
-}
 
 // refresh fetches new service health data
 func (d *ServicesDashboard) refresh() tea.Cmd {
@@ -424,7 +417,4 @@ func (d *ServicesDashboard) IsFocused() bool      { return d.focused }
 func (d *ServicesDashboard) Resize(width, height int) {
 	d.width = width
 	d.height = height
-	if d.responseChart != nil {
-		d.responseChart = linechart.New(width-4, height/4)
-	}
 }

@@ -7,8 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/NimbleMarkets/ntcharts/linechart"
-	"github.com/NimbleMarkets/ntcharts/sparkline"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/verticedev/vcli-go/internal/dashboard"
 )
 
@@ -20,10 +19,6 @@ type NetworkDashboard struct {
 	height           int
 	styles           dashboard.DashboardStyles
 	data             *NetworkData
-	bandwidthChart   *linechart.LineChart
-	latencyChart     *linechart.LineChart
-	inboundSparkline *sparkline.SparkLine
-	outboundSparkline *sparkline.SparkLine
 	refreshTicker    *time.Ticker
 }
 
@@ -95,12 +90,6 @@ func New() *NetworkDashboard {
 
 // Init initializes the dashboard
 func (d *NetworkDashboard) Init() tea.Cmd {
-	// Initialize charts
-	d.bandwidthChart = linechart.New(d.width-4, d.height/3)
-	d.latencyChart = linechart.New(d.width/2-4, d.height/4)
-	d.inboundSparkline = sparkline.New(20, 1)
-	d.outboundSparkline = sparkline.New(20, 1)
-
 	// Start refresh ticker (every 2 seconds for network metrics)
 	d.refreshTicker = time.NewTicker(2 * time.Second)
 
@@ -193,16 +182,12 @@ func (d *NetworkDashboard) renderBandwidth() string {
 	inStyle := d.getBandwidthStyle(d.data.InboundBandwidth)
 	b.WriteString(d.styles.Label.Render("↓ In:  "))
 	b.WriteString(inStyle.Render(fmt.Sprintf("%7.2f Mbps", d.data.InboundBandwidth)))
-	b.WriteString("  ")
-	b.WriteString(d.inboundSparkline.View())
 	b.WriteString("\n")
 
 	// Outbound
 	outStyle := d.getBandwidthStyle(d.data.OutboundBandwidth)
 	b.WriteString(d.styles.Label.Render("↑ Out: "))
 	b.WriteString(outStyle.Render(fmt.Sprintf("%7.2f Mbps", d.data.OutboundBandwidth)))
-	b.WriteString("  ")
-	b.WriteString(d.outboundSparkline.View())
 	b.WriteString("\n")
 
 	// Total traffic
@@ -359,36 +344,7 @@ func (d *NetworkDashboard) renderTopConnections() string {
 
 // updateCharts updates chart data
 func (d *NetworkDashboard) updateCharts() {
-	// Update bandwidth sparklines
-	if d.inboundSparkline != nil && len(d.data.BandwidthHistory) > 0 {
-		d.inboundSparkline.Clear()
-		for _, sample := range d.data.BandwidthHistory {
-			d.inboundSparkline.Push(sample.Inbound)
-		}
-	}
-
-	if d.outboundSparkline != nil && len(d.data.BandwidthHistory) > 0 {
-		d.outboundSparkline.Clear()
-		for _, sample := range d.data.BandwidthHistory {
-			d.outboundSparkline.Push(sample.Outbound)
-		}
-	}
-
-	// Update bandwidth chart
-	if d.bandwidthChart != nil && len(d.data.BandwidthHistory) > 0 {
-		d.bandwidthChart.Clear()
-		for _, sample := range d.data.BandwidthHistory {
-			d.bandwidthChart.Push(sample.Inbound + sample.Outbound)
-		}
-	}
-
-	// Update latency chart
-	if d.latencyChart != nil && len(d.data.LatencyHistory) > 0 {
-		d.latencyChart.Clear()
-		for _, val := range d.data.LatencyHistory {
-			d.latencyChart.Push(val)
-		}
-	}
+	// Charts removed - no-op for now
 }
 
 // refresh fetches new network data
@@ -499,11 +455,11 @@ func (d *NetworkDashboard) fetchNetworkData(ctx context.Context) *NetworkData {
 
 // Helper functions
 
-func (d *NetworkDashboard) getBandwidthStyle(bandwidth float64) dashboard.DashboardStyles {
+func (d *NetworkDashboard) getBandwidthStyle(bandwidth float64) lipgloss.Style {
 	if bandwidth > 80.0 {
-		return d.styles // High bandwidth - could be warning in some contexts
+		return d.styles.Warning
 	}
-	return d.styles
+	return d.styles.Value
 }
 
 func formatBytes(bytes uint64) string {
@@ -547,16 +503,4 @@ func (d *NetworkDashboard) IsFocused() bool { return d.focused }
 func (d *NetworkDashboard) Resize(width, height int) {
 	d.width = width
 	d.height = height
-	if d.bandwidthChart != nil {
-		d.bandwidthChart = linechart.New(width-4, height/3)
-	}
-	if d.latencyChart != nil {
-		d.latencyChart = linechart.New(width/2-4, height/4)
-	}
-	if d.inboundSparkline != nil {
-		d.inboundSparkline = sparkline.New(20, 1)
-	}
-	if d.outboundSparkline != nil {
-		d.outboundSparkline = sparkline.New(20, 1)
-	}
 }
