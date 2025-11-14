@@ -15,8 +15,9 @@
  * - Live badge de comando operacional
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import styles from './ActivityFeedSection.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import { formatTime } from "../../../utils/dateHelpers";
+import styles from "./ActivityFeedSection.module.css";
 
 export const ActivityFeedSection = ({ realThreats = [] }) => {
   const [activities, setActivities] = useState([]);
@@ -31,49 +32,49 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
     const newActivity = {
       id: latestThreat.id,
       timestamp: latestThreat.timestamp,
-      ...generateActivityFromThreat(latestThreat)
+      ...generateActivityFromThreat(latestThreat),
     };
 
-    setActivities(prev => [newActivity, ...prev].slice(0, 20));
+    setActivities((prev) => [newActivity, ...prev].slice(0, 20));
   }, [realThreats]);
 
   // Gera atividade formatada baseada na ameaça real
   const generateActivityFromThreat = (threat) => {
     if (threat.isMalicious) {
       return {
-        type: 'threat',
-        icon: '🎯',
-        title: 'HOSTIL DETECTADO',
+        type: "threat",
+        icon: "🎯",
+        title: "HOSTIL DETECTADO",
         message: threat.ip,
-        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
-        severity: 'critical'
+        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || "Unknown"}`,
+        severity: "critical",
       };
-    } else if (threat.severity === 'suspicious') {
+    } else if (threat.severity === "suspicious") {
       return {
-        type: 'warning',
-        icon: '⚠️',
-        title: 'ALVO SUSPEITO',
+        type: "warning",
+        icon: "⚠️",
+        title: "ALVO SUSPEITO",
         message: threat.ip,
-        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || 'Unknown'}`,
-        severity: 'high'
+        detail: `Ameaça: ${threat.threatScore}/100 | ${threat.geolocation?.country || "Unknown"}`,
+        severity: "high",
       };
-    } else if (threat.severity === 'questionable') {
+    } else if (threat.severity === "questionable") {
       return {
-        type: 'info',
-        icon: '🔍',
-        title: 'INTEL ADQUIRIDA',
+        type: "info",
+        icon: "🔍",
+        title: "INTEL ADQUIRIDA",
         message: threat.ip,
         detail: `Ameaça: ${threat.threatScore}/100`,
-        severity: 'medium'
+        severity: "medium",
       };
     } else {
       return {
-        type: 'success',
-        icon: '✅',
-        title: 'ZONA LIMPA',
+        type: "success",
+        icon: "✅",
+        title: "ZONA LIMPA",
         message: threat.ip,
         detail: `Ameaça: ${threat.threatScore}/100 - Seguro`,
-        severity: 'low'
+        severity: "low",
       };
     }
   };
@@ -81,22 +82,60 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
   // Atividades de background
   useEffect(() => {
     const backgroundActivities = [
-      { type: 'info', icon: '🔭', title: 'RECON INICIADO', message: '192.168.0.0/24', detail: 'Varredura de zona tática', severity: 'low' },
-      { type: 'success', icon: '🔐', title: 'CERTIFICADO ARMADO', message: 'api.vertice.com', detail: 'SSL certificate válido', severity: 'low' },
-      { type: 'info', icon: '💾', title: 'BACKUP TÁTICO', message: 'prod-db-01', detail: 'Database snapshot seguro', severity: 'low' },
-      { type: 'info', icon: '🔍', title: 'PORT SCAN COMPLETO', message: '10.0.0.0/8', detail: '65535 portas analisadas', severity: 'low' },
-      { type: 'success', icon: '🛡️', title: 'ESCUDO ATUALIZADO', message: 'fw-edge-01', detail: 'Defesas reforçadas', severity: 'low' }
+      {
+        type: "info",
+        icon: "🔭",
+        title: "RECON INICIADO",
+        message: "192.168.0.0/24",
+        detail: "Varredura de zona tática",
+        severity: "low",
+      },
+      {
+        type: "success",
+        icon: "🔐",
+        title: "CERTIFICADO ARMADO",
+        message: "api.vertice.com",
+        detail: "SSL certificate válido",
+        severity: "low",
+      },
+      {
+        type: "info",
+        icon: "💾",
+        title: "BACKUP TÁTICO",
+        message: "prod-db-01",
+        detail: "Database snapshot seguro",
+        severity: "low",
+      },
+      {
+        type: "info",
+        icon: "🔍",
+        title: "PORT SCAN COMPLETO",
+        message: "10.0.0.0/8",
+        detail: "65535 portas analisadas",
+        severity: "low",
+      },
+      {
+        type: "success",
+        icon: "🛡️",
+        title: "ESCUDO ATUALIZADO",
+        message: "fw-edge-01",
+        detail: "Defesas reforçadas",
+        severity: "low",
+      },
     ];
 
     const interval = setInterval(() => {
-      const randomActivity = backgroundActivities[Math.floor(Math.random() * backgroundActivities.length)];
+      const randomActivity =
+        backgroundActivities[
+          Math.floor(Math.random() * backgroundActivities.length)
+        ];
       const newActivity = {
         ...randomActivity,
         id: Date.now(),
-        timestamp: new Date().toLocaleTimeString('pt-BR'),
+        timestamp: formatTime(new Date(), "--:--:--"),
       };
 
-      setActivities(prev => [newActivity, ...prev].slice(0, 20));
+      setActivities((prev) => [newActivity, ...prev].slice(0, 20));
     }, 8000);
 
     return () => clearInterval(interval);
@@ -122,7 +161,9 @@ export const ActivityFeedSection = ({ realThreats = [] }) => {
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>📡</div>
             <p className={styles.emptyText}>Aguardando operações...</p>
-            <p className={styles.emptyHint}>Arsenal monitorando alvos globais</p>
+            <p className={styles.emptyHint}>
+              Arsenal monitorando alvos globais
+            </p>
           </div>
         ) : (
           <div className={styles.timeline}>
@@ -153,9 +194,7 @@ const ActivityItem = ({ activity, index }) => {
       </div>
 
       {/* Icon */}
-      <div className={styles.icon}>
-        {activity.icon}
-      </div>
+      <div className={styles.icon}>{activity.icon}</div>
 
       {/* Content */}
       <div className={styles.content}>
@@ -164,15 +203,11 @@ const ActivityItem = ({ activity, index }) => {
           <span className={styles.timestamp}>{activity.timestamp}</span>
         </div>
         <p className={styles.message}>{activity.message}</p>
-        {activity.detail && (
-          <p className={styles.detail}>{activity.detail}</p>
-        )}
+        {activity.detail && <p className={styles.detail}>{activity.detail}</p>}
       </div>
 
       {/* Severity Badge */}
-      <div className={styles.badge}>
-        {activity.severity?.toUpperCase()}
-      </div>
+      <div className={styles.badge}>{activity.severity?.toUpperCase()}</div>
     </article>
   );
 };

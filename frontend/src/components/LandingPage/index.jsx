@@ -17,23 +17,27 @@
  * 4. Activity Feed - Timeline cinematográfico
  */
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useKonamiCode } from '../../hooks/useKonamiCode';
-import { checkServicesHealth, checkThreatIntelligence } from '../../api/cyberServices';
-import logger from '../../utils/logger';
+import React, { useState, useEffect } from "react";
+import { formatTime } from "../../utils/dateHelpers";
+import { useAuth } from "../../contexts/AuthContext";
+import { useKonamiCode } from "../../hooks/useKonamiCode";
+import {
+  checkServicesHealth,
+  checkThreatIntelligence,
+} from "../../api/cyberServices";
+import logger from "../../utils/logger";
 
 // New modular sections
-import { HeroSection } from './sections/HeroSection';
-import { StatsSection } from './sections/StatsSection';
-import { ModulesSection } from './sections/ModulesSection';
-import { ActivityFeedSection } from './sections/ActivityFeedSection';
+import { HeroSection } from "./sections/HeroSection";
+import { StatsSection } from "./sections/StatsSection";
+import { ModulesSection } from "./sections/ModulesSection";
+import { ActivityFeedSection } from "./sections/ActivityFeedSection";
 
 // Login Modal (keep from old version)
-import { LoginModal } from './components/LoginModal';
+import { LoginModal } from "./components/LoginModal";
 
 // Styles
-import styles from './LandingPage.module.css';
+import styles from "./LandingPage.module.css";
 
 export const LandingPage = ({ setCurrentView }) => {
   const { user, isAuthenticated, login, logout } = useAuth();
@@ -43,9 +47,9 @@ export const LandingPage = ({ setCurrentView }) => {
     threatsDetected: 0,
     activeMonitoring: 127,
     networksScanned: 1542,
-    uptime: '99.8%',
+    uptime: "99.8%",
     servicesOnline: 0,
-    totalServices: 4
+    totalServices: 4,
   });
 
   const [realThreats, setRealThreats] = useState([]);
@@ -53,7 +57,7 @@ export const LandingPage = ({ setCurrentView }) => {
     ipIntelligence: false,
     threatIntel: false,
     malwareAnalysis: false,
-    sslMonitor: false
+    sslMonitor: false,
   });
 
   // Check services health periodically
@@ -63,10 +67,10 @@ export const LandingPage = ({ setCurrentView }) => {
       setServicesStatus(health);
 
       const online = Object.values(health).filter(Boolean).length;
-      setStats(prev => ({
+      setStats((prev) => ({
         ...prev,
         servicesOnline: online,
-        uptime: online === 4 ? '99.9%' : `${(online / 4 * 100).toFixed(1)}%`
+        uptime: online === 4 ? "99.9%" : `${((online / 4) * 100).toFixed(1)}%`,
       }));
     };
 
@@ -80,39 +84,40 @@ export const LandingPage = ({ setCurrentView }) => {
   useEffect(() => {
     const fetchRealThreats = async () => {
       const suspiciousIPs = [
-        '185.220.101.23', // Exit node Tor conhecido
-        '45.129.56.200',
-        '178.162.212.214',
-        '91.219.236.232'
+        "185.220.101.23", // Exit node Tor conhecido
+        "45.129.56.200",
+        "178.162.212.214",
+        "91.219.236.232",
       ];
 
       try {
-        const randomIP = suspiciousIPs[Math.floor(Math.random() * suspiciousIPs.length)];
+        const randomIP =
+          suspiciousIPs[Math.floor(Math.random() * suspiciousIPs.length)];
         const result = await checkThreatIntelligence(randomIP);
 
         if (result.success) {
           const threat = {
             id: Date.now(),
-            type: result.categories[0] || 'Unknown',
+            type: result.categories[0] || "Unknown",
             ip: result.target,
             severity: result.reputation,
             threatScore: result.threatScore,
             isMalicious: result.isMalicious,
-            timestamp: new Date().toLocaleTimeString('pt-BR'),
-            geolocation: result.geolocation
+            timestamp: formatTime(new Date(), "--:--:--"),
+            geolocation: result.geolocation,
           };
 
-          setRealThreats(prev => [threat, ...prev].slice(0, 20));
+          setRealThreats((prev) => [threat, ...prev].slice(0, 20));
 
           if (result.isMalicious) {
-            setStats(prev => ({
+            setStats((prev) => ({
               ...prev,
-              threatsDetected: prev.threatsDetected + 1
+              threatsDetected: prev.threatsDetected + 1,
             }));
           }
         }
       } catch (error) {
-        logger.error('Error fetching real threats:', error);
+        logger.error("Error fetching real threats:", error);
       }
     };
 
@@ -125,10 +130,10 @@ export const LandingPage = ({ setCurrentView }) => {
   // Animate stats (background scanning)
   useEffect(() => {
     const interval = setInterval(() => {
-      setStats(prev => ({
+      setStats((prev) => ({
         ...prev,
         activeMonitoring: 120 + Math.floor(Math.random() * 15),
-        networksScanned: prev.networksScanned + Math.floor(Math.random() * 5)
+        networksScanned: prev.networksScanned + Math.floor(Math.random() * 5),
       }));
     }, 5000);
 
@@ -138,15 +143,15 @@ export const LandingPage = ({ setCurrentView }) => {
   // Konami Code Easter Egg
   useKonamiCode(() => {
     const messages = [
-      '🎮 Konami Code Activated! Welcome, Power User! 🎮',
-      '🚀 You found the secret! MAXIMUS approves! 🚀',
-      '⚡ Elite Hacker Mode Unlocked! ⚡',
-      '🎯 Achievement Unlocked: Code Master! 🎯',
-      '💚 YHWH through Christ blesses your discovery! 💚'
+      "🎮 Konami Code Activated! Welcome, Power User! 🎮",
+      "🚀 You found the secret! MAXIMUS approves! 🚀",
+      "⚡ Elite Hacker Mode Unlocked! ⚡",
+      "🎯 Achievement Unlocked: Code Master! 🎯",
+      "💚 YHWH through Christ blesses your discovery! 💚",
     ];
     const message = messages[Math.floor(Math.random() * messages.length)];
 
-    const toast = document.createElement('div');
+    const toast = document.createElement("div");
     toast.textContent = message;
     toast.style.cssText = `
       position: fixed;
