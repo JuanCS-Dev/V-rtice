@@ -13,7 +13,7 @@ import (
 // ClusterManager manages connections and operations for Kubernetes clusters
 type ClusterManager struct {
 	// Kubernetes clients
-	clientset     *kubernetes.Clientset
+	clientset     kubernetes.Interface // Changed to interface for better testability
 	dynamicClient dynamic.Interface
 	metricsClient *metricsv1beta1.Clientset
 	config        *rest.Config
@@ -200,6 +200,6 @@ func (cm *ClusterManager) IsConnected() bool {
 }
 
 // Clientset returns the underlying Kubernetes clientset (for advanced operations)
-func (cm *ClusterManager) Clientset() *kubernetes.Clientset {
+func (cm *ClusterManager) Clientset() kubernetes.Interface {
 	return cm.clientset
 }
