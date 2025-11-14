@@ -1,5 +1,6 @@
-import React from 'react';
-import { useFocusTrap } from '../hooks/useFocusTrap';
+import React from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
+import { formatDate } from "../utils/dateHelpers";
 
 const ModalRelatorio = ({ dossierData, onClose }) => {
   const modalRef = useFocusTrap({
@@ -7,21 +8,21 @@ const ModalRelatorio = ({ dossierData, onClose }) => {
     autoFocus: true,
     returnFocus: true,
     onEscape: onClose,
-    allowOutsideClick: false
+    allowOutsideClick: false,
   });
 
   const handlePrint = () => {
     // Esconde os botões para não aparecerem na impressão
-    const printButton = document.getElementById('print-button');
-    const closeButton = document.getElementById('close-button');
-    printButton.style.display = 'none';
-    closeButton.style.display = 'none';
+    const printButton = document.getElementById("print-button");
+    const closeButton = document.getElementById("close-button");
+    printButton.style.display = "none";
+    closeButton.style.display = "none";
 
     window.print(); // Abre a janela de impressão do navegador
 
     // Mostra os botões novamente após a impressão
-    printButton.style.display = 'block';
-    closeButton.style.display = 'block';
+    printButton.style.display = "block";
+    closeButton.style.display = "block";
   };
 
   return (
@@ -37,7 +38,12 @@ const ModalRelatorio = ({ dossierData, onClose }) => {
         aria-labelledby="modal-report-title"
       >
         <header className="flex items-center justify-between p-4 bg-gray-200 border-b border-gray-300">
-          <h2 id="modal-report-title" className="text-xl font-bold text-gray-700">Relatório de Inteligência Veicular</h2>
+          <h2
+            id="modal-report-title"
+            className="text-xl font-bold text-gray-700"
+          >
+            Relatório de Inteligência Veicular
+          </h2>
           <div className="flex items-center space-x-2">
             <button
               id="print-button"
@@ -60,31 +66,72 @@ const ModalRelatorio = ({ dossierData, onClose }) => {
 
         <main className="flex-1 p-8 overflow-y-auto">
           <section className="mb-6">
-            <h3 className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4">Informações do Veículo</h3>
+            <h3 className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4">
+              Informações do Veículo
+            </h3>
             <div className="grid grid-cols-3 gap-4 text-sm">
-              <div><strong>Placa:</strong> <span className="font-mono text-base">{dossierData.placa}</span></div>
-              <div><strong>Situação:</strong> <span className="font-semibold text-red-600">{dossierData.situacao}</span></div>
-              <div><strong>Risco:</strong> <span className="font-semibold">{dossierData.riskLevel}</span></div>
-              <div className="col-span-2"><strong>Veículo:</strong> {dossierData.marca} {dossierData.modelo}</div>
-              <div><strong>Cor:</strong> {dossierData.cor}</div>
-              <div><strong>Ano/Modelo:</strong> {dossierData.ano}/{dossierData.anoModelo}</div>
-              <div className="col-span-2"><strong>Chassi:</strong> <span className="font-mono">{dossierData.chassi}</span></div>
-              <div className="col-span-3"><strong>Local:</strong> {dossierData.municipio} - {dossierData.uf}</div>
+              <div>
+                <strong>Placa:</strong>{" "}
+                <span className="font-mono text-base">{dossierData.placa}</span>
+              </div>
+              <div>
+                <strong>Situação:</strong>{" "}
+                <span className="font-semibold text-red-600">
+                  {dossierData.situacao}
+                </span>
+              </div>
+              <div>
+                <strong>Risco:</strong>{" "}
+                <span className="font-semibold">{dossierData.riskLevel}</span>
+              </div>
+              <div className="col-span-2">
+                <strong>Veículo:</strong> {dossierData.marca}{" "}
+                {dossierData.modelo}
+              </div>
+              <div>
+                <strong>Cor:</strong> {dossierData.cor}
+              </div>
+              <div>
+                <strong>Ano/Modelo:</strong> {dossierData.ano}/
+                {dossierData.anoModelo}
+              </div>
+              <div className="col-span-2">
+                <strong>Chassi:</strong>{" "}
+                <span className="font-mono">{dossierData.chassi}</span>
+              </div>
+              <div className="col-span-3">
+                <strong>Local:</strong> {dossierData.municipio} -{" "}
+                {dossierData.uf}
+              </div>
             </div>
           </section>
 
           <section>
-            <h3 className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4">Histórico de Ocorrências</h3>
+            <h3 className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4">
+              Histórico de Ocorrências
+            </h3>
             <div className="space-y-4 text-sm">
-              {dossierData.ocorrencias.map(ocorrencia => (
-                <div key={ocorrencia.id} className="border border-gray-200 rounded p-3">
+              {dossierData.ocorrencias.map((ocorrencia) => (
+                <div
+                  key={ocorrencia.id}
+                  className="border border-gray-200 rounded p-3"
+                >
                   <div className="flex justify-between font-semibold mb-1">
-                    <span>{ocorrencia.tipo} (ID: {ocorrencia.id})</span>
+                    <span>
+                      {ocorrencia.tipo} (ID: {ocorrencia.id})
+                    </span>
                     <span>Status: {ocorrencia.status}</span>
                   </div>
                   <p className="text-gray-600 mb-2">{ocorrencia.resumo}</p>
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Data: {new Date(ocorrencia.data).toLocaleDateString('pt-BR')}</span>
+                    <span>
+                      Data:{" "}
+                      {formatDate(
+                        ocorrencia.data,
+                        { dateStyle: "short" },
+                        "N/A",
+                      )}
+                    </span>
                     <span>Local: {ocorrencia.local}</span>
                   </div>
                 </div>
