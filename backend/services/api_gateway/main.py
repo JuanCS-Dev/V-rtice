@@ -50,6 +50,56 @@ from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# TIMEOUT CONFIGURATION - Boris Cherny Pattern: Explicit Configuration
+# =============================================================================
+# Follow httpx best practices (2025): connect, read, write, pool timeouts
+# Reference: https://www.restack.io/p/fastapi-answer-timeout-middleware
+
+# Default timeout for backend proxying (production-safe)
+DEFAULT_BACKEND_TIMEOUT = httpx.Timeout(
+    timeout=60.0,  # Overall timeout: 60s
+    connect=5.0,  # Connection timeout: 5s
+    read=60.0,  # Read timeout: 60s (allow for slow processing)
+    write=10.0,  # Write timeout: 10s
+    pool=5.0,  # Pool connection timeout: 5s
+)
+
+# Endpoint-specific timeout overrides (for operations that need more time)
+ENDPOINT_TIMEOUTS = {
+    "/api/osint": httpx.Timeout(timeout=120.0, read=120.0),  # OSINT can be slow
+    "/api/malware/analyze": httpx.Timeout(
+        timeout=180.0, read=180.0
+    ),  # Malware analysis is intensive
+    "/api/scan": httpx.Timeout(timeout=90.0, read=90.0),  # Scans take time
+    "/api/offensive/scan": httpx.Timeout(timeout=90.0, read=90.0),
+    "/api/defensive/analyze": httpx.Timeout(timeout=90.0, read=90.0),
+}
+
+
+def get_timeout_for_endpoint(path: str) -> httpx.Timeout:
+    """Get timeout configuration for a specific endpoint.
+
+    Args:
+        path: The request path (e.g., "/api/osint/search")
+
+    Returns:
+        httpx.Timeout: Configured timeout for the endpoint
+
+    Boris Cherny Pattern: Explicit over implicit configuration
+    """
+    for pattern, timeout in ENDPOINT_TIMEOUTS.items():
+        if path.startswith(pattern):
+            logger.debug(
+                f"Using custom timeout for {path}: {timeout.timeout}s",
+                extra={"path": path, "timeout": timeout.timeout},
+            )
+            return timeout
+
+    # Default timeout for all other endpoints
+    return DEFAULT_BACKEND_TIMEOUT
+
+
 # Global health cache instance
 health_cache: HealthCheckCache = None
 redis_client = None
@@ -1475,6 +1525,14 @@ async def stream_apv_ws(websocket: WebSocket):
 async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResponse:
     """Proxies the incoming request to the specified backend service.
 
+    Boris Cherny Pattern: Production-ready timeout with intelligent error handling
+
+    Features:
+    - Endpoint-specific timeout configuration
+    - Granular error handling (timeout, connection, HTTP status)
+    - Structured logging for debugging
+    - Clear error messages for clients
+
     Args:
         base_url (str): The base URL of the target backend service.
         path (str): The specific path for the request.
@@ -1484,10 +1542,18 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
         JSONResponse: The response from the backend service.
 
     Raises:
-        HTTPException: If there is an error communicating with the backend service.
+        HTTPException:
+            - 504: Timeout errors
+            - 503: Connection errors
+            - 500: Generic request errors
+            - 4xx/5xx: Proxied from backend
     """
     url = f"{base_url}/{path}"
-    async with httpx.AsyncClient() as client:
+
+    # Get timeout configuration for this endpoint
+    timeout_config = get_timeout_for_endpoint(f"/{path}")
+
+    async with httpx.AsyncClient(timeout=timeout_config) as client:
         try:
             # Reconstruct headers, excluding host and content-length which httpx handles
             headers = {
@@ -1518,11 +1584,74 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
             return JSONResponse(
                 content=response.json(), status_code=response.status_code
             )
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Service communication error: {e}"
+
+        except httpx.TimeoutException as e:
+            # Log timeout with details for debugging
+            logger.error(
+                f"Backend timeout: {base_url}/{path}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "timeout_config": timeout_config.timeout,
+                    "error": str(e),
+                },
             )
+
+            raise HTTPException(
+                status_code=504,
+                detail=f"Backend service timeout after {timeout_config.timeout}s. "
+                f"The operation is taking longer than expected. Please try again later.",
+            )
+
+        except httpx.ConnectError as e:
+            # Connection refused, DNS failure, etc.
+            logger.error(
+                f"Backend connection error: {base_url}/{path} - {e}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "error": str(e),
+                },
+            )
+
+            raise HTTPException(
+                status_code=503,
+                detail=f"Cannot connect to backend service at {base_url}. "
+                f"Service may be down or unreachable.",
+            )
+
+        except httpx.RequestError as e:
+            # Generic request errors (network issues, etc.)
+            logger.error(
+                f"Backend request error: {base_url}/{path} - {e}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "error": str(e),
+                },
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Service communication error: {str(e)}",
+            )
+
         except httpx.HTTPStatusError as e:
+            # Backend returned 4xx/5xx status
+            logger.warning(
+                f"Backend HTTP error: {base_url}/{path} - {e.response.status_code}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "status_code": e.response.status_code,
+                    "response_text": e.response.text[:200],  # First 200 chars
+                },
+            )
+
             raise HTTPException(
                 status_code=e.response.status_code,
                 detail=f"Backend service error: {e.response.text}",
