@@ -31,7 +31,7 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
@@ -48,6 +48,19 @@ export const ThreatMap = () => {
   const { threats, loading, error, filters, setFilters, refresh } = useThreatData();
   const [selectedThreat, setSelectedThreat] = useState(null);
 
+  // GAP #31 FIX: Use useMemo to cache filtered results
+  // Boris Cherny Standard: Without memoization, filtering 1000 threats 4 times
+  // per render = 4000 iterations. With useMemo, only recalculates when threats change
+  const severityCounts = useMemo(() => {
+    const counts = { critical: 0, high: 0, medium: 0, low: 0, total: threats.length };
+    threats.forEach(t => {
+      if (counts[t.severity] !== undefined) {
+        counts[t.severity]++;
+      }
+    });
+    return counts;
+  }, [threats]);
+
   const handleThreatClick = (threat) => {
     setSelectedThreat(threat);
   };
@@ -55,7 +68,7 @@ export const ThreatMap = () => {
   return (
     <Card
       title="CYBER THREAT MAP"
-      badge={`${threats.length} THREATS`}
+      badge={`${severityCounts.total} THREATS`}
       variant="cyber"
       className={styles.widget}
       data-maximus-tool="threat-map"
@@ -67,7 +80,7 @@ export const ThreatMap = () => {
             context={{
               type: 'threat_map',
               data: threats,
-              count: threats.length,
+              count: severityCounts.total,
               filters
             }}
             prompt="Analyze these global cyber threats and identify patterns, high-risk regions, and threat trends"
@@ -142,30 +155,30 @@ export const ThreatMap = () => {
           data-maximus-section="stats">
           <div className={styles.stat}>
             <span className={styles.statLabel}>TOTAL:</span>
-            <span className={styles.statValue}>{threats.length}</span>
+            <span className={styles.statValue}>{severityCounts.total}</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statLabel}>CRITICAL:</span>
             <Badge variant="critical" size="sm">
-              {threats.filter(t => t.severity === 'critical').length}
+              {severityCounts.critical}
             </Badge>
           </div>
           <div className={styles.stat}>
             <span className={styles.statLabel}>HIGH:</span>
             <Badge variant="high" size="sm">
-              {threats.filter(t => t.severity === 'high').length}
+              {severityCounts.high}
             </Badge>
           </div>
           <div className={styles.stat}>
             <span className={styles.statLabel}>MEDIUM:</span>
             <Badge variant="medium" size="sm">
-              {threats.filter(t => t.severity === 'medium').length}
+              {severityCounts.medium}
             </Badge>
           </div>
           <div className={styles.stat}>
             <span className={styles.statLabel}>LOW:</span>
             <Badge variant="low" size="sm">
-              {threats.filter(t => t.severity === 'low').length}
+              {severityCounts.low}
             </Badge>
           </div>
         </section>

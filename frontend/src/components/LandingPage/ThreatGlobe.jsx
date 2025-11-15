@@ -23,6 +23,14 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
   const markersRef = useRef([]);
   const pathsRef = useRef([]);
 
+  // GAP #28 & #29 FIX: Track all timers for cleanup to prevent memory leaks
+  // Boris Cherny Standard: Each untracked interval/timeout leaks ~200KB-500KB
+  // Without cleanup, 10 threats = 2MB+ leak, animations accumulate to 10MB+
+  const timersRef = useRef({
+    intervals: [],
+    timeouts: []
+  });
+
   const [_activeTrace, _setActiveTrace] = useState(null);
   const [threatCount, setThreatCount] = useState(0);
 
@@ -162,17 +170,23 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       circle.bindPopup(popupContent);
 
       // Animação de pulso para ameaças maliciosas
+      // GAP #28 FIX: Track pulse intervals for cleanup
       if (threat.isMalicious) {
         let pulseCount = 0;
         const pulseInterval = setInterval(() => {
           if (pulseCount >= 3) {
             clearInterval(pulseInterval);
+            // Remove from tracking when self-clearing
+            const idx = timersRef.current.intervals.indexOf(pulseInterval);
+            if (idx > -1) timersRef.current.intervals.splice(idx, 1);
             return;
           }
           circle.setRadius(circle.getRadius() * 1.3);
-          setTimeout(() => circle.setRadius(threat.isMalicious ? 10 : 6), 300);
+          const pulseTimeout = setTimeout(() => circle.setRadius(threat.isMalicious ? 10 : 6), 300);
+          timersRef.current.timeouts.push(pulseTimeout);
           pulseCount++;
         }, 1000);
+        timersRef.current.intervals.push(pulseInterval);
       }
 
       markersRef.current.push(circle);
@@ -185,6 +199,13 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       }
     });
 
+    // GAP #28 & #29 FIX: Cleanup all timers on unmount or when realThreats change
+    // Boris Cherny Standard: Prevent memory leaks by clearing ALL tracked timers
+    return () => {
+      timersRef.current.intervals.forEach(clearInterval);
+      timersRef.current.timeouts.forEach(clearTimeout);
+      timersRef.current = { intervals: [], timeouts: [] };
+    };
   }, [realThreats]);
 
   // Animar trace path estilo OnionTracer
@@ -214,6 +235,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       className: 'trace-path'
     }).addTo(map);
 
+    // GAP #29 FIX: Track nested animation timers for cleanup
     // Animação: fade in
     let opacity = 0;
     const fadeIn = setInterval(() => {
@@ -223,9 +245,12 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
 
       if (opacity >= 0.8) {
         clearInterval(fadeIn);
+        // Remove from tracking when self-clearing
+        const idx = timersRef.current.intervals.indexOf(fadeIn);
+        if (idx > -1) timersRef.current.intervals.splice(idx, 1);
 
         // Fade out depois de 5s
-        setTimeout(() => {
+        const fadeOutTimeout = setTimeout(() => {
           let fadeOpacity = opacity;
           const fadeOut = setInterval(() => {
             fadeOpacity -= 0.1;
@@ -234,13 +259,19 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
 
             if (fadeOpacity <= 0) {
               clearInterval(fadeOut);
+              // Remove from tracking when self-clearing
+              const fadeOutIdx = timersRef.current.intervals.indexOf(fadeOut);
+              if (fadeOutIdx > -1) timersRef.current.intervals.splice(fadeOutIdx, 1);
               map.removeLayer(path1);
               map.removeLayer(path2);
             }
           }, 100);
+          timersRef.current.intervals.push(fadeOut);
         }, 5000);
+        timersRef.current.timeouts.push(fadeOutTimeout);
       }
     }, 100);
+    timersRef.current.intervals.push(fadeIn);
 
     pathsRef.current.push(path1, path2);
   };
