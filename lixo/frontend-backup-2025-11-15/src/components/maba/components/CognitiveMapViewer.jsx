@@ -18,12 +18,18 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 // GAP #30 FIX: Tree-shake D3 imports - import only what we use
 // Boris Cherny Standard: `import * as d3` = 300KB, specific imports = ~100KB
 // Saves 200KB in bundle by importing only needed functions
-import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } from 'd3-force';
-import { select } from 'd3-selection';
-import { drag } from 'd3-drag';
-import { zoom } from 'd3-zoom';
-import { scaleOrdinal } from 'd3-scale';
-import { schemeCategory10 } from 'd3-scale-chromatic';
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+} from "d3-force";
+import { select } from "d3-selection";
+import { drag } from "d3-drag";
+import { zoom } from "d3-zoom";
+import { scaleOrdinal } from "d3-scale";
+import { schemeCategory10 } from "d3-scale-chromatic";
 import { formatDateTime } from "../../../utils/dateHelpers";
 import styles from "./CognitiveMapViewer.module.css";
 
@@ -112,9 +118,7 @@ export const CognitiveMapViewer = ({ graph, isLoading }) => {
 
     // Color scale by domain
     const domains = [...new Set(graph.nodes.map((n) => n.domain))];
-    const colorScale = scaleOrdinal()
-      .domain(domains)
-      .range(schemeCategory10);
+    const colorScale = scaleOrdinal().domain(domains).range(schemeCategory10);
 
     // Draw links
     const link = g

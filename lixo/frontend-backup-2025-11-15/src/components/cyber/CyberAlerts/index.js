@@ -1,2 +1,2 @@
-export { CyberAlerts } from './CyberAlerts';
-export { default } from './CyberAlerts';
+export { CyberAlerts } from "./CyberAlerts";
+export { default } from "./CyberAlerts";

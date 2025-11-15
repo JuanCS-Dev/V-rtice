@@ -1,47 +1,52 @@
 /**
  * 🎯 Honeypot Status Grid
- * 
+ *
  * Real-time honeypot health monitoring and status visualization.
  * Displays deployment status, activity metrics, and alert conditions.
- * 
+ *
  * @module HoneypotStatusGrid
  */
 
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import styles from './HoneypotStatusGrid.module.css';
+import React, { useState } from "react";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import styles from "./HoneypotStatusGrid.module.css";
 
 const HoneypotStatusGrid = ({ honeypots = [] }) => {
-  const [selectedType, setSelectedType] = useState('all');
-  const [sortBy, setSortBy] = useState('activity');
+  const [selectedType, setSelectedType] = useState("all");
+  const [sortBy, setSortBy] = useState("activity");
 
   /**
    * Filter and sort honeypots
    */
   const processedHoneypots = React.useMemo(() => {
     let filtered = [...honeypots];
-    
+
     // Filter by type
-    if (selectedType !== 'all') {
-      filtered = filtered.filter(h => h.type === selectedType);
+    if (selectedType !== "all") {
+      filtered = filtered.filter((h) => h.type === selectedType);
     }
-    
+
     // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'activity':
+        case "activity":
           return (b.interactions || 0) - (a.interactions || 0);
-        case 'name':
+        case "name":
           return a.name.localeCompare(b.name);
-        case 'status':
+        case "status":
           return a.status.localeCompare(b.status);
         default:
           return 0;
       }
     });
-    
+
     return filtered;
   }, [honeypots, selectedType, sortBy]);
 
@@ -49,7 +54,7 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
    * Get unique honeypot types
    */
   const honeypotTypes = React.useMemo(() => {
-    return [...new Set(honeypots.map(h => h.type))];
+    return [...new Set(honeypots.map((h) => h.type))];
   }, [honeypots]);
 
   /**
@@ -57,10 +62,10 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
    */
   const getStatusInfo = (status) => {
     const map = {
-      active: { color: '#10b981', icon: '🟢', label: 'ACTIVE' },
-      inactive: { color: '#6b7280', icon: '⚪', label: 'INACTIVE' },
-      degraded: { color: '#ffaa00', icon: '🟡', label: 'DEGRADED' },
-      error: { color: '#ff0040', icon: '🔴', label: 'ERROR' }
+      active: { color: "#10b981", icon: "🟢", label: "ACTIVE" },
+      inactive: { color: "#6b7280", icon: "⚪", label: "INACTIVE" },
+      degraded: { color: "#ffaa00", icon: "🟡", label: "DEGRADED" },
+      error: { color: "#ff0040", icon: "🔴", label: "ERROR" },
     };
     return map[status] || map.inactive;
   };
@@ -69,11 +74,11 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
    * Get activity level
    */
   const getActivityLevel = (interactions) => {
-    if (interactions >= 100) return { level: 'Critical', color: '#ff0040' };
-    if (interactions >= 50) return { level: 'High', color: '#ff4000' };
-    if (interactions >= 10) return { level: 'Medium', color: '#ffaa00' };
-    if (interactions > 0) return { level: 'Low', color: '#10b981' };
-    return { level: 'None', color: '#6b7280' };
+    if (interactions >= 100) return { level: "Critical", color: "#ff0040" };
+    if (interactions >= 50) return { level: "High", color: "#ff4000" };
+    if (interactions >= 10) return { level: "Medium", color: "#ffaa00" };
+    if (interactions > 0) return { level: "Low", color: "#10b981" };
+    return { level: "None", color: "#6b7280" };
   };
 
   /**
@@ -81,9 +86,9 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
    */
   const getUptimePercentage = (honeypot) => {
     // Mock calculation - in real implementation, use actual uptime data
-    if (honeypot.status === 'active') return 99.9;
-    if (honeypot.status === 'degraded') return 95.0;
-    if (honeypot.status === 'inactive') return 0;
+    if (honeypot.status === "active") return 99.9;
+    if (honeypot.status === "degraded") return 95.0;
+    if (honeypot.status === "inactive") return 0;
     return 85.0;
   };
 
@@ -91,23 +96,23 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
     <div className={styles.container}>
       {/* Header with controls */}
       <div className={styles.header}>
-        <h3 className={styles.title}>
-          🎯 Honeypot Status Grid
-        </h3>
-        
+        <h3 className={styles.title}>🎯 Honeypot Status Grid</h3>
+
         <div className={styles.controls}>
-          <select 
+          <select
             className={styles.select}
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
           >
             <option value="all">All Types</option>
-            {honeypotTypes.map(type => (
-              <option key={type} value={type}>{type.toUpperCase()}</option>
+            {honeypotTypes.map((type) => (
+              <option key={type} value={type}>
+                {type.toUpperCase()}
+              </option>
             ))}
           </select>
-          
-          <select 
+
+          <select
             className={styles.select}
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -127,13 +132,13 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
             <p className={styles.emptyText}>No honeypots deployed</p>
           </div>
         ) : (
-          processedHoneypots.map(honeypot => {
+          processedHoneypots.map((honeypot) => {
             const statusInfo = getStatusInfo(honeypot.status);
             const activityLevel = getActivityLevel(honeypot.interactions || 0);
             const uptime = getUptimePercentage(honeypot);
-            
+
             return (
-              <div 
+              <div
                 key={honeypot.id}
                 className={`${styles.card} ${styles[honeypot.status]}`}
               >
@@ -143,13 +148,13 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
                     <span className={styles.cardIcon}>{statusInfo.icon}</span>
                     <span className={styles.cardName}>{honeypot.name}</span>
                   </div>
-                  
-                  <span 
+
+                  <span
                     className={styles.statusBadge}
-                    style={{ 
+                    style={{
                       background: `${statusInfo.color}20`,
                       borderColor: `${statusInfo.color}50`,
-                      color: statusInfo.color
+                      color: statusInfo.color,
                     }}
                   >
                     {statusInfo.label}
@@ -162,12 +167,14 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
                     <span className={styles.infoLabel}>Type:</span>
                     <span className={styles.infoValue}>{honeypot.type}</span>
                   </div>
-                  
+
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Port:</span>
-                    <span className={styles.infoValue}>{honeypot.port || 'N/A'}</span>
+                    <span className={styles.infoValue}>
+                      {honeypot.port || "N/A"}
+                    </span>
                   </div>
-                  
+
                   <div className={styles.infoRow}>
                     <span className={styles.infoLabel}>Uptime:</span>
                     <span className={`${styles.infoValue} ${styles.uptime}`}>
@@ -184,9 +191,9 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
                     </span>
                     <span className={styles.metricLabel}>Interactions</span>
                   </div>
-                  
+
                   <div className={styles.metricBox}>
-                    <span 
+                    <span
                       className={styles.metricValue}
                       style={{ color: activityLevel.color }}
                     >
@@ -198,11 +205,11 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
 
                 {/* Activity Bar */}
                 <div className={styles.activityBar}>
-                  <div 
+                  <div
                     className={styles.activityFill}
-                    style={{ 
-                      width: `${Math.min((honeypot.interactions || 0) / 100 * 100, 100)}%`,
-                      background: activityLevel.color
+                    style={{
+                      width: `${Math.min(((honeypot.interactions || 0) / 100) * 100, 100)}%`,
+                      background: activityLevel.color,
                     }}
                   />
                 </div>
@@ -210,9 +217,10 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
                 {/* Footer */}
                 <div className={styles.cardFooter}>
                   <span className={styles.footerText}>
-                    Last seen: {honeypot.last_seen ?
-                      formatTime(honeypot.last_seen) :
-                      'Never'}
+                    Last seen:{" "}
+                    {honeypot.last_seen
+                      ? formatTime(honeypot.last_seen)
+                      : "Never"}
                   </span>
                 </div>
               </div>
@@ -226,18 +234,23 @@ const HoneypotStatusGrid = ({ honeypots = [] }) => {
         <div className={styles.summary}>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Total:</span>
-            <span className={styles.summaryValue}>{processedHoneypots.length}</span>
+            <span className={styles.summaryValue}>
+              {processedHoneypots.length}
+            </span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Active:</span>
             <span className={`${styles.summaryValue} ${styles.active}`}>
-              {processedHoneypots.filter(h => h.status === 'active').length}
+              {processedHoneypots.filter((h) => h.status === "active").length}
             </span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Total Interactions:</span>
             <span className={styles.summaryValue}>
-              {processedHoneypots.reduce((sum, h) => sum + (h.interactions || 0), 0)}
+              {processedHoneypots.reduce(
+                (sum, h) => sum + (h.interactions || 0),
+                0,
+              )}
             </span>
           </div>
         </div>

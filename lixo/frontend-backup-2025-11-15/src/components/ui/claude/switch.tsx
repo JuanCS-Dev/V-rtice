@@ -8,10 +8,10 @@
  * Estilo: Clean toggle with verde active state
  */
 
-import * as React from "react"
-import * as SwitchPrimitives from "@radix-ui/react-switch"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import * as SwitchPrimitives from "@radix-ui/react-switch";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Switch Component - Claude.ai Green Style
@@ -50,7 +50,7 @@ const Switch = React.forwardRef<
         "data-[state=checked]:bg-[var(--primary)]",
         "data-[state=checked]:shadow-[var(--shadow-glow-green-soft)]",
       ].join(" "),
-      className
+      className,
     )}
     {...props}
     ref={ref}
@@ -66,11 +66,11 @@ const Switch = React.forwardRef<
           "transition-transform duration-[var(--transition-normal)]",
           "data-[state=checked]:translate-x-5",
           "data-[state=unchecked]:translate-x-0",
-        ].join(" ")
+        ].join(" "),
       )}
     />
   </SwitchPrimitives.Root>
-))
-Switch.displayName = SwitchPrimitives.Root.displayName
+));
+Switch.displayName = SwitchPrimitives.Root.displayName;
 
-export { Switch }
+export { Switch };

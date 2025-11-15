@@ -11,17 +11,19 @@
  * NO MOCKS - Production Ready
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { ServiceEndpoints } from '@/config/endpoints';
-import { queryKeys } from '../../../../config/queryClient';
-import logger from '@/utils/logger';
+import { useQuery } from "@tanstack/react-query";
+import { ServiceEndpoints } from "@/config/endpoints";
+import { queryKeys } from "../../../../config/queryClient";
+import logger from "@/utils/logger";
 
 const fetchDefensiveMetrics = async () => {
   // Fetch from Maximus Core health endpoint (centralized config)
-  const healthResponse = await fetch(`${ServiceEndpoints.defensive.core}/health`);
+  const healthResponse = await fetch(
+    `${ServiceEndpoints.defensive.core}/health`,
+  );
 
   if (!healthResponse.ok) {
-    throw new Error('Failed to fetch defensive metrics');
+    throw new Error("Failed to fetch defensive metrics");
   }
 
   const healthData = await healthResponse.json();
@@ -33,7 +35,7 @@ const fetchDefensiveMetrics = async () => {
     threats: healthData.memory_system?.episodic_stats?.investigations || 0,
     suspiciousIPs: healthData.security_stats?.suspicious_ips || 0,
     domains: healthData.security_stats?.monitored_domains || 0,
-    monitored: healthData.total_integrated_tools || 57
+    monitored: healthData.total_integrated_tools || 57,
   };
 };
 
@@ -46,8 +48,8 @@ export const useDefensiveMetrics = () => {
     retry: 2,
     retryDelay: 1000,
     onError: (err) => {
-      logger.error('Failed to fetch defensive metrics:', err);
-    }
+      logger.error("Failed to fetch defensive metrics:", err);
+    },
   });
 
   return {
@@ -55,9 +57,9 @@ export const useDefensiveMetrics = () => {
       threats: 0,
       suspiciousIPs: 0,
       domains: 0,
-      monitored: 0
+      monitored: 0,
     },
     loading: isLoading,
-    error: error?.message || null
+    error: error?.message || null,
   };
 };

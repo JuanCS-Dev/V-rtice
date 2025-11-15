@@ -1,2 +1,2 @@
-export { IpIntelligence } from './IpIntelligence';
-export { default } from './IpIntelligence';
+export { IpIntelligence } from "./IpIntelligence";
+export { default } from "./IpIntelligence";

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '../../../shared';
-import styles from './QuickActions.module.css';
+import React from "react";
+import { Button } from "../../../shared";
+import styles from "./QuickActions.module.css";
 
 export const QuickActions = () => {
   return (

@@ -20,37 +20,43 @@ import logger from '@/utils/logger';
  * />
  */
 
-import React, { useState } from 'react';
-import { analyzeWithAI, chatWithMaximus } from '../../api/maximusAI';
-import { useRateLimit } from '../../hooks/useRateLimit';
-import './AskMaximusButton.css';
+import React, { useState } from "react";
+import { analyzeWithAI, chatWithMaximus } from "../../api/maximusAI";
+import { useRateLimit } from "../../hooks/useRateLimit";
+import "./AskMaximusButton.css";
 
 export const AskMaximusButton = ({
   context = {},
   prompt = null,
   onResponse = null,
-  buttonText = '🤖 Ask Maximus AI',
-  size = 'medium', // 'small', 'medium', 'large'
-  variant = 'primary' // 'primary', 'secondary', 'ghost'
+  buttonText = "🤖 Ask Maximus AI",
+  size = "medium", // 'small', 'medium', 'large'
+  variant = "primary", // 'primary', 'secondary', 'ghost'
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [aiResponse, setAiResponse] = useState(null);
-  const [customPrompt, setCustomPrompt] = useState(prompt || '');
+  const [customPrompt, setCustomPrompt] = useState(prompt || "");
 
   // Rate limiting: 5 AI requests per minute
-  const { execute: executeWithRateLimit, remaining: _remaining, resetIn: _resetIn } = useRateLimit('ask-maximus-ai', {
+  const {
+    execute: executeWithRateLimit,
+    remaining: _remaining,
+    resetIn: _resetIn,
+  } = useRateLimit("ask-maximus-ai", {
     maxRequests: 5,
     windowMs: 60000, // 1 minute
     onLimitExceeded: ({ resetIn: reset }) => {
-      alert(`Rate limit exceeded. Please wait ${Math.ceil(reset / 1000)} seconds before asking again.`);
-    }
+      alert(
+        `Rate limit exceeded. Please wait ${Math.ceil(reset / 1000)} seconds before asking again.`,
+      );
+    },
   });
 
   // Handle AI analysis
   const handleAskMaximus = async () => {
     if (!customPrompt && !context) {
-      alert('Please provide context or a question for Maximus AI');
+      alert("Please provide context or a question for Maximus AI");
       return;
     }
 
@@ -64,10 +70,15 @@ export const AskMaximusButton = ({
 
         if (customPrompt) {
           // Use chat if there's a specific prompt
-          response = await chatWithMaximus(customPrompt, { ...context, mode: 'deep_analysis' });
+          response = await chatWithMaximus(customPrompt, {
+            ...context,
+            mode: "deep_analysis",
+          });
         } else {
           // Use analyze if only context provided
-          response = await analyzeWithAI(context, { type: context.type || 'general' });
+          response = await analyzeWithAI(context, {
+            type: context.type || "general",
+          });
         }
 
         if (response.success) {
@@ -75,7 +86,7 @@ export const AskMaximusButton = ({
             response: response.response || response.analysis,
             suggestions: response.suggestions || [],
             tools_used: response.tools_used || [],
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           };
 
           setAiResponse(result);
@@ -84,15 +95,15 @@ export const AskMaximusButton = ({
             onResponse(result);
           }
         } else {
-          throw new Error(response.error || 'AI analysis failed');
+          throw new Error(response.error || "AI analysis failed");
         }
       });
     } catch (error) {
-      logger.error('Ask Maximus error:', error);
+      logger.error("Ask Maximus error:", error);
       setAiResponse({
         response: `Error: ${error.message}`,
         isError: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } finally {
       setIsAnalyzing(false);
@@ -102,7 +113,7 @@ export const AskMaximusButton = ({
   const handleClose = () => {
     setShowModal(false);
     setAiResponse(null);
-    if (!prompt) setCustomPrompt('');
+    if (!prompt) setCustomPrompt("");
   };
 
   return (
@@ -113,20 +124,20 @@ export const AskMaximusButton = ({
         onClick={() => setShowModal(true)}
         disabled={isAnalyzing}
       >
-        {isAnalyzing ? '⏳ Analyzing...' : buttonText}
+        {isAnalyzing ? "⏳ Analyzing..." : buttonText}
       </button>
 
       {/* Modal */}
       {showModal && (
-        <div 
-          className="ask-maximus-modal-overlay" 
+        <div
+          className="ask-maximus-modal-overlay"
           onClick={handleClose}
           onKeyDown={(e) => {
-            if (e.key === 'Escape') handleClose();
+            if (e.key === "Escape") handleClose();
           }}
           role="presentation"
         >
-          <div 
+          <div
             className="ask-maximus-modal"
             role="dialog"
             aria-modal="true"
@@ -135,7 +146,9 @@ export const AskMaximusButton = ({
             {/* Header */}
             <div className="modal-header">
               <h3 id="ask-maximus-title">🤖 Ask Maximus AI</h3>
-              <button className="modal-close" onClick={handleClose}>×</button>
+              <button className="modal-close" onClick={handleClose}>
+                ×
+              </button>
             </div>
 
             {/* Content */}
@@ -143,7 +156,9 @@ export const AskMaximusButton = ({
               {/* Prompt Input */}
               {!prompt && (
                 <div className="prompt-section">
-                  <label htmlFor="maximus-prompt-textarea">What would you like to know?</label>
+                  <label htmlFor="maximus-prompt-textarea">
+                    What would you like to know?
+                  </label>
                   {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
                   <textarea
                     id="maximus-prompt-textarea"
@@ -161,48 +176,60 @@ export const AskMaximusButton = ({
               {prompt && (
                 <div className="prompt-section">
                   <label htmlFor="maximus-prompt-display">Question:</label>
-                  <div id="maximus-prompt-display" className="prompt-display">{prompt}</div>
+                  <div id="maximus-prompt-display" className="prompt-display">
+                    {prompt}
+                  </div>
                 </div>
               )}
 
               {/* Context Display */}
               {Object.keys(context).length > 0 && (
                 <div className="context-section">
-                  <label htmlFor="maximus-context-display">Context provided:</label>
+                  <label htmlFor="maximus-context-display">
+                    Context provided:
+                  </label>
                   <div id="maximus-context-display" className="context-display">
-                    <pre>{JSON.stringify(context, null, 2).slice(0, 300)}...</pre>
+                    <pre>
+                      {JSON.stringify(context, null, 2).slice(0, 300)}...
+                    </pre>
                   </div>
                 </div>
               )}
 
               {/* AI Response */}
               {aiResponse && (
-                <div className={`response-section ${aiResponse.isError ? 'response-error' : ''}`}>
+                <div
+                  className={`response-section ${aiResponse.isError ? "response-error" : ""}`}
+                >
                   <label>
-                    {aiResponse.isError ? '⚠️ Error' : '🤖 Maximus AI Response'}
+                    {aiResponse.isError ? "⚠️ Error" : "🤖 Maximus AI Response"}
                   </label>
                   <div className="response-content">
                     <p>{aiResponse.response}</p>
 
-                    {aiResponse.tools_used && aiResponse.tools_used.length > 0 && (
-                      <div className="tools-used">
-                        <span className="tools-label">🔧 Tools used:</span>
-                        {aiResponse.tools_used.map((tool, idx) => (
-                          <span key={idx} className="tool-badge">{tool}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    {aiResponse.suggestions && aiResponse.suggestions.length > 0 && (
-                      <div className="suggestions">
-                        <span className="sugg-label">💡 Suggestions:</span>
-                        <ul>
-                          {aiResponse.suggestions.map((sugg, idx) => (
-                            <li key={idx}>{sugg.text || sugg}</li>
+                    {aiResponse.tools_used &&
+                      aiResponse.tools_used.length > 0 && (
+                        <div className="tools-used">
+                          <span className="tools-label">🔧 Tools used:</span>
+                          {aiResponse.tools_used.map((tool, idx) => (
+                            <span key={idx} className="tool-badge">
+                              {tool}
+                            </span>
                           ))}
-                        </ul>
-                      </div>
-                    )}
+                        </div>
+                      )}
+
+                    {aiResponse.suggestions &&
+                      aiResponse.suggestions.length > 0 && (
+                        <div className="suggestions">
+                          <span className="sugg-label">💡 Suggestions:</span>
+                          <ul>
+                            {aiResponse.suggestions.map((sugg, idx) => (
+                              <li key={idx}>{sugg.text || sugg}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 </div>
               )}
@@ -224,11 +251,11 @@ export const AskMaximusButton = ({
                   onClick={handleAskMaximus}
                   disabled={isAnalyzing || (!customPrompt && !prompt)}
                 >
-                  {isAnalyzing ? '⏳ Analyzing...' : '🚀 Analyze with AI'}
+                  {isAnalyzing ? "⏳ Analyzing..." : "🚀 Analyze with AI"}
                 </button>
               )}
               <button className="btn-close" onClick={handleClose}>
-                {aiResponse ? 'Close' : 'Cancel'}
+                {aiResponse ? "Close" : "Cancel"}
               </button>
             </div>
           </div>

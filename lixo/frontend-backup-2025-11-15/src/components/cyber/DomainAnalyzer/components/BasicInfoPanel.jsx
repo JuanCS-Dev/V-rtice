@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import { getStatusVariant } from '../utils/statusUtils';
-import styles from './BasicInfoPanel.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import { getStatusVariant } from "../utils/statusUtils";
+import styles from "./BasicInfoPanel.module.css";
 
 export const BasicInfoPanel = ({ data }) => {
   return (

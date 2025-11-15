@@ -9,11 +9,11 @@
  * Governed by: Constituição Vértice v2.5 - ADR-004 (Testing Strategy)
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { BaseService } from '../BaseService';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { BaseService } from "../BaseService";
 
 // Mock logger
-vi.mock('../../../utils/logger', () => ({
+vi.mock("../../../utils/logger", () => ({
   default: {
     debug: vi.fn(),
     info: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock('../../../utils/logger', () => ({
   },
 }));
 
-describe('BaseService Retry Logic', () => {
+describe("BaseService Retry Logic", () => {
   let service;
   let mockClient;
 
@@ -37,80 +37,80 @@ describe('BaseService Retry Logic', () => {
       delete: vi.fn(),
     };
 
-    service = new BaseService('/api/test', mockClient);
+    service = new BaseService("/api/test", mockClient);
   });
 
   // ========================================================================
   // GET REQUESTS - AUTOMATIC RETRY (Idempotent)
   // ========================================================================
 
-  describe('GET - Automatic Retry', () => {
-    it('should retry GET on network error', async () => {
+  describe("GET - Automatic Retry", () => {
+    it("should retry GET on network error", async () => {
       // Fail 2x, succeed on 3rd attempt
       mockClient.get
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({ data: 'success' });
+        .mockRejectedValueOnce(new Error("Network error"))
+        .mockRejectedValueOnce(new Error("Network error"))
+        .mockResolvedValueOnce({ data: "success" });
 
-      const result = await service.get('/endpoint');
+      const result = await service.get("/endpoint");
 
       // Should have been called 3 times (1 initial + 2 retries)
       expect(mockClient.get).toHaveBeenCalledTimes(3);
-      expect(result).toEqual({ data: 'success' });
+      expect(result).toEqual({ data: "success" });
     });
 
-    it('should fail after max retries exhausted', async () => {
+    it("should fail after max retries exhausted", async () => {
       // Fail all attempts
-      mockClient.get.mockRejectedValue(new Error('Persistent network error'));
+      mockClient.get.mockRejectedValue(new Error("Persistent network error"));
 
-      await expect(service.get('/endpoint')).rejects.toThrow();
+      await expect(service.get("/endpoint")).rejects.toThrow();
 
       // 1 initial attempt + 3 retries = 4 total
       expect(mockClient.get).toHaveBeenCalledTimes(4);
     });
 
-    it('should NOT retry GET on 401 Unauthorized', async () => {
-      mockClient.get.mockRejectedValue(new Error('401 Unauthorized'));
+    it("should NOT retry GET on 401 Unauthorized", async () => {
+      mockClient.get.mockRejectedValue(new Error("401 Unauthorized"));
 
-      await expect(service.get('/endpoint')).rejects.toThrow('401');
+      await expect(service.get("/endpoint")).rejects.toThrow("401");
 
       // Only 1 attempt, no retries
       expect(mockClient.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should NOT retry GET on 403 Forbidden', async () => {
-      mockClient.get.mockRejectedValue(new Error('403 Forbidden'));
+    it("should NOT retry GET on 403 Forbidden", async () => {
+      mockClient.get.mockRejectedValue(new Error("403 Forbidden"));
 
-      await expect(service.get('/endpoint')).rejects.toThrow('403');
+      await expect(service.get("/endpoint")).rejects.toThrow("403");
 
       // Only 1 attempt
       expect(mockClient.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should allow disabling retry with retry: 0', async () => {
-      mockClient.get.mockRejectedValue(new Error('Network error'));
+    it("should allow disabling retry with retry: 0", async () => {
+      mockClient.get.mockRejectedValue(new Error("Network error"));
 
-      await expect(service.get('/endpoint', { retry: 0 })).rejects.toThrow();
+      await expect(service.get("/endpoint", { retry: 0 })).rejects.toThrow();
 
       // Only 1 attempt, no retries
       expect(mockClient.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should allow custom retry count', async () => {
-      mockClient.get.mockRejectedValue(new Error('Network error'));
+    it("should allow custom retry count", async () => {
+      mockClient.get.mockRejectedValue(new Error("Network error"));
 
-      await expect(service.get('/endpoint', { retry: 5 })).rejects.toThrow();
+      await expect(service.get("/endpoint", { retry: 5 })).rejects.toThrow();
 
       // 1 initial + 5 retries = 6 total
       expect(mockClient.get).toHaveBeenCalledTimes(6);
     });
 
-    it('should use exponential backoff delays', async () => {
+    it("should use exponential backoff delays", async () => {
       vi.useFakeTimers();
 
-      mockClient.get.mockRejectedValue(new Error('Network error'));
+      mockClient.get.mockRejectedValue(new Error("Network error"));
 
-      const promise = service.get('/endpoint');
+      const promise = service.get("/endpoint");
 
       // Verify delays: 1s, 2s, 4s
       await vi.advanceTimersByTimeAsync(1000); // 1st retry
@@ -122,13 +122,13 @@ describe('BaseService Retry Logic', () => {
       vi.useRealTimers();
     });
 
-    it('should succeed on first attempt without retry', async () => {
-      mockClient.get.mockResolvedValue({ data: 'success' });
+    it("should succeed on first attempt without retry", async () => {
+      mockClient.get.mockResolvedValue({ data: "success" });
 
-      const result = await service.get('/endpoint');
+      const result = await service.get("/endpoint");
 
       expect(mockClient.get).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ data: 'success' });
+      expect(result).toEqual({ data: "success" });
     });
   });
 
@@ -136,54 +136,54 @@ describe('BaseService Retry Logic', () => {
   // POST REQUESTS - OPT-IN RETRY (Non-Idempotent)
   // ========================================================================
 
-  describe('POST - Opt-In Retry', () => {
-    it('should NOT retry POST by default', async () => {
-      mockClient.post.mockRejectedValue(new Error('Network error'));
+  describe("POST - Opt-In Retry", () => {
+    it("should NOT retry POST by default", async () => {
+      mockClient.post.mockRejectedValue(new Error("Network error"));
 
-      await expect(service.post('/endpoint', {})).rejects.toThrow();
+      await expect(service.post("/endpoint", {})).rejects.toThrow();
 
       // Only 1 attempt, no automatic retry
       expect(mockClient.post).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry POST when options.retry = true', async () => {
+    it("should retry POST when options.retry = true", async () => {
       mockClient.post
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({ data: 'success' });
+        .mockRejectedValueOnce(new Error("Network error"))
+        .mockResolvedValueOnce({ data: "success" });
 
-      const result = await service.post('/endpoint', {}, { retry: true });
+      const result = await service.post("/endpoint", {}, { retry: true });
 
       // 2 attempts (1 initial + 1 retry)
       expect(mockClient.post).toHaveBeenCalledTimes(2);
-      expect(result).toEqual({ data: 'success' });
+      expect(result).toEqual({ data: "success" });
     });
 
-    it('should use custom maxRetries for POST', async () => {
-      mockClient.post.mockRejectedValue(new Error('Network error'));
+    it("should use custom maxRetries for POST", async () => {
+      mockClient.post.mockRejectedValue(new Error("Network error"));
 
       await expect(
-        service.post('/endpoint', {}, { retry: true, maxRetries: 5 })
+        service.post("/endpoint", {}, { retry: true, maxRetries: 5 }),
       ).rejects.toThrow();
 
       // 1 initial + 5 retries = 6 total
       expect(mockClient.post).toHaveBeenCalledTimes(6);
     });
 
-    it('should NOT retry POST on auth errors even with retry: true', async () => {
-      mockClient.post.mockRejectedValue(new Error('401 Unauthorized'));
+    it("should NOT retry POST on auth errors even with retry: true", async () => {
+      mockClient.post.mockRejectedValue(new Error("401 Unauthorized"));
 
       await expect(
-        service.post('/endpoint', {}, { retry: true })
-      ).rejects.toThrow('401');
+        service.post("/endpoint", {}, { retry: true }),
+      ).rejects.toThrow("401");
 
       // Only 1 attempt
       expect(mockClient.post).toHaveBeenCalledTimes(1);
     });
 
-    it('should succeed on first POST without retry', async () => {
+    it("should succeed on first POST without retry", async () => {
       mockClient.post.mockResolvedValue({ id: 123 });
 
-      const result = await service.post('/endpoint', { name: 'test' });
+      const result = await service.post("/endpoint", { name: "test" });
 
       expect(mockClient.post).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ id: 123 });
@@ -194,21 +194,21 @@ describe('BaseService Retry Logic', () => {
   // PUT REQUESTS - OPT-IN RETRY (Non-Idempotent)
   // ========================================================================
 
-  describe('PUT - Opt-In Retry', () => {
-    it('should NOT retry PUT by default', async () => {
-      mockClient.put.mockRejectedValue(new Error('Network error'));
+  describe("PUT - Opt-In Retry", () => {
+    it("should NOT retry PUT by default", async () => {
+      mockClient.put.mockRejectedValue(new Error("Network error"));
 
-      await expect(service.put('/endpoint/123', {})).rejects.toThrow();
+      await expect(service.put("/endpoint/123", {})).rejects.toThrow();
 
       expect(mockClient.put).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry PUT when options.retry = true', async () => {
+    it("should retry PUT when options.retry = true", async () => {
       mockClient.put
-        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({ updated: true });
 
-      const result = await service.put('/endpoint/123', {}, { retry: true });
+      const result = await service.put("/endpoint/123", {}, { retry: true });
 
       expect(mockClient.put).toHaveBeenCalledTimes(2);
       expect(result).toEqual({ updated: true });
@@ -219,21 +219,21 @@ describe('BaseService Retry Logic', () => {
   // DELETE REQUESTS - OPT-IN RETRY (Non-Idempotent)
   // ========================================================================
 
-  describe('DELETE - Opt-In Retry', () => {
-    it('should NOT retry DELETE by default', async () => {
-      mockClient.delete.mockRejectedValue(new Error('Network error'));
+  describe("DELETE - Opt-In Retry", () => {
+    it("should NOT retry DELETE by default", async () => {
+      mockClient.delete.mockRejectedValue(new Error("Network error"));
 
-      await expect(service.delete('/endpoint/123')).rejects.toThrow();
+      await expect(service.delete("/endpoint/123")).rejects.toThrow();
 
       expect(mockClient.delete).toHaveBeenCalledTimes(1);
     });
 
-    it('should retry DELETE when options.retry = true', async () => {
+    it("should retry DELETE when options.retry = true", async () => {
       mockClient.delete
-        .mockRejectedValueOnce(new Error('Network error'))
+        .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({ deleted: true });
 
-      const result = await service.delete('/endpoint/123', { retry: true });
+      const result = await service.delete("/endpoint/123", { retry: true });
 
       expect(mockClient.delete).toHaveBeenCalledTimes(2);
       expect(result).toEqual({ deleted: true });
@@ -244,45 +244,45 @@ describe('BaseService Retry Logic', () => {
   // RETRY METHOD - INTERNAL LOGIC
   // ========================================================================
 
-  describe('retry() method', () => {
-    it('should retry function with exponential backoff', async () => {
+  describe("retry() method", () => {
+    it("should retry function with exponential backoff", async () => {
       let callCount = 0;
 
       const flakeyFn = async () => {
         callCount++;
         if (callCount < 3) {
-          throw new Error('Temporary failure');
+          throw new Error("Temporary failure");
         }
-        return 'success';
+        return "success";
       };
 
       const result = await service.retry(flakeyFn, 5, 100);
 
-      expect(result).toBe('success');
+      expect(result).toBe("success");
       expect(callCount).toBe(3);
     });
 
-    it('should stop retrying on auth error', async () => {
+    it("should stop retrying on auth error", async () => {
       let callCount = 0;
 
       const authErrorFn = async () => {
         callCount++;
-        throw new Error('401 Unauthorized');
+        throw new Error("401 Unauthorized");
       };
 
-      await expect(service.retry(authErrorFn, 5, 100)).rejects.toThrow('401');
+      await expect(service.retry(authErrorFn, 5, 100)).rejects.toThrow("401");
 
       // Should stop immediately, not retry
       expect(callCount).toBe(1);
     });
 
-    it('should throw last error after all retries exhausted', async () => {
+    it("should throw last error after all retries exhausted", async () => {
       const alwaysFailFn = async () => {
-        throw new Error('Persistent error');
+        throw new Error("Persistent error");
       };
 
       await expect(service.retry(alwaysFailFn, 3, 100)).rejects.toThrow(
-        'Persistent error'
+        "Persistent error",
       );
     });
   });
@@ -291,26 +291,26 @@ describe('BaseService Retry Logic', () => {
   // ERROR HANDLING
   // ========================================================================
 
-  describe('Error Handling', () => {
-    it('should enhance errors with context', async () => {
-      mockClient.get.mockRejectedValue(new Error('Original error'));
+  describe("Error Handling", () => {
+    it("should enhance errors with context", async () => {
+      mockClient.get.mockRejectedValue(new Error("Original error"));
 
       try {
-        await service.get('/test', { retry: 0 });
+        await service.get("/test", { retry: 0 });
       } catch (error) {
-        expect(error.message).toContain('Original error');
-        expect(error.method).toBe('GET');
-        expect(error.endpoint).toContain('/test');
-        expect(error.service).toBe('BaseService');
+        expect(error.message).toContain("Original error");
+        expect(error.method).toBe("GET");
+        expect(error.endpoint).toContain("/test");
+        expect(error.service).toBe("BaseService");
       }
     });
 
-    it('should extract error message from various formats', () => {
-      expect(service.extractErrorMessage('string error')).toBe('string error');
-      expect(service.extractErrorMessage({ message: 'msg' })).toBe('msg');
-      expect(service.extractErrorMessage({ detail: 'detail' })).toBe('detail');
-      expect(service.extractErrorMessage({ error: 'err' })).toBe('err');
-      expect(service.extractErrorMessage({})).toBe('Unknown error occurred');
+    it("should extract error message from various formats", () => {
+      expect(service.extractErrorMessage("string error")).toBe("string error");
+      expect(service.extractErrorMessage({ message: "msg" })).toBe("msg");
+      expect(service.extractErrorMessage({ detail: "detail" })).toBe("detail");
+      expect(service.extractErrorMessage({ error: "err" })).toBe("err");
+      expect(service.extractErrorMessage({})).toBe("Unknown error occurred");
     });
   });
 
@@ -318,34 +318,34 @@ describe('BaseService Retry Logic', () => {
   // VALIDATION
   // ========================================================================
 
-  describe('Request Validation', () => {
-    it('should throw on null data', async () => {
-      await expect(service.post('/endpoint', null)).rejects.toThrow(
-        'cannot be null'
+  describe("Request Validation", () => {
+    it("should throw on null data", async () => {
+      await expect(service.post("/endpoint", null)).rejects.toThrow(
+        "cannot be null",
       );
     });
 
-    it('should throw on undefined data', async () => {
-      await expect(service.post('/endpoint', undefined)).rejects.toThrow(
-        'cannot be null'
+    it("should throw on undefined data", async () => {
+      await expect(service.post("/endpoint", undefined)).rejects.toThrow(
+        "cannot be null",
       );
     });
 
-    it('should throw on oversized payload', async () => {
+    it("should throw on oversized payload", async () => {
       // Create 6MB payload (exceeds 5MB limit)
-      const largePayload = { data: 'x'.repeat(6 * 1024 * 1024) };
+      const largePayload = { data: "x".repeat(6 * 1024 * 1024) };
 
-      await expect(service.post('/endpoint', largePayload)).rejects.toThrow(
-        'payload too large'
+      await expect(service.post("/endpoint", largePayload)).rejects.toThrow(
+        "payload too large",
       );
     });
 
-    it('should accept valid payloads', async () => {
+    it("should accept valid payloads", async () => {
       mockClient.post.mockResolvedValue({ ok: true });
 
-      const validPayload = { name: 'test', value: 123 };
+      const validPayload = { name: "test", value: 123 };
 
-      const result = await service.post('/endpoint', validPayload);
+      const result = await service.post("/endpoint", validPayload);
 
       expect(result).toEqual({ ok: true });
     });
@@ -355,47 +355,47 @@ describe('BaseService Retry Logic', () => {
   // INTEGRATION TESTS
   // ========================================================================
 
-  describe('Integration Tests', () => {
-    it('should handle complete GET retry flow', async () => {
+  describe("Integration Tests", () => {
+    it("should handle complete GET retry flow", async () => {
       // Simulate: fail → fail → success
       mockClient.get
-        .mockRejectedValueOnce(new Error('Network timeout'))
-        .mockRejectedValueOnce(new Error('Connection refused'))
-        .mockResolvedValueOnce({ data: 'final success' });
+        .mockRejectedValueOnce(new Error("Network timeout"))
+        .mockRejectedValueOnce(new Error("Connection refused"))
+        .mockResolvedValueOnce({ data: "final success" });
 
-      const result = await service.get('/flaky-endpoint');
+      const result = await service.get("/flaky-endpoint");
 
       expect(mockClient.get).toHaveBeenCalledTimes(3);
-      expect(result).toEqual({ data: 'final success' });
+      expect(result).toEqual({ data: "final success" });
     });
 
-    it('should handle POST with explicit retry enabled', async () => {
+    it("should handle POST with explicit retry enabled", async () => {
       mockClient.post
-        .mockRejectedValueOnce(new Error('503 Service Unavailable'))
+        .mockRejectedValueOnce(new Error("503 Service Unavailable"))
         .mockResolvedValueOnce({ created: true, id: 456 });
 
       const result = await service.post(
-        '/create',
-        { name: 'test' },
-        { retry: true, maxRetries: 3 }
+        "/create",
+        { name: "test" },
+        { retry: true, maxRetries: 3 },
       );
 
       expect(mockClient.post).toHaveBeenCalledTimes(2);
       expect(result).toEqual({ created: true, id: 456 });
     });
 
-    it('should respect idempotency rules across methods', async () => {
+    it("should respect idempotency rules across methods", async () => {
       // GET: auto-retry
-      mockClient.get.mockRejectedValue(new Error('Network error'));
-      await expect(service.get('/data')).rejects.toThrow();
+      mockClient.get.mockRejectedValue(new Error("Network error"));
+      await expect(service.get("/data")).rejects.toThrow();
       const getCallsWithRetry = mockClient.get.mock.calls.length;
       expect(getCallsWithRetry).toBeGreaterThan(1); // Has retries
 
       vi.clearAllMocks();
 
       // POST: no auto-retry
-      mockClient.post.mockRejectedValue(new Error('Network error'));
-      await expect(service.post('/data', {})).rejects.toThrow();
+      mockClient.post.mockRejectedValue(new Error("Network error"));
+      await expect(service.post("/data", {})).rejects.toThrow();
       const postCallsNoRetry = mockClient.post.mock.calls.length;
       expect(postCallsNoRetry).toBe(1); // No retries
     });

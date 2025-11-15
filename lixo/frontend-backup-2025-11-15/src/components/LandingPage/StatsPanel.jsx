@@ -2,38 +2,38 @@
  * StatsPanel - Estatísticas em Tempo Real
  */
 
-import React from 'react';
+import React from "react";
 
 export const StatsPanel = ({ stats }) => {
   const statCards = [
     {
-      icon: '🛡️',
-      label: 'Ameaças Detectadas',
+      icon: "🛡️",
+      label: "Ameaças Detectadas",
       value: stats.threatsDetected,
-      trend: '+12%',
-      color: 'red'
+      trend: "+12%",
+      color: "red",
     },
     {
-      icon: '👁️',
-      label: 'Monitoramento Ativo',
+      icon: "👁️",
+      label: "Monitoramento Ativo",
       value: stats.activeMonitoring,
-      trend: 'Estável',
-      color: 'cyan'
+      trend: "Estável",
+      color: "cyan",
     },
     {
-      icon: '🌐',
-      label: 'Redes Escaneadas',
+      icon: "🌐",
+      label: "Redes Escaneadas",
       value: stats.networksScanned,
-      trend: '+8%',
-      color: 'green'
+      trend: "+8%",
+      color: "green",
     },
     {
-      icon: '⚡',
-      label: 'Uptime',
+      icon: "⚡",
+      label: "Uptime",
       value: stats.uptime,
-      trend: '30 dias',
-      color: 'yellow'
-    }
+      trend: "30 dias",
+      color: "yellow",
+    },
   ];
 
   return (

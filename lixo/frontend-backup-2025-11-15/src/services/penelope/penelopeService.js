@@ -18,14 +18,14 @@
  * Created: 2025-10-31
  */
 
-import { BaseService } from '../base/BaseService';
-import { API_ENDPOINTS } from '../../config/api';
-import logger from '../../utils/logger';
+import { BaseService } from "../base/BaseService";
+import { API_ENDPOINTS } from "../../config/api";
+import logger from "../../utils/logger";
 
 export class PenelopeService extends BaseService {
   constructor() {
     super(API_ENDPOINTS.penelope);
-    this.serviceName = 'PENELOPE';
+    this.serviceName = "PENELOPE";
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -38,11 +38,11 @@ export class PenelopeService extends BaseService {
    */
   async getHealth() {
     try {
-      const response = await this.get('/health');
-      logger.info('[PENELOPE] Health check:', response);
+      const response = await this.get("/health");
+      logger.info("[PENELOPE] Health check:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Health check failed:', error);
+      logger.error("[PENELOPE] Health check failed:", error);
       throw error;
     }
   }
@@ -53,11 +53,11 @@ export class PenelopeService extends BaseService {
    */
   async getFruitsStatus() {
     try {
-      const response = await this.get('/fruits/status');
-      logger.debug('[PENELOPE] Fruits status:', response);
+      const response = await this.get("/fruits/status");
+      logger.debug("[PENELOPE] Fruits status:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to get fruits status:', error);
+      logger.error("[PENELOPE] Failed to get fruits status:", error);
       throw error;
     }
   }
@@ -68,11 +68,11 @@ export class PenelopeService extends BaseService {
    */
   async getVirtueMetrics() {
     try {
-      const response = await this.get('/virtues/metrics');
-      logger.debug('[PENELOPE] Virtue metrics:', response);
+      const response = await this.get("/virtues/metrics");
+      logger.debug("[PENELOPE] Virtue metrics:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to get virtue metrics:', error);
+      logger.error("[PENELOPE] Failed to get virtue metrics:", error);
       throw error;
     }
   }
@@ -92,7 +92,7 @@ export class PenelopeService extends BaseService {
       logger.debug(`[PENELOPE] Fetched ${response.length} healing events`);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to get healing history:', error);
+      logger.error("[PENELOPE] Failed to get healing history:", error);
       throw error;
     }
   }
@@ -105,11 +105,11 @@ export class PenelopeService extends BaseService {
   async diagnoseAnomaly(anomalyData) {
     try {
       this.validateRequest(anomalyData);
-      const response = await this.post('/diagnose', anomalyData);
-      logger.info('[PENELOPE] Diagnosis completed:', response);
+      const response = await this.post("/diagnose", anomalyData);
+      logger.info("[PENELOPE] Diagnosis completed:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Diagnosis failed:', error);
+      logger.error("[PENELOPE] Diagnosis failed:", error);
       throw error;
     }
   }
@@ -122,10 +122,10 @@ export class PenelopeService extends BaseService {
   async getPatch(patchId) {
     try {
       const response = await this.get(`/patches/${patchId}`);
-      logger.debug('[PENELOPE] Patch retrieved:', patchId);
+      logger.debug("[PENELOPE] Patch retrieved:", patchId);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to get patch:', error);
+      logger.error("[PENELOPE] Failed to get patch:", error);
       throw error;
     }
   }
@@ -138,12 +138,12 @@ export class PenelopeService extends BaseService {
   async listPatches(filters = {}) {
     try {
       const queryParams = new URLSearchParams(filters).toString();
-      const endpoint = queryParams ? `/patches?${queryParams}` : '/patches';
+      const endpoint = queryParams ? `/patches?${queryParams}` : "/patches";
       const response = await this.get(endpoint);
       logger.debug(`[PENELOPE] Retrieved ${response.length} patches`);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to list patches:', error);
+      logger.error("[PENELOPE] Failed to list patches:", error);
       throw error;
     }
   }
@@ -156,10 +156,10 @@ export class PenelopeService extends BaseService {
   async validatePatch(patchId) {
     try {
       const response = await this.post(`/patches/${patchId}/validate`);
-      logger.info('[PENELOPE] Patch validation:', response);
+      logger.info("[PENELOPE] Patch validation:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Patch validation failed:', error);
+      logger.error("[PENELOPE] Patch validation failed:", error);
       throw error;
     }
   }
@@ -172,10 +172,10 @@ export class PenelopeService extends BaseService {
   async deployPatch(patchId) {
     try {
       const response = await this.post(`/patches/${patchId}/deploy`);
-      logger.info('[PENELOPE] Patch deployed:', response);
+      logger.info("[PENELOPE] Patch deployed:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Patch deployment failed:', error);
+      logger.error("[PENELOPE] Patch deployment failed:", error);
       throw error;
     }
   }
@@ -192,12 +192,14 @@ export class PenelopeService extends BaseService {
   async queryWisdomBase(query = {}) {
     try {
       const queryParams = new URLSearchParams(query).toString();
-      const endpoint = queryParams ? `/wisdom?${queryParams}` : '/wisdom';
+      const endpoint = queryParams ? `/wisdom?${queryParams}` : "/wisdom";
       const response = await this.get(endpoint);
-      logger.debug(`[PENELOPE] Wisdom base query returned ${response.length} precedents`);
+      logger.debug(
+        `[PENELOPE] Wisdom base query returned ${response.length} precedents`,
+      );
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Wisdom base query failed:', error);
+      logger.error("[PENELOPE] Wisdom base query failed:", error);
       throw error;
     }
   }
@@ -208,11 +210,11 @@ export class PenelopeService extends BaseService {
    */
   async getWisdomBaseStats() {
     try {
-      const response = await this.get('/wisdom/stats');
-      logger.debug('[PENELOPE] Wisdom base stats:', response);
+      const response = await this.get("/wisdom/stats");
+      logger.debug("[PENELOPE] Wisdom base stats:", response);
       return response;
     } catch (error) {
-      logger.error('[PENELOPE] Failed to get wisdom base stats:', error);
+      logger.error("[PENELOPE] Failed to get wisdom base stats:", error);
       throw error;
     }
   }
@@ -228,13 +230,16 @@ export class PenelopeService extends BaseService {
    * @protected
    */
   validateRequest(data) {
-    if (!data || typeof data !== 'object') {
-      throw new Error('[PENELOPE] Invalid request data: must be an object');
+    if (!data || typeof data !== "object") {
+      throw new Error("[PENELOPE] Invalid request data: must be an object");
     }
 
     // Specific validations for diagnose endpoint
-    if (data.anomaly_description && typeof data.anomaly_description !== 'string') {
-      throw new Error('[PENELOPE] anomaly_description must be a string');
+    if (
+      data.anomaly_description &&
+      typeof data.anomaly_description !== "string"
+    ) {
+      throw new Error("[PENELOPE] anomaly_description must be a string");
     }
 
     return true;
@@ -248,7 +253,7 @@ export class PenelopeService extends BaseService {
    */
   transformResponse(response) {
     // Add sabbath mode indicator if missing
-    if (response && !('sabbath_mode' in response)) {
+    if (response && !("sabbath_mode" in response)) {
       const now = new Date();
       response.sabbath_mode = now.getDay() === 0; // Sunday = 0
     }

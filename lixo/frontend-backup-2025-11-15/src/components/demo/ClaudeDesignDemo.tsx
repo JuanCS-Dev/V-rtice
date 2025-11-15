@@ -17,7 +17,7 @@
  * Se ainda tiver laranja/vermelho = FALHOU ❌
  */
 
-import React from 'react'
+import React from "react";
 import {
   Button,
   Input,
@@ -45,26 +45,35 @@ import {
   Skeleton,
   CardSkeleton,
   ListSkeleton,
-} from '../ui/claude'
+} from "../ui/claude";
 
 export function ClaudeDesignDemo() {
   return (
-    <div className="min-h-screen p-8" style={{
-      backgroundColor: 'var(--background)',
-      color: 'var(--foreground)',
-      fontFamily: 'var(--font-primary)',
-    }}>
+    <div
+      className="min-h-screen p-8"
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--foreground)",
+        fontFamily: "var(--font-primary)",
+      }}
+    >
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-12">
-        <h1 className="text-6xl font-bold mb-4" style={{
-          fontFamily: 'var(--font-display)',
-          color: 'var(--foreground)',
-        }}>
+        <h1
+          className="text-6xl font-bold mb-4"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--foreground)",
+          }}
+        >
           Claude.ai Design System
         </h1>
-        <p className="text-xl" style={{
-          color: 'var(--muted-foreground)',
-        }}>
+        <p
+          className="text-xl"
+          style={{
+            color: "var(--muted-foreground)",
+          }}
+        >
           Green Variant - Clean, Calm, Focused
         </p>
         <div className="flex gap-3 mt-6">
@@ -134,7 +143,9 @@ export function ClaudeDesignDemo() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Default Input</label>
+              <label className="block text-sm font-medium mb-2">
+                Default Input
+              </label>
               <Input placeholder="Enter text..." />
             </div>
 
@@ -149,12 +160,16 @@ export function ClaudeDesignDemo() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Success State</label>
+              <label className="block text-sm font-medium mb-2">
+                Success State
+              </label>
               <Input placeholder="Valid input" success />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Error State</label>
+              <label className="block text-sm font-medium mb-2">
+                Error State
+              </label>
               <Input placeholder="Invalid input" error />
             </div>
 
@@ -169,9 +184,7 @@ export function ClaudeDesignDemo() {
         <Card>
           <CardHeader>
             <CardTitle>Cards - Subtle Elevation</CardTitle>
-            <CardDescription>
-              Hover to see verde border accent
-            </CardDescription>
+            <CardDescription>Hover to see verde border accent</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -252,7 +265,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--primary)' }}
+                  style={{ backgroundColor: "var(--primary)" }}
                 />
                 <p className="text-sm font-medium">Primary (Verde)</p>
                 <p className="text-xs text-muted-foreground">#10b981</p>
@@ -261,7 +274,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--secondary)' }}
+                  style={{ backgroundColor: "var(--secondary)" }}
                 />
                 <p className="text-sm font-medium">Secondary</p>
               </div>
@@ -269,7 +282,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg border"
-                  style={{ backgroundColor: 'var(--background)' }}
+                  style={{ backgroundColor: "var(--background)" }}
                 />
                 <p className="text-sm font-medium">Background</p>
               </div>
@@ -277,7 +290,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg border"
-                  style={{ backgroundColor: 'var(--muted)' }}
+                  style={{ backgroundColor: "var(--muted)" }}
                 />
                 <p className="text-sm font-medium">Muted</p>
               </div>
@@ -285,7 +298,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--color-success)' }}
+                  style={{ backgroundColor: "var(--color-success)" }}
                 />
                 <p className="text-sm font-medium">Success</p>
                 <p className="text-xs text-muted-foreground">#10b981</p>
@@ -294,7 +307,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--color-warning)' }}
+                  style={{ backgroundColor: "var(--color-warning)" }}
                 />
                 <p className="text-sm font-medium">Warning</p>
                 <p className="text-xs text-muted-foreground">#f59e0b</p>
@@ -303,7 +316,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--destructive)' }}
+                  style={{ backgroundColor: "var(--destructive)" }}
                 />
                 <p className="text-sm font-medium">Destructive</p>
               </div>
@@ -311,7 +324,7 @@ export function ClaudeDesignDemo() {
               <div className="space-y-2">
                 <div
                   className="h-20 rounded-lg"
-                  style={{ backgroundColor: 'var(--color-info)' }}
+                  style={{ backgroundColor: "var(--color-info)" }}
                 />
                 <p className="text-sm font-medium">Info</p>
                 <p className="text-xs text-muted-foreground">#3b82f6</p>
@@ -330,36 +343,52 @@ export function ClaudeDesignDemo() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h1 className="text-6xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+              <h1
+                className="text-6xl font-bold mb-2"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 Display Heading
               </h1>
               <p className="text-sm text-muted-foreground">text-6xl - Serif</p>
             </div>
 
             <div>
-              <h2 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+              <h2
+                className="text-4xl font-bold mb-2"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 Heading 1
               </h2>
               <p className="text-sm text-muted-foreground">text-4xl - Serif</p>
             </div>
 
             <div>
-              <h3 className="text-2xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3
+                className="text-2xl font-semibold mb-2"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 Heading 2
               </h3>
               <p className="text-sm text-muted-foreground">text-2xl - Serif</p>
             </div>
 
             <div>
-              <p className="text-base mb-2" style={{ fontFamily: 'var(--font-primary)' }}>
-                Body text uses serif fonts for elegance and readability, matching Claude.ai's aesthetic.
-                This creates a calm, focused reading experience.
+              <p
+                className="text-base mb-2"
+                style={{ fontFamily: "var(--font-primary)" }}
+              >
+                Body text uses serif fonts for elegance and readability,
+                matching Claude.ai's aesthetic. This creates a calm, focused
+                reading experience.
               </p>
               <p className="text-sm text-muted-foreground">text-base - Serif</p>
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground mb-2" style={{ fontFamily: 'var(--font-primary)' }}>
+              <p
+                className="text-sm text-muted-foreground mb-2"
+                style={{ fontFamily: "var(--font-primary)" }}
+              >
                 Secondary text in muted color for less important information.
               </p>
               <p className="text-sm text-muted-foreground">text-sm - Muted</p>
@@ -388,7 +417,11 @@ export function ClaudeDesignDemo() {
 
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
-              <Textarea id="message" placeholder="Type your message here..." rows={4} />
+              <Textarea
+                id="message"
+                placeholder="Type your message here..."
+                rows={4}
+              />
             </div>
 
             <div className="space-y-2">
@@ -448,7 +481,11 @@ export function ClaudeDesignDemo() {
               </AlertDescription>
             </Alert>
 
-            <Alert variant="destructive" dismissible onDismiss={() => console.log('Dismissed')}>
+            <Alert
+              variant="destructive"
+              dismissible
+              onDismiss={() => console.log("Dismissed")}
+            >
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
                 Something went wrong. Please try again.
@@ -509,13 +546,19 @@ export function ClaudeDesignDemo() {
         <Card>
           <CardContent className="py-6">
             <div className="text-center space-y-4">
-              <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>
+              <p
+                className="text-2xl font-bold"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 ✅ Claude.ai Design System - GREEN Variant
               </p>
               <p className="text-muted-foreground">
                 Clean, Calm, Focused - VERDE (#10b981) 💚
               </p>
-              <p className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "var(--primary)" }}
+              >
                 12 COMPONENTES COMPLETOS | ZERO LARANJA | 100% VERDE
               </p>
               <div className="flex justify-center gap-2 flex-wrap">
@@ -532,13 +575,11 @@ export function ClaudeDesignDemo() {
                 <Badge>Spinner ✅</Badge>
                 <Badge>Skeleton ✅</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">
-                SOLI DEO GLORIA
-              </p>
+              <p className="text-sm text-muted-foreground">SOLI DEO GLORIA</p>
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

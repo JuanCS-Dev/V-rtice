@@ -8,11 +8,17 @@
  * Estilo: Clean, semantic feedback with verde success
  */
 
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { AlertCircle, CheckCircle2, Info, AlertTriangle, X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  AlertTriangle,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Alert Variants - Claude.ai style semantic alerts
@@ -71,8 +77,8 @@ const alertVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
-)
+  },
+);
 
 /**
  * Alert Icon mapping
@@ -83,7 +89,7 @@ const alertIcons = {
   warning: AlertTriangle,
   destructive: AlertCircle,
   info: Info,
-}
+};
 
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -91,15 +97,15 @@ export interface AlertProps
   /**
    * Show close button
    */
-  dismissible?: boolean
+  dismissible?: boolean;
   /**
    * On dismiss callback
    */
-  onDismiss?: () => void
+  onDismiss?: () => void;
   /**
    * Custom icon (overrides default)
    */
-  icon?: React.ReactNode
+  icon?: React.ReactNode;
 }
 
 /**
@@ -120,17 +126,20 @@ export interface AlertProps
  * ```
  */
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, dismissible, onDismiss, icon, children, ...props }, ref) => {
-    const [dismissed, setDismissed] = React.useState(false)
+  (
+    { className, variant, dismissible, onDismiss, icon, children, ...props },
+    ref,
+  ) => {
+    const [dismissed, setDismissed] = React.useState(false);
 
-    const Icon = variant ? alertIcons[variant] : alertIcons.default
+    const Icon = variant ? alertIcons[variant] : alertIcons.default;
 
     const handleDismiss = () => {
-      setDismissed(true)
-      onDismiss?.()
-    }
+      setDismissed(true);
+      onDismiss?.();
+    };
 
-    if (dismissed) return null
+    if (dismissed) return null;
 
     return (
       <div
@@ -146,24 +155,24 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
           </div>
 
           {/* Content */}
-          <div className="flex-1 [&_p]:leading-relaxed">
-            {children}
-          </div>
+          <div className="flex-1 [&_p]:leading-relaxed">{children}</div>
 
           {/* Dismiss button */}
           {dismissible && (
             <button
               onClick={handleDismiss}
-              className={cn([
-                "shrink-0",
-                "rounded-[var(--radius-sm)]",
-                "p-1",
-                "opacity-70 hover:opacity-100",
-                "transition-opacity duration-[var(--transition-fast)]",
-                "focus:outline-none",
-                "focus:ring-2",
-                "focus:ring-[var(--ring)]",
-              ].join(" "))}
+              className={cn(
+                [
+                  "shrink-0",
+                  "rounded-[var(--radius-sm)]",
+                  "p-1",
+                  "opacity-70 hover:opacity-100",
+                  "transition-opacity duration-[var(--transition-fast)]",
+                  "focus:outline-none",
+                  "focus:ring-2",
+                  "focus:ring-[var(--ring)]",
+                ].join(" "),
+              )}
               aria-label="Dismiss"
             >
               <X className="h-4 w-4" />
@@ -171,10 +180,10 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
           )}
         </div>
       </div>
-    )
-  }
-)
-Alert.displayName = "Alert"
+    );
+  },
+);
+Alert.displayName = "Alert";
 
 /**
  * Alert Title
@@ -193,12 +202,12 @@ const AlertTitle = React.forwardRef<
         "leading-none",
         "tracking-tight",
       ].join(" "),
-      className
+      className,
     )}
     {...props}
   />
-))
-AlertTitle.displayName = "AlertTitle"
+));
+AlertTitle.displayName = "AlertTitle";
 
 /**
  * Alert Description
@@ -210,15 +219,12 @@ const AlertDescription = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      [
-        "text-[var(--text-sm)]",
-        "[&_p]:leading-relaxed",
-      ].join(" "),
-      className
+      ["text-[var(--text-sm)]", "[&_p]:leading-relaxed"].join(" "),
+      className,
     )}
     {...props}
   />
-))
-AlertDescription.displayName = "AlertDescription"
+));
+AlertDescription.displayName = "AlertDescription";
 
-export { Alert, AlertTitle, AlertDescription, alertVariants }
+export { Alert, AlertTitle, AlertDescription, alertVariants };

@@ -1,10 +1,12 @@
-import React from 'react';
+import React from "react";
 
 const SidePanel = ({ alerts }) => {
   return (
     <aside className="w-80 border-r border-green-400/30 bg-black/30 backdrop-blur-sm overflow-y-auto">
       <div className="p-4 border-b border-green-400/30">
-        <h3 className="text-green-400 font-bold mb-3 tracking-wide">STATUS DO SISTEMA</h3>
+        <h3 className="text-green-400 font-bold mb-3 tracking-wide">
+          STATUS DO SISTEMA
+        </h3>
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-green-400/70">OPERACIONAL</span>
@@ -26,7 +28,9 @@ const SidePanel = ({ alerts }) => {
       </div>
 
       <div className="p-4">
-        <h3 className="text-green-400 font-bold mb-3 tracking-wide">ALERTAS EM TEMPO REAL</h3>
+        <h3 className="text-green-400 font-bold mb-3 tracking-wide">
+          ALERTAS EM TEMPO REAL
+        </h3>
         <div className="space-y-2 max-h-80 overflow-y-auto">
           {alerts.length === 0 ? (
             <div className="text-green-400/50 text-xs text-center py-4">
@@ -34,12 +38,12 @@ const SidePanel = ({ alerts }) => {
             </div>
           ) : (
             alerts.map((alert) => (
-              <div 
+              <div
                 key={alert.id}
                 className={`p-3 rounded border-l-4 ${
-                  alert.type === 'WARNING' 
-                    ? 'border-yellow-400 bg-yellow-400/10 text-yellow-400' 
-                    : 'border-green-400 bg-green-400/10 text-green-400'
+                  alert.type === "WARNING"
+                    ? "border-yellow-400 bg-yellow-400/10 text-yellow-400"
+                    : "border-green-400 bg-green-400/10 text-green-400"
                 }`}
               >
                 <div className="flex justify-between items-start">

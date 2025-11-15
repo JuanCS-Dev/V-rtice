@@ -1,2 +1,2 @@
-export { VerdictPanel } from './VerdictPanel';
-export { VerdictCard } from './VerdictCard';
+export { VerdictPanel } from "./VerdictPanel";
+export { VerdictCard } from "./VerdictCard";

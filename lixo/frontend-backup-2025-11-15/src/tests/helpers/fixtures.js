@@ -9,7 +9,7 @@
  * Generate unique ID (string format)
  */
 let idCounter = 0;
-export function generateId(prefix = 'test') {
+export function generateId(prefix = "test") {
   return `${prefix}-${++idCounter}-${Date.now()}`;
 }
 
@@ -25,15 +25,15 @@ export function generateTimestamp(offsetMs = 0) {
  */
 export function createAlertFixture(overrides = {}) {
   return {
-    id: generateId('alert'),
-    type: 'threat',
-    severity: 'high',
-    title: 'Test Alert',
-    message: 'Test alert message',
+    id: generateId("alert"),
+    type: "threat",
+    severity: "high",
+    title: "Test Alert",
+    message: "Test alert message",
     timestamp: generateTimestamp(),
-    source: 'test-source',
-    status: 'active',
-    ...overrides
+    source: "test-source",
+    status: "active",
+    ...overrides,
   };
 }
 
@@ -42,21 +42,21 @@ export function createAlertFixture(overrides = {}) {
  */
 export function createVerdictFixture(overrides = {}) {
   return {
-    id: generateId('verdict'),
+    id: generateId("verdict"),
     timestamp: generateTimestamp(),
-    threat_level: 'high',
+    threat_level: "high",
     confidence: 0.95,
-    verdict: 'malicious',
-    source_ip: '192.168.1.100',
-    destination_ip: '10.0.0.50',
-    protocol: 'TCP',
+    verdict: "malicious",
+    source_ip: "192.168.1.100",
+    destination_ip: "10.0.0.50",
+    protocol: "TCP",
     port: 443,
-    indicators: ['suspicious-pattern', 'known-malware'],
+    indicators: ["suspicious-pattern", "known-malware"],
     details: {
-      description: 'Test threat detected',
-      recommendation: 'Block immediately'
+      description: "Test threat detected",
+      recommendation: "Block immediately",
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -65,17 +65,17 @@ export function createVerdictFixture(overrides = {}) {
  */
 export function createNodeFixture(overrides = {}) {
   return {
-    id: generateId('node'),
-    label: 'Test Node',
-    type: 'server',
-    status: 'active',
-    ip: '192.168.1.1',
+    id: generateId("node"),
+    label: "Test Node",
+    type: "server",
+    status: "active",
+    ip: "192.168.1.1",
     position: { x: 0, y: 0 },
     metadata: {
-      os: 'Linux',
-      version: '5.10'
+      os: "Linux",
+      version: "5.10",
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -84,13 +84,13 @@ export function createNodeFixture(overrides = {}) {
  */
 export function createEdgeFixture(overrides = {}) {
   return {
-    id: generateId('edge'),
-    source: generateId('node-src'),
-    target: generateId('node-tgt'),
-    type: 'connection',
-    label: 'Test Connection',
+    id: generateId("edge"),
+    source: generateId("node-src"),
+    target: generateId("node-tgt"),
+    type: "connection",
+    label: "Test Connection",
     weight: 1.0,
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -99,17 +99,17 @@ export function createEdgeFixture(overrides = {}) {
  */
 export function createAttackFixture(overrides = {}) {
   return {
-    id: generateId('attack'),
+    id: generateId("attack"),
     timestamp: generateTimestamp(),
-    type: 'brute-force',
-    severity: 'critical',
-    source: '203.0.113.42',
-    target: '192.168.1.10',
-    status: 'detected',
-    description: 'Brute force attack detected',
-    techniques: ['T1110.001', 'T1078'],
-    mitigation_status: 'in-progress',
-    ...overrides
+    type: "brute-force",
+    severity: "critical",
+    source: "203.0.113.42",
+    target: "192.168.1.10",
+    status: "detected",
+    description: "Brute force attack detected",
+    techniques: ["T1110.001", "T1078"],
+    mitigation_status: "in-progress",
+    ...overrides,
   };
 }
 
@@ -118,14 +118,14 @@ export function createAttackFixture(overrides = {}) {
  */
 export function createMetricFixture(overrides = {}) {
   return {
-    id: generateId('metric'),
+    id: generateId("metric"),
     timestamp: generateTimestamp(),
-    name: 'cpu_usage',
+    name: "cpu_usage",
     value: 75.5,
-    unit: 'percent',
-    source: 'server-1',
-    tags: ['performance', 'monitoring'],
-    ...overrides
+    unit: "percent",
+    source: "server-1",
+    tags: ["performance", "monitoring"],
+    ...overrides,
   };
 }
 
@@ -134,15 +134,15 @@ export function createMetricFixture(overrides = {}) {
  */
 export function createUserFixture(overrides = {}) {
   return {
-    id: generateId('user'),
-    username: 'testuser',
-    email: 'test@example.com',
-    role: 'analyst',
-    status: 'active',
+    id: generateId("user"),
+    username: "testuser",
+    email: "test@example.com",
+    role: "analyst",
+    status: "active",
     created_at: generateTimestamp(-86400000), // 1 day ago
     last_login: generateTimestamp(-3600000), // 1 hour ago
-    permissions: ['read', 'write'],
-    ...overrides
+    permissions: ["read", "write"],
+    ...overrides,
   };
 }
 
@@ -151,15 +151,15 @@ export function createUserFixture(overrides = {}) {
  */
 export function createServiceFixture(overrides = {}) {
   return {
-    id: generateId('service'),
-    name: 'test-service',
-    status: 'running',
-    health: 'healthy',
+    id: generateId("service"),
+    name: "test-service",
+    status: "running",
+    health: "healthy",
     uptime: 3600,
-    version: '1.0.0',
-    url: 'http://localhost:5000',
+    version: "1.0.0",
+    url: "http://localhost:5000",
     last_check: generateTimestamp(),
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -168,16 +168,16 @@ export function createServiceFixture(overrides = {}) {
  */
 export function createLogFixture(overrides = {}) {
   return {
-    id: generateId('log'),
+    id: generateId("log"),
     timestamp: generateTimestamp(),
-    level: 'info',
-    message: 'Test log message',
-    source: 'test-component',
+    level: "info",
+    message: "Test log message",
+    source: "test-component",
     metadata: {
-      context: 'test',
-      details: 'additional information'
+      context: "test",
+      details: "additional information",
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -186,14 +186,14 @@ export function createLogFixture(overrides = {}) {
  */
 export function createNotificationFixture(overrides = {}) {
   return {
-    id: generateId('notification'),
+    id: generateId("notification"),
     timestamp: generateTimestamp(),
-    type: 'info',
-    title: 'Test Notification',
-    message: 'This is a test notification',
+    type: "info",
+    title: "Test Notification",
+    message: "This is a test notification",
     read: false,
-    action_url: '/dashboard',
-    ...overrides
+    action_url: "/dashboard",
+    ...overrides,
   };
 }
 
@@ -202,7 +202,7 @@ export function createNotificationFixture(overrides = {}) {
  */
 export function createFixtures(factoryFn, count = 5, overrides = {}) {
   return Array.from({ length: count }, (_, i) =>
-    factoryFn({ ...overrides, index: i })
+    factoryFn({ ...overrides, index: i }),
   );
 }
 
@@ -219,7 +219,7 @@ export const fixtures = {
   // Network topology
   topology: () => ({
     nodes: createFixtures(createNodeFixture, 10),
-    edges: createFixtures(createEdgeFixture, 15)
+    edges: createFixtures(createEdgeFixture, 15),
   }),
 
   // Attack timeline
@@ -238,7 +238,7 @@ export const fixtures = {
   logs: () => createFixtures(createLogFixture, 50),
 
   // Notifications
-  notifications: () => createFixtures(createNotificationFixture, 10)
+  notifications: () => createFixtures(createNotificationFixture, 10),
 };
 
 /**

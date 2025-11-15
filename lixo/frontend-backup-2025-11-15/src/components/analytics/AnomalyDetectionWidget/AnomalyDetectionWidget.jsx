@@ -8,94 +8,104 @@
  * @author Gemini
  */
 
-import React from 'react';
-import { Card, LoadingSpinner, Alert } from '../../../shared';
-import { AnomalyDetectionForm } from './components/AnomalyDetectionForm';
-import { AnomalyResults } from './components/AnomalyResults';
-import { useAnomalyDetection } from './hooks/useAnomalyDetection';
-import { getConfidenceBadge, formatExecutionTime } from '../../../../api/worldClassTools';
-import styles from './AnomalyDetectionWidget.module.css';
+import React from "react";
+import { Card, LoadingSpinner, Alert } from "../../../shared";
+import { AnomalyDetectionForm } from "./components/AnomalyDetectionForm";
+import { AnomalyResults } from "./components/AnomalyResults";
+import { useAnomalyDetection } from "./hooks/useAnomalyDetection";
+import {
+  getConfidenceBadge,
+  formatExecutionTime,
+} from "../../../../api/worldClassTools";
+import styles from "./AnomalyDetectionWidget.module.css";
 
 export const AnomalyDetectionWidget = () => {
-    const {
-        dataInput, setDataInput,
-        method, setMethod,
-        sensitivity, setSensitivity,
-        loading,
-        result,
-        error,
-        detect,
-        generateSampleData
-    } = useAnomalyDetection();
+  const {
+    dataInput,
+    setDataInput,
+    method,
+    setMethod,
+    sensitivity,
+    setSensitivity,
+    loading,
+    result,
+    error,
+    detect,
+    generateSampleData,
+  } = useAnomalyDetection();
 
-    const confidenceBadge = result ? getConfidenceBadge(result.confidence) : null;
+  const confidenceBadge = result ? getConfidenceBadge(result.confidence) : null;
 
-    return (
-        <Card
-            title="ANOMALY DETECTION"
-            badge="ML + STATS"
+  return (
+    <Card title="ANOMALY DETECTION" badge="ML + STATS" variant="analytics">
+      <div className={styles.widgetBody}>
+        <AnomalyDetectionForm
+          dataInput={dataInput}
+          setDataInput={setDataInput}
+          method={method}
+          setMethod={setMethod}
+          sensitivity={sensitivity}
+          setSensitivity={setSensitivity}
+          loading={loading}
+          onDetect={detect}
+          onGenerateSample={generateSampleData}
+        />
+
+        {error && (
+          <Alert
+            variant="error"
+            icon={
+              <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            }
+            role="alert"
+            aria-live="assertive"
+          >
+            {error}
+          </Alert>
+        )}
+
+        {loading && (
+          <LoadingSpinner
             variant="analytics"
-        >
-            <div className={styles.widgetBody}>
-                <AnomalyDetectionForm
-                    dataInput={dataInput}
-                    setDataInput={setDataInput}
-                    method={method}
-                    setMethod={setMethod}
-                    sensitivity={sensitivity}
-                    setSensitivity={setSensitivity}
-                    loading={loading}
-                    onDetect={detect}
-                    onGenerateSample={generateSampleData}
-                />
+            size="lg"
+            text="Analisando dados..."
+          />
+        )}
 
-                {error && (
-                    <Alert
-                        variant="error"
-                        icon={<i className="fas fa-exclamation-triangle" aria-hidden="true"></i>}
-                        role="alert"
-                        aria-live="assertive"
-                    >
-                        {error}
-                    </Alert>
-                )}
-
-                {loading && (
-                    <LoadingSpinner
-                        variant="analytics"
-                        size="lg"
-                        text="Analisando dados..."
-                    />
-                )}
-
-                {result && !loading && (
-                    <>
-                        <div className={styles.statusBar}>
-                            <div className={styles.statusItem}>
-                                <span className={styles.label}>STATUS:</span>
-                                <span className={`${styles.value} ${result.status === 'success' ? 'text-success' : 'text-error'}`}>
-                                {result.status === 'success' ? '✓ SUCCESS' : '✗ FAILED'}
-                                </span>
-                            </div>
-                            {confidenceBadge && (
-                                <div className={styles.statusItem}>
-                                    <span className={styles.label}>CONFIDENCE:</span>
-                                    <span className={`${styles.value} ${confidenceBadge.className}`}>
-                                    {confidenceBadge.icon} {result.confidence.toFixed(1)}%
-                                    </span>
-                                </div>
-                            )}
-                            <div className={styles.statusItem}>
-                                <span className={styles.label}>TEMPO:</span>
-                                <span className={styles.value}>{formatExecutionTime(result.execution_time_ms)}</span>
-                            </div>
-                        </div>
-                        <AnomalyResults result={result} dataInput={dataInput} />
-                    </>
-                )}
+        {result && !loading && (
+          <>
+            <div className={styles.statusBar}>
+              <div className={styles.statusItem}>
+                <span className={styles.label}>STATUS:</span>
+                <span
+                  className={`${styles.value} ${result.status === "success" ? "text-success" : "text-error"}`}
+                >
+                  {result.status === "success" ? "✓ SUCCESS" : "✗ FAILED"}
+                </span>
+              </div>
+              {confidenceBadge && (
+                <div className={styles.statusItem}>
+                  <span className={styles.label}>CONFIDENCE:</span>
+                  <span
+                    className={`${styles.value} ${confidenceBadge.className}`}
+                  >
+                    {confidenceBadge.icon} {result.confidence.toFixed(1)}%
+                  </span>
+                </div>
+              )}
+              <div className={styles.statusItem}>
+                <span className={styles.label}>TEMPO:</span>
+                <span className={styles.value}>
+                  {formatExecutionTime(result.execution_time_ms)}
+                </span>
+              </div>
             </div>
-        </Card>
-    );
+            <AnomalyResults result={result} dataInput={dataInput} />
+          </>
+        )}
+      </div>
+    </Card>
+  );
 };
 
 export default AnomalyDetectionWidget;

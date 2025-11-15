@@ -20,17 +20,15 @@
  * @returns {Object} { fruits, isLoading, error, overallScore, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { penelopeService } from '../../services/penelope/penelopeService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { penelopeService } from "../../services/penelope/penelopeService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 30000; // 30s
 
 export const useFruitsStatus = (options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [fruits, setFruits] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,9 +42,9 @@ export const useFruitsStatus = (options = {}) => {
       const response = await penelopeService.getFruitsStatus();
       setFruits(response.fruits || response);
       setIsLoading(false);
-      logger.debug('[useFruitsStatus] Fruits status updated:', response);
+      logger.debug("[useFruitsStatus] Fruits status updated:", response);
     } catch (err) {
-      logger.error('[useFruitsStatus] Failed to fetch fruits:', err);
+      logger.error("[useFruitsStatus] Failed to fetch fruits:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -67,7 +65,10 @@ export const useFruitsStatus = (options = {}) => {
   // Calculate overall score (average of all 9 fruits)
   const overallScore = fruits
     ? Math.round(
-        Object.values(fruits).reduce((sum, fruit) => sum + (fruit.score || 0), 0) / 9
+        Object.values(fruits).reduce(
+          (sum, fruit) => sum + (fruit.score || 0),
+          0,
+        ) / 9,
       )
     : 0;
 

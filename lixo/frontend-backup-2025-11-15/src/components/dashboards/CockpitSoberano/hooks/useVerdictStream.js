@@ -1,16 +1,18 @@
 /**
  * useVerdictStream - Real-time Verdict WebSocket Hook
- * 
+ *
  * Connects to Verdict Engine WebSocket stream for live verdict updates
  * NO MOCKS - Real WebSocket connection to backend
- * 
+ *
  * @version 1.0.0
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 import logger from "@/utils/logger";
 
-const WS_URL = import.meta.env.VITE_VERDICT_ENGINE_WS || 'ws://34.148.161.131:8000/ws/verdicts';
+const WS_URL =
+  import.meta.env.VITE_VERDICT_ENGINE_WS ||
+  "ws://34.148.161.131:8000/ws/verdicts";
 const MAX_VERDICTS = 100;
 
 /**
@@ -22,7 +24,7 @@ const MAX_VERDICTS = 100;
 const getReconnectDelay = (attempt) => {
   return Math.min(
     1000 * Math.pow(2, attempt), // 1s, 2s, 4s, 8s, 16s, 32s...
-    60000 // Max 60 seconds
+    60000, // Max 60 seconds
   );
 };
 
@@ -35,7 +37,7 @@ export const useVerdictStream = () => {
     activeCritical: 0,
     activeHigh: 0,
     activeMedium: 0,
-    activeLow: 0
+    activeLow: 0,
   });
 
   const wsRef = useRef(null);
@@ -48,7 +50,7 @@ export const useVerdictStream = () => {
       const ws = new WebSocket(WS_URL);
 
       ws.onopen = () => {
-        logger.debug('[VerdictStream] Connected to Verdict Engine');
+        logger.debug("[VerdictStream] Connected to Verdict Engine");
         setIsConnected(true);
         setError(null);
         reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
@@ -60,38 +62,48 @@ export const useVerdictStream = () => {
 
           // GAP #49 FIX: Validate message format (Boris Cherny Standard)
           // Ensure message has required fields before processing
-          if (!verdict || typeof verdict !== 'object' || !verdict.id || !verdict.severity) {
-            logger.warn('[VerdictStream] Invalid verdict format:', verdict);
+          if (
+            !verdict ||
+            typeof verdict !== "object" ||
+            !verdict.id ||
+            !verdict.severity
+          ) {
+            logger.warn("[VerdictStream] Invalid verdict format:", verdict);
             return;
           }
 
           // Validate severity is one of expected values
-          const validSeverities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+          const validSeverities = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
           if (!validSeverities.includes(verdict.severity)) {
-            logger.warn('[VerdictStream] Invalid severity value:', verdict.severity);
+            logger.warn(
+              "[VerdictStream] Invalid severity value:",
+              verdict.severity,
+            );
             return;
           }
 
-          setVerdicts(prev => {
+          setVerdicts((prev) => {
             const updated = [verdict, ...prev].slice(0, MAX_VERDICTS);
             return updated;
           });
 
-          setStats(prev => ({
+          setStats((prev) => ({
             totalReceived: prev.totalReceived + 1,
-            activeCritical: prev.activeCritical + (verdict.severity === 'CRITICAL' ? 1 : 0),
-            activeHigh: prev.activeHigh + (verdict.severity === 'HIGH' ? 1 : 0),
-            activeMedium: prev.activeMedium + (verdict.severity === 'MEDIUM' ? 1 : 0),
-            activeLow: prev.activeLow + (verdict.severity === 'LOW' ? 1 : 0)
+            activeCritical:
+              prev.activeCritical + (verdict.severity === "CRITICAL" ? 1 : 0),
+            activeHigh: prev.activeHigh + (verdict.severity === "HIGH" ? 1 : 0),
+            activeMedium:
+              prev.activeMedium + (verdict.severity === "MEDIUM" ? 1 : 0),
+            activeLow: prev.activeLow + (verdict.severity === "LOW" ? 1 : 0),
           }));
         } catch (err) {
-          logger.error('[VerdictStream] Failed to parse verdict:', err);
+          logger.error("[VerdictStream] Failed to parse verdict:", err);
         }
       };
 
       ws.onerror = (err) => {
-        logger.error('[VerdictStream] WebSocket error:', err);
-        setError('Connection error');
+        logger.error("[VerdictStream] WebSocket error:", err);
+        setError("Connection error");
       };
 
       ws.onclose = () => {
@@ -99,7 +111,9 @@ export const useVerdictStream = () => {
 
         // Boris Cherny Standard: Exponential backoff (GAP #18 fix)
         const delay = getReconnectDelay(reconnectAttemptsRef.current);
-        logger.debug(`[VerdictStream] Disconnected, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`);
+        logger.debug(
+          `[VerdictStream] Disconnected, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`,
+        );
 
         reconnectAttemptsRef.current += 1;
 
@@ -110,7 +124,7 @@ export const useVerdictStream = () => {
 
       wsRef.current = ws;
     } catch (err) {
-      logger.error('[VerdictStream] Failed to connect:', err);
+      logger.error("[VerdictStream] Failed to connect:", err);
       setError(err.message);
     }
   }, []);
@@ -131,28 +145,33 @@ export const useVerdictStream = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const dismissVerdict = useCallback((verdictId) => {
-    setVerdicts(prev => prev.filter(v => v.id !== verdictId));
-    
-    setStats(prev => {
-      const verdict = verdicts.find(v => v.id === verdictId);
-      if (!verdict) return prev;
+  const dismissVerdict = useCallback(
+    (verdictId) => {
+      setVerdicts((prev) => prev.filter((v) => v.id !== verdictId));
 
-      return {
-        ...prev,
-        activeCritical: prev.activeCritical - (verdict.severity === 'CRITICAL' ? 1 : 0),
-        activeHigh: prev.activeHigh - (verdict.severity === 'HIGH' ? 1 : 0),
-        activeMedium: prev.activeMedium - (verdict.severity === 'MEDIUM' ? 1 : 0),
-        activeLow: prev.activeLow - (verdict.severity === 'LOW' ? 1 : 0)
-      };
-    });
-  }, [verdicts]);
+      setStats((prev) => {
+        const verdict = verdicts.find((v) => v.id === verdictId);
+        if (!verdict) return prev;
+
+        return {
+          ...prev,
+          activeCritical:
+            prev.activeCritical - (verdict.severity === "CRITICAL" ? 1 : 0),
+          activeHigh: prev.activeHigh - (verdict.severity === "HIGH" ? 1 : 0),
+          activeMedium:
+            prev.activeMedium - (verdict.severity === "MEDIUM" ? 1 : 0),
+          activeLow: prev.activeLow - (verdict.severity === "LOW" ? 1 : 0),
+        };
+      });
+    },
+    [verdicts],
+  );
 
   return {
     verdicts,
     isConnected,
     error,
     stats,
-    dismissVerdict
+    dismissVerdict,
   };
 };

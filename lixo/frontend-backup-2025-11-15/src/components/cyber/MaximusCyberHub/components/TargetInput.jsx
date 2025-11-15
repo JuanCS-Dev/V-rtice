@@ -19,11 +19,11 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import { Button } from '../../../shared/Button/Button';
-import { Input } from '../../../shared/Input/Input';
-import { INVESTIGATION_TYPES } from '../utils/investigationUtils';
-import styles from './TargetInput.module.css';
+import React from "react";
+import { Button } from "../../../shared/Button/Button";
+import { Input } from "../../../shared/Input/Input";
+import { INVESTIGATION_TYPES } from "../utils/investigationUtils";
+import styles from "./TargetInput.module.css";
 
 export const TargetInput = ({
   targetInput,
@@ -31,7 +31,7 @@ export const TargetInput = ({
   investigationType,
   setInvestigationType,
   isAnalyzing,
-  onStart
+  onStart,
 }) => {
   return (
     <div className={styles.container}>
@@ -62,8 +62,9 @@ export const TargetInput = ({
         <div
           role="radiogroup"
           aria-label="Select investigation type"
-          className={styles.types}>
-          {INVESTIGATION_TYPES.map(type => (
+          className={styles.types}
+        >
+          {INVESTIGATION_TYPES.map((type) => (
             <button
               key={type.id}
               type="button"
@@ -72,7 +73,7 @@ export const TargetInput = ({
               aria-label={`${type.name}: ${type.description}`}
               onClick={() => setInvestigationType(type.id)}
               disabled={isAnalyzing}
-              className={`${styles.typeButton} ${investigationType === type.id ? styles.active : ''}`}
+              className={`${styles.typeButton} ${investigationType === type.id ? styles.active : ""}`}
             >
               <div className={styles.typeName}>{type.name}</div>
               <div className={styles.typeDescription}>{type.description}</div>
@@ -87,7 +88,9 @@ export const TargetInput = ({
         disabled={isAnalyzing || !targetInput.trim()}
         variant="success"
         fullWidth
-        aria-label={isAnalyzing ? "Investigation in progress" : "Initialize investigation"}
+        aria-label={
+          isAnalyzing ? "Investigation in progress" : "Initialize investigation"
+        }
       >
         {isAnalyzing ? (
           <>

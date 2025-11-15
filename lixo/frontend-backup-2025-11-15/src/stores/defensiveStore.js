@@ -14,8 +14,8 @@
  * Boris Cherny Standard - GAP #39 FIX: localStorage with expiration timestamps
  */
 
-import { create } from 'zustand';
-import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist, createJSONStorage } from "zustand/middleware";
 
 // Boris Cherny Standard - GAP #39 FIX: Expiration time for persisted data
 const STORE_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -31,123 +31,134 @@ export const useDefensiveStore = create(
           domains: 0,
           monitored: 0,
           behavioralAnomalies: 0,
-          encryptedThreats: 0
+          encryptedThreats: 0,
         },
         alerts: [],
-        activeModule: 'threat-map',
+        activeModule: "threat-map",
         loading: {
           metrics: true,
           alerts: false,
           behavioral: false,
-          traffic: false
+          traffic: false,
         },
         error: null,
         lastUpdate: null,
-        
+
         // NEW: Defensive tools data
         behavioralResults: [],
         trafficResults: [],
 
         // Actions - Metrics
-        setMetrics: (metrics) => set({
-          metrics,
-          lastUpdate: new Date().toISOString(),
-          loading: { ...get().loading, metrics: false }
-        }),
+        setMetrics: (metrics) =>
+          set({
+            metrics,
+            lastUpdate: new Date().toISOString(),
+            loading: { ...get().loading, metrics: false },
+          }),
 
-        updateMetric: (key, value) => set((state) => ({
-          metrics: {
-            ...state.metrics,
-            [key]: value
-          },
-          lastUpdate: new Date().toISOString()
-        })),
+        updateMetric: (key, value) =>
+          set((state) => ({
+            metrics: {
+              ...state.metrics,
+              [key]: value,
+            },
+            lastUpdate: new Date().toISOString(),
+          })),
 
         // Actions - Alerts
-        addAlert: (alert) => set((state) => ({
-          alerts: [
-            {
-              ...alert,
-              id: alert.id || `alert-${Date.now()}-${Math.random()}`,
-              timestamp: alert.timestamp || new Date().toISOString()
-            },
-            ...state.alerts
-          ].slice(0, 50) // Keep last 50 alerts
-        })),
+        addAlert: (alert) =>
+          set((state) => ({
+            alerts: [
+              {
+                ...alert,
+                id: alert.id || `alert-${Date.now()}-${Math.random()}`,
+                timestamp: alert.timestamp || new Date().toISOString(),
+              },
+              ...state.alerts,
+            ].slice(0, 50), // Keep last 50 alerts
+          })),
 
         clearAlerts: () => set({ alerts: [] }),
 
-        removeAlert: (alertId) => set((state) => ({
-          alerts: state.alerts.filter(a => a.id !== alertId)
-        })),
+        removeAlert: (alertId) =>
+          set((state) => ({
+            alerts: state.alerts.filter((a) => a.id !== alertId),
+          })),
 
         // Actions - Module
         setActiveModule: (moduleId) => set({ activeModule: moduleId }),
 
         // Actions - Loading
-        setLoading: (key, value) => set((state) => ({
-          loading: {
-            ...state.loading,
-            [key]: value
-          }
-        })),
+        setLoading: (key, value) =>
+          set((state) => ({
+            loading: {
+              ...state.loading,
+              [key]: value,
+            },
+          })),
 
         // Actions - Error
         setError: (error) => set({ error }),
         clearError: () => set({ error: null }),
 
         // NEW: Actions - Behavioral Analyzer
-        addBehavioralResult: (result) => set((state) => ({
-          behavioralResults: [result, ...state.behavioralResults].slice(0, 50),
-          metrics: {
-            ...state.metrics,
-            behavioralAnomalies: result.is_anomalous 
-              ? state.metrics.behavioralAnomalies + 1 
-              : state.metrics.behavioralAnomalies
-          }
-        })),
+        addBehavioralResult: (result) =>
+          set((state) => ({
+            behavioralResults: [result, ...state.behavioralResults].slice(
+              0,
+              50,
+            ),
+            metrics: {
+              ...state.metrics,
+              behavioralAnomalies: result.is_anomalous
+                ? state.metrics.behavioralAnomalies + 1
+                : state.metrics.behavioralAnomalies,
+            },
+          })),
 
         clearBehavioralResults: () => set({ behavioralResults: [] }),
 
         // NEW: Actions - Traffic Analyzer
-        addTrafficResult: (result) => set((state) => ({
-          trafficResults: [result, ...state.trafficResults].slice(0, 50),
-          metrics: {
-            ...state.metrics,
-            encryptedThreats: result.is_threat 
-              ? state.metrics.encryptedThreats + 1 
-              : state.metrics.encryptedThreats
-          }
-        })),
+        addTrafficResult: (result) =>
+          set((state) => ({
+            trafficResults: [result, ...state.trafficResults].slice(0, 50),
+            metrics: {
+              ...state.metrics,
+              encryptedThreats: result.is_threat
+                ? state.metrics.encryptedThreats + 1
+                : state.metrics.encryptedThreats,
+            },
+          })),
 
         clearTrafficResults: () => set({ trafficResults: [] }),
 
         // Actions - Reset
-        reset: () => set({
-          metrics: {
-            threats: 0,
-            suspiciousIPs: 0,
-            domains: 0,
-            monitored: 0,
-            behavioralAnomalies: 0,
-            encryptedThreats: 0
-          },
-          alerts: [],
-          activeModule: 'threat-map',
-          loading: {
-            metrics: true,
-            alerts: false,
-            behavioral: false,
-            traffic: false
-          },
-          error: null,
-          lastUpdate: null,
-          behavioralResults: [],
-          trafficResults: []
-        })
+        reset: () =>
+          set({
+            metrics: {
+              threats: 0,
+              suspiciousIPs: 0,
+              domains: 0,
+              monitored: 0,
+              behavioralAnomalies: 0,
+              encryptedThreats: 0,
+            },
+            alerts: [],
+            activeModule: "threat-map",
+            loading: {
+              metrics: true,
+              alerts: false,
+              behavioral: false,
+              traffic: false,
+            },
+            error: null,
+            lastUpdate: null,
+            behavioralResults: [],
+            trafficResults: [],
+          }),
       }),
       {
-        name: 'defensive-store',
+        name: "defensive-store",
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
           // Only persist these fields
@@ -164,7 +175,7 @@ export const useDefensiveStore = create(
           if (expiresAt && Date.now() > expiresAt) {
             // Data expired, return empty state (will use defaults)
             return {
-              activeModule: 'threat-map',
+              activeModule: "threat-map",
               alerts: [],
             };
           }
@@ -172,10 +183,10 @@ export const useDefensiveStore = create(
           const { _expiresAt, ...validState } = persistedState || {};
           return validState;
         },
-      }
+      },
     ),
-    { name: 'DefensiveStore' }
-  )
+    { name: "DefensiveStore" },
+  ),
 );
 
 // Selectors (for optimized re-renders)

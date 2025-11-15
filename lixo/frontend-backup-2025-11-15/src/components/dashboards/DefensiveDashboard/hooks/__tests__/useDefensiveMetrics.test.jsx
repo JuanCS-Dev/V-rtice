@@ -6,10 +6,10 @@
  * Uses React Query for data fetching
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useDefensiveMetrics } from '../useDefensiveMetrics';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useDefensiveMetrics } from "../useDefensiveMetrics";
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -26,14 +26,14 @@ const createWrapper = () => {
   );
 };
 
-describe('useDefensiveMetrics Hook', () => {
+describe("useDefensiveMetrics Hook", () => {
   beforeEach(() => {
     global.fetch = vi.fn();
   });
 
-  it('should fetch defensive metrics successfully', async () => {
+  it("should fetch defensive metrics successfully", async () => {
     const mockHealthData = {
-      status: 'healthy',
+      status: "healthy",
       memory_system: {
         episodic_stats: {
           investigations: 15,
@@ -70,9 +70,9 @@ describe('useDefensiveMetrics Hook', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('should return default values when health endpoint has no stats', async () => {
+  it("should return default values when health endpoint has no stats", async () => {
     const mockHealthData = {
-      status: 'healthy',
+      status: "healthy",
       total_integrated_tools: 50,
     };
 
@@ -97,7 +97,7 @@ describe('useDefensiveMetrics Hook', () => {
     });
   });
 
-  it('should handle API errors gracefully', async () => {
+  it("should handle API errors gracefully", async () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
@@ -120,8 +120,8 @@ describe('useDefensiveMetrics Hook', () => {
     });
   });
 
-  it('should handle network errors', async () => {
-    global.fetch.mockRejectedValueOnce(new Error('Network error'));
+  it("should handle network errors", async () => {
+    global.fetch.mockRejectedValueOnce(new Error("Network error"));
 
     const { result } = renderHook(() => useDefensiveMetrics(), {
       wrapper: createWrapper(),
@@ -134,7 +134,7 @@ describe('useDefensiveMetrics Hook', () => {
     expect(result.current.error).toBeTruthy();
   });
 
-  it('should refetch data on interval', async () => {
+  it("should refetch data on interval", async () => {
     vi.useFakeTimers();
 
     const mockHealthData = {
@@ -168,7 +168,7 @@ describe('useDefensiveMetrics Hook', () => {
     vi.useRealTimers();
   });
 
-  it('should call correct API endpoint', async () => {
+  it("should call correct API endpoint", async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -181,7 +181,9 @@ describe('useDefensiveMetrics Hook', () => {
     });
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('http://34.148.161.131:8000/health');
+      expect(global.fetch).toHaveBeenCalledWith(
+        "http://34.148.161.131:8000/health",
+      );
     });
   });
 });

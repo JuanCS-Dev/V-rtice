@@ -9,9 +9,9 @@
  * Hover: Subtle border color change (VERDE)
  */
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Card - Base component
@@ -39,12 +39,12 @@ const Card = React.forwardRef<
         "hover:shadow-[var(--shadow-md)]",
         "hover:border-[var(--primary)]",
       ].join(" "),
-      className
+      className,
     )}
     {...props}
   />
-))
-Card.displayName = "Card"
+));
+Card.displayName = "Card";
 
 /**
  * CardHeader - Top section of card
@@ -59,17 +59,15 @@ const CardHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      [
-        "flex flex-col",
-        "space-y-[var(--space-2)]",
-        "p-[var(--space-6)]",
-      ].join(" "),
-      className
+      ["flex flex-col", "space-y-[var(--space-2)]", "p-[var(--space-6)]"].join(
+        " ",
+      ),
+      className,
     )}
     {...props}
   />
-))
-CardHeader.displayName = "CardHeader"
+));
+CardHeader.displayName = "CardHeader";
 
 /**
  * CardTitle - Card heading
@@ -92,12 +90,12 @@ const CardTitle = React.forwardRef<
         "tracking-tight",
         "text-[var(--card-foreground)]",
       ].join(" "),
-      className
+      className,
     )}
     {...props}
   />
-))
-CardTitle.displayName = "CardTitle"
+));
+CardTitle.displayName = "CardTitle";
 
 /**
  * CardDescription - Subtitle/description
@@ -117,12 +115,12 @@ const CardDescription = React.forwardRef<
         "text-[var(--muted-foreground)]",
         "leading-[var(--leading-normal)]",
       ].join(" "),
-      className
+      className,
     )}
     {...props}
   />
-))
-CardDescription.displayName = "CardDescription"
+));
+CardDescription.displayName = "CardDescription";
 
 /**
  * CardContent - Main content area
@@ -135,17 +133,11 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      [
-        "p-[var(--space-6)]",
-        "pt-0",
-      ].join(" "),
-      className
-    )}
+    className={cn(["p-[var(--space-6)]", "pt-0"].join(" "), className)}
     {...props}
   />
-))
-CardContent.displayName = "CardContent"
+));
+CardContent.displayName = "CardContent";
 
 /**
  * CardFooter - Footer section
@@ -159,16 +151,19 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      [
-        "flex items-center",
-        "p-[var(--space-6)]",
-        "pt-0",
-      ].join(" "),
-      className
+      ["flex items-center", "p-[var(--space-6)]", "pt-0"].join(" "),
+      className,
     )}
     {...props}
   />
-))
-CardFooter.displayName = "CardFooter"
+));
+CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+};

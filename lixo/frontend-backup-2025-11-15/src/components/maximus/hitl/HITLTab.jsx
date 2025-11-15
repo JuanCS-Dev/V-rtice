@@ -18,49 +18,52 @@
  * Glory to YHWH - Designer of Balance
  */
 
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import logger from '@/utils/logger';
-import useHITLWebSocket from '@/hooks/useHITLWebSocket';
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import logger from "@/utils/logger";
+import useHITLWebSocket from "@/hooks/useHITLWebSocket";
 import {
   fetchPendingPatches,
   fetchDecisionSummary,
   approvePatch,
   rejectPatch,
-} from './api';
-import { PendingPatchCard } from './PendingPatchCard';
-import { DecisionStatsCards } from './DecisionStatsCards';
+} from "./api";
+import { PendingPatchCard } from "./PendingPatchCard";
+import { DecisionStatsCards } from "./DecisionStatsCards";
 
-export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
+export const HITLTab = ({ timeRange: _timeRange = "24h" }) => {
   const [selectedPatch, setSelectedPatch] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all', 'critical', 'high', 'medium', 'low'
-  const [rejectReason, setRejectReason] = useState('');
-  const [comment, setComment] = useState('');
+  const [filter, setFilter] = useState("all"); // 'all', 'critical', 'high', 'medium', 'low'
+  const [rejectReason, setRejectReason] = useState("");
+  const [comment, setComment] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
 
   const queryClient = useQueryClient();
 
-  logger.debug('🎭 HITL Tab rendering', { filter, selectedPatch: selectedPatch?.decision_id });
+  logger.debug("🎭 HITL Tab rendering", {
+    filter,
+    selectedPatch: selectedPatch?.decision_id,
+  });
 
   // WebSocket for real-time updates
-  const {
-    connectionState,
-    isConnected,
-    connectionId,
-  } = useHITLWebSocket({
+  const { connectionState, isConnected, connectionId } = useHITLWebSocket({
     onNewPatch: (patchData) => {
-      logger.info('🔔 New patch received via WebSocket:', patchData.patch_id);
+      logger.info("🔔 New patch received via WebSocket:", patchData.patch_id);
       // Invalidate queries to refetch with new patch
-      queryClient.invalidateQueries(['hitl-pending']);
-      queryClient.invalidateQueries(['hitl-summary']);
+      queryClient.invalidateQueries(["hitl-pending"]);
+      queryClient.invalidateQueries(["hitl-summary"]);
     },
     onDecisionUpdate: (decisionData) => {
-      logger.info('🔔 Decision update via WebSocket:', decisionData.decision_id, decisionData.decision);
+      logger.info(
+        "🔔 Decision update via WebSocket:",
+        decisionData.decision_id,
+        decisionData.decision,
+      );
       // Invalidate queries to reflect updated decision
-      queryClient.invalidateQueries(['hitl-pending']);
-      queryClient.invalidateQueries(['hitl-summary']);
+      queryClient.invalidateQueries(["hitl-pending"]);
+      queryClient.invalidateQueries(["hitl-summary"]);
     },
     autoConnect: true,
     autoReconnect: true,
@@ -72,55 +75,53 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
     isLoading: patchesLoading,
     error: patchesError,
   } = useQuery({
-    queryKey: ['hitl-pending', filter],
-    queryFn: () => fetchPendingPatches({
-      limit: 50,
-      priority: filter !== 'all' ? filter : null,
-    }),
+    queryKey: ["hitl-pending", filter],
+    queryFn: () =>
+      fetchPendingPatches({
+        limit: 50,
+        priority: filter !== "all" ? filter : null,
+      }),
     refetchInterval: 10000, // 10s - real-time feel
   });
 
   // Fetch decision summary
-  const {
-    data: summary,
-    isLoading: summaryLoading,
-  } = useQuery({
-    queryKey: ['hitl-summary'],
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ["hitl-summary"],
     queryFn: fetchDecisionSummary,
     refetchInterval: 30000, // 30s
   });
 
   // Approve mutation
   const approveMutation = useMutation({
-    mutationFn: ({ patchId, decisionId, comment }) => 
+    mutationFn: ({ patchId, decisionId, comment }) =>
       approvePatch(patchId, decisionId, comment),
     onSuccess: () => {
-      logger.info('✅ Patch approved successfully');
-      queryClient.invalidateQueries(['hitl-pending']);
-      queryClient.invalidateQueries(['hitl-summary']);
+      logger.info("✅ Patch approved successfully");
+      queryClient.invalidateQueries(["hitl-pending"]);
+      queryClient.invalidateQueries(["hitl-summary"]);
       setSelectedPatch(null);
-      setComment('');
+      setComment("");
     },
     onError: (error) => {
-      logger.error('❌ Failed to approve patch:', error);
+      logger.error("❌ Failed to approve patch:", error);
     },
   });
 
   // Reject mutation
   const rejectMutation = useMutation({
-    mutationFn: ({ patchId, decisionId, reason, comment }) => 
+    mutationFn: ({ patchId, decisionId, reason, comment }) =>
       rejectPatch(patchId, decisionId, reason, comment),
     onSuccess: () => {
-      logger.info('✅ Patch rejected successfully');
-      queryClient.invalidateQueries(['hitl-pending']);
-      queryClient.invalidateQueries(['hitl-summary']);
+      logger.info("✅ Patch rejected successfully");
+      queryClient.invalidateQueries(["hitl-pending"]);
+      queryClient.invalidateQueries(["hitl-summary"]);
       setSelectedPatch(null);
-      setRejectReason('');
-      setComment('');
+      setRejectReason("");
+      setComment("");
       setShowRejectModal(false);
     },
     onError: (error) => {
-      logger.error('❌ Failed to reject patch:', error);
+      logger.error("❌ Failed to reject patch:", error);
     },
   });
 
@@ -150,8 +151,12 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       <div className="flex items-center justify-center min-h-[600px]">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-pulse">🎭</div>
-          <div className="text-red-400 text-xl font-semibold">Loading HITL Queue...</div>
-          <div className="text-gray-500 text-sm mt-2">Fetching pending patches</div>
+          <div className="text-red-400 text-xl font-semibold">
+            Loading HITL Queue...
+          </div>
+          <div className="text-gray-500 text-sm mt-2">
+            Fetching pending patches
+          </div>
         </div>
       </div>
     );
@@ -162,8 +167,12 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       <div className="flex items-center justify-center min-h-[600px]">
         <div className="text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <div className="text-red-400 text-xl font-semibold">HITL Service Unavailable</div>
-          <div className="text-gray-500 text-sm mt-2">{patchesError.message}</div>
+          <div className="text-red-400 text-xl font-semibold">
+            HITL Service Unavailable
+          </div>
+          <div className="text-gray-500 text-sm mt-2">
+            {patchesError.message}
+          </div>
           <div className="text-gray-600 text-xs mt-4">
             Ensure HITL Patch Service is running on port 8027
           </div>
@@ -177,21 +186,27 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       {/* Header with WebSocket Status */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-red-400">Human-in-the-Loop Review</h2>
+          <h2 className="text-2xl font-bold text-red-400">
+            Human-in-the-Loop Review
+          </h2>
           <p className="text-gray-500 text-sm mt-1">
             Regulatory T-cells preventing auto-immune patch deployment
           </p>
         </div>
-        
+
         {/* WebSocket Connection Indicator */}
         <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${
-            isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-          }`} />
-          <span className={`text-sm font-semibold ${
-            isConnected ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {isConnected ? 'LIVE' : connectionState}
+          <div
+            className={`w-3 h-3 rounded-full ${
+              isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
+            }`}
+          />
+          <span
+            className={`text-sm font-semibold ${
+              isConnected ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {isConnected ? "LIVE" : connectionState}
           </span>
           {connectionId && (
             <span className="text-xs text-gray-600 ml-2">
@@ -208,21 +223,25 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       <Card className="p-4 bg-gray-800/50 border border-red-500/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-gray-400 text-sm font-semibold">FILTER BY PRIORITY:</span>
+            <span className="text-gray-400 text-sm font-semibold">
+              FILTER BY PRIORITY:
+            </span>
             <div className="flex gap-2">
-              {['all', 'critical', 'high', 'medium', 'low'].map((filterOption) => (
-                <button
-                  key={filterOption}
-                  onClick={() => setFilter(filterOption)}
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    filter === filterOption
-                      ? 'bg-red-600 text-white shadow-lg shadow-red-500/50'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
-                  }`}
-                >
-                  {filterOption.toUpperCase()}
-                </button>
-              ))}
+              {["all", "critical", "high", "medium", "low"].map(
+                (filterOption) => (
+                  <button
+                    key={filterOption}
+                    onClick={() => setFilter(filterOption)}
+                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                      filter === filterOption
+                        ? "bg-red-600 text-white shadow-lg shadow-red-500/50"
+                        : "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600"
+                    }`}
+                  >
+                    {filterOption.toUpperCase()}
+                  </button>
+                ),
+              )}
             </div>
           </div>
 
@@ -250,7 +269,9 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       ) : (
         <Card className="p-12 bg-gray-800/30 border border-gray-700 text-center">
           <div className="text-6xl mb-4">✅</div>
-          <div className="text-xl font-semibold text-gray-400">No Pending Patches</div>
+          <div className="text-xl font-semibold text-gray-400">
+            No Pending Patches
+          </div>
           <div className="text-sm text-gray-500 mt-2">
             All patches have been reviewed. Great work!
           </div>
@@ -266,7 +287,8 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
                 Review Patch: {selectedPatch.patch_id}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
-                CVE: {selectedPatch.cve_id || 'N/A'} • Age: {Math.round(selectedPatch.age_seconds / 60)}min
+                CVE: {selectedPatch.cve_id || "N/A"} • Age:{" "}
+                {Math.round(selectedPatch.age_seconds / 60)}min
               </p>
 
               {/* Comment Textarea */}
@@ -288,7 +310,7 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
                 disabled={approveMutation.isPending}
                 className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold rounded-lg shadow-lg shadow-green-500/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {approveMutation.isPending ? '⏳ Approving...' : '✓ APPROVE'}
+                {approveMutation.isPending ? "⏳ Approving..." : "✓ APPROVE"}
               </button>
 
               {/* Reject Button */}
@@ -297,14 +319,14 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
                 disabled={rejectMutation.isPending}
                 className="px-8 py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg shadow-lg shadow-red-500/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {rejectMutation.isPending ? '⏳ Rejecting...' : '✗ REJECT'}
+                {rejectMutation.isPending ? "⏳ Rejecting..." : "✗ REJECT"}
               </button>
 
               {/* Cancel Button */}
               <button
                 onClick={() => {
                   setSelectedPatch(null);
-                  setComment('');
+                  setComment("");
                 }}
                 className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold rounded-lg transition-all"
               >
@@ -319,7 +341,9 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
       {showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
           <Card className="w-full max-w-2xl mx-4 p-6 bg-gray-900 border-2 border-red-500 shadow-2xl shadow-red-500/30">
-            <h3 className="text-2xl font-bold text-red-400 mb-4">Reject Patch</h3>
+            <h3 className="text-2xl font-bold text-red-400 mb-4">
+              Reject Patch
+            </h3>
             <p className="text-gray-400 mb-4">
               Please provide a reason for rejection (required for audit trail):
             </p>
@@ -340,7 +364,7 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
               <button
                 onClick={() => {
                   setShowRejectModal(false);
-                  setRejectReason('');
+                  setRejectReason("");
                 }}
                 className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold rounded-lg transition-all"
               >
@@ -351,7 +375,9 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
                 disabled={!rejectReason.trim() || rejectMutation.isPending}
                 className="px-6 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold rounded-lg shadow-lg shadow-red-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {rejectMutation.isPending ? '⏳ Rejecting...' : 'Confirm Rejection'}
+                {rejectMutation.isPending
+                  ? "⏳ Rejecting..."
+                  : "Confirm Rejection"}
               </button>
             </div>
           </Card>

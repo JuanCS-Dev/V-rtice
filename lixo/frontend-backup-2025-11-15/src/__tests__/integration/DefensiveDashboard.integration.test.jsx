@@ -9,46 +9,61 @@
  * - Multi-component interactions
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import userEvent from '@testing-library/user-event';
-import DefensiveDashboard from '../../components/dashboards/DefensiveDashboard/DefensiveDashboard';
-import { createAlertFixture, generateTimestamp } from '../../tests/helpers/fixtures';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import userEvent from "@testing-library/user-event";
+import DefensiveDashboard from "../../components/dashboards/DefensiveDashboard/DefensiveDashboard";
+import {
+  createAlertFixture,
+  generateTimestamp,
+} from "../../tests/helpers/fixtures";
 
 // Mock all hooks and components
-vi.mock('../../components/dashboards/DefensiveDashboard/hooks/useDefensiveMetrics');
-vi.mock('../../components/dashboards/DefensiveDashboard/hooks/useRealTimeAlerts');
-vi.mock('../../cyber/ThreatMap', () => ({
-  default: () => <div data-testid="threat-map">Threat Map Module</div>
+vi.mock(
+  "../../components/dashboards/DefensiveDashboard/hooks/useDefensiveMetrics",
+);
+vi.mock(
+  "../../components/dashboards/DefensiveDashboard/hooks/useRealTimeAlerts",
+);
+vi.mock("../../cyber/ThreatMap", () => ({
+  default: () => <div data-testid="threat-map">Threat Map Module</div>,
 }));
-vi.mock('../../cyber/DomainAnalyzer', () => ({
-  default: () => <div data-testid="domain-analyzer">Domain Analyzer Module</div>
+vi.mock("../../cyber/DomainAnalyzer", () => ({
+  default: () => (
+    <div data-testid="domain-analyzer">Domain Analyzer Module</div>
+  ),
 }));
-vi.mock('../../cyber/IpIntelligence', () => ({
-  default: () => <div data-testid="ip-intelligence">IP Intelligence Module</div>
+vi.mock("../../cyber/IpIntelligence", () => ({
+  default: () => (
+    <div data-testid="ip-intelligence">IP Intelligence Module</div>
+  ),
 }));
-vi.mock('../../cyber/NetworkMonitor', () => ({
-  default: () => <div data-testid="network-monitor">Network Monitor Module</div>
+vi.mock("../../cyber/NetworkMonitor", () => ({
+  default: () => (
+    <div data-testid="network-monitor">Network Monitor Module</div>
+  ),
 }));
-vi.mock('../../cyber/NmapScanner', () => ({
-  default: () => <div data-testid="nmap-scanner">NMAP Scanner Module</div>
+vi.mock("../../cyber/NmapScanner", () => ({
+  default: () => <div data-testid="nmap-scanner">NMAP Scanner Module</div>,
 }));
-vi.mock('../../cyber/SystemSecurity', () => ({
-  default: () => <div data-testid="system-security">System Security Module</div>
+vi.mock("../../cyber/SystemSecurity", () => ({
+  default: () => (
+    <div data-testid="system-security">System Security Module</div>
+  ),
 }));
-vi.mock('../../cyber/ExploitSearchWidget', () => ({
-  default: () => <div data-testid="exploit-search">Exploit Search Module</div>
+vi.mock("../../cyber/ExploitSearchWidget", () => ({
+  default: () => <div data-testid="exploit-search">Exploit Search Module</div>,
 }));
-vi.mock('../../cyber/MaximusCyberHub', () => ({
-  default: () => <div data-testid="maximus-hub">Maximus Hub Module</div>
+vi.mock("../../cyber/MaximusCyberHub", () => ({
+  default: () => <div data-testid="maximus-hub">Maximus Hub Module</div>,
 }));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { retry: false, cacheTime: 0 }
-    }
+      queries: { retry: false, cacheTime: 0 },
+    },
   });
 
   return ({ children }) => (
@@ -56,7 +71,7 @@ const createWrapper = () => {
   );
 };
 
-describe('Defensive Dashboard Integration Tests', () => {
+describe("Defensive Dashboard Integration Tests", () => {
   let useDefensiveMetrics, useRealTimeAlerts;
 
   beforeEach(async () => {
@@ -64,8 +79,12 @@ describe('Defensive Dashboard Integration Tests', () => {
     vi.useFakeTimers();
 
     // Setup mock implementations
-    const metricsModule = await import('../../components/dashboards/DefensiveDashboard/hooks/useDefensiveMetrics');
-    const alertsModule = await import('../../components/dashboards/DefensiveDashboard/hooks/useRealTimeAlerts');
+    const metricsModule = await import(
+      "../../components/dashboards/DefensiveDashboard/hooks/useDefensiveMetrics"
+    );
+    const alertsModule = await import(
+      "../../components/dashboards/DefensiveDashboard/hooks/useRealTimeAlerts"
+    );
 
     useDefensiveMetrics = metricsModule.useDefensiveMetrics;
     useRealTimeAlerts = alertsModule.useRealTimeAlerts;
@@ -75,27 +94,27 @@ describe('Defensive Dashboard Integration Tests', () => {
         threats: 15,
         suspiciousIPs: 23,
         domains: 145,
-        monitored: 57
+        monitored: 57,
       },
-      loading: false
+      loading: false,
     });
 
     useRealTimeAlerts.mockReturnValue({
       alerts: [
         createAlertFixture({
-          id: 'alert-1',
-          severity: 'critical',
-          message: 'SQL Injection detected',
-          timestamp: generateTimestamp()
+          id: "alert-1",
+          severity: "critical",
+          message: "SQL Injection detected",
+          timestamp: generateTimestamp(),
         }),
         createAlertFixture({
-          id: 'alert-2',
-          severity: 'high',
-          message: 'Port scan from 192.168.1.50',
-          timestamp: generateTimestamp(-5000)
-        })
+          id: "alert-2",
+          severity: "high",
+          message: "Port scan from 192.168.1.50",
+          timestamp: generateTimestamp(-5000),
+        }),
       ],
-      addAlert: vi.fn()
+      addAlert: vi.fn(),
     });
   });
 
@@ -103,11 +122,11 @@ describe('Defensive Dashboard Integration Tests', () => {
     vi.useRealTimers();
   });
 
-  it('should complete full defensive monitoring workflow', async () => {
+  it("should complete full defensive monitoring workflow", async () => {
     render(<DefensiveDashboard />, { wrapper: createWrapper() });
 
     // 1. Dashboard loads with default module (Threat Map)
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
 
     // 2. Metrics are displayed
     await waitFor(() => {
@@ -121,11 +140,13 @@ describe('Defensive Dashboard Integration Tests', () => {
     vi.advanceTimersByTime(2000);
 
     // Dashboard remains stable
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 
-  it('should handle metrics updates in real-time', async () => {
-    const { rerender } = render(<DefensiveDashboard />, { wrapper: createWrapper() });
+  it("should handle metrics updates in real-time", async () => {
+    const { rerender } = render(<DefensiveDashboard />, {
+      wrapper: createWrapper(),
+    });
 
     // Initial metrics
     expect(useDefensiveMetrics).toHaveBeenCalled();
@@ -136,9 +157,9 @@ describe('Defensive Dashboard Integration Tests', () => {
         threats: 18, // increased
         suspiciousIPs: 25, // increased
         domains: 145,
-        monitored: 57
+        monitored: 57,
       },
-      loading: false
+      loading: false,
     });
 
     rerender(<DefensiveDashboard />);
@@ -149,9 +170,11 @@ describe('Defensive Dashboard Integration Tests', () => {
     });
   });
 
-  it('should handle new real-time alerts', async () => {
+  it("should handle new real-time alerts", async () => {
     const mockAddAlert = vi.fn();
-    const { rerender } = render(<DefensiveDashboard />, { wrapper: createWrapper() });
+    const { rerender } = render(<DefensiveDashboard />, {
+      wrapper: createWrapper(),
+    });
 
     // Initial state
     expect(useRealTimeAlerts).toHaveBeenCalled();
@@ -159,11 +182,26 @@ describe('Defensive Dashboard Integration Tests', () => {
     // Simulate new alert
     useRealTimeAlerts.mockReturnValue({
       alerts: [
-        { id: 1, severity: 'critical', message: 'SQL Injection detected', timestamp: Date.now() },
-        { id: 2, severity: 'high', message: 'Port scan from 192.168.1.50', timestamp: Date.now() - 5000 },
-        { id: 3, severity: 'critical', message: 'Ransomware behavior detected', timestamp: Date.now() }
+        {
+          id: 1,
+          severity: "critical",
+          message: "SQL Injection detected",
+          timestamp: Date.now(),
+        },
+        {
+          id: 2,
+          severity: "high",
+          message: "Port scan from 192.168.1.50",
+          timestamp: Date.now() - 5000,
+        },
+        {
+          id: 3,
+          severity: "critical",
+          message: "Ransomware behavior detected",
+          timestamp: Date.now(),
+        },
       ],
-      addAlert: mockAddAlert
+      addAlert: mockAddAlert,
     });
 
     rerender(<DefensiveDashboard />);
@@ -173,37 +211,39 @@ describe('Defensive Dashboard Integration Tests', () => {
     });
   });
 
-  it('should maintain state during loading transitions', async () => {
+  it("should maintain state during loading transitions", async () => {
     render(<DefensiveDashboard />, { wrapper: createWrapper() });
 
     // Start with loaded state
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
 
     // Transition to loading
     useDefensiveMetrics.mockReturnValue({
       metrics: { threats: 0, suspiciousIPs: 0, domains: 0, monitored: 0 },
-      loading: true
+      loading: true,
     });
 
     // Dashboard should still render
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 
-  it('should handle error states gracefully', async () => {
+  it("should handle error states gracefully", async () => {
     useDefensiveMetrics.mockReturnValue({
       metrics: { threats: 0, suspiciousIPs: 0, domains: 0, monitored: 0 },
       loading: false,
-      error: 'Service unavailable'
+      error: "Service unavailable",
     });
 
     render(<DefensiveDashboard />, { wrapper: createWrapper() });
 
     // Dashboard should still render without crashing
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 
-  it('should persist through rapid state updates', async () => {
-    const { rerender } = render(<DefensiveDashboard />, { wrapper: createWrapper() });
+  it("should persist through rapid state updates", async () => {
+    const { rerender } = render(<DefensiveDashboard />, {
+      wrapper: createWrapper(),
+    });
 
     // Simulate rapid updates
     for (let i = 0; i < 5; i++) {
@@ -212,9 +252,9 @@ describe('Defensive Dashboard Integration Tests', () => {
           threats: 15 + i,
           suspiciousIPs: 23 + i,
           domains: 145,
-          monitored: 57
+          monitored: 57,
         },
-        loading: false
+        loading: false,
       });
 
       rerender(<DefensiveDashboard />);
@@ -222,14 +262,16 @@ describe('Defensive Dashboard Integration Tests', () => {
     }
 
     // Should remain stable
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 
-  it('should cleanup resources on unmount', () => {
-    const { unmount } = render(<DefensiveDashboard />, { wrapper: createWrapper() });
+  it("should cleanup resources on unmount", () => {
+    const { unmount } = render(<DefensiveDashboard />, {
+      wrapper: createWrapper(),
+    });
 
     // Verify initial render
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
 
     // Unmount
     unmount();
@@ -240,39 +282,41 @@ describe('Defensive Dashboard Integration Tests', () => {
     // No errors should occur
   });
 
-  it('should handle back navigation', async () => {
+  it("should handle back navigation", async () => {
     const mockSetView = vi.fn();
-    render(<DefensiveDashboard setCurrentView={mockSetView} />, { wrapper: createWrapper() });
+    render(<DefensiveDashboard setCurrentView={mockSetView} />, {
+      wrapper: createWrapper(),
+    });
 
     // Dashboard renders
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
 
     // setCurrentView callback is passed to header for navigation
     // Header component would call mockSetView('main') on back button
   });
 
-  it('should support multiple modules lifecycle', async () => {
+  it("should support multiple modules lifecycle", async () => {
     render(<DefensiveDashboard />, { wrapper: createWrapper() });
 
     // Default module loads
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
 
     // All 8 modules should be available in the dashboard config:
     // threats, domain, ip, network, nmap, security, exploits, maximus
     // This verifies the complete defensive toolkit is integrated
   });
 
-  it('should maintain performance with high alert volume', async () => {
+  it("should maintain performance with high alert volume", async () => {
     const manyAlerts = Array.from({ length: 100 }, (_, i) => ({
       id: i,
-      severity: i % 3 === 0 ? 'critical' : i % 2 === 0 ? 'high' : 'medium',
+      severity: i % 3 === 0 ? "critical" : i % 2 === 0 ? "high" : "medium",
       message: `Alert ${i}`,
-      timestamp: Date.now() - (i * 1000)
+      timestamp: Date.now() - i * 1000,
     }));
 
     useRealTimeAlerts.mockReturnValue({
       alerts: manyAlerts,
-      addAlert: vi.fn()
+      addAlert: vi.fn(),
     });
 
     const startTime = performance.now();
@@ -282,10 +326,10 @@ describe('Defensive Dashboard Integration Tests', () => {
     // Should render in reasonable time even with many alerts
     expect(renderTime).toBeLessThan(1000); // 1 second max
 
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 
-  it('should integrate all defensive components correctly', async () => {
+  it("should integrate all defensive components correctly", async () => {
     render(<DefensiveDashboard />, { wrapper: createWrapper() });
 
     // Verify complete integration:
@@ -296,8 +340,8 @@ describe('Defensive Dashboard Integration Tests', () => {
     // 5. Real-time clock
     // 6. Scanline effect
 
-    const dashboard = screen.getByRole('main');
+    const dashboard = screen.getByRole("main");
     expect(dashboard).toBeInTheDocument();
-    expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+    expect(screen.getByTestId("threat-map")).toBeInTheDocument();
   });
 });

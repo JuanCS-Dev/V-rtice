@@ -8,10 +8,10 @@
  * Estilo: Clean, minimal spinner with verde accent
  */
 
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Spinner Variants - Claude.ai style
@@ -40,8 +40,8 @@ const spinnerVariants = cva(
       size: "default",
       variant: "default",
     },
-  }
-)
+  },
+);
 
 export interface SpinnerProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -49,7 +49,7 @@ export interface SpinnerProps
   /**
    * Show loading text
    */
-  label?: string
+  label?: string;
 }
 
 /**
@@ -67,25 +67,20 @@ export interface SpinnerProps
 function Spinner({ className, size, variant, label, ...props }: SpinnerProps) {
   return (
     <div
-      className={cn(
-        "inline-flex items-center gap-[var(--space-2)]",
-        className
-      )}
+      className={cn("inline-flex items-center gap-[var(--space-2)]", className)}
       role="status"
       aria-label={label || "Loading"}
       {...props}
     >
       <div className={cn(spinnerVariants({ size, variant }))} />
       {label && (
-        <span
-          className="text-[var(--text-sm)] font-[var(--font-primary)] text-[var(--muted-foreground)]"
-        >
+        <span className="text-[var(--text-sm)] font-[var(--font-primary)] text-[var(--muted-foreground)]">
           {label}
         </span>
       )}
       <span className="sr-only">{label || "Loading"}</span>
     </div>
-  )
+  );
 }
 
 /**
@@ -98,19 +93,21 @@ function Spinner({ className, size, variant, label, ...props }: SpinnerProps) {
  * ```
  */
 export interface LoadingOverlayProps {
-  message?: string
+  message?: string;
 }
 
 function LoadingOverlay({ message }: LoadingOverlayProps) {
   return (
     <div
-      className={cn([
-        "fixed inset-0",
-        "z-[var(--z-modal)]",
-        "flex items-center justify-center",
-        "bg-[var(--background)]/80",
-        "backdrop-blur-[var(--blur-sm)]",
-      ].join(" "))}
+      className={cn(
+        [
+          "fixed inset-0",
+          "z-[var(--z-modal)]",
+          "flex items-center justify-center",
+          "bg-[var(--background)]/80",
+          "backdrop-blur-[var(--blur-sm)]",
+        ].join(" "),
+      )}
       role="dialog"
       aria-modal="true"
       aria-label={message || "Loading"}
@@ -124,7 +121,7 @@ function LoadingOverlay({ message }: LoadingOverlayProps) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export { Spinner, LoadingOverlay, spinnerVariants }
+export { Spinner, LoadingOverlay, spinnerVariants };

@@ -11,12 +11,12 @@
  * Following Boris Cherny's principle: "Breaking changes must be explicit"
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll } from "vitest";
 
 // API base URL for testing
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:8000";
 
-describe('OpenAPI Contract Tests', () => {
+describe("OpenAPI Contract Tests", () => {
   let schema: any;
 
   beforeAll(async () => {
@@ -25,31 +25,31 @@ describe('OpenAPI Contract Tests', () => {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch OpenAPI schema: ${response.status} ${response.statusText}`
+        `Failed to fetch OpenAPI schema: ${response.status} ${response.statusText}`,
       );
     }
 
     schema = await response.json();
   });
 
-  describe('Schema Validation', () => {
-    it('should have valid OpenAPI schema', () => {
+  describe("Schema Validation", () => {
+    it("should have valid OpenAPI schema", () => {
       expect(schema).toBeDefined();
       expect(schema.openapi).toMatch(/^3\./);
     });
 
-    it('should have API metadata', () => {
+    it("should have API metadata", () => {
       expect(schema.info).toBeDefined();
       expect(schema.info.title).toBeDefined();
       expect(schema.info.version).toBeDefined();
     });
 
-    it('should have paths defined', () => {
+    it("should have paths defined", () => {
       expect(schema.paths).toBeDefined();
       expect(Object.keys(schema.paths).length).toBeGreaterThan(0);
     });
 
-    it('should have security schemes defined', () => {
+    it("should have security schemes defined", () => {
       expect(schema.components).toBeDefined();
       expect(schema.components.securitySchemes).toBeDefined();
 
@@ -57,37 +57,37 @@ describe('OpenAPI Contract Tests', () => {
 
       // Should have BearerAuth
       expect(schemes.BearerAuth).toBeDefined();
-      expect(schemes.BearerAuth.type).toBe('http');
-      expect(schemes.BearerAuth.scheme).toBe('bearer');
+      expect(schemes.BearerAuth.type).toBe("http");
+      expect(schemes.BearerAuth.scheme).toBe("bearer");
 
       // Should have ApiKeyAuth
       expect(schemes.ApiKeyAuth).toBeDefined();
-      expect(schemes.ApiKeyAuth.type).toBe('apiKey');
-      expect(schemes.ApiKeyAuth.in).toBe('header');
+      expect(schemes.ApiKeyAuth.type).toBe("apiKey");
+      expect(schemes.ApiKeyAuth.in).toBe("header");
     });
   });
 
-  describe('Required Endpoints', () => {
-    it('should have /api/v1/health endpoint', () => {
-      expect(schema.paths['/api/v1/health']).toBeDefined();
-      expect(schema.paths['/api/v1/health'].get).toBeDefined();
+  describe("Required Endpoints", () => {
+    it("should have /api/v1/health endpoint", () => {
+      expect(schema.paths["/api/v1/health"]).toBeDefined();
+      expect(schema.paths["/api/v1/health"].get).toBeDefined();
     });
 
-    it('should have /api/v1/ root endpoint', () => {
-      expect(schema.paths['/api/v1/']).toBeDefined();
-      expect(schema.paths['/api/v1/'].get).toBeDefined();
+    it("should have /api/v1/ root endpoint", () => {
+      expect(schema.paths["/api/v1/"]).toBeDefined();
+      expect(schema.paths["/api/v1/"].get).toBeDefined();
     });
 
-    it('should have versioned endpoints', () => {
+    it("should have versioned endpoints", () => {
       const v1Paths = Object.keys(schema.paths).filter((path) =>
-        path.startsWith('/api/v1/')
+        path.startsWith("/api/v1/"),
       );
 
       expect(v1Paths.length).toBeGreaterThanOrEqual(2);
     });
   });
 
-  describe('Health Endpoint Contract', () => {
+  describe("Health Endpoint Contract", () => {
     let healthResponse: any;
 
     beforeAll(async () => {
@@ -95,33 +95,33 @@ describe('OpenAPI Contract Tests', () => {
       healthResponse = await response.json();
     });
 
-    it('should return 200 status', async () => {
+    it("should return 200 status", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/health`);
       expect(response.status).toBe(200);
     });
 
-    it('should have required response fields', () => {
+    it("should have required response fields", () => {
       expect(healthResponse.status).toBeDefined();
       expect(healthResponse.version).toBeDefined();
       expect(healthResponse.timestamp).toBeDefined();
     });
 
-    it('should have services object', () => {
+    it("should have services object", () => {
       expect(healthResponse.services).toBeDefined();
-      expect(typeof healthResponse.services).toBe('object');
+      expect(typeof healthResponse.services).toBe("object");
     });
 
-    it('should have X-API-Version header', async () => {
+    it("should have X-API-Version header", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/health`);
-      const versionHeader = response.headers.get('X-API-Version');
+      const versionHeader = response.headers.get("X-API-Version");
 
       expect(versionHeader).toBeDefined();
-      expect(versionHeader).toBe('v1');
+      expect(versionHeader).toBe("v1");
     });
 
-    it('should have X-Request-ID header', async () => {
+    it("should have X-Request-ID header", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/health`);
-      const requestId = response.headers.get('X-Request-ID');
+      const requestId = response.headers.get("X-Request-ID");
 
       expect(requestId).toBeDefined();
 
@@ -132,10 +132,10 @@ describe('OpenAPI Contract Tests', () => {
     });
   });
 
-  describe('Error Response Contract', () => {
-    it('should return standard error format for 404', async () => {
+  describe("Error Response Contract", () => {
+    it("should return standard error format for 404", async () => {
       const response = await fetch(
-        `${API_BASE_URL}/api/v1/nonexistent-endpoint-test`
+        `${API_BASE_URL}/api/v1/nonexistent-endpoint-test`,
       );
 
       expect(response.status).toBe(404);
@@ -150,20 +150,20 @@ describe('OpenAPI Contract Tests', () => {
       expect(error.timestamp).toBeDefined();
     });
 
-    it('should propagate request ID in errors', async () => {
-      const testRequestId = 'test-contract-' + Date.now();
+    it("should propagate request ID in errors", async () => {
+      const testRequestId = "test-contract-" + Date.now();
 
       const response = await fetch(
         `${API_BASE_URL}/api/v1/nonexistent-endpoint-test`,
         {
           headers: {
-            'X-Request-ID': testRequestId,
+            "X-Request-ID": testRequestId,
           },
-        }
+        },
       );
 
       // Check header
-      const responseRequestId = response.headers.get('X-Request-ID');
+      const responseRequestId = response.headers.get("X-Request-ID");
       expect(responseRequestId).toBe(testRequestId);
 
       // Check body
@@ -172,20 +172,20 @@ describe('OpenAPI Contract Tests', () => {
     });
   });
 
-  describe('Backward Compatibility', () => {
-    it('should not remove v1 core endpoints', () => {
-      const requiredEndpoints = ['/api/v1/health', '/api/v1/'];
+  describe("Backward Compatibility", () => {
+    it("should not remove v1 core endpoints", () => {
+      const requiredEndpoints = ["/api/v1/health", "/api/v1/"];
 
       for (const endpoint of requiredEndpoints) {
         expect(schema.paths[endpoint]).toBeDefined();
       }
     });
 
-    it('should not remove required response fields', async () => {
+    it("should not remove required response fields", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/health`);
       const data = await response.json();
 
-      const requiredFields = ['status', 'version', 'timestamp'];
+      const requiredFields = ["status", "version", "timestamp"];
 
       for (const field of requiredFields) {
         expect(data[field]).toBeDefined();
@@ -193,24 +193,24 @@ describe('OpenAPI Contract Tests', () => {
     });
   });
 
-  describe('Request ID Tracing', () => {
-    it('should accept client-provided request ID', async () => {
+  describe("Request ID Tracing", () => {
+    it("should accept client-provided request ID", async () => {
       const clientRequestId = crypto.randomUUID();
 
       const response = await fetch(`${API_BASE_URL}/api/v1/health`, {
         headers: {
-          'X-Request-ID': clientRequestId,
+          "X-Request-ID": clientRequestId,
         },
       });
 
-      const responseRequestId = response.headers.get('X-Request-ID');
+      const responseRequestId = response.headers.get("X-Request-ID");
       expect(responseRequestId).toBe(clientRequestId);
     });
 
-    it('should generate request ID if not provided', async () => {
+    it("should generate request ID if not provided", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/health`);
 
-      const requestId = response.headers.get('X-Request-ID');
+      const requestId = response.headers.get("X-Request-ID");
       expect(requestId).toBeDefined();
 
       // Should be UUID v4
@@ -220,24 +220,24 @@ describe('OpenAPI Contract Tests', () => {
     });
   });
 
-  describe('API Versioning', () => {
-    it('should include version in all v1 responses', async () => {
-      const v1Endpoints = ['/api/v1/health', '/api/v1/'];
+  describe("API Versioning", () => {
+    it("should include version in all v1 responses", async () => {
+      const v1Endpoints = ["/api/v1/health", "/api/v1/"];
 
       for (const endpoint of v1Endpoints) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`);
-        const versionHeader = response.headers.get('X-API-Version');
+        const versionHeader = response.headers.get("X-API-Version");
 
-        expect(versionHeader).toBe('v1');
+        expect(versionHeader).toBe("v1");
       }
     });
 
-    it('should have version info in root endpoint', async () => {
+    it("should have version info in root endpoint", async () => {
       const response = await fetch(`${API_BASE_URL}/api/v1/`);
       const data = await response.json();
 
-      expect(data.version).toBe('v1');
-      expect(data.message).toContain('Version 1');
+      expect(data.version).toBe("v1");
+      expect(data.message).toContain("Version 1");
     });
   });
 });

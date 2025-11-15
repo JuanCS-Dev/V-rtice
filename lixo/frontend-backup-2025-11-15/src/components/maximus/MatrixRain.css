@@ -19,5 +19,5 @@
 /* Colunas de código caindo - múltiplas para efeito mais rico */
 .maximus-scanline::before,
 .maximus-scanline::after {
-  content: '0101011011001011100101110100011010010110001101100101'; /* ✅ CORREÇÃO: String fechada */
+  content: "0101011011001011100101110100011010010110001101100101"; /* ✅ CORREÇÃO: String fechada */
 } /* ✅ CORREÇÃO: Bloco fechado */

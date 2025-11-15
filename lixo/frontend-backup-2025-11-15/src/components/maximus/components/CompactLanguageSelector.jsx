@@ -6,21 +6,22 @@
  * ✅ Matches MaximusHeader design
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import styles from './CompactLanguageSelector.module.css';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import styles from "./CompactLanguageSelector.module.css";
 
 const LANGUAGES = [
-  { code: 'pt-BR', flag: '🇧🇷', name: 'Português' },
-  { code: 'en-US', flag: '🇺🇸', name: 'English' },
-  { code: 'es-ES', flag: '🇪🇸', name: 'Español' }
+  { code: "pt-BR", flag: "🇧🇷", name: "Português" },
+  { code: "en-US", flag: "🇺🇸", name: "English" },
+  { code: "es-ES", flag: "🇪🇸", name: "Español" },
 ];
 
 export const CompactLanguageSelector = () => {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentLang = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
+  const currentLang =
+    LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
 
   const handleChange = (langCode) => {
     i18n.changeLanguage(langCode);
@@ -50,18 +51,16 @@ export const CompactLanguageSelector = () => {
           onMouseLeave={() => setIsOpen(false)}
         >
           {/* Header */}
-          <div className={styles.dropdownHeader}>
-            🌐 Language
-          </div>
+          <div className={styles.dropdownHeader}>🌐 Language</div>
 
           {/* Language Options */}
-          {LANGUAGES.map(lang => (
+          {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
               onClick={() => handleChange(lang.code)}
-              className={`${styles.langButton} ${currentLang.code === lang.code ? styles.active : ''}`}
+              className={`${styles.langButton} ${currentLang.code === lang.code ? styles.active : ""}`}
               role="menuitem"
-              aria-current={currentLang.code === lang.code ? 'true' : undefined}
+              aria-current={currentLang.code === lang.code ? "true" : undefined}
             >
               <span className={styles.flag}>{lang.flag}</span>
               <span className={styles.langName}>{lang.name}</span>

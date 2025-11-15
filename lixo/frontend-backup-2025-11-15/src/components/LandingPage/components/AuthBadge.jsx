@@ -10,20 +10,18 @@
  * - Compact & clean
  */
 
-import React from 'react';
-import styles from './AuthBadge.module.css';
+import React from "react";
+import styles from "./AuthBadge.module.css";
 
 export const AuthBadge = ({ isAuthenticated, user, onLogin, onLogout }) => {
   if (isAuthenticated) {
     return (
       <div className={styles.authenticated}>
         <div className={styles.userInfo}>
-          <div className={styles.userName}>
-            {user?.name || user?.email}
-          </div>
+          <div className={styles.userName}>{user?.name || user?.email}</div>
           <div className={styles.userRole}>
-            {user?.role?.toUpperCase() || 'USER'}
-            {user?.role === 'super_admin' && ' 👑'}
+            {user?.role?.toUpperCase() || "USER"}
+            {user?.role === "super_admin" && " 👑"}
           </div>
         </div>
         <button

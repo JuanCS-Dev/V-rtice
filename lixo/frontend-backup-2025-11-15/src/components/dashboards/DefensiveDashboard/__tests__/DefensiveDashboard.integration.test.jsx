@@ -8,14 +8,14 @@
  * Governed by: Constituição Vértice v2.5 - ADR-004 (Testing Strategy)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import DefensiveDashboard from '../DefensiveDashboard';
-import { useDefensiveMetrics } from '@/hooks/services/useDefensiveService';
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import DefensiveDashboard from "../DefensiveDashboard";
+import { useDefensiveMetrics } from "@/hooks/services/useDefensiveService";
 
 // Mock i18n
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key) => key,
     i18n: { changeLanguage: vi.fn() },
@@ -25,7 +25,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 // Mock the service layer - use factory function to provide mock implementation
-vi.mock('@/hooks/services/useDefensiveService', () => ({
+vi.mock("@/hooks/services/useDefensiveService", () => ({
   useDefensiveMetrics: vi.fn(() => ({
     data: {
       threats: 12,
@@ -41,22 +41,22 @@ vi.mock('@/hooks/services/useDefensiveService', () => ({
 }));
 
 // Mock WebSocket hook
-vi.mock('../hooks/useRealTimeAlerts', () => ({
+vi.mock("../hooks/useRealTimeAlerts", () => ({
   useRealTimeAlerts: vi.fn(() => ({
     alerts: [
       {
-        id: 'alert-001',
-        type: 'threat_detected',
-        severity: 'high',
-        message: 'Suspicious activity detected',
-        timestamp: '2024-01-15T10:30:00Z',
+        id: "alert-001",
+        type: "threat_detected",
+        severity: "high",
+        message: "Suspicious activity detected",
+        timestamp: "2024-01-15T10:30:00Z",
       },
       {
-        id: 'alert-002',
-        type: 'anomaly',
-        severity: 'medium',
-        message: 'Unusual traffic pattern',
-        timestamp: '2024-01-15T10:25:00Z',
+        id: "alert-002",
+        type: "anomaly",
+        severity: "medium",
+        message: "Unusual traffic pattern",
+        timestamp: "2024-01-15T10:25:00Z",
       },
     ],
     addAlert: vi.fn(),
@@ -64,56 +64,67 @@ vi.mock('../hooks/useRealTimeAlerts', () => ({
 }));
 
 // Mock defensive modules
-vi.mock('../../../cyber/ThreatMap', () => ({
+vi.mock("../../../cyber/ThreatMap", () => ({
   default: () => <div data-testid="threat-map">Threat Map</div>,
 }));
 
-vi.mock('../../../cyber/CyberAlerts', () => ({
+vi.mock("../../../cyber/CyberAlerts", () => ({
   default: () => <div data-testid="cyber-alerts">Cyber Alerts</div>,
 }));
 
-vi.mock('../../../cyber/DomainAnalyzer', () => ({
+vi.mock("../../../cyber/DomainAnalyzer", () => ({
   default: () => <div data-testid="domain-analyzer">Domain Analyzer</div>,
 }));
 
-vi.mock('../../../cyber/IpIntelligence', () => ({
+vi.mock("../../../cyber/IpIntelligence", () => ({
   default: () => <div data-testid="ip-intelligence">IP Intelligence</div>,
 }));
 
-vi.mock('../../../cyber/NetworkMonitor', () => ({
+vi.mock("../../../cyber/NetworkMonitor", () => ({
   default: () => <div data-testid="network-monitor">Network Monitor</div>,
 }));
 
-vi.mock('../../../cyber/NmapScanner', () => ({
+vi.mock("../../../cyber/NmapScanner", () => ({
   default: () => <div data-testid="nmap-scanner">Nmap Scanner</div>,
 }));
 
-vi.mock('../../../cyber/SystemSecurity', () => ({
+vi.mock("../../../cyber/SystemSecurity", () => ({
   default: () => <div data-testid="system-security">System Security</div>,
 }));
 
-vi.mock('../../../cyber/ExploitSearchWidget', () => ({
+vi.mock("../../../cyber/ExploitSearchWidget", () => ({
   default: () => <div data-testid="exploit-search">Exploit Search</div>,
 }));
 
-vi.mock('../../../cyber/MaximusCyberHub', () => ({
+vi.mock("../../../cyber/MaximusCyberHub", () => ({
   default: () => <div data-testid="maximus-hub">Maximus Hub</div>,
 }));
 
-vi.mock('../../../cyber/BehavioralAnalyzer/BehavioralAnalyzer', () => ({
-  default: () => <div data-testid="behavioral-analyzer">Behavioral Analyzer</div>,
+vi.mock("../../../cyber/BehavioralAnalyzer/BehavioralAnalyzer", () => ({
+  default: () => (
+    <div data-testid="behavioral-analyzer">Behavioral Analyzer</div>
+  ),
 }));
 
-vi.mock('../../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer', () => ({
-  default: () => <div data-testid="traffic-analyzer">Traffic Analyzer</div>,
-}));
+vi.mock(
+  "../../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer",
+  () => ({
+    default: () => <div data-testid="traffic-analyzer">Traffic Analyzer</div>,
+  }),
+);
 
 // Mock dashboard child components
-vi.mock('../components/DefensiveHeader', () => ({
-  default: ({ modules, setActiveModule, setCurrentView, metrics, metricsLoading }) => (
+vi.mock("../components/DefensiveHeader", () => ({
+  default: ({
+    modules,
+    setActiveModule,
+    setCurrentView,
+    metrics,
+    metricsLoading,
+  }) => (
     <div data-testid="defensive-header">
       Defensive Header
-      {modules?.map(m => (
+      {modules?.map((m) => (
         <button key={m.id} onClick={() => setActiveModule?.(m.id)}>
           {m.name}
         </button>
@@ -122,7 +133,7 @@ vi.mock('../components/DefensiveHeader', () => ({
   ),
 }));
 
-vi.mock('../components/DefensiveSidebar', () => ({
+vi.mock("../components/DefensiveSidebar", () => ({
   default: ({ alerts }) => (
     <div data-testid="defensive-sidebar">
       Defensive Sidebar ({alerts?.length || 0} alerts)
@@ -130,13 +141,13 @@ vi.mock('../components/DefensiveSidebar', () => ({
   ),
 }));
 
-vi.mock('../components/ModuleContainer', () => ({
+vi.mock("../components/ModuleContainer", () => ({
   default: ({ children }) => (
     <div data-testid="module-container">{children}</div>
   ),
 }));
 
-vi.mock('../../../shared/DashboardFooter', () => ({
+vi.mock("../../../shared/DashboardFooter", () => ({
   DashboardFooter: () => <div data-testid="dashboard-footer">Footer</div>,
 }));
 
@@ -160,7 +171,7 @@ const createTestWrapper = () => {
   );
 };
 
-describe('DefensiveDashboard - Service Layer Integration', () => {
+describe("DefensiveDashboard - Service Layer Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -187,19 +198,19 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // BASIC RENDERING
   // ============================================================================
 
-  it('should render dashboard with metrics from service layer', async () => {
+  it("should render dashboard with metrics from service layer", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     // Wait for dashboard to render
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Verify useDefensiveMetrics was called
     expect(useDefensiveMetrics).toHaveBeenCalled();
   });
 
-  it('should display loading state when metrics are loading', async () => {
+  it("should display loading state when metrics are loading", async () => {
     useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: true,
@@ -211,23 +222,23 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
 
     // Dashboard should still render with default metrics
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
   });
 
-  it('should handle metrics error gracefully', async () => {
+  it("should handle metrics error gracefully", async () => {
     useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: false,
       isError: true,
-      error: new Error('Failed to fetch metrics'),
+      error: new Error("Failed to fetch metrics"),
     });
 
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     // Dashboard should render with default metrics (0s)
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
   });
 
@@ -235,19 +246,19 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // MODULE LOADING
   // ============================================================================
 
-  it('should render threat map module by default', async () => {
+  it("should render threat map module by default", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+      expect(screen.getByTestId("threat-map")).toBeInTheDocument();
     });
   });
 
-  it('should have 10 defensive modules available', async () => {
+  it("should have 10 defensive modules available", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Modules: Threat Map, Behavioral, Traffic, Domain, IP, Network, Nmap, Security, Exploits, Maximus
@@ -258,7 +269,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // METRICS INTEGRATION
   // ============================================================================
 
-  it('should pass correct metrics to header component', async () => {
+  it("should pass correct metrics to header component", async () => {
     const customMetrics = {
       threats: 25,
       suspiciousIPs: 15,
@@ -276,14 +287,14 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Verify metrics were passed (header receives metrics prop)
     expect(useDefensiveMetrics).toHaveBeenCalled();
   });
 
-  it('should provide default metrics when data is undefined', async () => {
+  it("should provide default metrics when data is undefined", async () => {
     useDefensiveMetrics.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -294,13 +305,13 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Dashboard should not crash and use default metrics
   });
 
-  it('should pass metricsLoading prop to header', async () => {
+  it("should pass metricsLoading prop to header", async () => {
     useDefensiveMetrics.mockReturnValue({
       data: null,
       isLoading: true,
@@ -311,7 +322,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Header receives metricsLoading={true}
@@ -321,18 +332,18 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // REAL-TIME ALERTS
   // ============================================================================
 
-  it('should display real-time alerts in sidebar', async () => {
+  it("should display real-time alerts in sidebar", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Alerts are passed to DefensiveSidebar component
   });
 
-  it('should handle empty alerts array', async () => {
-    const { useRealTimeAlerts } = await import('../hooks/useRealTimeAlerts');
+  it("should handle empty alerts array", async () => {
+    const { useRealTimeAlerts } = await import("../hooks/useRealTimeAlerts");
     useRealTimeAlerts.mockReturnValue({
       alerts: [],
       addAlert: vi.fn(),
@@ -341,15 +352,15 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
   });
 
-  it('should pass metrics to sidebar', async () => {
+  it("should pass metrics to sidebar", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Sidebar receives both alerts and metrics props
@@ -359,23 +370,23 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // CLOCK FUNCTIONALITY
   // ============================================================================
 
-  it('should display current time in header', async () => {
+  it("should display current time in header", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // currentTime is passed to DefensiveHeader
   });
 
-  it('should update clock every second', async () => {
+  it("should update clock every second", async () => {
     vi.useFakeTimers();
 
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Advance time by 1 second
@@ -385,13 +396,13 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     vi.useRealTimers();
   });
 
-  it('should cleanup timer on unmount', async () => {
+  it("should cleanup timer on unmount", async () => {
     const { unmount } = render(<DefensiveDashboard />, {
       wrapper: createTestWrapper(),
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Unmount should clear interval
@@ -402,24 +413,24 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // MODULE SWITCHING
   // ============================================================================
 
-  it('should support module switching via activeModule state', async () => {
+  it("should support module switching via activeModule state", async () => {
     const { rerender } = render(<DefensiveDashboard />, {
       wrapper: createTestWrapper(),
     });
 
     // Default module is 'threats'
     await waitFor(() => {
-      expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+      expect(screen.getByTestId("threat-map")).toBeInTheDocument();
     });
 
     // Module switching is handled by DefensiveHeader via setActiveModule prop
   });
 
-  it('should display fallback message if module not found', async () => {
+  it("should display fallback message if module not found", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // If activeModuleData is null, shows "Module not found"
@@ -429,11 +440,11 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // STYLING
   // ============================================================================
 
-  it('should render scanline overlay effect', async () => {
+  it("should render scanline overlay effect", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Scanline overlay div is present for visual effect
@@ -443,24 +454,24 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // NAVIGATION
   // ============================================================================
 
-  it('should pass setCurrentView to header for navigation', async () => {
+  it("should pass setCurrentView to header for navigation", async () => {
     const mockSetView = vi.fn();
     render(<DefensiveDashboard setCurrentView={mockSetView} />, {
       wrapper: createTestWrapper(),
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // DefensiveHeader receives setCurrentView prop
   });
 
-  it('should handle missing setCurrentView gracefully', async () => {
+  it("should handle missing setCurrentView gracefully", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Should not crash if setCurrentView is undefined
@@ -470,7 +481,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // SERVICE LAYER INTEGRATION
   // ============================================================================
 
-  it('should use useDefensiveMetrics from service layer', async () => {
+  it("should use useDefensiveMetrics from service layer", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
@@ -480,7 +491,7 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     // Verify correct import: @/hooks/services/useDefensiveService
   });
 
-  it('should handle metrics refetch correctly', async () => {
+  it("should handle metrics refetch correctly", async () => {
     const mockRefetch = vi.fn();
     useDefensiveMetrics.mockReturnValue({
       data: { threats: 5, suspiciousIPs: 3, domains: 10, monitored: 50 },
@@ -493,19 +504,19 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // refetch function is available if needed
   });
 
-  it('should update when metrics data changes', async () => {
+  it("should update when metrics data changes", async () => {
     const { rerender } = render(<DefensiveDashboard />, {
       wrapper: createTestWrapper(),
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // Update metrics
@@ -533,18 +544,18 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // MODULE COMPONENTS
   // ============================================================================
 
-  it('should render all defensive modules correctly', async () => {
+  it("should render all defensive modules correctly", async () => {
     const modules = [
-      'threats',
-      'behavioral',
-      'encrypted',
-      'domain',
-      'ip',
-      'network',
-      'nmap',
-      'security',
-      'exploits',
-      'maximus',
+      "threats",
+      "behavioral",
+      "encrypted",
+      "domain",
+      "ip",
+      "network",
+      "nmap",
+      "security",
+      "exploits",
+      "maximus",
     ];
 
     for (const moduleId of modules) {
@@ -555,15 +566,15 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
   });
 
-  it('should wrap module in ModuleContainer', async () => {
+  it("should wrap module in ModuleContainer", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByTestId('threat-map')).toBeInTheDocument();
+      expect(screen.getByTestId("threat-map")).toBeInTheDocument();
     });
 
     // Module is wrapped in <ModuleContainer>
@@ -573,21 +584,21 @@ describe('DefensiveDashboard - Service Layer Integration', () => {
   // NEW MODULES - ACTIVE IMMUNE CORE
   // ============================================================================
 
-  it('should include BehavioralAnalyzer module', async () => {
+  it("should include BehavioralAnalyzer module", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // BehavioralAnalyzer is in DEFENSIVE_MODULES (id: 'behavioral')
   });
 
-  it('should include EncryptedTrafficAnalyzer module', async () => {
+  it("should include EncryptedTrafficAnalyzer module", async () => {
     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
 
     await waitFor(() => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole("main")).toBeInTheDocument();
     });
 
     // EncryptedTrafficAnalyzer is in DEFENSIVE_MODULES (id: 'encrypted')

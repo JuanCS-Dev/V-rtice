@@ -1,15 +1,18 @@
 # ✅ MAXIMUS CHAT - NLP Interface IMPLEMENTADO
 
 ## 📍 Localização
+
 `/frontend/src/components/maximus/MaximusChat/`
 
 ## 🎯 O que foi feito
 
 ### Substituição Completa do Terminal
+
 - ❌ **MaximusTerminal.jsx** (antigo - terminal xterm)
 - ✅ **MaximusChat** (novo - chat NLP estilo Claude)
 
 ### Estrutura de Arquivos
+
 ```
 MaximusChat/
 ├── MaximusChat.jsx                 # Container principal
@@ -29,6 +32,7 @@ MaximusChat/
 ## 🎨 Design System
 
 ### Paleta de Cores (Maximus Theme)
+
 - **Primary**: `#ef4444` (Red)
 - **Secondary**: `#f97316` (Orange)
 - **Success**: `#10b981` (Green)
@@ -37,6 +41,7 @@ MaximusChat/
 ### Componentes Implementados
 
 #### 1. ConversationSidebar
+
 - ✅ Histórico vertical de conversas
 - ✅ Botão "Nova Conversa"
 - ✅ Timestamps relativos (Agora, 5m atrás, etc.)
@@ -44,18 +49,21 @@ MaximusChat/
 - ✅ Estado ativo (highlight)
 
 #### 2. ChatWindow
+
 - ✅ Empty state com sugestões de prompts
 - ✅ Auto-scroll ao receber mensagens
 - ✅ Suporte a markdown básico
 - ✅ Animações de entrada
 
 #### 3. MessageBubble
+
 - ✅ Avatars diferenciados (�� user, 🧠 assistant)
 - ✅ Timestamps formatados
-- ✅ Suporte a markdown inline (`code`, **bold**, *italic*)
+- ✅ Suporte a markdown inline (`code`, **bold**, _italic_)
 - ✅ Ações (copiar, regenerar)
 
 #### 4. MessageInput
+
 - ✅ Textarea auto-expansível
 - ✅ Atalhos de teclado:
   - `Enter` → Enviar
@@ -64,6 +72,7 @@ MaximusChat/
 - ✅ Hint do vcli-go
 
 #### 5. ThinkingIndicator
+
 - ✅ Animação de dots pulsantes
 - ✅ Barra de progresso NLP
 - ✅ Avatar pulsante
@@ -72,12 +81,13 @@ MaximusChat/
 ## 🔌 Backend Integration
 
 ### Estado Atual: MOCK
+
 ```javascript
 // useMaximusChat.js (linha ~15)
 const mockAPIResponse = async (userMessage) => {
   // Simula delay de 1.5-2.5s
   await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
-  
+
   // Respostas baseadas em keywords
   if (lowerMessage.includes('status')) { ... }
   if (lowerMessage.includes('alert')) { ... }
@@ -86,24 +96,29 @@ const mockAPIResponse = async (userMessage) => {
 ```
 
 ### Endpoint Preparado
+
 ```javascript
 // TODO: Substituir mock por:
-const response = await fetch('/api/nlp/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/nlp/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     conversationId: activeConversationId,
     message: content,
-    context: { /* metadata */ }
-  })
+    context: {
+      /* metadata */
+    },
+  }),
 });
 ```
 
 ## 💾 Persistência
 
 ### LocalStorage
+
 - **Key**: `maximus_chat_conversations`
 - **Estrutura**:
+
 ```json
 [
   {
@@ -117,6 +132,7 @@ const response = await fetch('/api/nlp/chat', {
 ```
 
 ### Auto-save
+
 - ✅ Salva após cada mensagem
 - ✅ Carrega automaticamente no mount
 - ✅ Seleciona conversa mais recente
@@ -124,6 +140,7 @@ const response = await fetch('/api/nlp/chat', {
 ## 🧪 Testes Sugeridos
 
 ### Funcionalidades a Validar
+
 1. ✅ Criar nova conversa
 2. ✅ Enviar mensagem (Enter)
 3. ✅ Nova linha (Shift+Enter)
@@ -138,12 +155,14 @@ const response = await fetch('/api/nlp/chat', {
 ## 🚀 Próximos Passos
 
 ### Backend (Pendente)
+
 1. Implementar `/api/nlp/chat` endpoint
 2. Integrar com vcli-go NLP engine
 3. SSE/WebSocket para streaming
 4. Persistência em DB (PostgreSQL)
 
 ### Features Adicionais
+
 1. Markdown completo (react-markdown)
 2. Code syntax highlighting
 3. Anexos de arquivos
@@ -154,11 +173,13 @@ const response = await fetch('/api/nlp/chat', {
 ## 📊 Métricas de Código
 
 ### Lint Status
+
 - ⚠️ 6 warnings (accessibility - não bloqueantes)
 - ✅ 0 errors
 - ✅ Código formatado (Prettier)
 
 ### Conformidade Doutrina
+
 - ✅ Design System seguido (cores, spacing)
 - ✅ Padrão de componentes respeitado
 - ✅ Accessibility básico implementado
@@ -169,11 +190,13 @@ const response = await fetch('/api/nlp/chat', {
 ## 🎓 Como Usar
 
 ### Acessar o Chat
+
 1. Navegar para Dashboard Maximus
 2. Clicar na aba "Terminal" (agora é Chat)
 3. Interface carregará automaticamente
 
 ### Exemplo de Uso
+
 ```
 Você: "Qual o status dos sistemas de consciência?"
 

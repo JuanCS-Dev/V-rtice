@@ -90,7 +90,7 @@
   border: 1px solid rgba(0, 255, 136, 0.3);
   border-radius: 6px;
   color: #ffffff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   transition: border-color 0.3s;
 }
@@ -112,7 +112,9 @@
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -246,14 +248,14 @@
 .value {
   color: #ffffff;
   font-weight: 500;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 @media (max-width: 768px) {
   .formRow {
     grid-template-columns: 1fr;
   }
-  
+
   .flowInfo {
     grid-template-columns: 1fr;
   }

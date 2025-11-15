@@ -1,12 +1,12 @@
 /**
  * Accessible Form Components
  * MAXIMUS Vértice - Phase 4C
- * 
+ *
  * Form components with built-in accessibility
  */
 
-import React, { useRef, useId } from 'react';
-import PropTypes from 'prop-types';
+import React, { useRef, useId } from "react";
+import PropTypes from "prop-types";
 
 /**
  * Accessible Input - Always use this for text inputs
@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
  */
 export const Input = ({
   label,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   placeholder,
@@ -22,7 +22,7 @@ export const Input = ({
   disabled = false,
   error,
   helperText,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const inputId = useId();
@@ -34,15 +34,19 @@ export const Input = ({
   return (
     <div className={`form-group ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={inputId}
           className="form-label block text-sm font-medium mb-1"
         >
           {label}
-          {required && <span className="text-error ml-1" aria-label="required">*</span>}
+          {required && (
+            <span className="text-error ml-1" aria-label="required">
+              *
+            </span>
+          )}
         </label>
       )}
-      
+
       <input
         id={inputId}
         type={type}
@@ -52,21 +56,30 @@ export const Input = ({
         required={required}
         disabled={disabled}
         className={`form-input w-full px-3 py-2 border rounded-lg transition-base ${
-          hasError ? 'border-error focus:ring-error' : 'border-border focus:ring-primary'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          hasError
+            ? "border-error focus:ring-error"
+            : "border-border focus:ring-primary"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         aria-invalid={hasError}
-        aria-describedby={`${hasError ? errorId : ''} ${helperText ? helperId : ''}`.trim()}
+        aria-describedby={`${hasError ? errorId : ""} ${helperText ? helperId : ""}`.trim()}
         {...rest}
       />
-      
+
       {error && (
-        <p id={errorId} className="form-error text-error text-sm mt-1" role="alert">
+        <p
+          id={errorId}
+          className="form-error text-error text-sm mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
-      
+
       {helperText && !error && (
-        <p id={helperId} className="form-helper text-text-secondary text-sm mt-1">
+        <p
+          id={helperId}
+          className="form-helper text-text-secondary text-sm mt-1"
+        >
           {helperText}
         </p>
       )}
@@ -100,7 +113,7 @@ export const Textarea = ({
   disabled = false,
   error,
   helperText,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const textareaId = useId();
@@ -112,15 +125,19 @@ export const Textarea = ({
   return (
     <div className={`form-group ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={textareaId}
           className="form-label block text-sm font-medium mb-1"
         >
           {label}
-          {required && <span className="text-error ml-1" aria-label="required">*</span>}
+          {required && (
+            <span className="text-error ml-1" aria-label="required">
+              *
+            </span>
+          )}
         </label>
       )}
-      
+
       {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
       <textarea
         id={textareaId}
@@ -132,21 +149,30 @@ export const Textarea = ({
         disabled={disabled}
         maxLength={maxLength || 1000}
         className={`form-textarea w-full px-3 py-2 border rounded-lg transition-base ${
-          hasError ? 'border-error focus:ring-error' : 'border-border focus:ring-primary'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          hasError
+            ? "border-error focus:ring-error"
+            : "border-border focus:ring-primary"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         aria-invalid={hasError}
-        aria-describedby={`${hasError ? errorId : ''} ${helperText ? helperId : ''}`.trim()}
+        aria-describedby={`${hasError ? errorId : ""} ${helperText ? helperId : ""}`.trim()}
         {...rest}
       />
-      
+
       {error && (
-        <p id={errorId} className="form-error text-error text-sm mt-1" role="alert">
+        <p
+          id={errorId}
+          className="form-error text-error text-sm mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
-      
+
       {helperText && !error && (
-        <p id={helperId} className="form-helper text-text-secondary text-sm mt-1">
+        <p
+          id={helperId}
+          className="form-helper text-text-secondary text-sm mt-1"
+        >
           {helperText}
         </p>
       )}
@@ -180,7 +206,7 @@ export const Select = ({
   disabled = false,
   error,
   helperText,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const selectId = useId();
@@ -192,15 +218,19 @@ export const Select = ({
   return (
     <div className={`form-group ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={selectId}
           className="form-label block text-sm font-medium mb-1"
         >
           {label}
-          {required && <span className="text-error ml-1" aria-label="required">*</span>}
+          {required && (
+            <span className="text-error ml-1" aria-label="required">
+              *
+            </span>
+          )}
         </label>
       )}
-      
+
       <select
         id={selectId}
         value={value}
@@ -208,10 +238,12 @@ export const Select = ({
         required={required}
         disabled={disabled}
         className={`form-select w-full px-3 py-2 border rounded-lg transition-base ${
-          hasError ? 'border-error focus:ring-error' : 'border-border focus:ring-primary'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          hasError
+            ? "border-error focus:ring-error"
+            : "border-border focus:ring-primary"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         aria-invalid={hasError}
-        aria-describedby={`${hasError ? errorId : ''} ${helperText ? helperId : ''}`.trim()}
+        aria-describedby={`${hasError ? errorId : ""} ${helperText ? helperId : ""}`.trim()}
         {...rest}
       >
         {placeholder && (
@@ -225,15 +257,22 @@ export const Select = ({
           </option>
         ))}
       </select>
-      
+
       {error && (
-        <p id={errorId} className="form-error text-error text-sm mt-1" role="alert">
+        <p
+          id={errorId}
+          className="form-error text-error text-sm mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}
-      
+
       {helperText && !error && (
-        <p id={helperId} className="form-helper text-text-secondary text-sm mt-1">
+        <p
+          id={helperId}
+          className="form-helper text-text-secondary text-sm mt-1"
+        >
           {helperText}
         </p>
       )}
@@ -245,10 +284,13 @@ Select.propTypes = {
   label: PropTypes.string,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
-  options: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    label: PropTypes.string.isRequired,
-  })),
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        .isRequired,
+      label: PropTypes.string.isRequired,
+    }),
+  ),
   placeholder: PropTypes.string,
   required: PropTypes.bool,
   disabled: PropTypes.bool,
@@ -266,7 +308,7 @@ export const Checkbox = ({
   onChange,
   disabled = false,
   error,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const checkboxId = useId();
@@ -287,17 +329,18 @@ export const Checkbox = ({
           {...rest}
         />
         {label && (
-          <label 
-            htmlFor={checkboxId}
-            className="ml-2 text-sm cursor-pointer"
-          >
+          <label htmlFor={checkboxId} className="ml-2 text-sm cursor-pointer">
             {label}
           </label>
         )}
       </div>
-      
+
       {error && (
-        <p id={errorId} className="form-error text-error text-sm mt-1" role="alert">
+        <p
+          id={errorId}
+          className="form-error text-error text-sm mt-1"
+          role="alert"
+        >
           {error}
         </p>
       )}

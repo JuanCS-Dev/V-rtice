@@ -7,9 +7,9 @@
  * Following Boris Cherny's principle: "Graceful degradation is not optional"
  */
 
-import { useEffect, useState } from 'react';
-import { useMutationState, useQueryClient } from '@tanstack/react-query';
-import type { MutationState } from '@tanstack/react-query';
+import { useEffect, useState } from "react";
+import { useMutationState, useQueryClient } from "@tanstack/react-query";
+import type { MutationState } from "@tanstack/react-query";
 
 // ============================================================================
 // Online/Offline Detection
@@ -41,27 +41,27 @@ import type { MutationState } from '@tanstack/react-query';
  */
 export function useOnlineStatus(): boolean {
   const [isOnline, setIsOnline] = useState(() => {
-    if (typeof window === 'undefined') return true;
+    if (typeof window === "undefined") return true;
     return window.navigator.onLine;
   });
 
   useEffect(() => {
     function handleOnline() {
-      console.info('[OfflineQueue] Connection restored');
+      console.info("[OfflineQueue] Connection restored");
       setIsOnline(true);
     }
 
     function handleOffline() {
-      console.warn('[OfflineQueue] Connection lost - mutations will be queued');
+      console.warn("[OfflineQueue] Connection lost - mutations will be queued");
       setIsOnline(false);
     }
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -78,7 +78,7 @@ export function useOnlineStatus(): boolean {
 export interface PendingMutation {
   mutationKey: string[];
   variables: unknown;
-  status: 'pending' | 'error' | 'paused';
+  status: "pending" | "error" | "paused";
   error?: Error;
   timestamp: string;
 }
@@ -108,7 +108,7 @@ export interface PendingMutation {
  */
 export function useMutationQueue(): PendingMutation[] {
   const mutations = useMutationState({
-    filters: { status: 'pending' },
+    filters: { status: "pending" },
     select: (mutation: MutationState) => ({
       mutationKey: mutation.mutationKey as string[],
       variables: mutation.variables,
@@ -174,12 +174,12 @@ export function useOfflineQueue() {
 
   const clearQueue = () => {
     queryClient.getMutationCache().clear();
-    console.info('[OfflineQueue] Mutation queue cleared');
+    console.info("[OfflineQueue] Mutation queue cleared");
   };
 
   const retryAll = () => {
     if (!isOnline) {
-      console.warn('[OfflineQueue] Cannot retry while offline');
+      console.warn("[OfflineQueue] Cannot retry while offline");
       return;
     }
 
@@ -187,9 +187,12 @@ export function useOfflineQueue() {
     const mutations = mutationCache.getAll();
 
     mutations
-      .filter((m) => m.state.status === 'pending' || m.state.status === 'error')
+      .filter((m) => m.state.status === "pending" || m.state.status === "error")
       .forEach((m) => {
-        console.info('[OfflineQueue] Retrying mutation:', m.options.mutationKey);
+        console.info(
+          "[OfflineQueue] Retrying mutation:",
+          m.options.mutationKey,
+        );
         // TanStack Query will automatically retry based on retry config
       });
   };
@@ -229,7 +232,9 @@ export function useAutoRetryOnReconnect() {
     if (isOnline) {
       // Resume all paused queries
       queryClient.resumePausedMutations().then(() => {
-        console.info('[OfflineQueue] Auto-retried pending mutations after reconnect');
+        console.info(
+          "[OfflineQueue] Auto-retried pending mutations after reconnect",
+        );
       });
     }
   }, [isOnline, queryClient]);

@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useContext, useCallback } from 'react';
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import { SearchAddon } from '@xterm/addon-search';
-import { AuthContext } from '../../contexts/AuthContext';
-import { useTerminalHistory } from './hooks/useTerminalHistory';
-import { useCommandProcessor } from './hooks/useCommandProcessor';
-import { useTerminalInput } from './hooks/useTerminalInput';
-import TerminalDisplay from './components/TerminalDisplay';
-import '@xterm/xterm/css/xterm.css';
+import React, { useEffect, useRef, useContext, useCallback } from "react";
+import { Terminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { SearchAddon } from "@xterm/addon-search";
+import { AuthContext } from "../../contexts/AuthContext";
+import { useTerminalHistory } from "./hooks/useTerminalHistory";
+import { useCommandProcessor } from "./hooks/useCommandProcessor";
+import { useTerminalInput } from "./hooks/useTerminalInput";
+import TerminalDisplay from "./components/TerminalDisplay";
+import "@xterm/xterm/css/xterm.css";
 
 const ASCII_BANNER = `
 \x1b[1;32m██╗   ██╗███████╗██████╗ ████████╗██╗ ██████╗███████╗\x1b[0m
@@ -30,14 +30,19 @@ const TerminalEmulator = ({ theme, isFullscreen }) => {
   const { user } = useContext(AuthContext);
 
   const getPrompt = useCallback(() => {
-    const userName = user?.email?.split('@')[0] || 'user';
-    const currentPath = '~'; // This can be moved to a state later
+    const userName = user?.email?.split("@")[0] || "user";
+    const currentPath = "~"; // This can be moved to a state later
     return `\r\n\x1b[1;32m${userName}@vertice\x1b[0m:\x1b[1;34m${currentPath}\x1b[0m$ `;
   }, [user]);
 
   const commandHistoryHook = useTerminalHistory();
   const commandProcessorHook = useCommandProcessor(terminal);
-  const { handleTerminalInput } = useTerminalInput(terminal, commandHistoryHook, commandProcessorHook, getPrompt());
+  const { handleTerminalInput } = useTerminalInput(
+    terminal,
+    commandHistoryHook,
+    commandProcessorHook,
+    getPrompt(),
+  );
 
   useEffect(() => {
     const term = new Terminal({
@@ -77,7 +82,7 @@ const TerminalEmulator = ({ theme, isFullscreen }) => {
     return () => {
       term.dispose();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
 
   useEffect(() => {

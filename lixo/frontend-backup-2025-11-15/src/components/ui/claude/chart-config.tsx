@@ -7,7 +7,7 @@
  * NÃO laranja/vermelho!
  */
 
-import "../../../styles/claude-design-green.css"
+import "../../../styles/claude-design-green.css";
 
 /**
  * Chart Color Palette - VERDE Theme
@@ -29,13 +29,13 @@ export const chartColors = {
   // Semantic
   success: "#10b981", // Verde (mesmo primary)
   warning: "#f59e0b", // Amber
-  danger: "#ef4444",  // Red
-  info: "#3b82f6",    // Blue
+  danger: "#ef4444", // Red
+  info: "#3b82f6", // Blue
 
   // Gradients
   gradientPrimary: ["#10b981", "#059669"],
   gradientSecondary: ["#34d399", "#10b981"],
-}
+};
 
 /**
  * Chart Theme Configuration for Recharts
@@ -66,7 +66,7 @@ export const chartTheme = {
     textColor: "var(--foreground)",
     fontSize: "var(--text-sm)",
   },
-}
+};
 
 /**
  * Default Recharts Props - VERDE Theme
@@ -100,7 +100,7 @@ export const defaultChartProps = {
     color: "var(--popover-foreground)",
     boxShadow: "var(--shadow-md)",
   },
-}
+};
 
 /**
  * Line Chart Config - VERDE
@@ -119,7 +119,7 @@ export const lineChartConfig = {
     stroke: "var(--background)",
   },
   stroke: chartColors.primary,
-}
+};
 
 /**
  * Bar Chart Config - VERDE
@@ -128,7 +128,7 @@ export const barChartConfig = {
   fill: chartColors.primary,
   radius: [4, 4, 0, 0] as [number, number, number, number],
   maxBarSize: 50,
-}
+};
 
 /**
  * Area Chart Config - VERDE
@@ -138,30 +138,30 @@ export const areaChartConfig = {
   fill: chartColors.primary,
   fillOpacity: 0.2,
   strokeWidth: 2,
-}
+};
 
 /**
  * Pie Chart Config - Multiple colors with VERDE primary
  */
 export const pieChartConfig = {
   colors: [
-    chartColors.primary,      // Verde
-    chartColors.purple,       // Purple
-    chartColors.blue,         // Blue
-    chartColors.cyan,         // Cyan
-    chartColors.warning,      // Amber
-    chartColors.info,         // Blue
+    chartColors.primary, // Verde
+    chartColors.purple, // Purple
+    chartColors.blue, // Blue
+    chartColors.cyan, // Cyan
+    chartColors.warning, // Amber
+    chartColors.info, // Blue
   ],
   innerRadius: 60,
   outerRadius: 80,
   paddingAngle: 2,
-}
+};
 
 /**
  * Helper: Apply verde gradient to chart
  */
 export function getGradientId(id: string) {
-  return `gradient-${id}`
+  return `gradient-${id}`;
 }
 
 /**
@@ -174,18 +174,18 @@ export function getChartColor(index: number): string {
     chartColors.blue,
     chartColors.cyan,
     chartColors.pink,
-  ]
-  return colors[index % colors.length]
+  ];
+  return colors[index % colors.length];
 }
 
 /**
  * Chart Container Wrapper
  */
 export const ChartContainer: React.FC<{
-  children: React.ReactNode
-  className?: string
-  title?: string
-  description?: string
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+  description?: string;
 }> = ({ children, className, title, description }) => {
   return (
     <div
@@ -207,8 +207,8 @@ export const ChartContainer: React.FC<{
       )}
       {children}
     </div>
-  )
-}
+  );
+};
 
 /**
  * Export all
@@ -224,4 +224,4 @@ export default {
   getGradientId,
   getChartColor,
   ChartContainer,
-}
+};

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import { getSeverityVariant, getSeverityIcon } from '../utils/alertUtils';
-import styles from './AlertsList.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import { getSeverityVariant, getSeverityIcon } from "../utils/alertUtils";
+import styles from "./AlertsList.module.css";
 
 export const AlertsList = ({ alerts }) => {
   if (alerts.length === 0) {
@@ -22,7 +22,9 @@ export const AlertsList = ({ alerts }) => {
           <div key={alert.id} className={styles.alert}>
             <div className={styles.alertHeader}>
               <div className={styles.alertType}>
-                <span className={styles.icon}>{getSeverityIcon(alert.severity)}</span>
+                <span className={styles.icon}>
+                  {getSeverityIcon(alert.severity)}
+                </span>
                 <Badge variant={getSeverityVariant(alert.severity)} size="sm">
                   {alert.type}
                 </Badge>

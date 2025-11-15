@@ -1,2 +1,2 @@
-export { FloatingThemeButton } from './FloatingThemeButton';
-export { default } from './FloatingThemeButton';
+export { FloatingThemeButton } from "./FloatingThemeButton";
+export { default } from "./FloatingThemeButton";

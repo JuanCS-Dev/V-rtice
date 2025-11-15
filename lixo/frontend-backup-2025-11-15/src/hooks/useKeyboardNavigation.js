@@ -20,16 +20,16 @@ import logger from '@/utils/logger';
  * });
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export const useKeyboardNavigation = ({
   itemCount = 0,
   initialIndex = -1,
   onSelect = null,
   onEscape = null,
-  orientation = 'vertical', // 'vertical' | 'horizontal' | 'both'
+  orientation = "vertical", // 'vertical' | 'horizontal' | 'both'
   loop = true, // Loop to first/last item
-  autoFocus = false
+  autoFocus = false,
 }) => {
   const [focusedIndex, setFocusedIndex] = useState(initialIndex);
   const itemRefs = useRef([]);
@@ -48,12 +48,15 @@ export const useKeyboardNavigation = ({
   }, [autoFocus]);
 
   // Focus item by index
-  const focusItem = useCallback((index) => {
-    if (index >= 0 && index < itemCount && itemRefs.current[index]) {
-      itemRefs.current[index].focus();
-      setFocusedIndex(index);
-    }
-  }, [itemCount]);
+  const focusItem = useCallback(
+    (index) => {
+      if (index >= 0 && index < itemCount && itemRefs.current[index]) {
+        itemRefs.current[index].focus();
+        setFocusedIndex(index);
+      }
+    },
+    [itemCount],
+  );
 
   // Navigate to next item
   const navigateNext = useCallback(() => {
@@ -86,87 +89,96 @@ export const useKeyboardNavigation = ({
   }, [itemCount, focusItem]);
 
   // Keyboard event handler
-  const handleKeyDown = useCallback((event) => {
-    const { key } = event;
+  const handleKeyDown = useCallback(
+    (event) => {
+      const { key } = event;
 
-    // Arrow navigation
-    if (orientation === 'vertical' || orientation === 'both') {
-      if (key === 'ArrowDown') {
+      // Arrow navigation
+      if (orientation === "vertical" || orientation === "both") {
+        if (key === "ArrowDown") {
+          event.preventDefault();
+          navigateNext();
+          return;
+        }
+        if (key === "ArrowUp") {
+          event.preventDefault();
+          navigatePrevious();
+          return;
+        }
+      }
+
+      if (orientation === "horizontal" || orientation === "both") {
+        if (key === "ArrowRight") {
+          event.preventDefault();
+          navigateNext();
+          return;
+        }
+        if (key === "ArrowLeft") {
+          event.preventDefault();
+          navigatePrevious();
+          return;
+        }
+      }
+
+      // Home/End navigation
+      if (key === "Home") {
         event.preventDefault();
-        navigateNext();
+        navigateFirst();
         return;
       }
-      if (key === 'ArrowUp') {
+
+      if (key === "End") {
         event.preventDefault();
-        navigatePrevious();
+        navigateLast();
         return;
       }
-    }
 
-    if (orientation === 'horizontal' || orientation === 'both') {
-      if (key === 'ArrowRight') {
+      // Enter/Space activation
+      if ((key === "Enter" || key === " ") && onSelect && focusedIndex >= 0) {
         event.preventDefault();
-        navigateNext();
+        onSelect(focusedIndex);
         return;
       }
-      if (key === 'ArrowLeft') {
+
+      // Escape
+      if (key === "Escape" && onEscape) {
         event.preventDefault();
-        navigatePrevious();
+        onEscape();
         return;
       }
-    }
-
-    // Home/End navigation
-    if (key === 'Home') {
-      event.preventDefault();
-      navigateFirst();
-      return;
-    }
-
-    if (key === 'End') {
-      event.preventDefault();
-      navigateLast();
-      return;
-    }
-
-    // Enter/Space activation
-    if ((key === 'Enter' || key === ' ') && onSelect && focusedIndex >= 0) {
-      event.preventDefault();
-      onSelect(focusedIndex);
-      return;
-    }
-
-    // Escape
-    if (key === 'Escape' && onEscape) {
-      event.preventDefault();
-      onEscape();
-      return;
-    }
-  }, [
-    orientation,
-    navigateNext,
-    navigatePrevious,
-    navigateFirst,
-    navigateLast,
-    onSelect,
-    onEscape,
-    focusedIndex
-  ]);
+    },
+    [
+      orientation,
+      navigateNext,
+      navigatePrevious,
+      navigateFirst,
+      navigateLast,
+      onSelect,
+      onEscape,
+      focusedIndex,
+    ],
+  );
 
   // Get ref callback for item
-  const getItemRef = useCallback((index) => (el) => {
-    itemRefs.current[index] = el;
-  }, []);
+  const getItemRef = useCallback(
+    (index) => (el) => {
+      itemRefs.current[index] = el;
+    },
+    [],
+  );
 
   // Get props for item
-  const getItemProps = useCallback((index, additionalProps = {}) => ({
-    ref: getItemRef(index),
-    tabIndex: focusedIndex === index ? 0 : -1,
-    'data-focused': focusedIndex === index,
-    onKeyDown: handleKeyDown,
-    onFocus: () => setFocusedIndex(index),
-    ...additionalProps
-  }), [focusedIndex, handleKeyDown, getItemRef]);
+  const getItemProps = useCallback(
+    (index, additionalProps = {}) => ({
+      ref: getItemRef(index),
+      tabIndex: focusedIndex === index ? 0 : -1,
+      "data-focused": focusedIndex === index,
+      onKeyDown: handleKeyDown,
+      onFocus: () => setFocusedIndex(index),
+      ...additionalProps,
+    }),
+    [focusedIndex, handleKeyDown, getItemRef],
+  );
 
   return {
     focusedIndex,
@@ -178,7 +190,7 @@ export const useKeyboardNavigation = ({
     navigateNext,
     navigatePrevious,
     navigateFirst,
-    navigateLast
+    navigateLast,
   };
 };
 

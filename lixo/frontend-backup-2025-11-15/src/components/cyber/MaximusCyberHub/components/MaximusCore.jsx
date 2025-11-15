@@ -12,28 +12,36 @@
  * - Sugestões inteligentes
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import logger from '@/utils/logger';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
+import React, { useState, useEffect, useRef } from "react";
+import logger from "@/utils/logger";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
 import {
   chatWithMaximus,
   getAIMemory,
   getAISuggestions,
   getToolCatalog,
   callTool,
-  getMaximusHealth
-} from '../../../../api/maximusAI';
-import styles from './MaximusCore.module.css';
+  getMaximusHealth,
+} from "../../../../api/maximusAI";
+import styles from "./MaximusCore.module.css";
 
 export const MaximusCore = () => {
   // Chat state
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
+  const [currentStreamingMessage, setCurrentStreamingMessage] = useState("");
 
   // AI state
-  const [aiStatus, setAiStatus] = useState({ status: 'checking', tools_count: 0 });
+  const [aiStatus, setAiStatus] = useState({
+    status: "checking",
+    tools_count: 0,
+  });
   const [toolCatalog, setToolCatalog] = useState(null);
   const [activeTools, setActiveTools] = useState([]);
   const [aiMemory, setAiMemory] = useState([]);
@@ -53,7 +61,7 @@ export const MaximusCore = () => {
 
   // Auto-scroll chat
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, currentStreamingMessage]);
 
   // Load AI health status
@@ -61,12 +69,12 @@ export const MaximusCore = () => {
     const health = await getMaximusHealth();
     if (health.success !== false) {
       setAiStatus({
-        status: health.status || 'online',
+        status: health.status || "online",
         tools_count: health.total_integrated_tools || 0,
-        model: health.ai_model || 'Claude Opus'
+        model: health.ai_model || "Claude Opus",
       });
     } else {
-      setAiStatus({ status: 'offline', tools_count: 0 });
+      setAiStatus({ status: "offline", tools_count: 0 });
     }
   };
 
@@ -88,7 +96,7 @@ export const MaximusCore = () => {
 
   // Load suggestions based on context
   const loadSuggestions = async (context) => {
-    const sugg = await getAISuggestions(context, 'next_action');
+    const sugg = await getAISuggestions(context, "next_action");
     if (sugg.success !== false && sugg.suggestions) {
       setSuggestions(sugg.suggestions.slice(0, 3)); // Top 3 suggestions
     }
@@ -100,60 +108,65 @@ export const MaximusCore = () => {
 
     const userMessage = {
       id: Date.now(),
-      role: 'user',
+      role: "user",
       content: inputMessage,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
     setIsStreaming(true);
-    setCurrentStreamingMessage('');
+    setCurrentStreamingMessage("");
 
     try {
       // Chat with streaming
       const response = await chatWithMaximus(
         inputMessage,
         {
-          mode: 'deep_analysis',
-          context: messages.slice(-5) // Last 5 messages for context
+          mode: "deep_analysis",
+          context: messages.slice(-5), // Last 5 messages for context
         },
         (chunk, fullResponse) => {
           setCurrentStreamingMessage(fullResponse);
-        }
+        },
       );
 
       if (response.success) {
         const aiMessage = {
           id: Date.now() + 1,
-          role: 'assistant',
+          role: "assistant",
           content: response.response || currentStreamingMessage,
           timestamp: new Date().toISOString(),
           tools_used: response.tools_used || [],
-          reasoning: response.reasoning || null
+          reasoning: response.reasoning || null,
         };
 
-        setMessages(prev => [...prev, aiMessage]);
+        setMessages((prev) => [...prev, aiMessage]);
 
         // Track active tools
         if (response.tools_used && response.tools_used.length > 0) {
-          setActiveTools(prev => [...new Set([...prev, ...response.tools_used])]);
+          setActiveTools((prev) => [
+            ...new Set([...prev, ...response.tools_used]),
+          ]);
         }
 
         // Load suggestions for next action
         loadSuggestions({ last_message: inputMessage, ai_response: response });
       }
     } catch (error) {
-      logger.error('Chat error:', error);
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        role: 'system',
-        content: `Error: ${error.message}`,
-        timestamp: new Date().toISOString()
-      }]);
+      logger.error("Chat error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "system",
+          content: `Error: ${error.message}`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setIsStreaming(false);
-      setCurrentStreamingMessage('');
+      setCurrentStreamingMessage("");
     }
   };
 
@@ -164,35 +177,42 @@ export const MaximusCore = () => {
 
   // Handle quick tool call
   const handleQuickToolCall = async (toolName, params = {}) => {
-    setActiveTools(prev => [...new Set([...prev, toolName])]);
+    setActiveTools((prev) => [...new Set([...prev, toolName])]);
 
     const result = await callTool(toolName, params);
 
     if (result.success) {
-      setMessages(prev => [...prev, {
-        id: Date.now(),
-        role: 'tool',
-        tool_name: toolName,
-        content: JSON.stringify(result.result, null, 2),
-        timestamp: new Date().toISOString()
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "tool",
+          tool_name: toolName,
+          content: JSON.stringify(result.result, null, 2),
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     }
   };
 
   // Render message
   const renderMessage = (msg) => {
-    const isUser = msg.role === 'user';
-    const isSystem = msg.role === 'system';
-    const isTool = msg.role === 'tool';
+    const isUser = msg.role === "user";
+    const isSystem = msg.role === "system";
+    const isTool = msg.role === "tool";
 
     return (
       <div
         key={msg.id}
-        className={`${styles.message} ${isUser ? styles.userMessage : ''} ${isSystem ? styles.systemMessage : ''} ${isTool ? styles.toolMessage : ''}`}
+        className={`${styles.message} ${isUser ? styles.userMessage : ""} ${isSystem ? styles.systemMessage : ""} ${isTool ? styles.toolMessage : ""}`}
       >
         <div className={styles.messageHeader}>
           <span className={styles.messageRole}>
-            {isUser ? '👤 You' : isTool ? `🔧 ${msg.tool_name}` : '🤖 Maximus AI'}
+            {isUser
+              ? "👤 You"
+              : isTool
+                ? `🔧 ${msg.tool_name}`
+                : "🤖 Maximus AI"}
           </span>
           <span className={styles.messageTime}>
             {formatTime(msg.timestamp)}
@@ -211,7 +231,9 @@ export const MaximusCore = () => {
           <div className={styles.toolsUsed}>
             <span className={styles.toolsLabel}>Tools used:</span>
             {msg.tools_used.map((tool, idx) => (
-              <span key={idx} className={styles.toolBadge}>{tool}</span>
+              <span key={idx} className={styles.toolBadge}>
+                {tool}
+              </span>
             ))}
           </div>
         )}
@@ -233,7 +255,7 @@ export const MaximusCore = () => {
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>🤖 Maximus AI Core</h2>
           <span className={`${styles.status} ${styles[aiStatus.status]}`}>
-            {aiStatus.status === 'online' ? '🟢' : '🔴'} {aiStatus.status}
+            {aiStatus.status === "online" ? "🟢" : "🔴"} {aiStatus.status}
           </span>
         </div>
 
@@ -273,9 +295,11 @@ export const MaximusCore = () => {
 
                 {toolCatalog.offensive_arsenal && (
                   <div className={styles.toolCategory}>
-                    <h4>Offensive Arsenal ({toolCatalog.offensive_arsenal.count})</h4>
+                    <h4>
+                      Offensive Arsenal ({toolCatalog.offensive_arsenal.count})
+                    </h4>
                     <div className={styles.toolList}>
-                      {toolCatalog.offensive_arsenal.tools.map(tool => (
+                      {toolCatalog.offensive_arsenal.tools.map((tool) => (
                         <button
                           key={tool}
                           className={styles.toolItem}
@@ -290,16 +314,17 @@ export const MaximusCore = () => {
 
                 {toolCatalog.world_class_tools && (
                   <div className={styles.toolCategory}>
-                    <h4>World-Class Tools ({toolCatalog.world_class_tools.count})</h4>
+                    <h4>
+                      World-Class Tools ({toolCatalog.world_class_tools.count})
+                    </h4>
                     <div className={styles.toolList}>
-                      {toolCatalog.world_class_tools.tools.slice(0, 8).map(tool => (
-                        <button
-                          key={tool}
-                          className={styles.toolItem}
-                        >
-                          {tool}
-                        </button>
-                      ))}
+                      {toolCatalog.world_class_tools.tools
+                        .slice(0, 8)
+                        .map((tool) => (
+                          <button key={tool} className={styles.toolItem}>
+                            {tool}
+                          </button>
+                        ))}
                     </div>
                   </div>
                 )}
@@ -333,17 +358,37 @@ export const MaximusCore = () => {
             {messages.length === 0 ? (
               <div className={styles.welcomeMessage}>
                 <h3>👋 Welcome to Maximus AI Core</h3>
-                <p>I'm your AI orchestrator with access to {aiStatus.tools_count}+ tools.</p>
-                <p>Ask me to analyze threats, run scans, investigate targets, or orchestrate complex workflows.</p>
+                <p>
+                  I'm your AI orchestrator with access to {aiStatus.tools_count}
+                  + tools.
+                </p>
+                <p>
+                  Ask me to analyze threats, run scans, investigate targets, or
+                  orchestrate complex workflows.
+                </p>
 
                 <div className={styles.quickActions}>
-                  <button onClick={() => setInputMessage('Show me a full security assessment workflow')}>
+                  <button
+                    onClick={() =>
+                      setInputMessage(
+                        "Show me a full security assessment workflow",
+                      )
+                    }
+                  >
                     📊 Full Assessment
                   </button>
-                  <button onClick={() => setInputMessage('Run an OSINT investigation on')}>
+                  <button
+                    onClick={() =>
+                      setInputMessage("Run an OSINT investigation on")
+                    }
+                  >
                     🔍 OSINT Investigation
                   </button>
-                  <button onClick={() => setInputMessage('Analyze network 192.168.1.0/24')}>
+                  <button
+                    onClick={() =>
+                      setInputMessage("Analyze network 192.168.1.0/24")
+                    }
+                  >
                     🌐 Network Analysis
                   </button>
                 </div>
@@ -356,7 +401,9 @@ export const MaximusCore = () => {
                   <div className={`${styles.message} ${styles.streaming}`}>
                     <div className={styles.messageHeader}>
                       <span className={styles.messageRole}>🤖 Maximus AI</span>
-                      <span className={styles.streamingIndicator}>● Thinking...</span>
+                      <span className={styles.streamingIndicator}>
+                        ● Thinking...
+                      </span>
                     </div>
                     <div className={styles.messageContent}>
                       <p>{currentStreamingMessage}</p>
@@ -392,7 +439,7 @@ export const MaximusCore = () => {
               placeholder="Ask Maximus AI anything..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               disabled={isStreaming}
             />
             <button
@@ -400,7 +447,7 @@ export const MaximusCore = () => {
               onClick={handleSendMessage}
               disabled={isStreaming || !inputMessage.trim()}
             >
-              {isStreaming ? '⏳' : '📤'} Send
+              {isStreaming ? "⏳" : "📤"} Send
             </button>
           </div>
         </div>
@@ -411,7 +458,9 @@ export const MaximusCore = () => {
         <div className={styles.activeToolsBar}>
           <span>🔧 Active: </span>
           {activeTools.map((tool, idx) => (
-            <span key={idx} className={styles.activeToolBadge}>{tool}</span>
+            <span key={idx} className={styles.activeToolBadge}>
+              {tool}
+            </span>
           ))}
         </div>
       )}

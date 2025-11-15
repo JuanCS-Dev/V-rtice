@@ -25,11 +25,11 @@
  * />
  */
 
-import React, { useMemo } from 'react';
-import { List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import PropTypes from 'prop-types';
-import styles from './VirtualList.module.css';
+import React, { useMemo } from "react";
+import { List } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
+import PropTypes from "prop-types";
+import styles from "./VirtualList.module.css";
 
 /**
  * VirtualList component with auto-sizing
@@ -52,12 +52,12 @@ export const VirtualList = ({
   height,
   width,
   overscanCount = 5,
-  className = '',
+  className = "",
   style = {},
-  emptyMessage = 'No items to display',
+  emptyMessage = "No items to display",
 }) => {
   const safeItems = Array.isArray(items) ? items : [];
-  
+
   if (!renderItem) {
     return <div>No render function</div>;
   }
@@ -74,9 +74,7 @@ export const VirtualList = ({
   return (
     <div className={className} style={style}>
       {safeItems.map((item, index) => (
-        <div key={index}>
-          {renderItem({ item, index, style: {} })}
-        </div>
+        <div key={index}>{renderItem({ item, index, style: {} })}</div>
       ))}
     </div>
   );

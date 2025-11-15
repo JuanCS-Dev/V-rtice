@@ -1,4 +1,3 @@
-
 .controlsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -42,7 +41,11 @@
 
 .actionButton {
   width: 100%;
-  background: linear-gradient(to right, var(--color-cyber-primary), var(--color-cyber-secondary));
+  background: linear-gradient(
+    to right,
+    var(--color-cyber-primary),
+    var(--color-cyber-secondary)
+  );
   color: var(--bg-primary);
   font-family: var(--font-mono);
   font-weight: var(--font-bold);
@@ -60,7 +63,11 @@
 }
 
 .actionButton.danger {
-  background: linear-gradient(to right, var(--color-error), var(--color-critical));
+  background: linear-gradient(
+    to right,
+    var(--color-error),
+    var(--color-critical)
+  );
   color: var(--text-primary);
 }
 
@@ -69,7 +76,11 @@
 }
 
 .actionButton.warning {
-  background: linear-gradient(to right, var(--color-warning), var(--color-high));
+  background: linear-gradient(
+    to right,
+    var(--color-warning),
+    var(--color-high)
+  );
   color: var(--text-primary);
 }
 

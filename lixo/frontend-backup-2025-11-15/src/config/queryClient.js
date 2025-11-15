@@ -15,8 +15,8 @@
  * Boris Cherny Standard - GAP #35, #71, #72 FIXES
  */
 
-import { QueryClient } from '@tanstack/react-query';
-import logger from '@/utils/logger';
+import { QueryClient } from "@tanstack/react-query";
+import logger from "@/utils/logger";
 
 // ============================================================================
 // POLLING INTERVALS - Boris Cherny Standard (GAP #35 FIX)
@@ -26,11 +26,11 @@ import logger from '@/utils/logger';
  * Use these constants instead of hardcoded values
  */
 export const POLLING_INTERVALS = {
-  REAL_TIME: 1000,      // 1s - Critical real-time data (active scans, live metrics)
-  FREQUENT: 5000,       // 5s - Frequently changing data (alerts, scan status)
-  NORMAL: 30000,        // 30s - Normal updates (metrics, health checks)
-  INFREQUENT: 60000,    // 60s - Slow changing data (HITL reviews, static configs)
-  MANUAL: false,        // No automatic polling - manual refresh only
+  REAL_TIME: 1000, // 1s - Critical real-time data (active scans, live metrics)
+  FREQUENT: 5000, // 5s - Frequently changing data (alerts, scan status)
+  NORMAL: 30000, // 30s - Normal updates (metrics, health checks)
+  INFREQUENT: 60000, // 60s - Slow changing data (HITL reviews, static configs)
+  MANUAL: false, // No automatic polling - manual refresh only
 };
 
 export const queryClient = new QueryClient({
@@ -53,8 +53,8 @@ export const queryClient = new QueryClient({
 
       // Error handling
       onError: (error) => {
-        if (process.env.NODE_ENV === 'development') {
-          logger.error('[React Query] Error:', error);
+        if (process.env.NODE_ENV === "development") {
+          logger.error("[React Query] Error:", error);
         }
       },
 
@@ -62,7 +62,7 @@ export const queryClient = new QueryClient({
       suspense: false,
 
       // Keep previous data while fetching new data
-      keepPreviousData: true
+      keepPreviousData: true,
     },
 
     mutations: {
@@ -72,8 +72,8 @@ export const queryClient = new QueryClient({
 
       // Error handling
       onError: (error) => {
-        if (process.env.NODE_ENV === 'development') {
-          logger.error('[React Query] Mutation Error:', error);
+        if (process.env.NODE_ENV === "development") {
+          logger.error("[React Query] Mutation Error:", error);
         }
       },
 
@@ -81,9 +81,9 @@ export const queryClient = new QueryClient({
       // Mutations will be persisted and retried when connection is restored
       // Note: Requires persistence configuration in App setup (see below)
       gcTime: 1000 * 60 * 60 * 24, // 24 hours - keep failed mutations for retry
-      networkMode: 'offlineFirst' // Queue mutations when offline
-    }
-  }
+      networkMode: "offlineFirst", // Queue mutations when offline
+    },
+  },
 });
 
 // ============================================================================
@@ -106,11 +106,11 @@ export const prefetchQuery = async (queryKey, queryFn, options = {}) => {
       queryKey,
       queryFn,
       staleTime: 5 * 60 * 1000, // 5 minutes
-      ...options
+      ...options,
     });
-    logger.debug('[React Query] Prefetched:', queryKey);
+    logger.debug("[React Query] Prefetched:", queryKey);
   } catch (error) {
-    logger.error('[React Query] Prefetch failed:', queryKey, error);
+    logger.error("[React Query] Prefetch failed:", queryKey, error);
   }
 };
 
@@ -125,9 +125,7 @@ export const prefetchQuery = async (queryKey, queryFn, options = {}) => {
  */
 export const prefetchQueries = async (queries) => {
   await Promise.all(
-    queries.map(({ key, fn, options }) =>
-      prefetchQuery(key, fn, options)
-    )
+    queries.map(({ key, fn, options }) => prefetchQuery(key, fn, options)),
   );
 };
 
@@ -137,7 +135,7 @@ export const prefetchQueries = async (queries) => {
  */
 export const invalidateQueries = async (queryKey) => {
   await queryClient.invalidateQueries({ queryKey });
-  logger.debug('[React Query] Invalidated:', queryKey);
+  logger.debug("[React Query] Invalidated:", queryKey);
 };
 
 // ============================================================================
@@ -151,32 +149,32 @@ export const invalidateQueries = async (queryKey) => {
  */
 export const queryKeys = {
   // Defensive
-  defensiveMetrics: ['defensive', 'metrics'],
-  defensiveAlerts: ['defensive', 'alerts'],
-  defensiveHealth: ['defensive', 'health'],
+  defensiveMetrics: ["defensive", "metrics"],
+  defensiveAlerts: ["defensive", "alerts"],
+  defensiveHealth: ["defensive", "health"],
 
   // Offensive
-  offensiveMetrics: ['offensive', 'metrics'],
-  offensiveExecutions: ['offensive', 'executions'],
-  offensiveScans: (status) => ['offensive', 'scans', status],
+  offensiveMetrics: ["offensive", "metrics"],
+  offensiveExecutions: ["offensive", "executions"],
+  offensiveScans: (status) => ["offensive", "scans", status],
 
   // Purple Team
-  purpleCorrelations: ['purple', 'correlations'],
-  purpleGaps: ['purple', 'gaps'],
+  purpleCorrelations: ["purple", "correlations"],
+  purpleGaps: ["purple", "gaps"],
 
   // Maximus AI
-  maximusHealth: ['maximus', 'health'],
-  maximusChat: (sessionId) => ['maximus', 'chat', sessionId],
-  maximusTools: ['maximus', 'tools'],
+  maximusHealth: ["maximus", "health"],
+  maximusChat: (sessionId) => ["maximus", "chat", sessionId],
+  maximusTools: ["maximus", "tools"],
 
   // OSINT
-  osintDomain: (domain) => ['osint', 'domain', domain],
-  osintIP: (ip) => ['osint', 'ip', ip],
+  osintDomain: (domain) => ["osint", "domain", domain],
+  osintIP: (ip) => ["osint", "ip", ip],
 
   // Services
-  serviceHealth: (serviceId) => ['service', 'health', serviceId],
-  serviceMetrics: (serviceId) => ['service', 'metrics', serviceId]
+  serviceHealth: (serviceId) => ["service", "health", serviceId],
+  serviceMetrics: (serviceId) => ["service", "metrics", serviceId],
 };
 
 // Export centralized query keys (GAP #34 FIX)
-export { queryKeys as centralizedQueryKeys } from './queryKeys';
+export { queryKeys as centralizedQueryKeys } from "./queryKeys";

@@ -9,20 +9,20 @@
  * Focus Color: VERDE (#10b981)
  */
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   /**
    * Error state
    */
-  error?: boolean
+  error?: boolean;
   /**
    * Success state
    */
-  success?: boolean
+  success?: boolean;
 }
 
 /**
@@ -83,26 +83,28 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "file:text-[var(--foreground)]",
           ].join(" "),
           // Error state - Red
-          error && [
-            "border-[var(--destructive)]",
-            "focus-visible:ring-[var(--destructive)]",
-            "text-[var(--color-danger-text)]",
-          ].join(" "),
+          error &&
+            [
+              "border-[var(--destructive)]",
+              "focus-visible:ring-[var(--destructive)]",
+              "text-[var(--color-danger-text)]",
+            ].join(" "),
           // Success state - Verde
-          success && [
-            "border-[var(--color-success)]",
-            "focus-visible:ring-[var(--color-success)]",
-            "text-[var(--color-success-text)]",
-          ].join(" "),
-          className
+          success &&
+            [
+              "border-[var(--color-success)]",
+              "focus-visible:ring-[var(--color-success)]",
+              "text-[var(--color-success-text)]",
+            ].join(" "),
+          className,
         )}
         ref={ref}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-Input.displayName = "Input"
+Input.displayName = "Input";
 
-export { Input }
+export { Input };

@@ -10,23 +10,23 @@
  * - Antibody Repertoire
  */
 
-import logger from '@/utils/logger';
-import React, { useState } from 'react';
+import logger from "@/utils/logger";
+import React, { useState } from "react";
 import {
   suppressFalsePositives,
   consolidateMemory,
-  queryLongTermMemory
-} from '../../../api/maximusAI';
-import './ImmuneEnhancementWidget.css';
+  queryLongTermMemory,
+} from "../../../api/maximusAI";
+import "./ImmuneEnhancementWidget.css";
 
 export const ImmuneEnhancementWidget = () => {
-  const [activeTab, setActiveTab] = useState('fp-suppression');
+  const [activeTab, setActiveTab] = useState("fp-suppression");
   const [loading, setLoading] = useState(false);
   const [fpResults, setFpResults] = useState(null);
   const [consolidationResults, setConsolidationResults] = useState(null);
   const [ltmResults, setLtmResults] = useState(null);
-  const [ltmQuery, setLtmQuery] = useState('ransomware campaigns');
-  const [alertsInput, setAlertsInput] = useState('');
+  const [ltmQuery, setLtmQuery] = useState("ransomware campaigns");
+  const [alertsInput, setAlertsInput] = useState("");
   const [inputError, setInputError] = useState(null);
 
   const runFPSuppression = async () => {
@@ -35,20 +35,20 @@ export const ImmuneEnhancementWidget = () => {
     try {
       // Parse alerts from user input (JSON format expected)
       if (!alertsInput.trim()) {
-        throw new Error('Please provide alerts in JSON format');
+        throw new Error("Please provide alerts in JSON format");
       }
 
       const alerts = JSON.parse(alertsInput);
 
       if (!Array.isArray(alerts) || alerts.length === 0) {
-        throw new Error('Alerts must be a non-empty array');
+        throw new Error("Alerts must be a non-empty array");
       }
 
       const result = await suppressFalsePositives(alerts, 0.7);
       setFpResults(result);
     } catch (error) {
       setInputError(error.message);
-      logger.error('FP suppression failed:', error);
+      logger.error("FP suppression failed:", error);
     } finally {
       setLoading(false);
     }
@@ -59,11 +59,11 @@ export const ImmuneEnhancementWidget = () => {
     try {
       const result = await consolidateMemory({
         manual: true,
-        threshold: 0.7
+        threshold: 0.7,
       });
       setConsolidationResults(result);
     } catch (error) {
-      logger.error('Memory consolidation failed:', error);
+      logger.error("Memory consolidation failed:", error);
     } finally {
       setLoading(false);
     }
@@ -74,11 +74,11 @@ export const ImmuneEnhancementWidget = () => {
     try {
       const result = await queryLongTermMemory(ltmQuery, {
         limit: 5,
-        minImportance: 0.7
+        minImportance: 0.7,
       });
       setLtmResults(result);
     } catch (error) {
-      logger.error('LTM query failed:', error);
+      logger.error("LTM query failed:", error);
     } finally {
       setLoading(false);
     }
@@ -93,33 +93,41 @@ export const ImmuneEnhancementWidget = () => {
 
       <div className="tabs">
         <button
-          className={`tab ${activeTab === 'fp-suppression' ? 'active' : ''}`}
-          onClick={() => setActiveTab('fp-suppression')}
+          className={`tab ${activeTab === "fp-suppression" ? "active" : ""}`}
+          onClick={() => setActiveTab("fp-suppression")}
         >
           FP Suppression
         </button>
         <button
-          className={`tab ${activeTab === 'consolidation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('consolidation')}
+          className={`tab ${activeTab === "consolidation" ? "active" : ""}`}
+          onClick={() => setActiveTab("consolidation")}
         >
           Memory STM → LTM
         </button>
         <button
-          className={`tab ${activeTab === 'ltm-query' ? 'active' : ''}`}
-          onClick={() => setActiveTab('ltm-query')}
+          className={`tab ${activeTab === "ltm-query" ? "active" : ""}`}
+          onClick={() => setActiveTab("ltm-query")}
         >
           LTM Query
         </button>
       </div>
 
-      {activeTab === 'fp-suppression' && (
+      {activeTab === "fp-suppression" && (
         <div className="tab-content">
           <p className="description">
-            Regulatory T-Cells suppress false positive alerts through tolerance learning
+            Regulatory T-Cells suppress false positive alerts through tolerance
+            learning
           </p>
 
           <div className="input-section">
-            <label htmlFor="alerts-input" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+            <label
+              htmlFor="alerts-input"
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: "bold",
+              }}
+            >
               Alerts (JSON Array):
             </label>
             {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
@@ -131,19 +139,22 @@ export const ImmuneEnhancementWidget = () => {
               rows={6}
               maxLength={5000}
               style={{
-                width: '100%',
-                padding: '10px',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                borderRadius: '4px',
-                border: '1px solid var(--border-color, #333)',
-                backgroundColor: 'var(--bg-dark, #1a1a1a)',
-                color: 'var(--text-color, #fff)',
-                marginBottom: '12px'
+                width: "100%",
+                padding: "10px",
+                fontFamily: "monospace",
+                fontSize: "12px",
+                borderRadius: "4px",
+                border: "1px solid var(--border-color, #333)",
+                backgroundColor: "var(--bg-dark, #1a1a1a)",
+                color: "var(--text-color, #fff)",
+                marginBottom: "12px",
               }}
             />
             {inputError && (
-              <div className="text-critical" style={{ marginBottom: '12px', fontSize: '14px' }}>
+              <div
+                className="text-critical"
+                style={{ marginBottom: "12px", fontSize: "14px" }}
+              >
                 ⚠️ {inputError}
               </div>
             )}
@@ -154,18 +165,22 @@ export const ImmuneEnhancementWidget = () => {
             onClick={runFPSuppression}
             disabled={loading || !alertsInput.trim()}
           >
-            {loading ? '⏳ Evaluating...' : '🔬 Suppress False Positives'}
+            {loading ? "⏳ Evaluating..." : "🔬 Suppress False Positives"}
           </button>
 
           {fpResults && (
             <div className="results">
               <div className="stat-card">
                 <span className="stat-label">Alerts Evaluated</span>
-                <span className="stat-value">{fpResults.total_alerts || 0}</span>
+                <span className="stat-value">
+                  {fpResults.total_alerts || 0}
+                </span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Suppressed</span>
-                <span className="stat-value suppressed">{fpResults.suppressed_count || 0}</span>
+                <span className="stat-value suppressed">
+                  {fpResults.suppressed_count || 0}
+                </span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Avg Tolerance Score</span>
@@ -178,39 +193,46 @@ export const ImmuneEnhancementWidget = () => {
         </div>
       )}
 
-      {activeTab === 'consolidation' && (
+      {activeTab === "consolidation" && (
         <div className="tab-content">
           <p className="description">
-            Trigger memory consolidation cycle (STM → LTM) with pattern extraction
+            Trigger memory consolidation cycle (STM → LTM) with pattern
+            extraction
           </p>
           <button
             className="action-btn"
             onClick={runConsolidation}
             disabled={loading}
           >
-            {loading ? '⏳ Consolidating...' : '💾 Run Consolidation'}
+            {loading ? "⏳ Consolidating..." : "💾 Run Consolidation"}
           </button>
 
           {consolidationResults && (
             <div className="results">
               <div className="stat-card">
                 <span className="stat-label">Patterns Extracted</span>
-                <span className="stat-value">{consolidationResults.patterns_count || 0}</span>
+                <span className="stat-value">
+                  {consolidationResults.patterns_count || 0}
+                </span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Memories Created</span>
-                <span className="stat-value">{consolidationResults.ltm_entries_created || 0}</span>
+                <span className="stat-value">
+                  {consolidationResults.ltm_entries_created || 0}
+                </span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Consolidation Time</span>
-                <span className="stat-value">{consolidationResults.duration_ms || 0}ms</span>
+                <span className="stat-value">
+                  {consolidationResults.duration_ms || 0}ms
+                </span>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {activeTab === 'ltm-query' && (
+      {activeTab === "ltm-query" && (
         <div className="tab-content">
           <p className="description">
             Query long-term immunological memory for patterns and attack chains
@@ -227,7 +249,7 @@ export const ImmuneEnhancementWidget = () => {
               onClick={runLTMQuery}
               disabled={loading || !ltmQuery}
             >
-              {loading ? '⏳ Searching...' : '🔍 Search LTM'}
+              {loading ? "⏳ Searching..." : "🔍 Search LTM"}
             </button>
           </div>
 
@@ -237,12 +259,17 @@ export const ImmuneEnhancementWidget = () => {
                 ltmResults.memories.map((memory, idx) => (
                   <div key={idx} className="memory-item">
                     <div className="memory-header">
-                      <span className="memory-type">{memory.pattern_type || 'Unknown'}</span>
+                      <span className="memory-type">
+                        {memory.pattern_type || "Unknown"}
+                      </span>
                       <span className="importance">
-                        {((memory.importance || 0) * 100).toFixed(0)}% importance
+                        {((memory.importance || 0) * 100).toFixed(0)}%
+                        importance
                       </span>
                     </div>
-                    <p className="memory-content">{memory.description || 'No description'}</p>
+                    <p className="memory-content">
+                      {memory.description || "No description"}
+                    </p>
                   </div>
                 ))
               ) : (

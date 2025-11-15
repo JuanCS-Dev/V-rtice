@@ -1,55 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import logger from "@/utils/logger";
-import PropTypes from 'prop-types';
-import { useDecisionSubmit } from '../hooks/useDecisionSubmit';
-import styles from './DecisionPanel.module.css';
+import PropTypes from "prop-types";
+import { useDecisionSubmit } from "../hooks/useDecisionSubmit";
+import styles from "./DecisionPanel.module.css";
 
 const DecisionPanel = ({ review, apvSelected, onSuccess }) => {
-  const [justification, setJustification] = useState('');
+  const [justification, setJustification] = useState("");
   const [confidence, setConfidence] = useState(0.9);
   const { submit, loading, error, success } = useDecisionSubmit();
 
   if (!apvSelected) {
-    return <div className={styles.empty}><p>Select APV to decide</p></div>;
+    return (
+      <div className={styles.empty}>
+        <p>Select APV to decide</p>
+      </div>
+    );
   }
 
   const handleDecision = async (decision) => {
     if (!justification || justification.length < 10) {
-      alert('Justification required (min 10 chars)');
+      alert("Justification required (min 10 chars)");
       return;
     }
-    
+
     try {
       await submit({
         apv_id: review.apv_id,
         decision,
         justification,
         confidence,
-        reviewer_name: 'Security Reviewer',
-        reviewer_email: 'reviewer@example.com'
+        reviewer_name: "Security Reviewer",
+        reviewer_email: "reviewer@example.com",
       });
       if (onSuccess) onSuccess();
-      setJustification('');
+      setJustification("");
     } catch (err) {
-      logger.error('Decision failed:', err);
+      logger.error("Decision failed:", err);
     }
   };
 
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>DECISION PANEL</h2>
-      
+
       <div className={styles.buttons}>
-        <button className={`${styles.btn} ${styles.approve}`} onClick={() => handleDecision('approve')} disabled={loading}>
+        <button
+          className={`${styles.btn} ${styles.approve}`}
+          onClick={() => handleDecision("approve")}
+          disabled={loading}
+        >
           ✅ APPROVE
         </button>
-        <button className={`${styles.btn} ${styles.reject}`} onClick={() => handleDecision('reject')} disabled={loading}>
+        <button
+          className={`${styles.btn} ${styles.reject}`}
+          onClick={() => handleDecision("reject")}
+          disabled={loading}
+        >
           ❌ REJECT
         </button>
-        <button className={`${styles.btn} ${styles.modify}`} onClick={() => handleDecision('modify')} disabled={loading}>
+        <button
+          className={`${styles.btn} ${styles.modify}`}
+          onClick={() => handleDecision("modify")}
+          disabled={loading}
+        >
           🔧 MODIFY
         </button>
-        <button className={`${styles.btn} ${styles.escalate}`} onClick={() => handleDecision('escalate')} disabled={loading}>
+        <button
+          className={`${styles.btn} ${styles.escalate}`}
+          onClick={() => handleDecision("escalate")}
+          disabled={loading}
+        >
           ⬆️ ESCALATE
         </button>
       </div>
@@ -84,7 +104,7 @@ const DecisionPanel = ({ review, apvSelected, onSuccess }) => {
 DecisionPanel.propTypes = {
   review: PropTypes.object,
   apvSelected: PropTypes.bool,
-  onSuccess: PropTypes.func
+  onSuccess: PropTypes.func,
 };
 
 export default DecisionPanel;

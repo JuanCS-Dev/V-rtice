@@ -17,10 +17,10 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import { Input, Button } from '../../../shared';
-import { useKeyPress } from '../../../../hooks';
-import styles from './SearchHeader.module.css';
+import React from "react";
+import { Input, Button } from "../../../shared";
+import { useKeyPress } from "../../../../hooks";
+import styles from "./SearchHeader.module.css";
 
 export const SearchHeader = ({
   domain,
@@ -28,9 +28,9 @@ export const SearchHeader = ({
   loading,
   onAnalyze,
   searchHistory,
-  onSelectHistory
+  onSelectHistory,
 }) => {
-  useKeyPress('Enter', () => {
+  useKeyPress("Enter", () => {
     if (domain.trim() && !loading) {
       onAnalyze();
     }
@@ -51,8 +51,8 @@ export const SearchHeader = ({
         className={styles.searchBar}
         onSubmit={handleSubmit}
         role="search"
-        aria-label="Domain intelligence search">
-
+        aria-label="Domain intelligence search"
+      >
         <label htmlFor="domain-input" className={styles.visuallyHidden}>
           Domain Name
         </label>
@@ -75,13 +75,19 @@ export const SearchHeader = ({
           size="md"
           disabled={loading || !domain.trim()}
           loading={loading}
-          aria-label="Analyze domain">
-          {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
+          aria-label="Analyze domain"
+        >
+          {loading ? "ANALISANDO..." : "EXECUTAR ANÁLISE"}
         </Button>
       </form>
 
       {loading && (
-        <div id="domain-search-status" className={styles.visuallyHidden} role="status" aria-live="polite">
+        <div
+          id="domain-search-status"
+          className={styles.visuallyHidden}
+          role="status"
+          aria-live="polite"
+        >
           Analyzing domain...
         </div>
       )}
@@ -89,14 +95,19 @@ export const SearchHeader = ({
       {searchHistory.length > 0 && (
         <fieldset className={styles.history}>
           <legend className={styles.historyLabel}>HISTÓRICO:</legend>
-          <div className={styles.historyItems} role="group" aria-label="Recent domain searches">
+          <div
+            className={styles.historyItems}
+            role="group"
+            aria-label="Recent domain searches"
+          >
             {searchHistory.slice(0, 5).map((historicDomain, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => onSelectHistory(historicDomain)}
                 className={styles.historyItem}
-                aria-label={`Load domain ${historicDomain}`}>
+                aria-label={`Load domain ${historicDomain}`}
+              >
                 {historicDomain}
               </button>
             ))}

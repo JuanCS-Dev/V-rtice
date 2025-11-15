@@ -19,16 +19,16 @@ When multiple components mount and request the same query simultaneously:
 // Component A
 function ComponentA() {
   const { data } = useQuery({
-    queryKey: ['scan', '123'],
-    queryFn: () => fetchScan('123'),
+    queryKey: ["scan", "123"],
+    queryFn: () => fetchScan("123"),
   });
 }
 
 // Component B (mounts at same time)
 function ComponentB() {
   const { data } = useQuery({
-    queryKey: ['scan', '123'],  // Same key!
-    queryFn: () => fetchScan('123'),
+    queryKey: ["scan", "123"], // Same key!
+    queryFn: () => fetchScan("123"),
   });
 }
 
@@ -36,6 +36,7 @@ function ComponentB() {
 ```
 
 **What happens:**
+
 1. Component A mounts → Triggers query with key `['scan', '123']`
 2. Component B mounts (same render cycle) → Also requests `['scan', '123']`
 3. React Query detects identical `queryKey`
@@ -61,6 +62,7 @@ function App() {
 ```
 
 **Test scenario:**
+
 1. Open DevTools → Network tab
 2. Mount multiple components requesting same data
 3. Observe: Only **1 network request** despite multiple `useQuery` calls
@@ -82,7 +84,7 @@ function ScanDetails({ scanId }: { scanId: string }) {
 
 function ScanProgress({ scanId }: { scanId: string }) {
   const { data: scan } = useQuery({
-    queryKey: queryKeys.scan.detail(scanId),  // Same key!
+    queryKey: queryKeys.scan.detail(scanId), // Same key!
     queryFn: () => fetchScan(scanId),
   });
 
@@ -92,7 +94,7 @@ function ScanProgress({ scanId }: { scanId: string }) {
 function Page() {
   return (
     <>
-      <ScanDetails scanId="123" />  {/* Request 1 */}
+      <ScanDetails scanId="123" /> {/* Request 1 */}
       <ScanProgress scanId="123" /> {/* Deduped! */}
     </>
   );
@@ -105,10 +107,10 @@ function Page() {
 
 ```tsx
 function SearchComponent() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const { data } = useQuery({
-    queryKey: ['search', query],
+    queryKey: ["search", query],
     queryFn: () => fetchSearch(query),
     enabled: query.length > 0,
   });
@@ -156,21 +158,21 @@ For effective deduplication, use consistent query keys:
 // lib/queryClient.ts
 export const queryKeys = {
   scan: {
-    all: ['scans'] as const,
-    detail: (id: string) => ['scans', 'detail', id] as const,
+    all: ["scans"] as const,
+    detail: (id: string) => ["scans", "detail", id] as const,
   },
 } as const;
 
 // Component A
 useQuery({
-  queryKey: queryKeys.scan.detail('123'),  // ['scans', 'detail', '123']
-  queryFn: () => fetchScan('123'),
+  queryKey: queryKeys.scan.detail("123"), // ['scans', 'detail', '123']
+  queryFn: () => fetchScan("123"),
 });
 
 // Component B
 useQuery({
-  queryKey: queryKeys.scan.detail('123'),  // Same key → deduped!
-  queryFn: () => fetchScan('123'),
+  queryKey: queryKeys.scan.detail("123"), // Same key → deduped!
+  queryFn: () => fetchScan("123"),
 });
 ```
 
@@ -179,14 +181,14 @@ useQuery({
 ```typescript
 // Component A
 useQuery({
-  queryKey: ['scan', '123'],  // Different key structure!
-  queryFn: () => fetchScan('123'),
+  queryKey: ["scan", "123"], // Different key structure!
+  queryFn: () => fetchScan("123"),
 });
 
 // Component B
 useQuery({
-  queryKey: ['scans', 'detail', '123'],  // Different → NOT deduped
-  queryFn: () => fetchScan('123'),
+  queryKey: ["scans", "detail", "123"], // Different → NOT deduped
+  queryFn: () => fetchScan("123"),
 });
 
 // Result: 2 network requests (should be 1)
@@ -201,8 +203,8 @@ In rare cases, you may want to disable deduplication:
 const { data } = useQuery({
   queryKey: queryKeys.scan.detail(scanId),
   queryFn: fetchScan,
-  staleTime: 0,  // Always considered stale
-  gcTime: 0,     // Don't cache
+  staleTime: 0, // Always considered stale
+  gcTime: 0, // Don't cache
 });
 ```
 
@@ -213,11 +215,11 @@ const { data } = useQuery({
 ```typescript
 // Manual fetch (no deduplication)
 useEffect(() => {
-  fetch('/api/v1/scans/123');  // Component A
+  fetch("/api/v1/scans/123"); // Component A
 }, []);
 
 useEffect(() => {
-  fetch('/api/v1/scans/123');  // Component B → Duplicate!
+  fetch("/api/v1/scans/123"); // Component B → Duplicate!
 }, []);
 
 // Result: 2 requests ❌
@@ -227,8 +229,8 @@ useEffect(() => {
 
 ```typescript
 // Automatic deduplication
-useQuery({ queryKey: ['scan', '123'], queryFn: fetchScan });  // A
-useQuery({ queryKey: ['scan', '123'], queryFn: fetchScan });  // B
+useQuery({ queryKey: ["scan", "123"], queryFn: fetchScan }); // A
+useQuery({ queryKey: ["scan", "123"], queryFn: fetchScan }); // B
 
 // Result: 1 request ✅
 // Reduced network traffic by 50%!
@@ -236,14 +238,14 @@ useQuery({ queryKey: ['scan', '123'], queryFn: fetchScan });  // B
 
 ## 🎯 Benefits
 
-| Feature | Status |
-|---------|--------|
-| **Automatic Deduplication** | ✅ Zero configuration |
-| **Shared State** | ✅ All components get same data |
-| **Reduced Network** | ✅ 50-90% fewer requests |
-| **Improved Performance** | ✅ Faster page loads |
-| **Lower Server Load** | ✅ Fewer backend requests |
-| **Battery Savings** | ✅ Fewer mobile radio activations |
+| Feature                     | Status                            |
+| --------------------------- | --------------------------------- |
+| **Automatic Deduplication** | ✅ Zero configuration             |
+| **Shared State**            | ✅ All components get same data   |
+| **Reduced Network**         | ✅ 50-90% fewer requests          |
+| **Improved Performance**    | ✅ Faster page loads              |
+| **Lower Server Load**       | ✅ Fewer backend requests         |
+| **Battery Savings**         | ✅ Fewer mobile radio activations |
 
 ## 🚨 Common Mistakes
 
@@ -264,9 +266,9 @@ const componentB = useQuery({ queryKey: queryKeys.scan.detail(id), ... });
 ```typescript
 // ❌ BAD - Forces new request every time
 const { data } = useQuery({
-  queryKey: ['scan', id],
+  queryKey: ["scan", id],
   queryFn: fetchScan,
-  staleTime: 0,  // Don't do this without reason!
+  staleTime: 0, // Don't do this without reason!
 });
 
 // ✅ GOOD - Use default staleTime (5 minutes in our config)
@@ -280,9 +282,9 @@ const { data } = useQuery({
 
 ```typescript
 // ❌ BAD - Each component gets unique key
-const componentId = useId();  // React 18 useId()
+const componentId = useId(); // React 18 useId()
 const { data } = useQuery({
-  queryKey: ['scan', id, componentId],  // Unique per component!
+  queryKey: ["scan", id, componentId], // Unique per component!
   queryFn: fetchScan,
 });
 
@@ -301,7 +303,7 @@ const { data } = useQuery({
 // Add request interceptor
 typedApiClient.use({
   onRequest({ request }) {
-    console.log('[API Request]', request.method, request.url);
+    console.log("[API Request]", request.method, request.url);
     return request;
   },
 });
@@ -314,12 +316,9 @@ typedApiClient.use({
 ### React Query DevTools
 
 ```tsx
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-<ReactQueryDevtools
-  initialIsOpen={false}
-  buttonPosition="bottom-right"
-/>
+<ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />;
 
 // DevTools shows:
 // - Active queries
@@ -339,14 +338,18 @@ const queryClient = useQueryClient();
 useEffect(() => {
   const cache = queryClient.getQueryCache();
 
-  console.log('Active Queries:', cache.getAll().length);
-  console.log('Query Keys:', cache.getAll().map(q => q.queryKey));
+  console.log("Active Queries:", cache.getAll().length);
+  console.log(
+    "Query Keys:",
+    cache.getAll().map((q) => q.queryKey),
+  );
 }, [queryClient]);
 ```
 
 ## 🎓 Summary
 
 **GAP #10 (Request Deduplication):**
+
 - ✅ **Status**: Already implemented via React Query
 - ✅ **Configuration**: Zero config required
 - ✅ **Benefit**: 50-90% reduction in duplicate requests

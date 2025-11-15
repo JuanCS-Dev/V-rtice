@@ -1,2 +1,2 @@
-export { default } from './EncryptedTrafficAnalyzer';
-export { EncryptedTrafficAnalyzer } from './EncryptedTrafficAnalyzer';
+export { default } from "./EncryptedTrafficAnalyzer";
+export { EncryptedTrafficAnalyzer } from "./EncryptedTrafficAnalyzer";

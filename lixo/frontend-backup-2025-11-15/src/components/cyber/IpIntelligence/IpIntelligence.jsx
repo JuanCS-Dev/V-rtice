@@ -22,24 +22,25 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import { Card } from '../../shared/Card';
-import IpSearchForm from './components/IpSearchForm';
-import IpAnalysisResults from './components/IpAnalysisResults';
-import { useIpIntelligence } from './hooks/useIpIntelligence';
-import { AskMaximusButton } from '../../shared/AskMaximusButton';
-import styles from './IpIntelligence.module.css';
+import React from "react";
+import { Card } from "../../shared/Card";
+import IpSearchForm from "./components/IpSearchForm";
+import IpAnalysisResults from "./components/IpAnalysisResults";
+import { useIpIntelligence } from "./hooks/useIpIntelligence";
+import { AskMaximusButton } from "../../shared/AskMaximusButton";
+import styles from "./IpIntelligence.module.css";
 
 export const IpIntelligence = () => {
   const {
-    ipAddress, setIpAddress,
+    ipAddress,
+    setIpAddress,
     loading,
     analysisResult,
     searchHistory,
     loadingMyIp,
     handleAnalyzeIP,
     handleAnalyzeMyIP,
-    getThreatColor
+    getThreatColor,
   } = useIpIntelligence();
 
   return (
@@ -49,14 +50,14 @@ export const IpIntelligence = () => {
       variant="cyber"
       data-maximus-tool="ip-intelligence"
       data-maximus-category="shared"
-      data-maximus-status={loading || loadingMyIp ? 'analyzing' : 'ready'}
+      data-maximus-status={loading || loadingMyIp ? "analyzing" : "ready"}
       headerAction={
         analysisResult && (
           <AskMaximusButton
             context={{
-              type: 'ip_intelligence',
+              type: "ip_intelligence",
               ip: ipAddress,
-              analysis: analysisResult
+              analysis: analysisResult,
             }}
             prompt="Analyze this IP intelligence data and assess threat level"
             size="small"
@@ -70,7 +71,8 @@ export const IpIntelligence = () => {
         <section
           role="region"
           aria-label="IP search form"
-          data-maximus-section="search">
+          data-maximus-section="search"
+        >
           <IpSearchForm
             ipAddress={ipAddress}
             setIpAddress={setIpAddress}
@@ -86,7 +88,8 @@ export const IpIntelligence = () => {
           <section
             role="region"
             aria-label="IP analysis results"
-            data-maximus-section="results">
+            data-maximus-section="results"
+          >
             <IpAnalysisResults
               analysisResult={analysisResult}
               getThreatColor={getThreatColor}
@@ -99,10 +102,14 @@ export const IpIntelligence = () => {
             className={styles.initialState}
             role="region"
             aria-label="Empty state"
-            data-maximus-section="empty-state">
+            data-maximus-section="empty-state"
+          >
             <div className={styles.initialStateIcon}>🎯</div>
             <h3 className={styles.initialStateTitle}>IP INTELLIGENCE READY</h3>
-            <p className={styles.initialStateDescription}>Digite um endereço IP para análise completa de geolocalização e ameaças</p>
+            <p className={styles.initialStateDescription}>
+              Digite um endereço IP para análise completa de geolocalização e
+              ameaças
+            </p>
           </section>
         )}
       </div>

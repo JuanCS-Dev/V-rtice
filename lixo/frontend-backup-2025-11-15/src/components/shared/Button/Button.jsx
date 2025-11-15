@@ -1,18 +1,18 @@
-import React from 'react';
-import styles from './Button.module.css';
+import React from "react";
+import styles from "./Button.module.css";
 
 export const Button = ({
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   loading = false,
   disabled = false,
   icon,
-  iconPosition = 'left',
+  iconPosition = "left",
   fullWidth = false,
   onClick,
-  type = 'button',
-  className = '',
+  type = "button",
+  className = "",
   ...props
 }) => {
   const buttonClasses = [
@@ -21,8 +21,10 @@ export const Button = ({
     styles[size],
     loading && styles.loading,
     fullWidth && styles.fullWidth,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   // Boris Cherny Standard - GAP #85 FIX: Add aria-busy for loading state
   return (
@@ -36,11 +38,11 @@ export const Button = ({
       {...props}
     >
       {loading && <span className={styles.spinner} aria-hidden="true" />}
-      {!loading && icon && iconPosition === 'left' && (
+      {!loading && icon && iconPosition === "left" && (
         <i className={`${styles.icon} ${icon}`} aria-hidden="true" />
       )}
       <span className={styles.content}>{children}</span>
-      {!loading && icon && iconPosition === 'right' && (
+      {!loading && icon && iconPosition === "right" && (
         <i className={`${styles.icon} ${icon}`} aria-hidden="true" />
       )}
     </button>

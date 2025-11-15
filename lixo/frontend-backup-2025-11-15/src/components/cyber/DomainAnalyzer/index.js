@@ -1,2 +1,2 @@
-export { DomainAnalyzer } from './DomainAnalyzer';
-export { default } from './DomainAnalyzer';
+export { DomainAnalyzer } from "./DomainAnalyzer";
+export { default } from "./DomainAnalyzer";

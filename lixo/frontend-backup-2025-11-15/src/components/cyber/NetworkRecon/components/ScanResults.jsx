@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 /**
  * ScanResults - Exibe resultados de scan em tempo real
@@ -10,48 +10,54 @@ export const ScanResults = ({ scan }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed':
-        return 'text-green-400 border-green-400';
-      case 'running':
-        return 'text-orange-400 border-orange-400 animate-pulse';
-      case 'failed':
-        return 'text-red-400 border-red-400';
+      case "completed":
+        return "text-green-400 border-green-400";
+      case "running":
+        return "text-orange-400 border-orange-400 animate-pulse";
+      case "failed":
+        return "text-red-400 border-red-400";
       default:
-        return 'text-red-400 border-red-400';
+        return "text-red-400 border-red-400";
     }
   };
 
   const getSeverityColor = (severity) => {
     switch (severity?.toLowerCase()) {
-      case 'critical':
-        return 'text-red-400 bg-red-400/20 border-red-400';
-      case 'high':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400';
-      case 'medium':
-        return 'text-yellow-400 bg-yellow-400/20 border-yellow-400';
-      case 'low':
-        return 'text-orange-400 bg-orange-400/20 border-orange-400';
+      case "critical":
+        return "text-red-400 bg-red-400/20 border-red-400";
+      case "high":
+        return "text-orange-400 bg-orange-400/20 border-orange-400";
+      case "medium":
+        return "text-yellow-400 bg-yellow-400/20 border-yellow-400";
+      case "low":
+        return "text-orange-400 bg-orange-400/20 border-orange-400";
       default:
-        return 'text-red-400 bg-red-400/20 border-red-400';
+        return "text-red-400 bg-red-400/20 border-red-400";
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Scan Header */}
-      <div className={`border-2 rounded-lg p-4 bg-black/30 ${getStatusColor(scan.status)}`}>
+      <div
+        className={`border-2 rounded-lg p-4 bg-black/30 ${getStatusColor(scan.status)}`}
+      >
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
               <span className="text-2xl">
-                {scan.status === 'completed' ? '✅' : scan.status === 'running' ? '⚡' : '❌'}
+                {scan.status === "completed"
+                  ? "✅"
+                  : scan.status === "running"
+                    ? "⚡"
+                    : "❌"}
               </span>
               <div>
                 <h3 className="font-bold text-lg">
-                  Scan #{scan.scan_id?.slice(0, 8) || 'N/A'}
+                  Scan #{scan.scan_id?.slice(0, 8) || "N/A"}
                 </h3>
                 <p className="text-sm opacity-70">
-                  Target: {scan.target || 'Unknown'}
+                  Target: {scan.target || "Unknown"}
                 </p>
               </div>
             </div>
@@ -59,14 +65,12 @@ export const ScanResults = ({ scan }) => {
 
           <div className="text-right">
             <div className="text-sm opacity-70">Status</div>
-            <div className="text-xl font-bold uppercase">
-              {scan.status}
-            </div>
+            <div className="text-xl font-bold uppercase">{scan.status}</div>
           </div>
         </div>
 
         {/* Progress Bar (if running) */}
-        {scan.status === 'running' && scan.progress !== undefined && (
+        {scan.status === "running" && scan.progress !== undefined && (
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1">
               <span>Progress</span>
@@ -92,12 +96,14 @@ export const ScanResults = ({ scan }) => {
             <div className="text-xs opacity-70">Open Ports</div>
           </div>
           <div className="bg-black/50 rounded p-3 text-center">
-            <div className="text-2xl font-bold">{scan.services_detected || 0}</div>
+            <div className="text-2xl font-bold">
+              {scan.services_detected || 0}
+            </div>
             <div className="text-xs opacity-70">Services</div>
           </div>
           <div className="bg-black/50 rounded p-3 text-center">
             <div className="text-2xl font-bold">
-              {scan.duration ? `${Math.floor(scan.duration)}s` : '--'}
+              {scan.duration ? `${Math.floor(scan.duration)}s` : "--"}
             </div>
             <div className="text-xs opacity-70">Duration</div>
           </div>
@@ -120,12 +126,14 @@ export const ScanResults = ({ scan }) => {
               >
                 {/* Host Header */}
                 <button
-                  onClick={() => setExpandedHost(expandedHost === idx ? null : idx)}
+                  onClick={() =>
+                    setExpandedHost(expandedHost === idx ? null : idx)
+                  }
                   className="w-full p-4 flex items-center justify-between hover:bg-red-400/5 transition-all"
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-2xl">
-                      {host.status === 'up' ? '🟢' : '🔴'}
+                      {host.status === "up" ? "🟢" : "🔴"}
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-red-400 font-mono">
@@ -151,7 +159,7 @@ export const ScanResults = ({ scan }) => {
                       )}
                     </div>
                     <div className="text-red-400 text-xl">
-                      {expandedHost === idx ? '▼' : '▶'}
+                      {expandedHost === idx ? "▼" : "▶"}
                     </div>
                   </div>
                 </button>
@@ -173,7 +181,7 @@ export const ScanResults = ({ scan }) => {
                               {port.port}/{port.protocol}
                             </div>
                             <div className="text-red-400/70">
-                              {port.service || 'unknown'}
+                              {port.service || "unknown"}
                             </div>
                             {port.version && (
                               <div className="text-red-400/50 text-sm">
@@ -183,7 +191,9 @@ export const ScanResults = ({ scan }) => {
                           </div>
 
                           {port.vulnerability_score && (
-                            <div className={`px-3 py-1 rounded text-xs font-bold border ${getSeverityColor(port.severity)}`}>
+                            <div
+                              className={`px-3 py-1 rounded text-xs font-bold border ${getSeverityColor(port.severity)}`}
+                            >
                               VULN SCORE: {port.vulnerability_score}
                             </div>
                           )}
@@ -223,15 +233,16 @@ export const ScanResults = ({ scan }) => {
       )}
 
       {/* No Results */}
-      {scan.status === 'completed' && (!scan.hosts || scan.hosts.length === 0) && (
-        <div className="border border-yellow-400/30 rounded-lg p-6 bg-yellow-400/5 text-center">
-          <div className="text-4xl mb-3">⚠️</div>
-          <div className="text-yellow-400 font-bold">No Hosts Found</div>
-          <div className="text-yellow-400/60 text-sm mt-2">
-            The target network did not respond or no open ports were detected.
+      {scan.status === "completed" &&
+        (!scan.hosts || scan.hosts.length === 0) && (
+          <div className="border border-yellow-400/30 rounded-lg p-6 bg-yellow-400/5 text-center">
+            <div className="text-4xl mb-3">⚠️</div>
+            <div className="text-yellow-400 font-bold">No Hosts Found</div>
+            <div className="text-yellow-400/60 text-sm mt-2">
+              The target network did not respond or no open ports were detected.
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

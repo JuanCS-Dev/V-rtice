@@ -1,15 +1,15 @@
-import React from 'react';
-import styles from './Card.module.css';
+import React from "react";
+import styles from "./Card.module.css";
 
 export const Card = ({
   title,
   subtitle,
   badge,
   children,
-  variant = 'cyber',
-  padding = 'md',
+  variant = "cyber",
+  padding = "md",
   hoverable = false,
-  className = '',
+  className = "",
   headerActions,
   footer,
   ...props
@@ -19,8 +19,10 @@ export const Card = ({
     styles[variant],
     styles[`padding-${padding}`],
     hoverable && styles.hoverable,
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={cardClasses} {...props}>

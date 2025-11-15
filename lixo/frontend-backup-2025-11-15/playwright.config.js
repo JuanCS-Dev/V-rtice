@@ -11,13 +11,13 @@
  * License: Proprietary
  */
 
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
 
   // Timeout para cada teste (30 segundos)
   timeout: 30 * 1000,
@@ -29,21 +29,21 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   // Reporter (verbose localmente, github-actions em CI)
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI ? "github" : "list",
 
   // Configurações compartilhadas para todos os projetos
   use: {
     // Base URL do frontend (Vite dev server)
-    baseURL: 'http://localhost:5173',
+    baseURL: "http://localhost:5173",
 
     // Trace em falhas (para debug)
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
 
     // Screenshot em falhas
-    screenshot: 'only-on-failure',
+    screenshot: "only-on-failure",
 
     // Video em falhas
-    video: 'retain-on-failure',
+    video: "retain-on-failure",
 
     // Viewport padrão
     viewport: { width: 1280, height: 720 },
@@ -52,18 +52,18 @@ export default defineConfig({
   // Projetos de teste (browsers)
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
 
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
     },
 
     {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
     },
 
     // Teste mobile (opcional)
@@ -75,8 +75,8 @@ export default defineConfig({
 
   // Dev server (iniciar Vite automaticamente)
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command: "npm run dev",
+    url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import { getScoreColor, getScoreTextColor } from '../utils/statusUtils';
-import styles from './ThreatAnalysisPanel.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import { getScoreColor, getScoreTextColor } from "../utils/statusUtils";
+import styles from "./ThreatAnalysisPanel.module.css";
 
 export const ThreatAnalysisPanel = ({ data }) => {
   const scoreColor = getScoreColor(data.reputation_score);

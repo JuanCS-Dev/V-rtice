@@ -50,6 +50,7 @@
 ### Componentes a REESCREVER:
 
 #### ❌ Buttons
+
 - [ ] Button Primary (CTA style Claude.ai)
 - [ ] Button Secondary
 - [ ] Button Ghost
@@ -58,6 +59,7 @@
 - [ ] Button Loading State
 
 #### ❌ Inputs & Forms
+
 - [ ] Input Text
 - [ ] Input Number
 - [ ] Input Password
@@ -72,6 +74,7 @@
 - [ ] Form Validation Display
 
 #### ❌ Cards & Containers
+
 - [ ] Card (base component)
 - [ ] Card Header
 - [ ] Card Body
@@ -82,12 +85,14 @@
 - [ ] DashboardCard
 
 #### ❌ Badges & Pills
+
 - [ ] Badge
 - [ ] Pill
 - [ ] Status Badge
 - [ ] Severity Badge
 
 #### ❌ Modals & Overlays
+
 - [ ] Modal (base)
 - [ ] Dialog
 - [ ] Drawer
@@ -96,6 +101,7 @@
 - [ ] Toast/Notification
 
 #### ❌ Navigation
+
 - [ ] Tabs
 - [ ] Breadcrumbs
 - [ ] Pagination
@@ -103,6 +109,7 @@
 - [ ] ContextMenu
 
 #### ❌ Data Display
+
 - [ ] Table
 - [ ] DataGrid
 - [ ] List
@@ -112,6 +119,7 @@
 - [ ] Skeleton Loader
 
 #### ❌ Feedback
+
 - [ ] Alert
 - [ ] Toast
 - [ ] Spinner
@@ -126,6 +134,7 @@
 ### Componentes a REESCREVER:
 
 #### ❌ Main Layout
+
 - [ ] AppLayout
 - [ ] DashboardLayout
 - [ ] Container
@@ -133,6 +142,7 @@
 - [ ] Flexbox Utilities
 
 #### ❌ Navigation Components
+
 - [ ] Navbar (REESCREVER estilo Claude.ai)
 - [ ] Sidebar (REESCREVER estilo Claude.ai chat sidebar)
 - [ ] TopBar
@@ -140,6 +150,7 @@
 - [ ] Footer
 
 #### ❌ Sections
+
 - [ ] HeroSection
 - [ ] ContentSection
 - [ ] FeatureSection
@@ -151,40 +162,49 @@
 ### Dashboards a REIMPLEMENTAR:
 
 #### ❌ Admin
+
 - [ ] AdminDashboard
 - [ ] HITLConsole
 - [ ] AdminHeader
 
 #### ❌ OSINT
+
 - [ ] OSINTDashboard
 - [ ] Components específicos
 
 #### ❌ Cyber
+
 - [ ] CyberDashboard
 - [ ] Components específicos
 
 #### ❌ Maximus
+
 - [ ] MaximusDashboard
 - [ ] ConsciousnessPanel
 - [ ] Components específicos
 
 #### ❌ Defensive
+
 - [ ] DefensiveDashboard
 - [ ] Components específicos
 
 #### ❌ Offensive
+
 - [ ] OffensiveDashboard
 - [ ] Components específicos
 
 #### ❌ Purple Team
+
 - [ ] PurpleTeamDashboard
 - [ ] Components específicos
 
 #### ❌ Reactive Fabric
+
 - [ ] ReactiveFabricDashboard
 - [ ] Components específicos
 
 #### ❌ MVP
+
 - [ ] MVPDashboard
 - [ ] NarrativeFeed
 - [ ] StoryCard
@@ -193,6 +213,7 @@
 - [ ] StatsOverview
 
 #### ❌ Landing Page
+
 - [ ] LandingPage
 - [ ] HeroSection
 - [ ] ModulesSection
@@ -208,6 +229,7 @@
 ## 📈 WIDGETS & SPECIALIZED COMPONENTS - PRIORIDADE 4
 
 ### ❌ Charts (Recharts config)
+
 - [ ] LineChart (verde theme)
 - [ ] BarChart (verde theme)
 - [ ] PieChart (verde theme)
@@ -215,11 +237,13 @@
 - [ ] RadarChart (verde theme)
 
 ### ❌ Intelligence Components
+
 - [ ] DeceptionMetricsCard
 - [ ] ThreatIntelligenceWidget
 - [ ] AlertsWidget
 
 ### ❌ Visualization
+
 - [ ] ThreatGlobe
 - [ ] NetworkGraph
 - [ ] Heatmaps
@@ -243,11 +267,13 @@
 ## 🎨 TEMAS & VARIAÇÕES - PRIORIDADE 6
 
 ### Dark Mode
+
 - [ ] Configurar dark mode com OKLCH colors
 - [ ] Testar transições smooth
 - [ ] Garantir contraste adequado
 
 ### Responsive
+
 - [ ] Mobile breakpoints
 - [ ] Tablet layouts
 - [ ] Desktop optimizations
@@ -257,6 +283,7 @@
 ## ✅ CRITÉRIOS DE SUCESSO
 
 ### Design Tokens
+
 - [x] OKLCH color space implementado
 - [x] Verde como primary (#10b981)
 - [x] Serif typography
@@ -266,6 +293,7 @@
 - [x] Dark mode support
 
 ### Componentes UI
+
 - [ ] ZERO imports de CSS antigo
 - [ ] ZERO referências a cores antigas (#ef4444, #f97316)
 - [ ] 100% componentes usando novo design system
@@ -276,6 +304,7 @@
 - [ ] Error states helpful
 
 ### Código
+
 - [ ] ZERO hardcoded colors
 - [ ] ZERO inline styles com cores antigas
 - [ ] 100% CSS variables do novo sistema
@@ -283,6 +312,7 @@
 - [ ] Build sem warnings críticos
 
 ### Visual
+
 - [ ] Indistinguível do Claude.ai (mas verde)
 - [ ] Clean, calm, focused
 - [ ] Serif typography elegante
@@ -291,6 +321,7 @@
 - [ ] Animations smooth
 
 ### Performance
+
 - [ ] Lighthouse Performance ≥95
 - [ ] Lighthouse Accessibility ≥95
 - [ ] Lighthouse Best Practices ≥95
@@ -302,14 +333,17 @@
 ## 🚀 PLANO DE EXECUÇÃO
 
 ### FASE 1: ✅ PREPARAÇÃO (COMPLETO)
+
 - [x] Backup
 - [x] Branch criada
 - [x] Design system criado
 
 ### FASE 2: ✅ DESIGN TOKENS (COMPLETO)
+
 - [x] claude-design-green.css criado DO ZERO
 
 ### FASE 3: ⏳ COMPONENTES UI BASE (PRÓXIMO)
+
 - [ ] Button → ButtonClaude
 - [ ] Input → InputClaude
 - [ ] Card → CardClaude
@@ -318,36 +352,43 @@
 - [ ] (continuar para TODOS)
 
 ### FASE 4: ⏳ LAYOUTS
+
 - [ ] Navbar → NavbarClaude
 - [ ] Sidebar → SidebarClaude
 - [ ] Container → ContainerClaude
 
 ### FASE 5: ⏳ WIDGETS
+
 - [ ] StatCard → StatCardClaude
 - [ ] Charts → config verde
 - [ ] Tables → TableClaude
 
 ### FASE 6: ⏳ PAGES
+
 - [ ] Dashboard layouts reimplementados
 - [ ] Landing Page atualizada
 
 ### FASE 7: ⏳ ANIMAÇÕES
+
 - [ ] Micro-interações Claude.ai
 - [ ] Skeleton loaders
 - [ ] Transitions
 
 ### FASE 8: ⏳ ESTADOS
+
 - [ ] Loading
 - [ ] Empty
 - [ ] Error
 
 ### FASE 9: ⏳ VALIDAÇÃO
+
 - [ ] Visual QA
 - [ ] Code review
 - [ ] Lighthouse audit
 - [ ] Accessibility check
 
 ### FASE 10: ⏳ CLEANUP
+
 - [ ] Remover código antigo
 - [ ] Commit
 - [ ] Push
@@ -360,6 +401,7 @@
 ### ⚠️ ANTI-PREGUIÇA
 
 **NÃO FAZER:**
+
 - ❌ Find/replace de cores
 - ❌ Adaptar componentes antigos
 - ❌ Manter estrutura antiga com cores novas
@@ -367,6 +409,7 @@
 - ❌ Imports de CSS antigo
 
 **FAZER:**
+
 - ✅ REESCREVER componentes DO ZERO
 - ✅ Seguir exatamente estilo Claude.ai
 - ✅ Verde (#10b981), NÃO laranja (#f97316)

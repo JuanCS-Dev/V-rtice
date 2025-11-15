@@ -8,63 +8,69 @@
  * Estilo: Clean, collapsible, verde accents
  */
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight, Home, Settings, HelpCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "./button"
-import { Badge } from "./badge"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Settings,
+  HelpCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
+import { Badge } from "./badge";
+import "../../../styles/claude-design-green.css";
 
 export interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * Sidebar items
    */
-  items?: SidebarItem[]
+  items?: SidebarItem[];
   /**
    * Collapsed state
    */
-  collapsed?: boolean
+  collapsed?: boolean;
   /**
    * On collapse toggle
    */
-  onCollapsedChange?: (collapsed: boolean) => void
+  onCollapsedChange?: (collapsed: boolean) => void;
   /**
    * Show header
    */
-  showHeader?: boolean
+  showHeader?: boolean;
   /**
    * Header content
    */
-  header?: React.ReactNode
+  header?: React.ReactNode;
   /**
    * Show footer
    */
-  showFooter?: boolean
+  showFooter?: boolean;
   /**
    * Footer content
    */
-  footer?: React.ReactNode
+  footer?: React.ReactNode;
   /**
    * Position
    */
-  position?: "left" | "right"
+  position?: "left" | "right";
   /**
    * Collapsible
    */
-  collapsible?: boolean
+  collapsible?: boolean;
 }
 
 export interface SidebarItem {
-  id?: string
-  label: string
-  icon?: React.ReactNode
-  href?: string
-  onClick?: () => void
-  badge?: string | number
-  badgeVariant?: "default" | "success" | "warning" | "destructive"
-  active?: boolean
-  disabled?: boolean
-  children?: SidebarItem[]
+  id?: string;
+  label: string;
+  icon?: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  badge?: string | number;
+  badgeVariant?: "default" | "success" | "warning" | "destructive";
+  active?: boolean;
+  disabled?: boolean;
+  children?: SidebarItem[];
 }
 
 /**
@@ -100,21 +106,21 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [expandedItems, setExpandedItems] = React.useState<Set<string>>(
-      new Set()
-    )
+      new Set(),
+    );
 
     const toggleExpanded = (id: string) => {
-      const newExpanded = new Set(expandedItems)
+      const newExpanded = new Set(expandedItems);
       if (newExpanded.has(id)) {
-        newExpanded.delete(id)
+        newExpanded.delete(id);
       } else {
-        newExpanded.add(id)
+        newExpanded.add(id);
       }
-      setExpandedItems(newExpanded)
-    }
+      setExpandedItems(newExpanded);
+    };
 
     return (
       <aside
@@ -135,30 +141,31 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
             // Shadow
             "shadow-[var(--shadow-sm)]",
           ].join(" "),
-          className
+          className,
         )}
         {...props}
       >
         {/* Header */}
         {showHeader && (
           <div
-            className={cn([
-              "flex items-center",
-              collapsed ? "justify-center" : "justify-between",
-              "h-16 px-[var(--space-4)]",
-              "border-b border-[var(--sidebar-border)]",
-            ].join(" "))}
+            className={cn(
+              [
+                "flex items-center",
+                collapsed ? "justify-center" : "justify-between",
+                "h-16 px-[var(--space-4)]",
+                "border-b border-[var(--sidebar-border)]",
+              ].join(" "),
+            )}
           >
-            {!collapsed && (
-              header || (
+            {!collapsed &&
+              (header || (
                 <div
                   className="text-[var(--text-xl)] font-[var(--font-display)] font-bold"
                   style={{ color: "var(--sidebar-primary)" }}
                 >
                   VÉRTICE 💚
                 </div>
-              )
-            )}
+              ))}
 
             {collapsible && (
               <Button
@@ -186,9 +193,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
                 item={item}
                 collapsed={collapsed}
                 expanded={expandedItems.has(item.id || `${index}`)}
-                onToggleExpand={() =>
-                  toggleExpanded(item.id || `${index}`)
-                }
+                onToggleExpand={() => toggleExpanded(item.id || `${index}`)}
               />
             ))}
           </div>
@@ -200,10 +205,12 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         {/* Footer */}
         {showFooter && (
           <div
-            className={cn([
-              "px-[var(--space-4)] py-[var(--space-4)]",
-              "border-t border-[var(--sidebar-border)]",
-            ].join(" "))}
+            className={cn(
+              [
+                "px-[var(--space-4)] py-[var(--space-4)]",
+                "border-t border-[var(--sidebar-border)]",
+              ].join(" "),
+            )}
           >
             {footer || (
               <div className={cn(collapsed ? "flex justify-center" : "")}>
@@ -220,11 +227,11 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           </div>
         )}
       </aside>
-    )
-  }
-)
+    );
+  },
+);
 
-Sidebar.displayName = "Sidebar"
+Sidebar.displayName = "Sidebar";
 
 /**
  * Sidebar Item Component
@@ -236,14 +243,14 @@ function SidebarItemComponent({
   onToggleExpand,
   level = 0,
 }: {
-  item: SidebarItem
-  collapsed: boolean
-  expanded: boolean
-  onToggleExpand: () => void
-  level?: number
+  item: SidebarItem;
+  collapsed: boolean;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  level?: number;
 }) {
-  const hasChildren = item.children && item.children.length > 0
-  const paddingLeft = collapsed ? 0 : level * 12
+  const hasChildren = item.children && item.children.length > 0;
+  const paddingLeft = collapsed ? 0 : level * 12;
 
   if (hasChildren) {
     return (
@@ -251,21 +258,23 @@ function SidebarItemComponent({
         <button
           onClick={onToggleExpand}
           disabled={item.disabled}
-          className={cn([
-            "w-full flex items-center gap-[var(--space-3)]",
-            collapsed ? "justify-center" : "justify-between",
-            "px-[var(--space-3)] py-[var(--space-2)]",
-            "text-[var(--text-sm)]",
-            "font-[var(--font-primary)]",
-            "font-medium",
-            "rounded-[var(--radius-md)]",
-            "transition-all duration-[var(--transition-fast)]",
-            // States
-            item.active
-              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] shadow-[var(--shadow-glow-green-soft)]"
-              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
-            item.disabled && "opacity-50 cursor-not-allowed",
-          ].join(" "))}
+          className={cn(
+            [
+              "w-full flex items-center gap-[var(--space-3)]",
+              collapsed ? "justify-center" : "justify-between",
+              "px-[var(--space-3)] py-[var(--space-2)]",
+              "text-[var(--text-sm)]",
+              "font-[var(--font-primary)]",
+              "font-medium",
+              "rounded-[var(--radius-md)]",
+              "transition-all duration-[var(--transition-fast)]",
+              // States
+              item.active
+                ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] shadow-[var(--shadow-glow-green-soft)]"
+                : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
+              item.disabled && "opacity-50 cursor-not-allowed",
+            ].join(" "),
+          )}
           style={{ paddingLeft: `${paddingLeft}px` }}
         >
           <span className="flex items-center gap-[var(--space-3)]">
@@ -276,14 +285,17 @@ function SidebarItemComponent({
           {!collapsed && (
             <span className="flex items-center gap-2">
               {item.badge && (
-                <Badge variant={item.badgeVariant || "default"} className="text-xs">
+                <Badge
+                  variant={item.badgeVariant || "default"}
+                  className="text-xs"
+                >
                   {item.badge}
                 </Badge>
               )}
               <ChevronRight
                 className={cn(
                   "h-4 w-4 transition-transform",
-                  expanded && "rotate-90"
+                  expanded && "rotate-90",
                 )}
               />
             </span>
@@ -306,28 +318,30 @@ function SidebarItemComponent({
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
     <a
       href={item.href}
       onClick={item.onClick}
-      className={cn([
-        "flex items-center gap-[var(--space-3)]",
-        collapsed ? "justify-center" : "",
-        "px-[var(--space-3)] py-[var(--space-2)]",
-        "text-[var(--text-sm)]",
-        "font-[var(--font-primary)]",
-        "font-medium",
-        "rounded-[var(--radius-md)]",
-        "transition-all duration-[var(--transition-fast)]",
-        // States
-        item.active
-          ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] shadow-[var(--shadow-glow-green-soft)]"
-          : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
-        item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-      ].join(" "))}
+      className={cn(
+        [
+          "flex items-center gap-[var(--space-3)]",
+          collapsed ? "justify-center" : "",
+          "px-[var(--space-3)] py-[var(--space-2)]",
+          "text-[var(--text-sm)]",
+          "font-[var(--font-primary)]",
+          "font-medium",
+          "rounded-[var(--radius-md)]",
+          "transition-all duration-[var(--transition-fast)]",
+          // States
+          item.active
+            ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)] shadow-[var(--shadow-glow-green-soft)]"
+            : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
+          item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
+        ].join(" "),
+      )}
       style={{ paddingLeft: `${paddingLeft}px` }}
       title={collapsed ? item.label : undefined}
     >
@@ -343,8 +357,8 @@ function SidebarItemComponent({
         </>
       )}
     </a>
-  )
+  );
 }
 
-export { SidebarItemComponent }
-export type { SidebarItem }
+export { SidebarItemComponent };
+export type { SidebarItem };

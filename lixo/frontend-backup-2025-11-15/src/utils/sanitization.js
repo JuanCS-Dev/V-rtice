@@ -5,7 +5,7 @@
  * Addresses Air Gap #9 - ZERO Input Sanitization
  */
 
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 // ============================================================================
 // SANITIZATION CONFIGURATION
@@ -24,8 +24,8 @@ const PLAIN_TEXT_CONFIG = {
  * DOMPurify config for rich text (limited safe HTML)
  */
 const RICH_TEXT_CONFIG = {
-  ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br'],
-  ALLOWED_ATTR: ['href'],
+  ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "br"],
+  ALLOWED_ATTR: ["href"],
   ALLOWED_URI_REGEXP: /^https?:\/\//,
 };
 
@@ -54,8 +54,8 @@ const PARANOID_CONFIG = {
  * // Returns: 'Hello'
  */
 export function sanitizePlainText(input) {
-  if (typeof input !== 'string') {
-    return '';
+  if (typeof input !== "string") {
+    return "";
   }
 
   return DOMPurify.sanitize(input, PLAIN_TEXT_CONFIG);
@@ -73,8 +73,8 @@ export function sanitizePlainText(input) {
  * // Returns: '<b>Bold</b>'
  */
 export function sanitizeRichText(input) {
-  if (typeof input !== 'string') {
-    return '';
+  if (typeof input !== "string") {
+    return "";
   }
 
   return DOMPurify.sanitize(input, RICH_TEXT_CONFIG);
@@ -88,8 +88,8 @@ export function sanitizeRichText(input) {
  * @returns {string} - Completely stripped text
  */
 export function sanitizeParanoid(input) {
-  if (typeof input !== 'string') {
-    return '';
+  if (typeof input !== "string") {
+    return "";
   }
 
   return DOMPurify.sanitize(input, PARANOID_CONFIG);
@@ -103,15 +103,15 @@ export function sanitizeParanoid(input) {
  * @returns {string} - Safe attribute value
  */
 export function sanitizeAttribute(value) {
-  if (typeof value !== 'string') {
-    return '';
+  if (typeof value !== "string") {
+    return "";
   }
 
   // Remove quotes, angle brackets, and other dangerous characters
   return value
-    .replace(/[<>"'`]/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '');
+    .replace(/[<>"'`]/g, "")
+    .replace(/javascript:/gi, "")
+    .replace(/on\w+=/gi, "");
 }
 
 /**
@@ -121,27 +121,31 @@ export function sanitizeAttribute(value) {
  * @returns {string} - Safe URL or empty string
  */
 export function sanitizeURL(url) {
-  if (typeof url !== 'string') {
-    return '';
+  if (typeof url !== "string") {
+    return "";
   }
 
   const trimmed = url.trim().toLowerCase();
 
   // Block dangerous schemes
-  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
+  const dangerousSchemes = ["javascript:", "data:", "vbscript:", "file:"];
   for (const scheme of dangerousSchemes) {
     if (trimmed.startsWith(scheme)) {
-      return '';
+      return "";
     }
   }
 
   // Only allow http(s) and relative URLs
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) {
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("/")
+  ) {
     return url.trim();
   }
 
   // Default: block
-  return '';
+  return "";
 }
 
 /**
@@ -152,7 +156,7 @@ export function sanitizeURL(url) {
  * @returns {Object|null} - Parsed object or null if invalid
  */
 export function sanitizeJSON(jsonString) {
-  if (typeof jsonString !== 'string') {
+  if (typeof jsonString !== "string") {
     return null;
   }
 
@@ -160,7 +164,7 @@ export function sanitizeJSON(jsonString) {
     const parsed = JSON.parse(jsonString);
 
     // Prevent __proto__ pollution
-    if (parsed && typeof parsed === 'object') {
+    if (parsed && typeof parsed === "object") {
       delete parsed.__proto__;
       delete parsed.constructor;
       delete parsed.prototype;
@@ -179,19 +183,19 @@ export function sanitizeJSON(jsonString) {
  * @returns {string} - Safe filename
  */
 export function sanitizeFilename(filename) {
-  if (typeof filename !== 'string') {
-    return 'file';
+  if (typeof filename !== "string") {
+    return "file";
   }
 
   // Remove path traversal attempts
   let safe = filename
-    .replace(/\.\./g, '')
-    .replace(/[\/\\]/g, '')
-    .replace(/[<>:"|?*\x00-\x1f]/g, '');
+    .replace(/\.\./g, "")
+    .replace(/[\/\\]/g, "")
+    .replace(/[<>:"|?*\x00-\x1f]/g, "");
 
   // Ensure not empty
   if (!safe.trim()) {
-    return 'file';
+    return "file";
   }
 
   return safe;
@@ -205,12 +209,12 @@ export function sanitizeFilename(filename) {
  * @returns {string} - Sanitized args
  */
 export function sanitizeCommandArgs(args) {
-  if (typeof args !== 'string') {
-    return '';
+  if (typeof args !== "string") {
+    return "";
   }
 
   // Only allow alphanumeric, spaces, hyphens, dots, commas, colons, slashes
-  return args.replace(/[^\w\s\-\.,:/]/g, '');
+  return args.replace(/[^\w\s\-\.,:/]/g, "");
 }
 
 /**
@@ -221,20 +225,20 @@ export function sanitizeCommandArgs(args) {
  * @returns {Object} - Object with sanitized values
  */
 export function sanitizeObject(obj, sanitizer = sanitizePlainText) {
-  if (!obj || typeof obj !== 'object') {
+  if (!obj || typeof obj !== "object") {
     return {};
   }
 
   const sanitized = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       sanitized[key] = sanitizer(value);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item =>
-        typeof item === 'string' ? sanitizer(item) : item
+      sanitized[key] = value.map((item) =>
+        typeof item === "string" ? sanitizer(item) : item,
       );
-    } else if (value && typeof value === 'object') {
+    } else if (value && typeof value === "object") {
       sanitized[key] = sanitizeObject(value, sanitizer);
     } else {
       sanitized[key] = value;
@@ -252,56 +256,62 @@ export function sanitizeObject(obj, sanitizer = sanitizePlainText) {
  * Sanitizes IP address input
  */
 export function sanitizeIP(ip) {
-  if (typeof ip !== 'string') {
-    return '';
+  if (typeof ip !== "string") {
+    return "";
   }
 
   // Only allow IP-valid characters
-  return ip.trim().replace(/[^0-9a-fA-F.:]/g, '');
+  return ip.trim().replace(/[^0-9a-fA-F.:]/g, "");
 }
 
 /**
  * Sanitizes email input
  */
 export function sanitizeEmail(email) {
-  if (typeof email !== 'string') {
-    return '';
+  if (typeof email !== "string") {
+    return "";
   }
 
   // Remove dangerous characters, keep email-valid ones
-  return email.trim().toLowerCase().replace(/[^a-z0-9@._\-+]/g, '');
+  return email
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9@._\-+]/g, "");
 }
 
 /**
  * Sanitizes port input
  */
 export function sanitizePort(port) {
-  if (typeof port !== 'string') {
-    return '';
+  if (typeof port !== "string") {
+    return "";
   }
 
   // Only numbers, commas, hyphens
-  return port.trim().replace(/[^0-9,\-]/g, '');
+  return port.trim().replace(/[^0-9,\-]/g, "");
 }
 
 /**
  * Sanitizes domain input
  */
 export function sanitizeDomain(domain) {
-  if (typeof domain !== 'string') {
-    return '';
+  if (typeof domain !== "string") {
+    return "";
   }
 
   // Only domain-valid characters
-  return domain.trim().toLowerCase().replace(/[^a-z0-9.\-]/g, '');
+  return domain
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9.\-]/g, "");
 }
 
 /**
  * Sanitizes search query
  */
 export function sanitizeSearchQuery(query) {
-  if (typeof query !== 'string') {
-    return '';
+  if (typeof query !== "string") {
+    return "";
   }
 
   // Remove script tags and dangerous patterns

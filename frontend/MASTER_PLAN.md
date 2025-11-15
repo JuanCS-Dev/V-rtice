@@ -9,12 +9,12 @@
 
 ## 📊 PROGRESSO GERAL
 
-| Fase | Status | Progresso |
-|------|--------|-----------|
-| **FASE 0**: Setup Inicial | ✅ COMPLETO | 100% |
-| **FASE 1**: Design System & UI Base | ✅ COMPLETO | 100% |
-| **FASE 2**: Infraestrutura API & Services | 🟡 EM ANDAMENTO | 35% |
-| **FASE 3**: Dashboards Funcionais | ⏳ PENDENTE | 0% |
+| Fase                                      | Status          | Progresso |
+| ----------------------------------------- | --------------- | --------- |
+| **FASE 0**: Setup Inicial                 | ✅ COMPLETO     | 100%      |
+| **FASE 1**: Design System & UI Base       | ✅ COMPLETO     | 100%      |
+| **FASE 2**: Infraestrutura API & Services | 🟡 EM ANDAMENTO | 35%       |
+| **FASE 3**: Dashboards Funcionais         | ⏳ PENDENTE     | 0%        |
 
 ---
 
@@ -44,7 +44,7 @@
 ## 🟡 FASE 2: INFRAESTRUTURA API & SERVICES (35%)
 
 - [x] offensiveService.ts
-- [x] defensiveService.ts  
+- [x] defensiveService.ts
 - [x] osintService.ts
 - [x] NetworkScanForm component
 - [ ] immunisService.ts

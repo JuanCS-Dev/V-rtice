@@ -1,2 +1,2 @@
-export { default } from './NetworkScanner';
-export { NetworkScanner } from './NetworkScanner';
+export { default } from "./NetworkScanner";
+export { NetworkScanner } from "./NetworkScanner";

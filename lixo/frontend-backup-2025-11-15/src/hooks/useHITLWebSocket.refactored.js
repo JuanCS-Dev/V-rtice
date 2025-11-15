@@ -23,16 +23,16 @@
  * Glory to YHWH - Designer of Real-time Communication
  */
 
-import { useState, useCallback } from 'react';
-import { useWebSocketManager } from './useWebSocketManager';
-import logger from '@/utils/logger';
+import { useState, useCallback } from "react";
+import { useWebSocketManager } from "./useWebSocketManager";
+import logger from "@/utils/logger";
 
 // Connection states (for backward compatibility)
 export const WS_STATE = {
-  CONNECTING: 'CONNECTING',
-  CONNECTED: 'CONNECTED',
-  DISCONNECTED: 'DISCONNECTED',
-  ERROR: 'ERROR',
+  CONNECTING: "CONNECTING",
+  CONNECTED: "CONNECTED",
+  DISCONNECTED: "DISCONNECTED",
+  ERROR: "ERROR",
 };
 
 /**
@@ -62,56 +62,56 @@ export const useHITLWebSocket = ({
     (data) => {
       setLastMessage(data);
 
-      logger.debug('[useHITLWebSocket] Message received:', data.type);
+      logger.debug("[useHITLWebSocket] Message received:", data.type);
 
       switch (data.type) {
-        case 'welcome':
+        case "welcome":
           setConnectionId(data.connection_id);
-          logger.info('[useHITLWebSocket] Connected:', data.connection_id);
+          logger.info("[useHITLWebSocket] Connected:", data.connection_id);
           break;
 
-        case 'new_patch':
+        case "new_patch":
           if (onNewPatch) {
             onNewPatch(data.data);
           }
           break;
 
-        case 'decision_update':
+        case "decision_update":
           if (onDecisionUpdate) {
             onDecisionUpdate(data.data);
           }
           break;
 
-        case 'system_status':
+        case "system_status":
           if (onSystemStatus) {
             onSystemStatus(data.data);
           }
           break;
 
-        case 'heartbeat':
-          logger.debug('[useHITLWebSocket] Heartbeat received');
+        case "heartbeat":
+          logger.debug("[useHITLWebSocket] Heartbeat received");
           break;
 
-        case 'pong':
-          logger.debug('[useHITLWebSocket] Pong received');
+        case "pong":
+          logger.debug("[useHITLWebSocket] Pong received");
           break;
 
-        case 'error':
-          logger.error('[useHITLWebSocket] Server error:', data.message);
+        case "error":
+          logger.error("[useHITLWebSocket] Server error:", data.message);
           break;
 
-        case 'connection':
+        case "connection":
           // Handle connection state changes
-          if (data.status === 'disconnected') {
+          if (data.status === "disconnected") {
             setConnectionId(null);
           }
           break;
 
         default:
-          logger.warn('[useHITLWebSocket] Unknown message type:', data.type);
+          logger.warn("[useHITLWebSocket] Unknown message type:", data.type);
       }
     },
-    [onNewPatch, onDecisionUpdate, onSystemStatus]
+    [onNewPatch, onDecisionUpdate, onSystemStatus],
   );
 
   // Use centralized WebSocketManager
@@ -122,7 +122,7 @@ export const useHITLWebSocket = ({
     isError,
     send,
     reconnect,
-  } = useWebSocketManager('hitl.ws', {
+  } = useWebSocketManager("hitl.ws", {
     enabled: autoConnect,
     onMessage: handleMessage,
     connectionOptions: {
@@ -142,7 +142,7 @@ export const useHITLWebSocket = ({
   // Disconnect function (calls reconnect to force new connection)
   const disconnect = useCallback(() => {
     // WebSocketManager handles disconnect automatically on unmount
-    logger.info('[useHITLWebSocket] Disconnect requested');
+    logger.info("[useHITLWebSocket] Disconnect requested");
   }, []);
 
   // Connect function (uses reconnect from WebSocketManager)

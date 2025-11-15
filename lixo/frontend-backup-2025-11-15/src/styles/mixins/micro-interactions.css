@@ -1,10 +1,10 @@
 /**
  * Micro-interactions - PAGANI Quality
  * ====================================
- * 
+ *
  * Delightful interactions that make users smile
  * Every click, every hover, every focus is a moment of joy
- * 
+ *
  * Philosophy: "Don't make me think, make me feel"
  */
 
@@ -18,8 +18,9 @@ a:not([disabled]),
 .card,
 [role="button"]:not([disabled]),
 [role="link"]:not([disabled]) {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease;
 }
 
 .lift:hover,
@@ -29,7 +30,7 @@ a:not([disabled]):hover,
 [role="button"]:not([disabled]):hover,
 [role="link"]:not([disabled]):hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.2),
     0 0 24px rgba(var(--color-primary-rgb, 0, 255, 65), 0.15);
 }
@@ -40,7 +41,7 @@ a:not([disabled]):active,
 [role="button"]:not([disabled]):active,
 [role="link"]:not([disabled]):active {
   transform: translateY(0);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.15),
     0 0 12px rgba(var(--color-primary-rgb, 0, 255, 65), 0.1);
 }
@@ -61,7 +62,7 @@ button.primary,
 button.primary::before,
 .btn-primary::before,
 .highlight::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -2px;
   background: linear-gradient(
@@ -94,7 +95,7 @@ a:not(.no-underline),
 
 a:not(.no-underline)::after,
 .link::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -166,7 +167,7 @@ img.icon:hover,
 }
 
 .ripple::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -175,7 +176,9 @@ img.icon:hover,
   border-radius: 50%;
   background: rgba(var(--color-primary-rgb, 0, 255, 65), 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
 .ripple:active::after {
@@ -222,7 +225,8 @@ img.icon:hover,
    =================================== */
 
 @keyframes pulse-subtle {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -241,9 +245,23 @@ img.icon:hover,
    =================================== */
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 
 .shake {
@@ -255,8 +273,13 @@ img.icon:hover,
    =================================== */
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .bounce {
@@ -268,8 +291,12 @@ img.icon:hover,
    =================================== */
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spin {

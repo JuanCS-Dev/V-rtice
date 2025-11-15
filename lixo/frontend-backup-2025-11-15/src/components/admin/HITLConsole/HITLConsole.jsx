@@ -8,19 +8,23 @@
  * - Bottom: HITL Statistics & History
  */
 
-import React, { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
-import logger from '@/utils/logger';
-import ReviewQueue from './components/ReviewQueue';
-import ReviewDetails from './components/ReviewDetails';
-import DecisionPanel from './components/DecisionPanel';
-import HITLStats from './components/HITLStats';
-import { useReviewQueue } from './hooks/useReviewQueue';
-import { useReviewDetails } from './hooks/useReviewDetails';
-import { useHITLStats } from './hooks/useHITLStats';
-import { useWebSocket, MessageType, WebSocketStatus } from './hooks/useWebSocket';
-import styles from './HITLConsole.module.css';
+import React, { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
+import logger from "@/utils/logger";
+import ReviewQueue from "./components/ReviewQueue";
+import ReviewDetails from "./components/ReviewDetails";
+import DecisionPanel from "./components/DecisionPanel";
+import HITLStats from "./components/HITLStats";
+import { useReviewQueue } from "./hooks/useReviewQueue";
+import { useReviewDetails } from "./hooks/useReviewDetails";
+import { useHITLStats } from "./hooks/useHITLStats";
+import {
+  useWebSocket,
+  MessageType,
+  WebSocketStatus,
+} from "./hooks/useWebSocket";
+import styles from "./HITLConsole.module.css";
 
 const HITLConsole = () => {
   const { t } = useTranslation();
@@ -43,56 +47,68 @@ const HITLConsole = () => {
   } = useReviewQueue(filters);
 
   // Fetch selected APV details
-  const { review: selectedReview, loading: detailsLoading } = useReviewDetails(selectedAPV);
+  const { review: selectedReview, loading: detailsLoading } =
+    useReviewDetails(selectedAPV);
 
   // Fetch HITL stats
   const { stats, loading: statsLoading } = useHITLStats();
 
   // Boris Cherny Standard - GAP #83: Replace console.log with logger
   // WebSocket message handler
-  const handleWebSocketMessage = useCallback((message) => {
-    logger.debug('[HITLConsole] WebSocket message received:', message);
+  const handleWebSocketMessage = useCallback(
+    (message) => {
+      logger.debug("[HITLConsole] WebSocket message received:", message);
 
-    switch (message.type) {
-      case MessageType.NEW_APV:
-        // New APV added to queue - invalidate review queue cache
-        logger.debug('[HITLConsole] New APV:', message.apv_code);
-        queryClient.invalidateQueries({ queryKey: ['hitl-reviews'] });
-        queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
-        break;
+      switch (message.type) {
+        case MessageType.NEW_APV:
+          // New APV added to queue - invalidate review queue cache
+          logger.debug("[HITLConsole] New APV:", message.apv_code);
+          queryClient.invalidateQueries({ queryKey: ["hitl-reviews"] });
+          queryClient.invalidateQueries({ queryKey: ["hitl-stats"] });
+          break;
 
-      case MessageType.DECISION_MADE:
-        // Decision made - invalidate caches
-        logger.debug('[HITLConsole] Decision made:', message.decision, 'on', message.apv_code);
-        queryClient.invalidateQueries({ queryKey: ['hitl-reviews'] });
-        queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
-        break;
+        case MessageType.DECISION_MADE:
+          // Decision made - invalidate caches
+          logger.debug(
+            "[HITLConsole] Decision made:",
+            message.decision,
+            "on",
+            message.apv_code,
+          );
+          queryClient.invalidateQueries({ queryKey: ["hitl-reviews"] });
+          queryClient.invalidateQueries({ queryKey: ["hitl-stats"] });
+          break;
 
-      case MessageType.STATS_UPDATE:
-        // Stats updated - invalidate stats cache
-        logger.debug('[HITLConsole] Stats updated:', message);
-        queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
-        break;
+        case MessageType.STATS_UPDATE:
+          // Stats updated - invalidate stats cache
+          logger.debug("[HITLConsole] Stats updated:", message);
+          queryClient.invalidateQueries({ queryKey: ["hitl-stats"] });
+          break;
 
-      case MessageType.CONNECTION_ACK:
-        logger.debug('[HITLConsole] Connected with client ID:', message.client_id);
-        break;
+        case MessageType.CONNECTION_ACK:
+          logger.debug(
+            "[HITLConsole] Connected with client ID:",
+            message.client_id,
+          );
+          break;
 
-      default:
-        // Other message types
-        break;
-    }
-  }, [queryClient]);
+        default:
+          // Other message types
+          break;
+      }
+    },
+    [queryClient],
+  );
 
   // WebSocket connection
-  const wsUrl = `${import.meta.env.VITE_HITL_API_URL.replace('http', 'ws')}/hitl/ws`;
+  const wsUrl = `${import.meta.env.VITE_HITL_API_URL.replace("http", "ws")}/hitl/ws`;
   const {
     status: wsStatus,
     isConnected: _wsConnected,
     clientId: _wsClientId,
   } = useWebSocket({
     url: wsUrl,
-    channels: ['apvs', 'decisions', 'stats'],
+    channels: ["apvs", "decisions", "stats"],
     onMessage: handleWebSocketMessage,
     autoConnect: true,
     reconnectInterval: 5000,
@@ -123,10 +139,10 @@ const HITLConsole = () => {
             <span className={styles.headerIcon}>🛡️</span>
             <div>
               <h1 className={styles.headerTitle}>
-                {t('hitl.title', 'HITL CONSOLE')}
+                {t("hitl.title", "HITL CONSOLE")}
               </h1>
               <p className={styles.headerSubtitle}>
-                {t('hitl.subtitle', 'HUMAN DECISION PANEL')}
+                {t("hitl.subtitle", "HUMAN DECISION PANEL")}
               </p>
             </div>
           </div>
@@ -135,27 +151,41 @@ const HITLConsole = () => {
           {stats && (
             <div className={styles.headerStats}>
               {/* WebSocket Status Indicator */}
-              <div className={styles.statBadge} title={`WebSocket: ${wsStatus}`}>
+              <div
+                className={styles.statBadge}
+                title={`WebSocket: ${wsStatus}`}
+              >
                 <span className={styles.statLabel}>
-                  {wsStatus === WebSocketStatus.CONNECTED && '🟢'}
-                  {wsStatus === WebSocketStatus.CONNECTING && '🟡'}
-                  {wsStatus === WebSocketStatus.RECONNECTING && '🟠'}
-                  {(wsStatus === WebSocketStatus.DISCONNECTED || wsStatus === WebSocketStatus.ERROR) && '🔴'}
-                  {' '}
-                  {t('hitl.realtime', 'Real-time')}
+                  {wsStatus === WebSocketStatus.CONNECTED && "🟢"}
+                  {wsStatus === WebSocketStatus.CONNECTING && "🟡"}
+                  {wsStatus === WebSocketStatus.RECONNECTING && "🟠"}
+                  {(wsStatus === WebSocketStatus.DISCONNECTED ||
+                    wsStatus === WebSocketStatus.ERROR) &&
+                    "🔴"}{" "}
+                  {t("hitl.realtime", "Real-time")}
                 </span>
               </div>
 
               <div className={styles.statBadge}>
-                <span className={styles.statLabel}>{t('hitl.pending', 'Pending')}:</span>
-                <span className={styles.statValue}>{stats.pending_reviews}</span>
+                <span className={styles.statLabel}>
+                  {t("hitl.pending", "Pending")}:
+                </span>
+                <span className={styles.statValue}>
+                  {stats.pending_reviews}
+                </span>
               </div>
               <div className={styles.statBadge}>
-                <span className={styles.statLabel}>{t('hitl.today', 'Today')}:</span>
-                <span className={styles.statValue}>{stats.decisions_today}</span>
+                <span className={styles.statLabel}>
+                  {t("hitl.today", "Today")}:
+                </span>
+                <span className={styles.statValue}>
+                  {stats.decisions_today}
+                </span>
               </div>
               <div className={styles.statBadge}>
-                <span className={styles.statLabel}>{t('hitl.agreement', 'Agreement')}:</span>
+                <span className={styles.statLabel}>
+                  {t("hitl.agreement", "Agreement")}:
+                </span>
                 <span className={styles.statValue}>
                   {(stats.human_ai_agreement_rate * 100).toFixed(0)}%
                 </span>
@@ -202,10 +232,7 @@ const HITLConsole = () => {
 
       {/* Bottom: Statistics */}
       <footer className={styles.statsSection}>
-        <HITLStats
-          stats={stats}
-          loading={statsLoading}
-        />
+        <HITLStats stats={stats} loading={statsLoading} />
       </footer>
     </div>
   );

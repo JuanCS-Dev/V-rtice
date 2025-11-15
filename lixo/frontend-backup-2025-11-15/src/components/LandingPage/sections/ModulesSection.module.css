@@ -39,7 +39,7 @@
   font-weight: var(--font-extrabold);
   color: var(--color-text-primary);
   margin: 0 0 var(--space-md) 0;
-  font-family: 'Orbitron', monospace;
+  font-family: "Orbitron", monospace;
   letter-spacing: var(--tracking-tight);
 }
 
@@ -149,7 +149,7 @@
   font-weight: var(--font-bold);
   color: var(--color-text-primary);
   margin: 0;
-  font-family: 'Orbitron', monospace;
+  font-family: "Orbitron", monospace;
   letter-spacing: var(--tracking-tight);
 }
 
@@ -292,11 +292,19 @@
 }
 
 .card.cyan .cta {
-  background: linear-gradient(135deg, var(--color-accent-secondary), var(--color-info));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-secondary),
+    var(--color-info)
+  );
 }
 
 .card.cyan .hoverGlow {
-  background: linear-gradient(135deg, var(--color-accent-secondary), var(--color-info));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-secondary),
+    var(--color-info)
+  );
 }
 
 /* Blue - OSINT */
@@ -305,7 +313,11 @@
 }
 
 .card.blue .cta {
-  background: linear-gradient(135deg, var(--color-info), var(--color-accent-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--color-info),
+    var(--color-accent-secondary)
+  );
 }
 
 /* Yellow - Admin */
@@ -314,11 +326,19 @@
 }
 
 .card.yellow .cta {
-  background: linear-gradient(135deg, var(--color-warning), var(--color-success));
+  background: linear-gradient(
+    135deg,
+    var(--color-warning),
+    var(--color-success)
+  );
 }
 
 .card.yellow .hoverGlow {
-  background: linear-gradient(135deg, var(--color-warning), var(--color-success));
+  background: linear-gradient(
+    135deg,
+    var(--color-warning),
+    var(--color-success)
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

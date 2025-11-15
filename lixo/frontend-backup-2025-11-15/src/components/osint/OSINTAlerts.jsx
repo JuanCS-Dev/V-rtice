@@ -1,23 +1,33 @@
-import React from 'react';
+import React from "react";
 
 const OSINTAlerts = ({ alerts, systemStats }) => {
   const getSeverityColor = (severity) => {
     switch (severity) {
-      case 'critical': return 'border-red-400 bg-red-400/10 text-red-400';
-      case 'high': return 'border-orange-400 bg-orange-400/10 text-orange-400';
-      case 'medium': return 'border-yellow-400 bg-yellow-400/10 text-yellow-400';
-      case 'info': return 'border-red-400 bg-red-400/10 text-red-400';
-      default: return 'border-gray-400 bg-gray-400/10 text-gray-400';
+      case "critical":
+        return "border-red-400 bg-red-400/10 text-red-400";
+      case "high":
+        return "border-orange-400 bg-orange-400/10 text-orange-400";
+      case "medium":
+        return "border-yellow-400 bg-yellow-400/10 text-yellow-400";
+      case "info":
+        return "border-red-400 bg-red-400/10 text-red-400";
+      default:
+        return "border-gray-400 bg-gray-400/10 text-gray-400";
     }
   };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
-      case 'critical': return '🚨';
-      case 'high': return '⚠️';
-      case 'medium': return '🔍';
-      case 'info': return 'ℹ️';
-      default: return '📋';
+      case "critical":
+        return "🚨";
+      case "high":
+        return "⚠️";
+      case "medium":
+        return "🔍";
+      case "info":
+        return "ℹ️";
+      default:
+        return "📋";
     }
   };
 
@@ -25,7 +35,9 @@ const OSINTAlerts = ({ alerts, systemStats }) => {
     <div className="h-full flex flex-col">
       {/* Status do Sistema OSINT */}
       <div className="p-4 border-b border-red-400/30">
-        <h3 className="text-red-400 font-bold mb-3 tracking-wide">STATUS OSINT OPS</h3>
+        <h3 className="text-red-400 font-bold mb-3 tracking-wide">
+          STATUS OSINT OPS
+        </h3>
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-red-400/70">AURORA AI</span>
@@ -48,22 +60,32 @@ const OSINTAlerts = ({ alerts, systemStats }) => {
 
       {/* Métricas Rápidas */}
       <div className="p-4 border-b border-red-400/30">
-        <h3 className="text-red-400 font-bold mb-3 tracking-wide">MÉTRICAS EM TEMPO REAL</h3>
+        <h3 className="text-red-400 font-bold mb-3 tracking-wide">
+          MÉTRICAS EM TEMPO REAL
+        </h3>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="bg-red-400/20 border border-red-400/50 rounded p-2 text-center">
-            <div className="text-red-400 font-bold text-lg">{systemStats?.totalInvestigations || 0}</div>
+            <div className="text-red-400 font-bold text-lg">
+              {systemStats?.totalInvestigations || 0}
+            </div>
             <div className="text-red-400/70">INVESTIG.</div>
           </div>
           <div className="bg-yellow-400/20 border border-yellow-400/50 rounded p-2 text-center">
-            <div className="text-yellow-400 font-bold text-lg">{systemStats?.activeTargets || 0}</div>
+            <div className="text-yellow-400 font-bold text-lg">
+              {systemStats?.activeTargets || 0}
+            </div>
             <div className="text-yellow-400/70">ALVOS</div>
           </div>
           <div className="bg-orange-400/20 border border-orange-400/50 rounded p-2 text-center">
-            <div className="text-orange-400 font-bold text-lg">{systemStats?.threatsDetected || 0}</div>
+            <div className="text-orange-400 font-bold text-lg">
+              {systemStats?.threatsDetected || 0}
+            </div>
             <div className="text-orange-400/70">AMEAÇAS</div>
           </div>
           <div className="bg-red-400/20 border border-red-400/50 rounded p-2 text-center">
-            <div className="text-red-400 font-bold text-lg">{systemStats?.dataPoints || 0}K</div>
+            <div className="text-red-400 font-bold text-lg">
+              {systemStats?.dataPoints || 0}K
+            </div>
             <div className="text-red-400/70">DADOS</div>
           </div>
         </div>
@@ -71,7 +93,9 @@ const OSINTAlerts = ({ alerts, systemStats }) => {
 
       {/* Stream de Alertas OSINT */}
       <div className="flex-1 p-4 overflow-hidden">
-        <h3 className="text-red-400 font-bold mb-3 tracking-wide">🚨 OSINT ALERTS</h3>
+        <h3 className="text-red-400 font-bold mb-3 tracking-wide">
+          🚨 OSINT ALERTS
+        </h3>
         <div className="space-y-2 max-h-full overflow-y-auto">
           {alerts.length === 0 ? (
             <div className="text-red-400/50 text-xs text-center py-8">
@@ -94,12 +118,8 @@ const OSINTAlerts = ({ alerts, systemStats }) => {
                 </div>
                 <p className="text-xs mb-2">{alert.message}</p>
                 <div className="flex justify-between text-xs opacity-60 font-mono">
-                  {alert.target && (
-                    <span>🎯 {alert.target}</span>
-                  )}
-                  {alert.source && (
-                    <span>📡 {alert.source}</span>
-                  )}
+                  {alert.target && <span>🎯 {alert.target}</span>}
+                  {alert.source && <span>📡 {alert.source}</span>}
                 </div>
               </div>
             ))

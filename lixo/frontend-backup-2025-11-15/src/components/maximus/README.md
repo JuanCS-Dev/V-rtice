@@ -24,6 +24,7 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 **Theme**: Cyberpunk meets Military Intelligence
 
 **Color Palette**:
+
 - Primary: `#8B5CF6` (Purple - AI)
 - Secondary: `#06B6D4` (Cyan - Tech)
 - Success: `#10B981` (Green)
@@ -32,6 +33,7 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 - Dark: `#0F172A` (Navy Black)
 
 **Design Elements**:
+
 - Animated grid background
 - Scan line effects
 - Pulsing status indicators
@@ -59,6 +61,7 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 ### MaximusDashboard (Main Component)
 
 **Features**:
+
 - ✅ Header com status real-time dos serviços
 - ✅ Navigation entre painéis (Insights, Oráculo, Eureka)
 - ✅ Clock em tempo real
@@ -68,9 +71,11 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 - ✅ Classification banner de segurança
 
 **Props**:
+
 - `setCurrentView(view)`: Função para voltar à landing page
 
 **State**:
+
 ```jsx
 {
   activePanel: 'insights' | 'oraculo' | 'eureka',
@@ -88,6 +93,7 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 ### OraculoPanel (Self-Improvement)
 
 **Features**:
+
 - ✅ Estatísticas em tempo real (sugestões, implementações, taxa de sucesso)
 - ✅ Controle de análise configurável (categoria, max suggestions, confiança mínima)
 - ✅ Modo dry-run vs. implementação automática
@@ -96,14 +102,16 @@ Dashboard cinematográfico para visualização e controle dos componentes de AI 
 - ✅ Visualização de resultados da última sessão
 
 **API Endpoints Utilizados**:
+
 ```javascript
-GET  /api/v1/oraculo/stats                    // Estatísticas
-GET  /api/v1/oraculo/pending-approvals        // Sugestões pendentes
-POST /api/v1/oraculo/analyze                  // Executar análise
-POST /api/v1/oraculo/approve/{suggestion_id}  // Aprovar sugestão
+GET / api / v1 / oraculo / stats; // Estatísticas
+GET / api / v1 / oraculo / pending - approvals; // Sugestões pendentes
+POST / api / v1 / oraculo / analyze; // Executar análise
+POST / api / v1 / oraculo / approve / { suggestion_id }; // Aprovar sugestão
 ```
 
 **Configuração de Análise**:
+
 ```jsx
 {
   focusCategory: 'all' | 'security' | 'performance' | 'features' | 'refactoring' | 'documentation' | 'testing',
@@ -118,6 +126,7 @@ POST /api/v1/oraculo/approve/{suggestion_id}  // Aprovar sugestão
 ### EurekaPanel (Malware Analysis)
 
 **Features**:
+
 - ✅ Upload e análise de arquivos maliciosos
 - ✅ Toggle entre modo upload e resultados
 - ✅ Pipeline de análise visualizado (6 etapas)
@@ -129,13 +138,15 @@ POST /api/v1/oraculo/approve/{suggestion_id}  // Aprovar sugestão
 - ✅ Visualização de hashes (MD5, SHA1, SHA256)
 
 **API Endpoints Utilizados**:
+
 ```javascript
-GET  /api/v1/eureka/stats      // Estatísticas
-GET  /api/v1/eureka/patterns   // Padrões disponíveis
-POST /api/v1/eureka/analyze    // Analisar arquivo
+GET / api / v1 / eureka / stats; // Estatísticas
+GET / api / v1 / eureka / patterns; // Padrões disponíveis
+POST / api / v1 / eureka / analyze; // Analisar arquivo
 ```
 
 **Analysis Request**:
+
 ```jsx
 {
   filePath: '/path/to/file',
@@ -144,6 +155,7 @@ POST /api/v1/eureka/analyze    // Analisar arquivo
 ```
 
 **Analysis Result**:
+
 ```jsx
 {
   classification: { family, type },
@@ -167,6 +179,7 @@ POST /api/v1/eureka/analyze    // Analisar arquivo
 ### AIInsightsPanel (Unified Dashboard)
 
 **Features**:
+
 - ✅ Brain visual com pulsação animada
 - ✅ System health meter (0-100%)
 - ✅ Estatísticas consolidadas (Oráculo + Eureka)
@@ -180,39 +193,40 @@ POST /api/v1/eureka/analyze    // Analisar arquivo
 - ✅ Quick actions buttons
 
 **Workflows**:
+
 ```jsx
 [
   {
-    id: 'analyze-and-respond',
-    name: 'Analyze & Respond',
+    id: "analyze-and-respond",
+    name: "Analyze & Respond",
     steps: [
-      'EUREKA Analysis',
-      'Playbook Generation',
-      'ADR Core Loading',
-      'Auto Execution'
-    ]
+      "EUREKA Analysis",
+      "Playbook Generation",
+      "ADR Core Loading",
+      "Auto Execution",
+    ],
   },
   {
-    id: 'self-improvement',
-    name: 'Self-Improvement Cycle',
+    id: "self-improvement",
+    name: "Self-Improvement Cycle",
     steps: [
-      'Codebase Scan',
-      'AI Suggestions',
-      'Safe Implementation',
-      'Testing & Validation'
-    ]
+      "Codebase Scan",
+      "AI Suggestions",
+      "Safe Implementation",
+      "Testing & Validation",
+    ],
   },
   {
-    id: 'supply-chain-guardian',
-    name: 'Supply Chain Guardian',
+    id: "supply-chain-guardian",
+    name: "Supply Chain Guardian",
     steps: [
-      'Dependency Scan',
-      'Code Analysis',
-      'Threat Detection',
-      'Auto Mitigation'
-    ]
-  }
-]
+      "Dependency Scan",
+      "Code Analysis",
+      "Threat Detection",
+      "Auto Mitigation",
+    ],
+  },
+];
 ```
 
 ---
@@ -226,7 +240,7 @@ Cliente HTTP completo para comunicação com MAXIMUS Integration Service (port 8
 ### Health Check
 
 ```javascript
-import { checkMaximusHealth, isMaximusAvailable } from '@/api/maximusService';
+import { checkMaximusHealth, isMaximusAvailable } from "@/api/maximusService";
 
 const health = await checkMaximusHealth();
 // { success: true, data: { status, version, uptime_seconds, services } }
@@ -242,22 +256,22 @@ import {
   runOraculoAnalysis,
   getOraculoPendingApprovals,
   approveOraculoSuggestion,
-  getOraculoStats
-} from '@/api/maximusService';
+  getOraculoStats,
+} from "@/api/maximusService";
 
 // Run analysis
 const result = await runOraculoAnalysis({
-  focusCategory: 'security',
+  focusCategory: "security",
   maxSuggestions: 5,
   minConfidence: 0.8,
-  dryRun: true
+  dryRun: true,
 });
 
 // Get pending approvals
 const pending = await getOraculoPendingApprovals();
 
 // Approve suggestion
-const approval = await approveOraculoSuggestion('suggestion-id-123');
+const approval = await approveOraculoSuggestion("suggestion-id-123");
 
 // Get stats
 const stats = await getOraculoStats();
@@ -269,13 +283,13 @@ const stats = await getOraculoStats();
 import {
   analyzeFileWithEureka,
   getEurekaStats,
-  getEurekaPatterns
-} from '@/api/maximusService';
+  getEurekaPatterns,
+} from "@/api/maximusService";
 
 // Analyze file
 const result = await analyzeFileWithEureka({
-  filePath: '/tmp/malware.exe',
-  generatePlaybook: true
+  filePath: "/tmp/malware.exe",
+  generatePlaybook: true,
 });
 
 // Get stats
@@ -288,17 +302,17 @@ const patterns = await getEurekaPatterns();
 ### Integration Workflows
 
 ```javascript
-import { analyzeAndRespond, runSupplyChainScan } from '@/api/maximusService';
+import { analyzeAndRespond, runSupplyChainScan } from "@/api/maximusService";
 
 // Analyze & Respond workflow
-const result = await analyzeAndRespond('/path/to/malware');
+const result = await analyzeAndRespond("/path/to/malware");
 
 // Supply Chain Guardian
 const scan = await runSupplyChainScan({
-  repositoryPath: '/path/to/repo',
+  repositoryPath: "/path/to/repo",
   scanDependencies: true,
   analyzeCode: true,
-  autoFix: false
+  autoFix: false,
 });
 ```
 
@@ -309,12 +323,12 @@ const scan = await runSupplyChainScan({
 ### 1. Integração no App.jsx
 
 ```jsx
-import MaximusDashboard from './components/maximus/MaximusDashboard';
+import MaximusDashboard from "./components/maximus/MaximusDashboard";
 
 function App() {
-  const [currentView, setCurrentView] = useState('main');
+  const [currentView, setCurrentView] = useState("main");
 
-  if (currentView === 'maximus') {
+  if (currentView === "maximus") {
     return (
       <ErrorBoundary>
         <MaximusDashboard setCurrentView={setCurrentView} />
@@ -332,12 +346,12 @@ function App() {
 // LandingPage/ModuleGrid.jsx
 const modules = [
   {
-    id: 'maximus',
-    name: 'MAXIMUS AI',
-    description: 'Autonomous Intelligence Platform',
-    icon: '🧠',
-    color: 'gradient-ai',
-    features: ['Self-Improvement', 'Malware Analysis', 'AI Insights']
+    id: "maximus",
+    name: "MAXIMUS AI",
+    description: "Autonomous Intelligence Platform",
+    icon: "🧠",
+    color: "gradient-ai",
+    features: ["Self-Improvement", "Malware Analysis", "AI Insights"],
   },
   // ... outros módulos
 ];
@@ -382,12 +396,12 @@ Edite `MaximusDashboard.css`:
 
 ```css
 :root {
-  --maximus-primary: #8B5CF6;    /* Purple */
-  --maximus-secondary: #06B6D4;  /* Cyan */
-  --maximus-success: #10B981;    /* Green */
-  --maximus-danger: #EF4444;     /* Red */
-  --maximus-warning: #F59E0B;    /* Orange */
-  --maximus-dark: #0F172A;       /* Navy Black */
+  --maximus-primary: #8b5cf6; /* Purple */
+  --maximus-secondary: #06b6d4; /* Cyan */
+  --maximus-success: #10b981; /* Green */
+  --maximus-danger: #ef4444; /* Red */
+  --maximus-warning: #f59e0b; /* Orange */
+  --maximus-dark: #0f172a; /* Navy Black */
 }
 ```
 
@@ -395,9 +409,9 @@ Edite `MaximusDashboard.css`:
 
 ```jsx
 // MaximusDashboard.jsx
-const HEALTH_CHECK_INTERVAL = 30000;  // 30 seconds
-const STATS_UPDATE_INTERVAL = 15000;  // 15 seconds
-const ACTIVITY_INTERVAL = 8000;       // 8 seconds
+const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
+const STATS_UPDATE_INTERVAL = 15000; // 15 seconds
+const ACTIVITY_INTERVAL = 8000; // 8 seconds
 ```
 
 ---
@@ -407,6 +421,7 @@ const ACTIVITY_INTERVAL = 8000;       // 8 seconds
 ### Manual Testing Checklist
 
 **MaximusDashboard**:
+
 - [ ] Header mostra status correto dos serviços
 - [ ] Clock atualiza a cada segundo
 - [ ] Navegação entre painéis funciona
@@ -415,6 +430,7 @@ const ACTIVITY_INTERVAL = 8000;       // 8 seconds
 - [ ] Background animations estão suaves
 
 **OraculoPanel**:
+
 - [ ] Stats são carregados corretamente
 - [ ] Form de análise permite configuração
 - [ ] Botão "Iniciar Análise" dispara request
@@ -424,6 +440,7 @@ const ACTIVITY_INTERVAL = 8000;       // 8 seconds
 - [ ] Botão "Aprovar" funciona
 
 **EurekaPanel**:
+
 - [ ] Stats são carregados
 - [ ] Toggle entre Upload/Results funciona
 - [ ] Input de file path aceita valores
@@ -437,6 +454,7 @@ const ACTIVITY_INTERVAL = 8000;       // 8 seconds
   - File Hashes
 
 **AIInsightsPanel**:
+
 - [ ] Brain visual pulsa animado
 - [ ] Health meter mostra porcentagem correta
 - [ ] Stats consolidadas corretas
@@ -453,6 +471,7 @@ const ACTIVITY_INTERVAL = 8000;       // 8 seconds
 **Problema**: Tela branca ou erro no console
 
 **Solução**:
+
 ```bash
 # Verificar se backend está rodando
 curl http://localhost:8099/health
@@ -466,6 +485,7 @@ curl http://localhost:8099/health
 **Problema**: Stats ficam em 0
 
 **Solução**:
+
 1. Verificar se MAXIMUS Integration Service está online
 2. Verificar network tab no DevTools
 3. Confirmar que endpoints retornam 200 OK
@@ -475,6 +495,7 @@ curl http://localhost:8099/health
 **Problema**: Dashboard sem estilo ou com layout quebrado
 
 **Solução**:
+
 ```bash
 # Verificar se CSS foi importado corretamente
 # MaximusDashboard.jsx deve ter:
@@ -490,6 +511,7 @@ import './Panels.css';
 
 **Solução**:
 O MAXIMUS Integration Service já tem CORS configurado:
+
 ```python
 # main.py
 app.add_middleware(
@@ -563,6 +585,7 @@ app.add_middleware(
 ### v1.0.0 (2025-10-02)
 
 **✨ Features**:
+
 - ✅ Dashboard principal com 3 painéis
 - ✅ Oráculo Panel (self-improvement)
 - ✅ Eureka Panel (malware analysis)
@@ -574,6 +597,7 @@ app.add_middleware(
 - ✅ Responsive layout
 
 **🎨 Styling**:
+
 - ✅ Cyberpunk theme
 - ✅ Gradient accents
 - ✅ Glass morphism cards
@@ -581,6 +605,7 @@ app.add_middleware(
 - ✅ Scan line effects
 
 **🔌 Integration**:
+
 - ✅ Integrado no App.jsx
 - ✅ Adicionado ao ModuleGrid
 - ✅ API service configurado
@@ -614,6 +639,7 @@ Propriedade do **Projeto Vértice** - Uso Restrito
 **Data**: 2025-10-02
 
 **Tecnologias**:
+
 - React 18
 - CSS3 (Custom Properties, Animations, Grid, Flexbox)
 - Fetch API

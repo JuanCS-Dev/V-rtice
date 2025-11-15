@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useCallback } from "react";
+import logger from "@/utils/logger";
 import {
   scanWebTarget,
   runWebTest,
   getWebScanReport,
-} from '../../../../api/offensiveServices';
+} from "../../../../api/offensiveServices";
 
 /**
  * useWebAttack - Hook para Web Attack Surface
@@ -21,40 +21,46 @@ export const useWebAttack = () => {
   /**
    * Inicia scan completo de web attack surface
    */
-  const startScan = useCallback(async (url, scanProfile = 'full', authConfig = null) => {
-    setIsScanning(true);
-    setError(null);
+  const startScan = useCallback(
+    async (url, scanProfile = "full", authConfig = null) => {
+      setIsScanning(true);
+      setError(null);
 
-    try {
-      const result = await scanWebTarget(url, scanProfile, authConfig);
+      try {
+        const result = await scanWebTarget(url, scanProfile, authConfig);
 
-      if (result.success) {
-        setCurrentScan(result);
-        setScanResults(result.results || result);
+        if (result.success) {
+          setCurrentScan(result);
+          setScanResults(result.results || result);
 
-        // Adiciona aos scans
-        setScans(prev => [...prev, {
-          scan_id: result.scan_id || Date.now(),
-          url,
-          scan_profile: scanProfile,
-          status: 'completed',
-          started_at: new Date().toISOString(),
-          vulnerabilities_found: result.vulnerabilities?.length || 0,
-        }]);
+          // Adiciona aos scans
+          setScans((prev) => [
+            ...prev,
+            {
+              scan_id: result.scan_id || Date.now(),
+              url,
+              scan_profile: scanProfile,
+              status: "completed",
+              started_at: new Date().toISOString(),
+              vulnerabilities_found: result.vulnerabilities?.length || 0,
+            },
+          ]);
 
-        return { success: true, scanId: result.scan_id };
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+          return { success: true, scanId: result.scan_id };
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error starting web scan:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsScanning(false);
       }
-    } catch (err) {
-      logger.error('Error starting web scan:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsScanning(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Executa teste específico (SQLi, XSS, etc)
@@ -73,7 +79,7 @@ export const useWebAttack = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error running web test:', err);
+      logger.error("Error running web test:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -100,7 +106,7 @@ export const useWebAttack = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error getting scan report:', err);
+      logger.error("Error getting scan report:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

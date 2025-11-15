@@ -11,11 +11,11 @@
  * Boris Cherny Standard - GAP #35 FIX: Standardized polling intervals
  */
 
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { API_ENDPOINTS } from '@/config/api';
-import { queryKeys } from '@/config/queryKeys';
-import { POLLING_INTERVALS } from '@/config/queryClient';
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
+import { queryKeys } from "@/config/queryKeys";
+import { POLLING_INTERVALS } from "@/config/queryClient";
 
 const API_BASE_URL = API_ENDPOINTS.hitl;
 
@@ -32,19 +32,21 @@ const fetchReviewQueue = async (filters = {}) => {
   const params = new URLSearchParams();
 
   if (filters.severity) {
-    params.append('severity', filters.severity);
+    params.append("severity", filters.severity);
   }
   if (filters.patch_strategy) {
-    params.append('patch_strategy', filters.patch_strategy);
+    params.append("patch_strategy", filters.patch_strategy);
   }
   if (filters.wargame_verdict) {
-    params.append('wargame_verdict', filters.wargame_verdict);
+    params.append("wargame_verdict", filters.wargame_verdict);
   }
 
-  params.append('limit', '50');
-  params.append('offset', '0');
+  params.append("limit", "50");
+  params.append("offset", "0");
 
-  const response = await axios.get(`${API_BASE_URL}/hitl/reviews?${params.toString()}`);
+  const response = await axios.get(
+    `${API_BASE_URL}/hitl/reviews?${params.toString()}`,
+  );
   // API returns {reviews: [...], total: N}
   return response.data.reviews || [];
 };

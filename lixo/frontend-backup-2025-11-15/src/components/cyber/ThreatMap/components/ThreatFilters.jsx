@@ -1,32 +1,32 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import styles from './ThreatFilters.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import styles from "./ThreatFilters.module.css";
 
 const SEVERITIES = [
-  { value: 'critical', label: 'Critical', variant: 'critical' },
-  { value: 'high', label: 'High', variant: 'high' },
-  { value: 'medium', label: 'Medium', variant: 'medium' },
-  { value: 'low', label: 'Low', variant: 'low' }
+  { value: "critical", label: "Critical", variant: "critical" },
+  { value: "high", label: "High", variant: "high" },
+  { value: "medium", label: "Medium", variant: "medium" },
+  { value: "low", label: "Low", variant: "low" },
 ];
 
 const THREAT_TYPES = [
-  { value: 'malware', label: 'Malware', icon: '🦠' },
-  { value: 'botnet', label: 'Botnet', icon: '🤖' },
-  { value: 'phishing', label: 'Phishing', icon: '🎣' },
-  { value: 'ddos', label: 'DDoS', icon: '💥' },
-  { value: 'exploit', label: 'Exploit', icon: '⚡' }
+  { value: "malware", label: "Malware", icon: "🦠" },
+  { value: "botnet", label: "Botnet", icon: "🤖" },
+  { value: "phishing", label: "Phishing", icon: "🎣" },
+  { value: "ddos", label: "DDoS", icon: "💥" },
+  { value: "exploit", label: "Exploit", icon: "⚡" },
 ];
 
 export const ThreatFilters = ({ filters, onFiltersChange }) => {
   const toggleFilter = (filterType, value) => {
     const currentFilters = filters[filterType] || [];
     const newFilters = currentFilters.includes(value)
-      ? currentFilters.filter(v => v !== value)
+      ? currentFilters.filter((v) => v !== value)
       : [...currentFilters, value];
 
     onFiltersChange({
       ...filters,
-      [filterType]: newFilters
+      [filterType]: newFilters,
     });
   };
 
@@ -38,15 +38,20 @@ export const ThreatFilters = ({ filters, onFiltersChange }) => {
           <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
           Severidade:
         </label>
-        <div id="severity-filters" className={styles.filterButtons} role="group" aria-label="Severity filters">
-          {SEVERITIES.map(severity => (
+        <div
+          id="severity-filters"
+          className={styles.filterButtons}
+          role="group"
+          aria-label="Severity filters"
+        >
+          {SEVERITIES.map((severity) => (
             <button
               key={severity.value}
               type="button"
               className={`${styles.filterButton} ${
-                filters.severity.includes(severity.value) ? styles.active : ''
+                filters.severity.includes(severity.value) ? styles.active : ""
               }`}
-              onClick={() => toggleFilter('severity', severity.value)}
+              onClick={() => toggleFilter("severity", severity.value)}
             >
               <Badge variant={severity.variant} size="sm">
                 {severity.label}
@@ -62,15 +67,20 @@ export const ThreatFilters = ({ filters, onFiltersChange }) => {
           <i className="fas fa-shield-virus" aria-hidden="true"></i>
           Tipo de Ameaça:
         </label>
-        <div id="threat-type-filters" className={styles.filterButtons} role="group" aria-label="Threat type filters">
-          {THREAT_TYPES.map(type => (
+        <div
+          id="threat-type-filters"
+          className={styles.filterButtons}
+          role="group"
+          aria-label="Threat type filters"
+        >
+          {THREAT_TYPES.map((type) => (
             <button
               key={type.value}
               type="button"
               className={`${styles.filterButton} ${
-                filters.type.includes(type.value) ? styles.active : ''
+                filters.type.includes(type.value) ? styles.active : ""
               }`}
-              onClick={() => toggleFilter('type', type.value)}
+              onClick={() => toggleFilter("type", type.value)}
             >
               <span className={styles.typeIcon}>{type.icon}</span>
               <span>{type.label}</span>

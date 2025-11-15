@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
 import {
   createC2Session,
   listC2Sessions,
   executeC2Command,
   passSession as apiPassSession,
   executeAttackChain,
-} from '../../../../api/offensiveServices';
+} from "../../../../api/offensiveServices";
 
 /**
  * useC2 - Hook para C2 Orchestration
@@ -33,11 +33,14 @@ export const useC2 = () => {
         setSessions(sessionList);
 
         // Separa sessões ativas
-        const active = sessionList.filter(session => session.status === 'active' || session.status === 'connected');
+        const active = sessionList.filter(
+          (session) =>
+            session.status === "active" || session.status === "connected",
+        );
         setActiveSessions(active);
       }
     } catch (err) {
-      logger.error('Error loading sessions:', err);
+      logger.error("Error loading sessions:", err);
       setError(err.message);
     }
   }, []);
@@ -61,44 +64,52 @@ export const useC2 = () => {
   /**
    * Cria nova sessão C2
    */
-  const createSession = useCallback(async (framework, targetHost, payload, config = {}) => {
-    setIsExecuting(true);
-    setError(null);
+  const createSession = useCallback(
+    async (framework, targetHost, payload, config = {}) => {
+      setIsExecuting(true);
+      setError(null);
 
-    try {
-      const result = await createC2Session(framework, targetHost, payload, config);
-
-      if (result.success) {
-        // Adiciona nova sessão
-        const newSession = {
-          session_id: result.session_id || Date.now(),
+      try {
+        const result = await createC2Session(
           framework,
-          target_host: targetHost,
+          targetHost,
           payload,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          ...result,
-        };
+          config,
+        );
 
-        setSessions(prev => [...prev, newSession]);
-        setActiveSessions(prev => [...prev, newSession]);
+        if (result.success) {
+          // Adiciona nova sessão
+          const newSession = {
+            session_id: result.session_id || Date.now(),
+            framework,
+            target_host: targetHost,
+            payload,
+            status: "active",
+            created_at: new Date().toISOString(),
+            ...result,
+          };
 
-        // Recarrega lista
-        await loadSessions();
+          setSessions((prev) => [...prev, newSession]);
+          setActiveSessions((prev) => [...prev, newSession]);
 
-        return { success: true, sessionId: result.session_id };
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+          // Recarrega lista
+          await loadSessions();
+
+          return { success: true, sessionId: result.session_id };
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error creating session:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsExecuting(false);
       }
-    } catch (err) {
-      logger.error('Error creating session:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsExecuting(false);
-    }
-  }, [loadSessions]);
+    },
+    [loadSessions],
+  );
 
   /**
    * Executa comando em sessão
@@ -112,13 +123,16 @@ export const useC2 = () => {
 
       if (result.success) {
         // Adiciona ao histórico
-        setCommandHistory(prev => [...prev, {
-          session_id: sessionId,
-          command,
-          args,
-          output: result.output || result.data,
-          timestamp: new Date().toISOString(),
-        }]);
+        setCommandHistory((prev) => [
+          ...prev,
+          {
+            session_id: sessionId,
+            command,
+            args,
+            output: result.output || result.data,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
 
         return result;
       } else {
@@ -126,7 +140,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error executing command:', err);
+      logger.error("Error executing command:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {
@@ -137,38 +151,41 @@ export const useC2 = () => {
   /**
    * Passa sessão entre frameworks
    */
-  const passSession = useCallback(async (sessionId, targetFramework) => {
-    setIsExecuting(true);
-    setError(null);
+  const passSession = useCallback(
+    async (sessionId, targetFramework) => {
+      setIsExecuting(true);
+      setError(null);
 
-    try {
-      const result = await apiPassSession(sessionId, targetFramework);
+      try {
+        const result = await apiPassSession(sessionId, targetFramework);
 
-      if (result.success) {
-        // Atualiza sessão
-        setSessions(prev =>
-          prev.map(session =>
-            session.session_id === sessionId
-              ? { ...session, framework: targetFramework }
-              : session
-          )
-        );
+        if (result.success) {
+          // Atualiza sessão
+          setSessions((prev) =>
+            prev.map((session) =>
+              session.session_id === sessionId
+                ? { ...session, framework: targetFramework }
+                : session,
+            ),
+          );
 
-        await loadSessions();
+          await loadSessions();
 
-        return result;
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+          return result;
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error passing session:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsExecuting(false);
       }
-    } catch (err) {
-      logger.error('Error passing session:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsExecuting(false);
-    }
-  }, [loadSessions]);
+    },
+    [loadSessions],
+  );
 
   /**
    * Executa attack chain
@@ -182,12 +199,15 @@ export const useC2 = () => {
 
       if (result.success) {
         // Adiciona aos chains executados
-        setAttackChains(prev => [...prev, {
-          ...chainConfig,
-          execution_id: result.execution_id || Date.now(),
-          status: 'running',
-          started_at: new Date().toISOString(),
-        }]);
+        setAttackChains((prev) => [
+          ...prev,
+          {
+            ...chainConfig,
+            execution_id: result.execution_id || Date.now(),
+            status: "running",
+            started_at: new Date().toISOString(),
+          },
+        ]);
 
         return result;
       } else {
@@ -195,7 +215,7 @@ export const useC2 = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error executing attack chain:', err);
+      logger.error("Error executing attack chain:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

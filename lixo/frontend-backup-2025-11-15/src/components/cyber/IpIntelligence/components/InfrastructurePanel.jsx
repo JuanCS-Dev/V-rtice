@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './InfrastructurePanel.module.css';
+import React from "react";
+import styles from "./InfrastructurePanel.module.css";
 
 export const InfrastructurePanel = ({ data }) => {
   return (

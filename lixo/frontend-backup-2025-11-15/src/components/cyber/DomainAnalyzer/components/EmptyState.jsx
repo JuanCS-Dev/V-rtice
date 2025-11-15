@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './EmptyState.module.css';
+import React from "react";
+import styles from "./EmptyState.module.css";
 
 export const EmptyState = () => {
   return (

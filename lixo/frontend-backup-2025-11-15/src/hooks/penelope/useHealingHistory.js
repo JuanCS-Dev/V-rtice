@@ -12,9 +12,9 @@
  * @returns {Object} { history, isLoading, error, refetch, stats }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { penelopeService } from '../../services/penelope/penelopeService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { penelopeService } from "../../services/penelope/penelopeService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 60000; // 60s (less frequent than health checks)
 const DEFAULT_LIMIT = 50;
@@ -40,7 +40,7 @@ export const useHealingHistory = (options = {}) => {
       setIsLoading(false);
       logger.debug(`[useHealingHistory] Fetched ${response.length} events`);
     } catch (err) {
-      logger.error('[useHealingHistory] Failed to fetch history:', err);
+      logger.error("[useHealingHistory] Failed to fetch history:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -59,21 +59,28 @@ export const useHealingHistory = (options = {}) => {
   }, [enabled, pollingInterval, fetchHistory]);
 
   // Calculate statistics from history
-  const stats = history.length > 0 ? {
-    total: history.length,
-    successful: history.filter(e => e.outcome === 'success').length,
-    failed: history.filter(e => e.outcome === 'failed').length,
-    escalated: history.filter(e => e.outcome === 'escalated').length,
-    successRate: Math.round(
-      (history.filter(e => e.outcome === 'success').length / history.length) * 100
-    ),
-    avgPatchSize: Math.round(
-      history.reduce((sum, e) => sum + (e.patch_size_lines || 0), 0) / history.length
-    ),
-    avgMansidao: (
-      history.reduce((sum, e) => sum + (e.mansidao_score || 0), 0) / history.length
-    ).toFixed(2),
-  } : null;
+  const stats =
+    history.length > 0
+      ? {
+          total: history.length,
+          successful: history.filter((e) => e.outcome === "success").length,
+          failed: history.filter((e) => e.outcome === "failed").length,
+          escalated: history.filter((e) => e.outcome === "escalated").length,
+          successRate: Math.round(
+            (history.filter((e) => e.outcome === "success").length /
+              history.length) *
+              100,
+          ),
+          avgPatchSize: Math.round(
+            history.reduce((sum, e) => sum + (e.patch_size_lines || 0), 0) /
+              history.length,
+          ),
+          avgMansidao: (
+            history.reduce((sum, e) => sum + (e.mansidao_score || 0), 0) /
+            history.length
+          ).toFixed(2),
+        }
+      : null;
 
   return {
     history,

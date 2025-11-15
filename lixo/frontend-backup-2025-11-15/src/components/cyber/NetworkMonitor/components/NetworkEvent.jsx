@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './NetworkEventStream.module.css';
+import React from "react";
+import styles from "./NetworkEventStream.module.css";
 
 /**
  * A memoized component to display a single network event.
@@ -7,13 +7,17 @@ import styles from './NetworkEventStream.module.css';
  */
 const NetworkEvent = ({ event, getSeverityClass }) => {
   return (
-    <li className={`${styles.eventCard} ${styles[getSeverityClass(event.severity)]}`}>
+    <li
+      className={`${styles.eventCard} ${styles[getSeverityClass(event.severity)]}`}
+    >
       <div className={styles.eventHeader}>
         <div className={styles.eventTypeTimestamp}>
           <span className={styles.eventType}>{event.type}</span>
           <span className={styles.eventTimestamp}>{event.timestamp}</span>
         </div>
-        <span className={`${styles.eventSeverity} ${styles[getSeverityClass(event.severity)]}`}>
+        <span
+          className={`${styles.eventSeverity} ${styles[getSeverityClass(event.severity)]}`}
+        >
           {event.severity}
         </span>
       </div>

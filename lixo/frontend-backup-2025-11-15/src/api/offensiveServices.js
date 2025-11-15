@@ -1,5 +1,5 @@
-import logger from '@/utils/logger';
-import { ServiceEndpoints } from '../config/endpoints';
+import logger from "@/utils/logger";
+import { ServiceEndpoints } from "../config/endpoints";
 
 /**
  * Offensive Security Arsenal - API Client
@@ -39,11 +39,15 @@ const ENDPOINTS = {
 /**
  * Executa varredura completa de rede (Masscan + Nmap + Service Detection)
  */
-export const scanNetwork = async (target, scanType = 'quick', ports = '1-1000') => {
+export const scanNetwork = async (
+  target,
+  scanType = "quick",
+  ports = "1-1000",
+) => {
   try {
     const response = await fetch(`${ENDPOINTS.NETWORK_RECON}/api/scan`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         target,
         scan_type: scanType,
@@ -51,10 +55,11 @@ export const scanNetwork = async (target, scanType = 'quick', ports = '1-1000') 
       }),
     });
 
-    if (!response.ok) throw new Error(`Network scan failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Network scan failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in network scan:', error);
+    logger.error("Error in network scan:", error);
     return { success: false, error: error.message };
   }
 };
@@ -64,11 +69,14 @@ export const scanNetwork = async (target, scanType = 'quick', ports = '1-1000') 
  */
 export const getScanStatus = async (scanId) => {
   try {
-    const response = await fetch(`${ENDPOINTS.NETWORK_RECON}/api/scan/${scanId}/status`);
-    if (!response.ok) throw new Error(`Failed to get scan status: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.NETWORK_RECON}/api/scan/${scanId}/status`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to get scan status: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting scan status:', error);
+    logger.error("Error getting scan status:", error);
     return { success: false, error: error.message };
   }
 };
@@ -78,11 +86,14 @@ export const getScanStatus = async (scanId) => {
  */
 export const listScans = async (limit = 50) => {
   try {
-    const response = await fetch(`${ENDPOINTS.NETWORK_RECON}/api/scans?limit=${limit}`);
-    if (!response.ok) throw new Error(`Failed to list scans: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.NETWORK_RECON}/api/scans?limit=${limit}`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to list scans: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error listing scans:', error);
+    logger.error("Error listing scans:", error);
     return { success: false, error: error.message };
   }
 };
@@ -93,15 +104,16 @@ export const listScans = async (limit = 50) => {
 export const discoverHosts = async (network) => {
   try {
     const response = await fetch(`${ENDPOINTS.NETWORK_RECON}/api/discover`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ network }),
     });
 
-    if (!response.ok) throw new Error(`Host discovery failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Host discovery failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in host discovery:', error);
+    logger.error("Error in host discovery:", error);
     return { success: false, error: error.message };
   }
 };
@@ -121,7 +133,7 @@ export const searchCVE = async (cveId) => {
     if (!response.ok) throw new Error(`CVE search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error searching CVE:', error);
+    logger.error("Error searching CVE:", error);
     return { success: false, error: error.message };
   }
 };
@@ -136,11 +148,14 @@ export const searchVulnerabilities = async (query, filters = {}) => {
       ...filters,
     });
 
-    const response = await fetch(`${ENDPOINTS.VULN_INTEL}/api/search?${params}`);
-    if (!response.ok) throw new Error(`Vulnerability search failed: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.VULN_INTEL}/api/search?${params}`,
+    );
+    if (!response.ok)
+      throw new Error(`Vulnerability search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error searching vulnerabilities:', error);
+    logger.error("Error searching vulnerabilities:", error);
     return { success: false, error: error.message };
   }
 };
@@ -150,11 +165,14 @@ export const searchVulnerabilities = async (query, filters = {}) => {
  */
 export const getExploits = async (cveId) => {
   try {
-    const response = await fetch(`${ENDPOINTS.VULN_INTEL}/api/cve/${cveId}/exploits`);
-    if (!response.ok) throw new Error(`Exploit search failed: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.VULN_INTEL}/api/cve/${cveId}/exploits`,
+    );
+    if (!response.ok)
+      throw new Error(`Exploit search failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting exploits:', error);
+    logger.error("Error getting exploits:", error);
     return { success: false, error: error.message };
   }
 };
@@ -164,13 +182,16 @@ export const getExploits = async (cveId) => {
  */
 export const correlateWithScan = async (scanId) => {
   try {
-    const response = await fetch(`${ENDPOINTS.VULN_INTEL}/api/correlate/${scanId}`, {
-      method: 'POST',
-    });
+    const response = await fetch(
+      `${ENDPOINTS.VULN_INTEL}/api/correlate/${scanId}`,
+      {
+        method: "POST",
+      },
+    );
     if (!response.ok) throw new Error(`Correlation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error correlating vulnerabilities:', error);
+    logger.error("Error correlating vulnerabilities:", error);
     return { success: false, error: error.message };
   }
 };
@@ -184,11 +205,15 @@ export const correlateWithScan = async (scanId) => {
 /**
  * Escaneia superfície de ataque web (OWASP Top 10, SQLi, XSS, etc)
  */
-export const scanWebTarget = async (url, scanProfile = 'full', authConfig = null) => {
+export const scanWebTarget = async (
+  url,
+  scanProfile = "full",
+  authConfig = null,
+) => {
   try {
     const response = await fetch(`${ENDPOINTS.WEB_ATTACK}/api/scan`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         url,
         scan_profile: scanProfile,
@@ -199,7 +224,7 @@ export const scanWebTarget = async (url, scanProfile = 'full', authConfig = null
     if (!response.ok) throw new Error(`Web scan failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in web scan:', error);
+    logger.error("Error in web scan:", error);
     return { success: false, error: error.message };
   }
 };
@@ -209,19 +234,22 @@ export const scanWebTarget = async (url, scanProfile = 'full', authConfig = null
  */
 export const runWebTest = async (url, testType, params = {}) => {
   try {
-    const response = await fetch(`${ENDPOINTS.WEB_ATTACK}/api/test/${testType}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url,
-        ...params,
-      }),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.WEB_ATTACK}/api/test/${testType}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          ...params,
+        }),
+      },
+    );
 
     if (!response.ok) throw new Error(`Web test failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error running web test:', error);
+    logger.error("Error running web test:", error);
     return { success: false, error: error.message };
   }
 };
@@ -231,11 +259,14 @@ export const runWebTest = async (url, testType, params = {}) => {
  */
 export const getWebScanReport = async (scanId) => {
   try {
-    const response = await fetch(`${ENDPOINTS.WEB_ATTACK}/api/scan/${scanId}/report`);
-    if (!response.ok) throw new Error(`Failed to get report: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.WEB_ATTACK}/api/scan/${scanId}/report`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to get report: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting web scan report:', error);
+    logger.error("Error getting web scan report:", error);
     return { success: false, error: error.message };
   }
 };
@@ -249,23 +280,32 @@ export const getWebScanReport = async (scanId) => {
 /**
  * Cria sessão C2 (Cobalt Strike ou Metasploit)
  */
-export const createC2Session = async (framework, targetHost, payload, config = {}) => {
+export const createC2Session = async (
+  framework,
+  targetHost,
+  payload,
+  config = {},
+) => {
   try {
-    const response = await fetch(`${ENDPOINTS.C2_ORCHESTRATION}/api/session/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        framework, // 'cobalt_strike' | 'metasploit'
-        target_host: targetHost,
-        payload,
-        config,
-      }),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.C2_ORCHESTRATION}/api/session/create`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          framework, // 'cobalt_strike' | 'metasploit'
+          target_host: targetHost,
+          payload,
+          config,
+        }),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Session creation failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Session creation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error creating C2 session:', error);
+    logger.error("Error creating C2 session:", error);
     return { success: false, error: error.message };
   }
 };
@@ -275,12 +315,15 @@ export const createC2Session = async (framework, targetHost, payload, config = {
  */
 export const listC2Sessions = async (framework = null) => {
   try {
-    const params = framework ? `?framework=${framework}` : '';
-    const response = await fetch(`${ENDPOINTS.C2_ORCHESTRATION}/api/sessions${params}`);
-    if (!response.ok) throw new Error(`Failed to list sessions: ${response.status}`);
+    const params = framework ? `?framework=${framework}` : "";
+    const response = await fetch(
+      `${ENDPOINTS.C2_ORCHESTRATION}/api/sessions${params}`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to list sessions: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error listing C2 sessions:', error);
+    logger.error("Error listing C2 sessions:", error);
     return { success: false, error: error.message };
   }
 };
@@ -290,19 +333,23 @@ export const listC2Sessions = async (framework = null) => {
  */
 export const executeC2Command = async (sessionId, command, args = []) => {
   try {
-    const response = await fetch(`${ENDPOINTS.C2_ORCHESTRATION}/api/session/${sessionId}/execute`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        command,
-        args,
-      }),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.C2_ORCHESTRATION}/api/session/${sessionId}/execute`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          command,
+          args,
+        }),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Command execution failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Command execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error executing C2 command:', error);
+    logger.error("Error executing C2 command:", error);
     return { success: false, error: error.message };
   }
 };
@@ -312,18 +359,22 @@ export const executeC2Command = async (sessionId, command, args = []) => {
  */
 export const passSession = async (sessionId, targetFramework) => {
   try {
-    const response = await fetch(`${ENDPOINTS.C2_ORCHESTRATION}/api/session/${sessionId}/pass`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        target_framework: targetFramework,
-      }),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.C2_ORCHESTRATION}/api/session/${sessionId}/pass`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_framework: targetFramework,
+        }),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Session passing failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Session passing failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error passing session:', error);
+    logger.error("Error passing session:", error);
     return { success: false, error: error.message };
   }
 };
@@ -333,16 +384,20 @@ export const passSession = async (sessionId, targetFramework) => {
  */
 export const executeAttackChain = async (chainConfig) => {
   try {
-    const response = await fetch(`${ENDPOINTS.C2_ORCHESTRATION}/api/attack-chain/execute`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(chainConfig),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.C2_ORCHESTRATION}/api/attack-chain/execute`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(chainConfig),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Attack chain execution failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Attack chain execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error executing attack chain:', error);
+    logger.error("Error executing attack chain:", error);
     return { success: false, error: error.message };
   }
 };
@@ -356,11 +411,16 @@ export const executeAttackChain = async (chainConfig) => {
 /**
  * Executa simulação de técnica MITRE ATT&CK
  */
-export const runAttackSimulation = async (techniqueId, targetHost, platform, params = {}) => {
+export const runAttackSimulation = async (
+  techniqueId,
+  targetHost,
+  platform,
+  params = {},
+) => {
   try {
     const response = await fetch(`${ENDPOINTS.BAS}/api/simulate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         technique_id: techniqueId,
         target_host: targetHost,
@@ -372,7 +432,7 @@ export const runAttackSimulation = async (techniqueId, targetHost, platform, par
     if (!response.ok) throw new Error(`Simulation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error running attack simulation:', error);
+    logger.error("Error running attack simulation:", error);
     return { success: false, error: error.message };
   }
 };
@@ -383,14 +443,15 @@ export const runAttackSimulation = async (techniqueId, targetHost, platform, par
 export const listAttackTechniques = async (tactic = null, platform = null) => {
   try {
     const params = new URLSearchParams();
-    if (tactic) params.append('tactic', tactic);
-    if (platform) params.append('platform', platform);
+    if (tactic) params.append("tactic", tactic);
+    if (platform) params.append("platform", platform);
 
     const response = await fetch(`${ENDPOINTS.BAS}/api/techniques?${params}`);
-    if (!response.ok) throw new Error(`Failed to list techniques: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to list techniques: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error listing attack techniques:', error);
+    logger.error("Error listing attack techniques:", error);
     return { success: false, error: error.message };
   }
 };
@@ -401,18 +462,19 @@ export const listAttackTechniques = async (tactic = null, platform = null) => {
 export const validatePurpleTeam = async (simulationId, telemetrySources) => {
   try {
     const response = await fetch(`${ENDPOINTS.BAS}/api/purple-team/validate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         simulation_id: simulationId,
         telemetry_sources: telemetrySources,
       }),
     });
 
-    if (!response.ok) throw new Error(`Purple team validation failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Purple team validation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in purple team validation:', error);
+    logger.error("Error in purple team validation:", error);
     return { success: false, error: error.message };
   }
 };
@@ -422,12 +484,13 @@ export const validatePurpleTeam = async (simulationId, telemetrySources) => {
  */
 export const getAttackCoverage = async (organizationId = null) => {
   try {
-    const params = organizationId ? `?org_id=${organizationId}` : '';
+    const params = organizationId ? `?org_id=${organizationId}` : "";
     const response = await fetch(`${ENDPOINTS.BAS}/api/coverage${params}`);
-    if (!response.ok) throw new Error(`Failed to get coverage: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to get coverage: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting attack coverage:', error);
+    logger.error("Error getting attack coverage:", error);
     return { success: false, error: error.message };
   }
 };
@@ -443,16 +506,20 @@ export const getAttackCoverage = async (organizationId = null) => {
  */
 export const createWorkflow = async (workflowConfig) => {
   try {
-    const response = await fetch(`${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(workflowConfig),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/create`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(workflowConfig),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Workflow creation failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Workflow creation failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error creating workflow:', error);
+    logger.error("Error creating workflow:", error);
     return { success: false, error: error.message };
   }
 };
@@ -462,16 +529,20 @@ export const createWorkflow = async (workflowConfig) => {
  */
 export const executeWorkflow = async (workflowId, context = {}) => {
   try {
-    const response = await fetch(`${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/${workflowId}/execute`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ context }),
-    });
+    const response = await fetch(
+      `${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/${workflowId}/execute`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ context }),
+      },
+    );
 
-    if (!response.ok) throw new Error(`Workflow execution failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Workflow execution failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error executing workflow:', error);
+    logger.error("Error executing workflow:", error);
     return { success: false, error: error.message };
   }
 };
@@ -481,11 +552,14 @@ export const executeWorkflow = async (workflowId, context = {}) => {
  */
 export const getWorkflowStatus = async (executionId) => {
   try {
-    const response = await fetch(`${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/execution/${executionId}`);
-    if (!response.ok) throw new Error(`Failed to get workflow status: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflow/execution/${executionId}`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to get workflow status: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting workflow status:', error);
+    logger.error("Error getting workflow status:", error);
     return { success: false, error: error.message };
   }
 };
@@ -495,11 +569,14 @@ export const getWorkflowStatus = async (executionId) => {
  */
 export const listWorkflows = async () => {
   try {
-    const response = await fetch(`${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflows`);
-    if (!response.ok) throw new Error(`Failed to list workflows: ${response.status}`);
+    const response = await fetch(
+      `${ENDPOINTS.OFFENSIVE_GATEWAY}/api/workflows`,
+    );
+    if (!response.ok)
+      throw new Error(`Failed to list workflows: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error listing workflows:', error);
+    logger.error("Error listing workflows:", error);
     return { success: false, error: error.message };
   }
 };
@@ -526,7 +603,7 @@ export const checkOffensiveServicesHealth = async () => {
   const checkService = async (name, endpoint) => {
     try {
       const response = await fetch(`${endpoint}/health`, {
-        method: 'GET',
+        method: "GET",
         signal: AbortSignal.timeout(3000),
       });
       services[name] = response.ok;
@@ -537,12 +614,12 @@ export const checkOffensiveServicesHealth = async () => {
   };
 
   await Promise.all([
-    checkService('networkRecon', ENDPOINTS.NETWORK_RECON),
-    checkService('vulnIntel', ENDPOINTS.VULN_INTEL),
-    checkService('webAttack', ENDPOINTS.WEB_ATTACK),
-    checkService('c2Orchestration', ENDPOINTS.C2_ORCHESTRATION),
-    checkService('bas', ENDPOINTS.BAS),
-    checkService('offensiveGateway', ENDPOINTS.OFFENSIVE_GATEWAY),
+    checkService("networkRecon", ENDPOINTS.NETWORK_RECON),
+    checkService("vulnIntel", ENDPOINTS.VULN_INTEL),
+    checkService("webAttack", ENDPOINTS.WEB_ATTACK),
+    checkService("c2Orchestration", ENDPOINTS.C2_ORCHESTRATION),
+    checkService("bas", ENDPOINTS.BAS),
+    checkService("offensiveGateway", ENDPOINTS.OFFENSIVE_GATEWAY),
   ]);
 
   return services;

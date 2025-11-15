@@ -7,14 +7,17 @@
  * Following Boris Cherny's principle: "State should survive failures"
  */
 
-import { get, set, del } from 'idb-keyval';
-import type { PersistedClient, Persister } from '@tanstack/react-query-persist-client';
+import { get, set, del } from "idb-keyval";
+import type {
+  PersistedClient,
+  Persister,
+} from "@tanstack/react-query-persist-client";
 
 // ============================================================================
 // IndexedDB Configuration
 // ============================================================================
 
-const IDB_KEY = 'VERTICE_REACT_QUERY_OFFLINE_CACHE';
+const IDB_KEY = "VERTICE_REACT_QUERY_OFFLINE_CACHE";
 const MAX_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 /**
@@ -48,9 +51,9 @@ export function createIDBPersister(): Persister {
     persistClient: async (client: PersistedClient) => {
       try {
         await set(IDB_KEY, client);
-        console.info('[QueryPersister] State persisted to IndexedDB');
+        console.info("[QueryPersister] State persisted to IndexedDB");
       } catch (error) {
-        console.error('[QueryPersister] Failed to persist state:', error);
+        console.error("[QueryPersister] Failed to persist state:", error);
         // Silently fail - persistence is optional enhancement
       }
     },
@@ -60,14 +63,14 @@ export function createIDBPersister(): Persister {
         const client = await get<PersistedClient>(IDB_KEY);
 
         if (!client) {
-          console.info('[QueryPersister] No persisted state found');
+          console.info("[QueryPersister] No persisted state found");
           return undefined;
         }
 
-        console.info('[QueryPersister] Restored state from IndexedDB');
+        console.info("[QueryPersister] Restored state from IndexedDB");
         return client;
       } catch (error) {
-        console.error('[QueryPersister] Failed to restore state:', error);
+        console.error("[QueryPersister] Failed to restore state:", error);
         return undefined;
       }
     },
@@ -75,9 +78,9 @@ export function createIDBPersister(): Persister {
     removeClient: async () => {
       try {
         await del(IDB_KEY);
-        console.info('[QueryPersister] Cleared persisted state');
+        console.info("[QueryPersister] Cleared persisted state");
       } catch (error) {
-        console.error('[QueryPersister] Failed to clear state:', error);
+        console.error("[QueryPersister] Failed to clear state:", error);
       }
     },
   };
@@ -92,7 +95,7 @@ export function createIDBPersister(): Persister {
  */
 export const persistOptions = {
   maxAge: MAX_AGE,
-  buster: '', // Change this to invalidate all cached data
+  buster: "", // Change this to invalidate all cached data
 };
 
 /**
@@ -102,7 +105,7 @@ export const persistOptions = {
  */
 export function isIndexedDBSupported(): boolean {
   try {
-    return typeof window !== 'undefined' && 'indexedDB' in window;
+    return typeof window !== "undefined" && "indexedDB" in window;
   } catch {
     return false;
   }
@@ -125,8 +128,8 @@ export function isIndexedDBSupported(): boolean {
 export async function clearPersistedQueries(): Promise<void> {
   try {
     await del(IDB_KEY);
-    console.info('[QueryPersister] Cleared all persisted queries');
+    console.info("[QueryPersister] Cleared all persisted queries");
   } catch (error) {
-    console.error('[QueryPersister] Failed to clear queries:', error);
+    console.error("[QueryPersister] Failed to clear queries:", error);
   }
 }

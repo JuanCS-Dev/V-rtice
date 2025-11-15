@@ -1,7 +1,7 @@
 /**
  * Animation & Transition Design Tokens
  * MAXIMUS Vértice - Frontend Phase 3
- * 
+ *
  * Philosophy: Motion with meaning. Every animation serves purpose.
  * - Feedback: User knows system responded
  * - Hierarchy: Important changes are emphasized
@@ -12,87 +12,88 @@
   /* ========================================
      DURATIONS
      ======================================== */
-  
+
   /* Instant - imperceptible, for state toggles */
   --duration-instant: 50ms;
-  
+
   /* Fast - UI feedback, hover states */
   --duration-fast: 150ms;
-  
+
   /* Normal - most transitions */
   --duration-normal: 250ms;
-  
+
   /* Moderate - component entrances */
   --duration-moderate: 350ms;
-  
+
   /* Slow - page transitions, modals */
   --duration-slow: 500ms;
-  
+
   /* Slower - emphasis, storytelling */
   --duration-slower: 700ms;
-  
+
   /* Slowest - hero animations, rare */
   --duration-slowest: 1000ms;
 
   /* ========================================
      EASING CURVES
      ======================================== */
-  
+
   /* Standard easing - general purpose */
-  --ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
-  
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* Deceleration - entering elements */
-  --ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
-  
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+
   /* Acceleration - exiting elements */
-  --ease-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
-  
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
   /* Sharp - quick state changes */
-  --ease-sharp: cubic-bezier(0.4, 0.0, 0.6, 1);
-  
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+
   /* Smooth - organic feel */
   --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
-  
+
   /* Bounce - playful feedback */
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  
+
   /* Elastic - attention-grabbing */
   --ease-elastic: cubic-bezier(0.68, -0.3, 0.265, 1.3);
 
   /* ========================================
      PRESET TRANSITIONS
      ======================================== */
-  
+
   /* Quick UI feedback */
   --transition-fast: all var(--duration-fast) var(--ease-standard);
-  
+
   /* Standard interactive elements */
   --transition-base: all var(--duration-normal) var(--ease-standard);
-  
+
   /* Component entrances */
   --transition-enter: all var(--duration-moderate) var(--ease-decelerate);
-  
+
   /* Component exits */
   --transition-exit: all var(--duration-moderate) var(--ease-accelerate);
-  
+
   /* Color transitions (slightly faster) */
-  --transition-color: color var(--duration-fast) var(--ease-standard),
-                      background-color var(--duration-fast) var(--ease-standard),
-                      border-color var(--duration-fast) var(--ease-standard);
-  
+  --transition-color:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+
   /* Transform transitions (GPU optimized) */
   --transition-transform: transform var(--duration-normal) var(--ease-standard);
-  
+
   /* Opacity transitions */
   --transition-opacity: opacity var(--duration-normal) var(--ease-standard);
-  
+
   /* Shadow transitions (expensive, use sparingly) */
   --transition-shadow: box-shadow var(--duration-normal) var(--ease-standard);
 
   /* ========================================
      ANIMATION DELAYS (Staggered Entrances)
      ======================================== */
-  
+
   --delay-none: 0ms;
   --delay-xs: 50ms;
   --delay-sm: 100ms;
@@ -135,7 +136,7 @@
     --duration-slow: 1ms;
     --duration-slower: 1ms;
     --duration-slowest: 1ms;
-    
+
     /* Disable all animations */
     --ease-standard: linear;
     --ease-decelerate: linear;
@@ -143,7 +144,7 @@
     --ease-bounce: linear;
     --ease-elastic: linear;
   }
-  
+
   *,
   *::before,
   *::after {
@@ -168,9 +169,23 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 @keyframes bounce-in {
@@ -249,7 +264,8 @@
 }
 
 @keyframes error-x {
-  0%, 50% {
+  0%,
+  50% {
     transform: scale(0) rotate(0deg);
     opacity: 0;
   }
@@ -334,9 +350,21 @@
 }
 
 /* Stagger delays for list items */
-.stagger-1 { animation-delay: var(--delay-xs); }
-.stagger-2 { animation-delay: calc(var(--delay-xs) * 2); }
-.stagger-3 { animation-delay: calc(var(--delay-xs) * 3); }
-.stagger-4 { animation-delay: calc(var(--delay-xs) * 4); }
-.stagger-5 { animation-delay: calc(var(--delay-xs) * 5); }
-.stagger-6 { animation-delay: calc(var(--delay-xs) * 6); }
+.stagger-1 {
+  animation-delay: var(--delay-xs);
+}
+.stagger-2 {
+  animation-delay: calc(var(--delay-xs) * 2);
+}
+.stagger-3 {
+  animation-delay: calc(var(--delay-xs) * 3);
+}
+.stagger-4 {
+  animation-delay: calc(var(--delay-xs) * 4);
+}
+.stagger-5 {
+  animation-delay: calc(var(--delay-xs) * 5);
+}
+.stagger-6 {
+  animation-delay: calc(var(--delay-xs) * 6);
+}

@@ -18,10 +18,10 @@ All API requests have automatic timeout protection to prevent hanging requests.
 **30 seconds** - Production-safe default for all requests.
 
 ```javascript
-import { apiClient, DEFAULT_TIMEOUT } from './api/client';
+import { apiClient, DEFAULT_TIMEOUT } from "./api/client";
 
 // Uses default 30s timeout
-const data = await apiClient.get('/api/data');
+const data = await apiClient.get("/api/data");
 ```
 
 ### Custom Timeout
@@ -30,23 +30,23 @@ Override timeout for specific operations:
 
 ```javascript
 // Custom timeout for long-running operations
-const result = await apiClient.post('/api/malware/analyze', payload, {
-  timeout: 120000  // 120s (2 minutes)
+const result = await apiClient.post("/api/malware/analyze", payload, {
+  timeout: 120000, // 120s (2 minutes)
 });
 
 // Fast timeout for health checks
-const health = await apiClient.get('/api/health', {
-  timeout: 3000  // 3s
+const health = await apiClient.get("/api/health", {
+  timeout: 3000, // 3s
 });
 ```
 
 ### Timeout Constants
 
 ```javascript
-import { DEFAULT_TIMEOUT, HEALTH_CHECK_TIMEOUT } from './api/client';
+import { DEFAULT_TIMEOUT, HEALTH_CHECK_TIMEOUT } from "./api/client";
 
-console.log(DEFAULT_TIMEOUT);       // 30000 (30s)
-console.log(HEALTH_CHECK_TIMEOUT);  // 3000 (3s)
+console.log(DEFAULT_TIMEOUT); // 30000 (30s)
+console.log(HEALTH_CHECK_TIMEOUT); // 3000 (3s)
 ```
 
 ### Timeout Error Handling
@@ -55,10 +55,10 @@ When a timeout occurs, the request is aborted and a clear error is thrown:
 
 ```javascript
 try {
-  const data = await apiClient.get('/slow-endpoint');
+  const data = await apiClient.get("/slow-endpoint");
 } catch (error) {
-  if (error.message.includes('timeout')) {
-    console.error('Request timed out after 30s');
+  if (error.message.includes("timeout")) {
+    console.error("Request timed out after 30s");
     // Handle timeout gracefully
   }
 }
@@ -70,27 +70,27 @@ try {
 
 ```javascript
 // Simple GET
-const users = await apiClient.get('/api/users');
+const users = await apiClient.get("/api/users");
 
 // With query parameters
-const filtered = await apiClient.get('/api/users?role=admin');
+const filtered = await apiClient.get("/api/users?role=admin");
 
 // With custom timeout
-const data = await apiClient.get('/api/data', { timeout: 60000 });
+const data = await apiClient.get("/api/data", { timeout: 60000 });
 ```
 
 ### POST Requests
 
 ```javascript
 // POST with data
-const result = await apiClient.post('/api/scans', {
-  target: '192.168.1.1',
-  type: 'vulnerability'
+const result = await apiClient.post("/api/scans", {
+  target: "192.168.1.1",
+  type: "vulnerability",
 });
 
 // POST with custom timeout
-const analysis = await apiClient.post('/api/analyze', payload, {
-  timeout: 180000  // 3 minutes
+const analysis = await apiClient.post("/api/analyze", payload, {
+  timeout: 180000, // 3 minutes
 });
 ```
 
@@ -98,10 +98,10 @@ const analysis = await apiClient.post('/api/analyze', payload, {
 
 ```javascript
 // Update resource
-await apiClient.put('/api/users/123', { name: 'Updated' });
+await apiClient.put("/api/users/123", { name: "Updated" });
 
 // Delete resource
-await apiClient.delete('/api/users/123');
+await apiClient.delete("/api/users/123");
 ```
 
 ## Direct Client
@@ -109,16 +109,16 @@ await apiClient.delete('/api/users/123');
 For direct service-to-service communication (bypassing API Gateway):
 
 ```javascript
-import { directClient } from './api/client';
+import { directClient } from "./api/client";
 
 const result = await directClient.request(
-  'http://osint-service:8003',
-  '/api/search',
+  "http://osint-service:8003",
+  "/api/search",
   {
-    method: 'POST',
-    body: JSON.stringify({ query: 'example.com' }),
-    timeout: 60000  // Custom timeout supported
-  }
+    method: "POST",
+    body: JSON.stringify({ query: "example.com" }),
+    timeout: 60000, // Custom timeout supported
+  },
 );
 ```
 
@@ -133,10 +133,10 @@ const result = await directClient.request(
 ### Custom Errors
 
 ```javascript
-import { UnauthorizedError, ForbiddenError } from './api/client';
+import { UnauthorizedError, ForbiddenError } from "./api/client";
 
 try {
-  await apiClient.post('/api/admin/users', data);
+  await apiClient.post("/api/admin/users", data);
 } catch (error) {
   if (error instanceof UnauthorizedError) {
     // Handle session expiry
@@ -162,9 +162,9 @@ try {
 ## WebSocket Support
 
 ```javascript
-import { getWebSocketUrl } from './api/client';
+import { getWebSocketUrl } from "./api/client";
 
-const wsUrl = getWebSocketUrl('/ws/scans');
+const wsUrl = getWebSocketUrl("/ws/scans");
 // Returns: ws://api-gateway:8000/ws/scans?api_key=...
 
 const socket = new WebSocket(wsUrl);
@@ -176,12 +176,12 @@ Configured via `config/endpoints.js`:
 
 ```javascript
 export const ServiceEndpoints = {
-  apiGateway: 'http://api-gateway:8000',
+  apiGateway: "http://api-gateway:8000",
   // ...
 };
 
 export const AuthConfig = {
-  apiKey: 'your-api-key',
+  apiKey: "your-api-key",
   // ...
 };
 ```
@@ -195,6 +195,7 @@ npm test -- src/api/__tests__/client.test.js
 ```
 
 Tests cover:
+
 - GET/POST/PUT/DELETE requests
 - Timeout behavior (default, custom, abort)
 - Error handling (401, 403, 404, 500)

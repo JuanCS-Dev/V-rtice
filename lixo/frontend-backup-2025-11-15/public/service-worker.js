@@ -14,7 +14,7 @@
  * Governed by: Constituição Vértice v2.5 - Phase 3 Optimizations
  */
 
-const CACHE_VERSION = 'vertice-v1.0.0';
+const CACHE_VERSION = "vertice-v1.0.0";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -22,19 +22,15 @@ const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.ico',
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/favicon.ico",
   // Add other critical static assets
 ];
 
 // API endpoints to cache (with TTL)
-const API_CACHE_PATTERNS = [
-  /\/api\/metrics/,
-  /\/api\/scans/,
-  /\/api\/alerts/,
-];
+const API_CACHE_PATTERNS = [/\/api\/metrics/, /\/api\/scans/, /\/api\/alerts/];
 
 // Max age for different cache types (in seconds)
 const CACHE_MAX_AGE = {
@@ -48,23 +44,23 @@ const CACHE_MAX_AGE = {
 // INSTALL EVENT - Cache static assets
 // ============================================================================
 
-self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...', CACHE_VERSION);
+self.addEventListener("install", (event) => {
+  console.log("[Service Worker] Installing...", CACHE_VERSION);
 
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
       .then((cache) => {
-        console.log('[Service Worker] Caching static assets');
+        console.log("[Service Worker] Caching static assets");
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('[Service Worker] Installed successfully');
+        console.log("[Service Worker] Installed successfully");
         return self.skipWaiting(); // Activate immediately
       })
       .catch((error) => {
-        console.error('[Service Worker] Installation failed:', error);
-      })
+        console.error("[Service Worker] Installation failed:", error);
+      }),
   );
 });
 
@@ -72,8 +68,8 @@ self.addEventListener('install', (event) => {
 // ACTIVATE EVENT - Clean up old caches
 // ============================================================================
 
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...', CACHE_VERSION);
+self.addEventListener("activate", (event) => {
+  console.log("[Service Worker] Activating...", CACHE_VERSION);
 
   event.waitUntil(
     caches
@@ -82,17 +78,20 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             // Delete old versions
-            if (cacheName.startsWith('vertice-') && !cacheName.startsWith(CACHE_VERSION)) {
-              console.log('[Service Worker] Deleting old cache:', cacheName);
+            if (
+              cacheName.startsWith("vertice-") &&
+              !cacheName.startsWith(CACHE_VERSION)
+            ) {
+              console.log("[Service Worker] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       })
       .then(() => {
-        console.log('[Service Worker] Activated successfully');
+        console.log("[Service Worker] Activated successfully");
         return self.clients.claim(); // Take control immediately
-      })
+      }),
   );
 });
 
@@ -100,7 +99,7 @@ self.addEventListener('activate', (event) => {
 // FETCH EVENT - Intercept network requests
 // ============================================================================
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -110,7 +109,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip WebSocket connections
-  if (request.url.includes('/ws') || request.url.startsWith('ws:')) {
+  if (request.url.includes("/ws") || request.url.startsWith("ws:")) {
     return;
   }
 
@@ -147,13 +146,13 @@ async function cacheFirstStrategy(request, cacheName) {
       const maxAge = CACHE_MAX_AGE[getCacheType(cacheName)];
 
       if (Date.now() - cacheTime < maxAge * 1000) {
-        console.log('[Service Worker] Cache hit:', request.url);
+        console.log("[Service Worker] Cache hit:", request.url);
         return cachedResponse;
       }
     }
 
     // Fetch from network
-    console.log('[Service Worker] Fetching from network:', request.url);
+    console.log("[Service Worker] Fetching from network:", request.url);
     const networkResponse = await fetch(request);
 
     // Cache successful responses
@@ -165,19 +164,19 @@ async function cacheFirstStrategy(request, cacheName) {
 
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] Fetch failed:', error);
+    console.error("[Service Worker] Fetch failed:", error);
 
     // Return cached response even if stale
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-      console.log('[Service Worker] Returning stale cache:', request.url);
+      console.log("[Service Worker] Returning stale cache:", request.url);
       return cachedResponse;
     }
 
     // Return offline fallback
-    return new Response('Offline - Resource not available', {
+    return new Response("Offline - Resource not available", {
       status: 503,
-      statusText: 'Service Unavailable',
+      statusText: "Service Unavailable",
     });
   }
 }
@@ -189,7 +188,7 @@ async function cacheFirstStrategy(request, cacheName) {
 async function networkFirstStrategy(request, cacheName) {
   try {
     // Try network first
-    console.log('[Service Worker] Fetching from network:', request.url);
+    console.log("[Service Worker] Fetching from network:", request.url);
     const networkResponse = await fetch(request);
 
     // Cache successful responses
@@ -201,26 +200,26 @@ async function networkFirstStrategy(request, cacheName) {
 
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] Network failed, trying cache:', error);
+    console.error("[Service Worker] Network failed, trying cache:", error);
 
     // Fallback to cache
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-      console.log('[Service Worker] Cache hit (fallback):', request.url);
+      console.log("[Service Worker] Cache hit (fallback):", request.url);
       return cachedResponse;
     }
 
     // Return offline fallback
     return new Response(
       JSON.stringify({
-        error: 'Offline',
-        message: 'Network unavailable and no cached data',
+        error: "Offline",
+        message: "Network unavailable and no cached data",
       }),
       {
         status: 503,
-        statusText: 'Service Unavailable',
-        headers: { 'Content-Type': 'application/json' },
-      }
+        statusText: "Service Unavailable",
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 }
@@ -232,13 +231,14 @@ async function networkFirstStrategy(request, cacheName) {
 function isStaticAsset(request) {
   return (
     request.url.match(/\.(js|css|woff2?|ttf|otf|eot|svg)$/) ||
-    request.url.includes('/assets/')
+    request.url.includes("/assets/")
   );
 }
 
 function isAPIRequest(request) {
   return (
-    request.url.includes('/api/') || API_CACHE_PATTERNS.some((pattern) => pattern.test(request.url))
+    request.url.includes("/api/") ||
+    API_CACHE_PATTERNS.some((pattern) => pattern.test(request.url))
   );
 }
 
@@ -247,29 +247,29 @@ function isImageRequest(request) {
 }
 
 function isHTMLRequest(request) {
-  return request.headers.get('Accept')?.includes('text/html');
+  return request.headers.get("Accept")?.includes("text/html");
 }
 
 function getCacheType(cacheName) {
-  if (cacheName.includes('static')) return 'static';
-  if (cacheName.includes('api')) return 'api';
-  if (cacheName.includes('images')) return 'images';
-  return 'runtime';
+  if (cacheName.includes("static")) return "static";
+  if (cacheName.includes("api")) return "api";
+  if (cacheName.includes("images")) return "images";
+  return "runtime";
 }
 
 // Cache timing (stored in IndexedDB for persistence)
-const CACHE_TIMES_STORE = 'cache-times';
+const CACHE_TIMES_STORE = "cache-times";
 
 async function getCacheTime(request, cacheName) {
   try {
     const db = await openCacheTimesDB();
-    const tx = db.transaction(CACHE_TIMES_STORE, 'readonly');
+    const tx = db.transaction(CACHE_TIMES_STORE, "readonly");
     const store = tx.objectStore(CACHE_TIMES_STORE);
     const key = `${cacheName}:${request.url}`;
     const result = await store.get(key);
     return result?.timestamp || 0;
   } catch (error) {
-    console.error('[Service Worker] Failed to get cache time:', error);
+    console.error("[Service Worker] Failed to get cache time:", error);
     return 0;
   }
 }
@@ -277,18 +277,18 @@ async function getCacheTime(request, cacheName) {
 async function setCacheTime(request, cacheName) {
   try {
     const db = await openCacheTimesDB();
-    const tx = db.transaction(CACHE_TIMES_STORE, 'readwrite');
+    const tx = db.transaction(CACHE_TIMES_STORE, "readwrite");
     const store = tx.objectStore(CACHE_TIMES_STORE);
     const key = `${cacheName}:${request.url}`;
     await store.put({ key, timestamp: Date.now() });
   } catch (error) {
-    console.error('[Service Worker] Failed to set cache time:', error);
+    console.error("[Service Worker] Failed to set cache time:", error);
   }
 }
 
 function openCacheTimesDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('vertice-sw-cache', 1);
+    const request = indexedDB.open("vertice-sw-cache", 1);
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
@@ -296,7 +296,7 @@ function openCacheTimesDB() {
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(CACHE_TIMES_STORE)) {
-        db.createObjectStore(CACHE_TIMES_STORE, { keyPath: 'key' });
+        db.createObjectStore(CACHE_TIMES_STORE, { keyPath: "key" });
       }
     };
   });
@@ -306,38 +306,40 @@ function openCacheTimesDB() {
 // MESSAGE HANDLER - Communication with main thread
 // ============================================================================
 
-self.addEventListener('message', (event) => {
+self.addEventListener("message", (event) => {
   const { type, payload } = event.data;
 
   switch (type) {
-    case 'SKIP_WAITING':
+    case "SKIP_WAITING":
       self.skipWaiting();
       break;
 
-    case 'CACHE_URLS':
+    case "CACHE_URLS":
       event.waitUntil(
         caches.open(RUNTIME_CACHE).then((cache) => {
           return cache.addAll(payload.urls);
-        })
+        }),
       );
       break;
 
-    case 'CLEAR_CACHE':
+    case "CLEAR_CACHE":
       event.waitUntil(
         caches.keys().then((cacheNames) => {
           return Promise.all(cacheNames.map((name) => caches.delete(name)));
-        })
+        }),
       );
       break;
 
-    case 'GET_CACHE_SIZE':
-      event.waitUntil(getCacheSize().then((size) => {
-        event.ports[0].postMessage({ type: 'CACHE_SIZE', size });
-      }));
+    case "GET_CACHE_SIZE":
+      event.waitUntil(
+        getCacheSize().then((size) => {
+          event.ports[0].postMessage({ type: "CACHE_SIZE", size });
+        }),
+      );
       break;
 
     default:
-      console.log('[Service Worker] Unknown message type:', type);
+      console.log("[Service Worker] Unknown message type:", type);
   }
 });
 
@@ -354,4 +356,4 @@ async function getCacheSize() {
   return totalSize;
 }
 
-console.log('[Service Worker] Loaded', CACHE_VERSION);
+console.log("[Service Worker] Loaded", CACHE_VERSION);

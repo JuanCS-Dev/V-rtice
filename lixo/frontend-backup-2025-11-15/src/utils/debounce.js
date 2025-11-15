@@ -12,7 +12,7 @@
  * onClick={debouncedRefetch} // Won't fire more than once per 300ms
  */
 
-import logger from './logger';
+import logger from "./logger";
 
 /**
  * Creates a debounced function that delays invoking func until after wait milliseconds
@@ -127,11 +127,11 @@ export function debounceRefetch(refetchFn, wait = 300) {
         await refetchFn();
       } catch (error) {
         // React Query handles errors, just prevent throw
-        logger.error('[Debounce] Refetch error:', error);
+        logger.error("[Debounce] Refetch error:", error);
       }
     },
     wait,
-    { leading: true, trailing: false } // Execute immediately, ignore rapid subsequent calls
+    { leading: true, trailing: false }, // Execute immediately, ignore rapid subsequent calls
   );
 }
 

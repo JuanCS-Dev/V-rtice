@@ -5,33 +5,33 @@
  * Includes automatic reconnection logic.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 import logger from "@/utils/logger";
 
 /**
  * WebSocket connection states
  */
 export const WebSocketStatus = {
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  DISCONNECTED: 'disconnected',
-  ERROR: 'error',
-  RECONNECTING: 'reconnecting',
+  CONNECTING: "connecting",
+  CONNECTED: "connected",
+  DISCONNECTED: "disconnected",
+  ERROR: "error",
+  RECONNECTING: "reconnecting",
 };
 
 /**
  * WebSocket message types
  */
 export const MessageType = {
-  PING: 'ping',
-  PONG: 'pong',
-  SUBSCRIBE: 'subscribe',
-  UNSUBSCRIBE: 'unsubscribe',
-  NEW_APV: 'new_apv',
-  DECISION_MADE: 'decision_made',
-  STATS_UPDATE: 'stats_update',
-  CONNECTION_ACK: 'connection_ack',
-  ERROR: 'error',
+  PING: "ping",
+  PONG: "pong",
+  SUBSCRIBE: "subscribe",
+  UNSUBSCRIBE: "unsubscribe",
+  NEW_APV: "new_apv",
+  DECISION_MADE: "decision_made",
+  STATS_UPDATE: "stats_update",
+  CONNECTION_ACK: "connection_ack",
+  ERROR: "error",
 };
 
 /**
@@ -79,41 +79,51 @@ export const useWebSocket = ({
       wsRef.current.send(JSON.stringify(message));
       return true;
     }
-    logger.warn('[useWebSocket] Cannot send message: WebSocket not connected');
+    logger.warn("[useWebSocket] Cannot send message: WebSocket not connected");
     return false;
   }, []);
 
   /**
    * Subscribe to channels
    */
-  const subscribe = useCallback((channelList) => {
-    const success = send({
-      type: MessageType.SUBSCRIBE,
-      channels: channelList,
-    });
+  const subscribe = useCallback(
+    (channelList) => {
+      const success = send({
+        type: MessageType.SUBSCRIBE,
+        channels: channelList,
+      });
 
-    if (success) {
-      channelList.forEach(channel => subscribedChannelsRef.current.add(channel));
-    }
+      if (success) {
+        channelList.forEach((channel) =>
+          subscribedChannelsRef.current.add(channel),
+        );
+      }
 
-    return success;
-  }, [send]);
+      return success;
+    },
+    [send],
+  );
 
   /**
    * Unsubscribe from channels
    */
-  const unsubscribe = useCallback((channelList) => {
-    const success = send({
-      type: MessageType.UNSUBSCRIBE,
-      channels: channelList,
-    });
+  const unsubscribe = useCallback(
+    (channelList) => {
+      const success = send({
+        type: MessageType.UNSUBSCRIBE,
+        channels: channelList,
+      });
 
-    if (success) {
-      channelList.forEach(channel => subscribedChannelsRef.current.delete(channel));
-    }
+      if (success) {
+        channelList.forEach((channel) =>
+          subscribedChannelsRef.current.delete(channel),
+        );
+      }
 
-    return success;
-  }, [send]);
+      return success;
+    },
+    [send],
+  );
 
   /**
    * Send ping to keep connection alive
@@ -134,20 +144,20 @@ export const useWebSocket = ({
     if (
       wsRef.current &&
       (wsRef.current.readyState === WebSocket.CONNECTING ||
-       wsRef.current.readyState === WebSocket.OPEN)
+        wsRef.current.readyState === WebSocket.OPEN)
     ) {
-      logger.debug('[useWebSocket] Already connected or connecting');
+      logger.debug("[useWebSocket] Already connected or connecting");
       return;
     }
 
-    logger.debug('[useWebSocket] Connecting to:', url);
+    logger.debug("[useWebSocket] Connecting to:", url);
     setStatus(WebSocketStatus.CONNECTING);
 
     try {
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
-        logger.debug('[useWebSocket] Connected');
+        logger.debug("[useWebSocket] Connected");
         setStatus(WebSocketStatus.CONNECTED);
         reconnectAttemptsRef.current = 0;
 
@@ -166,12 +176,15 @@ export const useWebSocket = ({
           // Handle connection acknowledgment
           if (message.type === MessageType.CONNECTION_ACK) {
             setClientId(message.client_id);
-            logger.debug('[useWebSocket] Client ID assigned:', message.client_id);
+            logger.debug(
+              "[useWebSocket] Client ID assigned:",
+              message.client_id,
+            );
           }
 
           // Handle pong
           if (message.type === MessageType.PONG) {
-            logger.debug('[useWebSocket] Pong received');
+            logger.debug("[useWebSocket] Pong received");
           }
 
           // Forward message to callback
@@ -179,26 +192,33 @@ export const useWebSocket = ({
             onMessage(message);
           }
         } catch (error) {
-          logger.error('[useWebSocket] Failed to parse message:', error);
+          logger.error("[useWebSocket] Failed to parse message:", error);
         }
       };
 
       ws.onerror = (error) => {
-        logger.error('[useWebSocket] Error:', error);
+        logger.error("[useWebSocket] Error:", error);
         setStatus(WebSocketStatus.ERROR);
       };
 
       ws.onclose = (event) => {
-        logger.debug('[useWebSocket] Connection closed:', event.code, event.reason);
+        logger.debug(
+          "[useWebSocket] Connection closed:",
+          event.code,
+          event.reason,
+        );
         setStatus(WebSocketStatus.DISCONNECTED);
         setClientId(null);
         subscribedChannelsRef.current.clear();
 
         // Attempt reconnection if not a clean close
-        if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        if (
+          event.code !== 1000 &&
+          reconnectAttemptsRef.current < maxReconnectAttempts
+        ) {
           reconnectAttemptsRef.current += 1;
           logger.debug(
-            `[useWebSocket] Reconnecting... Attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`
+            `[useWebSocket] Reconnecting... Attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`,
           );
           setStatus(WebSocketStatus.RECONNECTING);
 
@@ -206,23 +226,30 @@ export const useWebSocket = ({
             connect();
           }, reconnectInterval);
         } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-          logger.error('[useWebSocket] Max reconnection attempts reached');
+          logger.error("[useWebSocket] Max reconnection attempts reached");
           setStatus(WebSocketStatus.ERROR);
         }
       };
 
       wsRef.current = ws;
     } catch (error) {
-      logger.error('[useWebSocket] Failed to create WebSocket:', error);
+      logger.error("[useWebSocket] Failed to create WebSocket:", error);
       setStatus(WebSocketStatus.ERROR);
     }
-  }, [url, channels, onMessage, subscribe, reconnectInterval, maxReconnectAttempts]);
+  }, [
+    url,
+    channels,
+    onMessage,
+    subscribe,
+    reconnectInterval,
+    maxReconnectAttempts,
+  ]);
 
   /**
    * Disconnect from WebSocket server
    */
   const disconnect = useCallback(() => {
-    logger.debug('[useWebSocket] Disconnecting');
+    logger.debug("[useWebSocket] Disconnecting");
 
     // Clear reconnection timeout
     if (reconnectTimeoutRef.current) {
@@ -232,7 +259,7 @@ export const useWebSocket = ({
 
     // Close WebSocket connection
     if (wsRef.current) {
-      wsRef.current.close(1000, 'Client disconnect');
+      wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
 

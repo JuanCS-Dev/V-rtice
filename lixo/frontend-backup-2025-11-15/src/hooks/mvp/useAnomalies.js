@@ -13,17 +13,15 @@
  * @returns {Object} { anomalies, isLoading, error, timeline, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mvpService } from '../../services/mvp/mvpService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mvpService } from "../../services/mvp/mvpService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 30000; // 30s
 
 export const useAnomalies = (filters = {}, options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [anomalies, setAnomalies] = useState([]);
   const [timeline, setTimeline] = useState([]);
@@ -40,7 +38,7 @@ export const useAnomalies = (filters = {}, options = {}) => {
       setIsLoading(false);
       logger.debug(`[useAnomalies] Detected ${response.length} anomalies`);
     } catch (err) {
-      logger.error('[useAnomalies] Failed to fetch anomalies:', err);
+      logger.error("[useAnomalies] Failed to fetch anomalies:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -51,9 +49,9 @@ export const useAnomalies = (filters = {}, options = {}) => {
     try {
       const response = await mvpService.getAnomalyTimeline(days);
       setTimeline(response);
-      logger.debug('[useAnomalies] Timeline fetched');
+      logger.debug("[useAnomalies] Timeline fetched");
     } catch (err) {
-      logger.error('[useAnomalies] Failed to fetch timeline:', err);
+      logger.error("[useAnomalies] Failed to fetch timeline:", err);
     }
   }, []);
 
@@ -71,20 +69,23 @@ export const useAnomalies = (filters = {}, options = {}) => {
   }, [enabled, pollingInterval, fetchAnomalies, fetchTimeline]);
 
   // Statistics
-  const stats = anomalies.length > 0 ? {
-    total: anomalies.length,
-    bySeverity: {
-      critical: anomalies.filter(a => a.severity === 'critical').length,
-      high: anomalies.filter(a => a.severity === 'high').length,
-      medium: anomalies.filter(a => a.severity === 'medium').length,
-      low: anomalies.filter(a => a.severity === 'low').length,
-    },
-    recentCount: anomalies.filter(a => {
-      const detectedAt = new Date(a.detected_at);
-      const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
-      return detectedAt > hourAgo;
-    }).length,
-  } : null;
+  const stats =
+    anomalies.length > 0
+      ? {
+          total: anomalies.length,
+          bySeverity: {
+            critical: anomalies.filter((a) => a.severity === "critical").length,
+            high: anomalies.filter((a) => a.severity === "high").length,
+            medium: anomalies.filter((a) => a.severity === "medium").length,
+            low: anomalies.filter((a) => a.severity === "low").length,
+          },
+          recentCount: anomalies.filter((a) => {
+            const detectedAt = new Date(a.detected_at);
+            const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            return detectedAt > hourAgo;
+          }).length,
+        }
+      : null;
 
   return {
     anomalies,

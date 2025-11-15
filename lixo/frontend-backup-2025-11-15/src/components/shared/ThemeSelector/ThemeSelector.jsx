@@ -5,11 +5,14 @@
  * Componente para trocar entre temas (Cyberpunk, Windows 11, etc)
  */
 
-import React, { useState } from 'react';
-import { useTheme } from '../../../hooks/useTheme';
-import styles from './ThemeSelector.module.css';
+import React, { useState } from "react";
+import { useTheme } from "../../../hooks/useTheme";
+import styles from "./ThemeSelector.module.css";
 
-export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = false }) => {
+export const ThemeSelector = ({
+  compact = false,
+  showInHeader: _showInHeader = false,
+}) => {
   const {
     theme,
     mode,
@@ -17,7 +20,7 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
     toggleMode,
     availableThemes,
     currentThemeInfo,
-    supportsMode
+    supportsMode,
   } = useTheme();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -37,13 +40,13 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
           title="Mudar tema"
         >
           <span className={styles.themeIcon}>
-            {theme === 'default' && '🟢'}
-            {theme === 'cyber-blue' && '🔵'}
-            {theme === 'purple-haze' && '🟣'}
-            {theme === 'amber-alert' && '🟠'}
-            {theme === 'red-alert' && '🔴'}
-            {theme === 'stealth-mode' && '⚫'}
-            {theme === 'windows11' && '🪟'}
+            {theme === "default" && "🟢"}
+            {theme === "cyber-blue" && "🔵"}
+            {theme === "purple-haze" && "🟣"}
+            {theme === "amber-alert" && "🟠"}
+            {theme === "red-alert" && "🔴"}
+            {theme === "stealth-mode" && "⚫"}
+            {theme === "windows11" && "🪟"}
           </span>
         </button>
 
@@ -52,16 +55,22 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
             {availableThemes.map((t) => (
               <button
                 key={t.id}
-                className={`${styles.dropdownItem} ${theme === t.id ? styles.active : ''}`}
+                className={`${styles.dropdownItem} ${theme === t.id ? styles.active : ""}`}
                 onClick={() => handleThemeChange(t.id)}
                 style={{
-                  '--preview-primary': t.preview.primary,
-                  '--preview-secondary': t.preview.secondary
+                  "--preview-primary": t.preview.primary,
+                  "--preview-secondary": t.preview.secondary,
                 }}
               >
                 <span className={styles.themePreview}>
-                  <span className={styles.previewDot} style={{ backgroundColor: 'var(--preview-primary)' }} />
-                  <span className={styles.previewDot} style={{ backgroundColor: 'var(--preview-secondary)' }} />
+                  <span
+                    className={styles.previewDot}
+                    style={{ backgroundColor: "var(--preview-primary)" }}
+                  />
+                  <span
+                    className={styles.previewDot}
+                    style={{ backgroundColor: "var(--preview-secondary)" }}
+                  />
                 </span>
                 <span className={styles.themeName}>{t.name}</span>
                 {theme === t.id && <span className={styles.checkmark}>✓</span>}
@@ -79,10 +88,10 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
                   }}
                 >
                   <span className={styles.modeIcon}>
-                    {mode === 'light' ? '☀️' : '🌙'}
+                    {mode === "light" ? "☀️" : "🌙"}
                   </span>
                   <span className={styles.themeName}>
-                    {mode === 'light' ? 'Modo Escuro' : 'Modo Claro'}
+                    {mode === "light" ? "Modo Escuro" : "Modo Claro"}
                   </span>
                 </button>
               </>
@@ -98,40 +107,48 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
     <div className={styles.container}>
       <div className={styles.header}>
         <h3 className={styles.title}>Tema da Interface</h3>
-        <p className={styles.subtitle}>
-          Personalize a aparência da plataforma
-        </p>
+        <p className={styles.subtitle}>Personalize a aparência da plataforma</p>
       </div>
 
       <div className={styles.themesGrid}>
         {availableThemes.map((t) => (
           <button
             key={t.id}
-            className={`${styles.themeCard} ${theme === t.id ? styles.selected : ''}`}
+            className={`${styles.themeCard} ${theme === t.id ? styles.selected : ""}`}
             onClick={() => handleThemeChange(t.id)}
           >
             <div className={styles.cardHeader}>
               <div
                 className={styles.themePreviewLarge}
                 style={{
-                  '--preview-bg': t.preview.background,
-                  '--preview-primary': t.preview.primary,
-                  '--preview-secondary': t.preview.secondary
+                  "--preview-bg": t.preview.background,
+                  "--preview-primary": t.preview.primary,
+                  "--preview-secondary": t.preview.secondary,
                 }}
               >
-                <div className={styles.previewSquare} style={{ backgroundColor: 'var(--preview-bg)' }}>
+                <div
+                  className={styles.previewSquare}
+                  style={{ backgroundColor: "var(--preview-bg)" }}
+                >
                   <div
                     className={styles.previewAccent}
                     style={{
-                      borderColor: 'var(--preview-primary)',
-                      boxShadow: t.id === 'cyberpunk'
-                        ? `0 0 10px var(--preview-primary)`
-                        : 'none'
+                      borderColor: "var(--preview-primary)",
+                      boxShadow:
+                        t.id === "cyberpunk"
+                          ? `0 0 10px var(--preview-primary)`
+                          : "none",
                     }}
                   />
                   <div className={styles.previewContent}>
-                    <span className={styles.previewLine} style={{ backgroundColor: 'var(--preview-primary)' }} />
-                    <span className={styles.previewLine} style={{ backgroundColor: 'var(--preview-secondary)' }} />
+                    <span
+                      className={styles.previewLine}
+                      style={{ backgroundColor: "var(--preview-primary)" }}
+                    />
+                    <span
+                      className={styles.previewLine}
+                      style={{ backgroundColor: "var(--preview-secondary)" }}
+                    />
                   </div>
                 </div>
               </div>
@@ -154,14 +171,15 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
       {supportsMode && (
         <div className={styles.modeToggle}>
           <span className={styles.modeLabel}>Modo:</span>
-          <button
-            className={styles.modeButton}
-            onClick={toggleMode}
-          >
-            <span className={`${styles.modeOption} ${mode === 'light' ? styles.modeActive : ''}`}>
+          <button className={styles.modeButton} onClick={toggleMode}>
+            <span
+              className={`${styles.modeOption} ${mode === "light" ? styles.modeActive : ""}`}
+            >
               ☀️ Claro
             </span>
-            <span className={`${styles.modeOption} ${mode === 'dark' ? styles.modeActive : ''}`}>
+            <span
+              className={`${styles.modeOption} ${mode === "dark" ? styles.modeActive : ""}`}
+            >
               🌙 Escuro
             </span>
           </button>
@@ -171,7 +189,7 @@ export const ThemeSelector = ({ compact = false, showInHeader: _showInHeader = f
       <div className={styles.footer}>
         <span className={styles.currentTheme}>
           Tema atual: <strong>{currentThemeInfo.name}</strong>
-          {supportsMode && ` (${mode === 'light' ? 'Claro' : 'Escuro'})`}
+          {supportsMode && ` (${mode === "light" ? "Claro" : "Escuro"})`}
         </span>
       </div>
     </div>

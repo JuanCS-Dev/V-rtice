@@ -3008,7 +3008,7 @@ This ensures that you're testing the behavior the user would see in the browser.
  × src/api/__tests__/maximusAI.test.js > maximusAI API Client > getAIMemory > should retrieve AI memory 12ms
    → expected "spy" to be called with arguments: [ Array(2) ][90m
 
-Received: 
+Received:
 
 [1m  1st spy call:
 
@@ -5871,10 +5871,10 @@ vi[33m.[39m[34mmock[39m([35mimport[39m([32m"react-i18next"[39m)[33m,[3
 
  ❯ src/components/shared/QueryErrorBoundary.jsx:168:38
     166| };
-    167| 
+    167|
     168| const TranslatedQueryErrorBoundary = withTranslation()(QueryErrorBound…
        |                                      ^
-    169| 
+    169|
     170| /**
  ❯ src/components/dashboards/OffensiveDashboard/OffensiveDashboard.jsx:11:32
 
@@ -5885,7 +5885,7 @@ vi[33m.[39m[34mmock[39m([35mimport[39m([32m"react-i18next"[39m)[33m,[3
 Error: Failed to parse source for import analysis because the content contains invalid JS syntax. If you are using JSX, make sure to name the file with the .jsx or .tsx extension.
   Plugin: vite:import-analysis
   File: /home/juan/vertice-dev/frontend/src/components/dashboards/DefensiveDashboard/hooks/__tests__/useDefensiveMetrics.test.js:25:79
-  23 |  
+  23 |
   24 |    return ({ children }) => (
   25 |      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
      |                                                                                ^
@@ -6095,7 +6095,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:46:3
      44|   });
-     45| 
+     45|
      46|   it('should update connection state when opened', async () => {
        |   ^
      47|     const url = 'ws://localhost:8001/ws/test';
@@ -6108,7 +6108,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:63:3
      61|   });
-     62| 
+     62|
      63|   it('should receive messages', async () => {
        |   ^
      64|     const url = 'ws://localhost:8001/ws/test';
@@ -6121,7 +6121,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:85:3
      83|   });
-     84| 
+     84|
      85|   it('should send messages when connected', async () => {
        |   ^
      86|     const url = 'ws://localhost:8001/ws/test';
@@ -6140,7 +6140,7 @@ AssertionError: expected +0 to be 1 // Object.is equality
 
  ❯ src/hooks/useWebSocket.test.js:112:43
     110|     result.current.send(message);
-    111| 
+    111|
     112|     expect(result.current.queuedMessages).toBe(1);
        |                                           ^
     113|     expect(mockWebSocket.send).not.toHaveBeenCalled();
@@ -6159,10 +6159,10 @@ AssertionError: expected +0 to be 2 // Object.is equality
 
  ❯ src/hooks/useWebSocket.test.js:124:43
     122|     result.current.send({ type: 'message2' });
-    123| 
+    123|
     124|     expect(result.current.queuedMessages).toBe(2);
        |                                           ^
-    125| 
+    125|
     126|     // Connect
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/103]⎯
@@ -6172,7 +6172,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:136:3
     134|   });
-    135| 
+    135|
     136|   it('should start heartbeat when connected', async () => {
        |   ^
     137|     const url = 'ws://localhost:8001/ws/test';
@@ -6185,7 +6185,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:190:3
     188|   });
-    189| 
+    189|
     190|   it('should fallback to polling after max reconnect attempts', async …
        |   ^
     191|     const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
@@ -6196,7 +6196,7 @@ If this is a long-running test, pass a timeout value as the last argument or con
  FAIL  src/hooks/useWebSocket.test.js > useWebSocket > should handle manual reconnect
 TypeError: Cannot read properties of undefined (reading 'code')
  ❯ Object.ws.onclose src/hooks/useWebSocket.js:197:35
-    195| 
+    195|
     196|       ws.onclose = (event) => {
     197|         log('Disconnected', event.code, event.reason);
        |                                   ^
@@ -6211,7 +6211,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/hooks/useWebSocket.test.js:254:3
     252|   });
-    253| 
+    253|
     254|   it('should handle connection errors', async () => {
        |   ^
     255|     const url = 'ws://localhost:8001/ws/test';
@@ -6236,7 +6236,7 @@ AssertionError: expected { Object (threats, suspiciousIPs, ...) } to deeply equa
 
  ❯ src/stores/defensiveStore.test.js:23:36
      21|     const { result } = renderHook(() => useDefensiveStore());
-     22| 
+     22|
      23|     expect(result.current.metrics).toEqual({
        |                                    ^
      24|       threats: 0,
@@ -6260,7 +6260,7 @@ AssertionError: expected { Object (threats, suspiciousIPs, ...) } to deeply equa
 [2m  }[22m
 
  ❯ src/stores/defensiveStore.test.js:225:36
-    223| 
+    223|
     224|     // Should be back to defaults
     225|     expect(result.current.metrics).toEqual({
        |                                    ^
@@ -6286,7 +6286,7 @@ AssertionError: expected { Object (threats, suspiciousIPs, ...) } to deeply equa
 
  ❯ src/stores/defensiveStore.test.js:260:35
     258|     );
-    259| 
+    259|
     260|     expect(metricsResult.current).toEqual({
        |                                   ^
     261|       threats: 0,
@@ -6501,11 +6501,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:99:19
-     97| 
+     97|
      98|     // 1. Dashboard loads with default module (Threat Map)
      99|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
-    100| 
+    100|
     101|     // 2. Metrics are displayed
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/103]⎯
@@ -6513,11 +6513,11 @@ Ignored nodes: comments, script, style
  FAIL  src/__tests__/integration/DefensiveDashboard.integration.test.jsx > Defensive Dashboard Integration Tests > should handle metrics updates in real-time
 AssertionError: expected "useDefensiveMetrics" to be called at least once
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:120:33
-    118| 
+    118|
     119|     // Initial metrics
     120|     expect(useDefensiveMetrics).toHaveBeenCalled();
        |                                 ^
-    121| 
+    121|
     122|     // Simulate metrics update
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/103]⎯
@@ -6527,7 +6527,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:141:3
     139|   });
-    140| 
+    140|
     141|   it('should handle new real-time alerts', async () => {
        |   ^
     142|     const mockAddAlert = vi.fn();
@@ -6742,11 +6742,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:169:19
-    167| 
+    167|
     168|     // Start with loaded state
     169|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
-    170| 
+    170|
     171|     // Transition to loading
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/103]⎯
@@ -6958,12 +6958,12 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:191:19
-    189| 
+    189|
     190|     // Dashboard should still render without crashing
     191|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
     192|   });
-    193| 
+    193|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/103]⎯
 
@@ -7174,12 +7174,12 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:214:19
-    212| 
+    212|
     213|     // Should remain stable
     214|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
     215|   });
-    216| 
+    216|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/103]⎯
 
@@ -7390,11 +7390,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:221:19
-    219| 
+    219|
     220|     // Verify initial render
     221|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
-    222| 
+    222|
     223|     // Unmount
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/103]⎯
@@ -7606,11 +7606,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:237:19
-    235| 
+    235|
     236|     // Dashboard renders
     237|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
-    238| 
+    238|
     239|     // setCurrentView callback is passed to header for navigation
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/103]⎯
@@ -7822,11 +7822,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:247:19
-    245| 
+    245|
     246|     // Default module loads
     247|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
-    248| 
+    248|
     249|     // All 8 modules should be available in the dashboard config:
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/103]⎯
@@ -8039,11 +8039,11 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/__tests__/integration/DefensiveDashboard.integration.test.jsx:274:19
     272|     expect(renderTime).toBeLessThan(1000); // 1 second max
-    273| 
+    273|
     274|     expect(screen.getByTestId('threat-map')).toBeInTheDocument();
        |                   ^
     275|   });
-    276| 
+    276|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/103]⎯
 
@@ -8282,7 +8282,7 @@ AssertionError: promise resolved "{ success: false, …(1) }" instead of rejecti
     408|       ).rejects.toThrow();
        |       ^
     409|     });
-    410| 
+    410|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/103]⎯
 
@@ -8305,7 +8305,7 @@ AssertionError: promise resolved "{ success: false, …(1) }" instead of rejecti
     420|       ).rejects.toThrow();
        |       ^
     421|     });
-    422| 
+    422|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/103]⎯
 
@@ -8335,34 +8335,34 @@ AssertionError: promise resolved "{ success: false, …(1) }" instead of rejecti
  FAIL  src/api/__tests__/cyberServices.test.js > cyberServices API Client > checkThreatIntelligence > should check threat intelligence for IP
 AssertionError: expected undefined to be 3 // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 3
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/cyberServices.test.js:218:36
-    216| 
+    216|
     217|       expect(result.reputation).toBe('malicious');
     218|       expect(result.threats_found).toBe(3);
        |                                    ^
     219|     });
-    220| 
+    220|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/103]⎯
 
  FAIL  src/api/__tests__/cyberServices.test.js > cyberServices API Client > checkThreatIntelligence > should check threat intelligence for domain
 AssertionError: expected undefined to be 'domain' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "domain"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/cyberServices.test.js:237:34
     235|       const result = await checkThreatIntelligence('evil.com', 'domain…
-    236| 
+    236|
     237|       expect(result.target_type).toBe('domain');
        |                                  ^
     238|       expect(result.categories).toContain('phishing');
@@ -8373,45 +8373,45 @@ undefined
  FAIL  src/api/__tests__/cyberServices.test.js > cyberServices API Client > checkThreatIntelligence > should check threat intelligence for hash
 AssertionError: expected undefined to be 'WannaCry' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "WannaCry"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/cyberServices.test.js:257:37
     255|       const result = await checkThreatIntelligence('a1b2c3d4e5f6...', …
-    256| 
+    256|
     257|       expect(result.malware_family).toBe('WannaCry');
        |                                     ^
     258|     });
-    259| 
+    259|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/103]⎯
 
  FAIL  src/api/__tests__/cyberServices.test.js > cyberServices API Client > checkThreatIntelligence > should handle clean target
 AssertionError: expected undefined to be +0 // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 0
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/cyberServices.test.js:276:36
-    274| 
+    274|
     275|       expect(result.reputation).toBe('clean');
     276|       expect(result.threats_found).toBe(0);
        |                                    ^
     277|     });
-    278| 
+    278|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/103]⎯
 
  FAIL  src/api/__tests__/maximusAI.test.js > maximusAI API Client > getAIMemory > should retrieve AI memory
 AssertionError: expected "spy" to be called with arguments: [ Array(2) ][90m
 
-Received: 
+Received:
 
 [1m  1st spy call:
 
@@ -8426,7 +8426,7 @@ Number of calls: [1m1[22m
 [39m
  ❯ src/api/__tests__/maximusAI.test.js:259:28
     257|       const result = await getAIMemory('session_123', 'short_term');
-    258| 
+    258|
     259|       expect(global.fetch).toHaveBeenCalledWith(
        |                            ^
     260|         expect.stringContaining('/api/memory'),
@@ -8437,10 +8437,10 @@ Number of calls: [1m1[22m
  FAIL  src/api/__tests__/worldClassTools.test.js > World Class Tools API Client > Utility Functions > getConfidenceBadge > deve retornar badge VERY HIGH para confiança >= 90
 AssertionError: expected undefined to be '#00ff00' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "#00ff00"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/worldClassTools.test.js:264:29
@@ -8456,10 +8456,10 @@ undefined
  FAIL  src/api/__tests__/worldClassTools.test.js > World Class Tools API Client > Utility Functions > getConfidenceBadge > deve retornar badge HIGH para confiança >= 75
 AssertionError: expected undefined to be '#00ffff' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "#00ffff"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/worldClassTools.test.js:271:29
@@ -8475,10 +8475,10 @@ undefined
  FAIL  src/api/__tests__/worldClassTools.test.js > World Class Tools API Client > Utility Functions > getConfidenceBadge > deve retornar badge MEDIUM para confiança >= 50
 AssertionError: expected undefined to be '#ffaa00' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "#ffaa00"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/worldClassTools.test.js:278:29
@@ -8494,10 +8494,10 @@ undefined
  FAIL  src/api/__tests__/worldClassTools.test.js > World Class Tools API Client > Utility Functions > getConfidenceBadge > deve retornar badge LOW para confiança >= 25
 AssertionError: expected undefined to be '#ff4000' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "#ff4000"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/worldClassTools.test.js:285:29
@@ -8513,10 +8513,10 @@ undefined
  FAIL  src/api/__tests__/worldClassTools.test.js > World Class Tools API Client > Utility Functions > getConfidenceBadge > deve retornar badge VERY LOW para confiança < 25
 AssertionError: expected undefined to be '#ff0040' // Object.is equality
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 "#ff0040"
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 undefined
 
  ❯ src/api/__tests__/worldClassTools.test.js:292:29
@@ -8533,7 +8533,7 @@ undefined
 AssertionError: expected function to throw an error, but it didn't
  ❯ src/config/__tests__/endpoints.test.js:79:43
      77|     mockEnv.VITE_API_GATEWAY_URL = undefined;
-     78| 
+     78|
      79|     expect(() => validateConfiguration()).toThrow(ConfigurationError);
        |                                           ^
      80|   });
@@ -8552,10 +8552,10 @@ AssertionError: expected false to be true // Object.is equality
 
  ❯ src/hooks/__tests__/useApiCall.test.js:43:36
      41|     });
-     42| 
+     42|
      43|     expect(result.current.loading).toBe(true);
        |                                    ^
-     44| 
+     44|
      45|     await waitFor(() => {
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/103]⎯
@@ -8564,7 +8564,7 @@ AssertionError: expected false to be true // Object.is equality
 TypeError: Cannot read properties of undefined (reading 'ok')
  ❯ Object.execute src/hooks/useApiCall.js:69:23
      67|         const response = await fetchWithTimeout(url, fetchOptions);
-     68| 
+     68|
      69|         if (!response.ok) {
        |                       ^
      70|           // Erro HTTP
@@ -8577,7 +8577,7 @@ TypeError: Cannot read properties of undefined (reading 'ok')
 TypeError: Cannot read properties of undefined (reading 'ok')
  ❯ Object.execute src/hooks/useApiCall.js:69:23
      67|         const response = await fetchWithTimeout(url, fetchOptions);
-     68| 
+     68|
      69|         if (!response.ok) {
        |                       ^
      70|           // Erro HTTP
@@ -8589,11 +8589,11 @@ TypeError: Cannot read properties of undefined (reading 'ok')
  FAIL  src/hooks/__tests__/useApiCall.test.js > useApiCall Hook > should cancel request on abort
 TypeError: result.current.cancel is not a function
  ❯ src/hooks/__tests__/useApiCall.test.js:117:20
-    115| 
+    115|
     116|     result.current.execute('http://api.test/slow');
     117|     result.current.cancel();
        |                    ^
-    118| 
+    118|
     119|     await waitFor(() => {
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/103]⎯
@@ -8601,10 +8601,10 @@ TypeError: result.current.cancel is not a function
  FAIL  src/hooks/__tests__/useApiCall.test.js > useApiCall Hook > should reset state
 AssertionError: expected { data: 'test' } to be null
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 null
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 {
   "data": "test",
 }
@@ -8615,22 +8615,22 @@ null
     144|     expect(result.current.data).toBeNull();
        |                                 ^
     145|   });
-    146| 
+    146|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/103]⎯
 
  FAIL  src/hooks/__tests__/useLocalStorage.test.js > useLocalStorage Hook > should remove item when set to undefined
 AssertionError: expected 'undefined' to be null
 
-[32m- Expected:[39m 
+[32m- Expected:[39m
 null
 
-[31m+ Received:[39m 
+[31m+ Received:[39m
 "undefined"
 
  ❯ src/hooks/__tests__/useLocalStorage.test.js:100:46
      98|     });
-     99| 
+     99|
     100|     expect(localStorage.getItem('test-key')).toBeNull();
        |                                              ^
     101|     expect(result.current[0]).toBe('default');
@@ -8650,7 +8650,7 @@ Received: [31m"initial"[39m
     127|     expect(result2.current[0]).toBe('updated');
        |                                ^
     128|   });
-    129| 
+    129|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/103]⎯
 
@@ -8704,7 +8704,7 @@ Ignored nodes: comments, script, style
      44|     expect(screen.getByText('Matrix Green')).toBeInTheDocument();
        |                   ^
      45|   });
-     46| 
+     46|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/103]⎯
 
@@ -8770,7 +8770,7 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/ThemeSelector/__tests__/ThemeSelector.test.jsx:63:19
-     61|     
+     61|
      62|     // Verificar alguns temas
      63|     expect(screen.getByText('Cyber Blue')).toBeInTheDocument();
        |                   ^
@@ -8841,12 +8841,12 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/ThemeSelector/__tests__/ThemeSelector.test.jsx:76:36
-     74|     
+     74|
      75|     // Clicar em Cyber Blue
      76|     const cyberBlueOption = screen.getByText('Cyber Blue');
        |                                    ^
      77|     fireEvent.click(cyberBlueOption);
-     78|     
+     78|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/103]⎯
 
@@ -8912,12 +8912,12 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/ThemeSelector/__tests__/ThemeSelector.test.jsx:114:33
-    112|     
+    112|
     113|     // Trocar para Purple Haze
     114|     const purpleOption = screen.getByText('Purple Haze');
        |                                 ^
     115|     fireEvent.click(purpleOption);
-    116|     
+    116|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/103]⎯
 
@@ -8983,7 +8983,7 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/ThemeSelector/__tests__/ThemeSelector.test.jsx:128:33
-    126|     
+    126|
     127|     // O tema default (Matrix Green) deve ter classe active
     128|     const activeOption = screen.getByText('Matrix Green').closest('but…
        |                                 ^
@@ -8999,12 +8999,12 @@ Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
 Received has type:  Null
 Received has value: [31mnull[39m
  ❯ src/components/optimized/__tests__/MemoizedMetricCard.test.jsx:76:26
-     74| 
+     74|
      75|     const trendElement = container.querySelector('[class*="trend-neutr…
      76|     expect(trendElement).toBeInTheDocument();
        |                          ^
      77|   });
-     78| 
+     78|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[54/103]⎯
 
@@ -9052,7 +9052,7 @@ Ignored nodes: comments, script, style
      81|     expect(screen.getByText(/↑/)).toBeInTheDocument();
        |                   ^
      82|   });
-     83| 
+     83|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[55/103]⎯
 
@@ -9100,7 +9100,7 @@ Ignored nodes: comments, script, style
      86|     expect(screen.getByText(/↓/)).toBeInTheDocument();
        |                   ^
      87|   });
-     88| 
+     88|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[56/103]⎯
 
@@ -9109,11 +9109,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:330:3
     328|   });
-    329| 
+    329|
     330|   it('should update clock every second', async () => {
        |   ^
     331|     vi.useFakeTimers();
-    332| 
+    332|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[57/103]⎯
 
@@ -9122,7 +9122,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:346:3
     344|   });
-    345| 
+    345|
     346|   it('should cleanup timer on unmount', async () => {
        |   ^
     347|     const { unmount } = render(<DefensiveDashboard />, {
@@ -9135,7 +9135,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:363:3
     361|   // =================================================================…
-    362| 
+    362|
     363|   it('should support module switching via activeModule state', async (…
        |   ^
     364|     const { rerender } = render(<DefensiveDashboard />, {
@@ -9148,11 +9148,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:376:3
     374|   });
-    375| 
+    375|
     376|   it('should display fallback message if module not found', async () =…
        |   ^
     377|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    378| 
+    378|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[60/103]⎯
 
@@ -9161,11 +9161,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:390:3
     388|   // =================================================================…
-    389| 
+    389|
     390|   it('should render scanline overlay effect', async () => {
        |   ^
     391|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    392| 
+    392|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[61/103]⎯
 
@@ -9174,7 +9174,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:404:3
     402|   // =================================================================…
-    403| 
+    403|
     404|   it('should pass setCurrentView to header for navigation', async () =…
        |   ^
     405|     const mockSetView = vi.fn();
@@ -9187,11 +9187,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:417:3
     415|   });
-    416| 
+    416|
     417|   it('should handle missing setCurrentView gracefully', async () => {
        |   ^
     418|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    419| 
+    419|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[63/103]⎯
 
@@ -9200,11 +9200,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:431:3
     429|   // =================================================================…
-    430| 
+    430|
     431|   it('should use useDefensiveMetrics from service layer', async () => {
        |   ^
     432|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    433| 
+    433|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[64/103]⎯
 
@@ -9213,7 +9213,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:441:3
     439|   });
-    440| 
+    440|
     441|   it('should handle metrics refetch correctly', async () => {
        |   ^
     442|     const mockRefetch = vi.fn();
@@ -9226,7 +9226,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:460:3
     458|   });
-    459| 
+    459|
     460|   it('should update when metrics data changes', async () => {
        |   ^
     461|     const { rerender } = render(<DefensiveDashboard />, {
@@ -9239,7 +9239,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:494:3
     492|   // =================================================================…
-    493| 
+    493|
     494|   it('should render all defensive modules correctly', async () => {
        |   ^
     495|     const modules = [
@@ -9252,11 +9252,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:520:3
     518|   });
-    519| 
+    519|
     520|   it('should wrap module in ModuleContainer', async () => {
        |   ^
     521|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    522| 
+    522|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[68/103]⎯
 
@@ -9265,11 +9265,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:534:3
     532|   // =================================================================…
-    533| 
+    533|
     534|   it('should include BehavioralAnalyzer module', async () => {
        |   ^
     535|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    536| 
+    536|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[69/103]⎯
 
@@ -9278,11 +9278,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.integration.test.jsx:544:3
     542|   });
-    543| 
+    543|
     544|   it('should include EncryptedTrafficAnalyzer module', async () => {
        |   ^
     545|     render(<DefensiveDashboard />, { wrapper: createTestWrapper() });
-    546| 
+    546|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[70/103]⎯
 
@@ -9293,12 +9293,12 @@ Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
 Received has type:  Null
 Received has value: [31mnull[39m
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.test.jsx:175:23
-    173| 
+    173|
     174|     const dashboard = container.querySelector('.dashboard-defensive');
     175|     expect(dashboard).toBeInTheDocument();
        |                       ^
     176|   });
-    177| 
+    177|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[71/103]⎯
 
@@ -9309,7 +9309,7 @@ Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
 Received has type:  Null
 Received has value: [31mnull[39m
  ❯ src/components/dashboards/DefensiveDashboard/__tests__/DefensiveDashboard.test.jsx:182:22
-    180| 
+    180|
     181|     const scanline = container.querySelector('.scanline-overlay');
     182|     expect(scanline).toBeInTheDocument();
        |                      ^
@@ -9487,7 +9487,7 @@ Ignored nodes: comments, script, style
     107|     expect(screen.getByTestId('purple-footer')).toBeInTheDocument();
        |                   ^
     108|   });
-    109| 
+    109|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[73/103]⎯
 
@@ -9496,7 +9496,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:59:3
      57|   });
-     58| 
+     58|
      59|   it('should fetch topology on mount', async () => {
        |   ^
      60|     const mockTopology = {
@@ -9509,7 +9509,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:75:3
      73|   });
-     74| 
+     74|
      75|   it('should switch to metrics view', async () => {
        |   ^
      76|     const user = userEvent.setup({ delay: null });
@@ -9522,7 +9522,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:96:3
      94|   });
-     95| 
+     95|
      96|   it('should display topology summary', async () => {
        |   ^
      97|     const mockTopology = {
@@ -9535,7 +9535,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:114:3
     112|   });
-    113| 
+    113|
     114|   it('should display agent cards', async () => {
        |   ^
     115|     const mockTopology = {
@@ -9548,7 +9548,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:148:3
     146|   });
-    147| 
+    147|
     148|   it('should display global metrics', async () => {
        |   ^
     149|     const user = userEvent.setup({ delay: null });
@@ -9561,11 +9561,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:181:3
     179|   });
-    180| 
+    180|
     181|   it('should auto-refresh topology every 10 seconds', async () => {
        |   ^
     182|     maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] …
-    183| 
+    183|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[79/103]⎯
 
@@ -9574,7 +9574,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:198:3
     196|   });
-    197| 
+    197|
     198|   it('should disable auto-refresh when toggled off', async () => {
        |   ^
     199|     const user = userEvent.setup({ delay: null });
@@ -9587,7 +9587,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:218:3
     216|   });
-    217| 
+    217|
     218|   it('should re-enable auto-refresh when toggled back on', async () =>…
        |   ^
     219|     const user = userEvent.setup({ delay: null });
@@ -9600,7 +9600,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:242:3
     240|   });
-    241| 
+    241|
     242|   it('should apply correct health color for healthy agents', async () …
        |   ^
     243|     const mockTopology = {
@@ -9613,7 +9613,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:261:3
     259|   });
-    260| 
+    260|
     261|   it('should apply correct health color for degraded agents', async ()…
        |   ^
     262|     const mockTopology = {
@@ -9626,7 +9626,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:280:3
     278|   });
-    279| 
+    279|
     280|   it('should show "no agents" when topology is empty', async () => {
        |   ^
     281|     const mockTopology = {
@@ -9639,7 +9639,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:296:3
     294|   });
-    295| 
+    295|
     296|   it('should handle API errors gracefully', async () => {
        |   ^
     297|     const consoleError = vi.spyOn(console, 'error').mockImplementation…
@@ -9652,11 +9652,11 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:309:3
     307|   });
-    308| 
+    308|
     309|   it('should cleanup interval on unmount', async () => {
        |   ^
     310|     maximusAI.getTopology.mockResolvedValue({ agents: [], regions: [] …
-    311| 
+    311|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[86/103]⎯
 
@@ -9665,7 +9665,7 @@ Error: Test timed out in 10000ms.
 If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
  ❯ src/components/maximus/widgets/__tests__/DistributedTopologyWidget.test.jsx:326:3
     324|   });
-    325| 
+    325|
     326|   it('should refetch when switching between views', async () => {
        |   ^
     327|     const user = userEvent.setup({ delay: null });
@@ -9825,7 +9825,7 @@ Ignored nodes: comments, script, style
  ❯ Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
  ❯ src/components/maximus/widgets/__tests__/ImmuneEnhancementWidget.test.jsx:76:13
      74|       await user.click(suppressBtn);
-     75| 
+     75|
      76|       await waitFor(() => {
        |             ^
      77|         expect(screen.getByText(/Please provide alerts in JSON format/…
@@ -9845,11 +9845,11 @@ Error: Expected key descriptor but found "" in "{"
  ❯ Object.type node_modules/@testing-library/user-event/dist/esm/utility/type.js:15:16
  ❯ Object.asyncWrapper node_modules/@testing-library/react/dist/pure.js:88:22
  ❯ src/components/maximus/widgets/__tests__/ImmuneEnhancementWidget.test.jsx:86:7
-     84| 
+     84|
      85|       const textarea = screen.getByPlaceholderText(/alert_001/);
      86|       await user.type(textarea, 'invalid json{');
        |       ^
-     87| 
+     87|
      88|       const suppressBtn = screen.getByText('🔬 Suppress False Positive…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[89/103]⎯
@@ -9869,7 +9869,7 @@ Error: Expected repeat modifier or release modifier or "}" but found "n" in "{"n
     101|       await user.clear(textarea);
     102|       await user.type(textarea, '{"not": "array"}');
        |       ^
-    103| 
+    103|
     104|       const suppressBtn = screen.getByText('🔬 Suppress False Positive…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[90/103]⎯
@@ -9890,7 +9890,7 @@ Error: Expected key descriptor but found "{" in "[{"id":"alert_001","severity":"
     129|       await user.clear(textarea);
     130|       await user.type(textarea, alertsJSON);
        |       ^
-    131| 
+    131|
     132|       const suppressBtn = screen.getByText('🔬 Suppress False Positive…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[91/103]⎯
@@ -9911,7 +9911,7 @@ Error: Expected key descriptor but found "{" in "[{"id":"a1"}]"
     156|       await user.clear(textarea);
     157|       await user.type(textarea, alertsJSON);
        |       ^
-    158| 
+    158|
     159|       const suppressBtn = screen.getByText('🔬 Suppress False Positive…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[92/103]⎯
@@ -9932,7 +9932,7 @@ Error: Expected key descriptor but found "{" in "[{"id":"a1"}]"
     179|       await user.clear(textarea);
     180|       await user.type(textarea, alertsJSON);
        |       ^
-    181| 
+    181|
     182|       const suppressBtn = screen.getByText('🔬 Suppress False Positive…
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[93/103]⎯
@@ -9953,7 +9953,7 @@ Error: Expected key descriptor but found "{" in "[{"id":"a1"}]"
     357|     const textarea = screen.getByPlaceholderText(/alert_001/);
     358|     await user.type(textarea, alertsJSON);
        |     ^
-    359| 
+    359|
     360|     await user.click(screen.getByText('🔬 Suppress False Positives'));
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[94/103]⎯
@@ -10071,12 +10071,12 @@ Ignored nodes: comments, script, style
   [36m</body>[39m
 [36m</html>[39m
  ❯ src/components/maximus/widgets/__tests__/ThreatPredictionWidget.test.jsx:286:28
-    284| 
+    284|
     285|     await waitFor(() => {
     286|       expect(consoleError).toHaveBeenCalledWith('Prediction failed:', …
        |                            ^
     287|     });
-    288| 
+    288|
  ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
  ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
  ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
@@ -10186,7 +10186,7 @@ Ignored nodes: comments, script, style
      60|     expect(screen.getByText(/no alerts at this time/i)).toBeInTheDocum…
        |                   ^
      61|   });
-     62| 
+     62|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[96/103]⎯
 
@@ -10293,7 +10293,7 @@ Ignored nodes: comments, script, style
      65|     expect(screen.getByText(/all clear/i)).toBeInTheDocument();
        |                   ^
      66|   });
-     67| 
+     67|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[97/103]⎯
 
@@ -10631,7 +10631,7 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/dashboards/DefensiveDashboard/components/__tests__/VirtualizedAlertsList.test.jsx:134:19
-    132| 
+    132|
     133|     expect(screen.getByText('Total:')).toBeInTheDocument();
     134|     expect(screen.getByText('6')).toBeInTheDocument();
        |                   ^
@@ -10822,7 +10822,7 @@ Ignored nodes: comments, script, style
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:55:13
  ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
  ❯ src/components/dashboards/DefensiveDashboard/components/__tests__/VirtualizedAlertsList.test.jsx:176:32
-    174| 
+    174|
     175|     // Should format time (exact format depends on locale, just check …
     176|     const timeElement = screen.getByText((content) => content.includes…
        |                                ^
@@ -11536,7 +11536,7 @@ Ignored nodes: comments, script, style
     128|     expect(screen.getByText('1')).toBeInTheDocument(); // Completed va…
        |                   ^
     129|   });
-    130| 
+    130|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[102/103]⎯
 
@@ -11545,4 +11545,3 @@ Ignored nodes: comments, script, style
       Tests  100 failed | 483 passed (583)
    Start at  10:31:45
    Duration  143.70s (transform 2.96s, setup 6.91s, collect 7.51s, tests 376.26s, environment 23.36s, prepare 4.27s)
-

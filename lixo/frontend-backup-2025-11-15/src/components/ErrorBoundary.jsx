@@ -10,10 +10,10 @@
  * - Error context logging
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import logger from '@/utils/logger';
-import './shared/ErrorBoundary.css';
+import React from "react";
+import PropTypes from "prop-types";
+import logger from "@/utils/logger";
+import "./shared/ErrorBoundary.css";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -22,7 +22,7 @@ class ErrorBoundary extends React.Component {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorCount: 0
+      errorCount: 0,
     };
   }
 
@@ -31,12 +31,12 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    logger.error('ErrorBoundary caught an error:', error, errorInfo);
+    logger.error("ErrorBoundary caught an error:", error, errorInfo);
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       error,
       errorInfo,
-      errorCount: prevState.errorCount + 1
+      errorCount: prevState.errorCount + 1,
     }));
 
     // Log to telemetry service (ready for Sentry integration)
@@ -46,13 +46,13 @@ class ErrorBoundary extends React.Component {
   logErrorToService = (error, errorInfo) => {
     const errorData = {
       timestamp: new Date().toISOString(),
-      message: error?.toString() || 'Unknown error',
-      stack: error?.stack || 'No stack trace',
-      componentStack: errorInfo?.componentStack || 'No component stack',
-      context: this.props.context || 'Unknown context',
+      message: error?.toString() || "Unknown error",
+      stack: error?.stack || "No stack trace",
+      componentStack: errorInfo?.componentStack || "No component stack",
+      context: this.props.context || "Unknown context",
       errorCount: this.state.errorCount + 1,
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     };
 
     // Error tracking via backend logging endpoint
@@ -60,17 +60,17 @@ class ErrorBoundary extends React.Component {
 
     // Log para console em desenvolvimento
     if (import.meta.env.DEV) {
-      logger.group('🚨 Error Boundary - Telemetry Data', () => {
-        logger.error('Error:', errorData);
+      logger.group("🚨 Error Boundary - Telemetry Data", () => {
+        logger.error("Error:", errorData);
       });
     }
 
     // Enviar para endpoint de logging (se disponível)
     try {
-      fetch('/api/errors/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(errorData)
+      fetch("/api/errors/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(errorData),
       }).catch(() => {
         // Fail silently se endpoint não existir
       });
@@ -83,7 +83,7 @@ class ErrorBoundary extends React.Component {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     });
 
     // Callback para parent component
@@ -99,7 +99,7 @@ class ErrorBoundary extends React.Component {
         return this.props.fallback({
           error: this.state.error,
           errorInfo: this.state.errorInfo,
-          resetError: this.handleReset
+          resetError: this.handleReset,
         });
       }
 
@@ -109,10 +109,11 @@ class ErrorBoundary extends React.Component {
           <div className="error-boundary-content">
             <div className="error-boundary-icon">⚠️</div>
             <h2 className="error-boundary-title">
-              {this.props.title || 'Algo deu errado'}
+              {this.props.title || "Algo deu errado"}
             </h2>
             <p className="error-boundary-message">
-              {this.props.message || 'Ocorreu um erro inesperado. Nossa equipe foi notificada.'}
+              {this.props.message ||
+                "Ocorreu um erro inesperado. Nossa equipe foi notificada."}
             </p>
 
             {import.meta.env.DEV && this.state.error && (
@@ -120,7 +121,7 @@ class ErrorBoundary extends React.Component {
                 <summary>Detalhes do Erro (Dev Only)</summary>
                 <pre className="error-boundary-stack">
                   {this.state.error.toString()}
-                  {'\n\n'}
+                  {"\n\n"}
                   {this.state.error.stack}
                 </pre>
               </details>
@@ -135,7 +136,7 @@ class ErrorBoundary extends React.Component {
               </button>
 
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = "/")}
                 className="error-boundary-btn error-boundary-btn-secondary"
               >
                 🏠 Voltar ao Início
@@ -162,7 +163,7 @@ ErrorBoundary.propTypes = {
   fallback: PropTypes.func,
   title: PropTypes.string,
   message: PropTypes.string,
-  onReset: PropTypes.func
+  onReset: PropTypes.func,
 };
 
 export default ErrorBoundary;

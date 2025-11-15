@@ -8,52 +8,52 @@
  * Estilo: Clean, minimal, sticky, backdrop blur
  */
 
-import * as React from "react"
-import { Menu, X, ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "./button"
-import { Badge } from "./badge"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
+import { Badge } from "./badge";
+import "../../../styles/claude-design-green.css";
 
 export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   /**
    * Logo or brand component
    */
-  logo?: React.ReactNode
+  logo?: React.ReactNode;
   /**
    * Navigation items
    */
-  navItems?: NavItem[]
+  navItems?: NavItem[];
   /**
    * Right side actions
    */
-  actions?: React.ReactNode
+  actions?: React.ReactNode;
   /**
    * Mobile menu open state
    */
-  mobileMenuOpen?: boolean
+  mobileMenuOpen?: boolean;
   /**
    * Toggle mobile menu
    */
-  onMobileMenuToggle?: () => void
+  onMobileMenuToggle?: () => void;
   /**
    * Sticky positioning
    */
-  sticky?: boolean
+  sticky?: boolean;
   /**
    * Show border bottom
    */
-  bordered?: boolean
+  bordered?: boolean;
 }
 
 export interface NavItem {
-  label: string
-  href?: string
-  onClick?: () => void
-  badge?: string
-  active?: boolean
-  disabled?: boolean
-  children?: NavItem[]
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  badge?: string;
+  active?: boolean;
+  disabled?: boolean;
+  children?: NavItem[];
 }
 
 /**
@@ -87,9 +87,9 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const [openDropdown, setOpenDropdown] = React.useState<string | null>(null)
+    const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
 
     return (
       <>
@@ -113,7 +113,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
               // Transition
               "transition-all duration-[var(--transition-normal)]",
             ].join(" "),
-            className
+            className,
           )}
           {...props}
         >
@@ -140,7 +140,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                     isOpen={openDropdown === item.label}
                     onToggle={() =>
                       setOpenDropdown(
-                        openDropdown === item.label ? null : item.label
+                        openDropdown === item.label ? null : item.label,
                       )
                     }
                   />
@@ -177,17 +177,19 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div
-            className={cn([
-              "md:hidden",
-              "fixed inset-x-0 top-16",
-              "z-[var(--z-sticky)]",
-              "bg-[var(--sidebar-background)]",
-              "border-b border-[var(--sidebar-border)]",
-              "shadow-[var(--shadow-lg)]",
-              "backdrop-blur-[var(--blur-md)]",
-              "max-h-[calc(100vh-4rem)]",
-              "overflow-y-auto",
-            ].join(" "))}
+            className={cn(
+              [
+                "md:hidden",
+                "fixed inset-x-0 top-16",
+                "z-[var(--z-sticky)]",
+                "bg-[var(--sidebar-background)]",
+                "border-b border-[var(--sidebar-border)]",
+                "shadow-[var(--shadow-lg)]",
+                "backdrop-blur-[var(--blur-md)]",
+                "max-h-[calc(100vh-4rem)]",
+                "overflow-y-auto",
+              ].join(" "),
+            )}
           >
             <div className="px-[var(--space-4)] py-[var(--space-4)] space-y-[var(--space-2)]">
               {navItems.map((item, index) => (
@@ -203,11 +205,11 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
           </div>
         )}
       </>
-    )
-  }
-)
+    );
+  },
+);
 
-Navbar.displayName = "Navbar"
+Navbar.displayName = "Navbar";
 
 /**
  * Desktop Nav Item
@@ -217,11 +219,11 @@ function NavItemComponent({
   isOpen,
   onToggle,
 }: {
-  item: NavItem
-  isOpen: boolean
-  onToggle: () => void
+  item: NavItem;
+  isOpen: boolean;
+  onToggle: () => void;
 }) {
-  const hasChildren = item.children && item.children.length > 0
+  const hasChildren = item.children && item.children.length > 0;
 
   if (hasChildren) {
     return (
@@ -229,20 +231,22 @@ function NavItemComponent({
         <button
           onClick={onToggle}
           disabled={item.disabled}
-          className={cn([
-            "flex items-center gap-[var(--space-1)]",
-            "px-[var(--space-3)] py-[var(--space-2)]",
-            "text-[var(--text-sm)]",
-            "font-[var(--font-primary)]",
-            "font-medium",
-            "rounded-[var(--radius-md)]",
-            "transition-all duration-[var(--transition-fast)]",
-            // States
-            item.active
-              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]"
-              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
-            item.disabled && "opacity-50 cursor-not-allowed",
-          ].join(" "))}
+          className={cn(
+            [
+              "flex items-center gap-[var(--space-1)]",
+              "px-[var(--space-3)] py-[var(--space-2)]",
+              "text-[var(--text-sm)]",
+              "font-[var(--font-primary)]",
+              "font-medium",
+              "rounded-[var(--radius-md)]",
+              "transition-all duration-[var(--transition-fast)]",
+              // States
+              item.active
+                ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]"
+                : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
+              item.disabled && "opacity-50 cursor-not-allowed",
+            ].join(" "),
+          )}
         >
           {item.label}
           {item.badge && (
@@ -253,7 +257,7 @@ function NavItemComponent({
           <ChevronDown
             className={cn(
               "h-4 w-4 transition-transform",
-              isOpen && "rotate-180"
+              isOpen && "rotate-180",
             )}
           />
         </button>
@@ -261,31 +265,35 @@ function NavItemComponent({
         {/* Dropdown */}
         {isOpen && (
           <div
-            className={cn([
-              "absolute top-full left-0 mt-1",
-              "min-w-[200px]",
-              "bg-[var(--popover)]",
-              "border border-[var(--border)]",
-              "rounded-[var(--radius-default)]",
-              "shadow-[var(--shadow-lg)]",
-              "py-[var(--space-2)]",
-              "z-[var(--z-dropdown)]",
-            ].join(" "))}
+            className={cn(
+              [
+                "absolute top-full left-0 mt-1",
+                "min-w-[200px]",
+                "bg-[var(--popover)]",
+                "border border-[var(--border)]",
+                "rounded-[var(--radius-default)]",
+                "shadow-[var(--shadow-lg)]",
+                "py-[var(--space-2)]",
+                "z-[var(--z-dropdown)]",
+              ].join(" "),
+            )}
           >
             {item.children?.map((child, index) => (
               <a
                 key={index}
                 href={child.href}
                 onClick={child.onClick}
-                className={cn([
-                  "block px-[var(--space-4)] py-[var(--space-2)]",
-                  "text-[var(--text-sm)]",
-                  "font-[var(--font-primary)]",
-                  "text-[var(--foreground)]",
-                  "hover:bg-[var(--accent)]",
-                  "transition-colors duration-[var(--transition-fast)]",
-                  child.active && "bg-[var(--accent)] text-[var(--primary)]",
-                ].join(" "))}
+                className={cn(
+                  [
+                    "block px-[var(--space-4)] py-[var(--space-2)]",
+                    "text-[var(--text-sm)]",
+                    "font-[var(--font-primary)]",
+                    "text-[var(--foreground)]",
+                    "hover:bg-[var(--accent)]",
+                    "transition-colors duration-[var(--transition-fast)]",
+                    child.active && "bg-[var(--accent)] text-[var(--primary)]",
+                  ].join(" "),
+                )}
               >
                 {child.label}
               </a>
@@ -293,60 +301,18 @@ function NavItemComponent({
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
     <a
       href={item.href}
       onClick={item.onClick}
-      className={cn([
-        "flex items-center gap-[var(--space-2)]",
-        "px-[var(--space-3)] py-[var(--space-2)]",
-        "text-[var(--text-sm)]",
-        "font-[var(--font-primary)]",
-        "font-medium",
-        "rounded-[var(--radius-md)]",
-        "transition-all duration-[var(--transition-fast)]",
-        // States
-        item.active
-          ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]"
-          : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
-        item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
-      ].join(" "))}
-    >
-      {item.label}
-      {item.badge && (
-        <Badge variant="success" className="ml-2">
-          {item.badge}
-        </Badge>
-      )}
-    </a>
-  )
-}
-
-/**
- * Mobile Nav Item
- */
-function MobileNavItem({ item }: { item: NavItem }) {
-  const [expanded, setExpanded] = React.useState(false)
-  const hasChildren = item.children && item.children.length > 0
-
-  return (
-    <div>
-      <button
-        onClick={() => {
-          if (hasChildren) {
-            setExpanded(!expanded)
-          } else {
-            item.onClick?.()
-          }
-        }}
-        disabled={item.disabled}
-        className={cn([
-          "w-full flex items-center justify-between",
-          "px-[var(--space-4)] py-[var(--space-3)]",
-          "text-[var(--text-base)]",
+      className={cn(
+        [
+          "flex items-center gap-[var(--space-2)]",
+          "px-[var(--space-3)] py-[var(--space-2)]",
+          "text-[var(--text-sm)]",
           "font-[var(--font-primary)]",
           "font-medium",
           "rounded-[var(--radius-md)]",
@@ -355,8 +321,54 @@ function MobileNavItem({ item }: { item: NavItem }) {
           item.active
             ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]"
             : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
-          item.disabled && "opacity-50 cursor-not-allowed",
-        ].join(" "))}
+          item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
+        ].join(" "),
+      )}
+    >
+      {item.label}
+      {item.badge && (
+        <Badge variant="success" className="ml-2">
+          {item.badge}
+        </Badge>
+      )}
+    </a>
+  );
+}
+
+/**
+ * Mobile Nav Item
+ */
+function MobileNavItem({ item }: { item: NavItem }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const hasChildren = item.children && item.children.length > 0;
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          if (hasChildren) {
+            setExpanded(!expanded);
+          } else {
+            item.onClick?.();
+          }
+        }}
+        disabled={item.disabled}
+        className={cn(
+          [
+            "w-full flex items-center justify-between",
+            "px-[var(--space-4)] py-[var(--space-3)]",
+            "text-[var(--text-base)]",
+            "font-[var(--font-primary)]",
+            "font-medium",
+            "rounded-[var(--radius-md)]",
+            "transition-all duration-[var(--transition-fast)]",
+            // States
+            item.active
+              ? "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]"
+              : "text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)]",
+            item.disabled && "opacity-50 cursor-not-allowed",
+          ].join(" "),
+        )}
       >
         <span className="flex items-center gap-2">
           {item.label}
@@ -366,7 +378,7 @@ function MobileNavItem({ item }: { item: NavItem }) {
           <ChevronDown
             className={cn(
               "h-4 w-4 transition-transform",
-              expanded && "rotate-180"
+              expanded && "rotate-180",
             )}
           />
         )}
@@ -379,16 +391,19 @@ function MobileNavItem({ item }: { item: NavItem }) {
               key={index}
               href={child.href}
               onClick={child.onClick}
-              className={cn([
-                "block px-[var(--space-4)] py-[var(--space-2)]",
-                "text-[var(--text-sm)]",
-                "font-[var(--font-primary)]",
-                "text-[var(--sidebar-foreground)]",
-                "rounded-[var(--radius-md)]",
-                "hover:bg-[var(--sidebar-accent)]",
-                "transition-colors duration-[var(--transition-fast)]",
-                child.active && "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]",
-              ].join(" "))}
+              className={cn(
+                [
+                  "block px-[var(--space-4)] py-[var(--space-2)]",
+                  "text-[var(--text-sm)]",
+                  "font-[var(--font-primary)]",
+                  "text-[var(--sidebar-foreground)]",
+                  "rounded-[var(--radius-md)]",
+                  "hover:bg-[var(--sidebar-accent)]",
+                  "transition-colors duration-[var(--transition-fast)]",
+                  child.active &&
+                    "bg-[var(--sidebar-accent)] text-[var(--sidebar-primary)]",
+                ].join(" "),
+              )}
             >
               {child.label}
             </a>
@@ -396,8 +411,8 @@ function MobileNavItem({ item }: { item: NavItem }) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export { NavItemComponent, MobileNavItem }
-export type { NavItem }
+export { NavItemComponent, MobileNavItem };
+export type { NavItem };

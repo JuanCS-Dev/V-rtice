@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge, LoadingSpinner } from '../../../shared';
-import { getSeverityVariant } from '../utils/securityUtils';
-import styles from './AnalysisPanel.module.css';
+import React from "react";
+import { Badge, LoadingSpinner } from "../../../shared";
+import { getSeverityVariant } from "../utils/securityUtils";
+import styles from "./AnalysisPanel.module.css";
 
 /**
  * AnalysisPanel - Painel genérico para exibir dados de análise
@@ -11,7 +11,7 @@ export const AnalysisPanel = ({
   icon,
   data,
   loading,
-  emptyMessage = 'Nenhum dado disponível'
+  emptyMessage = "Nenhum dado disponível",
 }) => {
   if (loading) {
     return (
@@ -50,9 +50,15 @@ export const AnalysisPanel = ({
                 </Badge>
               )}
               <div className={styles.itemContent}>
-                {item.name && <div className={styles.itemName}>{item.name}</div>}
-                {item.description && <div className={styles.itemDesc}>{item.description}</div>}
-                {item.details && <div className={styles.itemDetails}>{item.details}</div>}
+                {item.name && (
+                  <div className={styles.itemName}>{item.name}</div>
+                )}
+                {item.description && (
+                  <div className={styles.itemDesc}>{item.description}</div>
+                )}
+                {item.details && (
+                  <div className={styles.itemDetails}>{item.details}</div>
+                )}
               </div>
             </div>
           ))

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 /**
  * Manages the command history for the terminal.
@@ -9,14 +9,17 @@ export const useTerminalHistory = () => {
 
   const addCommandToHistory = useCallback((command) => {
     if (command.trim()) {
-      setCommandHistory(prev => [command.trim(), ...prev].slice(0, 100)); // Limit history size
+      setCommandHistory((prev) => [command.trim(), ...prev].slice(0, 100)); // Limit history size
       setHistoryIndex(-1);
     }
   }, []);
 
   const getPreviousCommand = useCallback(() => {
     if (commandHistory.length === 0) return null;
-    const newIndex = historyIndex === -1 ? 0 : Math.min(commandHistory.length - 1, historyIndex + 1);
+    const newIndex =
+      historyIndex === -1
+        ? 0
+        : Math.min(commandHistory.length - 1, historyIndex + 1);
     setHistoryIndex(newIndex);
     return commandHistory[newIndex];
   }, [commandHistory, historyIndex]);
@@ -25,7 +28,7 @@ export const useTerminalHistory = () => {
     if (historyIndex < 0) return null;
     const newIndex = Math.max(-1, historyIndex - 1);
     setHistoryIndex(newIndex);
-    return newIndex === -1 ? '' : commandHistory[newIndex];
+    return newIndex === -1 ? "" : commandHistory[newIndex];
   }, [commandHistory, historyIndex]);
 
   const resetHistoryIndex = useCallback(() => {
@@ -37,7 +40,7 @@ export const useTerminalHistory = () => {
     addCommandToHistory,
     getPreviousCommand,
     getNextCommand,
-    resetHistoryIndex
+    resetHistoryIndex,
   };
 };
 

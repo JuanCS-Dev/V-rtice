@@ -16,11 +16,11 @@
  * - Polling fallback for execution updates
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useWebSocket } from '../../../../hooks/useWebSocket';
-import logger from '@/utils/logger';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useWebSocket } from "../../../../hooks/useWebSocket";
+import logger from "@/utils/logger";
 
-import { WS_ENDPOINTS } from '../../../../config/api';
+import { WS_ENDPOINTS } from "../../../../config/api";
 const GATEWAY_WS = WS_ENDPOINTS.executions;
 
 export const useRealTimeExecutions = () => {
@@ -35,19 +35,19 @@ export const useRealTimeExecutions = () => {
     heartbeatInterval: 30000,
     fallbackToPolling: true,
     pollingInterval: 3000,
-    debug: process.env.NODE_ENV === 'development'
+    debug: process.env.NODE_ENV === "development",
   });
 
   const addExecution = useCallback((execution) => {
     // GAP #1 FIX: Only update state if component is still mounted
     if (!isMountedRef.current) return;
 
-    setExecutions(prev => {
+    setExecutions((prev) => {
       // Check if execution already exists
-      const exists = prev.some(e => e.id === execution.id);
+      const exists = prev.some((e) => e.id === execution.id);
       if (exists) {
         // Update existing execution
-        return prev.map(e => e.id === execution.id ? execution : e);
+        return prev.map((e) => (e.id === execution.id ? execution : e));
       }
       // Add new execution (keep last 20)
       return [execution, ...prev].slice(0, 20);
@@ -58,7 +58,7 @@ export const useRealTimeExecutions = () => {
     // GAP #1 FIX: Only update state if component is still mounted
     if (!isMountedRef.current) return;
 
-    setExecutions(prev => prev.filter(e => e.id !== executionId));
+    setExecutions((prev) => prev.filter((e) => e.id !== executionId));
   }, []);
 
   // Handle WebSocket data
@@ -66,19 +66,19 @@ export const useRealTimeExecutions = () => {
     if (!wsData || !isMountedRef.current) return;
 
     try {
-      if (wsData.type === 'execution_update') {
+      if (wsData.type === "execution_update") {
         addExecution(wsData.execution);
-      } else if (wsData.type === 'execution_complete') {
+      } else if (wsData.type === "execution_complete") {
         // Update execution status
-        addExecution({ ...wsData.execution, status: 'completed' });
-      } else if (wsData.type === 'executions_list' && wsData.executions) {
+        addExecution({ ...wsData.execution, status: "completed" });
+      } else if (wsData.type === "executions_list" && wsData.executions) {
         // Polling fallback data
         if (isMountedRef.current) {
           setExecutions(wsData.executions.slice(0, 20));
         }
       }
     } catch (err) {
-      logger.error('Error processing execution data:', err);
+      logger.error("Error processing execution data:", err);
     }
   }, [wsData, addExecution]);
 
@@ -93,6 +93,6 @@ export const useRealTimeExecutions = () => {
     executions,
     addExecution,
     removeExecution,
-    isConnected
+    isConnected,
   };
 };

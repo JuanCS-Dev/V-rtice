@@ -7,27 +7,27 @@
  * Falls back to FloatingThemeButton functionality
  */
 
-import React from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
-import styles from './ThemeToggle.module.css';
+import React from "react";
+import { useTheme } from "../../../contexts/ThemeContext";
+import styles from "./ThemeToggle.module.css";
 
 export const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
 
   const getThemeIcon = () => {
     switch (theme) {
-      case 'enterprise':
-        return '💼';
-      case 'default':
-        return '🟢';
-      case 'cyberpunk':
-        return '🌃';
-      case 'dark':
-        return '🌙';
-      case 'light':
-        return '☀️';
+      case "enterprise":
+        return "💼";
+      case "default":
+        return "🟢";
+      case "cyberpunk":
+        return "🌃";
+      case "dark":
+        return "🌙";
+      case "light":
+        return "☀️";
       default:
-        return '🎨';
+        return "🎨";
     }
   };
 

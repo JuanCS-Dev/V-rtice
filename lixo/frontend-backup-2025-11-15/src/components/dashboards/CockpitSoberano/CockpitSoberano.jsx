@@ -27,20 +27,20 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import { SovereignHeader } from './components/SovereignHeader';
-import { VerdictPanel } from './components/VerdictPanel';
-import { RelationshipGraph } from './components/RelationshipGraph';
-import { CommandConsole } from './components/CommandConsole';
-import { DashboardFooter } from '../../shared/DashboardFooter';
-import { useVerdictStream } from './hooks/useVerdictStream';
-import { useCockpitMetrics } from './hooks/useCockpitMetrics';
-import { useAllianceGraph } from './hooks/useAllianceGraph';
-import SkipLink from '../../shared/SkipLink';
-import QueryErrorBoundary from '../../shared/QueryErrorBoundary';
-import styles from './CockpitSoberano.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import { SovereignHeader } from "./components/SovereignHeader";
+import { VerdictPanel } from "./components/VerdictPanel";
+import { RelationshipGraph } from "./components/RelationshipGraph";
+import { CommandConsole } from "./components/CommandConsole";
+import { DashboardFooter } from "../../shared/DashboardFooter";
+import { useVerdictStream } from "./hooks/useVerdictStream";
+import { useCockpitMetrics } from "./hooks/useCockpitMetrics";
+import { useAllianceGraph } from "./hooks/useAllianceGraph";
+import SkipLink from "../../shared/SkipLink";
+import QueryErrorBoundary from "../../shared/QueryErrorBoundary";
+import styles from "./CockpitSoberano.module.css";
 
 export const CockpitSoberano = ({ setCurrentView }) => {
   const { t } = useTranslation();
@@ -52,28 +52,29 @@ export const CockpitSoberano = ({ setCurrentView }) => {
 
   const handleBack = () => {
     if (setCurrentView) {
-      setCurrentView('main');
+      setCurrentView("main");
     }
   };
 
   // Extract unique agents from graph for command console
-  const availableAgents = graphData.nodes.map(node => ({
+  const availableAgents = graphData.nodes.map((node) => ({
     id: node.id,
     name: node.label,
-    status: node.status
+    status: node.status,
   }));
 
   return (
     <article
       className={styles.cockpitContainer}
-
       aria-labelledby="cockpit-soberano-title"
       data-maximus-module="cockpit-soberano"
       data-maximus-navigable="true"
       data-maximus-version="2.0"
-      data-maximus-category="command-center">
-
-      <SkipLink href="#cockpit-content">{t('accessibility.skipToMain')}</SkipLink>
+      data-maximus-category="command-center"
+    >
+      <SkipLink href="#cockpit-content">
+        {t("accessibility.skipToMain")}
+      </SkipLink>
 
       {/* Scanline Effect - Decorative */}
       <div className={styles.scanlineOverlay} aria-hidden="true"></div>
@@ -93,21 +94,19 @@ export const CockpitSoberano = ({ setCurrentView }) => {
       <section
         id="cockpit-content"
         className={styles.mainContent}
-
-        aria-label={t('cockpit.workspace', 'Command center workspace')}
-        data-maximus-section="workspace">
-
+        aria-label={t("cockpit.workspace", "Command center workspace")}
+        data-maximus-section="workspace"
+      >
         {/* Left Panel: Verdicts */}
         <section
           className={styles.leftPanel}
-
-          aria-label={t('cockpit.verdicts.title', 'Verdicts')}
+          aria-label={t("cockpit.verdicts.title", "Verdicts")}
           aria-live="polite"
           aria-atomic="false"
           data-maximus-section="verdicts"
           data-maximus-monitor="verdicts"
-          data-maximus-live="true">
-
+          data-maximus-live="true"
+        >
           <QueryErrorBoundary>
             <VerdictPanel
               verdicts={verdicts}
@@ -120,36 +119,34 @@ export const CockpitSoberano = ({ setCurrentView }) => {
         {/* Right Panel: Alliance Graph + Command Console */}
         <aside
           className={styles.rightPanel}
-
-          aria-label={t('cockpit.sidePanel', 'Alliance graph and command console')}
-          data-maximus-section="side-panel">
-
+          aria-label={t(
+            "cockpit.sidePanel",
+            "Alliance graph and command console",
+          )}
+          data-maximus-section="side-panel"
+        >
           <section
             className={styles.graphSection}
-
-            aria-label={t('cockpit.allianceGraph', 'Alliance relationship graph')}
+            aria-label={t(
+              "cockpit.allianceGraph",
+              "Alliance relationship graph",
+            )}
             data-maximus-section="alliance-graph"
-            data-maximus-interactive="true">
-
+            data-maximus-interactive="true"
+          >
             <QueryErrorBoundary>
-              <RelationshipGraph
-                graphData={graphData}
-                loading={graphLoading}
-              />
+              <RelationshipGraph graphData={graphData} loading={graphLoading} />
             </QueryErrorBoundary>
           </section>
 
           <section
             className={styles.commandSection}
-
-            aria-label={t('cockpit.commandConsole', 'C2L command console')}
+            aria-label={t("cockpit.commandConsole", "C2L command console")}
             data-maximus-section="command-console"
-            data-maximus-interactive="true">
-
+            data-maximus-interactive="true"
+          >
             <QueryErrorBoundary>
-              <CommandConsole
-                availableAgents={availableAgents}
-              />
+              <CommandConsole availableAgents={availableAgents} />
             </QueryErrorBoundary>
           </section>
         </aside>
@@ -160,13 +157,25 @@ export const CockpitSoberano = ({ setCurrentView }) => {
         moduleName="COCKPIT SOBERANO"
         classification="TOP SECRET"
         statusItems={[
-          { label: 'WEBSOCKET', value: isConnected ? 'CONNECTED' : 'DISCONNECTED', online: isConnected },
-          { label: 'SYSTEM', value: metrics.systemHealth || 'UNKNOWN', online: metrics.systemHealth === 'HEALTHY' },
-          { label: 'AGENTS', value: `${availableAgents.length} ONLINE`, online: availableAgents.length > 0 }
+          {
+            label: "WEBSOCKET",
+            value: isConnected ? "CONNECTED" : "DISCONNECTED",
+            online: isConnected,
+          },
+          {
+            label: "SYSTEM",
+            value: metrics.systemHealth || "UNKNOWN",
+            online: metrics.systemHealth === "HEALTHY",
+          },
+          {
+            label: "AGENTS",
+            value: `${availableAgents.length} ONLINE`,
+            online: availableAgents.length > 0,
+          },
         ]}
         metricsItems={[
-          { label: 'VERDICTS', value: verdicts.length },
-          { label: 'ALLIANCES', value: graphData.nodes.length }
+          { label: "VERDICTS", value: verdicts.length },
+          { label: "ALLIANCES", value: graphData.nodes.length },
         ]}
         showTimestamp={true}
       />
@@ -175,7 +184,7 @@ export const CockpitSoberano = ({ setCurrentView }) => {
 };
 
 CockpitSoberano.propTypes = {
-  setCurrentView: PropTypes.func
+  setCurrentView: PropTypes.func,
 };
 
 export default CockpitSoberano;

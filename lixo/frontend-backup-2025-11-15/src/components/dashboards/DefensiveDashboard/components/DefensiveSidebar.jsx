@@ -8,29 +8,27 @@
  * ✅ Virtual Scrolling for 100x performance on large lists
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { VirtualizedAlertsList } from './VirtualizedAlertsList';
-import styles from './DefensiveSidebar.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { VirtualizedAlertsList } from "./VirtualizedAlertsList";
+import styles from "./DefensiveSidebar.module.css";
 
 const DefensiveSidebar = ({ alerts }) => {
   return (
     <aside className={styles.sidebar} aria-label="Live Alerts">
       {/* Sidebar Header */}
       <div className={styles.header}>
-        <h3 className={styles.title}>
-          🚨 LIVE ALERTS
-        </h3>
-        <div className={styles.count} aria-label={`${alerts.length} active alerts`}>
+        <h3 className={styles.title}>🚨 LIVE ALERTS</h3>
+        <div
+          className={styles.count}
+          aria-label={`${alerts.length} active alerts`}
+        >
           {alerts.length} active alerts
         </div>
       </div>
 
       {/* Virtualized Alerts List for 100x performance */}
-      <VirtualizedAlertsList
-        alerts={alerts}
-        ariaLabel="Live alerts feed"
-      />
+      <VirtualizedAlertsList alerts={alerts} ariaLabel="Live alerts feed" />
     </aside>
   );
 };
@@ -43,9 +41,12 @@ DefensiveSidebar.propTypes = {
       severity: PropTypes.string,
       message: PropTypes.string,
       source: PropTypes.string,
-      timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
-    })
-  ).isRequired
+      timestamp: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.instanceOf(Date),
+      ]),
+    }),
+  ).isRequired,
 };
 
 export default DefensiveSidebar;

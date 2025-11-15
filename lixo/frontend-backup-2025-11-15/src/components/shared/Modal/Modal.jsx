@@ -1,19 +1,19 @@
-import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useFocusTrap } from '../../../hooks/useFocusTrap';
-import styles from './Modal.module.css';
+import React, { useEffect } from "react";
+import PropTypes from "prop-types";
+import { useFocusTrap } from "../../../hooks/useFocusTrap";
+import styles from "./Modal.module.css";
 
 export const Modal = ({
   isOpen,
   onClose,
   title,
   children,
-  variant = 'cyber',
-  size = 'md',
+  variant = "cyber",
+  size = "md",
   footer,
   closeOnEscape = true,
   closeOnBackdrop = true,
-  className = '',
+  className = "",
   ariaLabel,
   ariaDescribedBy,
   ...props
@@ -24,29 +24,26 @@ export const Modal = ({
     autoFocus: true,
     returnFocus: true,
     onEscape: closeOnEscape ? onClose : null,
-    allowOutsideClick: false
+    allowOutsideClick: false,
   });
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const modalClasses = [
-    styles.modal,
-    styles[variant],
-    styles[size],
-    className
-  ].filter(Boolean).join(' ');
+  const modalClasses = [styles.modal, styles[variant], styles[size], className]
+    .filter(Boolean)
+    .join(" ");
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget && closeOnBackdrop) {
@@ -55,7 +52,11 @@ export const Modal = ({
   };
 
   return (
-    <div className={styles.backdrop} onClick={handleBackdropClick} role="presentation">
+    <div
+      className={styles.backdrop}
+      onClick={handleBackdropClick}
+      role="presentation"
+    >
       <div
         ref={modalRef}
         className={modalClasses}
@@ -67,7 +68,11 @@ export const Modal = ({
       >
         {/* Header */}
         <div className={styles.header}>
-          {title && <h3 className={styles.title} id="modal-title">{title}</h3>}
+          {title && (
+            <h3 className={styles.title} id="modal-title">
+              {title}
+            </h3>
+          )}
           <button
             type="button"
             className={styles.closeButton}
@@ -79,16 +84,15 @@ export const Modal = ({
         </div>
 
         {/* Body */}
-        <div className={styles.body} id={ariaDescribedBy || 'modal-description'}>
+        <div
+          className={styles.body}
+          id={ariaDescribedBy || "modal-description"}
+        >
           {children}
         </div>
 
         {/* Footer */}
-        {footer && (
-          <div className={styles.footer}>
-            {footer}
-          </div>
-        )}
+        {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </div>
   );
@@ -99,14 +103,14 @@ Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string,
   children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['cyber', 'default', 'dark']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
+  variant: PropTypes.oneOf(["cyber", "default", "dark"]),
+  size: PropTypes.oneOf(["sm", "md", "lg", "xl"]),
   footer: PropTypes.node,
   closeOnEscape: PropTypes.bool,
   closeOnBackdrop: PropTypes.bool,
   className: PropTypes.string,
   ariaLabel: PropTypes.string,
-  ariaDescribedBy: PropTypes.string
+  ariaDescribedBy: PropTypes.string,
 };
 
 export default Modal;

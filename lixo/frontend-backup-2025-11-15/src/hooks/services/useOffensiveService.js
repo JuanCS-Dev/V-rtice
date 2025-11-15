@@ -14,21 +14,21 @@
  * Governed by: Constituição Vértice v2.5 - ADR-002
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOffensiveService } from '@/services/offensive';
-import logger from '@/utils/logger';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getOffensiveService } from "@/services/offensive";
+import logger from "@/utils/logger";
 
 // Query keys for cache management
 export const offensiveQueryKeys = {
-  all: ['offensive'],
-  metrics: ['offensive', 'metrics'],
-  health: ['offensive', 'health'],
-  scans: ['offensive', 'scans'],
-  scan: (id) => ['offensive', 'scans', id],
-  workflows: ['offensive', 'workflows'],
-  workflow: (id) => ['offensive', 'workflows', id],
-  c2Sessions: ['offensive', 'c2', 'sessions'],
-  techniques: ['offensive', 'bas', 'techniques'],
+  all: ["offensive"],
+  metrics: ["offensive", "metrics"],
+  health: ["offensive", "health"],
+  scans: ["offensive", "scans"],
+  scan: (id) => ["offensive", "scans", id],
+  workflows: ["offensive", "workflows"],
+  workflow: (id) => ["offensive", "workflows", id],
+  c2Sessions: ["offensive", "c2", "sessions"],
+  techniques: ["offensive", "bas", "techniques"],
 };
 
 // ============================================================================
@@ -50,7 +50,7 @@ export const useOffensiveMetrics = (options = {}) => {
     refetchInterval: options.refetchInterval ?? 30000, // 30 seconds
     retry: 2,
     onError: (error) => {
-      logger.error('[useOffensiveMetrics] Failed to fetch metrics:', error);
+      logger.error("[useOffensiveMetrics] Failed to fetch metrics:", error);
     },
     ...options,
   });
@@ -134,7 +134,9 @@ export const useScanNetwork = () => {
 
       // Snapshot previous values
       const previousScans = queryClient.getQueryData(offensiveQueryKeys.scans);
-      const previousMetrics = queryClient.getQueryData(offensiveQueryKeys.metrics);
+      const previousMetrics = queryClient.getQueryData(
+        offensiveQueryKeys.metrics,
+      );
 
       // Create optimistic scan entry
       const optimisticScan = {
@@ -142,7 +144,7 @@ export const useScanNetwork = () => {
         target,
         scan_type: scanType,
         ports,
-        status: 'running',
+        status: "running",
         created_at: new Date().toISOString(),
         _optimistic: true, // Flag to identify optimistic updates
       };
@@ -168,13 +170,19 @@ export const useScanNetwork = () => {
       return { previousScans, previousMetrics, optimisticScan };
     },
     onError: (error, variables, context) => {
-      logger.error('[useScanNetwork] Scan failed:', error);
+      logger.error("[useScanNetwork] Scan failed:", error);
       // Rollback on error
       if (context?.previousScans) {
-        queryClient.setQueryData(offensiveQueryKeys.scans, context.previousScans);
+        queryClient.setQueryData(
+          offensiveQueryKeys.scans,
+          context.previousScans,
+        );
       }
       if (context?.previousMetrics) {
-        queryClient.setQueryData(offensiveQueryKeys.metrics, context.previousMetrics);
+        queryClient.setQueryData(
+          offensiveQueryKeys.metrics,
+          context.previousMetrics,
+        );
       }
     },
     onSuccess: (data, variables, context) => {
@@ -184,7 +192,7 @@ export const useScanNetwork = () => {
           if (!old) return [data];
           // Replace optimistic entry with real data
           return old.map((scan) =>
-            scan.id === context.optimisticScan.id ? data : scan
+            scan.id === context.optimisticScan.id ? data : scan,
           );
         });
       }
@@ -207,7 +215,7 @@ export const useDiscoverHosts = () => {
   return useMutation({
     mutationFn: ({ network }) => service.discoverHosts(network),
     onError: (error) => {
-      logger.error('[useDiscoverHosts] Discovery failed:', error);
+      logger.error("[useDiscoverHosts] Discovery failed:", error);
     },
   });
 };
@@ -226,7 +234,7 @@ export const useSearchCVE = () => {
   return useMutation({
     mutationFn: ({ cveId }) => service.searchCVE(cveId),
     onError: (error) => {
-      logger.error('[useSearchCVE] Search failed:', error);
+      logger.error("[useSearchCVE] Search failed:", error);
     },
   });
 };
@@ -239,9 +247,10 @@ export const useSearchVulnerabilities = () => {
   const service = getOffensiveService();
 
   return useMutation({
-    mutationFn: ({ query, filters }) => service.searchVulnerabilities(query, filters),
+    mutationFn: ({ query, filters }) =>
+      service.searchVulnerabilities(query, filters),
     onError: (error) => {
-      logger.error('[useSearchVulnerabilities] Search failed:', error);
+      logger.error("[useSearchVulnerabilities] Search failed:", error);
     },
   });
 };
@@ -256,7 +265,7 @@ export const useGetExploits = () => {
   return useMutation({
     mutationFn: ({ cveId }) => service.getExploits(cveId),
     onError: (error) => {
-      logger.error('[useGetExploits] Failed to get exploits:', error);
+      logger.error("[useGetExploits] Failed to get exploits:", error);
     },
   });
 };
@@ -280,7 +289,7 @@ export const useScanWebTarget = () => {
       queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useScanWebTarget] Web scan failed:', error);
+      logger.error("[useScanWebTarget] Web scan failed:", error);
     },
   });
 };
@@ -296,7 +305,7 @@ export const useRunWebTest = () => {
     mutationFn: ({ url, testType, params }) =>
       service.runWebTest(url, testType, params),
     onError: (error) => {
-      logger.error('[useRunWebTest] Test failed:', error);
+      logger.error("[useRunWebTest] Test failed:", error);
     },
   });
 };
@@ -335,11 +344,13 @@ export const useCreateC2Session = () => {
     mutationFn: ({ framework, targetHost, payload, config }) =>
       service.createC2Session(framework, targetHost, payload, config),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.c2Sessions });
+      queryClient.invalidateQueries({
+        queryKey: offensiveQueryKeys.c2Sessions,
+      });
       queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useCreateC2Session] Session creation failed:', error);
+      logger.error("[useCreateC2Session] Session creation failed:", error);
     },
   });
 };
@@ -355,7 +366,7 @@ export const useExecuteC2Command = () => {
     mutationFn: ({ sessionId, command, args }) =>
       service.executeC2Command(sessionId, command, args),
     onError: (error) => {
-      logger.error('[useExecuteC2Command] Command execution failed:', error);
+      logger.error("[useExecuteC2Command] Command execution failed:", error);
     },
   });
 };
@@ -371,7 +382,11 @@ export const useExecuteC2Command = () => {
  * @param {Object} options - React Query options
  * @returns {Object} Query result with techniques
  */
-export const useAttackTechniques = (tactic = null, platform = null, options = {}) => {
+export const useAttackTechniques = (
+  tactic = null,
+  platform = null,
+  options = {},
+) => {
   const service = getOffensiveService();
 
   return useQuery({
@@ -393,7 +408,7 @@ export const useRunAttackSimulation = () => {
     mutationFn: ({ techniqueId, targetHost, platform, params }) =>
       service.runAttackSimulation(techniqueId, targetHost, platform, params),
     onError: (error) => {
-      logger.error('[useRunAttackSimulation] Simulation failed:', error);
+      logger.error("[useRunAttackSimulation] Simulation failed:", error);
     },
   });
 };
@@ -408,7 +423,7 @@ export const useAttackCoverage = (organizationId = null, options = {}) => {
   const service = getOffensiveService();
 
   return useQuery({
-    queryKey: ['offensive', 'bas', 'coverage', organizationId],
+    queryKey: ["offensive", "bas", "coverage", organizationId],
     queryFn: () => service.getAttackCoverage(organizationId),
     staleTime: 30000,
     ...options,
@@ -449,7 +464,7 @@ export const useCreateWorkflow = () => {
       queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.workflows });
     },
     onError: (error) => {
-      logger.error('[useCreateWorkflow] Workflow creation failed:', error);
+      logger.error("[useCreateWorkflow] Workflow creation failed:", error);
     },
   });
 };
@@ -465,7 +480,7 @@ export const useExecuteWorkflow = () => {
     mutationFn: ({ workflowId, context }) =>
       service.executeWorkflow(workflowId, context),
     onError: (error) => {
-      logger.error('[useExecuteWorkflow] Workflow execution failed:', error);
+      logger.error("[useExecuteWorkflow] Workflow execution failed:", error);
     },
   });
 };

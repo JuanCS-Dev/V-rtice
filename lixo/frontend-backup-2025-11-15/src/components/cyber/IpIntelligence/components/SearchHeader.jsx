@@ -18,10 +18,10 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import { Input, Button } from '../../../shared';
-import { useKeyPress } from '../../../../hooks';
-import styles from './SearchHeader.module.css';
+import React from "react";
+import { Input, Button } from "../../../shared";
+import { useKeyPress } from "../../../../hooks";
+import styles from "./SearchHeader.module.css";
 
 export const SearchHeader = ({
   ipAddress,
@@ -31,9 +31,9 @@ export const SearchHeader = ({
   onAnalyze,
   onAnalyzeMyIP,
   searchHistory,
-  onSelectHistory
+  onSelectHistory,
 }) => {
-  useKeyPress('Enter', () => {
+  useKeyPress("Enter", () => {
     if (ipAddress.trim() && !loading && !loadingMyIp) {
       onAnalyze();
     }
@@ -54,8 +54,8 @@ export const SearchHeader = ({
         className={styles.searchBar}
         onSubmit={handleSubmit}
         role="search"
-        aria-label="IP intelligence search">
-
+        aria-label="IP intelligence search"
+      >
         <label htmlFor="ip-header-input" className={styles.visuallyHidden}>
           IP Address
         </label>
@@ -69,10 +69,16 @@ export const SearchHeader = ({
           disabled={loading}
           fullWidth
           className={styles.input}
-          aria-describedby={loading || loadingMyIp ? "ip-header-status" : undefined}
+          aria-describedby={
+            loading || loadingMyIp ? "ip-header-status" : undefined
+          }
         />
 
-        <div className={styles.actions} role="group" aria-label="Analysis actions">
+        <div
+          className={styles.actions}
+          role="group"
+          aria-label="Analysis actions"
+        >
           <Button
             type="submit"
             variant="cyber"
@@ -80,8 +86,9 @@ export const SearchHeader = ({
             disabled={loading || loadingMyIp || !ipAddress.trim()}
             loading={loading}
             fullWidth
-            aria-label="Analyze IP address">
-            {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
+            aria-label="Analyze IP address"
+          >
+            {loading ? "ANALISANDO..." : "EXECUTAR ANÁLISE"}
           </Button>
 
           <Button
@@ -92,29 +99,40 @@ export const SearchHeader = ({
             disabled={loading || loadingMyIp}
             loading={loadingMyIp}
             icon="fas fa-bullseye"
-            aria-label="Detect and analyze my IP address">
-            {loadingMyIp ? 'DETECTANDO...' : 'MEU IP'}
+            aria-label="Detect and analyze my IP address"
+          >
+            {loadingMyIp ? "DETECTANDO..." : "MEU IP"}
           </Button>
         </div>
       </form>
 
       {(loading || loadingMyIp) && (
-        <div id="ip-header-status" className={styles.visuallyHidden} role="status" aria-live="polite">
-          {loading ? 'Analyzing IP address...' : 'Detecting your IP address...'}
+        <div
+          id="ip-header-status"
+          className={styles.visuallyHidden}
+          role="status"
+          aria-live="polite"
+        >
+          {loading ? "Analyzing IP address..." : "Detecting your IP address..."}
         </div>
       )}
 
       {searchHistory.length > 0 && (
         <fieldset className={styles.history}>
           <legend className={styles.historyLabel}>HISTÓRICO:</legend>
-          <div className={styles.historyItems} role="group" aria-label="Recent IP searches">
+          <div
+            className={styles.historyItems}
+            role="group"
+            aria-label="Recent IP searches"
+          >
             {searchHistory.slice(0, 5).map((historicIP, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => onSelectHistory(historicIP)}
                 className={styles.historyItem}
-                aria-label={`Load IP ${historicIP}`}>
+                aria-label={`Load IP ${historicIP}`}
+              >
                 {historicIP}
               </button>
             ))}

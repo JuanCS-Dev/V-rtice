@@ -1,15 +1,15 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import styles from './EventsList.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import styles from "./EventsList.module.css";
 
 const getSeverityVariant = (severity) => {
   const variants = {
-    'critical': 'critical',
-    'high': 'high',
-    'medium': 'medium',
-    'info': 'cyber'
+    critical: "critical",
+    high: "high",
+    medium: "medium",
+    info: "cyber",
   };
-  return variants[severity] || 'default';
+  return variants[severity] || "default";
 };
 
 export const EventsList = ({ events }) => {
@@ -18,7 +18,9 @@ export const EventsList = ({ events }) => {
       <div className={styles.emptyState}>
         <i className="fas fa-satellite-dish" aria-hidden="true"></i>
         <p>Aguardando eventos de rede...</p>
-        <span className={styles.hint}>Inicie o monitoramento para ver eventos em tempo real</span>
+        <span className={styles.hint}>
+          Inicie o monitoramento para ver eventos em tempo real
+        </span>
       </div>
     );
   }

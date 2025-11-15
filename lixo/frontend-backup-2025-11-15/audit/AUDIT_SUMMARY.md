@@ -14,18 +14,19 @@
 
 ### Compliance Ranking (Best to Worst)
 
-| Rank | Dashboard | Violations | Compliance | Status |
-|------|-----------|------------|------------|--------|
-| 🥇 1 | OSINTDashboard | 12 | **88%** | ✅ EXCELLENT |
-| 🥈 2 | CyberDashboard | 18 | **82%** | ✅ VERY GOOD |
-| 🥉 3 | AdminDashboard (HITL) | 35 | **65%** | ⚠️ GOOD |
-| 4 | DefensiveDashboard | 35 | **65%** | ⚠️ GOOD |
-| 5 | ReactiveFabricDashboard | 42 | **58%** | ⚠️ MODERATE |
-| 6 | PurpleTeamDashboard | 53 | **42%** | ❌ LOW |
-| 7 | OffensiveDashboard | 89 | **11%** | ❌ CRITICAL |
-| 8 | MaximusDashboard | 68 | **32%** | ❌ CRITICAL |
+| Rank | Dashboard               | Violations | Compliance | Status       |
+| ---- | ----------------------- | ---------- | ---------- | ------------ |
+| 🥇 1 | OSINTDashboard          | 12         | **88%**    | ✅ EXCELLENT |
+| 🥈 2 | CyberDashboard          | 18         | **82%**    | ✅ VERY GOOD |
+| 🥉 3 | AdminDashboard (HITL)   | 35         | **65%**    | ⚠️ GOOD      |
+| 4    | DefensiveDashboard      | 35         | **65%**    | ⚠️ GOOD      |
+| 5    | ReactiveFabricDashboard | 42         | **58%**    | ⚠️ MODERATE  |
+| 6    | PurpleTeamDashboard     | 53         | **42%**    | ❌ LOW       |
+| 7    | OffensiveDashboard      | 89         | **11%**    | ❌ CRITICAL  |
+| 8    | MaximusDashboard        | 68         | **32%**    | ❌ CRITICAL  |
 
 **Classification:**
+
 - ✅ **EXCELLENT** (80%+): 2 dashboards
 - ⚠️ **GOOD/MODERATE** (50-79%): 4 dashboards
 - ❌ **CRITICAL** (<50%): 2 dashboards
@@ -37,6 +38,7 @@
 ### 1. Wrong Color Schemes - 3 Dashboards
 
 #### MaximusDashboard - RED Theme (68 violations)
+
 **Issue:** Uses **RED (#dc2626)** as primary color instead of **PURPLE (#8b5cf6)**
 
 ```css
@@ -60,6 +62,7 @@ background: var(--gradient-primary);
 ---
 
 #### ReactiveFabricDashboard - RED Theme (42 violations)
+
 **Issue:** Uses **RED (#dc2626)** as primary theme color
 
 ```css
@@ -82,6 +85,7 @@ text-shadow: var(--shadow-glow-purple);
 ---
 
 #### OffensiveDashboard - RED/Orange Theme (89 violations)
+
 **Issue:** Uses **RED (#ff4444, #ff0000)** and **ORANGE (#ff9500)** throughout
 
 ```css
@@ -101,6 +105,7 @@ border-left: 4px solid var(--color-success); /* #10b981 */
 ```
 
 **Additional Issues:**
+
 - Uses pure web colors (#ff0000, #00ff00) instead of design system colors
 - Mixes red theme with purple in headers
 
@@ -112,6 +117,7 @@ border-left: 4px solid var(--color-success); /* #10b981 */
 ### 2. Custom Color Schemes - 2 Dashboards
 
 #### AdminDashboard - Yellow/Gold Theme (35 violations)
+
 **Issue:** Uses **custom GOLD (#fbbf24)** not in design system
 
 ```css
@@ -139,6 +145,7 @@ color: var(--color-accent-primary);
 ---
 
 #### PurpleTeamDashboard - Custom Purple (53 violations)
+
 **Issue:** Uses **custom purple (#b366ff / rgb(179, 102, 255))** instead of design system purple
 
 ```css
@@ -163,20 +170,21 @@ filter: drop-shadow(var(--shadow-glow-purple));
 
 ### Total Violations: 310
 
-| Category | Count | % of Total | Priority |
-|----------|-------|------------|----------|
-| **Hardcoded Colors** | 142 | 45.8% | P0 |
-| **Hardcoded Spacing/Typography** | 89 | 28.7% | P1 |
-| **Wrong/Missing Hover Effects** | 54 | 17.4% | P1 |
-| **Hardcoded Border Radius** | 17 | 5.5% | P2 |
-| **Wrong Font Fallbacks** | 5 | 1.6% | P0 |
-| **Inline Styles** | 3 | 1.0% | P2 |
+| Category                         | Count | % of Total | Priority |
+| -------------------------------- | ----- | ---------- | -------- |
+| **Hardcoded Colors**             | 142   | 45.8%      | P0       |
+| **Hardcoded Spacing/Typography** | 89    | 28.7%      | P1       |
+| **Wrong/Missing Hover Effects**  | 54    | 17.4%      | P1       |
+| **Hardcoded Border Radius**      | 17    | 5.5%       | P2       |
+| **Wrong Font Fallbacks**         | 5     | 1.6%       | P0       |
+| **Inline Styles**                | 3     | 1.0%       | P2       |
 
 ---
 
 ## 🔍 Common Patterns Across Dashboards
 
 ### Pattern 1: Hardcoded rgba(0, 0, 0, ...) Backgrounds
+
 **Found in:** DefensiveDashboard, OffensiveDashboard, AdminDashboard
 
 ```css
@@ -197,6 +205,7 @@ background: var(--color-bg-overlay);
 ---
 
 ### Pattern 2: Hardcoded Spacing Values
+
 **Found in:** ALL dashboards except OSINTDashboard
 
 ```css
@@ -221,6 +230,7 @@ font-size: var(--text-2xl);
 ---
 
 ### Pattern 3: Wrong Card Hover Effects
+
 **Found in:** DefensiveDashboard, OffensiveDashboard, PurpleTeamDashboard, MaximusDashboard, ReactiveFabricDashboard
 
 ```css
@@ -249,6 +259,7 @@ font-size: var(--text-2xl);
 ---
 
 ### Pattern 4: Hardcoded Border Radius
+
 **Found in:** ALL dashboards
 
 ```css
@@ -269,6 +280,7 @@ border-radius: var(--radius-md);
 ---
 
 ### Pattern 5: Custom Color Variables with Fallbacks
+
 **Found in:** OSINTDashboard, CyberDashboard
 
 ```css
@@ -289,9 +301,11 @@ color: var(--color-text-primary);
 ## 🎯 Priority-Based Remediation Plan
 
 ### Phase 1: Critical Color Fixes (P0) - 2 weeks
+
 **Target Dashboards:** MaximusDashboard, OffensiveDashboard, ReactiveFabricDashboard, AdminDashboard
 
 **Tasks:**
+
 1. **MaximusDashboard** (12-16 hours)
    - Replace RED (#dc2626) → PURPLE (var(--color-accent-primary))
    - Replace custom CYAN (#00f0ff) → design CYAN (var(--color-accent-secondary))
@@ -318,10 +332,13 @@ color: var(--color-text-primary);
 ---
 
 ### Phase 2: Spacing & Typography (P1) - 1 week
+
 **Target:** ALL dashboards with spacing violations
 
 **Tasks:**
+
 1. **Global Find/Replace** (8 hours)
+
    ```bash
    # Spacing
    padding: 1rem → padding: var(--space-lg)
@@ -345,9 +362,11 @@ color: var(--color-text-primary);
 ---
 
 ### Phase 3: Hover Effects & Interactions (P1) - 1 week
+
 **Target:** DefensiveDashboard, OffensiveDashboard, PurpleTeamDashboard, MaximusDashboard, ReactiveFabricDashboard
 
 **Tasks:**
+
 1. **Standardize Card Hovers** (12 hours)
    - Update all `.card:hover` to standard pattern
    - Add scale(1.02) where missing
@@ -363,10 +382,13 @@ color: var(--color-text-primary);
 ---
 
 ### Phase 4: Border Radius & Polish (P2) - 2 days
+
 **Target:** ALL dashboards
 
 **Tasks:**
+
 1. **Replace Border Radius** (4 hours)
+
    ```bash
    border-radius: 8px → border-radius: var(--radius-lg)
    border-radius: 12px → border-radius: var(--radius-xl)
@@ -383,6 +405,7 @@ color: var(--color-text-primary);
 ---
 
 ### Total Remediation Estimate
+
 - **Phase 1 (P0):** 40-52 hours (~1.5 sprints)
 - **Phase 2 (P1):** 20 hours (~0.5 sprint)
 - **Phase 3 (P1):** 20 hours (~0.5 sprint)
@@ -397,18 +420,22 @@ color: var(--color-text-primary);
 ### Critical Priority Files (P0)
 
 #### MaximusDashboard (68 violations)
+
 1. `/src/components/maximus/MaximusDashboard.module.css` - 42 violations
 2. `/src/components/maximus/MaximusCore.css` - 26 violations
 
 #### OffensiveDashboard (89 violations)
+
 1. `/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css` - 23 violations
 2. `/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css` - 16 violations
 3. `/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css` - 50 violations
 
 #### ReactiveFabricDashboard (42 violations)
+
 1. `/src/components/reactive-fabric/ReactiveFabricDashboard.module.css` - 42 violations
 
 #### AdminDashboard (35 violations)
+
 1. `/src/components/AdminDashboard.module.css` - 23 violations
 2. `/src/components/admin/HITLConsole/HITLConsole.module.css` - 12 violations
 
@@ -417,11 +444,13 @@ color: var(--color-text-primary);
 ### High Priority Files (P1)
 
 #### PurpleTeamDashboard (53 violations)
+
 1. `/src/components/dashboards/PurpleTeamDashboard/components/SplitView.module.css` - 24 violations
 2. `/src/components/dashboards/PurpleTeamDashboard/components/UnifiedTimeline.module.css` - 16 violations
 3. `/src/components/dashboards/PurpleTeamDashboard/components/GapAnalysis.module.css` - 13 violations
 
 #### DefensiveDashboard (35 violations)
+
 1. `/src/components/dashboards/DefensiveDashboard/components/DefensiveSidebar.module.css` - 15 violations
 2. `/src/components/dashboards/DefensiveDashboard/DefensiveDashboard.module.css` - 11 violations
 3. `/src/components/dashboards/DefensiveDashboard/components/DefensiveHeader.module.css` - 9 violations
@@ -431,10 +460,12 @@ color: var(--color-text-primary);
 ### Good Standing Files (P2 - Minor fixes)
 
 #### CyberDashboard (18 violations)
+
 1. `/src/components/CyberDashboard.module.css` - 14 violations
 2. `/src/components/cyber/MaximusCyberHub/MaximusCyberHub.module.css` - 4 violations
 
 #### OSINTDashboard (12 violations)
+
 1. `/src/components/OSINTDashboard.module.css` - 7 violations
 2. `/src/components/osint/DarkWebModule/DarkWebModule.module.css` - 2 violations
 3. Other OSINT components - 3 violations
@@ -446,6 +477,7 @@ color: var(--color-text-primary);
 ### Global Find/Replace Operations
 
 #### RED to PURPLE (MaximusDashboard, OffensiveDashboard, ReactiveFabricDashboard)
+
 ```bash
 # Exact hex colors
 #dc2626 → var(--color-accent-primary)
@@ -472,6 +504,7 @@ rgba(139, 0, 0, 0.1) → rgba(109, 40, 217, 0.1)
 ```
 
 #### Custom CYAN to Design CYAN (MaximusDashboard)
+
 ```bash
 #00f0ff → var(--color-accent-secondary)
 rgba(0, 240, 255, 0.1) → rgba(6, 182, 212, 0.1)
@@ -483,6 +516,7 @@ rgba(0, 191, 255, 0.5) → rgba(6, 182, 212, 0.5)
 ```
 
 #### Custom Purple to Design Purple (PurpleTeamDashboard)
+
 ```bash
 #b366ff → var(--color-accent-primary)
 rgba(179, 102, 255, 0.2) → rgba(139, 92, 246, 0.2)
@@ -494,6 +528,7 @@ rgba(128, 0, 255, 0.2) → rgba(109, 40, 217, 0.2)
 ```
 
 #### Gold to Orange/Purple (AdminDashboard) - PENDING DECISION
+
 ```bash
 # OPTION A: Use design system warning (orange)
 #fbbf24 → var(--color-warning) # #f59e0b
@@ -509,6 +544,7 @@ rgba(251, 191, 36, 0.5) → var(--color-border-hover)
 ```
 
 #### Pure Web Colors to Design System (OffensiveDashboard)
+
 ```bash
 # Pure green to design green
 #00ff00 → var(--color-success) # #10b981
@@ -527,6 +563,7 @@ rgba(0, 255, 127, 0.3) → rgba(16, 185, 129, 0.3)
 ```
 
 #### Black Backgrounds to Design Tokens (ALL dashboards)
+
 ```bash
 rgba(0, 0, 0, 0.3) → var(--color-bg-elevated)
 rgba(0, 0, 0, 0.4) → var(--color-bg-secondary)
@@ -562,6 +599,7 @@ rgba(0, 0, 0, 0.5) → var(--color-bg-overlay)
 Based on common patterns across dashboards, these tokens should be added to the design system:
 
 #### 1. Status/Severity Background Colors
+
 ```css
 /* Add to /src/styles/tokens/colors.css */
 :root {
@@ -580,6 +618,7 @@ Based on common patterns across dashboards, these tokens should be added to the 
 ```
 
 #### 2. Layout Constants
+
 ```css
 /* Add to /src/styles/tokens/spacing.css */
 :root {
@@ -592,6 +631,7 @@ Based on common patterns across dashboards, these tokens should be added to the 
 ```
 
 #### 3. Text Shadow Tokens
+
 ```css
 /* Add to /src/styles/tokens/effects.css */
 :root {
@@ -603,6 +643,7 @@ Based on common patterns across dashboards, these tokens should be added to the 
 ```
 
 #### 4. Scrollbar Tokens
+
 ```css
 /* Add to /src/styles/tokens/effects.css */
 :root {
@@ -615,13 +656,14 @@ Based on common patterns across dashboards, these tokens should be added to the 
 ```
 
 #### 5. Micro Font Sizes
+
 ```css
 /* Add to /src/styles/tokens/typography.css */
 :root {
   /* Additional font sizes */
-  --text-2xs: 0.625rem;  /* 10px */
-  --text-7xl: 4.5rem;    /* 72px */
-  --text-8xl: 6rem;      /* 96px */
+  --text-2xs: 0.625rem; /* 10px */
+  --text-7xl: 4.5rem; /* 72px */
+  --text-8xl: 6rem; /* 96px */
 }
 ```
 
@@ -630,13 +672,16 @@ Based on common patterns across dashboards, these tokens should be added to the 
 ## ✅ Best Performers - Reference Examples
 
 ### 1. OSINTDashboard (88% compliance)
+
 **Why it's good:**
+
 - Minimal hardcoded colors (only 2)
 - Good use of CSS variables with fallbacks
 - Clean layout structure
 - Proper responsive design
 
 **Best Practices Observed:**
+
 ```css
 /* Good variable usage with fallback */
 color: var(--osint-primary, var(--color-accent-primary));
@@ -647,6 +692,7 @@ border-radius: var(--radius-lg);
 ```
 
 **Areas for Improvement:**
+
 - Replace custom purple rgba(168, 85, 247) with design system
 - Standardize sidebar width
 - Add explicit hover effects
@@ -654,13 +700,16 @@ border-radius: var(--radius-lg);
 ---
 
 ### 2. CyberDashboard (82% compliance)
+
 **Why it's good:**
+
 - Excellent color variable usage
 - Semantic CSS naming
 - Good responsive breakpoints
 - Proper font implementation
 
 **Best Practices Observed:**
+
 ```css
 /* Semantic color usage */
 .metricCard.critical {
@@ -676,6 +725,7 @@ border-radius: var(--radius-lg);
 ```
 
 **Areas for Improvement:**
+
 - Fix semantic color usage (offline vs danger)
 - Replace hardcoded spacing
 - Add explicit hover effects
@@ -685,6 +735,7 @@ border-radius: var(--radius-lg);
 ## 🔧 Recommended Tooling
 
 ### 1. Automated Find/Replace Script
+
 Create `/scripts/migrate-design-tokens.sh`:
 
 ```bash
@@ -715,6 +766,7 @@ echo "✅ Automated replacements complete. Manual verification required."
 ```
 
 ### 2. Validation Script
+
 Create `/scripts/validate-design-tokens.sh`:
 
 ```bash
@@ -738,6 +790,7 @@ echo "\n✅ Validation complete."
 ```
 
 ### 3. Pre-commit Hook
+
 Add to `.husky/pre-commit`:
 
 ```bash
@@ -761,18 +814,22 @@ fi
 ## 📚 Documentation Recommendations
 
 ### 1. Update Design System Reference
+
 Add to `/docs/design-system-reference.md`:
 
 **Section: "Common Migration Patterns"**
+
 - Color migration guide
 - Spacing token mapping
 - Hover effect standards
 - Component patterns
 
 ### 2. Create Component Style Guide
+
 New file: `/docs/component-style-guide.md`
 
 **Contents:**
+
 - Card hover pattern
 - Button hover pattern
 - Badge variants
@@ -781,9 +838,11 @@ New file: `/docs/component-style-guide.md`
 - Error states
 
 ### 3. Update Visual Standard JSON
+
 New file: `/audit/visual-standard-v2.json`
 
 **Add:**
+
 - Status color tokens
 - Layout constants
 - Text shadow tokens
@@ -794,6 +853,7 @@ New file: `/audit/visual-standard-v2.json`
 ## 🎯 Success Criteria
 
 ### Phase 1 (P0) Success:
+
 - [ ] MaximusDashboard uses PURPLE as primary
 - [ ] OffensiveDashboard uses PURPLE as primary
 - [ ] ReactiveFabricDashboard uses PURPLE as primary
@@ -803,22 +863,26 @@ New file: `/audit/visual-standard-v2.json`
 - [ ] Build passes with 0 errors
 
 ### Phase 2 (P1) Success:
+
 - [ ] All dashboards use spacing tokens (0 hardcoded rem/px)
 - [ ] All dashboards use typography tokens
 - [ ] All dashboards have 0 hardcoded rgba(0,0,0,...) backgrounds
 
 ### Phase 3 (P1) Success:
+
 - [ ] All card hovers use `translateY(-10px) scale(1.02)`
 - [ ] All button hovers include glow effects
 - [ ] All interactive elements have consistent transitions
 
 ### Phase 4 (P2) Success:
+
 - [ ] All border-radius use design tokens
 - [ ] Visual QA passes on all dashboards
 - [ ] Accessibility audit passes
 - [ ] Cross-browser testing complete
 
 ### Final Success Criteria:
+
 - [ ] **AVERAGE COMPLIANCE SCORE: 90%+**
 - [ ] All dashboards have <10 violations
 - [ ] 0 critical (P0) violations remaining
@@ -829,25 +893,27 @@ New file: `/audit/visual-standard-v2.json`
 
 ## 📊 Before/After Comparison (Projected)
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Avg Compliance** | 64.5% | **95%+** | +30.5% |
-| **Total Violations** | 310 | **<50** | -84% |
-| **P0 Violations** | 92 | **0** | -100% |
-| **P1 Violations** | 143 | **<30** | -79% |
-| **Dashboards at 90%+** | 0/8 | **8/8** | +100% |
+| Metric                 | Before | After    | Improvement |
+| ---------------------- | ------ | -------- | ----------- |
+| **Avg Compliance**     | 64.5%  | **95%+** | +30.5%      |
+| **Total Violations**   | 310    | **<50**  | -84%        |
+| **P0 Violations**      | 92     | **0**    | -100%       |
+| **P1 Violations**      | 143    | **<30**  | -79%        |
+| **Dashboards at 90%+** | 0/8    | **8/8**  | +100%       |
 
 ---
 
 ## 🚦 Next Steps
 
 ### Immediate Actions (This Week)
+
 1. **Decision Meeting:** Resolve AdminDashboard color theme question
 2. **Prioritize:** Confirm which dashboard to fix first (recommend: MaximusDashboard)
 3. **Setup:** Create git branch `fix/design-system-compliance`
 4. **Tooling:** Setup automated validation scripts
 
 ### Week 1-2: Phase 1 (P0)
+
 1. Fix MaximusDashboard color scheme
 2. Fix OffensiveDashboard color scheme
 3. Fix ReactiveFabricDashboard color scheme
@@ -855,12 +921,14 @@ New file: `/audit/visual-standard-v2.json`
 5. Fix PurpleTeamDashboard custom purple
 
 ### Week 3: Phase 2 & 3 (P1)
+
 1. Global spacing token replacement
 2. Global typography token replacement
 3. Standardize hover effects
 4. Add missing design system tokens
 
 ### Week 4: Phase 4 & Testing (P2)
+
 1. Border radius standardization
 2. Comprehensive testing
 3. Documentation updates
@@ -895,24 +963,28 @@ New file: `/audit/visual-standard-v2.json`
 **Current State:** Significant design system fragmentation across dashboards
 
 **Key Issues:**
+
 1. 3 dashboards use wrong color schemes (RED instead of PURPLE)
 2. 2 dashboards use custom colors not in design system
 3. Extensive hardcoded values throughout codebase
 4. Inconsistent hover effects and interactions
 
 **Remediation Plan:** Phased approach over 3-4 weeks
+
 - Phase 1: Fix critical color violations
 - Phase 2: Standardize spacing/typography
 - Phase 3: Fix interactions
 - Phase 4: Polish and test
 
 **Expected Outcome:**
+
 - Average compliance: 95%+
 - All dashboards visually consistent
 - Maintainable, token-based codebase
 - Automated validation in place
 
 **Impact:**
+
 - Improved user experience (consistent UI)
 - Easier maintenance (centralized design tokens)
 - Faster development (clear patterns to follow)

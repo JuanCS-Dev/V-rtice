@@ -22,17 +22,17 @@
  * @param {string} className - Additional CSS classes
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import './PanelCard.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./PanelCard.css";
 
 export const PanelCard = ({
   title,
   icon,
-  variant = 'primary',
+  variant = "primary",
   actions,
   children,
-  className = ''
+  className = "",
 }) => {
   const cardClasses = `panel-card panel-card-${variant} ${className}`;
 
@@ -41,15 +41,17 @@ export const PanelCard = ({
       {(title || icon || actions) && (
         <div className="panel-card-header">
           <div className="panel-card-title-section">
-            {icon && <span className="panel-card-icon" aria-hidden="true">{icon}</span>}
+            {icon && (
+              <span className="panel-card-icon" aria-hidden="true">
+                {icon}
+              </span>
+            )}
             {title && <h3 className="panel-card-title">{title}</h3>}
           </div>
           {actions && <div className="panel-card-actions">{actions}</div>}
         </div>
       )}
-      <div className="panel-card-content">
-        {children}
-      </div>
+      <div className="panel-card-content">{children}</div>
     </div>
   );
 };
@@ -57,10 +59,10 @@ export const PanelCard = ({
 PanelCard.propTypes = {
   title: PropTypes.string,
   icon: PropTypes.string,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'dark']),
+  variant: PropTypes.oneOf(["primary", "secondary", "dark"]),
   actions: PropTypes.node,
   children: PropTypes.node.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default PanelCard;

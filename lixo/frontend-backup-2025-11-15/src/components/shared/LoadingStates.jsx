@@ -3,23 +3,23 @@
  * MAXIMUS Vértice - Frontend Phase 3
  */
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import styles from './LoadingStates.module.css';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import styles from "./LoadingStates.module.css";
 
 /**
  * Spinner component - themed loading indicator
  */
-export const Spinner = ({ size = 'md', color = 'primary', className = '' }) => {
+export const Spinner = ({ size = "md", color = "primary", className = "" }) => {
   const sizeClasses = {
     sm: styles.spinnerSm,
     md: styles.spinnerMd,
     lg: styles.spinnerLg,
-    xl: styles.spinnerXl
+    xl: styles.spinnerXl,
   };
 
   return (
-    <div 
+    <div
       className={`${styles.spinner} ${sizeClasses[size]} ${styles[`spinner${color.charAt(0).toUpperCase() + color.slice(1)}`]} ${className}`}
       role="status"
       aria-label="Loading"
@@ -34,13 +34,13 @@ export const Spinner = ({ size = 'md', color = 'primary', className = '' }) => {
  */
 export const DashboardLoader = ({ message }) => {
   const { t } = useTranslation();
-  
+
   return (
     <div className={styles.dashboardLoader}>
       <div className={styles.loaderContent}>
         <Spinner size="xl" />
         <p className={styles.loaderText}>
-          {message || t('common.loading').toUpperCase()}...
+          {message || t("common.loading").toUpperCase()}...
         </p>
         <div className={styles.loaderPulse}></div>
       </div>
@@ -58,10 +58,10 @@ export const SkeletonCard = ({ lines = 3, hasImage = false }) => {
       <div className={styles.skeletonContent}>
         <div className={styles.skeletonTitle}></div>
         {Array.from({ length: lines }).map((_, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={styles.skeletonLine}
-            style={{ width: `${100 - (i * 10)}%` }}
+            style={{ width: `${100 - i * 10}%` }}
           ></div>
         ))}
       </div>
@@ -91,11 +91,11 @@ export const SkeletonList = ({ items = 5 }) => {
 /**
  * Progress bar with animation
  */
-export const ProgressBar = ({ 
-  progress = 0, 
-  label = '', 
+export const ProgressBar = ({
+  progress = 0,
+  label = "",
   showPercentage = true,
-  variant = 'primary' 
+  variant = "primary",
 }) => {
   return (
     <div className={styles.progressContainer}>
@@ -106,7 +106,7 @@ export const ProgressBar = ({
         </div>
       )}
       <div className={styles.progressTrack}>
-        <div 
+        <div
           className={`${styles.progressBar} ${styles[`progress${variant.charAt(0).toUpperCase() + variant.slice(1)}`]}`}
           style={{ width: `${progress}%` }}
           role="progressbar"
@@ -140,9 +140,7 @@ export const LoadingOverlay = ({ isLoading, children, blur = true }) => {
 
   return (
     <div className={styles.loadingOverlayContainer}>
-      <div className={blur ? styles.loadingOverlayBlurred : ''}>
-        {children}
-      </div>
+      <div className={blur ? styles.loadingOverlayBlurred : ""}>{children}</div>
       <div className={styles.loadingOverlay}>
         <Spinner size="lg" />
       </div>

@@ -9,12 +9,15 @@
  * @author Gemini
  */
 
-import React, { useCallback } from 'react';
-import { Card, Badge, LoadingSpinner, Alert } from '../../shared';
-import InvestigationForm from './components/InvestigationForm';
-import { useSocialMediaInvestigation } from './hooks/useSocialMediaInvestigation';
-import { getConfidenceBadge, formatExecutionTime } from '../../../api/worldClassTools';
-import styles from './SocialMediaWidget.module.css';
+import React, { useCallback } from "react";
+import { Card, Badge, LoadingSpinner, Alert } from "../../shared";
+import InvestigationForm from "./components/InvestigationForm";
+import { useSocialMediaInvestigation } from "./hooks/useSocialMediaInvestigation";
+import {
+  getConfidenceBadge,
+  formatExecutionTime,
+} from "../../../api/worldClassTools";
+import styles from "./SocialMediaWidget.module.css";
 
 export const SocialMediaWidget = () => {
   const { result, loading, error, investigate } = useSocialMediaInvestigation();
@@ -26,14 +29,14 @@ export const SocialMediaWidget = () => {
     if (!data || Object.keys(data).length === 0) return null;
 
     return (
-        <div className={styles.platformData}>
-            {Object.entries(data).map(([key, value]) => (
-                <div key={key} className={styles.dataRow}>
-                    <span className={styles.dataLabel}>{key}:</span>
-                    <span className={styles.dataValue}>{String(value)}</span>
-                </div>
-            ))}
-        </div>
+      <div className={styles.platformData}>
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className={styles.dataRow}>
+            <span className={styles.dataLabel}>{key}:</span>
+            <span className={styles.dataValue}>{String(value)}</span>
+          </div>
+        ))}
+      </div>
     );
   }, []);
 
@@ -74,15 +77,19 @@ export const SocialMediaWidget = () => {
               </div>
               {confidenceBadge && (
                 <div className={styles.statusItem}>
-                    <span className={styles.label}>CONFIDENCE:</span>
-                    <span className={`${styles.value} ${confidenceBadge.className}`}>
+                  <span className={styles.label}>CONFIDENCE:</span>
+                  <span
+                    className={`${styles.value} ${confidenceBadge.className}`}
+                  >
                     {confidenceBadge.icon} {result.confidence.toFixed(1)}%
-                    </span>
+                  </span>
                 </div>
               )}
               <div className={styles.statusItem}>
                 <span className={styles.label}>TEMPO:</span>
-                <span className={styles.value}>{formatExecutionTime(result.execution_time_ms)}</span>
+                <span className={styles.value}>
+                  {formatExecutionTime(result.execution_time_ms)}
+                </span>
               </div>
             </div>
 
@@ -96,10 +103,13 @@ export const SocialMediaWidget = () => {
                   {result.platforms_found.map((platform, index) => (
                     <div key={index} className={styles.platformCard}>
                       <div className={styles.platformHeader}>
-                        <Badge variant="osint" size="sm">{platform.platform}</Badge>
+                        <Badge variant="osint" size="sm">
+                          {platform.platform}
+                        </Badge>
                         {platform.verified && (
                           <Badge variant="success" size="sm">
-                            <i className="fas fa-check" aria-hidden="true"></i> VERIFICADO
+                            <i className="fas fa-check" aria-hidden="true"></i>{" "}
+                            VERIFICADO
                           </Badge>
                         )}
                       </div>
@@ -110,9 +120,14 @@ export const SocialMediaWidget = () => {
                           rel="noopener noreferrer"
                           className={styles.platformLink}
                         >
-                          <i className="fas fa-external-link-alt" aria-hidden="true"></i>
+                          <i
+                            className="fas fa-external-link-alt"
+                            aria-hidden="true"
+                          ></i>
                           {platform.url}
-                          <span className={styles.visuallyHidden}>(opens in a new tab)</span>
+                          <span className={styles.visuallyHidden}>
+                            (opens in a new tab)
+                          </span>
                         </a>
                       )}
                       {renderPlatformData(platform.data)}
@@ -130,7 +145,13 @@ export const SocialMediaWidget = () => {
                 </h5>
                 <div className={styles.insightsList}>
                   {result.insights.map((insight, index) => (
-                    <Alert key={index} variant="info" icon={<i className="fas fa-lightbulb" aria-hidden="true"></i>}>
+                    <Alert
+                      key={index}
+                      variant="info"
+                      icon={
+                        <i className="fas fa-lightbulb" aria-hidden="true"></i>
+                      }
+                    >
                       {insight}
                     </Alert>
                   ))}
@@ -140,8 +161,11 @@ export const SocialMediaWidget = () => {
 
             {result.warnings?.length > 0 && (
               <div className={styles.section}>
-                 <h5 className={styles.sectionTitle}>
-                  <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                <h5 className={styles.sectionTitle}>
+                  <i
+                    className="fas fa-exclamation-triangle"
+                    aria-hidden="true"
+                  ></i>
                   Warnings
                 </h5>
                 {result.warnings.map((warning, index) => (

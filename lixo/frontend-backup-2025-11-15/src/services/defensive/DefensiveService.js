@@ -17,20 +17,20 @@
  * Component → Hook → Service (THIS LAYER) → API Client
  */
 
-import { BaseService } from '../base/BaseService';
-import { ServiceEndpoints } from '@/config/endpoints';
-import logger from '@/utils/logger';
+import { BaseService } from "../base/BaseService";
+import { ServiceEndpoints } from "@/config/endpoints";
+import logger from "@/utils/logger";
 
 export class DefensiveService extends BaseService {
   constructor(client) {
     // Use RELATIVE PATH for API Gateway routing
     // BaseService will concatenate this with apiClient's API_BASE
-    super('/api/defensive', client);
+    super("/api/defensive", client);
 
     // Service-specific endpoints (relative paths)
     this.endpoints = {
-      core: '/api/defensive',
-      immune: '/api/v1/immune/defensive',
+      core: "/api/defensive",
+      immune: "/api/v1/immune/defensive",
     };
   }
 
@@ -50,12 +50,15 @@ export class DefensiveService extends BaseService {
   async analyzeEvent(eventData) {
     this.validateRequest(eventData);
 
-    return await this.client.post(`${this.endpoints.immune}/behavioral/analyze`, {
-      entity_id: eventData.entityId,
-      event_type: eventData.eventType,
-      timestamp: eventData.timestamp || new Date().toISOString(),
-      metadata: eventData.metadata || {},
-    });
+    return await this.client.post(
+      `${this.endpoints.immune}/behavioral/analyze`,
+      {
+        entity_id: eventData.entityId,
+        event_type: eventData.eventType,
+        timestamp: eventData.timestamp || new Date().toISOString(),
+        metadata: eventData.metadata || {},
+      },
+    );
   }
 
   /**
@@ -65,7 +68,7 @@ export class DefensiveService extends BaseService {
    */
   async analyzeBatchEvents(events) {
     if (!Array.isArray(events) || events.length === 0) {
-      throw new Error('Events array is required and must not be empty');
+      throw new Error("Events array is required and must not be empty");
     }
 
     const formattedEvents = events.map((e) => ({
@@ -75,9 +78,12 @@ export class DefensiveService extends BaseService {
       metadata: e.metadata || {},
     }));
 
-    return await this.client.post(`${this.endpoints.immune}/behavioral/analyze-batch`, {
-      events: formattedEvents,
-    });
+    return await this.client.post(
+      `${this.endpoints.immune}/behavioral/analyze-batch`,
+      {
+        events: formattedEvents,
+      },
+    );
   }
 
   /**
@@ -88,11 +94,11 @@ export class DefensiveService extends BaseService {
    */
   async trainBaseline(entityId, trainingEvents) {
     if (!entityId) {
-      throw new Error('Entity ID is required');
+      throw new Error("Entity ID is required");
     }
 
     if (!Array.isArray(trainingEvents) || trainingEvents.length === 0) {
-      throw new Error('Training events are required');
+      throw new Error("Training events are required");
     }
 
     const formattedEvents = trainingEvents.map((e) => ({
@@ -101,10 +107,13 @@ export class DefensiveService extends BaseService {
       metadata: e.metadata || {},
     }));
 
-    return await this.client.post(`${this.endpoints.immune}/behavioral/train-baseline`, {
-      entity_id: entityId,
-      training_events: formattedEvents,
-    });
+    return await this.client.post(
+      `${this.endpoints.immune}/behavioral/train-baseline`,
+      {
+        entity_id: entityId,
+        training_events: formattedEvents,
+      },
+    );
   }
 
   /**
@@ -114,12 +123,15 @@ export class DefensiveService extends BaseService {
    */
   async getBaselineStatus(entityId) {
     if (!entityId) {
-      throw new Error('Entity ID is required');
+      throw new Error("Entity ID is required");
     }
 
-    return await this.client.get(`${this.endpoints.immune}/behavioral/baseline-status`, {
-      params: { entity_id: entityId },
-    });
+    return await this.client.get(
+      `${this.endpoints.immune}/behavioral/baseline-status`,
+      {
+        params: { entity_id: entityId },
+      },
+    );
   }
 
   /**
@@ -158,7 +170,7 @@ export class DefensiveService extends BaseService {
       dest_ip: flowData.destIp,
       source_port: flowData.sourcePort,
       dest_port: flowData.destPort,
-      protocol: flowData.protocol || 'tcp',
+      protocol: flowData.protocol || "tcp",
       packet_sizes: flowData.packetSizes || [],
       inter_arrival_times: flowData.interArrivalTimes || [],
       tls_version: flowData.tlsVersion,
@@ -175,7 +187,7 @@ export class DefensiveService extends BaseService {
    */
   async analyzeBatchFlows(flows) {
     if (!Array.isArray(flows) || flows.length === 0) {
-      throw new Error('Flows array is required and must not be empty');
+      throw new Error("Flows array is required and must not be empty");
     }
 
     const formattedFlows = flows.map((f) => ({
@@ -183,7 +195,7 @@ export class DefensiveService extends BaseService {
       dest_ip: f.destIp,
       source_port: f.sourcePort,
       dest_port: f.destPort,
-      protocol: f.protocol || 'tcp',
+      protocol: f.protocol || "tcp",
       packet_sizes: f.packetSizes || [],
       inter_arrival_times: f.interArrivalTimes || [],
       tls_version: f.tlsVersion,
@@ -192,9 +204,12 @@ export class DefensiveService extends BaseService {
       flow_duration_seconds: f.flowDuration || 0,
     }));
 
-    return await this.client.post(`${this.endpoints.immune}/traffic/analyze-batch`, {
-      flows: formattedFlows,
-    });
+    return await this.client.post(
+      `${this.endpoints.immune}/traffic/analyze-batch`,
+      {
+        flows: formattedFlows,
+      },
+    );
   }
 
   /**
@@ -216,9 +231,12 @@ export class DefensiveService extends BaseService {
   async getMetrics() {
     try {
       // Fetch from Maximus Core health endpoint
-      const healthData = await this.client.get(`${this.endpoints.core}/health`, {
-        signal: AbortSignal.timeout(5000),
-      });
+      const healthData = await this.client.get(
+        `${this.endpoints.core}/health`,
+        {
+          signal: AbortSignal.timeout(5000),
+        },
+      );
 
       // Also fetch behavioral and traffic metrics
       const [behavioralMetrics, trafficMetrics] = await Promise.allSettled([
@@ -240,24 +258,25 @@ export class DefensiveService extends BaseService {
 
       // Extract from health data
       if (healthData) {
-        metrics.threats = healthData.memory_system?.episodic_stats?.investigations || 0;
+        metrics.threats =
+          healthData.memory_system?.episodic_stats?.investigations || 0;
         metrics.monitored = healthData.total_integrated_tools || 57;
       }
 
       // Extract from behavioral metrics
-      if (behavioralMetrics.status === 'fulfilled' && behavioralMetrics.value) {
+      if (behavioralMetrics.status === "fulfilled" && behavioralMetrics.value) {
         metrics.threats += behavioralMetrics.value.anomalies_detected || 0;
       }
 
       // Extract from traffic metrics
-      if (trafficMetrics.status === 'fulfilled' && trafficMetrics.value) {
+      if (trafficMetrics.status === "fulfilled" && trafficMetrics.value) {
         metrics.suspiciousIPs = trafficMetrics.value.suspicious_flows || 0;
         metrics.domains = trafficMetrics.value.monitored_domains || 0;
       }
 
       return metrics;
     } catch (error) {
-      logger.error('[DefensiveService] Failed to aggregate metrics:', error);
+      logger.error("[DefensiveService] Failed to aggregate metrics:", error);
       // Return zeros on error
       return {
         threats: 0,
@@ -279,9 +298,9 @@ export class DefensiveService extends BaseService {
   async getAlerts(filters = {}) {
     const params = new URLSearchParams();
 
-    if (filters.severity) params.append('severity', filters.severity);
-    if (filters.limit) params.append('limit', filters.limit);
-    if (filters.status) params.append('status', filters.status);
+    if (filters.severity) params.append("severity", filters.severity);
+    if (filters.limit) params.append("limit", filters.limit);
+    if (filters.status) params.append("status", filters.status);
 
     return await this.client.get(`${this.endpoints.core}/api/alerts?${params}`);
   }
@@ -293,10 +312,12 @@ export class DefensiveService extends BaseService {
    */
   async getAlert(alertId) {
     if (!alertId) {
-      throw new Error('Alert ID is required');
+      throw new Error("Alert ID is required");
     }
 
-    return await this.client.get(`${this.endpoints.core}/api/alerts/${alertId}`);
+    return await this.client.get(
+      `${this.endpoints.core}/api/alerts/${alertId}`,
+    );
   }
 
   /**
@@ -306,19 +327,22 @@ export class DefensiveService extends BaseService {
    * @param {string} notes - Optional notes
    * @returns {Promise<Object>} Updated alert
    */
-  async updateAlertStatus(alertId, status, notes = '') {
+  async updateAlertStatus(alertId, status, notes = "") {
     if (!alertId) {
-      throw new Error('Alert ID is required');
+      throw new Error("Alert ID is required");
     }
 
-    if (!['investigating', 'resolved', 'false_positive'].includes(status)) {
-      throw new Error('Invalid alert status');
+    if (!["investigating", "resolved", "false_positive"].includes(status)) {
+      throw new Error("Invalid alert status");
     }
 
-    return await this.client.put(`${this.endpoints.core}/api/alerts/${alertId}`, {
-      status,
-      notes,
-    });
+    return await this.client.put(
+      `${this.endpoints.core}/api/alerts/${alertId}`,
+      {
+        status,
+        notes,
+      },
+    );
   }
 
   // ============================================================================
@@ -333,7 +357,9 @@ export class DefensiveService extends BaseService {
   async queryIPThreatIntel(ipAddress) {
     this.validateIPAddress(ipAddress);
 
-    return await this.client.get(`${this.endpoints.core}/api/threat-intel/ip/${ipAddress}`);
+    return await this.client.get(
+      `${this.endpoints.core}/api/threat-intel/ip/${ipAddress}`,
+    );
   }
 
   /**
@@ -343,10 +369,12 @@ export class DefensiveService extends BaseService {
    */
   async queryDomainThreatIntel(domain) {
     if (!domain || domain.length === 0) {
-      throw new Error('Domain is required');
+      throw new Error("Domain is required");
     }
 
-    return await this.client.get(`${this.endpoints.core}/api/threat-intel/domain/${domain}`);
+    return await this.client.get(
+      `${this.endpoints.core}/api/threat-intel/domain/${domain}`,
+    );
   }
 
   /**
@@ -356,10 +384,12 @@ export class DefensiveService extends BaseService {
    */
   async queryHashThreatIntel(hash) {
     if (!hash || hash.length < 32) {
-      throw new Error('Valid hash is required');
+      throw new Error("Valid hash is required");
     }
 
-    return await this.client.get(`${this.endpoints.core}/api/threat-intel/hash/${hash}`);
+    return await this.client.get(
+      `${this.endpoints.core}/api/threat-intel/hash/${hash}`,
+    );
   }
 
   // ============================================================================
@@ -382,11 +412,11 @@ export class DefensiveService extends BaseService {
       ]);
 
       return {
-        core: coreHealth.status === 'fulfilled' && !!coreHealth.value,
-        immune: immuneHealth.status === 'fulfilled' && !!immuneHealth.value,
+        core: coreHealth.status === "fulfilled" && !!coreHealth.value,
+        immune: immuneHealth.status === "fulfilled" && !!immuneHealth.value,
       };
     } catch (error) {
-      logger.warn('[DefensiveService] Health check failed:', error);
+      logger.warn("[DefensiveService] Health check failed:", error);
       return {
         core: false,
         immune: false,
@@ -406,18 +436,24 @@ export class DefensiveService extends BaseService {
    */
   validateRequest(data) {
     // Basic validation
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid request data');
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid request data");
     }
 
     // Validate entity ID
-    if (data.entityId !== undefined && (!data.entityId || data.entityId.length === 0)) {
-      throw new Error('Invalid entity ID');
+    if (
+      data.entityId !== undefined &&
+      (!data.entityId || data.entityId.length === 0)
+    ) {
+      throw new Error("Invalid entity ID");
     }
 
     // Validate event type
-    if (data.eventType !== undefined && (!data.eventType || data.eventType.length === 0)) {
-      throw new Error('Invalid event type');
+    if (
+      data.eventType !== undefined &&
+      (!data.eventType || data.eventType.length === 0)
+    ) {
+      throw new Error("Invalid event type");
     }
 
     // Validate IP addresses
@@ -450,15 +486,15 @@ export class DefensiveService extends BaseService {
   validateIPAddress(ip) {
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipRegex.test(ip)) {
-      throw new Error('Invalid IP address format');
+      throw new Error("Invalid IP address format");
     }
 
     // Validate each octet is 0-255
-    const parts = ip.split('.');
+    const parts = ip.split(".");
     for (const part of parts) {
       const num = parseInt(part, 10);
       if (num < 0 || num > 255) {
-        throw new Error('Invalid IP address format');
+        throw new Error("Invalid IP address format");
       }
     }
   }
@@ -470,8 +506,8 @@ export class DefensiveService extends BaseService {
    * @private
    */
   validatePort(port) {
-    if (typeof port !== 'number' || port < 0 || port > 65535) {
-      throw new Error('Invalid port number');
+    if (typeof port !== "number" || port < 0 || port > 65535) {
+      throw new Error("Invalid port number");
     }
   }
 
@@ -483,7 +519,7 @@ export class DefensiveService extends BaseService {
    */
   transformResponse(response) {
     // Transform common response patterns
-    if (response && typeof response === 'object') {
+    if (response && typeof response === "object") {
       // Ensure success field exists
       if (response.success === undefined) {
         response.success = true;

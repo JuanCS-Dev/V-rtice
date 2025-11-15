@@ -9,7 +9,7 @@
   flex-direction: column;
   background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
   color: var(--color-text-primary, #ffffff);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
   position: relative;
 }

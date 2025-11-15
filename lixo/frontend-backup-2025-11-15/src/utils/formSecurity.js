@@ -5,8 +5,8 @@
  * Boris Cherny Standard - Type-safe form handling
  */
 
-import * as validation from './validation';
-import sanitization from './sanitization';
+import * as validation from "./validation";
+import sanitization from "./sanitization";
 
 // ============================================================================
 // SECURE INPUT HANDLERS
@@ -33,7 +33,7 @@ export function createSecureHandler(
   setState,
   validator = null,
   sanitizer = sanitization.sanitizePlainText,
-  setError = null
+  setError = null,
 ) {
   return (event) => {
     const rawValue = event.target?.value ?? event;
@@ -154,20 +154,27 @@ export function createSecureSubmitHandler(validations, onSuccess, setErrors) {
  * />
  * {ipField.error && <span>{ipField.error}</span>}
  */
-export function useSecureField(initialValue = '', validator = null, sanitizer = sanitization.sanitizePlainText) {
+export function useSecureField(
+  initialValue = "",
+  validator = null,
+  sanitizer = sanitization.sanitizePlainText,
+) {
   const [value, setValue] = React.useState(initialValue);
   const [error, setError] = React.useState(null);
 
-  const onChange = React.useCallback((event) => {
-    const rawValue = event.target?.value ?? event;
-    const sanitized = sanitizer(rawValue);
-    setValue(sanitized);
+  const onChange = React.useCallback(
+    (event) => {
+      const rawValue = event.target?.value ?? event;
+      const sanitized = sanitizer(rawValue);
+      setValue(sanitized);
 
-    // Clear error on change
-    if (error) {
-      setError(null);
-    }
-  }, [sanitizer, error]);
+      // Clear error on change
+      if (error) {
+        setError(null);
+      }
+    },
+    [sanitizer, error],
+  );
 
   const onBlur = React.useCallback(() => {
     if (validator) {
@@ -190,7 +197,7 @@ export function useSecureField(initialValue = '', validator = null, sanitizer = 
 }
 
 // Note: Import React where this hook is used
-import React from 'react';
+import React from "react";
 
 // ============================================================================
 // PRE-CONFIGURED FIELD TYPES
@@ -204,73 +211,78 @@ export const FIELD_TYPES = {
     validator: validation.validateIP,
     sanitizer: sanitization.sanitizeIP,
     maxLength: 45, // IPv6 max length
-    placeholder: 'e.g., 192.168.1.1',
+    placeholder: "e.g., 192.168.1.1",
   },
 
   EMAIL: {
     validator: validation.validateEmail,
     sanitizer: sanitization.sanitizeEmail,
     maxLength: 500,
-    placeholder: 'email@example.com',
-    type: 'email',
+    placeholder: "email@example.com",
+    type: "email",
   },
 
   PORT: {
     validator: validation.validatePorts,
     sanitizer: sanitization.sanitizePort,
     maxLength: 100,
-    placeholder: 'e.g., 80,443,8080-8090',
+    placeholder: "e.g., 80,443,8080-8090",
   },
 
   CVE: {
     validator: validation.validateCVE,
     sanitizer: sanitization.sanitizePlainText,
     maxLength: 50,
-    placeholder: 'CVE-2021-44228',
+    placeholder: "CVE-2021-44228",
   },
 
   DOMAIN: {
     validator: validation.validateDomain,
     sanitizer: sanitization.sanitizeDomain,
     maxLength: 500,
-    placeholder: 'example.com',
+    placeholder: "example.com",
   },
 
   URL: {
     validator: validation.validateURL,
     sanitizer: sanitization.sanitizeURL,
     maxLength: 1000,
-    placeholder: 'https://example.com',
-    type: 'url',
+    placeholder: "https://example.com",
+    type: "url",
   },
 
   PHONE: {
     validator: validation.validatePhone,
     sanitizer: sanitization.sanitizePlainText,
     maxLength: 20,
-    placeholder: '+1 (555) 123-4567',
-    type: 'tel',
+    placeholder: "+1 (555) 123-4567",
+    type: "tel",
   },
 
   USERNAME: {
     validator: validation.validateUsername,
     sanitizer: sanitization.sanitizePlainText,
     maxLength: 100,
-    placeholder: 'username',
+    placeholder: "username",
   },
 
   NMAP_ARGS: {
     validator: validation.validateNmapArgs,
     sanitizer: sanitization.sanitizeCommandArgs,
     maxLength: 500,
-    placeholder: '-sV -A',
+    placeholder: "-sV -A",
   },
 
   SEARCH: {
-    validator: (value) => validation.validateText(value, { minLength: 2, maxLength: 1000, fieldName: 'Search query' }),
+    validator: (value) =>
+      validation.validateText(value, {
+        minLength: 2,
+        maxLength: 1000,
+        fieldName: "Search query",
+      }),
     sanitizer: sanitization.sanitizeSearchQuery,
     maxLength: 1000,
-    placeholder: 'Search...',
+    placeholder: "Search...",
   },
 };
 
@@ -284,7 +296,7 @@ export const FIELD_TYPES = {
  * @example
  * const ipField = useTypedField('IP', '');
  */
-export function useTypedField(fieldType, initialValue = '') {
+export function useTypedField(fieldType, initialValue = "") {
   const config = FIELD_TYPES[fieldType];
   if (!config) {
     throw new Error(`Unknown field type: ${fieldType}`);
@@ -319,9 +331,9 @@ export function getSecureInputProps(fieldType, field, additionalProps = {}) {
     onBlur: field.onBlur,
     maxLength: config.maxLength,
     placeholder: config.placeholder,
-    type: config.type || 'text',
-    'aria-invalid': !field.isValid,
-    'aria-describedby': field.error ? `${additionalProps.id}-error` : undefined,
+    type: config.type || "text",
+    "aria-invalid": !field.isValid,
+    "aria-describedby": field.error ? `${additionalProps.id}-error` : undefined,
     ...additionalProps,
   };
 }

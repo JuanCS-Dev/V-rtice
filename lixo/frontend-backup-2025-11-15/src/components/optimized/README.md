@@ -7,12 +7,14 @@ Components optimized with React.memo, useMemo, and useCallback
 ### When to Use React.memo
 
 ✅ **DO use React.memo when:**
+
 - Component renders often with same props
 - Component has expensive render logic
 - Component is in a list of items
 - Component receives object/array props that don't change
 
 ❌ **DON'T use React.memo when:**
+
 - Component rarely re-renders
 - Props change frequently
 - Render logic is trivial (< 1ms)
@@ -37,10 +39,7 @@ const data = useMemo(() => ({ value: count }), [count]);
 ```javascript
 // For complex prop comparisons
 const areEqual = (prevProps, nextProps) => {
-  return (
-    prevProps.id === nextProps.id &&
-    prevProps.value === nextProps.value
-  );
+  return prevProps.id === nextProps.id && prevProps.value === nextProps.value;
 };
 
 export const MyComponent = React.memo(Component, areEqual);
@@ -49,6 +48,7 @@ export const MyComponent = React.memo(Component, areEqual);
 ## Component Examples
 
 See the following optimized components:
+
 - `MemoizedMetricCard.jsx` - Dashboard metrics
 - `MemoizedAlertItem.jsx` - Alert list items
 - `MemoizedExecutionItem.jsx` - Execution list items
@@ -59,7 +59,7 @@ See the following optimized components:
 Before optimizing, measure:
 
 ```javascript
-import { Profiler } from 'react';
+import { Profiler } from "react";
 
 <Profiler
   id="ComponentName"
@@ -68,7 +68,7 @@ import { Profiler } from 'react';
   }}
 >
   <Component />
-</Profiler>
+</Profiler>;
 ```
 
 ## Resources

@@ -5,10 +5,10 @@
  * Tests for offensive dashboard metrics hook
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useOffensiveMetrics } from '../useOffensiveMetrics';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useOffensiveMetrics } from "../useOffensiveMetrics";
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -25,12 +25,12 @@ const createWrapper = () => {
   );
 };
 
-describe('useOffensiveMetrics Hook', () => {
+describe("useOffensiveMetrics Hook", () => {
   beforeEach(() => {
     global.fetch = vi.fn();
   });
 
-  it('should fetch offensive metrics successfully', async () => {
+  it("should fetch offensive metrics successfully", async () => {
     const mockHealthData = {
       offensive_stats: {
         active_scans: 5,
@@ -61,7 +61,7 @@ describe('useOffensiveMetrics Hook', () => {
     });
   });
 
-  it('should return default values when no stats available', async () => {
+  it("should return default values when no stats available", async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({}),
@@ -83,7 +83,7 @@ describe('useOffensiveMetrics Hook', () => {
     });
   });
 
-  it('should handle API errors', async () => {
+  it("should handle API errors", async () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 503,
@@ -100,7 +100,7 @@ describe('useOffensiveMetrics Hook', () => {
     expect(result.current.error).toBeTruthy();
   });
 
-  it('should refetch on interval', async () => {
+  it("should refetch on interval", async () => {
     vi.useFakeTimers();
 
     global.fetch.mockResolvedValue({

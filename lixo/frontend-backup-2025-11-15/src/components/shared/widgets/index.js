@@ -11,17 +11,12 @@
  * - PanelCard: Generic panel container with title and actions
  */
 
-import { MetricCard } from './MetricCard';
-import { ModuleStatusCard } from './ModuleStatusCard';
-import { ActivityItem } from './ActivityItem';
-import { PanelCard } from './PanelCard';
+import { MetricCard } from "./MetricCard";
+import { ModuleStatusCard } from "./ModuleStatusCard";
+import { ActivityItem } from "./ActivityItem";
+import { PanelCard } from "./PanelCard";
 
-export {
-  MetricCard,
-  ModuleStatusCard,
-  ActivityItem,
-  PanelCard,
-};
+export { MetricCard, ModuleStatusCard, ActivityItem, PanelCard };
 
 export default {
   MetricCard,

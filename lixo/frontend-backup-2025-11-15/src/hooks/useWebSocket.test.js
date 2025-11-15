@@ -13,19 +13,19 @@
  * - Polling fallback
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useWebSocket } from './useWebSocket';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useWebSocket } from "./useWebSocket";
 import {
   createMockWSServer,
   cleanupWSMocks,
   simulateWSDisconnection,
-  simulateWSError
-} from '@/tests/helpers/websocket';
+  simulateWSError,
+} from "@/tests/helpers/websocket";
 
-describe('useWebSocket - Scientific Tests', () => {
+describe("useWebSocket - Scientific Tests", () => {
   let server;
-  const TEST_URL = 'ws://localhost:8000/ws/test';
+  const TEST_URL = "ws://localhost:8000/ws/test";
 
   beforeEach(() => {
     // Create fresh mock server for each test
@@ -37,8 +37,8 @@ describe('useWebSocket - Scientific Tests', () => {
     cleanupWSMocks();
   });
 
-  describe('Connection Lifecycle', () => {
-    it('should connect to WebSocket server on mount', async () => {
+  describe("Connection Lifecycle", () => {
+    it("should connect to WebSocket server on mount", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       // Wait for connection
@@ -50,7 +50,7 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should disconnect on unmount', async () => {
+    it("should disconnect on unmount", async () => {
       const { unmount } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
@@ -62,7 +62,7 @@ describe('useWebSocket - Scientific Tests', () => {
       await server.closed;
     });
 
-    it('should handle manual reconnect', async () => {
+    it("should handle manual reconnect", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
@@ -88,13 +88,13 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should reconnect automatically after disconnection', async () => {
+    it("should reconnect automatically after disconnection", async () => {
       renderHook(() =>
         useWebSocket(TEST_URL, {
           reconnect: true,
           reconnectInterval: 100,
-          maxReconnectAttempts: 3
-        })
+          maxReconnectAttempts: 3,
+        }),
       );
 
       await server.connected;
@@ -111,14 +111,14 @@ describe('useWebSocket - Scientific Tests', () => {
     }, 5000);
   });
 
-  describe('Message Handling', () => {
-    it('should receive messages from server', async () => {
+  describe("Message Handling", () => {
+    it("should receive messages from server", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
 
       // Server sends message
-      const testMessage = { type: 'test', data: 'hello' };
+      const testMessage = { type: "test", data: "hello" };
       server.send(testMessage);
 
       // Verify message received
@@ -127,84 +127,84 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should send messages to server when connected', async () => {
+    it("should send messages to server when connected", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
 
       // Send message
-      const testMessage = { type: 'client-message' };
+      const testMessage = { type: "client-message" };
       result.current.send(testMessage);
 
       // Verify server received message
       await expect(server).toReceiveMessage(testMessage);
     });
 
-    it('should ignore pong messages', async () => {
+    it("should ignore pong messages", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
 
       // Send regular message first
-      server.send({ type: 'data', value: 'test' });
+      server.send({ type: "data", value: "test" });
 
       await waitFor(() => {
-        expect(result.current.data).toEqual({ type: 'data', value: 'test' });
+        expect(result.current.data).toEqual({ type: "data", value: "test" });
       });
 
       // Send pong message
-      server.send({ type: 'pong' });
+      server.send({ type: "pong" });
 
       // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Data should not update (still the previous message)
-      expect(result.current.data).toEqual({ type: 'data', value: 'test' });
+      expect(result.current.data).toEqual({ type: "data", value: "test" });
     });
 
-    it('should handle multiple messages in sequence', async () => {
+    it("should handle multiple messages in sequence", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
 
       // Send first message
-      server.send({ type: 'msg1' });
+      server.send({ type: "msg1" });
       await waitFor(() => {
-        expect(result.current.data).toEqual({ type: 'msg1' });
+        expect(result.current.data).toEqual({ type: "msg1" });
       });
 
       // Send second message
-      server.send({ type: 'msg2' });
+      server.send({ type: "msg2" });
       await waitFor(() => {
-        expect(result.current.data).toEqual({ type: 'msg2' });
+        expect(result.current.data).toEqual({ type: "msg2" });
       });
 
       // Send third message
-      server.send({ type: 'msg3' });
+      server.send({ type: "msg3" });
       await waitFor(() => {
-        expect(result.current.data).toEqual({ type: 'msg3' });
+        expect(result.current.data).toEqual({ type: "msg3" });
       });
     });
   });
 
-  describe('Message Queuing', () => {
-    it('should queue messages when offline', async () => {
+  describe("Message Queuing", () => {
+    it("should queue messages when offline", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       // Don't wait for connection - send while offline
-      result.current.send({ type: 'queued1' });
-      result.current.send({ type: 'queued2' });
+      result.current.send({ type: "queued1" });
+      result.current.send({ type: "queued2" });
 
       // Verify messages are queued
       expect(result.current.queuedMessages).toBe(2);
     });
 
-    it('should send queued messages when connected', async () => {
+    it("should send queued messages when connected", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       // Send while offline
-      result.current.send({ type: 'queued1' });
-      result.current.send({ type: 'queued2' });
+      result.current.send({ type: "queued1" });
+      result.current.send({ type: "queued2" });
 
       expect(result.current.queuedMessages).toBe(2);
 
@@ -212,8 +212,8 @@ describe('useWebSocket - Scientific Tests', () => {
       await server.connected;
 
       // Verify messages were sent
-      await expect(server).toReceiveMessage({ type: 'queued1' });
-      await expect(server).toReceiveMessage({ type: 'queued2' });
+      await expect(server).toReceiveMessage({ type: "queued1" });
+      await expect(server).toReceiveMessage({ type: "queued2" });
 
       // Queue should be empty
       await waitFor(() => {
@@ -221,7 +221,7 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should queue messages after disconnection', async () => {
+    it("should queue messages after disconnection", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
@@ -235,21 +235,21 @@ describe('useWebSocket - Scientific Tests', () => {
       });
 
       // Send while disconnected
-      result.current.send({ type: 'offline-message' });
+      result.current.send({ type: "offline-message" });
 
       expect(result.current.queuedMessages).toBe(1);
     });
   });
 
-  describe('Heartbeat', () => {
-    it('should send heartbeat messages at specified interval', async () => {
+  describe("Heartbeat", () => {
+    it("should send heartbeat messages at specified interval", async () => {
       vi.useFakeTimers();
 
       const { result } = renderHook(() =>
         useWebSocket(TEST_URL, {
           heartbeatInterval: 1000,
-          heartbeatMessage: JSON.stringify({ type: 'ping' })
-        })
+          heartbeatMessage: JSON.stringify({ type: "ping" }),
+        }),
       );
 
       await server.connected;
@@ -262,25 +262,25 @@ describe('useWebSocket - Scientific Tests', () => {
       await vi.advanceTimersByTimeAsync(1000);
 
       // Should have received heartbeat
-      await expect(server).toReceiveMessage({ type: 'ping' });
+      await expect(server).toReceiveMessage({ type: "ping" });
 
       // Fast-forward another second
       await vi.advanceTimersByTimeAsync(1000);
 
       // Should receive another heartbeat
-      await expect(server).toReceiveMessage({ type: 'ping' });
+      await expect(server).toReceiveMessage({ type: "ping" });
 
       vi.useRealTimers();
     }, 20000);
 
-    it('should stop heartbeat on disconnection', async () => {
+    it("should stop heartbeat on disconnection", async () => {
       vi.useFakeTimers();
 
       const { result } = renderHook(() =>
         useWebSocket(TEST_URL, {
           heartbeatInterval: 1000,
-          heartbeatMessage: JSON.stringify({ type: 'ping' })
-        })
+          heartbeatMessage: JSON.stringify({ type: "ping" }),
+        }),
       );
 
       await server.connected;
@@ -303,12 +303,10 @@ describe('useWebSocket - Scientific Tests', () => {
     }, 20000);
   });
 
-  describe('Error Handling', () => {
-    it('should handle connection errors', async () => {
+  describe("Error Handling", () => {
+    it("should handle connection errors", async () => {
       const onError = vi.fn();
-      const { result } = renderHook(() =>
-        useWebSocket(TEST_URL, { onError })
-      );
+      const { result } = renderHook(() => useWebSocket(TEST_URL, { onError }));
 
       await server.connected;
 
@@ -321,7 +319,7 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should set error state on connection error', async () => {
+    it("should set error state on connection error", async () => {
       const { result } = renderHook(() => useWebSocket(TEST_URL));
 
       await server.connected;
@@ -336,8 +334,8 @@ describe('useWebSocket - Scientific Tests', () => {
     });
   });
 
-  describe('Custom Callbacks', () => {
-    it('should call onOpen callback when connected', async () => {
+  describe("Custom Callbacks", () => {
+    it("should call onOpen callback when connected", async () => {
       const onOpen = vi.fn();
 
       renderHook(() => useWebSocket(TEST_URL, { onOpen }));
@@ -350,7 +348,7 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should call onMessage callback when message received', async () => {
+    it("should call onMessage callback when message received", async () => {
       const onMessage = vi.fn();
 
       renderHook(() => useWebSocket(TEST_URL, { onMessage }));
@@ -358,7 +356,7 @@ describe('useWebSocket - Scientific Tests', () => {
       await server.connected;
 
       // Send message
-      server.send({ type: 'test' });
+      server.send({ type: "test" });
 
       // Verify callback was called
       await waitFor(() => {
@@ -366,7 +364,7 @@ describe('useWebSocket - Scientific Tests', () => {
       });
     });
 
-    it('should call onClose callback when disconnected', async () => {
+    it("should call onClose callback when disconnected", async () => {
       const onClose = vi.fn();
 
       renderHook(() => useWebSocket(TEST_URL, { onClose }));
@@ -384,13 +382,13 @@ describe('useWebSocket - Scientific Tests', () => {
     });
   });
 
-  describe('Polling Fallback', () => {
-    it('should fallback to polling after max reconnect attempts', async () => {
+  describe("Polling Fallback", () => {
+    it("should fallback to polling after max reconnect attempts", async () => {
       vi.useFakeTimers();
 
-      const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValue({
+      const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
         ok: true,
-        json: async () => ({ data: 'polled' })
+        json: async () => ({ data: "polled" }),
       });
 
       const { result } = renderHook(() =>
@@ -399,8 +397,8 @@ describe('useWebSocket - Scientific Tests', () => {
           maxReconnectAttempts: 2,
           reconnectInterval: 100,
           fallbackToPolling: true,
-          pollingInterval: 1000
-        })
+          pollingInterval: 1000,
+        }),
       );
 
       await server.connected;
@@ -415,17 +413,23 @@ describe('useWebSocket - Scientific Tests', () => {
       await vi.advanceTimersByTimeAsync(400);
 
       // Should fallback to polling
-      await waitFor(() => {
-        expect(result.current.usePolling).toBe(true);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.usePolling).toBe(true);
+        },
+        { timeout: 5000 },
+      );
 
       // Fast-forward to trigger poll
       await vi.advanceTimersByTimeAsync(1000);
 
       // Verify fetch was called
-      await waitFor(() => {
-        expect(fetchSpy).toHaveBeenCalled();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(fetchSpy).toHaveBeenCalled();
+        },
+        { timeout: 5000 },
+      );
 
       fetchSpy.mockRestore();
       vi.useRealTimers();

@@ -1,5 +1,5 @@
 .distributed-topology-widget {
-  background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+  background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
   border-radius: 12px;
   padding: 20px;
   color: #e0e0e0;
@@ -193,7 +193,11 @@
 }
 
 .metric-card.primary {
-  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(79, 172, 254, 0.1) 0%,
+    rgba(0, 242, 254, 0.1) 100%
+  );
   border-left-width: 4px;
 }
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './ServicesStatus.module.css';
+import React from "react";
+import styles from "./ServicesStatus.module.css";
 
 export const ServicesStatus = ({ services }) => {
   return (

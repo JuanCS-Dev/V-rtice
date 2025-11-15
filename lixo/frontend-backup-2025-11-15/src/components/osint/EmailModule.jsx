@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { apiClient } from '@/api/client';
-import logger from '@/utils/logger';
+import React, { useState } from "react";
+import { apiClient } from "@/api/client";
+import logger from "@/utils/logger";
 
 const EmailModule = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
   const handleAnalyze = async () => {
     if (!email.trim()) {
-      alert('Digite um email para analisar');
+      alert("Digite um email para analisar");
       return;
     }
 
@@ -19,16 +19,18 @@ const EmailModule = () => {
     setResult(null);
 
     try {
-      const data = await apiClient.post('/api/email/analyze', { email: email.trim() });
+      const data = await apiClient.post("/api/email/analyze", {
+        email: email.trim(),
+      });
 
-      if (data.status === 'success' && data.data) {
+      if (data.status === "success" && data.data) {
         setResult(data.data);
       } else {
-        setError(data.detail || 'Erro ao analisar email');
+        setError(data.detail || "Erro ao analisar email");
       }
     } catch (err) {
-      setError('Erro de conexão com o serviço OSINT');
-      logger.error('Erro:', err);
+      setError("Erro de conexão com o serviço OSINT");
+      logger.error("Erro:", err);
     } finally {
       setAnalyzing(false);
     }
@@ -56,7 +58,7 @@ const EmailModule = () => {
             onClick={handleAnalyze}
             disabled={analyzing}
           >
-            {analyzing ? '📧 ANALISANDO...' : '🔍 ANALISAR EMAIL'}
+            {analyzing ? "📧 ANALISANDO..." : "🔍 ANALISAR EMAIL"}
           </button>
         </div>
 
@@ -80,27 +82,35 @@ const EmailModule = () => {
             )}
 
             <div className="bg-black/40 border border-red-400/30 rounded-lg p-4">
-              <h4 className="text-red-400 font-medium mb-2">⚠️ Risk Assessment</h4>
+              <h4 className="text-red-400 font-medium mb-2">
+                ⚠️ Risk Assessment
+              </h4>
               <div className="space-y-2">
                 <p className="text-red-300">
-                  <span className="font-bold">Level:</span> {result.risk_assessment?.risk_level || 'UNKNOWN'}
+                  <span className="font-bold">Level:</span>{" "}
+                  {result.risk_assessment?.risk_level || "UNKNOWN"}
                 </p>
                 <p className="text-red-300">
-                  <span className="font-bold">Score:</span> {result.risk_assessment?.risk_score || 0}/100
+                  <span className="font-bold">Score:</span>{" "}
+                  {result.risk_assessment?.risk_score || 0}/100
                 </p>
                 <p className="text-red-300">
-                  <span className="font-bold">Confidence:</span> {result.confidence_score || 0}%
+                  <span className="font-bold">Confidence:</span>{" "}
+                  {result.confidence_score || 0}%
                 </p>
               </div>
             </div>
 
             {result.recommendations && result.recommendations.length > 0 && (
               <div className="bg-black/40 border border-yellow-400/30 rounded-lg p-4">
-                <h4 className="text-yellow-400 font-medium mb-2">💡 Recommendations</h4>
+                <h4 className="text-yellow-400 font-medium mb-2">
+                  💡 Recommendations
+                </h4>
                 <ul className="space-y-2">
                   {result.recommendations.map((rec, idx) => (
                     <li key={idx} className="text-yellow-300 text-sm">
-                      • <span className="font-bold">{rec.action}:</span> {rec.description}
+                      • <span className="font-bold">{rec.action}:</span>{" "}
+                      {rec.description}
                     </li>
                   ))}
                 </ul>
@@ -109,10 +119,15 @@ const EmailModule = () => {
 
             {result.data_sources && result.data_sources.length > 0 && (
               <div className="bg-black/40 border border-cyan-400/30 rounded-lg p-4">
-                <h4 className="text-cyan-400 font-medium mb-2">📊 Data Sources</h4>
+                <h4 className="text-cyan-400 font-medium mb-2">
+                  📊 Data Sources
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {result.data_sources.map((source, idx) => (
-                    <span key={idx} className="bg-cyan-400/20 border border-cyan-400/50 text-cyan-300 px-2 py-1 rounded text-xs">
+                    <span
+                      key={idx}
+                      className="bg-cyan-400/20 border border-cyan-400/50 text-cyan-300 px-2 py-1 rounded text-xs"
+                    >
                       {source}
                     </span>
                   ))}

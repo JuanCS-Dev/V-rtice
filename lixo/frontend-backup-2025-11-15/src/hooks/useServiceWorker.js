@@ -11,47 +11,49 @@
  * const { isOffline, hasUpdate, updateServiceWorker, cacheSize } = useServiceWorker();
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   register,
   isOffline as checkOffline,
   getCacheSize,
   clearCaches,
   sendMessageToSW,
-} from '@/utils/serviceWorkerRegistration';
-import logger from '@/utils/logger';
+} from "@/utils/serviceWorkerRegistration";
+import logger from "@/utils/logger";
 
 export const useServiceWorker = () => {
   const [isOffline, setIsOffline] = useState(checkOffline());
   const [hasUpdate, setHasUpdate] = useState(false);
   const [registration, setRegistration] = useState(null);
   const [cacheSize, setCacheSize] = useState(0);
-  const [isSupported, setIsSupported] = useState('serviceWorker' in navigator);
+  const [isSupported, setIsSupported] = useState("serviceWorker" in navigator);
 
   // Register service worker on mount
   useEffect(() => {
     if (!isSupported) {
-      logger.warn('[useServiceWorker] Service Worker not supported');
+      logger.warn("[useServiceWorker] Service Worker not supported");
       return;
     }
 
     register({
       onSuccess: (reg) => {
-        logger.info('[useServiceWorker] Service worker registered successfully');
+        logger.info(
+          "[useServiceWorker] Service worker registered successfully",
+        );
         setRegistration(reg);
         updateCacheSize();
       },
       onUpdate: (reg) => {
-        logger.info('[useServiceWorker] Service worker update available');
+        logger.info("[useServiceWorker] Service worker update available");
         setHasUpdate(true);
         setRegistration(reg);
       },
       onOnline: () => {
-        logger.info('[useServiceWorker] App is online');
+        logger.info("[useServiceWorker] App is online");
         setIsOffline(false);
       },
       onOffline: () => {
-        logger.warn('[useServiceWorker] App is offline');
+        logger.warn("[useServiceWorker] App is offline");
         setIsOffline(true);
       },
     });
@@ -67,21 +69,21 @@ export const useServiceWorker = () => {
   // Listen for online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      logger.info('[useServiceWorker] Online event');
+      logger.info("[useServiceWorker] Online event");
       setIsOffline(false);
     };
 
     const handleOffline = () => {
-      logger.warn('[useServiceWorker] Offline event');
+      logger.warn("[useServiceWorker] Offline event");
       setIsOffline(true);
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -90,21 +92,21 @@ export const useServiceWorker = () => {
     try {
       const size = await getCacheSize();
       setCacheSize(size);
-      logger.debug('[useServiceWorker] Cache size:', size);
+      logger.debug("[useServiceWorker] Cache size:", size);
     } catch (error) {
-      logger.error('[useServiceWorker] Failed to get cache size:', error);
+      logger.error("[useServiceWorker] Failed to get cache size:", error);
     }
   }, []);
 
   // Update service worker
   const updateServiceWorker = useCallback(() => {
     if (registration && registration.waiting) {
-      logger.info('[useServiceWorker] Activating service worker update');
-      sendMessageToSW({ type: 'SKIP_WAITING' });
+      logger.info("[useServiceWorker] Activating service worker update");
+      sendMessageToSW({ type: "SKIP_WAITING" });
 
       // Reload page after SW activates
       let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (!refreshing) {
           refreshing = true;
           window.location.reload();
@@ -116,26 +118,29 @@ export const useServiceWorker = () => {
   // Clear all caches
   const clearAllCaches = useCallback(async () => {
     try {
-      logger.info('[useServiceWorker] Clearing all caches');
+      logger.info("[useServiceWorker] Clearing all caches");
       await clearCaches();
       await updateCacheSize();
-      logger.info('[useServiceWorker] Caches cleared successfully');
+      logger.info("[useServiceWorker] Caches cleared successfully");
     } catch (error) {
-      logger.error('[useServiceWorker] Failed to clear caches:', error);
+      logger.error("[useServiceWorker] Failed to clear caches:", error);
     }
   }, [updateCacheSize]);
 
   // Cache specific URLs
-  const cacheUrls = useCallback((urls) => {
-    if (!Array.isArray(urls) || urls.length === 0) {
-      logger.warn('[useServiceWorker] Invalid URLs provided for caching');
-      return;
-    }
+  const cacheUrls = useCallback(
+    (urls) => {
+      if (!Array.isArray(urls) || urls.length === 0) {
+        logger.warn("[useServiceWorker] Invalid URLs provided for caching");
+        return;
+      }
 
-    logger.info('[useServiceWorker] Caching URLs:', urls);
-    sendMessageToSW({ type: 'CACHE_URLS', payload: { urls } });
-    updateCacheSize();
-  }, [updateCacheSize]);
+      logger.info("[useServiceWorker] Caching URLs:", urls);
+      sendMessageToSW({ type: "CACHE_URLS", payload: { urls } });
+      updateCacheSize();
+    },
+    [updateCacheSize],
+  );
 
   return {
     // State

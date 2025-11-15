@@ -2,7 +2,7 @@
  * 🏢 ENTERPRISE DESIGN TOKENS
  * Microsoft Fluent Design 2.0 Inspired
  * Professional, clean, corporate aesthetic
- * 
+ *
  * Architecture: 3-Layer Token System
  * 1. Primitive - Raw values
  * 2. Semantic - Design decisions
@@ -20,7 +20,7 @@
   --primitive-blue-200: #80caf0;
   --primitive-blue-300: #4db6eb;
   --primitive-blue-400: #1aa1e6;
-  --primitive-blue-500: #0078d4;  /* Microsoft Blue */
+  --primitive-blue-500: #0078d4; /* Microsoft Blue */
   --primitive-blue-600: #005a9e;
   --primitive-blue-700: #004578;
   --primitive-blue-800: #003052;
@@ -40,45 +40,45 @@
 
   /* === SEMANTIC COLORS === */
   --primitive-success-50: #dff6dd;
-  --primitive-success-500: #107c10;  /* Green */
+  --primitive-success-500: #107c10; /* Green */
   --primitive-success-700: #0b5a0b;
 
   --primitive-warning-50: #fff4ce;
-  --primitive-warning-500: #ffb900;  /* Yellow */
+  --primitive-warning-500: #ffb900; /* Yellow */
   --primitive-warning-700: #b38300;
 
   --primitive-error-50: #fde7e9;
-  --primitive-error-500: #d13438;  /* Red */
+  --primitive-error-500: #d13438; /* Red */
   --primitive-error-700: #922529;
 
   --primitive-info-50: #e6f3fa;
-  --primitive-info-500: #0078d4;  /* Blue */
+  --primitive-info-500: #0078d4; /* Blue */
   --primitive-info-700: #005a9e;
 
   /* === SPACING SCALE (8px grid) === */
   --primitive-space-0: 0;
-  --primitive-space-1: 0.25rem;   /* 4px */
-  --primitive-space-2: 0.5rem;    /* 8px */
-  --primitive-space-3: 0.75rem;   /* 12px */
-  --primitive-space-4: 1rem;      /* 16px */
-  --primitive-space-5: 1.25rem;   /* 20px */
-  --primitive-space-6: 1.5rem;    /* 24px */
-  --primitive-space-8: 2rem;      /* 32px */
-  --primitive-space-10: 2.5rem;   /* 40px */
-  --primitive-space-12: 3rem;     /* 48px */
-  --primitive-space-16: 4rem;     /* 64px */
-  --primitive-space-20: 5rem;     /* 80px */
+  --primitive-space-1: 0.25rem; /* 4px */
+  --primitive-space-2: 0.5rem; /* 8px */
+  --primitive-space-3: 0.75rem; /* 12px */
+  --primitive-space-4: 1rem; /* 16px */
+  --primitive-space-5: 1.25rem; /* 20px */
+  --primitive-space-6: 1.5rem; /* 24px */
+  --primitive-space-8: 2rem; /* 32px */
+  --primitive-space-10: 2.5rem; /* 40px */
+  --primitive-space-12: 3rem; /* 48px */
+  --primitive-space-16: 4rem; /* 64px */
+  --primitive-space-20: 5rem; /* 80px */
 
   /* === TYPOGRAPHY SCALE === */
-  --primitive-font-size-xs: 0.75rem;    /* 12px */
-  --primitive-font-size-sm: 0.875rem;   /* 14px */
-  --primitive-font-size-base: 1rem;     /* 16px */
-  --primitive-font-size-lg: 1.125rem;   /* 18px */
-  --primitive-font-size-xl: 1.25rem;    /* 20px */
-  --primitive-font-size-2xl: 1.5rem;    /* 24px */
-  --primitive-font-size-3xl: 1.875rem;  /* 30px */
-  --primitive-font-size-4xl: 2.25rem;   /* 36px */
-  --primitive-font-size-5xl: 3rem;      /* 48px */
+  --primitive-font-size-xs: 0.75rem; /* 12px */
+  --primitive-font-size-sm: 0.875rem; /* 14px */
+  --primitive-font-size-base: 1rem; /* 16px */
+  --primitive-font-size-lg: 1.125rem; /* 18px */
+  --primitive-font-size-xl: 1.25rem; /* 20px */
+  --primitive-font-size-2xl: 1.5rem; /* 24px */
+  --primitive-font-size-3xl: 1.875rem; /* 30px */
+  --primitive-font-size-4xl: 2.25rem; /* 36px */
+  --primitive-font-size-5xl: 3rem; /* 48px */
 
   /* === FONT WEIGHTS === */
   --primitive-font-weight-light: 300;
@@ -96,21 +96,25 @@
   /* === SHADOWS (Elevation) === */
   --primitive-shadow-none: none;
   --primitive-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --primitive-shadow-default: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --primitive-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
-  --primitive-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-  --primitive-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --primitive-shadow-default:
+    0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --primitive-shadow-md:
+    0 4px 6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --primitive-shadow-lg:
+    0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --primitive-shadow-xl:
+    0 20px 25px rgba(0, 0, 0, 0.12), 0 10px 10px rgba(0, 0, 0, 0.04);
   --primitive-shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
 
   /* === BORDER RADIUS === */
   --primitive-radius-none: 0;
-  --primitive-radius-sm: 0.125rem;   /* 2px */
-  --primitive-radius-default: 0.25rem;  /* 4px */
-  --primitive-radius-md: 0.375rem;   /* 6px */
-  --primitive-radius-lg: 0.5rem;     /* 8px */
-  --primitive-radius-xl: 0.75rem;    /* 12px */
-  --primitive-radius-2xl: 1rem;      /* 16px */
-  --primitive-radius-full: 9999px;   /* Circular */
+  --primitive-radius-sm: 0.125rem; /* 2px */
+  --primitive-radius-default: 0.25rem; /* 4px */
+  --primitive-radius-md: 0.375rem; /* 6px */
+  --primitive-radius-lg: 0.5rem; /* 8px */
+  --primitive-radius-xl: 0.75rem; /* 12px */
+  --primitive-radius-2xl: 1rem; /* 16px */
+  --primitive-radius-full: 9999px; /* Circular */
 
   /* === TRANSITIONS === */
   --primitive-duration-instant: 50ms;
@@ -136,7 +140,6 @@
   --primitive-z-notification: 1080;
   --primitive-z-max: 9999;
 }
-
 
 /* ========================================
    LAYER 2: SEMANTIC TOKENS (Design Decisions)
@@ -218,9 +221,11 @@
   --spacing-3xl: var(--primitive-space-16);
 
   /* === TYPOGRAPHY SYSTEM === */
-  --font-family-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  --font-family-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
-  
+  --font-family-primary:
+    "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-family-mono: "Cascadia Code", "Consolas", "Courier New", monospace;
+
   --font-size-xs: var(--primitive-font-size-xs);
   --font-size-sm: var(--primitive-font-size-sm);
   --font-size-base: var(--primitive-font-size-base);
@@ -252,9 +257,11 @@
   --border-radius-full: var(--primitive-radius-full);
 
   /* === ANIMATION SYSTEM === */
-  --transition-instant: var(--primitive-duration-instant) var(--primitive-ease-out);
+  --transition-instant: var(--primitive-duration-instant)
+    var(--primitive-ease-out);
   --transition-fast: var(--primitive-duration-fast) var(--primitive-ease-out);
-  --transition-normal: var(--primitive-duration-normal) var(--primitive-ease-out);
+  --transition-normal: var(--primitive-duration-normal)
+    var(--primitive-ease-out);
   --transition-slow: var(--primitive-duration-slow) var(--primitive-ease-in-out);
 
   /* === Z-INDEX SYSTEM === */
@@ -267,7 +274,6 @@
   --z-popover: var(--primitive-z-popover);
   --z-tooltip: var(--primitive-z-tooltip);
 }
-
 
 /* ========================================
    LAYER 3: COMPONENT TOKENS (Contextual)
@@ -365,23 +371,22 @@
   --badge-padding-y: var(--spacing-xs);
 }
 
-
 /* ========================================
    ENTERPRISE CHART PALETTE
    ======================================== */
 
 :root {
   /* Professional color palette for data visualization */
-  --chart-color-1: #0078d4;   /* Primary blue */
-  --chart-color-2: #107c10;   /* Success green */
-  --chart-color-3: #ffb900;   /* Warning yellow */
-  --chart-color-4: #d13438;   /* Error red */
-  --chart-color-5: #00b7c3;   /* Teal */
-  --chart-color-6: #8764b8;   /* Purple */
-  --chart-color-7: #f7630c;   /* Orange */
-  --chart-color-8: #ca5010;   /* Dark orange */
-  --chart-color-9: #038387;   /* Dark teal */
-  --chart-color-10: #004e8c;  /* Dark blue */
+  --chart-color-1: #0078d4; /* Primary blue */
+  --chart-color-2: #107c10; /* Success green */
+  --chart-color-3: #ffb900; /* Warning yellow */
+  --chart-color-4: #d13438; /* Error red */
+  --chart-color-5: #00b7c3; /* Teal */
+  --chart-color-6: #8764b8; /* Purple */
+  --chart-color-7: #f7630c; /* Orange */
+  --chart-color-8: #ca5010; /* Dark orange */
+  --chart-color-9: #038387; /* Dark teal */
+  --chart-color-10: #004e8c; /* Dark blue */
 
   /* Chart backgrounds */
   --chart-bg-primary: var(--color-bg-card);
@@ -390,7 +395,6 @@
   --chart-text-color: var(--color-text-secondary);
   --chart-axis-color: var(--color-border-default);
 }
-
 
 /* ========================================
    ACCESSIBILITY TOKENS
@@ -404,8 +408,8 @@
   --focus-ring-style: solid;
 
   /* Minimum contrast ratios (WCAG AA) */
-  --contrast-minimum: 4.5;  /* Normal text */
-  --contrast-large: 3.0;     /* Large text (18px+ or 14px+ bold) */
+  --contrast-minimum: 4.5; /* Normal text */
+  --contrast-large: 3; /* Large text (18px+ or 14px+ bold) */
 
   /* Motion reduction (respects prefers-reduced-motion) */
   --motion-duration-default: var(--primitive-duration-normal);
@@ -421,32 +425,31 @@
   }
 }
 
-
 /* ========================================
    DOCUMENTATION & USAGE NOTES
    ======================================== */
 
 /*
  * Token Usage Guidelines:
- * 
+ *
  * 1. ALWAYS use component tokens in components
  *    ✅ background: var(--card-bg);
  *    ❌ background: var(--color-bg-card);
  *    ❌ background: #ffffff;
- * 
+ *
  * 2. Use semantic tokens for custom components
  *    ✅ color: var(--color-text-primary);
  *    ❌ color: var(--primitive-gray-900);
- * 
+ *
  * 3. NEVER use primitive tokens directly in components
  *    (except when creating new semantic/component tokens)
- * 
+ *
  * 4. Maintain 3-layer hierarchy:
  *    Components → Semantic → Primitive
- * 
+ *
  * 5. Add new tokens following the pattern:
  *    --[layer]-[category]-[property]-[variant]
- * 
+ *
  * Examples:
  *   --primitive-blue-500         (Layer 1)
  *   --color-text-primary          (Layer 2)

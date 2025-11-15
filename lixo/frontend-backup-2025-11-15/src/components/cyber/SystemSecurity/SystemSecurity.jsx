@@ -22,17 +22,17 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import AskMaximusButton from '../../shared/AskMaximusButton';
-import { useSystemSecurity } from './hooks/useSystemSecurity';
-import { SecurityHeader } from './components/SecurityHeader';
-import { AnalysisPanel } from './components/AnalysisPanel';
-import styles from './SystemSecurity.module.css';
+import React from "react";
+import AskMaximusButton from "../../shared/AskMaximusButton";
+import { useSystemSecurity } from "./hooks/useSystemSecurity";
+import { SecurityHeader } from "./components/SecurityHeader";
+import { AnalysisPanel } from "./components/AnalysisPanel";
+import styles from "./SystemSecurity.module.css";
 
 export const SystemSecurity = () => {
   const { securityData, loading, lastUpdate, refresh } = useSystemSecurity();
 
-  const isAnalyzing = Object.values(loading).some(l => l);
+  const isAnalyzing = Object.values(loading).some((l) => l);
 
   return (
     <article
@@ -41,26 +41,30 @@ export const SystemSecurity = () => {
       aria-labelledby="system-security-title"
       data-maximus-tool="system-security"
       data-maximus-category="shared"
-      data-maximus-status={isAnalyzing ? 'analyzing' : 'ready'}>
-
+      data-maximus-status={isAnalyzing ? "analyzing" : "ready"}
+    >
       <header
         role="region"
         aria-label="System security header"
-        data-maximus-section="header">
-        <h2 id="system-security-title" className={styles.visuallyHidden}>System Security</h2>
+        data-maximus-section="header"
+      >
+        <h2 id="system-security-title" className={styles.visuallyHidden}>
+          System Security
+        </h2>
         <SecurityHeader lastUpdate={lastUpdate} onRefresh={refresh} />
       </header>
 
       <section
-        style={{ margin: '1rem 0' }}
+        style={{ margin: "1rem 0" }}
         role="region"
         aria-label="AI assistance"
-        data-maximus-section="ai-assistance">
+        data-maximus-section="ai-assistance"
+      >
         <AskMaximusButton
           context={{
-            type: 'system_security',
+            type: "system_security",
             data: securityData,
-            lastUpdate
+            lastUpdate,
           }}
           prompt="Analyze this system security status and identify vulnerabilities, misconfigurations, or security risks"
           size="medium"
@@ -72,7 +76,8 @@ export const SystemSecurity = () => {
         className={styles.panels}
         role="region"
         aria-label="Security analysis panels"
-        data-maximus-section="analysis-panels">
+        data-maximus-section="analysis-panels"
+      >
         <AnalysisPanel
           title="ANÁLISE DE PORTAS"
           icon="🔍"

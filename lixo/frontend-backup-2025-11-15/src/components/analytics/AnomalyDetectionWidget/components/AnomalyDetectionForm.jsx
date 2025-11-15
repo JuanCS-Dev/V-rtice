@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../../../shared";
-import { validateNumericCSV } from '../../../../utils/validation';
-import { sanitizePlainText } from '../../../../utils/sanitization';
+import { validateNumericCSV } from "../../../../utils/validation";
+import { sanitizePlainText } from "../../../../utils/sanitization";
 import styles from "./AnomalyDetectionForm.module.css";
 
 const METHODS = [
@@ -61,7 +61,7 @@ const AnomalyDetectionForm = ({
 
     // Validate before submission
     if (!dataInput.trim()) {
-      setDataError('Data is required');
+      setDataError("Data is required");
       return;
     }
 
@@ -111,7 +111,8 @@ const AnomalyDetectionForm = ({
           onClick={onGenerateSample}
           disabled={loading}
         >
-          <i className="fas fa-magic" aria-hidden="true"></i> Gerar Dados de Exemplo
+          <i className="fas fa-magic" aria-hidden="true"></i> Gerar Dados de
+          Exemplo
         </button>
       </div>
 

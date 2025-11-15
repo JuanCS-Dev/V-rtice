@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './AccessDenied.module.css';
+import React from "react";
+import styles from "./AccessDenied.module.css";
 
 export const AccessDenied = () => {
   return (

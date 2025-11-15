@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useCallback } from "react";
+import logger from "@/utils/logger";
 import {
   searchCVE as apiSearchCVE,
   searchVulnerabilities,
   getExploits as apiGetExploits,
   correlateWithScan as apiCorrelate,
-} from '../../../../api/offensiveServices';
+} from "../../../../api/offensiveServices";
 
 /**
  * useVulnIntel - Hook para Vulnerability Intelligence
@@ -40,7 +40,7 @@ export const useVulnIntel = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error searching CVE:', err);
+      logger.error("Error searching CVE:", err);
       setError(err.message);
       setCurrentCVE(null);
       return { success: false, error: err.message };
@@ -69,7 +69,7 @@ export const useVulnIntel = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error searching vulnerabilities:', err);
+      logger.error("Error searching vulnerabilities:", err);
       setError(err.message);
       setVulnerabilities([]);
       return { success: false, error: err.message };
@@ -97,7 +97,7 @@ export const useVulnIntel = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error getting exploits:', err);
+      logger.error("Error getting exploits:", err);
       setError(err.message);
       setExploits([]);
       return { success: false, error: err.message };
@@ -126,7 +126,7 @@ export const useVulnIntel = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error correlating with scan:', err);
+      logger.error("Error correlating with scan:", err);
       setError(err.message);
       setCorrelationResults(null);
       return { success: false, error: err.message };

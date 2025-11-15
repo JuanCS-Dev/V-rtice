@@ -232,7 +232,10 @@ export const AuthProvider = ({ children }) => {
       safeLocalStorage.setItem("vertice_auth_token", newToken);
       const expiryDate = new Date();
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
-      safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+      safeLocalStorage.setItem(
+        "vertice_token_expiry",
+        expiryDate.toISOString(),
+      );
 
       // Update refresh token if provided
       if (data.refresh_token) {
@@ -290,11 +293,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const handleStorageChange = (e) => {
       // Only handle vertice_auth_token changes
-      if (e.key !== 'vertice_auth_token') return;
+      if (e.key !== "vertice_auth_token") return;
 
       // Case 1: Token removed in another tab (logout)
       if (!e.newValue && e.oldValue) {
-        logger.info('Cross-tab sync: Logout detected in another tab');
+        logger.info("Cross-tab sync: Logout detected in another tab");
         clearAuthData();
         setUser(null);
         return;
@@ -302,11 +305,11 @@ export const AuthProvider = ({ children }) => {
 
       // Case 2: Token added/changed in another tab (login or refresh)
       if (e.newValue && e.newValue !== e.oldValue) {
-        logger.info('Cross-tab sync: Login/refresh detected in another tab');
+        logger.info("Cross-tab sync: Login/refresh detected in another tab");
 
         // Get updated user data
-        const storedUser = safeLocalStorage.getItem('vertice_user');
-        const tokenExpiry = safeLocalStorage.getItem('vertice_token_expiry');
+        const storedUser = safeLocalStorage.getItem("vertice_user");
+        const tokenExpiry = safeLocalStorage.getItem("vertice_token_expiry");
 
         if (storedUser && tokenExpiry) {
           const expiryDate = new Date(tokenExpiry);
@@ -327,10 +330,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Add storage event listener (only fires for changes from OTHER tabs)
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [scheduleTokenRefresh]);
 
@@ -372,7 +375,10 @@ export const AuthProvider = ({ children }) => {
         expiryDate.setHours(expiryDate.getHours() + 1);
         safeLocalStorage.setItem("vertice_auth_token", authToken);
         safeLocalStorage.setItem("vertice_user", JSON.stringify(userData));
-        safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+        safeLocalStorage.setItem(
+          "vertice_token_expiry",
+          expiryDate.toISOString(),
+        );
         safeLocalStorage.setItem("vertice_refresh_token", mockRefreshToken);
 
         setToken(authToken);
@@ -441,7 +447,10 @@ export const AuthProvider = ({ children }) => {
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
       safeLocalStorage.setItem("vertice_auth_token", authToken);
       safeLocalStorage.setItem("vertice_user", JSON.stringify(userData));
-      safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+      safeLocalStorage.setItem(
+        "vertice_token_expiry",
+        expiryDate.toISOString(),
+      );
       if (data.refresh_token) {
         safeLocalStorage.setItem("vertice_refresh_token", data.refresh_token);
       }

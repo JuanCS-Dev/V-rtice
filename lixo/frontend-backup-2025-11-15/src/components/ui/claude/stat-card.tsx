@@ -8,53 +8,53 @@
  * Estilo: Clean, focused, verde accents
  */
 
-import * as React from "react"
-import { TrendingUp, TrendingDown, Minus, LucideIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Card } from "./card"
-import { Badge } from "./badge"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { TrendingUp, TrendingDown, Minus, LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card } from "./card";
+import { Badge } from "./badge";
+import "../../../styles/claude-design-green.css";
 
 export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Stat title/label
    */
-  title: string
+  title: string;
   /**
    * Main value
    */
-  value: string | number
+  value: string | number;
   /**
    * Description/subtitle
    */
-  description?: string
+  description?: string;
   /**
    * Icon
    */
-  icon?: React.ReactNode | LucideIcon
+  icon?: React.ReactNode | LucideIcon;
   /**
    * Trend data
    */
   trend?: {
-    value: number
-    label?: string
-    direction?: "up" | "down" | "neutral"
-  }
+    value: number;
+    label?: string;
+    direction?: "up" | "down" | "neutral";
+  };
   /**
    * Badge
    */
   badge?: {
-    text: string
-    variant?: "default" | "success" | "warning" | "destructive"
-  }
+    text: string;
+    variant?: "default" | "success" | "warning" | "destructive";
+  };
   /**
    * Loading state
    */
-  loading?: boolean
+  loading?: boolean;
   /**
    * Variant
    */
-  variant?: "default" | "success" | "warning" | "danger"
+  variant?: "default" | "success" | "warning" | "danger";
 }
 
 /**
@@ -86,23 +86,25 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
       variant = "default",
       ...props
     },
-    ref
+    ref,
   ) => {
     // Auto-determine trend direction if not specified
-    const trendDirection = trend?.direction || (
-      trend && trend.value > 0 ? "up" :
-      trend && trend.value < 0 ? "down" :
-      "neutral"
-    )
+    const trendDirection =
+      trend?.direction ||
+      (trend && trend.value > 0
+        ? "up"
+        : trend && trend.value < 0
+          ? "down"
+          : "neutral");
 
-    const IconComponent = icon && typeof icon === "function" ? icon : null
+    const IconComponent = icon && typeof icon === "function" ? icon : null;
 
     const variantStyles = {
       default: "",
       success: "border-[var(--color-success)] bg-[var(--color-success-light)]",
       warning: "border-[var(--color-warning)] bg-[var(--color-warning-light)]",
       danger: "border-[var(--destructive)] bg-[var(--color-danger-light)]",
-    }
+    };
 
     return (
       <Card
@@ -110,7 +112,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         className={cn(
           "relative overflow-hidden",
           variantStyles[variant],
-          className
+          className,
         )}
         {...props}
       >
@@ -129,7 +131,10 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
               ) : (
                 <p
                   className="text-[var(--text-3xl)] font-[var(--font-display)] font-bold"
-                  style={{ color: variant === "default" ? "var(--foreground)" : undefined }}
+                  style={{
+                    color:
+                      variant === "default" ? "var(--foreground)" : undefined,
+                  }}
                 >
                   {value}
                 </p>
@@ -139,19 +144,17 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             {/* Icon */}
             {icon && (
               <div
-                className={cn([
-                  "flex items-center justify-center",
-                  "w-12 h-12",
-                  "rounded-[var(--radius-default)]",
-                  "bg-[var(--primary)]/10",
-                  "text-[var(--primary)]",
-                ].join(" "))}
-              >
-                {IconComponent ? (
-                  <IconComponent className="w-6 h-6" />
-                ) : (
-                  icon
+                className={cn(
+                  [
+                    "flex items-center justify-center",
+                    "w-12 h-12",
+                    "rounded-[var(--radius-default)]",
+                    "bg-[var(--primary)]/10",
+                    "text-[var(--primary)]",
+                  ].join(" "),
                 )}
+              >
+                {IconComponent ? <IconComponent className="w-6 h-6" /> : icon}
               </div>
             )}
           </div>
@@ -172,16 +175,20 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
                 )}
 
                 <span
-                  className={cn([
-                    "text-[var(--text-sm)]",
-                    "font-[var(--font-primary)]",
-                    "font-medium",
-                    trendDirection === "up" && "text-[var(--color-success)]",
-                    trendDirection === "down" && "text-[var(--destructive)]",
-                    trendDirection === "neutral" && "text-[var(--muted-foreground)]",
-                  ].join(" "))}
+                  className={cn(
+                    [
+                      "text-[var(--text-sm)]",
+                      "font-[var(--font-primary)]",
+                      "font-medium",
+                      trendDirection === "up" && "text-[var(--color-success)]",
+                      trendDirection === "down" && "text-[var(--destructive)]",
+                      trendDirection === "neutral" &&
+                        "text-[var(--muted-foreground)]",
+                    ].join(" "),
+                  )}
                 >
-                  {trend.value > 0 ? "+" : ""}{trend.value}%
+                  {trend.value > 0 ? "+" : ""}
+                  {trend.value}%
                 </span>
 
                 {trend.label && (
@@ -201,9 +208,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
 
             {/* Badge */}
             {badge && (
-              <Badge variant={badge.variant || "default"}>
-                {badge.text}
-              </Badge>
+              <Badge variant={badge.variant || "default"}>{badge.text}</Badge>
             )}
           </div>
         </div>
@@ -215,21 +220,35 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
           </div>
         )}
       </Card>
-    )
-  }
-)
+    );
+  },
+);
 
-StatCard.displayName = "StatCard"
+StatCard.displayName = "StatCard";
 
 /**
  * MetricCard - Simplified stat card
  */
-export interface MetricCardProps extends Omit<StatCardProps, "trend" | "badge"> {
-  subtitle?: string
+export interface MetricCardProps
+  extends Omit<StatCardProps, "trend" | "badge"> {
+  subtitle?: string;
 }
 
 export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
-  ({ className, title, value, subtitle, icon, description, loading, variant, ...props }, ref) => {
+  (
+    {
+      className,
+      title,
+      value,
+      subtitle,
+      icon,
+      description,
+      loading,
+      variant,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <Card
         ref={ref}
@@ -261,15 +280,17 @@ export const MetricCard = React.forwardRef<HTMLDivElement, MetricCardProps>(
           </div>
           {icon && (
             <div className="text-[var(--primary)]">
-              {typeof icon === "function" ? React.createElement(icon, { className: "w-8 h-8" }) : icon}
+              {typeof icon === "function"
+                ? React.createElement(icon, { className: "w-8 h-8" })
+                : icon}
             </div>
           )}
         </div>
       </Card>
-    )
-  }
-)
+    );
+  },
+);
 
-MetricCard.displayName = "MetricCard"
+MetricCard.displayName = "MetricCard";
 
-export { TrendingUp, TrendingDown, Minus }
+export { TrendingUp, TrendingDown, Minus };

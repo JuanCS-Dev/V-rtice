@@ -13,18 +13,16 @@
  * @returns {Object} { narratives, isLoading, error, generateNarrative, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mvpService } from '../../services/mvp/mvpService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mvpService } from "../../services/mvp/mvpService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 60000; // 60s
 const DEFAULT_LIMIT = 20;
 
 export const useMVPNarratives = (filters = {}, options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [narratives, setNarratives] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +43,7 @@ export const useMVPNarratives = (filters = {}, options = {}) => {
       setIsLoading(false);
       logger.debug(`[useMVPNarratives] Fetched ${response.length} narratives`);
     } catch (err) {
-      logger.error('[useMVPNarratives] Failed to fetch narratives:', err);
+      logger.error("[useMVPNarratives] Failed to fetch narratives:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -64,36 +62,49 @@ export const useMVPNarratives = (filters = {}, options = {}) => {
   }, [enabled, pollingInterval, fetchNarratives]);
 
   // Generate new narrative
-  const generateNarrative = useCallback(async (params = {}) => {
-    try {
-      const newNarrative = await mvpService.generateNarrative(params);
-      logger.info('[useMVPNarratives] Narrative generated:', newNarrative.narrative_id);
+  const generateNarrative = useCallback(
+    async (params = {}) => {
+      try {
+        const newNarrative = await mvpService.generateNarrative(params);
+        logger.info(
+          "[useMVPNarratives] Narrative generated:",
+          newNarrative.narrative_id,
+        );
 
-      // Refresh narratives list
-      await fetchNarratives();
+        // Refresh narratives list
+        await fetchNarratives();
 
-      return newNarrative;
-    } catch (err) {
-      logger.error('[useMVPNarratives] Failed to generate narrative:', err);
-      throw err;
-    }
-  }, [fetchNarratives]);
+        return newNarrative;
+      } catch (err) {
+        logger.error("[useMVPNarratives] Failed to generate narrative:", err);
+        throw err;
+      }
+    },
+    [fetchNarratives],
+  );
 
   // Calculate statistics
-  const stats = narratives.length > 0 ? {
-    total: narratives.length,
-    byTone: {
-      reflective: narratives.filter(n => n.tone === 'reflective').length,
-      urgent: narratives.filter(n => n.tone === 'urgent').length,
-      informative: narratives.filter(n => n.tone === 'informative').length,
-    },
-    avgNQS: Math.round(
-      narratives.reduce((sum, n) => sum + (n.nqs || 0), 0) / narratives.length
-    ),
-    avgWordCount: Math.round(
-      narratives.reduce((sum, n) => sum + (n.word_count || 0), 0) / narratives.length
-    ),
-  } : null;
+  const stats =
+    narratives.length > 0
+      ? {
+          total: narratives.length,
+          byTone: {
+            reflective: narratives.filter((n) => n.tone === "reflective")
+              .length,
+            urgent: narratives.filter((n) => n.tone === "urgent").length,
+            informative: narratives.filter((n) => n.tone === "informative")
+              .length,
+          },
+          avgNQS: Math.round(
+            narratives.reduce((sum, n) => sum + (n.nqs || 0), 0) /
+              narratives.length,
+          ),
+          avgWordCount: Math.round(
+            narratives.reduce((sum, n) => sum + (n.word_count || 0), 0) /
+              narratives.length,
+          ),
+        }
+      : null;
 
   return {
     narratives,

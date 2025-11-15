@@ -8,9 +8,9 @@
  * Governed by: Constituição Vértice v2.5 - Phase 3 Optimizations
  */
 
-import React from 'react';
-import { useServiceWorker } from '@/hooks/useServiceWorker';
-import styles from './ServiceWorkerUpdateNotification.module.css';
+import React from "react";
+import { useServiceWorker } from "@/hooks/useServiceWorker";
+import styles from "./ServiceWorkerUpdateNotification.module.css";
 
 export const ServiceWorkerUpdateNotification = () => {
   const { hasUpdate, updateServiceWorker, isOffline } = useServiceWorker();

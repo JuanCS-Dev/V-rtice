@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './NetworkStatistics.module.css';
+import React from "react";
+import styles from "./NetworkStatistics.module.css";
 
 /**
  * Displays real-time network statistics.

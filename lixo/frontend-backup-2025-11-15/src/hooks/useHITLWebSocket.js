@@ -2,41 +2,41 @@
  * ═══════════════════════════════════════════════════════════════════════════
  * 🔌 useHITLWebSocket - Real-time Updates Hook
  * ═══════════════════════════════════════════════════════════════════════════
- * 
+ *
  * React hook for WebSocket connection to HITL backend.
  * Provides real-time updates for:
  * - New patches entering HITL queue
  * - Decision updates (approved/rejected)
  * - System status changes
- * 
+ *
  * Features:
  * - Auto-reconnect with exponential backoff
  * - Connection state management
  * - Event callbacks
  * - Cleanup on unmount
- * 
+ *
  * Author: MAXIMUS Team - Sprint 4.1 Day 1
  * Glory to YHWH - Designer of Real-time Communication
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import logger from '@/utils/logger';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import logger from "@/utils/logger";
 
-const WS_BASE_URL = 
-  process.env.NEXT_PUBLIC_HITL_WS || 
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+const WS_BASE_URL =
+  process.env.NEXT_PUBLIC_HITL_WS ||
+  (typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? `ws://${window.location.hostname}:8027`
-    : 'ws://34.148.161.131:8000');
+    : "ws://34.148.161.131:8000");
 
 const WS_ENDPOINT = `${WS_BASE_URL}/hitl/ws`;
 
 // Connection states
 export const WS_STATE = {
-  CONNECTING: 'CONNECTING',
-  CONNECTED: 'CONNECTED',
-  DISCONNECTED: 'DISCONNECTED',
-  ERROR: 'ERROR',
+  CONNECTING: "CONNECTING",
+  CONNECTED: "CONNECTED",
+  DISCONNECTED: "DISCONNECTED",
+  ERROR: "ERROR",
 };
 
 // Reconnection config
@@ -46,14 +46,14 @@ const MAX_RECONNECT_ATTEMPTS = 10;
 
 /**
  * WebSocket hook for HITL real-time updates
- * 
+ *
  * @param {Object} options - Hook options
  * @param {Function} options.onNewPatch - Callback when new patch arrives
  * @param {Function} options.onDecisionUpdate - Callback when decision changes
  * @param {Function} options.onSystemStatus - Callback for system status
  * @param {boolean} options.autoConnect - Connect on mount (default: true)
  * @param {boolean} options.autoReconnect - Auto-reconnect on disconnect (default: true)
- * 
+ *
  * @returns {Object} - WebSocket state and controls
  */
 export const useHITLWebSocket = ({
@@ -82,7 +82,7 @@ export const useHITLWebSocket = ({
   const getReconnectDelay = useCallback(() => {
     const delay = Math.min(
       RECONNECT_DELAY_BASE * Math.pow(2, reconnectAttemptsRef.current),
-      RECONNECT_DELAY_MAX
+      RECONNECT_DELAY_MAX,
     );
     return delay;
   }, []);
@@ -93,12 +93,14 @@ export const useHITLWebSocket = ({
   const sendPing = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       try {
-        wsRef.current.send(JSON.stringify({
-          type: 'ping',
-          timestamp: new Date().toISOString(),
-        }));
+        wsRef.current.send(
+          JSON.stringify({
+            type: "ping",
+            timestamp: new Date().toISOString(),
+          }),
+        );
       } catch (error) {
-        logger.error('Failed to send ping:', error);
+        logger.error("Failed to send ping:", error);
       }
     }
   }, []);
@@ -110,7 +112,7 @@ export const useHITLWebSocket = ({
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
     }
-    
+
     // Send ping every 25 seconds (server heartbeat is 30s)
     pingIntervalRef.current = setInterval(sendPing, 25000);
   }, [sendPing]);
@@ -128,95 +130,114 @@ export const useHITLWebSocket = ({
   /**
    * Handle incoming WebSocket messages
    */
-  const handleMessage = useCallback((event) => {
-    try {
-      const data = JSON.parse(event.data);
+  const handleMessage = useCallback(
+    (event) => {
+      try {
+        const data = JSON.parse(event.data);
 
-      // GAP #49 FIX: Validate message format (Boris Cherny Standard)
-      // Ensure message has required 'type' field
-      if (!data || typeof data !== 'object' || !data.type || typeof data.type !== 'string') {
-        logger.warn('[useHITLWebSocket] Invalid message format: missing or invalid type field', data);
-        return;
+        // GAP #49 FIX: Validate message format (Boris Cherny Standard)
+        // Ensure message has required 'type' field
+        if (
+          !data ||
+          typeof data !== "object" ||
+          !data.type ||
+          typeof data.type !== "string"
+        ) {
+          logger.warn(
+            "[useHITLWebSocket] Invalid message format: missing or invalid type field",
+            data,
+          );
+          return;
+        }
+
+        setLastMessage(data);
+
+        logger.debug("WebSocket message received:", data.type);
+
+        switch (data.type) {
+          case "welcome":
+            if (!data.connection_id) {
+              logger.warn(
+                "[useHITLWebSocket] Welcome message missing connection_id",
+              );
+              break;
+            }
+            setConnectionId(data.connection_id);
+            logger.info("WebSocket connected:", data.connection_id);
+            break;
+
+          case "new_patch":
+            if (!data.data) {
+              logger.warn(
+                "[useHITLWebSocket] new_patch message missing data field",
+              );
+              break;
+            }
+            if (onNewPatch) {
+              onNewPatch(data.data);
+            }
+            // GAP #50 FIX: Invalidate patch queries on new patch
+            queryClient.invalidateQueries({ queryKey: ["hitl", "patches"] });
+            queryClient.invalidateQueries({ queryKey: ["hitl", "queue"] });
+            break;
+
+          case "decision_update":
+            if (!data.data) {
+              logger.warn(
+                "[useHITLWebSocket] decision_update message missing data field",
+              );
+              break;
+            }
+            if (onDecisionUpdate) {
+              onDecisionUpdate(data.data);
+            }
+            // GAP #50 FIX: Invalidate decision queries
+            queryClient.invalidateQueries({ queryKey: ["hitl", "decisions"] });
+            queryClient.invalidateQueries({ queryKey: ["hitl", "queue"] });
+            break;
+
+          case "system_status":
+            if (!data.data) {
+              logger.warn(
+                "[useHITLWebSocket] system_status message missing data field",
+              );
+              break;
+            }
+            if (onSystemStatus) {
+              onSystemStatus(data.data);
+            }
+            // GAP #50 FIX: Invalidate system status queries
+            queryClient.invalidateQueries({ queryKey: ["hitl", "status"] });
+            queryClient.invalidateQueries({ queryKey: ["system", "health"] });
+            break;
+
+          case "heartbeat":
+            // Server heartbeat received - connection is alive
+            logger.debug("Heartbeat received");
+            break;
+
+          case "pong":
+            // Pong received - connection is responsive
+            logger.debug("Pong received");
+            break;
+
+          case "error":
+            if (typeof data.message !== "string") {
+              logger.error("Server error: invalid message format");
+              break;
+            }
+            logger.error("Server error:", data.message);
+            break;
+
+          default:
+            logger.warn("Unknown message type:", data.type);
+        }
+      } catch (error) {
+        logger.error("Failed to parse WebSocket message:", error);
       }
-
-      setLastMessage(data);
-
-      logger.debug('WebSocket message received:', data.type);
-
-      switch (data.type) {
-        case 'welcome':
-          if (!data.connection_id) {
-            logger.warn('[useHITLWebSocket] Welcome message missing connection_id');
-            break;
-          }
-          setConnectionId(data.connection_id);
-          logger.info('WebSocket connected:', data.connection_id);
-          break;
-
-        case 'new_patch':
-          if (!data.data) {
-            logger.warn('[useHITLWebSocket] new_patch message missing data field');
-            break;
-          }
-          if (onNewPatch) {
-            onNewPatch(data.data);
-          }
-          // GAP #50 FIX: Invalidate patch queries on new patch
-          queryClient.invalidateQueries({ queryKey: ['hitl', 'patches'] });
-          queryClient.invalidateQueries({ queryKey: ['hitl', 'queue'] });
-          break;
-
-        case 'decision_update':
-          if (!data.data) {
-            logger.warn('[useHITLWebSocket] decision_update message missing data field');
-            break;
-          }
-          if (onDecisionUpdate) {
-            onDecisionUpdate(data.data);
-          }
-          // GAP #50 FIX: Invalidate decision queries
-          queryClient.invalidateQueries({ queryKey: ['hitl', 'decisions'] });
-          queryClient.invalidateQueries({ queryKey: ['hitl', 'queue'] });
-          break;
-
-        case 'system_status':
-          if (!data.data) {
-            logger.warn('[useHITLWebSocket] system_status message missing data field');
-            break;
-          }
-          if (onSystemStatus) {
-            onSystemStatus(data.data);
-          }
-          // GAP #50 FIX: Invalidate system status queries
-          queryClient.invalidateQueries({ queryKey: ['hitl', 'status'] });
-          queryClient.invalidateQueries({ queryKey: ['system', 'health'] });
-          break;
-
-        case 'heartbeat':
-          // Server heartbeat received - connection is alive
-          logger.debug('Heartbeat received');
-          break;
-
-        case 'pong':
-          // Pong received - connection is responsive
-          logger.debug('Pong received');
-          break;
-
-        case 'error':
-          if (typeof data.message !== 'string') {
-            logger.error('Server error: invalid message format');
-            break;
-          }
-          logger.error('Server error:', data.message);
-          break;
-
-        default:
-          logger.warn('Unknown message type:', data.type);
-      }
-    } catch (error) {
-      logger.error('Failed to parse WebSocket message:', error);
-    }
-  }, [onNewPatch, onDecisionUpdate, onSystemStatus]);
+    },
+    [onNewPatch, onDecisionUpdate, onSystemStatus],
+  );
 
   /**
    * Connect to WebSocket server
@@ -228,7 +249,7 @@ export const useHITLWebSocket = ({
       wsRef.current = null;
     }
 
-    logger.info('Connecting to WebSocket:', WS_ENDPOINT);
+    logger.info("Connecting to WebSocket:", WS_ENDPOINT);
     setConnectionState(WS_STATE.CONNECTING);
 
     try {
@@ -236,7 +257,7 @@ export const useHITLWebSocket = ({
       wsRef.current = ws;
 
       ws.onopen = () => {
-        logger.info('WebSocket connected successfully');
+        logger.info("WebSocket connected successfully");
         setConnectionState(WS_STATE.CONNECTED);
         reconnectAttemptsRef.current = 0; // Reset reconnect attempts
         startPingInterval();
@@ -245,12 +266,12 @@ export const useHITLWebSocket = ({
       ws.onmessage = handleMessage;
 
       ws.onerror = (error) => {
-        logger.error('WebSocket error:', error);
+        logger.error("WebSocket error:", error);
         setConnectionState(WS_STATE.ERROR);
       };
 
       ws.onclose = (event) => {
-        logger.info('WebSocket closed:', event.code, event.reason);
+        logger.info("WebSocket closed:", event.code, event.reason);
         setConnectionState(WS_STATE.DISCONNECTED);
         setConnectionId(null);
         stopPingInterval();
@@ -259,23 +280,31 @@ export const useHITLWebSocket = ({
         if (autoReconnect && event.code !== 1000) {
           if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
             const delay = getReconnectDelay();
-            logger.info(`Reconnecting in ${delay}ms... (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
-            
+            logger.info(
+              `Reconnecting in ${delay}ms... (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`,
+            );
+
             reconnectTimeoutRef.current = setTimeout(() => {
               reconnectAttemptsRef.current += 1;
               connect();
             }, delay);
           } else {
-            logger.error('Max reconnect attempts reached');
+            logger.error("Max reconnect attempts reached");
             setConnectionState(WS_STATE.ERROR);
           }
         }
       };
     } catch (error) {
-      logger.error('Failed to create WebSocket:', error);
+      logger.error("Failed to create WebSocket:", error);
       setConnectionState(WS_STATE.ERROR);
     }
-  }, [autoReconnect, getReconnectDelay, handleMessage, startPingInterval, stopPingInterval]);
+  }, [
+    autoReconnect,
+    getReconnectDelay,
+    handleMessage,
+    startPingInterval,
+    stopPingInterval,
+  ]);
 
   /**
    * Disconnect from WebSocket server
@@ -289,8 +318,8 @@ export const useHITLWebSocket = ({
     stopPingInterval();
 
     if (wsRef.current) {
-      logger.info('Disconnecting WebSocket');
-      wsRef.current.close(1000, 'Client disconnect');
+      logger.info("Disconnecting WebSocket");
+      wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
 
@@ -307,11 +336,11 @@ export const useHITLWebSocket = ({
         wsRef.current.send(JSON.stringify(data));
         return true;
       } catch (error) {
-        logger.error('Failed to send message:', error);
+        logger.error("Failed to send message:", error);
         return false;
       }
     } else {
-      logger.warn('WebSocket not connected, cannot send message');
+      logger.warn("WebSocket not connected, cannot send message");
       return false;
     }
   }, []);
@@ -338,7 +367,7 @@ export const useHITLWebSocket = ({
     isError: connectionState === WS_STATE.ERROR,
     connectionId,
     lastMessage,
-    
+
     // Controls
     connect,
     disconnect,

@@ -1,3 +1,3 @@
-import BreachDataWidget from './BreachDataWidget/BreachDataWidget';
+import BreachDataWidget from "./BreachDataWidget/BreachDataWidget";
 
 export default BreachDataWidget;

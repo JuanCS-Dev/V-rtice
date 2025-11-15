@@ -6,18 +6,18 @@
  * Expandable textarea with send button and keyboard shortcuts
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import styles from '../MaximusChat.module.css';
+import React, { useState, useRef, useEffect } from "react";
+import PropTypes from "prop-types";
+import styles from "../MaximusChat.module.css";
 
 export const MessageInput = ({ onSendMessage, isDisabled }) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
 
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [message]);
@@ -25,18 +25,18 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
   const handleSubmit = () => {
     if (message.trim() && !isDisabled) {
       onSendMessage(message.trim());
-      setMessage('');
-      
+      setMessage("");
+
       // Reset textarea height
       if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = "auto";
       }
     }
   };
 
   const handleKeyDown = (e) => {
     // Send on Enter (without Shift)
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -58,7 +58,7 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
             rows={1}
             maxLength={5000}
           />
-          
+
           <button
             className={styles.sendButton}
             onClick={handleSubmit}
@@ -69,7 +69,7 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
             Enviar
           </button>
         </div>
-        
+
         <div className={styles.inputHint}>
           Powered by NLP Engine • vcli-go integration
         </div>
@@ -80,9 +80,9 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
 
 MessageInput.propTypes = {
   onSendMessage: PropTypes.func.isRequired,
-  isDisabled: PropTypes.bool
+  isDisabled: PropTypes.bool,
 };
 
 MessageInput.defaultProps = {
-  isDisabled: false
+  isDisabled: false,
 };

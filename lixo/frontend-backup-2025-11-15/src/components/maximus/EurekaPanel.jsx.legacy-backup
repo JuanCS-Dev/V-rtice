@@ -9,7 +9,7 @@
  * - Geram resposta específica, precisa e memorizada
  *
  * DIGITAL IMPLEMENTATION: Resposta Automatizada de Vulnerabilidades
- * 
+ *
  * ┌─────────────────────────────────────────────────────────────────┐
  * │ FASE 3: FORMULAÇÃO DE RESPOSTA (Confirmation + Patch)          │
  * │  • Recebe APV do Oráculo (antígeno processado)                 │
@@ -141,15 +141,15 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
   // === WEBSOCKET - Real-time Wargaming Updates ===
   useEffect(() => {
     let ws = null;
-    
+
     const connectWebSocket = () => {
       try {
         ws = new WebSocket('ws://localhost:8024/ws/wargaming');
-        
+
         ws.onopen = () => {
           logger.info('[Eureka] WebSocket connected - live wargaming updates enabled');
         };
-        
+
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
           if (message.type === 'wargaming_update') {
@@ -157,11 +157,11 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
             logger.debug('[Eureka] Wargaming update received:', message.data);
           }
         };
-        
+
         ws.onerror = (error) => {
           logger.error('[Eureka] WebSocket error:', error);
         };
-        
+
         ws.onclose = () => {
           logger.warn('[Eureka] WebSocket closed - attempting reconnect in 5s...');
           setTimeout(connectWebSocket, 5000);
@@ -170,9 +170,9 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
         logger.error('[Eureka] Failed to establish WebSocket:', error);
       }
     };
-    
+
     connectWebSocket();
-    
+
     return () => {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close();
@@ -185,7 +185,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
     fetchPendingApvs();
     fetchRemediationHistory();
     fetchPullRequests();
-    
+
     const statsInterval = setInterval(fetchStats, 10000);
     const apvsInterval = setInterval(fetchPendingApvs, 15000);
     const historyInterval = setInterval(fetchRemediationHistory, 30000);
@@ -209,7 +209,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
 
     try {
       logger.info(`[Eureka] Starting auto-remediation for APV ${apvId}`);
-      
+
       const response = await fetch(`http://localhost:8024/api/v1/eureka/remediate/${apvId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -226,12 +226,12 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
         const result = await response.json();
         if (result.status === 'success') {
           logger.info('[Eureka] Auto-remediation completed successfully:', result.data);
-          
+
           // Store wargaming results
           if (result.data.wargaming_results) {
             setWargamingResults(result.data.wargaming_results);
           }
-          
+
           // Refresh all data
           await Promise.all([
             fetchStats(),
@@ -239,7 +239,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
             fetchRemediationHistory(),
             fetchPullRequests()
           ]);
-          
+
           // Show success notification (você pode adicionar um toast aqui)
           logger.success(`[Eureka] Remediation complete! PR #${result.data.pr_number} created`);
         } else {
@@ -255,9 +255,9 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
       setIsRemediating(false);
       setAiStatus(prev => ({
         ...prev,
-        eureka: { 
-          ...prev.eureka, 
-          status: 'idle', 
+        eureka: {
+          ...prev.eureka,
+          status: 'idle',
           lastRun: new Date().toLocaleTimeString(),
           currentTask: null
         }
@@ -275,7 +275,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
       const response = await fetch(`http://localhost:8024/api/v1/eureka/dismiss/${apvId}`, {
         method: 'POST'
       });
-      
+
       if (response.ok) {
         logger.info(`[Eureka] APV ${apvId} dismissed`);
         await fetchPendingApvs();
@@ -347,7 +347,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
       stats.wargamingSuccessRate >= 100 ? 100 : stats.wargamingSuccessRate,
       stats.falsePositiveRate <= 2 ? 100 : (1 - (stats.falsePositiveRate / 2)) * 100
     ];
-    
+
     const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
     return Math.round(avgScore);
   };
@@ -493,7 +493,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
               {stats.lastRemediationTime ? formatTimestamp(stats.lastRemediationTime) : 'Never'}
             </div>
             <div className="kpi-detail">
-              {stats.lastRemediationTime 
+              {stats.lastRemediationTime
                 ? `${Math.round((Date.now() - new Date(stats.lastRemediationTime)) / 60000)}min ago`
                 : 'Awaiting first APV'
               }
@@ -614,12 +614,12 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
                   <div className="gauge-circle">
                     <svg viewBox="0 0 100 100" className="gauge-svg">
                       <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(139, 92, 246, 0.2)" strokeWidth="8"/>
-                      <circle 
-                        cx="50" 
-                        cy="50" 
-                        r="40" 
-                        fill="none" 
-                        stroke="#8B5CF6" 
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="none"
+                        stroke="#8B5CF6"
                         strokeWidth="8"
                         strokeDasharray={`${getHealthScore() * 2.51} 251`}
                         transform="rotate(-90 50 50)"
@@ -740,7 +740,7 @@ export const EurekaPanel = ({ aiStatus, setAiStatus }) => {
               <div className="analogy-item">
                 <span className="analogy-icon">🔬</span>
                 <div className="analogy-content">
-                  <strong>Biologia:</strong> Células dendríticas apresentam antígenos a células T naive. 
+                  <strong>Biologia:</strong> Células dendríticas apresentam antígenos a células T naive.
                   Células T ativam-se, diferenciam-se em efetoras e eliminam células infectadas com precisão cirúrgica.
                 </div>
               </div>

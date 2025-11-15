@@ -1,10 +1,10 @@
 /**
  * Theme Transitions - PAGANI Quality
  * ===================================
- * 
+ *
  * Smooth color transitions when switching themes
  * Applies to all theme-aware CSS variables
- * 
+ *
  * Performance: GPU-accelerated, 60fps, no jank
  * Accessibility: Respects prefers-reduced-motion
  */
@@ -12,28 +12,19 @@
 /* Root Theme Transitions */
 :root {
   /* Transition all color variables smoothly */
-  transition-property: 
-    background-color,
-    color,
-    border-color,
-    box-shadow,
-    opacity;
-  
+  transition-property:
+    background-color, color, border-color, box-shadow, opacity;
+
   transition-duration: 0.4s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Apply transitions to all elements that use theme variables */
 * {
-  transition-property: 
-    background-color,
-    color,
-    border-color,
-    box-shadow,
-    outline-color,
-    fill,
+  transition-property:
+    background-color, color, border-color, box-shadow, outline-color, fill,
     stroke;
-  
+
   transition-duration: 0.3s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

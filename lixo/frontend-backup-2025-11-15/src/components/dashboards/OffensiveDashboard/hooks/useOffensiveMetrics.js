@@ -22,10 +22,10 @@
  * - Offensive Gateway (VITE_OFFENSIVE_GATEWAY_URL)
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { ServiceEndpoints } from '@/config/endpoints';
-import { queryKeys } from '../../../../config/queryClient';
-import logger from '@/utils/logger';
+import { useQuery } from "@tanstack/react-query";
+import { ServiceEndpoints } from "@/config/endpoints";
+import { queryKeys } from "../../../../config/queryClient";
+import logger from "@/utils/logger";
 
 const fetchOffensiveMetrics = async () => {
   // TODO: Uncomment when offensive services are exposed
@@ -65,12 +65,12 @@ const fetchOffensiveMetrics = async () => {
   */
 
   // Temporary: Return zero metrics until services are exposed
-  logger.warn('Offensive services not yet exposed - returning zero metrics');
+  logger.warn("Offensive services not yet exposed - returning zero metrics");
   return {
     activeScans: 0,
     exploitsFound: 0,
     targets: 0,
-    c2Sessions: 0
+    c2Sessions: 0,
   };
 };
 
@@ -83,8 +83,8 @@ export const useOffensiveMetrics = () => {
     retry: 2, // Retry failed requests twice
     retryDelay: 1000,
     onError: (err) => {
-      logger.error('Failed to fetch offensive metrics:', err);
-    }
+      logger.error("Failed to fetch offensive metrics:", err);
+    },
   });
 
   return {
@@ -92,10 +92,10 @@ export const useOffensiveMetrics = () => {
       activeScans: 0,
       exploitsFound: 0,
       targets: 0,
-      c2Sessions: 0
+      c2Sessions: 0,
     },
     loading: isLoading,
     error: error?.message || null,
-    refresh: refetch
+    refresh: refetch,
   };
 };

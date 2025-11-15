@@ -3,7 +3,7 @@
 .theme-selector {
   position: fixed;
   z-index: 9999;
-  font-family: var(--font-mono, 'Fira Code', 'Consolas', monospace);
+  font-family: var(--font-mono, "Fira Code", "Consolas", monospace);
 }
 
 /* Posicionamento */
@@ -92,7 +92,7 @@
   background: rgba(var(--color-bg-rgb, 0, 0, 0), 0.95);
   border: 1px solid var(--color-primary, #00ff41);
   border-radius: 0.5rem;
-  box-shadow: 
+  box-shadow:
     0 4px 6px rgba(0, 0, 0, 0.3),
     0 0 20px rgba(var(--color-primary-rgb, 0, 255, 65), 0.2);
   backdrop-filter: blur(15px);

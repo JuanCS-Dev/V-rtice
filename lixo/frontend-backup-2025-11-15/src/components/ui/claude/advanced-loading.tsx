@@ -14,9 +14,9 @@
  * - SkeletonPulse: Animated skeleton verde accent
  */
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-animations.css"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-animations.css";
 
 /* ============================================================================
    PROGRESS BAR
@@ -26,19 +26,19 @@ export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Progress value (0-100)
    */
-  value?: number
+  value?: number;
   /**
    * Indeterminate mode (no value)
    */
-  indeterminate?: boolean
+  indeterminate?: boolean;
   /**
    * Bar size
    */
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg";
   /**
    * Show percentage label
    */
-  showLabel?: boolean
+  showLabel?: boolean;
 }
 
 /**
@@ -62,23 +62,23 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
       showLabel = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const height = {
       sm: "h-1",
       md: "h-2",
       lg: "h-3",
-    }[size]
+    }[size];
 
     if (indeterminate) {
       return (
         <div ref={ref} className={cn("w-full", className)} {...props}>
           <div className={cn("progress-indeterminate w-full", height)} />
         </div>
-      )
+      );
     }
 
-    const clampedValue = Math.min(Math.max(value, 0), 100)
+    const clampedValue = Math.min(Math.max(value, 0), 100);
 
     return (
       <div ref={ref} className={cn("w-full", className)} {...props}>
@@ -88,15 +88,17 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
               "relative w-full overflow-hidden rounded-full",
               "bg-[var(--muted)]",
               height,
-            ].join(" ")
+            ].join(" "),
           )}
         >
           <div
-            className={cn([
-              "h-full rounded-full",
-              "bg-[var(--primary)]",
-              "transition-all duration-500 ease-smooth",
-            ].join(" "))}
+            className={cn(
+              [
+                "h-full rounded-full",
+                "bg-[var(--primary)]",
+                "transition-all duration-500 ease-smooth",
+              ].join(" "),
+            )}
             style={{ width: `${clampedValue}%` }}
           />
         </div>
@@ -106,37 +108,38 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
           </div>
         )}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-ProgressBar.displayName = "ProgressBar"
+ProgressBar.displayName = "ProgressBar";
 
 /* ============================================================================
    CIRCULAR PROGRESS
    ============================================================================ */
 
-export interface CircularProgressProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CircularProgressProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Progress value (0-100)
    */
-  value?: number
+  value?: number;
   /**
    * Indeterminate mode (spinner)
    */
-  indeterminate?: boolean
+  indeterminate?: boolean;
   /**
    * Size in pixels
    */
-  size?: number
+  size?: number;
   /**
    * Stroke width
    */
-  strokeWidth?: number
+  strokeWidth?: number;
   /**
    * Show percentage in center
    */
-  showLabel?: boolean
+  showLabel?: boolean;
 }
 
 /**
@@ -150,7 +153,10 @@ export interface CircularProgressProps extends React.HTMLAttributes<HTMLDivEleme
  * <CircularProgress indeterminate />
  * ```
  */
-export const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgressProps>(
+export const CircularProgress = React.forwardRef<
+  HTMLDivElement,
+  CircularProgressProps
+>(
   (
     {
       className,
@@ -161,12 +167,12 @@ export const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgres
       showLabel = false,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const clampedValue = Math.min(Math.max(value, 0), 100)
-    const radius = (size - strokeWidth) / 2
-    const circumference = 2 * Math.PI * radius
-    const offset = circumference - (clampedValue / 100) * circumference
+    const clampedValue = Math.min(Math.max(value, 0), 100);
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (clampedValue / 100) * circumference;
 
     return (
       <div
@@ -202,7 +208,9 @@ export const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgres
             strokeDasharray={circumference}
             strokeDashoffset={indeterminate ? circumference * 0.75 : offset}
             style={{
-              transition: indeterminate ? "none" : "stroke-dashoffset 500ms ease-smooth",
+              transition: indeterminate
+                ? "none"
+                : "stroke-dashoffset 500ms ease-smooth",
               transform: "rotate(-90deg)",
               transformOrigin: "center",
             }}
@@ -217,11 +225,11 @@ export const CircularProgress = React.forwardRef<HTMLDivElement, CircularProgres
           </div>
         )}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-CircularProgress.displayName = "CircularProgress"
+CircularProgress.displayName = "CircularProgress";
 
 /* ============================================================================
    PULSE LOADER
@@ -231,15 +239,15 @@ export interface PulseLoaderProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Number of dots
    */
-  dots?: number
+  dots?: number;
   /**
    * Dot size
    */
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg";
   /**
    * Dot color (default: primary verde)
    */
-  color?: string
+  color?: string;
 }
 
 /**
@@ -259,7 +267,7 @@ export const PulseLoader = React.forwardRef<HTMLDivElement, PulseLoaderProps>(
       sm: "w-1.5 h-1.5",
       md: "w-2 h-2",
       lg: "w-3 h-3",
-    }[size]
+    }[size];
 
     return (
       <div
@@ -270,12 +278,14 @@ export const PulseLoader = React.forwardRef<HTMLDivElement, PulseLoaderProps>(
         {Array.from({ length: dots }).map((_, index) => (
           <div
             key={index}
-            className={cn([
-              dotSize,
-              "rounded-full",
-              "animate-pulse",
-              "bg-[var(--primary)]",
-            ].join(" "))}
+            className={cn(
+              [
+                dotSize,
+                "rounded-full",
+                "animate-pulse",
+                "bg-[var(--primary)]",
+              ].join(" "),
+            )}
             style={{
               animationDelay: `${index * 150}ms`,
               backgroundColor: color || undefined,
@@ -283,25 +293,26 @@ export const PulseLoader = React.forwardRef<HTMLDivElement, PulseLoaderProps>(
           />
         ))}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-PulseLoader.displayName = "PulseLoader"
+PulseLoader.displayName = "PulseLoader";
 
 /* ============================================================================
    TYPING INDICATOR
    ============================================================================ */
 
-export interface TypingIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface TypingIndicatorProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Size of dots
    */
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg";
   /**
    * Label text
    */
-  label?: string
+  label?: string;
 }
 
 /**
@@ -315,58 +326,60 @@ export interface TypingIndicatorProps extends React.HTMLAttributes<HTMLDivElemen
  * <TypingIndicator label="Claude is typing..." />
  * ```
  */
-export const TypingIndicator = React.forwardRef<HTMLDivElement, TypingIndicatorProps>(
-  ({ className, size = "md", label, ...props }, ref) => {
-    const dotSize = {
-      sm: "w-1 h-1",
-      md: "w-1.5 h-1.5",
-      lg: "w-2 h-2",
-    }[size]
+export const TypingIndicator = React.forwardRef<
+  HTMLDivElement,
+  TypingIndicatorProps
+>(({ className, size = "md", label, ...props }, ref) => {
+  const dotSize = {
+    sm: "w-1 h-1",
+    md: "w-1.5 h-1.5",
+    lg: "w-2 h-2",
+  }[size];
 
-    return (
-      <div
-        ref={ref}
-        className={cn("inline-flex items-center gap-2", className)}
-        {...props}
-      >
-        <div className="typing-indicator">
-          <span className={dotSize} />
-          <span className={dotSize} />
-          <span className={dotSize} />
-        </div>
-        {label && (
-          <span className="text-[var(--text-sm)] text-[var(--muted-foreground)]">
-            {label}
-          </span>
-        )}
+  return (
+    <div
+      ref={ref}
+      className={cn("inline-flex items-center gap-2", className)}
+      {...props}
+    >
+      <div className="typing-indicator">
+        <span className={dotSize} />
+        <span className={dotSize} />
+        <span className={dotSize} />
       </div>
-    )
-  }
-)
+      {label && (
+        <span className="text-[var(--text-sm)] text-[var(--muted-foreground)]">
+          {label}
+        </span>
+      )}
+    </div>
+  );
+});
 
-TypingIndicator.displayName = "TypingIndicator"
+TypingIndicator.displayName = "TypingIndicator";
 
 /* ============================================================================
    SKELETON PULSE
    ============================================================================ */
 
-export interface SkeletonPulseProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SkeletonPulseProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Use shimmer effect instead of pulse
    */
-  shimmer?: boolean
+  shimmer?: boolean;
   /**
    * Width
    */
-  width?: string | number
+  width?: string | number;
   /**
    * Height
    */
-  height?: string | number
+  height?: string | number;
   /**
    * Border radius
    */
-  rounded?: "none" | "sm" | "md" | "lg" | "full"
+  rounded?: "none" | "sm" | "md" | "lg" | "full";
 }
 
 /**
@@ -380,10 +393,21 @@ export interface SkeletonPulseProps extends React.HTMLAttributes<HTMLDivElement>
  * <SkeletonPulse shimmer width={300} height={20} rounded="md" />
  * ```
  */
-export const SkeletonPulse = React.forwardRef<HTMLDivElement, SkeletonPulseProps>(
+export const SkeletonPulse = React.forwardRef<
+  HTMLDivElement,
+  SkeletonPulseProps
+>(
   (
-    { className, shimmer = false, width, height, rounded = "md", style, ...props },
-    ref
+    {
+      className,
+      shimmer = false,
+      width,
+      height,
+      rounded = "md",
+      style,
+      ...props
+    },
+    ref,
   ) => {
     const roundedClass = {
       none: "rounded-none",
@@ -391,7 +415,7 @@ export const SkeletonPulse = React.forwardRef<HTMLDivElement, SkeletonPulseProps
       md: "rounded-md",
       lg: "rounded-lg",
       full: "rounded-full",
-    }[rounded]
+    }[rounded];
 
     return (
       <div
@@ -401,7 +425,7 @@ export const SkeletonPulse = React.forwardRef<HTMLDivElement, SkeletonPulseProps
             roundedClass,
             shimmer ? "skeleton-shimmer" : "animate-pulse bg-[var(--muted)]",
           ].join(" "),
-          className
+          className,
         )}
         style={{
           width: typeof width === "number" ? `${width}px` : width,
@@ -410,11 +434,11 @@ export const SkeletonPulse = React.forwardRef<HTMLDivElement, SkeletonPulseProps
         }}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-SkeletonPulse.displayName = "SkeletonPulse"
+SkeletonPulse.displayName = "SkeletonPulse";
 
 /* ============================================================================
    LOADING DOTS
@@ -424,11 +448,11 @@ export interface LoadingDotsProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Dot size
    */
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg";
   /**
    * Text to show after dots
    */
-  text?: string
+  text?: string;
 }
 
 /**
@@ -443,53 +467,58 @@ export interface LoadingDotsProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export const LoadingDots = React.forwardRef<HTMLDivElement, LoadingDotsProps>(
   ({ className, size = "md", text = "Loading", ...props }, ref) => {
-    const [dots, setDots] = React.useState("")
+    const [dots, setDots] = React.useState("");
 
     React.useEffect(() => {
       const interval = setInterval(() => {
-        setDots((prev) => (prev.length >= 3 ? "" : prev + "."))
-      }, 500)
+        setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+      }, 500);
 
-      return () => clearInterval(interval)
-    }, [])
+      return () => clearInterval(interval);
+    }, []);
 
     const fontSize = {
       sm: "text-sm",
       md: "text-base",
       lg: "text-lg",
-    }[size]
+    }[size];
 
     return (
       <div
         ref={ref}
         className={cn(
-          ["inline-flex items-center", fontSize, "text-[var(--muted-foreground)]"].join(" "),
-          className
+          [
+            "inline-flex items-center",
+            fontSize,
+            "text-[var(--muted-foreground)]",
+          ].join(" "),
+          className,
         )}
         {...props}
       >
         <span>{text}</span>
         <span className="inline-block w-8 text-left">{dots}</span>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-LoadingDots.displayName = "LoadingDots"
+LoadingDots.displayName = "LoadingDots";
 
 /* ============================================================================
    RIPPLE LOADER
    ============================================================================ */
 
-export interface RippleLoaderProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface RippleLoaderProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Size of ripple
    */
-  size?: number
+  size?: number;
   /**
    * Ripple color (default: primary verde)
    */
-  color?: string
+  color?: string;
 }
 
 /**
@@ -508,7 +537,10 @@ export const RippleLoader = React.forwardRef<HTMLDivElement, RippleLoaderProps>(
     return (
       <div
         ref={ref}
-        className={cn("relative inline-flex items-center justify-center", className)}
+        className={cn(
+          "relative inline-flex items-center justify-center",
+          className,
+        )}
         style={{ width: size, height: size }}
         {...props}
       >
@@ -525,11 +557,11 @@ export const RippleLoader = React.forwardRef<HTMLDivElement, RippleLoaderProps>(
           />
         ))}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-RippleLoader.displayName = "RippleLoader"
+RippleLoader.displayName = "RippleLoader";
 
 /* ============================================================================
    EXPORTS
@@ -543,4 +575,4 @@ export type {
   SkeletonPulseProps,
   LoadingDotsProps,
   RippleLoaderProps,
-}
+};

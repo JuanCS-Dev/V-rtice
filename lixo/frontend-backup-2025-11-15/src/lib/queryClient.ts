@@ -7,7 +7,7 @@
  * Following Boris Cherny's principle: "Configuration should be explicit"
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from "@tanstack/react-query";
 
 // ============================================================================
 // Retry Configuration
@@ -37,12 +37,12 @@ function shouldRetry(failureCount: number, error: any): boolean {
 
   // Don't retry authentication errors
   const errorCode = error?.error_code || error?.errorCode;
-  if (errorCode?.startsWith('AUTH_')) {
+  if (errorCode?.startsWith("AUTH_")) {
     return false;
   }
 
   // Don't retry validation errors
-  if (errorCode?.startsWith('VAL_')) {
+  if (errorCode?.startsWith("VAL_")) {
     return false;
   }
 
@@ -123,21 +123,21 @@ export function createQueryClient(): QueryClient {
 
         // Network mode: pause mutations when offline
         // This enables offline queue functionality
-        networkMode: 'offlineFirst',
+        networkMode: "offlineFirst",
 
         // Don't throw errors - handle via error state
         throwOnError: false,
 
         // Global mutation callbacks
         onError: (error: any, _variables, context) => {
-          console.error('[QueryClient] Mutation failed:', {
+          console.error("[QueryClient] Mutation failed:", {
             error: error.message || error,
             context,
           });
         },
 
         onSuccess: (_data, _variables, context) => {
-          console.info('[QueryClient] Mutation succeeded:', context);
+          console.info("[QueryClient] Mutation succeeded:", context);
         },
       },
     },
@@ -162,34 +162,34 @@ export function createQueryClient(): QueryClient {
  */
 export const queryKeys = {
   // Health endpoint
-  health: ['health'] as const,
+  health: ["health"] as const,
 
   // Scans
   scan: {
-    all: ['scans'] as const,
-    lists: () => [...queryKeys.scan.all, 'list'] as const,
+    all: ["scans"] as const,
+    lists: () => [...queryKeys.scan.all, "list"] as const,
     list: (filters: Record<string, any>) =>
       [...queryKeys.scan.lists(), { filters }] as const,
-    details: () => [...queryKeys.scan.all, 'detail'] as const,
+    details: () => [...queryKeys.scan.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.scan.details(), id] as const,
   },
 
   // Vulnerabilities
   vulnerability: {
-    all: ['vulnerabilities'] as const,
-    lists: () => [...queryKeys.vulnerability.all, 'list'] as const,
+    all: ["vulnerabilities"] as const,
+    lists: () => [...queryKeys.vulnerability.all, "list"] as const,
     list: (filters: Record<string, any>) =>
       [...queryKeys.vulnerability.lists(), { filters }] as const,
-    details: () => [...queryKeys.vulnerability.all, 'detail'] as const,
+    details: () => [...queryKeys.vulnerability.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.vulnerability.details(), id] as const,
   },
 
   // Metrics
   metrics: {
-    all: ['metrics'] as const,
-    dashboard: () => [...queryKeys.metrics.all, 'dashboard'] as const,
+    all: ["metrics"] as const,
+    dashboard: () => [...queryKeys.metrics.all, "dashboard"] as const,
     timeRange: (range: string) =>
-      [...queryKeys.metrics.all, 'timeRange', range] as const,
+      [...queryKeys.metrics.all, "timeRange", range] as const,
   },
 } as const;
 
@@ -204,13 +204,13 @@ export const queryKeys = {
  */
 export const mutationKeys = {
   scan: {
-    start: ['scan', 'start'] as const,
-    stop: (id: string) => ['scan', 'stop', id] as const,
-    delete: (id: string) => ['scan', 'delete', id] as const,
+    start: ["scan", "start"] as const,
+    stop: (id: string) => ["scan", "stop", id] as const,
+    delete: (id: string) => ["scan", "delete", id] as const,
   },
   vulnerability: {
-    acknowledge: (id: string) => ['vulnerability', 'acknowledge', id] as const,
-    ignore: (id: string) => ['vulnerability', 'ignore', id] as const,
+    acknowledge: (id: string) => ["vulnerability", "acknowledge", id] as const,
+    ignore: (id: string) => ["vulnerability", "ignore", id] as const,
   },
 } as const;
 
@@ -241,7 +241,9 @@ export function invalidateScans(queryClient: QueryClient) {
  * Invalidate all vulnerability-related queries
  */
 export function invalidateVulnerabilities(queryClient: QueryClient) {
-  return queryClient.invalidateQueries({ queryKey: queryKeys.vulnerability.all });
+  return queryClient.invalidateQueries({
+    queryKey: queryKeys.vulnerability.all,
+  });
 }
 
 /**

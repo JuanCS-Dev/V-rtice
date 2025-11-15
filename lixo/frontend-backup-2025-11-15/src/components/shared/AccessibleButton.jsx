@@ -5,9 +5,9 @@
  * Drop-in replacement for buttons that ensures accessibility
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import logger from '@/utils/logger';
+import React from "react";
+import PropTypes from "prop-types";
+import logger from "@/utils/logger";
 
 /**
  * Accessible Button - Always use this instead of <button>
@@ -16,38 +16,41 @@ import logger from '@/utils/logger';
 export const Button = ({
   children,
   onClick,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   disabled = false,
-  type = 'button',
+  type = "button",
   ariaLabel,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark',
-    secondary: 'bg-secondary text-white hover:bg-secondary-dark',
-    success: 'bg-success text-white hover:bg-success-dark',
-    danger: 'bg-error text-white hover:bg-error-dark',
-    ghost: 'bg-transparent border border-primary text-primary hover:bg-primary/10',
+    primary: "bg-primary text-white hover:bg-primary-dark",
+    secondary: "bg-secondary text-white hover:bg-secondary-dark",
+    success: "bg-success text-white hover:bg-success-dark",
+    danger: "bg-error text-white hover:bg-error-dark",
+    ghost:
+      "bg-transparent border border-primary text-primary hover:bg-primary/10",
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
   };
 
-  const baseClasses = 'rounded-lg font-medium transition-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses =
+    "rounded-lg font-medium transition-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed";
 
   // Boris Cherny Standard - GAP #83: Replace console.warn with logger
   // If children is only an icon, require aria-label
-  const hasOnlyIcon = React.Children.count(children) === 1 &&
-    typeof children === 'object' &&
-    children.type?.name?.includes('Icon');
+  const hasOnlyIcon =
+    React.Children.count(children) === 1 &&
+    typeof children === "object" &&
+    children.type?.name?.includes("Icon");
 
-  if (hasOnlyIcon && !ariaLabel && !rest['aria-label']) {
-    logger.warn('Button with only icon needs aria-label');
+  if (hasOnlyIcon && !ariaLabel && !rest["aria-label"]) {
+    logger.warn("Button with only icon needs aria-label");
   }
 
   return (
@@ -56,7 +59,7 @@ export const Button = ({
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      aria-label={ariaLabel || rest['aria-label']}
+      aria-label={ariaLabel || rest["aria-label"]}
       {...rest}
     >
       {children}
@@ -67,10 +70,16 @@ export const Button = ({
 Button.propTypes = {
   children: PropTypes.node.isRequired,
   onClick: PropTypes.func,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'success', 'danger', 'ghost']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  variant: PropTypes.oneOf([
+    "primary",
+    "secondary",
+    "success",
+    "danger",
+    "ghost",
+  ]),
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
   disabled: PropTypes.bool,
-  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  type: PropTypes.oneOf(["button", "submit", "reset"]),
   ariaLabel: PropTypes.string,
   className: PropTypes.string,
 };
@@ -82,15 +91,15 @@ export const IconButton = ({
   icon: Icon,
   label,
   onClick,
-  size = 'md',
-  variant = 'ghost',
-  className = '',
+  size = "md",
+  variant = "ghost",
+  className = "",
   ...rest
 }) => {
   const sizeMap = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
+    sm: "w-8 h-8",
+    md: "w-10 h-10",
+    lg: "w-12 h-12",
   };
 
   return (
@@ -111,8 +120,14 @@ IconButton.propTypes = {
   icon: PropTypes.elementType.isRequired,
   label: PropTypes.string.isRequired, // Required for accessibility
   onClick: PropTypes.func,
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  variant: PropTypes.oneOf(['primary', 'secondary', 'success', 'danger', 'ghost']),
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  variant: PropTypes.oneOf([
+    "primary",
+    "secondary",
+    "success",
+    "danger",
+    "ghost",
+  ]),
   className: PropTypes.string,
 };
 
@@ -124,14 +139,14 @@ export const Clickable = ({
   children,
   onClick,
   onKeyDown,
-  role = 'button',
+  role = "button",
   tabIndex = 0,
   ariaLabel,
-  className = '',
+  className = "",
   ...rest
 }) => {
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onClick?.(e);
     }

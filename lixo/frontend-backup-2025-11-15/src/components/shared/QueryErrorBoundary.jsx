@@ -13,11 +13,11 @@
  * </QueryErrorBoundary>
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useQueryErrorResetBoundary } from '@tanstack/react-query';
-import { withTranslation } from 'react-i18next';
-import './QueryErrorBoundary.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { withTranslation } from "react-i18next";
+import "./QueryErrorBoundary.css";
 
 class QueryErrorBoundaryComponent extends React.Component {
   constructor(props) {
@@ -25,7 +25,7 @@ class QueryErrorBoundaryComponent extends React.Component {
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     };
   }
 
@@ -38,10 +38,10 @@ class QueryErrorBoundaryComponent extends React.Component {
 
     // Log error to monitoring service
     // Error tracking service can be integrated here if needed
-    if (process.env.NODE_ENV === 'production') {
-      logger.error('QueryErrorBoundary caught:', error, errorInfo);
+    if (process.env.NODE_ENV === "production") {
+      logger.error("QueryErrorBoundary caught:", error, errorInfo);
     } else {
-      logger.error('QueryErrorBoundary caught:', error, errorInfo);
+      logger.error("QueryErrorBoundary caught:", error, errorInfo);
     }
   }
 
@@ -54,51 +54,56 @@ class QueryErrorBoundaryComponent extends React.Component {
 
   getErrorType = () => {
     const error = this.state.error;
-    if (!error) return 'unknown';
+    if (!error) return "unknown";
 
-    const message = error.message?.toLowerCase() || '';
+    const message = error.message?.toLowerCase() || "";
 
-    if (message.includes('network') || message.includes('fetch')) return 'network';
-    if (message.includes('timeout')) return 'timeout';
-    if (message.includes('429') || message.includes('rate limit')) return 'rate-limit';
-    if (message.includes('401') || message.includes('unauthorized')) return 'auth';
-    if (message.includes('403') || message.includes('forbidden')) return 'forbidden';
-    if (message.includes('404') || message.includes('not found')) return 'not-found';
-    if (message.includes('500') || message.includes('server')) return 'server';
+    if (message.includes("network") || message.includes("fetch"))
+      return "network";
+    if (message.includes("timeout")) return "timeout";
+    if (message.includes("429") || message.includes("rate limit"))
+      return "rate-limit";
+    if (message.includes("401") || message.includes("unauthorized"))
+      return "auth";
+    if (message.includes("403") || message.includes("forbidden"))
+      return "forbidden";
+    if (message.includes("404") || message.includes("not found"))
+      return "not-found";
+    if (message.includes("500") || message.includes("server")) return "server";
 
-    return 'query';
+    return "query";
   };
 
   getErrorMessage = (errorType) => {
     const { t } = this.props;
 
     const messages = {
-      network: t('error.api.network'),
-      timeout: t('error.api.timeout'),
-      'rate-limit': t('error.api.rateLimit'),
-      auth: t('error.api.unauthorized'),
-      forbidden: t('error.api.forbidden'),
-      'not-found': t('error.api.notFound'),
-      server: t('error.api.server'),
-      query: t('error.api.query')
+      network: t("error.api.network"),
+      timeout: t("error.api.timeout"),
+      "rate-limit": t("error.api.rateLimit"),
+      auth: t("error.api.unauthorized"),
+      forbidden: t("error.api.forbidden"),
+      "not-found": t("error.api.notFound"),
+      server: t("error.api.server"),
+      query: t("error.api.query"),
     };
 
-    return messages[errorType] || t('error.api.unknown');
+    return messages[errorType] || t("error.api.unknown");
   };
 
   getErrorIcon = (errorType) => {
     const icons = {
-      network: '🌐',
-      timeout: '⏱️',
-      'rate-limit': '⚠️',
-      auth: '🔒',
-      forbidden: '⛔',
-      'not-found': '🔍',
-      server: '🔥',
-      query: '❌'
+      network: "🌐",
+      timeout: "⏱️",
+      "rate-limit": "⚠️",
+      auth: "🔒",
+      forbidden: "⛔",
+      "not-found": "🔍",
+      server: "🔥",
+      query: "❌",
     };
 
-    return icons[errorType] || '⚠️';
+    return icons[errorType] || "⚠️";
   };
 
   render() {
@@ -116,13 +121,15 @@ class QueryErrorBoundaryComponent extends React.Component {
       return (
         <div className="query-error-boundary" role="alert">
           <div className="query-error-content">
-            <div className="query-error-icon" aria-hidden="true">{errorIcon}</div>
-            <h3 className="query-error-title">{t('error.api.title')}</h3>
+            <div className="query-error-icon" aria-hidden="true">
+              {errorIcon}
+            </div>
+            <h3 className="query-error-title">{t("error.api.title")}</h3>
             <p className="query-error-message">{errorMessage}</p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="query-error-details">
-                <summary>{t('error.technical.details')}</summary>
+                <summary>{t("error.technical.details")}</summary>
                 <pre className="query-error-stack">
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack}
@@ -134,18 +141,18 @@ class QueryErrorBoundaryComponent extends React.Component {
               <button
                 onClick={this.handleRetry}
                 className="query-error-retry"
-                aria-label={t('error.api.retry')}
+                aria-label={t("error.api.retry")}
               >
-                🔄 {t('error.api.retry')}
+                🔄 {t("error.api.retry")}
               </button>
 
-              {errorType === 'network' && (
+              {errorType === "network" && (
                 <button
                   onClick={() => window.location.reload()}
                   className="query-error-reload"
-                  aria-label={t('error.api.reload')}
+                  aria-label={t("error.api.reload")}
                 >
-                  ↻ {t('error.api.reload')}
+                  ↻ {t("error.api.reload")}
                 </button>
               )}
             </div>
@@ -162,10 +169,12 @@ QueryErrorBoundaryComponent.propTypes = {
   children: PropTypes.node.isRequired,
   fallback: PropTypes.node,
   onReset: PropTypes.func,
-  t: PropTypes.func.isRequired
+  t: PropTypes.func.isRequired,
 };
 
-const TranslatedQueryErrorBoundary = withTranslation()(QueryErrorBoundaryComponent);
+const TranslatedQueryErrorBoundary = withTranslation()(
+  QueryErrorBoundaryComponent,
+);
 
 /**
  * Wrapper with React Query error reset integration
@@ -182,7 +191,7 @@ export const QueryErrorBoundary = ({ children, ...props }) => {
 
 QueryErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
-  fallback: PropTypes.node
+  fallback: PropTypes.node,
 };
 
 export default QueryErrorBoundary;

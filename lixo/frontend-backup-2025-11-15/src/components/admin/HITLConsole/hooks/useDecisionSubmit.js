@@ -10,11 +10,11 @@
  * Boris Cherny Standard - GAP #33 FIX: Optimistic updates
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import { API_ENDPOINTS } from '@/config/api';
-import { queryKeys } from '@/config/queryKeys';
-import logger from '@/utils/logger';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
+import { queryKeys } from "@/config/queryKeys";
+import logger from "@/utils/logger";
 
 const API_BASE_URL = API_ENDPOINTS.hitl;
 
@@ -58,7 +58,9 @@ export const useDecisionSubmit = () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.hitl.stats() });
 
       // Snapshot previous values
-      const previousReviews = queryClient.getQueryData(queryKeys.hitl.reviews());
+      const previousReviews = queryClient.getQueryData(
+        queryKeys.hitl.reviews(),
+      );
       const previousStats = queryClient.getQueryData(queryKeys.hitl.stats());
 
       // Optimistically update reviews (remove the decided APV)
@@ -85,10 +87,13 @@ export const useDecisionSubmit = () => {
       return { previousReviews, previousStats };
     },
     onError: (error, variables, context) => {
-      logger.error('[useDecisionSubmit] Decision submission failed:', error);
+      logger.error("[useDecisionSubmit] Decision submission failed:", error);
       // Rollback on error
       if (context?.previousReviews) {
-        queryClient.setQueryData(queryKeys.hitl.reviews(), context.previousReviews);
+        queryClient.setQueryData(
+          queryKeys.hitl.reviews(),
+          context.previousReviews,
+        );
       }
       if (context?.previousStats) {
         queryClient.setQueryData(queryKeys.hitl.stats(), context.previousStats);

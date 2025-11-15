@@ -1,5 +1,5 @@
-import { API_BASE_URL } from '@/config/api';
-import logger from '@/utils/logger';
+import { API_BASE_URL } from "@/config/api";
+import logger from "@/utils/logger";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -32,7 +32,7 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${ADW_BASE_URL}${endpoint}`, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -72,7 +72,7 @@ const apiRequest = async (endpoint, options = {}) => {
  * - last_campaign: Most recent campaign info
  */
 export const getOffensiveStatus = async () => {
-  return apiRequest('/offensive/status');
+  return apiRequest("/offensive/status");
 };
 
 /**
@@ -88,8 +88,8 @@ export const getOffensiveStatus = async () => {
  * - created_at: ISO timestamp
  */
 export const createCampaign = async (config) => {
-  return apiRequest('/offensive/campaign', {
-    method: 'POST',
+  return apiRequest("/offensive/campaign", {
+    method: "POST",
     body: JSON.stringify({
       objective: config.objective,
       scope: config.scope,
@@ -107,7 +107,7 @@ export const createCampaign = async (config) => {
  * - completed: Completed campaigns count
  */
 export const listCampaigns = async () => {
-  return apiRequest('/offensive/campaigns');
+  return apiRequest("/offensive/campaigns");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -128,7 +128,7 @@ export const listCampaigns = async () => {
  * - complement: Complement system (cascade amplification)
  */
 export const getDefensiveStatus = async () => {
-  return apiRequest('/defensive/status');
+  return apiRequest("/defensive/status");
 };
 
 /**
@@ -143,7 +143,7 @@ export const getDefensiveStatus = async () => {
  * - timestamp: Detection time
  */
 export const getThreats = async () => {
-  return apiRequest('/defensive/threats');
+  return apiRequest("/defensive/threats");
 };
 
 /**
@@ -161,7 +161,7 @@ export const getThreats = async () => {
  * - restoration_cycles: Restoration operations performed
  */
 export const getCoagulationStatus = async () => {
-  return apiRequest('/defensive/coagulation');
+  return apiRequest("/defensive/coagulation");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -179,7 +179,7 @@ export const getCoagulationStatus = async () => {
  * - improvement_trend: Improvement direction (improving/stable/degrading)
  */
 export const getPurpleMetrics = async () => {
-  return apiRequest('/purple/metrics');
+  return apiRequest("/purple/metrics");
 };
 
 /**
@@ -196,8 +196,8 @@ export const getPurpleMetrics = async () => {
  * - started_at: ISO timestamp
  */
 export const triggerEvolutionCycle = async () => {
-  return apiRequest('/purple/cycle', {
-    method: 'POST',
+  return apiRequest("/purple/cycle", {
+    method: "POST",
   });
 };
 
@@ -224,13 +224,13 @@ export const triggerEvolutionCycle = async () => {
  * - message: Status message
  */
 export const executeAttackSurfaceWorkflow = async (domain, options = {}) => {
-  return apiRequest('/workflows/attack-surface', {
-    method: 'POST',
+  return apiRequest("/workflows/attack-surface", {
+    method: "POST",
     body: JSON.stringify({
       domain,
       include_subdomains: options.include_subdomains ?? true,
       port_range: options.port_range || null,
-      scan_depth: options.scan_depth || 'standard',
+      scan_depth: options.scan_depth || "standard",
     }),
   });
 };
@@ -257,8 +257,8 @@ export const executeAttackSurfaceWorkflow = async (domain, options = {}) => {
  * - message: Status message
  */
 export const executeCredentialIntelWorkflow = async (target) => {
-  return apiRequest('/workflows/credential-intel', {
-    method: 'POST',
+  return apiRequest("/workflows/credential-intel", {
+    method: "POST",
     body: JSON.stringify({
       email: target.email || null,
       username: target.username || null,
@@ -294,8 +294,8 @@ export const executeCredentialIntelWorkflow = async (target) => {
  * - message: Status message
  */
 export const executeTargetProfilingWorkflow = async (target) => {
-  return apiRequest('/workflows/target-profile', {
-    method: 'POST',
+  return apiRequest("/workflows/target-profile", {
+    method: "POST",
     body: JSON.stringify({
       username: target.username || null,
       email: target.email || null,
@@ -362,7 +362,7 @@ export const getWorkflowReport = async (workflowId) => {
  * - timestamp: ISO timestamp
  */
 export const getADWOverview = async () => {
-  return apiRequest('/overview');
+  return apiRequest("/overview");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -377,7 +377,7 @@ export const getADWOverview = async () => {
  * - message: Human-readable status message
  */
 export const checkADWHealth = async () => {
-  return apiRequest('/health');
+  return apiRequest("/health");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -389,7 +389,7 @@ export const checkADWHealth = async () => {
  */
 export const isADWAvailable = async () => {
   const health = await checkADWHealth();
-  return health.success && health.data.status === 'healthy';
+  return health.success && health.data.status === "healthy";
 };
 
 /**
@@ -415,7 +415,7 @@ export const getADWSummary = async () => {
       },
     };
   } catch (error) {
-    logger.error('Error fetching ADW summary:', error);
+    logger.error("Error fetching ADW summary:", error);
     return {
       success: false,
       error: error.message,
@@ -438,7 +438,7 @@ export const getAgentStatuses = async () => {
   }
   return {
     success: false,
-    error: 'Unable to fetch agent statuses',
+    error: "Unable to fetch agent statuses",
   };
 };
 

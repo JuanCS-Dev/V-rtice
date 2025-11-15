@@ -23,11 +23,11 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React, { useState } from 'react';
-import { Button, Input } from '../../../shared';
-import { validateIP } from '../../../../utils/validation';
-import { sanitizeIP } from '../../../../utils/sanitization';
-import styles from './IpSearchForm.module.css';
+import React, { useState } from "react";
+import { Button, Input } from "../../../shared";
+import { validateIP } from "../../../../utils/validation";
+import { sanitizeIP } from "../../../../utils/sanitization";
+import styles from "./IpSearchForm.module.css";
 
 const IpSearchForm = ({
   ipAddress,
@@ -68,7 +68,7 @@ const IpSearchForm = ({
 
     // Validate before submission
     if (!ipAddress.trim()) {
-      setError('IP address is required');
+      setError("IP address is required");
       return;
     }
 
@@ -88,8 +88,8 @@ const IpSearchForm = ({
       className={styles.searchContainer}
       onSubmit={handleSubmit}
       role="search"
-      aria-label="IP intelligence search">
-
+      aria-label="IP intelligence search"
+    >
       <div className={styles.inputGroup}>
         <label htmlFor="ip-address-input" className={styles.visuallyHidden}>
           IP Address
@@ -108,7 +108,13 @@ const IpSearchForm = ({
             disabled={loading || loadingMyIp}
             icon={loading && <div className={styles.loadingSpinner}></div>}
             aria-invalid={!!error}
-            aria-describedby={error ? "ip-input-error" : (loading ? "ip-search-status" : undefined)}
+            aria-describedby={
+              error
+                ? "ip-input-error"
+                : loading
+                  ? "ip-search-status"
+                  : undefined
+            }
           />
           {error && (
             <div
@@ -122,15 +128,20 @@ const IpSearchForm = ({
           )}
         </div>
 
-        <div className={styles.buttonGroup} role="group" aria-label="Search actions">
+        <div
+          className={styles.buttonGroup}
+          role="group"
+          aria-label="Search actions"
+        >
           <Button
             type="submit"
             disabled={loading || loadingMyIp || !ipAddress.trim() || !!error}
             variant="cyber"
             size="lg"
             className={styles.analyzeButton}
-            aria-label="Analyze IP address">
-            {loading ? 'ANALISANDO...' : 'EXECUTAR ANÁLISE'}
+            aria-label="Analyze IP address"
+          >
+            {loading ? "ANALISANDO..." : "EXECUTAR ANÁLISE"}
           </Button>
 
           <Button
@@ -140,15 +151,27 @@ const IpSearchForm = ({
             variant="warning"
             size="lg"
             className={styles.myIpButton}
-            icon={loadingMyIp ? <i className="fas fa-spinner fa-spin" aria-hidden="true"></i> : <i className="fas fa-crosshairs" aria-hidden="true"></i>}
-            aria-label="Analyze my IP address">
+            icon={
+              loadingMyIp ? (
+                <i className="fas fa-spinner fa-spin" aria-hidden="true"></i>
+              ) : (
+                <i className="fas fa-crosshairs" aria-hidden="true"></i>
+              )
+            }
+            aria-label="Analyze my IP address"
+          >
             MEU IP
           </Button>
         </div>
       </div>
 
       {loading && (
-        <div id="ip-search-status" className={styles.visuallyHidden} role="status" aria-live="polite">
+        <div
+          id="ip-search-status"
+          className={styles.visuallyHidden}
+          role="status"
+          aria-live="polite"
+        >
           Analyzing IP address...
         </div>
       )}
@@ -163,7 +186,8 @@ const IpSearchForm = ({
                 type="button"
                 onClick={() => setIpAddress(historicIP)}
                 className={styles.historyButton}
-                aria-label={`Load IP ${historicIP}`}>
+                aria-label={`Load IP ${historicIP}`}
+              >
                 {historicIP}
               </button>
             ))}

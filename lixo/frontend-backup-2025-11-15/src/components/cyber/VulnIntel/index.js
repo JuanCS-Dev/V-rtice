@@ -1,2 +1,2 @@
-export { VulnIntel } from './VulnIntel';
-export { default } from './VulnIntel';
+export { VulnIntel } from "./VulnIntel";
+export { default } from "./VulnIntel";

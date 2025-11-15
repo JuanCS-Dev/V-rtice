@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
 import {
   runAttackSimulation,
   listAttackTechniques,
   validatePurpleTeam as apiValidatePurpleTeam,
   getAttackCoverage,
-} from '../../../../api/offensiveServices';
+} from "../../../../api/offensiveServices";
 
 /**
  * useBAS - Hook para Breach & Attack Simulation
@@ -30,7 +30,7 @@ export const useBAS = () => {
         setTechniques(result.techniques || result.data || []);
       }
     } catch (err) {
-      logger.error('Error loading techniques:', err);
+      logger.error("Error loading techniques:", err);
       setError(err.message);
     }
   }, []);
@@ -46,7 +46,7 @@ export const useBAS = () => {
         setCoverage(result.coverage || result.data || result);
       }
     } catch (err) {
-      logger.error('Error loading coverage:', err);
+      logger.error("Error loading coverage:", err);
       setError(err.message);
     }
   }, []);
@@ -54,83 +54,97 @@ export const useBAS = () => {
   /**
    * Executa simulação de ataque
    */
-  const runSimulation = useCallback(async (techniqueId, targetHost, platform, params = {}) => {
-    setIsSimulating(true);
-    setError(null);
+  const runSimulation = useCallback(
+    async (techniqueId, targetHost, platform, params = {}) => {
+      setIsSimulating(true);
+      setError(null);
 
-    try {
-      const result = await runAttackSimulation(techniqueId, targetHost, platform, params);
-
-      if (result.success) {
-        // Adiciona simulação à lista
-        const newSimulation = {
-          simulation_id: result.simulation_id || Date.now(),
-          technique_id: techniqueId,
-          target_host: targetHost,
+      try {
+        const result = await runAttackSimulation(
+          techniqueId,
+          targetHost,
           platform,
-          status: result.status || 'completed',
-          detected: result.detected,
-          timestamp: new Date().toISOString(),
-          ...result,
-        };
+          params,
+        );
 
-        setSimulations(prev => [...prev, newSimulation]);
+        if (result.success) {
+          // Adiciona simulação à lista
+          const newSimulation = {
+            simulation_id: result.simulation_id || Date.now(),
+            technique_id: techniqueId,
+            target_host: targetHost,
+            platform,
+            status: result.status || "completed",
+            detected: result.detected,
+            timestamp: new Date().toISOString(),
+            ...result,
+          };
 
-        // Atualiza coverage
-        await loadCoverage();
+          setSimulations((prev) => [...prev, newSimulation]);
 
-        return { success: true, simulation: newSimulation };
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+          // Atualiza coverage
+          await loadCoverage();
+
+          return { success: true, simulation: newSimulation };
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error running simulation:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsSimulating(false);
       }
-    } catch (err) {
-      logger.error('Error running simulation:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsSimulating(false);
-    }
-  }, [loadCoverage]);
+    },
+    [loadCoverage],
+  );
 
   /**
    * Valida simulação com Purple Team (correlação com telemetria)
    */
-  const validatePurpleTeam = useCallback(async (simulationId, telemetrySources) => {
-    setIsSimulating(true);
-    setError(null);
+  const validatePurpleTeam = useCallback(
+    async (simulationId, telemetrySources) => {
+      setIsSimulating(true);
+      setError(null);
 
-    try {
-      const result = await apiValidatePurpleTeam(simulationId, telemetrySources);
-
-      if (result.success) {
-        // Atualiza simulação com resultados de detecção
-        setSimulations(prev =>
-          prev.map(s =>
-            s.simulation_id === simulationId
-              ? {
-                  ...s,
-                  detected: result.detected,
-                  telemetry: result.telemetry,
-                  validation_timestamp: new Date().toISOString(),
-                }
-              : s
-          )
+      try {
+        const result = await apiValidatePurpleTeam(
+          simulationId,
+          telemetrySources,
         );
 
-        return result;
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+        if (result.success) {
+          // Atualiza simulação com resultados de detecção
+          setSimulations((prev) =>
+            prev.map((s) =>
+              s.simulation_id === simulationId
+                ? {
+                    ...s,
+                    detected: result.detected,
+                    telemetry: result.telemetry,
+                    validation_timestamp: new Date().toISOString(),
+                  }
+                : s,
+            ),
+          );
+
+          return result;
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error validating purple team:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsSimulating(false);
       }
-    } catch (err) {
-      logger.error('Error validating purple team:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsSimulating(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   /**
    * Obtém coverage atualizado
@@ -150,7 +164,7 @@ export const useBAS = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error getting coverage:', err);
+      logger.error("Error getting coverage:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

@@ -1,24 +1,24 @@
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL } from "@/config/api";
 /**
  * Defensive Tools Services
- * 
+ *
  * API integration for defensive tools: Behavioral Analyzer & Encrypted Traffic
  * Connects to Active Immune Core defensive endpoints
- * 
+ *
  * Philosophy: Type-safe, async/await, complete error handling
  */
 
-import axios from 'axios';
+import axios from "axios";
 
-const DEFENSIVE_BASE = '/api/v1/immune/defensive';
+const DEFENSIVE_BASE = "/api/v1/immune/defensive";
 
 // Create axios instance
 const apiClient = axios.create({
   baseURL: process.env.REACT_APP_API_URL || API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 /**
@@ -30,21 +30,24 @@ export const behavioralAnalyzerService = {
    */
   async analyzeEvent(eventData) {
     try {
-      const response = await apiClient.post(`${DEFENSIVE_BASE}/behavioral/analyze`, {
-        entity_id: eventData.entityId,
-        event_type: eventData.eventType,
-        timestamp: eventData.timestamp || new Date().toISOString(),
-        metadata: eventData.metadata || {}
-      });
-      
+      const response = await apiClient.post(
+        `${DEFENSIVE_BASE}/behavioral/analyze`,
+        {
+          entity_id: eventData.entityId,
+          event_type: eventData.eventType,
+          timestamp: eventData.timestamp || new Date().toISOString(),
+          metadata: eventData.metadata || {},
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -54,23 +57,26 @@ export const behavioralAnalyzerService = {
    */
   async analyzeBatch(events) {
     try {
-      const response = await apiClient.post(`${DEFENSIVE_BASE}/behavioral/analyze-batch`, {
-        events: events.map(e => ({
-          entity_id: e.entityId,
-          event_type: e.eventType,
-          timestamp: e.timestamp || new Date().toISOString(),
-          metadata: e.metadata || {}
-        }))
-      });
-      
+      const response = await apiClient.post(
+        `${DEFENSIVE_BASE}/behavioral/analyze-batch`,
+        {
+          events: events.map((e) => ({
+            entity_id: e.entityId,
+            event_type: e.eventType,
+            timestamp: e.timestamp || new Date().toISOString(),
+            metadata: e.metadata || {},
+          })),
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -80,23 +86,26 @@ export const behavioralAnalyzerService = {
    */
   async trainBaseline(entityId, trainingEvents) {
     try {
-      const response = await apiClient.post(`${DEFENSIVE_BASE}/behavioral/train-baseline`, {
-        entity_id: entityId,
-        training_events: trainingEvents.map(e => ({
-          event_type: e.eventType,
-          timestamp: e.timestamp || new Date().toISOString(),
-          metadata: e.metadata || {}
-        }))
-      });
-      
+      const response = await apiClient.post(
+        `${DEFENSIVE_BASE}/behavioral/train-baseline`,
+        {
+          entity_id: entityId,
+          training_events: trainingEvents.map((e) => ({
+            event_type: e.eventType,
+            timestamp: e.timestamp || new Date().toISOString(),
+            metadata: e.metadata || {},
+          })),
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -106,18 +115,21 @@ export const behavioralAnalyzerService = {
    */
   async getBaselineStatus(entityId) {
     try {
-      const response = await apiClient.get(`${DEFENSIVE_BASE}/behavioral/baseline-status`, {
-        params: { entity_id: entityId }
-      });
-      
+      const response = await apiClient.get(
+        `${DEFENSIVE_BASE}/behavioral/baseline-status`,
+        {
+          params: { entity_id: entityId },
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -127,19 +139,21 @@ export const behavioralAnalyzerService = {
    */
   async getMetrics() {
     try {
-      const response = await apiClient.get(`${DEFENSIVE_BASE}/behavioral/metrics`);
-      
+      const response = await apiClient.get(
+        `${DEFENSIVE_BASE}/behavioral/metrics`,
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
-  }
+  },
 };
 
 /**
@@ -151,28 +165,31 @@ export const encryptedTrafficService = {
    */
   async analyzeFlow(flowData) {
     try {
-      const response = await apiClient.post(`${DEFENSIVE_BASE}/traffic/analyze`, {
-        source_ip: flowData.sourceIp,
-        dest_ip: flowData.destIp,
-        source_port: flowData.sourcePort,
-        dest_port: flowData.destPort,
-        protocol: flowData.protocol || 'tcp',
-        packet_sizes: flowData.packetSizes || [],
-        inter_arrival_times: flowData.interArrivalTimes || [],
-        tls_version: flowData.tlsVersion,
-        cipher_suite: flowData.cipherSuite,
-        sni: flowData.sni,
-        flow_duration_seconds: flowData.flowDuration || 0
-      });
-      
+      const response = await apiClient.post(
+        `${DEFENSIVE_BASE}/traffic/analyze`,
+        {
+          source_ip: flowData.sourceIp,
+          dest_ip: flowData.destIp,
+          source_port: flowData.sourcePort,
+          dest_port: flowData.destPort,
+          protocol: flowData.protocol || "tcp",
+          packet_sizes: flowData.packetSizes || [],
+          inter_arrival_times: flowData.interArrivalTimes || [],
+          tls_version: flowData.tlsVersion,
+          cipher_suite: flowData.cipherSuite,
+          sni: flowData.sni,
+          flow_duration_seconds: flowData.flowDuration || 0,
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -182,30 +199,33 @@ export const encryptedTrafficService = {
    */
   async analyzeBatch(flows) {
     try {
-      const response = await apiClient.post(`${DEFENSIVE_BASE}/traffic/analyze-batch`, {
-        flows: flows.map(f => ({
-          source_ip: f.sourceIp,
-          dest_ip: f.destIp,
-          source_port: f.sourcePort,
-          dest_port: f.destPort,
-          protocol: f.protocol || 'tcp',
-          packet_sizes: f.packetSizes || [],
-          inter_arrival_times: f.interArrivalTimes || [],
-          tls_version: f.tlsVersion,
-          cipher_suite: f.cipherSuite,
-          sni: f.sni,
-          flow_duration_seconds: f.flowDuration || 0
-        }))
-      });
-      
+      const response = await apiClient.post(
+        `${DEFENSIVE_BASE}/traffic/analyze-batch`,
+        {
+          flows: flows.map((f) => ({
+            source_ip: f.sourceIp,
+            dest_ip: f.destIp,
+            source_port: f.sourcePort,
+            dest_port: f.destPort,
+            protocol: f.protocol || "tcp",
+            packet_sizes: f.packetSizes || [],
+            inter_arrival_times: f.interArrivalTimes || [],
+            tls_version: f.tlsVersion,
+            cipher_suite: f.cipherSuite,
+            sni: f.sni,
+            flow_duration_seconds: f.flowDuration || 0,
+          })),
+        },
+      );
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
   },
@@ -216,18 +236,18 @@ export const encryptedTrafficService = {
   async getMetrics() {
     try {
       const response = await apiClient.get(`${DEFENSIVE_BASE}/traffic/metrics`);
-      
+
       return {
         success: true,
-        data: response.data
+        data: response.data,
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || error.message
+        error: error.response?.data?.detail || error.message,
       };
     }
-  }
+  },
 };
 
 /**
@@ -238,12 +258,12 @@ export const defensiveToolsHealth = async () => {
     const response = await apiClient.get(`${DEFENSIVE_BASE}/health`);
     return {
       success: true,
-      data: response.data
+      data: response.data,
     };
   } catch (error) {
     return {
       success: false,
-      error: error.response?.data?.detail || error.message
+      error: error.response?.data?.detail || error.message,
     };
   }
 };
@@ -251,5 +271,5 @@ export const defensiveToolsHealth = async () => {
 export default {
   behavioral: behavioralAnalyzerService,
   traffic: encryptedTrafficService,
-  health: defensiveToolsHealth
+  health: defensiveToolsHealth,
 };

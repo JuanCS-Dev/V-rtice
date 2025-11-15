@@ -17,12 +17,20 @@
  * @version 3.0.0 (Security Hardened)
  */
 
-import React, { useState } from 'react';
-import { Input, Button } from '../../../shared';
-import { useKeyPress } from '../../../../hooks';
-import { validateNmapArgs, validateIP, validateDomain, validateText } from '../../../../utils/validation';
-import { sanitizeCommandArgs, sanitizePlainText } from '../../../../utils/sanitization';
-import styles from './ScanForm.module.css';
+import React, { useState } from "react";
+import { Input, Button } from "../../../shared";
+import { useKeyPress } from "../../../../hooks";
+import {
+  validateNmapArgs,
+  validateIP,
+  validateDomain,
+  validateText,
+} from "../../../../utils/validation";
+import {
+  sanitizeCommandArgs,
+  sanitizePlainText,
+} from "../../../../utils/sanitization";
+import styles from "./ScanForm.module.css";
 
 export const ScanForm = ({
   target,
@@ -78,7 +86,7 @@ export const ScanForm = ({
 
     // Check if it's a CIDR notation (IP with /subnet)
     if (/^[\d.]+\/\d+$/.test(target)) {
-      const ipPart = target.split('/')[0];
+      const ipPart = target.split("/")[0];
       const ipCheck = validateIP(ipPart);
       if (ipCheck.valid) {
         setTargetError(null);
@@ -86,7 +94,7 @@ export const ScanForm = ({
       }
     }
 
-    setTargetError('Invalid target. Use IP address, domain, or CIDR notation');
+    setTargetError("Invalid target. Use IP address, domain, or CIDR notation");
   };
 
   // CRITICAL: Validate custom args on blur - GAP #11 FIX
@@ -104,7 +112,7 @@ export const ScanForm = ({
     }
   };
 
-  useKeyPress('Enter', () => {
+  useKeyPress("Enter", () => {
     if (target.trim() && !loading && !targetError && !customArgsError) {
       onScan();
     }
@@ -118,7 +126,7 @@ export const ScanForm = ({
 
     // Validate target
     if (!target.trim()) {
-      setTargetError('Target is required');
+      setTargetError("Target is required");
       hasErrors = true;
     } else {
       handleTargetBlur();
@@ -144,7 +152,11 @@ export const ScanForm = ({
     <div className={styles.container}>
       <h2 className={styles.title}>NMAP NETWORK SCANNER</h2>
 
-      <form className={styles.form} onSubmit={handleSubmit} aria-label="Nmap scan configuration">
+      <form
+        className={styles.form}
+        onSubmit={handleSubmit}
+        aria-label="Nmap scan configuration"
+      >
         <div>
           <Input
             label="Target (IP/CIDR/Hostname)"
@@ -183,7 +195,8 @@ export const ScanForm = ({
             onChange={(e) => setSelectedProfile(e.target.value)}
             className={styles.select}
             disabled={loading}
-            aria-label="Select scan profile">
+            aria-label="Select scan profile"
+          >
             {Object.entries(profiles).map(([key, profile]) => (
               <option key={key} value={key}>
                 {profile.name} - {profile.description}
@@ -223,11 +236,14 @@ export const ScanForm = ({
           type="submit"
           variant="cyber"
           size="md"
-          disabled={loading || !target.trim() || !!targetError || !!customArgsError}
+          disabled={
+            loading || !target.trim() || !!targetError || !!customArgsError
+          }
           loading={loading}
           fullWidth
-          aria-label="Start Nmap scan">
-          {loading ? 'EXECUTANDO SCAN...' : 'INICIAR SCAN'}
+          aria-label="Start Nmap scan"
+        >
+          {loading ? "EXECUTANDO SCAN..." : "INICIAR SCAN"}
         </Button>
       </form>
 
@@ -240,7 +256,11 @@ export const ScanForm = ({
       {scanHistory.length > 0 && (
         <fieldset className={styles.history}>
           <legend className={styles.historyLabel}>HISTÓRICO RECENTE:</legend>
-          <div className={styles.historyItems} role="group" aria-label="Recent scans">
+          <div
+            className={styles.historyItems}
+            role="group"
+            aria-label="Recent scans"
+          >
             {scanHistory.slice(0, 5).map((item, index) => (
               <button
                 key={index}
@@ -250,7 +270,8 @@ export const ScanForm = ({
                   setSelectedProfile(item.profile);
                 }}
                 className={styles.historyItem}
-                aria-label={`Load scan: ${item.target} with ${item.profile} profile from ${item.timestamp}`}>
+                aria-label={`Load scan: ${item.target} with ${item.profile} profile from ${item.timestamp}`}
+              >
                 {item.target} ({item.profile}) - {item.timestamp}
               </button>
             ))}

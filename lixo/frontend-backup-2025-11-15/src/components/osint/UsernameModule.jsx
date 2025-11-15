@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { searchUsername } from '@/api/osintService';
-import logger from '@/utils/logger';
+import React, { useState } from "react";
+import { searchUsername } from "@/api/osintService";
+import logger from "@/utils/logger";
 
 const UsernameModule = () => {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
 
   const handleSearch = async () => {
     if (!username.trim()) {
-      alert('Digite um username para buscar');
+      alert("Digite um username para buscar");
       return;
     }
 
@@ -21,27 +21,32 @@ const UsernameModule = () => {
 
       if (response.success && response.data) {
         const data = response.data;
-        
+
         // Adapt response to UI format
         const adaptedResults = {
           username: username,
           platforms_found: data.platforms_found || [],
           total_found: data.platforms_found?.length || 0,
-          confidence_score: Math.round(data.profile_data?.activity_level === 'high' ? 85 : 
-                                     data.profile_data?.activity_level === 'medium' ? 60 : 35),
-          risk_level: 'INFO',
+          confidence_score: Math.round(
+            data.profile_data?.activity_level === "high"
+              ? 85
+              : data.profile_data?.activity_level === "medium"
+                ? 60
+                : 35,
+          ),
+          risk_level: "INFO",
           patterns: [],
           recommendations: [],
-          data_sources: ['Username Enumeration'],
+          data_sources: ["Username Enumeration"],
           timestamp: data.timestamp,
-          profile_data: data.profile_data
+          profile_data: data.profile_data,
         };
         setResults(adaptedResults);
       } else {
-        throw new Error(response.error || 'Dados inválidos recebidos');
+        throw new Error(response.error || "Dados inválidos recebidos");
       }
     } catch (error) {
-      logger.error('Erro na busca:', error);
+      logger.error("Erro na busca:", error);
 
       // Return empty results with error indicator
       setResults({
@@ -49,8 +54,8 @@ const UsernameModule = () => {
         platforms_found: [],
         total_found: 0,
         confidence_score: 0,
-        error: 'Service unavailable. Please try again later.',
-        error_mode: true
+        error: "Service unavailable. Please try again later.",
+        error_mode: true,
       });
     } finally {
       setSearching(false);
@@ -59,19 +64,27 @@ const UsernameModule = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'found': return 'text-green-400 border-green-400';
-      case 'possible': return 'text-yellow-400 border-yellow-400';
-      case 'not_found': return 'text-red-400 border-red-400';
-      default: return 'text-gray-400 border-gray-400';
+      case "found":
+        return "text-green-400 border-green-400";
+      case "possible":
+        return "text-yellow-400 border-yellow-400";
+      case "not_found":
+        return "text-red-400 border-red-400";
+      default:
+        return "text-gray-400 border-gray-400";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'found': return '✅';
-      case 'possible': return '❓';
-      case 'not_found': return '❌';
-      default: return '⚪';
+      case "found":
+        return "✅";
+      case "possible":
+        return "❓";
+      case "not_found":
+        return "❌";
+      default:
+        return "⚪";
     }
   };
 
@@ -82,19 +95,26 @@ const UsernameModule = () => {
           👤 USERNAME HUNTER
         </h2>
         <p className="text-red-400/70 text-sm mb-6">
-          Busca avançada de usernames em múltiplas plataformas sociais e profissionais
+          Busca avançada de usernames em múltiplas plataformas sociais e
+          profissionais
         </p>
 
         {/* Search Input */}
         <div className="space-y-4 mb-6">
           <div className="space-y-2">
-            <label htmlFor="input-username-alvo-fibyx" className="text-red-400/80 text-xs font-bold tracking-wider">USERNAME ALVO</label>
-<input id="input-username-alvo-fibyx"
+            <label
+              htmlFor="input-username-alvo-fibyx"
+              className="text-red-400/80 text-xs font-bold tracking-wider"
+            >
+              USERNAME ALVO
+            </label>
+            <input
+              id="input-username-alvo-fibyx"
               className="w-full bg-black/70 border border-red-400/50 text-red-400 placeholder-red-400/50 p-3 rounded-lg focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-400/20 font-mono text-lg"
               placeholder="Digite o username..."
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
 
@@ -103,16 +123,19 @@ const UsernameModule = () => {
             onClick={handleSearch}
             disabled={searching}
           >
-            {searching ? '🔍 BUSCANDO...' : '🚀 INICIAR BUSCA'}
+            {searching ? "🔍 BUSCANDO..." : "🚀 INICIAR BUSCA"}
           </button>
         </div>
 
         {/* Results */}
         {results && (
-          <div className="bg-black/50 border border-red-400/30 rounded-lg p-6 max-h-[600px] overflow-y-auto" style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#ef4444 rgba(0,0,0,0.3)'
-          }}>
+          <div
+            className="bg-black/50 border border-red-400/30 rounded-lg p-6 max-h-[600px] overflow-y-auto"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "#ef4444 rgba(0,0,0,0.3)",
+            }}
+          >
             <style jsx>{`
               div::-webkit-scrollbar {
                 width: 8px;
@@ -130,9 +153,12 @@ const UsernameModule = () => {
               }
             `}</style>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-red-400 font-bold text-lg">RESULTADOS DA BUSCA</h3>
+              <h3 className="text-red-400 font-bold text-lg">
+                RESULTADOS DA BUSCA
+              </h3>
               <div className="text-red-400/60 text-sm">
-                Encontrado em {results.total_found} plataforma(s) | Confiança: {results.confidence_score}%
+                Encontrado em {results.total_found} plataforma(s) | Confiança:{" "}
+                {results.confidence_score}%
               </div>
             </div>
 
@@ -147,7 +173,9 @@ const UsernameModule = () => {
                       <span>{getStatusIcon(platform.status)}</span>
                       <span className="font-bold">{platform.platform}</span>
                     </div>
-                    <span className="text-xs uppercase font-bold">{platform.status.replace('_', ' ')}</span>
+                    <span className="text-xs uppercase font-bold">
+                      {platform.status.replace("_", " ")}
+                    </span>
                   </div>
 
                   {platform.url && (
@@ -182,10 +210,28 @@ const UsernameModule = () => {
 
         {/* Popular Platforms Info */}
         <div className="mt-6 bg-red-400/10 border border-red-400/30 rounded-lg p-4">
-          <h4 className="text-red-400 font-bold mb-3">PLATAFORMAS MONITORADAS</h4>
+          <h4 className="text-red-400 font-bold mb-3">
+            PLATAFORMAS MONITORADAS
+          </h4>
           <div className="grid grid-cols-4 gap-2 text-xs">
-            {['Twitter/X', 'Instagram', 'Facebook', 'LinkedIn', 'GitHub', 'Reddit', 'Discord', 'TikTok', 'YouTube', 'Telegram', 'WhatsApp', 'Snapchat'].map((platform, idx) => (
-              <div key={idx} className="bg-black/30 p-2 rounded text-center text-red-400/70">
+            {[
+              "Twitter/X",
+              "Instagram",
+              "Facebook",
+              "LinkedIn",
+              "GitHub",
+              "Reddit",
+              "Discord",
+              "TikTok",
+              "YouTube",
+              "Telegram",
+              "WhatsApp",
+              "Snapchat",
+            ].map((platform, idx) => (
+              <div
+                key={idx}
+                className="bg-black/30 p-2 rounded text-center text-red-400/70"
+              >
                 {platform}
               </div>
             ))}

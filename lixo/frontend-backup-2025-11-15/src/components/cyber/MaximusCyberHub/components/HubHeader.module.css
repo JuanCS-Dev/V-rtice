@@ -1,4 +1,3 @@
-
 .container {
   background: rgba(0, 0, 0, 0.4);
   border: var(--border-1) solid var(--color-cyber-border);
@@ -22,7 +21,11 @@
 .icon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(to bottom right, var(--color-cyber-bg-dark), var(--color-cyber-bg));
+  background: linear-gradient(
+    to bottom right,
+    var(--color-cyber-bg-dark),
+    var(--color-cyber-bg)
+  );
   border: var(--border-1) solid var(--color-cyber-border);
   border-radius: var(--radius-md);
   display: flex;

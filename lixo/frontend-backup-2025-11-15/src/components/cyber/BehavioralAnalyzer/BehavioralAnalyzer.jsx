@@ -22,17 +22,22 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import { behavioralAnalyzerService } from '../../../api/defensiveToolsServices';
-import styles from './BehavioralAnalyzer.module.css';
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import { behavioralAnalyzerService } from "../../../api/defensiveToolsServices";
+import styles from "./BehavioralAnalyzer.module.css";
 
 export const BehavioralAnalyzer = () => {
   const { t } = useTranslation();
-  const [entityId, setEntityId] = useState('');
-  const [eventType, setEventType] = useState('login');
-  const [metadata, setMetadata] = useState('{}');
+  const [entityId, setEntityId] = useState("");
+  const [eventType, setEventType] = useState("login");
+  const [metadata, setMetadata] = useState("{}");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -63,7 +68,7 @@ export const BehavioralAnalyzer = () => {
       const response = await behavioralAnalyzerService.analyzeEvent({
         entityId,
         eventType,
-        metadata: parsedMetadata
+        metadata: parsedMetadata,
       });
 
       if (response.success) {
@@ -80,11 +85,16 @@ export const BehavioralAnalyzer = () => {
 
   const getRiskColor = (riskLevel) => {
     switch (riskLevel) {
-      case 'CRITICAL': return '#ff0000';
-      case 'HIGH': return '#ff6600';
-      case 'MEDIUM': return '#ffaa00';
-      case 'LOW': return '#00ff00';
-      default: return '#888888';
+      case "CRITICAL":
+        return "#ff0000";
+      case "HIGH":
+        return "#ff6600";
+      case "MEDIUM":
+        return "#ffaa00";
+      case "LOW":
+        return "#00ff00";
+      default:
+        return "#888888";
     }
   };
 
@@ -95,14 +105,18 @@ export const BehavioralAnalyzer = () => {
       aria-labelledby="behavioral-analyzer-title"
       data-maximus-tool="behavioral-analyzer"
       data-maximus-category="defensive"
-      data-maximus-status={loading ? 'analyzing' : 'ready'}>
-
-      <header
-        className={styles.header}
-        data-maximus-section="tool-header">
-        <h2 id="behavioral-analyzer-title"><span aria-hidden="true">🧠</span> {t('defensive.behavioral.title', 'Behavioral Analyzer')}</h2>
+      data-maximus-status={loading ? "analyzing" : "ready"}
+    >
+      <header className={styles.header} data-maximus-section="tool-header">
+        <h2 id="behavioral-analyzer-title">
+          <span aria-hidden="true">🧠</span>{" "}
+          {t("defensive.behavioral.title", "Behavioral Analyzer")}
+        </h2>
         <p className={styles.subtitle}>
-          {t('defensive.behavioral.subtitle', 'Detect anomalous behavior patterns')}
+          {t(
+            "defensive.behavioral.subtitle",
+            "Detect anomalous behavior patterns",
+          )}
         </p>
       </header>
 
@@ -112,14 +126,17 @@ export const BehavioralAnalyzer = () => {
           className={styles.metrics}
           role="region"
           aria-label="Behavioral metrics"
-          data-maximus-section="metrics">
+          data-maximus-section="metrics"
+        >
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>Total Analyzed</span>
             <span className={styles.metricValue}>{metrics.total_analyzed}</span>
           </div>
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>Anomalies</span>
-            <span className={styles.metricValue}>{metrics.anomalies_detected}</span>
+            <span className={styles.metricValue}>
+              {metrics.anomalies_detected}
+            </span>
           </div>
           <div className={styles.metricCard}>
             <span className={styles.metricLabel}>False Positive</span>
@@ -140,68 +157,65 @@ export const BehavioralAnalyzer = () => {
       <section
         role="region"
         aria-label="Analysis form"
-        data-maximus-section="form">
+        data-maximus-section="form"
+      >
         <form onSubmit={handleAnalyze} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label htmlFor="entityId">Entity ID</label>
-          <input
-            id="entityId"
-            type="text"
-            value={entityId}
-            onChange={(e) => setEntityId(e.target.value)}
-            placeholder="user@domain.com or 192.168.1.100"
-            required
-            className={styles.input}
-          />
-        </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="entityId">Entity ID</label>
+            <input
+              id="entityId"
+              type="text"
+              value={entityId}
+              onChange={(e) => setEntityId(e.target.value)}
+              placeholder="user@domain.com or 192.168.1.100"
+              required
+              className={styles.input}
+            />
+          </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="eventType">Event Type</label>
-          <select
-            id="eventType"
-            value={eventType}
-            onChange={(e) => setEventType(e.target.value)}
-            className={styles.select}
+          <div className={styles.formGroup}>
+            <label htmlFor="eventType">Event Type</label>
+            <select
+              id="eventType"
+              value={eventType}
+              onChange={(e) => setEventType(e.target.value)}
+              className={styles.select}
+            >
+              <option value="login">Login</option>
+              <option value="file_access">File Access</option>
+              <option value="network_connection">Network Connection</option>
+              <option value="privilege_escalation">Privilege Escalation</option>
+              <option value="data_transfer">Data Transfer</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="metadata">Metadata (JSON)</label>
+            {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
+            <textarea
+              id="metadata"
+              value={metadata}
+              onChange={(e) => setMetadata(e.target.value)}
+              placeholder='{"source_ip": "192.168.1.100", "bytes": 1024}'
+              rows={3}
+              maxLength={5000}
+              className={styles.textarea}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !entityId}
+            className={styles.submitBtn}
           >
-            <option value="login">Login</option>
-            <option value="file_access">File Access</option>
-            <option value="network_connection">Network Connection</option>
-            <option value="privilege_escalation">Privilege Escalation</option>
-            <option value="data_transfer">Data Transfer</option>
-          </select>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="metadata">Metadata (JSON)</label>
-          {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
-          <textarea
-            id="metadata"
-            value={metadata}
-            onChange={(e) => setMetadata(e.target.value)}
-            placeholder='{"source_ip": "192.168.1.100", "bytes": 1024}'
-            rows={3}
-            maxLength={5000}
-            className={styles.textarea}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || !entityId}
-          className={styles.submitBtn}
-        >
-          {loading ? 'Analyzing...' : 'Analyze Behavior'}
-        </button>
-      </form>
+            {loading ? "Analyzing..." : "Analyze Behavior"}
+          </button>
+        </form>
       </section>
 
       {/* Error Display */}
       {error && (
-        <div
-          className={styles.error}
-          role="alert"
-          aria-live="assertive"
-        >
+        <div className={styles.error} role="alert" aria-live="assertive">
           <span className={styles.errorIcon}>⚠️</span>
           {error}
         </div>
@@ -213,13 +227,16 @@ export const BehavioralAnalyzer = () => {
           className={styles.result}
           role="region"
           aria-label="Analysis results"
-          data-maximus-section="results">
+          data-maximus-section="results"
+        >
           <div
             className={styles.resultHeader}
             style={{ borderLeftColor: getRiskColor(result.risk_level) }}
           >
             <h3>
-              {result.is_anomalous ? '🚨 Anomaly Detected' : '✅ Normal Behavior'}
+              {result.is_anomalous
+                ? "🚨 Anomaly Detected"
+                : "✅ Normal Behavior"}
             </h3>
             <span
               className={styles.riskBadge}

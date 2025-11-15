@@ -7,9 +7,9 @@
  * - React Query cache management
  */
 
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { API_ENDPOINTS } from '@/config/api';
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
 
 const API_BASE_URL = API_ENDPOINTS.hitl;
 
@@ -35,7 +35,7 @@ const fetchReviewDetails = async (apvId) => {
  */
 export const useReviewDetails = (apvId) => {
   const query = useQuery({
-    queryKey: ['hitl-review', apvId],
+    queryKey: ["hitl-review", apvId],
     queryFn: () => fetchReviewDetails(apvId),
     enabled: !!apvId, // Only fetch when apvId is provided
     staleTime: 60000, // 1 minute

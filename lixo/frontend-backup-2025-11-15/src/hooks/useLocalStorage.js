@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
 
 /**
  * Custom hook for managing localStorage with React state

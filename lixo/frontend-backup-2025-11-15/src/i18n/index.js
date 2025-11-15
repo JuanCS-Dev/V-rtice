@@ -9,5 +9,5 @@
  *   import { LANGUAGES, LANGUAGE_METADATA } from '@/i18n';
  */
 
-export { default } from './config.js';
-export { LANGUAGES, LANGUAGE_METADATA } from './config.js';
+export { default } from "./config.js";
+export { LANGUAGES, LANGUAGE_METADATA } from "./config.js";

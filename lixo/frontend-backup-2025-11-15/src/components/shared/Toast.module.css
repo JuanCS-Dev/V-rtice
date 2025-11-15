@@ -35,8 +35,9 @@
   background: var(--color-bg-secondary, rgba(255, 255, 255, 0.95));
   border-radius: 12px;
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.2));
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
-              0 0 30px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   pointer-events: auto;
   animation: slide-in-right 0.3s var(--ease-decelerate);
@@ -71,12 +72,16 @@
 
 .toast.error {
   border-left: 4px solid var(--color-error, #ff0a54);
-  animation: shake 0.5s ease-in-out, slide-in-right 0.3s var(--ease-decelerate);
+  animation:
+    shake 0.5s ease-in-out,
+    slide-in-right 0.3s var(--ease-decelerate);
 }
 
 .toast.warning {
   border-left: 4px solid var(--color-warning, #ffb703);
-  animation: pulse 2s ease-in-out infinite, slide-in-right 0.3s var(--ease-decelerate);
+  animation:
+    pulse 2s ease-in-out infinite,
+    slide-in-right 0.3s var(--ease-decelerate);
 }
 
 .toast.info {
@@ -272,16 +277,18 @@
 [data-theme="cyber-blue"] .toast.success,
 [data-theme="purple-haze"] .toast.success,
 [data-theme="red-alert"] .toast.success {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
-              0 0 40px rgba(0, 255, 136, 0.3);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(0, 255, 136, 0.3);
 }
 
 [data-theme="matrix-green"] .toast.error,
 [data-theme="cyber-blue"] .toast.error,
 [data-theme="purple-haze"] .toast.error,
 [data-theme="red-alert"] .toast.error {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
-              0 0 40px rgba(255, 10, 84, 0.3);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(255, 10, 84, 0.3);
 }
 
 /* Enterprise themes - subtle */
@@ -289,8 +296,9 @@
 [data-theme="stealth"] .toast {
   background: rgba(255, 255, 255, 0.98);
   color: #1a1a1a;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15),
-              0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="windows11"] .toastMessage,

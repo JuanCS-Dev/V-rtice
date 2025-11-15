@@ -178,7 +178,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Boris Cherny Standard - GAP #103 FIX: React Query DevTools for staging/development */}
-      {(import.meta.env.DEV || import.meta.env.MODE === 'staging') && (
+      {(import.meta.env.DEV || import.meta.env.MODE === "staging") && (
         <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
       )}
       <ToastProvider>

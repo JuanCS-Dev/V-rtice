@@ -40,13 +40,13 @@
 
 ### Ordem de Execução (Priorizado por ROI)
 
-| # | Otimização | ROI | Tempo | Score | Status |
-|---|------------|-----|-------|-------|--------|
-| 1 | **C01**: IPs Hardcoded Removidos | 144.0 | 5 min | +2pts | ✅ |
-| 2 | **A03**: CSP Headers Melhorados | 112.0 | 3 min | +2pts | ✅ |
-| 3 | **A01**: Bundle Size Otimizado | 72.0 | 5 min | +3pts | ✅ |
-| 4 | **A02**: Manifest.json PWA | 54.0 | 4 min | +2pts | ✅ |
-| 5 | **C02**: console.error→logger | 21.0 | 18 min | +1pt | ✅ |
+| #   | Otimização                       | ROI   | Tempo  | Score | Status |
+| --- | -------------------------------- | ----- | ------ | ----- | ------ |
+| 1   | **C01**: IPs Hardcoded Removidos | 144.0 | 5 min  | +2pts | ✅     |
+| 2   | **A03**: CSP Headers Melhorados  | 112.0 | 3 min  | +2pts | ✅     |
+| 3   | **A01**: Bundle Size Otimizado   | 72.0  | 5 min  | +3pts | ✅     |
+| 4   | **A02**: Manifest.json PWA       | 54.0  | 4 min  | +2pts | ✅     |
+| 5   | **C02**: console.error→logger    | 21.0  | 18 min | +1pt  | ✅     |
 
 **Total**: 5 otimizações | 35 minutos | +10 pontos
 
@@ -61,26 +61,30 @@
 **Impacto**: +2 pontos (Critical Security)
 
 #### Problema Identificado
+
 ```javascript
 // ❌ ANTES
-const ws = new WebSocket('ws://34.148.161.131:8000/ws/user');
-ws = new WebSocket('ws://34.148.161.131:8000/ws/wargaming');
+const ws = new WebSocket("ws://34.148.161.131:8000/ws/user");
+ws = new WebSocket("ws://34.148.161.131:8000/ws/wargaming");
 ```
 
 #### Solução Aplicada
+
 ```javascript
 // ✅ DEPOIS
-import { WS_ENDPOINTS } from '@/config/api';
+import { WS_ENDPOINTS } from "@/config/api";
 const ws = new WebSocket(`${WS_ENDPOINTS.hitl}/${username}`);
 ws = new WebSocket(WS_ENDPOINTS.wargaming);
 ```
 
 #### Arquivos Modificados (3)
+
 - `src/config/api.js` - Adicionado endpoint wargaming
 - `src/components/reactive-fabric/HITLDecisionConsole.jsx`
 - `src/components/maximus/EurekaPanel.jsx`
 
 #### Benefícios
+
 ✅ **Infrastructure-Agnostic**: Funciona em qualquer ambiente
 ✅ **Zero Downtime**: Não quebra se IP mudar
 ✅ **Constitutional Compliance**: Segue arquitetura centralizada
@@ -95,29 +99,35 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 **Impacto**: +2 pontos (Security Hardening)
 
 #### Melhorias Implementadas
+
 ```html
 <!-- ANTES: CSP básico -->
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self'; ...">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; ..." />
 
 <!-- DEPOIS: CSP completo -->
-<meta http-equiv="Content-Security-Policy"
-      content="default-src 'self';
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'self';
                script-src 'self' 'unsafe-inline' 'unsafe-eval';
                img-src 'self' data: blob: https: http:;
                frame-src 'none';
                object-src 'none';
-               upgrade-insecure-requests;">
+               upgrade-insecure-requests;"
+/>
 
 <!-- NOVO: Permissions Policy -->
-<meta http-equiv="Permissions-Policy"
-      content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
+<meta
+  http-equiv="Permissions-Policy"
+  content="geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+/>
 ```
 
 #### Arquivos Modificados (1)
+
 - `index.html`
 
 #### Benefícios
+
 🛡️ **XSS Protection**: Previne ataques de script injection
 🔒 **Plugin Exploits**: Bloqueia object/embed maliciosos
 🚀 **HTTPS Upgrade**: Força upgrade de HTTP→HTTPS
@@ -132,11 +142,13 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 **Impacto**: +3 pontos (Performance)
 
 #### Problema
+
 - **Bundle Inicial**: 1.6MB (muito grande)
 - **Main Chunk**: Continha todas as libs
 - **First Load**: Lento (carrega tudo de uma vez)
 
 #### Solução: Code Splitting Avançado
+
 ```javascript
 // vite.config.js - manualChunks
 {
@@ -164,9 +176,11 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 ```
 
 #### Arquivos Modificados (1)
+
 - `vite.config.js`
 
 #### Impacto Esperado
+
 ```
 ┌─────────────────┬─────────┬─────────┬──────────┐
 │ Métrica         │ Antes   │ Depois  │ Melhoria │
@@ -180,6 +194,7 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 ```
 
 #### Benefícios
+
 🚀 **50% Faster Initial Load**: De 1.6MB para ~400KB
 📦 **Better Caching**: Chunks separados por função
 🎯 **Lazy Loading**: Terminal só carrega no MAXIMUS
@@ -196,6 +211,7 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 #### Funcionalidades Adicionadas
 
 **manifest.json**:
+
 ```json
 {
   "name": "Vértice - Cybersecurity Operations Platform",
@@ -226,18 +242,24 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 ```
 
 **iOS Support**:
+
 ```html
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Vértice">
-<link rel="apple-touch-icon" href="/vite.svg">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="black-translucent"
+/>
+<meta name="apple-mobile-web-app-title" content="Vértice" />
+<link rel="apple-touch-icon" href="/vite.svg" />
 ```
 
 #### Arquivos Modificados (2)
+
 - `public/manifest.json` (novo)
 - `index.html`
 
 #### Benefícios
+
 📲 **Install to Home**: Mobile e desktop
 🚀 **App Shortcuts**: Acesso rápido aos dashboards
 💎 **Native-Like UX**: Standalone mode
@@ -253,26 +275,29 @@ ws = new WebSocket(WS_ENDPOINTS.wargaming);
 **Impacto**: +1 ponto (Code Quality)
 
 #### Problema
+
 ```javascript
 // ❌ ANTES - console poluído em produção
-console.error('Failed to fetch:', err);
-console.warn('Server error 500');
-console.error('WebSocket error:', error);
+console.error("Failed to fetch:", err);
+console.warn("Server error 500");
+console.error("WebSocket error:", error);
 ```
 
 #### Solução
+
 ```javascript
 // ✅ DEPOIS - logger estruturado
-import logger from '@/utils/logger';
+import logger from "@/utils/logger";
 
-logger.error('Failed to fetch:', { error: err, context: 'API' });
-logger.warn('Server error 500', { endpoint: '/api/data' });
-logger.error('WebSocket error:', { error, wsUrl });
+logger.error("Failed to fetch:", { error: err, context: "API" });
+logger.warn("Server error 500", { endpoint: "/api/data" });
+logger.error("WebSocket error:", { error, wsUrl });
 ```
 
 #### Arquivos Modificados (18 arquivos em 3 grupos)
 
 **Grupo 1 - Cockpit Soberano (5 arquivos)**:
+
 - `useCommandBus.js`
 - `useCockpitMetrics.js`
 - `useAllianceGraph.js`
@@ -280,6 +305,7 @@ logger.error('WebSocket error:', { error, wsUrl });
 - `CommandConsole.jsx`
 
 **Grupo 2 - HITL Console & Components (7 arquivos)**:
+
 - `admin/HITLConsole/hooks/useWebSocket.js`
 - `admin/HITLConsole/components/DecisionPanel.jsx`
 - `reactive-fabric/HITLDecisionConsole.jsx`
@@ -289,6 +315,7 @@ logger.error('WebSocket error:', { error, wsUrl });
 - `shared/WidgetErrorBoundary.jsx`
 
 **Grupo 3 - APIs & Final (6 arquivos)**:
+
 - `api/eureka.js`
 - `api/orchestrator.js`
 - `maximus/hitl/api.js`
@@ -297,6 +324,7 @@ logger.error('WebSocket error:', { error, wsUrl });
 - `reactive-fabric/HITLAuthPage.jsx`
 
 #### Benefícios
+
 📊 **Structured Logging**: Timestamp, severity, context
 🔒 **Production-Safe**: Sem exposição de dados sensíveis
 🐛 **Easier Debugging**: Logs centralizados
@@ -436,24 +464,28 @@ e9fc101 perf: remove hardcoded IPs from WebSocket connections
 ### 🎯 Próximos Passos
 
 1. **Instalar Dependências** (local):
+
    ```bash
    cd /home/user/V-rtice/frontend
    npm install
    ```
 
 2. **Validar Build**:
+
    ```bash
    npm run build
    # Verificar: dist/stats.html (bundle analyzer)
    ```
 
 3. **Executar Testes**:
+
    ```bash
    npm run test:run
    # Espera: 496/618 passando (baseline)
    ```
 
 4. **Push para Remote**:
+
    ```bash
    git push -u origin claude/frontend-audit-optimization-01LqEwFSS8SKK7rcdwSpGmqz
    ```

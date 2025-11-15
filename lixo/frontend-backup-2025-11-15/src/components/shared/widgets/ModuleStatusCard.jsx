@@ -17,23 +17,23 @@
  * @param {string} className - Additional CSS classes
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import './ModuleStatusCard.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./ModuleStatusCard.css";
 
 const STATUS_CONFIG = {
-  online: { dot: 'status-dot-online', label: 'Online' },
-  offline: { dot: 'status-dot-offline', label: 'Offline' },
-  degraded: { dot: 'status-dot-degraded', label: 'Degraded' },
-  idle: { dot: 'status-dot-idle', label: 'Idle' },
-  running: { dot: 'status-dot-running', label: 'Running' }
+  online: { dot: "status-dot-online", label: "Online" },
+  offline: { dot: "status-dot-offline", label: "Offline" },
+  degraded: { dot: "status-dot-degraded", label: "Degraded" },
+  idle: { dot: "status-dot-idle", label: "Idle" },
+  running: { dot: "status-dot-running", label: "Running" },
 };
 
 export const ModuleStatusCard = ({
   name,
-  status = 'online',
+  status = "online",
   activity,
-  className = ''
+  className = "",
 }) => {
   const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.online;
 
@@ -46,18 +46,16 @@ export const ModuleStatusCard = ({
           aria-label={`Status: ${statusConfig.label}`}
         ></div>
       </div>
-      {activity && (
-        <div className="module-status-activity">{activity}</div>
-      )}
+      {activity && <div className="module-status-activity">{activity}</div>}
     </div>
   );
 };
 
 ModuleStatusCard.propTypes = {
   name: PropTypes.string.isRequired,
-  status: PropTypes.oneOf(['online', 'offline', 'degraded', 'idle', 'running']),
+  status: PropTypes.oneOf(["online", "offline", "degraded", "idle", "running"]),
   activity: PropTypes.string,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default ModuleStatusCard;

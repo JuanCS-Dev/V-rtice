@@ -22,12 +22,12 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React from 'react';
-import { StatusPanel } from './components/StatusPanel';
-import { MetricsGrid } from './components/MetricsGrid';
-import { AlertsList } from './components/AlertsList';
-import { QuickActions } from './components/QuickActions';
-import styles from './CyberAlerts.module.css';
+import React from "react";
+import { StatusPanel } from "./components/StatusPanel";
+import { MetricsGrid } from "./components/MetricsGrid";
+import { AlertsList } from "./components/AlertsList";
+import { QuickActions } from "./components/QuickActions";
+import styles from "./CyberAlerts.module.css";
 
 export const CyberAlerts = ({ alerts = [], threatData = {} }) => {
   return (
@@ -37,8 +37,8 @@ export const CyberAlerts = ({ alerts = [], threatData = {} }) => {
       aria-labelledby="cyber-alerts-title"
       data-maximus-tool="cyber-alerts"
       data-maximus-category="shared"
-      data-maximus-status="monitoring">
-
+      data-maximus-status="monitoring"
+    >
       <header className={styles.visuallyHidden}>
         <h2 id="cyber-alerts-title">Cyber Alerts Dashboard</h2>
       </header>
@@ -46,28 +46,32 @@ export const CyberAlerts = ({ alerts = [], threatData = {} }) => {
       <section
         role="region"
         aria-label="System status"
-        data-maximus-section="status">
+        data-maximus-section="status"
+      >
         <StatusPanel />
       </section>
 
       <section
         role="region"
         aria-label="Threat metrics"
-        data-maximus-section="metrics">
+        data-maximus-section="metrics"
+      >
         <MetricsGrid threatData={threatData} />
       </section>
 
       <section
         role="region"
         aria-label="Alerts stream"
-        data-maximus-section="alerts">
+        data-maximus-section="alerts"
+      >
         <AlertsList alerts={alerts} />
       </section>
 
       <section
         role="region"
         aria-label="Quick actions"
-        data-maximus-section="actions">
+        data-maximus-section="actions"
+      >
         <QuickActions />
       </section>
     </article>

@@ -31,29 +31,41 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React, { useState, useMemo, lazy, Suspense } from 'react';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import { Card, Badge, LoadingSpinner } from '../../shared';
-import AskMaximusButton from '../../shared/AskMaximusButton';
-import { ThreatFilters } from './components/ThreatFilters';
-import { useThreatData } from './hooks/useThreatData';
-import styles from './ThreatMap.module.css';
+import React, { useState, useMemo, lazy, Suspense } from "react";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer } from "react-leaflet";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import { Card, Badge, LoadingSpinner } from "../../shared";
+import AskMaximusButton from "../../shared/AskMaximusButton";
+import { ThreatFilters } from "./components/ThreatFilters";
+import { useThreatData } from "./hooks/useThreatData";
+import styles from "./ThreatMap.module.css";
 
 // OTIMIZADO: Lazy load apenas dos componentes pesados
-const ThreatMarkers = lazy(() => import('./components/ThreatMarkers'));
+const ThreatMarkers = lazy(() => import("./components/ThreatMarkers"));
 
 export const ThreatMap = () => {
-  const { threats, loading, error, filters, setFilters, refresh } = useThreatData();
+  const { threats, loading, error, filters, setFilters, refresh } =
+    useThreatData();
   const [selectedThreat, setSelectedThreat] = useState(null);
 
   // GAP #31 FIX: Use useMemo to cache filtered results
   // Boris Cherny Standard: Without memoization, filtering 1000 threats 4 times
   // per render = 4000 iterations. With useMemo, only recalculates when threats change
   const severityCounts = useMemo(() => {
-    const counts = { critical: 0, high: 0, medium: 0, low: 0, total: threats.length };
-    threats.forEach(t => {
+    const counts = {
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      total: threats.length,
+    };
+    threats.forEach((t) => {
       if (counts[t.severity] !== undefined) {
         counts[t.severity]++;
       }
@@ -73,15 +85,15 @@ export const ThreatMap = () => {
       className={styles.widget}
       data-maximus-tool="threat-map"
       data-maximus-category="shared"
-      data-maximus-status={loading ? 'loading' : 'ready'}
+      data-maximus-status={loading ? "loading" : "ready"}
       headerActions={
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <AskMaximusButton
             context={{
-              type: 'threat_map',
+              type: "threat_map",
               data: threats,
               count: severityCounts.total,
-              filters
+              filters,
             }}
             prompt="Analyze these global cyber threats and identify patterns, high-risk regions, and threat trends"
             size="small"
@@ -93,7 +105,7 @@ export const ThreatMap = () => {
             disabled={loading}
             title="Atualizar"
           >
-            <i className={`fas fa-sync ${loading ? 'fa-spin' : ''}`}></i>
+            <i className={`fas fa-sync ${loading ? "fa-spin" : ""}`}></i>
           </button>
         </div>
       }
@@ -103,7 +115,8 @@ export const ThreatMap = () => {
         <section
           role="region"
           aria-label="Threat filters"
-          data-maximus-section="filters">
+          data-maximus-section="filters"
+        >
           <ThreatFilters filters={filters} onFiltersChange={setFilters} />
         </section>
 
@@ -112,10 +125,15 @@ export const ThreatMap = () => {
           className={styles.mapWrapper}
           role="region"
           aria-label="Threat map visualization"
-          data-maximus-section="map">
+          data-maximus-section="map"
+        >
           {loading && (
             <div className={styles.loadingOverlay}>
-              <LoadingSpinner variant="cyber" size="lg" text="Carregando ameaças..." />
+              <LoadingSpinner
+                variant="cyber"
+                size="lg"
+                text="Carregando ameaças..."
+              />
             </div>
           )}
 
@@ -142,7 +160,10 @@ export const ThreatMap = () => {
               errorTileUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
             />
             <Suspense fallback={null}>
-              <ThreatMarkers threats={threats} onThreatClick={handleThreatClick} />
+              <ThreatMarkers
+                threats={threats}
+                onThreatClick={handleThreatClick}
+              />
             </Suspense>
           </MapContainer>
         </section>
@@ -152,7 +173,8 @@ export const ThreatMap = () => {
           className={styles.statsBar}
           role="region"
           aria-label="Threat statistics"
-          data-maximus-section="stats">
+          data-maximus-section="stats"
+        >
           <div className={styles.stat}>
             <span className={styles.statLabel}>TOTAL:</span>
             <span className={styles.statValue}>{severityCounts.total}</span>
@@ -189,7 +211,8 @@ export const ThreatMap = () => {
             className={styles.threatDetails}
             role="region"
             aria-label="Selected threat details"
-            data-maximus-section="threat-details">
+            data-maximus-section="threat-details"
+          >
             <div className={styles.detailsHeader}>
               <h6 className={styles.detailsTitle}>
                 {selectedThreat.type.toUpperCase()}
@@ -210,12 +233,15 @@ export const ThreatMap = () => {
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Source:</span>
-                <span className={styles.detailValue}>{selectedThreat.source}</span>
+                <span className={styles.detailValue}>
+                  {selectedThreat.source}
+                </span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Location:</span>
                 <span className={styles.detailValue}>
-                  {selectedThreat.lat.toFixed(4)}, {selectedThreat.lng.toFixed(4)}
+                  {selectedThreat.lat.toFixed(4)},{" "}
+                  {selectedThreat.lng.toFixed(4)}
                 </span>
               </div>
               <div className={styles.detailRow}>

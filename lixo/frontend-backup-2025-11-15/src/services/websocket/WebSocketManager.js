@@ -20,18 +20,18 @@
  * Component → Hook → WebSocketManager (THIS LAYER) → WebSocket/SSE
  */
 
-import logger from '@/utils/logger';
-import { getWebSocketEndpoint } from '@/config/endpoints';
+import logger from "@/utils/logger";
+import { getWebSocketEndpoint } from "@/config/endpoints";
 
 // Connection states
 export const ConnectionState = {
-  IDLE: 'IDLE',
-  CONNECTING: 'CONNECTING',
-  CONNECTED: 'CONNECTED',
-  DISCONNECTING: 'DISCONNECTING',
-  DISCONNECTED: 'DISCONNECTED',
-  ERROR: 'ERROR',
-  FALLBACK: 'FALLBACK', // Using SSE/polling
+  IDLE: "IDLE",
+  CONNECTING: "CONNECTING",
+  CONNECTED: "CONNECTED",
+  DISCONNECTING: "DISCONNECTING",
+  DISCONNECTED: "DISCONNECTED",
+  ERROR: "ERROR",
+  FALLBACK: "FALLBACK", // Using SSE/polling
 };
 
 // Default configuration
@@ -40,7 +40,7 @@ const DEFAULT_CONFIG = {
   reconnectInterval: 1000,
   maxReconnectAttempts: 10,
   heartbeatInterval: 25000, // 25s (server heartbeat is typically 30s)
-  heartbeatMessage: { type: 'ping' },
+  heartbeatMessage: { type: "ping" },
   fallbackToSSE: true,
   fallbackToPolling: true,
   pollingInterval: 5000,
@@ -116,7 +116,7 @@ class ConnectionManager {
       try {
         callback(message);
       } catch (error) {
-        logger.error('[ConnectionManager] Subscriber callback error:', error);
+        logger.error("[ConnectionManager] Subscriber callback error:", error);
       }
     });
   }
@@ -125,8 +125,11 @@ class ConnectionManager {
    * Connects to WebSocket
    */
   connect() {
-    if (this.state === ConnectionState.CONNECTING || this.state === ConnectionState.CONNECTED) {
-      this.log('Already connecting or connected');
+    if (
+      this.state === ConnectionState.CONNECTING ||
+      this.state === ConnectionState.CONNECTED
+    ) {
+      this.log("Already connecting or connected");
       return;
     }
 
@@ -141,7 +144,7 @@ class ConnectionManager {
       this.ws.onerror = (error) => this.handleError(error);
       this.ws.onclose = (event) => this.handleClose(event);
     } catch (error) {
-      this.log('Failed to create WebSocket:', error);
+      this.log("Failed to create WebSocket:", error);
       this.handleError(error);
       this.tryFallback();
     }
@@ -151,7 +154,7 @@ class ConnectionManager {
    * Handles WebSocket open event
    */
   handleOpen() {
-    this.log('Connected');
+    this.log("Connected");
     this.setState(ConnectionState.CONNECTED);
     this.reconnectAttempts = 0;
 
@@ -163,8 +166,8 @@ class ConnectionManager {
 
     // Notify subscribers
     this.notify({
-      type: 'connection',
-      status: 'connected',
+      type: "connection",
+      status: "connected",
       url: this.url,
     });
   }
@@ -178,30 +181,30 @@ class ConnectionManager {
       const data = JSON.parse(event.data);
 
       // Handle system messages
-      if (data.type === 'pong') {
+      if (data.type === "pong") {
         this.lastHeartbeat = Date.now();
-        this.log('Pong received');
+        this.log("Pong received");
         return;
       }
 
-      if (data.type === 'welcome') {
+      if (data.type === "welcome") {
         this.connectionId = data.connection_id;
-        this.log('Connection ID:', this.connectionId);
+        this.log("Connection ID:", this.connectionId);
         return;
       }
 
-      if (data.type === 'heartbeat') {
+      if (data.type === "heartbeat") {
         this.lastHeartbeat = Date.now();
-        this.log('Heartbeat received');
+        this.log("Heartbeat received");
         return;
       }
 
       // Notify subscribers with data
       this.notify(data);
     } catch (error) {
-      logger.error('[ConnectionManager] Failed to parse message:', error);
+      logger.error("[ConnectionManager] Failed to parse message:", error);
       // Send raw data if JSON parsing fails
-      this.notify({ type: 'raw', data: event.data });
+      this.notify({ type: "raw", data: event.data });
     }
   }
 
@@ -210,13 +213,13 @@ class ConnectionManager {
    * @param {Event} error - Error event
    */
   handleError(error) {
-    logger.error('[ConnectionManager] WebSocket error:', error);
+    logger.error("[ConnectionManager] WebSocket error:", error);
     this.setState(ConnectionState.ERROR);
 
     this.notify({
-      type: 'connection',
-      status: 'error',
-      error: error.message || 'WebSocket error',
+      type: "connection",
+      status: "error",
+      error: error.message || "WebSocket error",
     });
   }
 
@@ -230,8 +233,8 @@ class ConnectionManager {
     this.stopHeartbeat();
 
     this.notify({
-      type: 'connection',
-      status: 'disconnected',
+      type: "connection",
+      status: "disconnected",
       code: event.code,
       reason: event.reason,
     });
@@ -240,7 +243,7 @@ class ConnectionManager {
     if (this.config.reconnect && event.code !== 1000) {
       this.scheduleReconnect();
     } else if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      this.log('Max reconnect attempts reached, trying fallback');
+      this.log("Max reconnect attempts reached, trying fallback");
       this.tryFallback();
     }
   }
@@ -250,17 +253,19 @@ class ConnectionManager {
    */
   scheduleReconnect() {
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      this.log('Max reconnect attempts reached');
+      this.log("Max reconnect attempts reached");
       this.tryFallback();
       return;
     }
 
     const delay = Math.min(
       this.config.reconnectInterval * Math.pow(2, this.reconnectAttempts),
-      30000 // Max 30s
+      30000, // Max 30s
     );
 
-    this.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1}/${this.config.maxReconnectAttempts})`);
+    this.log(
+      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1}/${this.config.maxReconnectAttempts})`,
+    );
 
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectAttempts++;
@@ -283,19 +288,22 @@ class ConnectionManager {
    * Connects using Server-Sent Events (SSE)
    */
   connectSSE() {
-    this.log('Falling back to SSE');
+    this.log("Falling back to SSE");
     this.setState(ConnectionState.FALLBACK);
 
-    const sseUrl = this.url.replace('ws://', 'http://').replace('wss://', 'https://').replace('/ws', '/sse');
+    const sseUrl = this.url
+      .replace("ws://", "http://")
+      .replace("wss://", "https://")
+      .replace("/ws", "/sse");
 
     try {
       this.eventSource = new EventSource(sseUrl);
 
       this.eventSource.onopen = () => {
-        this.log('SSE connected');
+        this.log("SSE connected");
         this.notify({
-          type: 'connection',
-          status: 'connected_sse',
+          type: "connection",
+          status: "connected_sse",
           url: sseUrl,
         });
       };
@@ -305,12 +313,15 @@ class ConnectionManager {
           const data = JSON.parse(event.data);
           this.notify(data);
         } catch (error) {
-          logger.error('[ConnectionManager] Failed to parse SSE message:', error);
+          logger.error(
+            "[ConnectionManager] Failed to parse SSE message:",
+            error,
+          );
         }
       };
 
       this.eventSource.onerror = (error) => {
-        logger.error('[ConnectionManager] SSE error:', error);
+        logger.error("[ConnectionManager] SSE error:", error);
         this.eventSource.close();
         this.eventSource = null;
 
@@ -320,7 +331,7 @@ class ConnectionManager {
         }
       };
     } catch (error) {
-      logger.error('[ConnectionManager] Failed to create EventSource:', error);
+      logger.error("[ConnectionManager] Failed to create EventSource:", error);
       if (this.config.fallbackToPolling) {
         this.startPolling();
       }
@@ -333,10 +344,13 @@ class ConnectionManager {
   startPolling() {
     if (this.pollingInterval) return;
 
-    this.log('Falling back to polling');
+    this.log("Falling back to polling");
     this.setState(ConnectionState.FALLBACK);
 
-    const pollingUrl = this.url.replace('ws://', 'http://').replace('wss://', 'https://').replace('/ws', '');
+    const pollingUrl = this.url
+      .replace("ws://", "http://")
+      .replace("wss://", "https://")
+      .replace("/ws", "");
 
     this.pollingInterval = setInterval(async () => {
       try {
@@ -346,13 +360,13 @@ class ConnectionManager {
           this.notify(data);
         }
       } catch (error) {
-        logger.error('[ConnectionManager] Polling error:', error);
+        logger.error("[ConnectionManager] Polling error:", error);
       }
     }, this.config.pollingInterval);
 
     this.notify({
-      type: 'connection',
-      status: 'connected_polling',
+      type: "connection",
+      status: "connected_polling",
       url: pollingUrl,
     });
   }
@@ -364,7 +378,7 @@ class ConnectionManager {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
-      this.log('Polling stopped');
+      this.log("Polling stopped");
     }
   }
 
@@ -387,16 +401,16 @@ class ConnectionManager {
 
         if (timeSinceLastHeartbeat > timeout) {
           // No heartbeat received - connection is dead
-          logger.warn('Heartbeat timeout detected - connection appears dead');
-          this.log('Heartbeat timeout - reconnecting');
-          this.handleError(new Error('Heartbeat timeout'));
+          logger.warn("Heartbeat timeout detected - connection appears dead");
+          this.log("Heartbeat timeout - reconnecting");
+          this.handleError(new Error("Heartbeat timeout"));
           this.disconnect();
           return;
         }
 
         // Send heartbeat
         this.send(this.config.heartbeatMessage);
-        this.log('Heartbeat sent');
+        this.log("Heartbeat sent");
       }
     }, this.config.heartbeatInterval);
   }
@@ -417,16 +431,17 @@ class ConnectionManager {
    * @returns {boolean} Success status
    */
   send(message) {
-    const payload = typeof message === 'string' ? message : JSON.stringify(message);
+    const payload =
+      typeof message === "string" ? message : JSON.stringify(message);
 
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(payload);
-      this.log('Message sent:', message);
+      this.log("Message sent:", message);
       return true;
     } else {
       // Queue message for when connection is restored
       this.messageQueue.push(payload);
-      this.log('Message queued (offline):', message);
+      this.log("Message queued (offline):", message);
       return false;
     }
   }
@@ -435,7 +450,10 @@ class ConnectionManager {
    * Processes queued messages
    */
   processQueue() {
-    if (this.messageQueue.length > 0 && this.ws?.readyState === WebSocket.OPEN) {
+    if (
+      this.messageQueue.length > 0 &&
+      this.ws?.readyState === WebSocket.OPEN
+    ) {
       this.log(`Processing ${this.messageQueue.length} queued messages`);
       while (this.messageQueue.length > 0) {
         const message = this.messageQueue.shift();
@@ -448,7 +466,7 @@ class ConnectionManager {
    * Disconnects from WebSocket
    */
   disconnect() {
-    this.log('Disconnecting');
+    this.log("Disconnecting");
     this.setState(ConnectionState.DISCONNECTING);
 
     // Clear reconnect timeout
@@ -471,7 +489,7 @@ class ConnectionManager {
 
     // Close WebSocket
     if (this.ws) {
-      this.ws.close(1000, 'Client disconnect');
+      this.ws.close(1000, "Client disconnect");
       this.ws = null;
     }
 
@@ -505,7 +523,9 @@ class ConnectionManager {
     return {
       url: this.url,
       state: this.state,
-      isConnected: this.state === ConnectionState.CONNECTED || this.state === ConnectionState.FALLBACK,
+      isConnected:
+        this.state === ConnectionState.CONNECTED ||
+        this.state === ConnectionState.FALLBACK,
       subscriberCount: this.subscribers.size,
       reconnectAttempts: this.reconnectAttempts,
       queuedMessages: this.messageQueue.length,

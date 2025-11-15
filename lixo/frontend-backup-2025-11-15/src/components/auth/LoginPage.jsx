@@ -1,35 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
-import { useAuth } from '../../contexts/AuthContext';
-import { AuthConfig } from '../../config/endpoints';
+import React, { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
+import { useAuth } from "../../contexts/AuthContext";
+import { AuthConfig } from "../../config/endpoints";
 
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { login, isAuthenticated } = useAuth();
 
-  const handleGoogleResponse = useCallback(async (response) => {
-    setIsLoading(true);
-    setError('');
+  const handleGoogleResponse = useCallback(
+    async (response) => {
+      setIsLoading(true);
+      setError("");
 
-    try {
-      const result = await login(response.credential);
+      try {
+        const result = await login(response.credential);
 
-      if (!result.success) {
-        setError(result.error || 'Login failed');
+        if (!result.success) {
+          setError(result.error || "Login failed");
+        }
+      } catch (err) {
+        setError("Login failed. Please try again.");
+        logger.error("Login error:", err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-      logger.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [login]);
+    },
+    [login],
+  );
 
   useEffect(() => {
     // Load Google Identity Services script
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -39,25 +42,29 @@ const LoginPage = () => {
         const clientId = AuthConfig.google.clientId;
 
         if (!clientId) {
-          setError('Google OAuth not configured. Please contact administrator.');
-          logger.error('VITE_GOOGLE_CLIENT_ID not set in environment variables');
+          setError(
+            "Google OAuth not configured. Please contact administrator.",
+          );
+          logger.error(
+            "VITE_GOOGLE_CLIENT_ID not set in environment variables",
+          );
           return;
         }
 
         window.google.accounts.id.initialize({
           client_id: clientId,
-          callback: handleGoogleResponse
+          callback: handleGoogleResponse,
         });
 
         window.google.accounts.id.renderButton(
-          document.getElementById('google-signin-button'),
+          document.getElementById("google-signin-button"),
           {
-            theme: 'filled_black',
-            size: 'large',
-            type: 'standard',
-            text: 'signin_with',
-            logo_alignment: 'left'
-          }
+            theme: "filled_black",
+            size: "large",
+            type: "standard",
+            text: "signin_with",
+            logo_alignment: "left",
+          },
         );
       }
     };
@@ -109,7 +116,7 @@ const LoginPage = () => {
           <div className="flex justify-center">
             <div
               id="google-signin-button"
-              className={`${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+              className={`${isLoading ? "opacity-50 pointer-events-none" : ""}`}
             />
           </div>
 
@@ -124,9 +131,10 @@ const LoginPage = () => {
           {/* Security Notice */}
           <div className="border-t border-red-400/30 pt-4 text-center">
             <p className="text-red-400/50 text-xs">
-              🔒 Todas as sessões são monitoradas e registradas<br/>
-              💼 Acesso restrito a usuários autorizados<br/>
-              ⚡ Ferramentas ofensivas requerem permissões especiais
+              🔒 Todas as sessões são monitoradas e registradas
+              <br />
+              💼 Acesso restrito a usuários autorizados
+              <br />⚡ Ferramentas ofensivas requerem permissões especiais
             </p>
           </div>
         </div>

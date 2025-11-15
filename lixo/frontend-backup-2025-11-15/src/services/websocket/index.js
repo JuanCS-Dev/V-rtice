@@ -5,5 +5,9 @@
  * Central export point for WebSocket management
  */
 
-export { webSocketManager, WebSocketManager, ConnectionState } from './WebSocketManager';
-export { default } from './WebSocketManager';
+export {
+  webSocketManager,
+  WebSocketManager,
+  ConnectionState,
+} from "./WebSocketManager";
+export { default } from "./WebSocketManager";

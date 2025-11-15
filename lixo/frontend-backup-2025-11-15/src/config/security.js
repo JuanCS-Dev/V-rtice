@@ -1,4 +1,4 @@
-import logger from '@/utils/logger';
+import logger from "@/utils/logger";
 /**
  * Security Configuration
  *
@@ -12,68 +12,64 @@ import logger from '@/utils/logger';
  */
 export const CSP_CONFIG = {
   // Allow scripts from self and inline (required for Vite dev)
-  'script-src': [
+  "script-src": [
     "'self'",
-    process.env.NODE_ENV === 'development' ? "'unsafe-inline'" : "",
-    process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ""
+    process.env.NODE_ENV === "development" ? "'unsafe-inline'" : "",
+    process.env.NODE_ENV === "development" ? "'unsafe-eval'" : "",
   ].filter(Boolean),
 
   // Allow styles from self and inline
-  'style-src': [
+  "style-src": [
     "'self'",
     "'unsafe-inline'", // Required for CSS-in-JS
-    'https://fonts.googleapis.com'
+    "https://fonts.googleapis.com",
   ],
 
   // Allow images from multiple sources
-  'img-src': [
+  "img-src": [
     "'self'",
-    'data:',
-    'blob:',
-    'https:',
-    '*.tile.openstreetmap.org' // Leaflet maps
+    "data:",
+    "blob:",
+    "https:",
+    "*.tile.openstreetmap.org", // Leaflet maps
   ],
 
   // Allow fonts
-  'font-src': [
-    "'self'",
-    'data:',
-    'https://fonts.gstatic.com'
-  ],
+  "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
 
   // Allow connections to APIs and WebSockets
-  'connect-src': [
+  "connect-src": [
     "'self'",
-    'http://localhost:*',  // Development
-    'ws://localhost:*',    // WebSocket development
-    'wss://localhost:*',
-    'https://api.gemini.com', // Gemini API (if needed)
-    process.env.VITE_API_URL || ''
+    "http://localhost:*", // Development
+    "ws://localhost:*", // WebSocket development
+    "wss://localhost:*",
+    "https://api.gemini.com", // Gemini API (if needed)
+    process.env.VITE_API_URL || "",
   ].filter(Boolean),
 
   // Default source
-  'default-src': ["'self'"],
+  "default-src": ["'self'"],
 
   // Frame ancestors (prevent clickjacking)
-  'frame-ancestors': ["'none'"],
+  "frame-ancestors": ["'none'"],
 
   // Base URI
-  'base-uri': ["'self'"],
+  "base-uri": ["'self'"],
 
   // Form actions
-  'form-action': ["'self'"],
+  "form-action": ["'self'"],
 
   // Object sources (Flash, Java, etc.)
-  'object-src': ["'none'"],
+  "object-src": ["'none'"],
 
   // Media sources
-  'media-src': ["'self'"],
+  "media-src": ["'self'"],
 
   // Worker sources
-  'worker-src': ["'self'", 'blob:'],
+  "worker-src": ["'self'", "blob:"],
 
   // Manifest sources
-  'manifest-src': ["'self'"]
+  "manifest-src": ["'self'"],
 };
 
 /**
@@ -85,38 +81,38 @@ export const RATE_LIMITS = {
   // API calls
   API_CALL: {
     maxRequests: 60,
-    windowMs: 60000 // 60 requests per minute
+    windowMs: 60000, // 60 requests per minute
   },
 
   // Authentication
   LOGIN: {
     maxRequests: 5,
-    windowMs: 300000 // 5 attempts per 5 minutes
+    windowMs: 300000, // 5 attempts per 5 minutes
   },
 
   // Search operations
   SEARCH: {
     maxRequests: 30,
-    windowMs: 60000 // 30 searches per minute
+    windowMs: 60000, // 30 searches per minute
   },
 
   // File uploads
   UPLOAD: {
     maxRequests: 10,
-    windowMs: 600000 // 10 uploads per 10 minutes
+    windowMs: 600000, // 10 uploads per 10 minutes
   },
 
   // Maximus AI queries
   AI_QUERY: {
     maxRequests: 20,
-    windowMs: 60000 // 20 queries per minute
+    windowMs: 60000, // 20 queries per minute
   },
 
   // WebSocket connections
   WEBSOCKET: {
     maxRequests: 10,
-    windowMs: 60000 // 10 connections per minute
-  }
+    windowMs: 60000, // 10 connections per minute
+  },
 };
 
 /**
@@ -128,45 +124,46 @@ export const VALIDATION_RULES = {
   // CVE ID
   CVE_ID: {
     pattern: /^CVE-\d{4}-\d{4,}$/i,
-    maxLength: 20
+    maxLength: 20,
   },
 
   // IP Address
   IP_ADDRESS: {
     pattern: /^(\d{1,3}\.){3}\d{1,3}$/,
-    maxLength: 15
+    maxLength: 15,
   },
 
   // Domain
   DOMAIN: {
-    pattern: /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
-    maxLength: 253
+    pattern:
+      /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/,
+    maxLength: 253,
   },
 
   // Email
   EMAIL: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    maxLength: 254
+    maxLength: 254,
   },
 
   // Username
   USERNAME: {
     pattern: /^[a-zA-Z0-9_-]{3,32}$/,
     minLength: 3,
-    maxLength: 32
+    maxLength: 32,
   },
 
   // Search query
   SEARCH_QUERY: {
     minLength: 2,
-    maxLength: 500
+    maxLength: 500,
   },
 
   // File name
   FILENAME: {
     pattern: /^[a-zA-Z0-9._-]+$/,
-    maxLength: 255
-  }
+    maxLength: 255,
+  },
 };
 
 /**
@@ -175,17 +172,17 @@ export const VALIDATION_RULES = {
  * Headers to be sent with all requests
  */
 export const SECURITY_HEADERS = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': [
-    'geolocation=()',
-    'microphone=()',
-    'camera=()',
-    'payment=()',
-    'usb=()'
-  ].join(', ')
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": [
+    "geolocation=()",
+    "microphone=()",
+    "camera=()",
+    "payment=()",
+    "usb=()",
+  ].join(", "),
 };
 
 /**
@@ -195,23 +192,23 @@ export const SECURITY_HEADERS = {
  */
 export const CORS_CONFIG = {
   allowedOrigins: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3000',
-    process.env.VITE_APP_URL
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:3000",
+    process.env.VITE_APP_URL,
   ].filter(Boolean),
 
-  allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-CSRF-Token',
-    'X-Requested-With'
+    "Content-Type",
+    "Authorization",
+    "X-CSRF-Token",
+    "X-Requested-With",
   ],
 
   credentials: true,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400, // 24 hours
 };
 
 /**
@@ -225,7 +222,7 @@ export const SESSION_CONFIG = {
   csrfTokenValidity: 60 * 60 * 1000,
 
   // Remember me duration (7 days)
-  rememberMeDuration: 7 * 24 * 60 * 60 * 1000
+  rememberMeDuration: 7 * 24 * 60 * 60 * 1000,
 };
 
 /**
@@ -234,26 +231,20 @@ export const SESSION_CONFIG = {
 export const UPLOAD_CONFIG = {
   // Allowed file types
   allowedTypes: [
-    'application/json',
-    'text/plain',
-    'text/csv',
-    'application/pdf'
+    "application/json",
+    "text/plain",
+    "text/csv",
+    "application/pdf",
   ],
 
   // Allowed extensions
-  allowedExtensions: [
-    '.json',
-    '.txt',
-    '.csv',
-    '.pdf',
-    '.log'
-  ],
+  allowedExtensions: [".json", ".txt", ".csv", ".pdf", ".log"],
 
   // Max file size (10MB)
   maxSize: 10 * 1024 * 1024,
 
   // Scan for malware
-  scanForMalware: true
+  scanForMalware: true,
 };
 
 /**
@@ -271,9 +262,9 @@ export const API_SECURITY = {
 
   // Headers to include in all requests
   defaultHeaders: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
-  }
+    "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
+  },
 };
 
 /**
@@ -289,7 +280,7 @@ export const XSS_PATTERNS = [
   /<object/gi,
   /<embed/gi,
   /eval\(/gi,
-  /expression\(/gi
+  /expression\(/gi,
 ];
 
 /**
@@ -303,20 +294,20 @@ export const SQL_INJECTION_PATTERNS = [
   /--/g,
   /\/\*/g,
   /xp_/gi,
-  /sp_/gi
+  /sp_/gi,
 ];
 
 /**
  * Security Event Logging
  */
 export const SECURITY_EVENTS = {
-  RATE_LIMIT_EXCEEDED: 'rate_limit_exceeded',
-  INVALID_INPUT: 'invalid_input',
-  XSS_ATTEMPT: 'xss_attempt',
-  SQL_INJECTION_ATTEMPT: 'sql_injection_attempt',
-  CSRF_TOKEN_MISMATCH: 'csrf_token_mismatch',
-  UNAUTHORIZED_ACCESS: 'unauthorized_access',
-  SUSPICIOUS_ACTIVITY: 'suspicious_activity'
+  RATE_LIMIT_EXCEEDED: "rate_limit_exceeded",
+  INVALID_INPUT: "invalid_input",
+  XSS_ATTEMPT: "xss_attempt",
+  SQL_INJECTION_ATTEMPT: "sql_injection_attempt",
+  CSRF_TOKEN_MISMATCH: "csrf_token_mismatch",
+  UNAUTHORIZED_ACCESS: "unauthorized_access",
+  SUSPICIOUS_ACTIVITY: "suspicious_activity",
 };
 
 /**
@@ -331,20 +322,20 @@ export const logSecurityEvent = (eventType, details = {}) => {
     timestamp: new Date().toISOString(),
     userAgent: navigator.userAgent,
     url: window.location.href,
-    ...details
+    ...details,
   };
 
   // Log to console in development
-  if (process.env.NODE_ENV === 'development') {
-    logger.warn('[Security Event]', event);
+  if (process.env.NODE_ENV === "development") {
+    logger.warn("[Security Event]", event);
   }
 
   // Send to security logging endpoint
   try {
-    fetch('/api/security/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event)
+    fetch("/api/security/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
     }).catch(() => {
       // Fail silently
     });

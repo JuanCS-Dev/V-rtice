@@ -19,16 +19,16 @@
  * @param {string} className - Additional CSS classes
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import './ActivityItem.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./ActivityItem.css";
 
 export const ActivityItem = ({
   timestamp,
   type,
   action,
-  severity = 'info',
-  className = ''
+  severity = "info",
+  className = "",
 }) => {
   const itemClasses = `activity-item activity-item-${severity} ${className}`;
 
@@ -45,8 +45,8 @@ ActivityItem.propTypes = {
   timestamp: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
   action: PropTypes.string.isRequired,
-  severity: PropTypes.oneOf(['info', 'success', 'warning', 'critical']),
-  className: PropTypes.string
+  severity: PropTypes.oneOf(["info", "success", "warning", "critical"]),
+  className: PropTypes.string,
 };
 
 export default ActivityItem;

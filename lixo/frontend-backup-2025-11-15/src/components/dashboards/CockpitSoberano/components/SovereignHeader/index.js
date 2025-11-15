@@ -1,1 +1,1 @@
-export { SovereignHeader } from './SovereignHeader';
+export { SovereignHeader } from "./SovereignHeader";

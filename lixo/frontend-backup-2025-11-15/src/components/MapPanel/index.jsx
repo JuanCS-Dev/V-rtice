@@ -6,16 +6,17 @@ import logger from '@/utils/logger';
  * Focado em FUNCIONAR, não em ser "elegante"
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Fix ícone padrão Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
 
 const MapPanel = ({ dossierData }) => {
@@ -28,7 +29,7 @@ const MapPanel = ({ dossierData }) => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    logger.debug('[MAP] 🗺️ Criando mapa...');
+    logger.debug("[MAP] 🗺️ Criando mapa...");
 
     try {
       // Criar instância do mapa
@@ -41,15 +42,15 @@ const MapPanel = ({ dossierData }) => {
       });
 
       // Adicionar tiles - OpenStreetMap (mais confiável)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
         maxZoom: 19,
         minZoom: 3,
       }).addTo(map);
 
       // Aguardar mapa ficar pronto
       map.whenReady(() => {
-        logger.debug('[MAP] ✅ Mapa pronto!');
+        logger.debug("[MAP] ✅ Mapa pronto!");
         setTimeout(() => {
           map.invalidateSize();
           setLoading(false);
@@ -59,17 +60,16 @@ const MapPanel = ({ dossierData }) => {
       mapRef.current = map;
 
       // Eventos de debug
-      map.on('load', () => logger.debug('[MAP] 📍 Tiles carregados'));
-      map.on('zoomend', () => logger.debug('[MAP] 🔍 Zoom:', map.getZoom()));
-
+      map.on("load", () => logger.debug("[MAP] 📍 Tiles carregados"));
+      map.on("zoomend", () => logger.debug("[MAP] 🔍 Zoom:", map.getZoom()));
     } catch (error) {
-      logger.error('[MAP] ❌ Erro ao criar mapa:', error);
+      logger.error("[MAP] ❌ Erro ao criar mapa:", error);
       setLoading(false);
     }
 
     // Cleanup
     return () => {
-      logger.debug('[MAP] 🧹 Limpando mapa...');
+      logger.debug("[MAP] 🧹 Limpando mapa...");
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -83,7 +83,7 @@ const MapPanel = ({ dossierData }) => {
 
     const { lat, lng } = dossierData.lastKnownLocation;
 
-    logger.debug('[MAP] 📍 Movendo para:', lat, lng);
+    logger.debug("[MAP] 📍 Movendo para:", lat, lng);
 
     // Remover marcador antigo
     if (markerRef.current) {
@@ -123,29 +123,35 @@ const MapPanel = ({ dossierData }) => {
           </style>
         </div>
       `,
-      className: '',
+      className: "",
       iconSize: [40, 40],
       iconAnchor: [20, 20],
     });
 
     // Adicionar novo marcador
-    const marker = L.marker([lat, lng], { icon: carIcon }).addTo(mapRef.current);
+    const marker = L.marker([lat, lng], { icon: carIcon }).addTo(
+      mapRef.current,
+    );
 
     // Popup
-    marker.bindPopup(`
+    marker
+      .bindPopup(
+        `
       <div style="font-family: monospace; min-width: 200px;">
         <h3 style="margin: 0 0 10px; color: #00ff41; border-bottom: 2px solid #00ff41; padding-bottom: 5px;">
           🚗 VEÍCULO LOCALIZADO
         </h3>
         <div style="color: #333;">
-          <p style="margin: 5px 0;"><strong>Placa:</strong> ${dossierData.placa || 'N/A'}</p>
-          <p style="margin: 5px 0;"><strong>Modelo:</strong> ${dossierData.modelo || 'N/A'}</p>
-          <p style="margin: 5px 0;"><strong>Cor:</strong> ${dossierData.cor || 'N/A'}</p>
+          <p style="margin: 5px 0;"><strong>Placa:</strong> ${dossierData.placa || "N/A"}</p>
+          <p style="margin: 5px 0;"><strong>Modelo:</strong> ${dossierData.modelo || "N/A"}</p>
+          <p style="margin: 5px 0;"><strong>Cor:</strong> ${dossierData.cor || "N/A"}</p>
           <p style="margin: 5px 0;"><strong>Lat:</strong> ${lat.toFixed(6)}</p>
           <p style="margin: 5px 0;"><strong>Lng:</strong> ${lng.toFixed(6)}</p>
         </div>
       </div>
-    `).openPopup();
+    `,
+      )
+      .openPopup();
 
     markerRef.current = marker;
 
@@ -154,7 +160,6 @@ const MapPanel = ({ dossierData }) => {
       duration: 1.5,
       easeLinearity: 0.5,
     });
-
   }, [dossierData]);
 
   return (
@@ -164,8 +169,8 @@ const MapPanel = ({ dossierData }) => {
         ref={mapContainerRef}
         className="absolute inset-0"
         style={{
-          backgroundColor: '#1a1a1a',
-          minHeight: '100%',
+          backgroundColor: "#1a1a1a",
+          minHeight: "100%",
         }}
       />
 
@@ -188,12 +193,14 @@ const MapPanel = ({ dossierData }) => {
       <div className="absolute top-4 left-4 z-[999] bg-black/80 backdrop-blur-sm border border-green-400/30 rounded-lg p-3 max-w-xs">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-green-400 font-bold text-sm tracking-wider">MAPA TÁTICO</span>
+          <span className="text-green-400 font-bold text-sm tracking-wider">
+            MAPA TÁTICO
+          </span>
         </div>
         <p className="text-green-400/70 text-xs">
-          {dossierData ?
-            `Rastreando: ${dossierData.placa || 'N/A'}` :
-            'Aguardando consulta...'}
+          {dossierData
+            ? `Rastreando: ${dossierData.placa || "N/A"}`
+            : "Aguardando consulta..."}
         </p>
       </div>
 
@@ -201,7 +208,8 @@ const MapPanel = ({ dossierData }) => {
       {!dossierData && (
         <div className="absolute bottom-4 left-4 z-[999] bg-black/80 backdrop-blur-sm border border-green-400/30 rounded-lg p-3 max-w-xs">
           <p className="text-green-400/70 text-xs">
-            💡 <strong>Dica:</strong> Digite uma placa e clique em "EXECUTAR CONSULTA" para localizar o veículo no mapa.
+            💡 <strong>Dica:</strong> Digite uma placa e clique em "EXECUTAR
+            CONSULTA" para localizar o veículo no mapa.
           </p>
         </div>
       )}

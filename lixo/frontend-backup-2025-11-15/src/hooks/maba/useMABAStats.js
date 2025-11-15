@@ -14,17 +14,15 @@
  * @returns {Object} { stats, isLoading, error, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mabaService } from '../../services/maba/mabaService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mabaService } from "../../services/maba/mabaService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 30000; // 30s
 
 export const useMABAStats = (options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,9 +36,9 @@ export const useMABAStats = (options = {}) => {
       const response = await mabaService.getStats();
       setStats(response);
       setIsLoading(false);
-      logger.debug('[useMABAStats] Stats updated:', response);
+      logger.debug("[useMABAStats] Stats updated:", response);
     } catch (err) {
-      logger.error('[useMABAStats] Failed to fetch stats:', err);
+      logger.error("[useMABAStats] Failed to fetch stats:", err);
       setError(err.message);
       setIsLoading(false);
     }

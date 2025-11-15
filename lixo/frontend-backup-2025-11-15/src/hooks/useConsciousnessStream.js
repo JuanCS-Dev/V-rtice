@@ -8,17 +8,21 @@
  * Governed by: Constituição Vértice v2.5 - ADR-002
  */
 
-import { useCallback } from 'react';
-import { useWebSocketManager } from './useWebSocketManager';
+import { useCallback } from "react";
+import { useWebSocketManager } from "./useWebSocketManager";
 
-export function useConsciousnessStream({ enabled = true, onMessage, onError } = {}) {
+export function useConsciousnessStream({
+  enabled = true,
+  onMessage,
+  onError,
+} = {}) {
   // Use centralized WebSocketManager
   const {
     data: lastEvent,
     isConnected,
     isFallback,
     status,
-  } = useWebSocketManager('consciousness.stream', {
+  } = useWebSocketManager("consciousness.stream", {
     enabled,
     onMessage: useCallback(
       (message) => {
@@ -26,7 +30,7 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
           onMessage(message);
         }
       },
-      [onMessage]
+      [onMessage],
     ),
     onError: useCallback(
       (error) => {
@@ -34,7 +38,7 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
           onError(error);
         }
       },
-      [onError]
+      [onError],
     ),
     connectionOptions: {
       fallbackToSSE: true,
@@ -44,7 +48,11 @@ export function useConsciousnessStream({ enabled = true, onMessage, onError } = 
   });
 
   // Determine connection type
-  const connectionType = isFallback ? 'sse' : isConnected ? 'websocket' : 'idle';
+  const connectionType = isFallback
+    ? "sse"
+    : isConnected
+      ? "websocket"
+      : "idle";
 
   return {
     connectionType,

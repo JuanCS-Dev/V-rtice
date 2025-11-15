@@ -1,7 +1,11 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import { getThreatBadgeVariant, getScoreColor, getThreatCategoryVariant } from '../utils/threatUtils';
-import styles from './ThreatAnalysisPanel.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import {
+  getThreatBadgeVariant,
+  getScoreColor,
+  getThreatCategoryVariant,
+} from "../utils/threatUtils";
+import styles from "./ThreatAnalysisPanel.module.css";
 
 export const ThreatAnalysisPanel = ({ data }) => {
   const scoreColor = getScoreColor(data.reputation.score);
@@ -25,7 +29,15 @@ export const ThreatAnalysisPanel = ({ data }) => {
           <span className={styles.label}>SCORE DE REPUTAÇÃO</span>
           <div className={styles.scoreContainer}>
             <div className={styles.scoreValue}>
-              <span className={scoreColor === 'bg-red-400' ? styles.scoreLow : scoreColor === 'bg-orange-400' ? styles.scoreMedium : styles.scoreHigh}>
+              <span
+                className={
+                  scoreColor === "bg-red-400"
+                    ? styles.scoreLow
+                    : scoreColor === "bg-orange-400"
+                      ? styles.scoreMedium
+                      : styles.scoreHigh
+                }
+              >
                 {data.reputation.score}
               </span>
               <span className={styles.scoreTotal}>/100</span>

@@ -7,7 +7,7 @@
  * Following Boris Cherny's principle: "Consistency reduces cognitive load"
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // REGEX PATTERNS
@@ -17,7 +17,12 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[\d\s\-\+\(\)]{7,20}$/;
 const USERNAME_PATTERN = /^[a-zA-Z0-9_\-\.]{1,30}$/;
 const NUMERIC_CSV_PATTERN = /^[\d\s,.\-]+$/;
-const SQL_INJECTION_PATTERNS = [/(\bor\b|\band\b).*?=/i, /union.*?select/i, /insert.*?into/i, /delete.*?from/i];
+const SQL_INJECTION_PATTERNS = [
+  /(\bor\b|\band\b).*?=/i,
+  /union.*?select/i,
+  /insert.*?into/i,
+  /delete.*?from/i,
+];
 
 // ============================================================================
 // EMAIL SCHEMA
@@ -32,13 +37,13 @@ export const EmailSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, 'Email is required')
-  .max(500, 'Email too long (max 500 characters)')
+  .min(1, "Email is required")
+  .max(500, "Email too long (max 500 characters)")
   .refine((val) => !SQL_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in email',
+    message: "Invalid characters in email",
   })
   .refine((val) => EMAIL_PATTERN.test(val), {
-    message: 'Invalid email format',
+    message: "Invalid email format",
   });
 
 export type Email = z.infer<typeof EmailSchema>;
@@ -51,11 +56,9 @@ export type Email = z.infer<typeof EmailSchema>;
 export const EmailListSchema = z
   .string()
   .trim()
-  .min(1, 'Email list is required')
-  .transform((val) => val.split(',').map((e) => e.trim()))
-  .pipe(
-    z.array(EmailSchema).min(1, 'At least one email is required')
-  );
+  .min(1, "Email list is required")
+  .transform((val) => val.split(",").map((e) => e.trim()))
+  .pipe(z.array(EmailSchema).min(1, "At least one email is required"));
 
 export type EmailList = z.infer<typeof EmailListSchema>;
 
@@ -71,9 +74,9 @@ export type EmailList = z.infer<typeof EmailListSchema>;
 export const PhoneSchema = z
   .string()
   .trim()
-  .min(1, 'Phone number is required')
+  .min(1, "Phone number is required")
   .refine((val) => PHONE_PATTERN.test(val), {
-    message: 'Invalid phone number format',
+    message: "Invalid phone number format",
   });
 
 export type Phone = z.infer<typeof PhoneSchema>;
@@ -90,10 +93,11 @@ export type Phone = z.infer<typeof PhoneSchema>;
 export const UsernameSchema = z
   .string()
   .trim()
-  .min(3, 'Username too short (min 3 characters)')
-  .max(100, 'Username too long (max 100 characters)')
+  .min(3, "Username too short (min 3 characters)")
+  .max(100, "Username too long (max 100 characters)")
   .refine((val) => USERNAME_PATTERN.test(val), {
-    message: 'Invalid username. Only letters, numbers, underscores, hyphens, and dots allowed',
+    message:
+      "Invalid username. Only letters, numbers, underscores, hyphens, and dots allowed",
   });
 
 export type Username = z.infer<typeof UsernameSchema>;
@@ -110,13 +114,13 @@ export type Username = z.infer<typeof UsernameSchema>;
 export const ShortTextSchema = z
   .string()
   .trim()
-  .min(1, 'This field cannot be empty')
-  .max(100, 'Text too long (max 100 characters)')
+  .min(1, "This field cannot be empty")
+  .max(100, "Text too long (max 100 characters)")
   .refine((val) => !/\0/.test(val), {
-    message: 'Invalid characters in text',
+    message: "Invalid characters in text",
   })
   .refine((val) => !/\u202E/.test(val), {
-    message: 'Invalid unicode characters in text',
+    message: "Invalid unicode characters in text",
   });
 
 export type ShortText = z.infer<typeof ShortTextSchema>;
@@ -129,13 +133,13 @@ export type ShortText = z.infer<typeof ShortTextSchema>;
 export const MediumTextSchema = z
   .string()
   .trim()
-  .min(1, 'This field cannot be empty')
-  .max(500, 'Text too long (max 500 characters)')
+  .min(1, "This field cannot be empty")
+  .max(500, "Text too long (max 500 characters)")
   .refine((val) => !/\0/.test(val), {
-    message: 'Invalid characters in text',
+    message: "Invalid characters in text",
   })
   .refine((val) => !/\u202E/.test(val), {
-    message: 'Invalid unicode characters in text',
+    message: "Invalid unicode characters in text",
   });
 
 export type MediumText = z.infer<typeof MediumTextSchema>;
@@ -148,13 +152,13 @@ export type MediumText = z.infer<typeof MediumTextSchema>;
 export const LongTextSchema = z
   .string()
   .trim()
-  .min(1, 'This field cannot be empty')
-  .max(1000, 'Text too long (max 1000 characters)')
+  .min(1, "This field cannot be empty")
+  .max(1000, "Text too long (max 1000 characters)")
   .refine((val) => !/\0/.test(val), {
-    message: 'Invalid characters in text',
+    message: "Invalid characters in text",
   })
   .refine((val) => !/\u202E/.test(val), {
-    message: 'Invalid unicode characters in text',
+    message: "Invalid unicode characters in text",
   });
 
 export type LongText = z.infer<typeof LongTextSchema>;
@@ -167,13 +171,13 @@ export type LongText = z.infer<typeof LongTextSchema>;
 export const VeryLongTextSchema = z
   .string()
   .trim()
-  .min(1, 'This field cannot be empty')
-  .max(5000, 'Text too long (max 5000 characters)')
+  .min(1, "This field cannot be empty")
+  .max(5000, "Text too long (max 5000 characters)")
   .refine((val) => !/\0/.test(val), {
-    message: 'Invalid characters in text',
+    message: "Invalid characters in text",
   })
   .refine((val) => !/\u202E/.test(val), {
-    message: 'Invalid unicode characters in text',
+    message: "Invalid unicode characters in text",
   });
 
 export type VeryLongText = z.infer<typeof VeryLongTextSchema>;
@@ -190,7 +194,7 @@ export type VeryLongText = z.infer<typeof VeryLongTextSchema>;
  */
 export const createSelectSchema = <T extends string>(
   options: readonly [T, ...T[]],
-  errorMessage = 'Invalid option selected'
+  errorMessage = "Invalid option selected",
 ) => {
   return z.enum(options, { errorMap: () => ({ message: errorMessage }) });
 };
@@ -207,10 +211,11 @@ export const createSelectSchema = <T extends string>(
 export const NumericCSVSchema = z
   .string()
   .trim()
-  .min(1, 'CSV data is required')
-  .max(5000, 'CSV data too long (max 5000 characters)')
+  .min(1, "CSV data is required")
+  .max(5000, "CSV data too long (max 5000 characters)")
   .refine((val) => NUMERIC_CSV_PATTERN.test(val), {
-    message: 'Invalid CSV format. Only numbers, spaces, commas, dots, and hyphens allowed',
+    message:
+      "Invalid CSV format. Only numbers, spaces, commas, dots, and hyphens allowed",
   });
 
 export type NumericCSV = z.infer<typeof NumericCSVSchema>;
@@ -227,10 +232,10 @@ export type NumericCSV = z.infer<typeof NumericCSVSchema>;
 export const SearchQuerySchema = z
   .string()
   .trim()
-  .min(2, 'Search query too short (min 2 characters)')
-  .max(500, 'Search query too long (max 500 characters)')
+  .min(2, "Search query too short (min 2 characters)")
+  .max(500, "Search query too long (max 500 characters)")
   .refine((val) => !/\0/.test(val), {
-    message: 'Invalid characters in search query',
+    message: "Invalid characters in search query",
   });
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
@@ -244,9 +249,7 @@ export type SearchQuery = z.infer<typeof SearchQuerySchema>;
  *
  * Validates UUID v4 format
  */
-export const UUIDSchema = z
-  .string()
-  .uuid('Invalid UUID format');
+export const UUIDSchema = z.string().uuid("Invalid UUID format");
 
 export type UUID = z.infer<typeof UUIDSchema>;
 
@@ -257,7 +260,7 @@ export type UUID = z.infer<typeof UUIDSchema>;
  */
 export const IDSchema = z
   .number()
-  .int('ID must be an integer')
-  .positive('ID must be positive');
+  .int("ID must be an integer")
+  .positive("ID must be positive");
 
 export type ID = z.infer<typeof IDSchema>;

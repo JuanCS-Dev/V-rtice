@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Footer = ({ searchHistory = [] }) => {
   return (
@@ -15,7 +15,9 @@ const Footer = ({ searchHistory = [] }) => {
           </span>
           <span className="text-green-400">USUÁRIO: OPERADOR_001</span>
           {searchHistory.length > 0 && (
-            <span className="text-green-400">CONSULTAS REALIZADAS: {searchHistory.length}</span>
+            <span className="text-green-400">
+              CONSULTAS REALIZADAS: {searchHistory.length}
+            </span>
           )}
         </div>
         <div className="text-green-400/70 font-mono">

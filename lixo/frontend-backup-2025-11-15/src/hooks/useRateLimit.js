@@ -17,7 +17,7 @@
  * });
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 /**
  * Rate limiter using token bucket algorithm
@@ -33,7 +33,9 @@ class RateLimiter {
   refill() {
     const now = Date.now();
     const timePassed = now - this.lastRefill;
-    const tokensToAdd = Math.floor((timePassed / this.windowMs) * this.maxRequests);
+    const tokensToAdd = Math.floor(
+      (timePassed / this.windowMs) * this.maxRequests,
+    );
 
     if (tokensToAdd > 0) {
       this.tokens = Math.min(this.maxRequests, this.tokens + tokensToAdd);
@@ -85,7 +87,7 @@ export const useRateLimit = (key, options = {}) => {
   const {
     maxRequests = 10,
     windowMs = 60000, // 1 minute
-    onLimitExceeded = null
+    onLimitExceeded = null,
   } = options;
 
   // Get or create rate limiter
@@ -97,7 +99,7 @@ export const useRateLimit = (key, options = {}) => {
 
   const [state, setState] = useState({
     remaining: limiter.getRemaining(),
-    resetIn: limiter.getResetTime()
+    resetIn: limiter.getResetTime(),
   });
 
   const updateIntervalRef = useRef(null);
@@ -107,7 +109,7 @@ export const useRateLimit = (key, options = {}) => {
     updateIntervalRef.current = setInterval(() => {
       setState({
         remaining: limiter.getRemaining(),
-        resetIn: limiter.getResetTime()
+        resetIn: limiter.getResetTime(),
       });
     }, 1000);
 
@@ -128,29 +130,34 @@ export const useRateLimit = (key, options = {}) => {
   /**
    * Execute action with rate limiting
    */
-  const execute = useCallback(async (fn) => {
-    if (!limiter.tryConsume()) {
-      // Rate limit exceeded
-      if (onLimitExceeded) {
-        onLimitExceeded({
-          key,
-          remaining: 0,
-          resetIn: limiter.getResetTime()
-        });
+  const execute = useCallback(
+    async (fn) => {
+      if (!limiter.tryConsume()) {
+        // Rate limit exceeded
+        if (onLimitExceeded) {
+          onLimitExceeded({
+            key,
+            remaining: 0,
+            resetIn: limiter.getResetTime(),
+          });
+        }
+
+        throw new Error(
+          `Rate limit exceeded for "${key}". Try again in ${Math.ceil(limiter.getResetTime() / 1000)}s`,
+        );
       }
 
-      throw new Error(`Rate limit exceeded for "${key}". Try again in ${Math.ceil(limiter.getResetTime() / 1000)}s`);
-    }
+      // Update state
+      setState({
+        remaining: limiter.getRemaining(),
+        resetIn: limiter.getResetTime(),
+      });
 
-    // Update state
-    setState({
-      remaining: limiter.getRemaining(),
-      resetIn: limiter.getResetTime()
-    });
-
-    // Execute function
-    return await fn();
-  }, [limiter, key, onLimitExceeded]);
+      // Execute function
+      return await fn();
+    },
+    [limiter, key, onLimitExceeded],
+  );
 
   /**
    * Reset rate limiter
@@ -161,7 +168,7 @@ export const useRateLimit = (key, options = {}) => {
 
     setState({
       remaining: limiter.getRemaining(),
-      resetIn: 0
+      resetIn: 0,
     });
   }, [limiter]);
 
@@ -170,7 +177,7 @@ export const useRateLimit = (key, options = {}) => {
     execute,
     remaining: state.remaining,
     resetIn: state.resetIn,
-    reset
+    reset,
   };
 };
 
@@ -192,6 +199,6 @@ export const getRateLimiterStats = (key) => {
     remaining: limiter.getRemaining(),
     resetIn: limiter.getResetTime(),
     maxRequests: limiter.maxRequests,
-    windowMs: limiter.windowMs
+    windowMs: limiter.windowMs,
   };
 };

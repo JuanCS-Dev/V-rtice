@@ -1,7 +1,7 @@
-import { useState, useCallback, useContext } from 'react';
-import { AuthContext } from '../../../contexts/AuthContext';
-import { useTerminalCommands } from '../../../hooks/useTerminalCommands';
-import { useNaturalLanguage } from '../../../hooks/useNaturalLanguage';
+import { useState, useCallback, useContext } from "react";
+import { AuthContext } from "../../../contexts/AuthContext";
+import { useTerminalCommands } from "../../../hooks/useTerminalCommands";
+import { useNaturalLanguage } from "../../../hooks/useNaturalLanguage";
 
 // All ASCII art and menu text can be moved to a constants file later
 const ASCII_BANNER = `
@@ -70,15 +70,21 @@ const MAIN_MENU_TEXT = `
  */
 export const useCommandProcessor = (terminal) => {
   const { user: _user, getAuthToken } = useContext(AuthContext);
-  const [menuContext, setMenuContext] = useState('main');
+  const [menuContext, setMenuContext] = useState("main");
   const [isAIChatMode, setIsAIChatMode] = useState(false);
   const [aiChatHistory, setAiChatHistory] = useState([]);
 
   const { executeCommand: _executeCommand } = useTerminalCommands();
   const { processNaturalLanguage } = useNaturalLanguage();
 
-  const write = useCallback((text) => terminal.current?.write(text), [terminal]);
-  const writeln = useCallback((text) => terminal.current?.writeln(text), [terminal]);
+  const write = useCallback(
+    (text) => terminal.current?.write(text),
+    [terminal],
+  );
+  const writeln = useCallback(
+    (text) => terminal.current?.writeln(text),
+    [terminal],
+  );
   const clear = useCallback(() => {
     terminal.current?.clear();
     write(ASCII_BANNER);
@@ -86,101 +92,127 @@ export const useCommandProcessor = (terminal) => {
 
   const showHelp = useCallback(() => writeln(HELP_TEXT), [writeln]);
   const showMainMenu = useCallback(() => {
-    setMenuContext('main');
+    setMenuContext("main");
     writeln(MAIN_MENU_TEXT);
   }, [writeln]);
 
-  const processAIChat = useCallback(async (_input) => {
-    // AI chat processing logic from the original file...
-    // ...
-    writeln(`\r\n\x1b[1;32mAurora>\x1b[0m `);
-  }, [writeln]);
+  const processAIChat = useCallback(
+    async (_input) => {
+      // AI chat processing logic from the original file...
+      // ...
+      writeln(`\r\n\x1b[1;32mAurora>\x1b[0m `);
+    },
+    [writeln],
+  );
 
-  const processCommand = useCallback(async (command, writePrompt) => {
-    writeln(''); // New line after command
+  const processCommand = useCallback(
+    async (command, writePrompt) => {
+      writeln(""); // New line after command
 
-    // Handle empty command
-    if (!command.trim()) {
-      writePrompt();
-      return;
-    }
+      // Handle empty command
+      if (!command.trim()) {
+        writePrompt();
+        return;
+      }
 
-    if (isAIChatMode) {
-      await processAIChat(command);
-      writePrompt();
-      return;
-    }
+      if (isAIChatMode) {
+        await processAIChat(command);
+        writePrompt();
+        return;
+      }
 
-    const [cmd, ..._args] = command.trim().split(/\s+/);
+      const [cmd, ..._args] = command.trim().split(/\s+/);
 
-    switch (cmd.toLowerCase()) {
-      case 'clear':
-      case 'cls':
-        clear();
-        writePrompt();
-        break;
-      case 'exit':
-        writeln('\x1b[1;31mDesconectando...\x1b[0m');
-        writePrompt();
-        break;
-      case 'help':
-        showHelp();
-        writePrompt();
-        break;
-      case 'menu':
-        showMainMenu();
-        writePrompt();
-        break;
-      case 'cyber':
-        writeln('\x1b[1;33m🛡️  CYBER SECURITY MODULE\x1b[0m');
-        writeln('  ip-intel    - Análise de IPs');
-        writeln('  threat      - Inteligência de Ameaças');
-        writeln('  onion       - Rastreamento Tor/Onion');
-        writeln('  scanner     - Varredura de portas');
-        writePrompt();
-        break;
-      case 'osint':
-        writeln('\x1b[1;33m🕵️  OSINT MODULE\x1b[0m');
-        writeln('  pessoas     - Investigação de pessoas');
-        writeln('  empresas    - Análise de empresas');
-        writeln('  veiculos    - Consulta veicular');
-        writeln('  geo         - Geolocalização');
-        writePrompt();
-        break;
-      case 'aurora':
-        writeln('\x1b[1;33m🤖 AURORA AI ACTIVATED\x1b[0m');
-        writeln('Digite sua pergunta ou comando:');
-        setIsAIChatMode(true);
-        writePrompt();
-        break;
-      default:
-        try {
-          // Fallback to natural language processing
-          writeln('\x1b[0;33mProcessando comando...\x1b[0m');
-          const nlpResult = await processNaturalLanguage(command, getAuthToken());
-          if (nlpResult && nlpResult.response) {
-            writeln(`\x1b[1;36m${nlpResult.response}\x1b[0m`);
-          } else {
+      switch (cmd.toLowerCase()) {
+        case "clear":
+        case "cls":
+          clear();
+          writePrompt();
+          break;
+        case "exit":
+          writeln("\x1b[1;31mDesconectando...\x1b[0m");
+          writePrompt();
+          break;
+        case "help":
+          showHelp();
+          writePrompt();
+          break;
+        case "menu":
+          showMainMenu();
+          writePrompt();
+          break;
+        case "cyber":
+          writeln("\x1b[1;33m🛡️  CYBER SECURITY MODULE\x1b[0m");
+          writeln("  ip-intel    - Análise de IPs");
+          writeln("  threat      - Inteligência de Ameaças");
+          writeln("  onion       - Rastreamento Tor/Onion");
+          writeln("  scanner     - Varredura de portas");
+          writePrompt();
+          break;
+        case "osint":
+          writeln("\x1b[1;33m🕵️  OSINT MODULE\x1b[0m");
+          writeln("  pessoas     - Investigação de pessoas");
+          writeln("  empresas    - Análise de empresas");
+          writeln("  veiculos    - Consulta veicular");
+          writeln("  geo         - Geolocalização");
+          writePrompt();
+          break;
+        case "aurora":
+          writeln("\x1b[1;33m🤖 AURORA AI ACTIVATED\x1b[0m");
+          writeln("Digite sua pergunta ou comando:");
+          setIsAIChatMode(true);
+          writePrompt();
+          break;
+        default:
+          try {
+            // Fallback to natural language processing
+            writeln("\x1b[0;33mProcessando comando...\x1b[0m");
+            const nlpResult = await processNaturalLanguage(
+              command,
+              getAuthToken(),
+            );
+            if (nlpResult && nlpResult.response) {
+              writeln(`\x1b[1;36m${nlpResult.response}\x1b[0m`);
+            } else {
+              writeln(`\x1b[1;31mComando não encontrado: ${cmd}\x1b[0m`);
+              writeln(
+                `Digite \x1b[1;32m'help'\x1b[0m para ver comandos disponíveis`,
+              );
+            }
+          } catch (e) {
             writeln(`\x1b[1;31mComando não encontrado: ${cmd}\x1b[0m`);
-            writeln(`Digite \x1b[1;32m'help'\x1b[0m para ver comandos disponíveis`);
+            writeln(
+              `Digite \x1b[1;32m'help'\x1b[0m para ver comandos disponíveis`,
+            );
           }
-        } catch (e) {
-          writeln(`\x1b[1;31mComando não encontrado: ${cmd}\x1b[0m`);
-          writeln(`Digite \x1b[1;32m'help'\x1b[0m para ver comandos disponíveis`);
-        }
-        writePrompt();
-        break;
-    }
-  }, [isAIChatMode, processAIChat, clear, showHelp, showMainMenu, processNaturalLanguage, getAuthToken, writeln, setIsAIChatMode]);
+          writePrompt();
+          break;
+      }
+    },
+    [
+      isAIChatMode,
+      processAIChat,
+      clear,
+      showHelp,
+      showMainMenu,
+      processNaturalLanguage,
+      getAuthToken,
+      writeln,
+      setIsAIChatMode,
+    ],
+  );
 
   return {
-    menuContext, setMenuContext,
-    isAIChatMode, setIsAIChatMode,
-    aiChatHistory, setAiChatHistory,
+    menuContext,
+    setMenuContext,
+    isAIChatMode,
+    setIsAIChatMode,
+    aiChatHistory,
+    setAiChatHistory,
     processCommand,
     clear,
     showHelp,
-    showMainMenu
+    showMainMenu,
   };
 };
 

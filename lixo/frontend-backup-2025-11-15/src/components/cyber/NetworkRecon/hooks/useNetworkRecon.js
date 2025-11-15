@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
 import {
   scanNetwork,
   getScanStatus,
   listScans,
   discoverHosts,
-} from '../../../../api/offensiveServices';
+} from "../../../../api/offensiveServices";
 
 /**
  * useNetworkRecon - Hook para Network Reconnaissance
@@ -30,12 +30,12 @@ export const useNetworkRecon = () => {
 
         // Separa scans ativos
         const active = (result.scans || []).filter(
-          s => s.status === 'running' || s.status === 'pending'
+          (s) => s.status === "running" || s.status === "pending",
         );
         setActiveScans(active);
       }
     } catch (err) {
-      logger.error('Error loading scans:', err);
+      logger.error("Error loading scans:", err);
       setError(err.message);
     }
   }, []);
@@ -43,36 +43,33 @@ export const useNetworkRecon = () => {
   /**
    * Atualiza status de scan específico
    */
-  const updateScanStatus = useCallback(async (scanId) => {
-    try {
-      const result = await getScanStatus(scanId);
+  const updateScanStatus = useCallback(
+    async (scanId) => {
+      try {
+        const result = await getScanStatus(scanId);
 
-      if (result.success) {
-        // Atualiza na lista
-        setScans(prev =>
-          prev.map(s =>
-            s.scan_id === scanId
-              ? { ...s, ...result }
-              : s
-          )
-        );
-
-        // Remove dos ativos se completou
-        if (result.status === 'completed' || result.status === 'failed') {
-          setActiveScans(prev =>
-            prev.filter(s => s.scan_id !== scanId)
+        if (result.success) {
+          // Atualiza na lista
+          setScans((prev) =>
+            prev.map((s) => (s.scan_id === scanId ? { ...s, ...result } : s)),
           );
-        }
 
-        // Atualiza current scan se for o mesmo
-        if (currentScan?.scan_id === scanId) {
-          setCurrentScan(prev => ({ ...prev, ...result }));
+          // Remove dos ativos se completou
+          if (result.status === "completed" || result.status === "failed") {
+            setActiveScans((prev) => prev.filter((s) => s.scan_id !== scanId));
+          }
+
+          // Atualiza current scan se for o mesmo
+          if (currentScan?.scan_id === scanId) {
+            setCurrentScan((prev) => ({ ...prev, ...result }));
+          }
         }
+      } catch (err) {
+        logger.error("Error updating scan status:", err);
       }
-    } catch (err) {
-      logger.error('Error updating scan status:', err);
-    }
-  }, [currentScan]);
+    },
+    [currentScan],
+  );
 
   // Carrega lista de scans ao montar
   useEffect(() => {
@@ -84,7 +81,7 @@ export const useNetworkRecon = () => {
     if (activeScans.length === 0) return;
 
     const interval = setInterval(() => {
-      activeScans.forEach(scan => {
+      activeScans.forEach((scan) => {
         updateScanStatus(scan.scan_id);
       });
     }, 3000); // Poll a cada 3 segundos
@@ -95,40 +92,46 @@ export const useNetworkRecon = () => {
   /**
    * Inicia novo scan
    */
-  const startScan = useCallback(async (target, scanType, ports) => {
-    setIsScanning(true);
-    setError(null);
+  const startScan = useCallback(
+    async (target, scanType, ports) => {
+      setIsScanning(true);
+      setError(null);
 
-    try {
-      const result = await scanNetwork(target, scanType, ports);
+      try {
+        const result = await scanNetwork(target, scanType, ports);
 
-      if (result.success) {
-        setCurrentScan(result);
+        if (result.success) {
+          setCurrentScan(result);
 
-        // Adiciona aos scans ativos
-        setActiveScans(prev => [...prev, {
-          scan_id: result.scan_id,
-          target: result.target,
-          status: 'running',
-          started_at: new Date().toISOString(),
-        }]);
+          // Adiciona aos scans ativos
+          setActiveScans((prev) => [
+            ...prev,
+            {
+              scan_id: result.scan_id,
+              target: result.target,
+              status: "running",
+              started_at: new Date().toISOString(),
+            },
+          ]);
 
-        // Recarrega lista
-        await loadScans();
+          // Recarrega lista
+          await loadScans();
 
-        return { success: true, scanId: result.scan_id };
-      } else {
-        setError(result.error);
-        return { success: false, error: result.error };
+          return { success: true, scanId: result.scan_id };
+        } else {
+          setError(result.error);
+          return { success: false, error: result.error };
+        }
+      } catch (err) {
+        logger.error("Error starting scan:", err);
+        setError(err.message);
+        return { success: false, error: err.message };
+      } finally {
+        setIsScanning(false);
       }
-    } catch (err) {
-      logger.error('Error starting scan:', err);
-      setError(err.message);
-      return { success: false, error: err.message };
-    } finally {
-      setIsScanning(false);
-    }
-  }, [loadScans]);
+    },
+    [loadScans],
+  );
 
   /**
    * Obtém detalhes completos de um scan
@@ -141,7 +144,7 @@ export const useNetworkRecon = () => {
         return result;
       }
     } catch (err) {
-      logger.error('Error getting scan details:', err);
+      logger.error("Error getting scan details:", err);
       setError(err.message);
     }
   }, []);
@@ -163,7 +166,7 @@ export const useNetworkRecon = () => {
         return { success: false, error: result.error };
       }
     } catch (err) {
-      logger.error('Error discovering hosts:', err);
+      logger.error("Error discovering hosts:", err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

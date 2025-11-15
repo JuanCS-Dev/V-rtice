@@ -19,8 +19,8 @@
  * Governed by: Constituição Vértice v2.7 - ADR-004
  */
 
-import { apiClient } from '../api/client';
-import logger from './logger';
+import { apiClient } from "../api/client";
+import logger from "./logger";
 
 /**
  * Log error to backend
@@ -32,7 +32,7 @@ import logger from './logger';
 export const logError = async (message, error = null, context = {}) => {
   try {
     const errorData = {
-      level: 'error',
+      level: "error",
       message,
       stack: error instanceof Error ? error.stack : undefined,
       context: {
@@ -46,16 +46,16 @@ export const logError = async (message, error = null, context = {}) => {
     };
 
     // Send to backend (fire and forget - don't block on logging)
-    apiClient.post('/api/errors/log', errorData).catch((logErr) => {
+    apiClient.post("/api/errors/log", errorData).catch((logErr) => {
       // Don't let logging errors crash the app
-      logger.warn('Failed to log error to backend:', logErr);
+      logger.warn("Failed to log error to backend:", logErr);
     });
 
     // Also log locally for development
     logger.error(message, error, context);
   } catch (err) {
     // Fail silently - don't break app if logging fails
-    logger.warn('Error logger failed:', err);
+    logger.warn("Error logger failed:", err);
   }
 };
 
@@ -68,7 +68,7 @@ export const logError = async (message, error = null, context = {}) => {
 export const logWarning = async (message, context = {}) => {
   try {
     const warningData = {
-      level: 'warn',
+      level: "warn",
       message,
       context,
       url: window.location.href,
@@ -76,13 +76,13 @@ export const logWarning = async (message, context = {}) => {
       timestamp: new Date().toISOString(),
     };
 
-    apiClient.post('/api/errors/log', warningData).catch((logErr) => {
-      logger.warn('Failed to log warning to backend:', logErr);
+    apiClient.post("/api/errors/log", warningData).catch((logErr) => {
+      logger.warn("Failed to log warning to backend:", logErr);
     });
 
     logger.warn(message, context);
   } catch (err) {
-    logger.warn('Warning logger failed:', err);
+    logger.warn("Warning logger failed:", err);
   }
 };
 
@@ -95,20 +95,20 @@ export const logWarning = async (message, context = {}) => {
 export const logInfo = async (message, context = {}) => {
   try {
     const infoData = {
-      level: 'info',
+      level: "info",
       message,
       context,
       url: window.location.href,
       timestamp: new Date().toISOString(),
     };
 
-    apiClient.post('/api/errors/log', infoData).catch((logErr) => {
-      logger.warn('Failed to log info to backend:', logErr);
+    apiClient.post("/api/errors/log", infoData).catch((logErr) => {
+      logger.warn("Failed to log info to backend:", logErr);
     });
 
     logger.info(message, context);
   } catch (err) {
-    logger.warn('Info logger failed:', err);
+    logger.warn("Info logger failed:", err);
   }
 };
 
@@ -118,30 +118,22 @@ export const logInfo = async (message, context = {}) => {
  */
 export const setupGlobalErrorHandler = () => {
   // Catch unhandled errors
-  window.addEventListener('error', (event) => {
-    logError(
-      'Unhandled error',
-      event.error,
-      {
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-      }
-    );
+  window.addEventListener("error", (event) => {
+    logError("Unhandled error", event.error, {
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    });
   });
 
   // Catch unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
-    logError(
-      'Unhandled promise rejection',
-      event.reason,
-      {
-        promise: 'unhandled',
-      }
-    );
+  window.addEventListener("unhandledrejection", (event) => {
+    logError("Unhandled promise rejection", event.reason, {
+      promise: "unhandled",
+    });
   });
 
-  logger.info('Global error handlers configured');
+  logger.info("Global error handlers configured");
 };
 
 export default {

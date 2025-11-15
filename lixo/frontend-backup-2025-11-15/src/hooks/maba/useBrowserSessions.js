@@ -12,17 +12,15 @@
  * @returns {Object} { sessions, isLoading, error, createSession, closeSession, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mabaService } from '../../services/maba/mabaService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mabaService } from "../../services/maba/mabaService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 10000; // 10s (more frequent for real-time monitoring)
 
 export const useBrowserSessions = (options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +36,7 @@ export const useBrowserSessions = (options = {}) => {
       setIsLoading(false);
       logger.debug(`[useBrowserSessions] Fetched ${response.length} sessions`);
     } catch (err) {
-      logger.error('[useBrowserSessions] Failed to fetch sessions:', err);
+      logger.error("[useBrowserSessions] Failed to fetch sessions:", err);
       setError(err.message);
       setIsLoading(false);
     }
@@ -57,38 +55,47 @@ export const useBrowserSessions = (options = {}) => {
   }, [enabled, pollingInterval, fetchSessions]);
 
   // Create new browser session
-  const createSession = useCallback(async (sessionOptions = {}) => {
-    try {
-      const newSession = await mabaService.createSession(sessionOptions);
-      logger.info('[useBrowserSessions] Session created:', newSession.session_id);
+  const createSession = useCallback(
+    async (sessionOptions = {}) => {
+      try {
+        const newSession = await mabaService.createSession(sessionOptions);
+        logger.info(
+          "[useBrowserSessions] Session created:",
+          newSession.session_id,
+        );
 
-      // Refresh sessions list
-      await fetchSessions();
+        // Refresh sessions list
+        await fetchSessions();
 
-      return newSession;
-    } catch (err) {
-      logger.error('[useBrowserSessions] Failed to create session:', err);
-      throw err;
-    }
-  }, [fetchSessions]);
+        return newSession;
+      } catch (err) {
+        logger.error("[useBrowserSessions] Failed to create session:", err);
+        throw err;
+      }
+    },
+    [fetchSessions],
+  );
 
   // Close browser session
-  const closeSession = useCallback(async (sessionId) => {
-    try {
-      await mabaService.closeSession(sessionId);
-      logger.info('[useBrowserSessions] Session closed:', sessionId);
+  const closeSession = useCallback(
+    async (sessionId) => {
+      try {
+        await mabaService.closeSession(sessionId);
+        logger.info("[useBrowserSessions] Session closed:", sessionId);
 
-      // Refresh sessions list
-      await fetchSessions();
-    } catch (err) {
-      logger.error('[useBrowserSessions] Failed to close session:', err);
-      throw err;
-    }
-  }, [fetchSessions]);
+        // Refresh sessions list
+        await fetchSessions();
+      } catch (err) {
+        logger.error("[useBrowserSessions] Failed to close session:", err);
+        throw err;
+      }
+    },
+    [fetchSessions],
+  );
 
   return {
     sessions,
-    activeSessions: sessions.filter(s => s.status === 'active'),
+    activeSessions: sessions.filter((s) => s.status === "active"),
     sessionCount: sessions.length,
     isLoading,
     error,

@@ -3,16 +3,21 @@
  * Real-time correlation between attacks and detections
  */
 
-import React from 'react';
-import styles from './SplitView.module.css';
+import React from "react";
+import styles from "./SplitView.module.css";
 
-export const SplitView = ({ attackData, defenseData, correlations, loading }) => {
+export const SplitView = ({
+  attackData,
+  defenseData,
+  correlations,
+  loading,
+}) => {
   const getCorrelationForAttack = (attackId) => {
-    return correlations.find(c => c.attackId === attackId);
+    return correlations.find((c) => c.attackId === attackId);
   };
 
   const getCorrelationForDetection = (detectionId) => {
-    return correlations.find(c => c.detectionId === detectionId);
+    return correlations.find((c) => c.detectionId === detectionId);
   };
 
   return (
@@ -52,22 +57,28 @@ export const SplitView = ({ attackData, defenseData, correlations, loading }) =>
                   <div
                     key={attack.id || index}
                     className={`${styles.attackCard} ${
-                      correlation ? styles.correlated : ''
+                      correlation ? styles.correlated : ""
                     }`}
                   >
                     <div className={styles.cardHeader}>
                       <span className={styles.attackType}>{attack.type}</span>
-                      <span className={styles.attackStatus}>{attack.status}</span>
+                      <span className={styles.attackStatus}>
+                        {attack.status}
+                      </span>
                     </div>
 
                     <div className={styles.cardBody}>
                       <div className={styles.cardField}>
                         <span className={styles.fieldLabel}>Target:</span>
-                        <span className={styles.fieldValue}>{attack.target}</span>
+                        <span className={styles.fieldValue}>
+                          {attack.target}
+                        </span>
                       </div>
                       <div className={styles.cardField}>
                         <span className={styles.fieldLabel}>Technique:</span>
-                        <span className={styles.fieldValue}>{attack.technique}</span>
+                        <span className={styles.fieldValue}>
+                          {attack.technique}
+                        </span>
                       </div>
                       {attack.progress !== undefined && (
                         <div className={styles.progress}>
@@ -136,12 +147,16 @@ export const SplitView = ({ attackData, defenseData, correlations, loading }) =>
                   <div
                     key={detection.id || index}
                     className={`${styles.detectionCard} ${
-                      correlation ? styles.correlated : ''
+                      correlation ? styles.correlated : ""
                     }`}
                   >
                     <div className={styles.cardHeader}>
-                      <span className={styles.detectionType}>{detection.type}</span>
-                      <span className={`${styles.severity} ${styles[detection.severity]}`}>
+                      <span className={styles.detectionType}>
+                        {detection.type}
+                      </span>
+                      <span
+                        className={`${styles.severity} ${styles[detection.severity]}`}
+                      >
                         {detection.severity}
                       </span>
                     </div>
@@ -149,15 +164,21 @@ export const SplitView = ({ attackData, defenseData, correlations, loading }) =>
                     <div className={styles.cardBody}>
                       <div className={styles.cardField}>
                         <span className={styles.fieldLabel}>Source:</span>
-                        <span className={styles.fieldValue}>{detection.source}</span>
+                        <span className={styles.fieldValue}>
+                          {detection.source}
+                        </span>
                       </div>
                       <div className={styles.cardField}>
                         <span className={styles.fieldLabel}>Rule:</span>
-                        <span className={styles.fieldValue}>{detection.rule}</span>
+                        <span className={styles.fieldValue}>
+                          {detection.rule}
+                        </span>
                       </div>
                       <div className={styles.cardField}>
                         <span className={styles.fieldLabel}>Confidence:</span>
-                        <span className={styles.fieldValue}>{detection.confidence}%</span>
+                        <span className={styles.fieldValue}>
+                          {detection.confidence}%
+                        </span>
                       </div>
                     </div>
 

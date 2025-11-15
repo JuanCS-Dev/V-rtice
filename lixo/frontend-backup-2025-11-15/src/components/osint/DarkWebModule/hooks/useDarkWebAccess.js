@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 /**
  * Custom hook for managing Dark Web Module access requests.
@@ -9,12 +9,12 @@ export const useDarkWebAccess = () => {
 
   const requestAccess = useCallback(() => {
     setIsRequestingAccess(true);
-    setAccessStatus('pending');
+    setAccessStatus("pending");
     // Simulate an async request
     setTimeout(() => {
-      alert('Funcionalidade em desenvolvimento - Requer autorização especial');
+      alert("Funcionalidade em desenvolvimento - Requer autorização especial");
       setIsRequestingAccess(false);
-      setAccessStatus('denied'); // For now, always denied in simulation
+      setAccessStatus("denied"); // For now, always denied in simulation
     }, 1500);
   }, []);
 

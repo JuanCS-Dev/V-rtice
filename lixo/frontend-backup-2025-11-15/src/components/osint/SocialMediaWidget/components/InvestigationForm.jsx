@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Button, Input } from '../../../shared';
-import { validateUsername } from '../../../../utils/validation';
-import { sanitizePlainText } from '../../../../utils/sanitization';
-import styles from './InvestigationForm.module.css';
+import React, { useState } from "react";
+import { Button, Input } from "../../../shared";
+import { validateUsername } from "../../../../utils/validation";
+import { sanitizePlainText } from "../../../../utils/sanitization";
+import styles from "./InvestigationForm.module.css";
 
 const PLATFORM_ICONS = {
-  twitter: 'fab fa-twitter',
-  linkedin: 'fab fa-linkedin',
-  github: 'fab fa-github',
-  instagram: 'fab fa-instagram',
-  reddit: 'fab fa-reddit',
-  facebook: 'fab fa-facebook',
-  youtube: 'fab fa-youtube',
-  tiktok: 'fab fa-tiktok'
+  twitter: "fab fa-twitter",
+  linkedin: "fab fa-linkedin",
+  github: "fab fa-github",
+  instagram: "fab fa-instagram",
+  reddit: "fab fa-reddit",
+  facebook: "fab fa-facebook",
+  youtube: "fab fa-youtube",
+  tiktok: "fab fa-tiktok",
 };
 
 /**
@@ -27,11 +27,18 @@ const PLATFORM_ICONS = {
  * @version 2.0.0 (Security Hardened)
  */
 const InvestigationForm = ({ onInvestigate, loading, error }) => {
-  const [target, setTarget] = useState('');
-  const [platforms, setPlatforms] = useState(['twitter', 'linkedin', 'github']);
+  const [target, setTarget] = useState("");
+  const [platforms, setPlatforms] = useState(["twitter", "linkedin", "github"]);
   const [targetError, setTargetError] = useState(null);
 
-  const availablePlatforms = ['twitter', 'linkedin', 'github', 'instagram', 'reddit', 'facebook'];
+  const availablePlatforms = [
+    "twitter",
+    "linkedin",
+    "github",
+    "instagram",
+    "reddit",
+    "facebook",
+  ];
 
   // Secure target input handler
   const handleTargetChange = (e) => {
@@ -55,10 +62,10 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
   };
 
   const togglePlatform = (platform) => {
-    setPlatforms(prev =>
+    setPlatforms((prev) =>
       prev.includes(platform)
-        ? prev.filter(p => p !== platform)
-        : [...prev, platform]
+        ? prev.filter((p) => p !== platform)
+        : [...prev, platform],
     );
   };
 
@@ -67,7 +74,7 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
 
     // Validate before submission
     if (!target.trim()) {
-      setTargetError('Username is required');
+      setTargetError("Username is required");
       return;
     }
 
@@ -88,16 +95,18 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !loading) {
-        handleSubmit(e);
+    if (e.key === "Enter" && !loading) {
+      handleSubmit(e);
     }
-  }
+  };
 
   return (
     <div className={styles.form}>
       <form onSubmit={handleSubmit} className={styles.searchForm}>
         <div className={styles.inputWrapper}>
-          <label htmlFor="target-input" className={styles.visuallyHidden}>Username ou Target</label>
+          <label htmlFor="target-input" className={styles.visuallyHidden}>
+            Username ou Target
+          </label>
           <input
             id="target-input"
             type="text"
@@ -130,9 +139,13 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
           size="lg"
           loading={loading}
           disabled={!target.trim() || platforms.length === 0}
-          icon={loading ? null : <i className="fas fa-search" aria-hidden="true"></i>}
+          icon={
+            loading ? null : (
+              <i className="fas fa-search" aria-hidden="true"></i>
+            )
+          }
         >
-          {loading ? 'INVESTIGANDO...' : 'INVESTIGAR'}
+          {loading ? "INVESTIGANDO..." : "INVESTIGAR"}
         </Button>
       </form>
 
@@ -141,19 +154,23 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
         <div id="platform-label" className={styles.platformLabel}>
           Plataformas ({platforms.length} selecionadas):
         </div>
-        <div className={styles.platformGrid} role="group" aria-labelledby="platform-label">
-          {availablePlatforms.map(platform => (
+        <div
+          className={styles.platformGrid}
+          role="group"
+          aria-labelledby="platform-label"
+        >
+          {availablePlatforms.map((platform) => (
             <button
               key={platform}
               type="button"
               aria-pressed={platforms.includes(platform)}
               className={`${styles.platformButton} ${
-                platforms.includes(platform) ? styles.active : ''
+                platforms.includes(platform) ? styles.active : ""
               }`}
               onClick={() => togglePlatform(platform)}
               disabled={loading}
             >
-              <i className={PLATFORM_ICONS[platform] || 'fas fa-globe'}></i>
+              <i className={PLATFORM_ICONS[platform] || "fas fa-globe"}></i>
               <span>{platform}</span>
             </button>
           ))}

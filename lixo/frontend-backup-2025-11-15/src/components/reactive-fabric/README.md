@@ -25,6 +25,7 @@ ReactiveFabricDashboard (Main Container)
 **Purpose**: Main orchestration component for all reactive fabric visualizations.
 
 **Features**:
+
 - Real-time data polling (5-second intervals)
 - Tab navigation between views
 - Metrics overview bar
@@ -34,6 +35,7 @@ ReactiveFabricDashboard (Main Container)
 **Props**: None (self-contained with internal state management)
 
 **API Endpoints**:
+
 - `GET /api/reactive-fabric/honeypots/status`
 - `GET /api/reactive-fabric/events/recent?limit=50`
 - `GET /api/reactive-fabric/intelligence/fusion`
@@ -45,6 +47,7 @@ ReactiveFabricDashboard (Main Container)
 **Purpose**: Geospatial visualization of honeypot deployment and threat origins.
 
 **Features**:
+
 - SVG-based world map with customizable projections
 - Real-time threat flow animations
 - Honeypot marker sizing based on activity
@@ -53,6 +56,7 @@ ReactiveFabricDashboard (Main Container)
 - Color-coded severity indicators
 
 **Props**:
+
 ```typescript
 {
   honeypots: Array<Honeypot>,
@@ -61,6 +65,7 @@ ReactiveFabricDashboard (Main Container)
 ```
 
 **Visual Elements**:
+
 - Pulsing honeypot markers
 - Animated threat flow lines
 - Activity-based sizing
@@ -73,6 +78,7 @@ ReactiveFabricDashboard (Main Container)
 **Purpose**: Advanced threat correlation and pattern analysis.
 
 **Features**:
+
 - Coordinated attack campaign detection
 - TTP (Tactics, Techniques, Procedures) distribution analysis
 - Temporal clustering of attack bursts
@@ -80,6 +86,7 @@ ReactiveFabricDashboard (Main Container)
 - Multi-target threat actor identification
 
 **Props**:
+
 ```typescript
 {
   fusionData: IntelligenceFusion | null,
@@ -88,6 +95,7 @@ ReactiveFabricDashboard (Main Container)
 ```
 
 **Analysis Capabilities**:
+
 - **Coordinated Attacks**: Identifies IPs targeting multiple honeypots
 - **TTP Distribution**: Frequency analysis of attack techniques
 - **Attack Clusters**: Temporal grouping of events (5-minute windows)
@@ -100,6 +108,7 @@ ReactiveFabricDashboard (Main Container)
 **Purpose**: Chronological threat event visualization.
 
 **Features**:
+
 - Time-bucketed event grouping (Last Minute, Hour, Day, Older)
 - Severity filtering (Critical, High, Medium, Low)
 - Expandable event details
@@ -108,6 +117,7 @@ ReactiveFabricDashboard (Main Container)
 - Compact mode for overview
 
 **Props**:
+
 ```typescript
 {
   events: Array<ThreatEvent>,
@@ -116,6 +126,7 @@ ReactiveFabricDashboard (Main Container)
 ```
 
 **Modes**:
+
 - **Full**: Complete timeline with time groups
 - **Compact**: Top 10 recent events only
 
@@ -126,6 +137,7 @@ ReactiveFabricDashboard (Main Container)
 **Purpose**: Real-time honeypot health and activity monitoring.
 
 **Features**:
+
 - Grid layout with auto-responsive columns
 - Status indicators (Active, Inactive, Degraded, Error)
 - Activity level classification
@@ -134,13 +146,15 @@ ReactiveFabricDashboard (Main Container)
 - Multi-sort capabilities (Activity, Name, Status)
 
 **Props**:
+
 ```typescript
 {
-  honeypots: Array<Honeypot>
+  honeypots: Array<Honeypot>;
 }
 ```
 
 **Metrics Per Honeypot**:
+
 - Interaction count
 - Activity level (None, Low, Medium, High, Critical)
 - Uptime percentage
@@ -153,18 +167,21 @@ ReactiveFabricDashboard (Main Container)
 All components follow the **PAGANI Standard** established during the frontend refactoring:
 
 ### Design Tokens
+
 - **Colors**: Reactive Fabric theme (red-dominant: `#dc2626`)
 - **Typography**: System fonts with monospace for data
 - **Spacing**: Consistent rem-based scale
 - **Animations**: Subtle, purposeful (pulse, fade, slide)
 
 ### CSS Architecture
+
 - **CSS Modules**: Scoped styles preventing conflicts
 - **BEM-inspired**: Clear naming conventions
 - **Responsive**: Mobile-first breakpoints
 - **Performance**: GPU-accelerated transforms
 
 ### Visual Language
+
 - **Military Grade**: Dark backgrounds, high contrast
 - **Information Density**: Efficient use of space
 - **Status Indicators**: Color-coded, icon-supported
@@ -177,6 +194,7 @@ All components follow the **PAGANI Standard** established during the frontend re
 **Purpose**: Human-in-the-Loop threat response authorization interface (Phase 3).
 
 **Features**:
+
 - Real-time decision queue with WebSocket updates
 - 3-column tactical layout (Queue | Details | Authorization)
 - Priority-based filtering (CRITICAL, HIGH, MEDIUM, LOW)
@@ -192,12 +210,14 @@ All components follow the **PAGANI Standard** established during the frontend re
 **Props**: None (self-contained with authentication check)
 
 **API Endpoints**:
+
 - `GET /api/hitl/decisions/pending` - Fetch pending decisions
 - `POST /api/hitl/decisions/{analysis_id}/decide` - Submit decision
 - `GET /api/hitl/decisions/stats` - Fetch metrics
 - `WS ws://localhost:8000/ws/{username}` - Real-time updates
 
 **Layout Structure**:
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Header: Title | WebSocket Status | Quick Stats         │
@@ -217,6 +237,7 @@ All components follow the **PAGANI Standard** established during the frontend re
 ```
 
 **Decision Workflow**:
+
 1. Analyst reviews threat in details panel
 2. Evaluates recommended actions
 3. Clicks Approve/Reject/Escalate
@@ -225,6 +246,7 @@ All components follow the **PAGANI Standard** established during the frontend re
 6. System executes or blocks action
 
 **Visual Cues**:
+
 - **CRITICAL**: Red pulsing animation, audio alert
 - **HIGH**: Amber/orange highlight
 - **MEDIUM**: Blue subtle glow
@@ -239,6 +261,7 @@ All components follow the **PAGANI Standard** established during the frontend re
 **Purpose**: Secure biometric-inspired authentication gateway for HITL Console access.
 
 **Features**:
+
 - JWT token-based authentication
 - Optional 2FA (TOTP) support
 - Progressive disclosure (Login → 2FA → Success)
@@ -251,6 +274,7 @@ All components follow the **PAGANI Standard** established during the frontend re
 - Version badge
 
 **Props**:
+
 ```typescript
 {
   onAuthSuccess?: () => void  // Optional callback after successful auth
@@ -258,10 +282,12 @@ All components follow the **PAGANI Standard** established during the frontend re
 ```
 
 **API Endpoints**:
+
 - `POST /api/auth/login` - Username/password authentication
 - `POST /api/auth/2fa/verify` - TOTP code verification
 
 **Authentication Flow**:
+
 ```
 Login Form (username + password)
     ↓
@@ -275,6 +301,7 @@ Redirect to HITL Console
 ```
 
 **Security Features**:
+
 - Form-encoded credentials (OAuth2 compatible)
 - JWT access token + refresh token storage
 - 2FA code validation (numeric, 6 digits)
@@ -283,12 +310,14 @@ Redirect to HITL Console
 - Version information for audit trails
 
 **Visual Design**:
+
 - **Biometric Scanner Aesthetic**: Pulsing logo, scan line, trust signals
 - **Military Vault**: Dark gradient, blue accents, high contrast
 - **Progressive States**: Each step clearly separated
 - **Success Feedback**: Green pulsing check icon, auto-redirect
 
 **Storage Keys**:
+
 - `hitl_token` - JWT access token
 - `hitl_refresh_token` - Refresh token for session renewal
 - `hitl_username` - Current authenticated user
@@ -298,12 +327,13 @@ Redirect to HITL Console
 ## Data Models
 
 ### Honeypot
+
 ```typescript
 interface Honeypot {
   id: string;
   name: string;
-  type: 'ssh' | 'http' | 'ftp' | 'smtp' | 'telnet';
-  status: 'active' | 'inactive' | 'degraded' | 'error';
+  type: "ssh" | "http" | "ftp" | "smtp" | "telnet";
+  status: "active" | "inactive" | "degraded" | "error";
   port?: number;
   interactions?: number;
   last_seen?: string;
@@ -311,6 +341,7 @@ interface Honeypot {
 ```
 
 ### ThreatEvent
+
 ```typescript
 interface ThreatEvent {
   id: string;
@@ -318,7 +349,7 @@ interface ThreatEvent {
   source_ip: string;
   honeypot_id: string;
   attack_type: string;
-  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  severity: "critical" | "high" | "medium" | "low" | "info";
   port?: number;
   protocol?: string;
   payload?: string;
@@ -326,6 +357,7 @@ interface ThreatEvent {
 ```
 
 ### IntelligenceFusion
+
 ```typescript
 interface IntelligenceFusion {
   patterns: {
@@ -339,20 +371,21 @@ interface IntelligenceFusion {
 ```
 
 ### HITLDecision
+
 ```typescript
 interface HITLDecision {
   analysis_id: string;
   timestamp: string;
-  threat_level: 'critical' | 'high' | 'medium' | 'low';
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  threat_level: "critical" | "high" | "medium" | "low";
+  severity: "critical" | "high" | "medium" | "low";
+  priority: "critical" | "high" | "medium" | "low";
   source_ip: string;
   target_honeypot: string;
   attack_type: string;
 
   // Threat intelligence
-  iocs: string[];  // Indicators of Compromise
-  ttps: string[];  // MITRE ATT&CK techniques
+  iocs: string[]; // Indicators of Compromise
+  ttps: string[]; // MITRE ATT&CK techniques
   recommended_actions: string[];
 
   // Analysis
@@ -360,7 +393,7 @@ interface HITLDecision {
   confidence_score: number;
 
   // Decision state
-  status: 'pending' | 'approved' | 'rejected' | 'escalated';
+  status: "pending" | "approved" | "rejected" | "escalated";
   decided_by?: string;
   decided_at?: string;
   notes?: string;
@@ -368,11 +401,12 @@ interface HITLDecision {
 ```
 
 ### AuthenticationResponse
+
 ```typescript
 interface AuthenticationResponse {
   access_token: string;
   refresh_token?: string;
-  token_type: 'bearer';
+  token_type: "bearer";
   requires_2fa?: boolean;
 }
 ```
@@ -385,11 +419,9 @@ interface AuthenticationResponse {
 
 ```jsx
 // In your main navigation component
-import { ReactiveFabricDashboard } from '@/components/reactive-fabric';
+import { ReactiveFabricDashboard } from "@/components/reactive-fabric";
 
-<Link href="/reactive-fabric">
-  🕸️ Reactive Fabric
-</Link>
+<Link href="/reactive-fabric">🕸️ Reactive Fabric</Link>;
 ```
 
 ### Standalone Usage
@@ -409,15 +441,18 @@ import {
 ### HITL Console with Authentication
 
 ```jsx
-import { HITLAuthPage, HITLDecisionConsole } from '@/components/reactive-fabric';
-import { useState } from 'react';
+import {
+  HITLAuthPage,
+  HITLDecisionConsole,
+} from "@/components/reactive-fabric";
+import { useState } from "react";
 
 function HITLPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check if user has valid token
   useEffect(() => {
-    const token = localStorage.getItem('hitl_token');
+    const token = localStorage.getItem("hitl_token");
     if (token) {
       // Optionally validate token with backend
       setIsAuthenticated(true);
@@ -435,11 +470,11 @@ function HITLPage() {
 ### Protected Route Example (React Router)
 
 ```jsx
-import { Navigate } from 'react-router-dom';
-import { HITLDecisionConsole } from '@/components/reactive-fabric';
+import { Navigate } from "react-router-dom";
+import { HITLDecisionConsole } from "@/components/reactive-fabric";
 
 function ProtectedHITLRoute() {
-  const token = localStorage.getItem('hitl_token');
+  const token = localStorage.getItem("hitl_token");
 
   if (!token) {
     return <Navigate to="/reactive-fabric/hitl/auth" replace />;
@@ -454,17 +489,20 @@ function ProtectedHITLRoute() {
 ## Performance
 
 ### Optimizations
+
 - **useMemo**: Heavy computations (pattern detection, clustering)
 - **useCallback**: API fetch functions to prevent re-renders
 - **Virtualization**: Consider for large event lists (>1000)
 - **Debouncing**: Real-time polling with 5-second intervals
 
 ### Bundle Size
+
 - Dashboard components: ~45KB gzipped
 - HITL components: ~35KB gzipped (console + auth)
 - Per component: ~8-15KB
 
 ### WebSocket Considerations
+
 - **HITLDecisionConsole** maintains persistent WebSocket connection
 - Automatic reconnection with exponential backoff
 - Heartbeat every 30 seconds to keep connection alive
@@ -485,16 +523,19 @@ function ProtectedHITLRoute() {
 ## Testing Strategy
 
 ### Unit Tests
+
 ```bash
 npm test reactive-fabric
 ```
 
 ### Visual Regression
+
 ```bash
 npm run storybook
 ```
 
 ### Integration
+
 ```bash
 npm run test:e2e -- --grep "Reactive Fabric"
 ```
@@ -504,12 +545,14 @@ npm run test:e2e -- --grep "Reactive Fabric"
 ## Future Enhancements
 
 ### Phase 1 ✅
+
 - [x] Passive Intelligence Collection (Dashboard)
 - [x] Honeypot visualization
 - [x] Threat timeline
 - [x] Intelligence fusion
 
 ### Phase 2 🚨
+
 - [ ] Response automation controls
 - [ ] Export to SIEM integration
 - [ ] Custom alert rules
@@ -517,6 +560,7 @@ npm run test:e2e -- --grep "Reactive Fabric"
 - [ ] Advanced GeoIP integration
 
 ### Phase 3 ✅
+
 - [x] HITL Decision Console
 - [x] Authentication system with 2FA
 - [x] Real-time WebSocket updates
@@ -525,6 +569,7 @@ npm run test:e2e -- --grep "Reactive Fabric"
 - [x] Audio alerts for critical threats
 
 ### Future Phases
+
 - [ ] Machine learning threat scoring
 - [ ] Advanced forensic timeline reconstruction
 - [ ] Automated response playbooks
@@ -537,6 +582,7 @@ npm run test:e2e -- --grep "Reactive Fabric"
 ## Compliance
 
 ✅ **DOUTRINA_VERTICE Adherence**:
+
 - Zero placeholders or TODOs
 - 100% TypeScript/JSX type safety
 - Production-ready error handling
@@ -549,6 +595,7 @@ npm run test:e2e -- --grep "Reactive Fabric"
 ## Deployment Checklist
 
 ### Dashboard Components (Phase 1)
+
 - [x] All components created
 - [x] CSS Modules implemented
 - [x] Type definitions complete
@@ -559,6 +606,7 @@ npm run test:e2e -- --grep "Reactive Fabric"
 - [x] Component Styling & Polish - COMPLETE ✅
 
 ### HITL Components (Phase 3)
+
 - [x] HITLDecisionConsole created
 - [x] HITLAuthPage created
 - [x] CSS Modules implemented (PAGANI standard)
@@ -578,17 +626,20 @@ npm run test:e2e -- --grep "Reactive Fabric"
 ## Security Considerations
 
 ### Authentication
+
 - JWT tokens stored in localStorage (consider httpOnly cookies for production)
 - 2FA TOTP support for enhanced security
 - Token refresh mechanism needed for long sessions
 - Session timeout after inactivity (implement client-side)
 
 ### Authorization
+
 - All HITL endpoints require valid JWT token
 - Role-based access control (RBAC) should be enforced backend-side
 - Audit trail for all decisions (who, what, when)
 
 ### WebSocket Security
+
 - Authentication via JWT in connection URL or headers
 - Validate all incoming messages
 - Rate limiting on WebSocket events

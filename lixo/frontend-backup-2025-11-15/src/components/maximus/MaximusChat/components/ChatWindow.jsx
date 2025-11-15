@@ -6,37 +6,37 @@
  * Main chat display area with messages and thinking indicator
  */
 
-import React, { useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { MessageBubble } from './MessageBubble';
-import { ThinkingIndicator } from './ThinkingIndicator';
-import styles from '../MaximusChat.module.css';
+import React, { useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+import { MessageBubble } from "./MessageBubble";
+import { ThinkingIndicator } from "./ThinkingIndicator";
+import styles from "../MaximusChat.module.css";
 
 export const ChatWindow = ({ messages, isThinking, onPromptSelect }) => {
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
 
   const suggestedPrompts = [
     {
-      id: '1',
-      text: 'Qual o status dos sistemas de consciência artificial?'
+      id: "1",
+      text: "Qual o status dos sistemas de consciência artificial?",
     },
     {
-      id: '2',
-      text: 'Analise os últimos alerts de segurança detectados'
+      id: "2",
+      text: "Analise os últimos alerts de segurança detectados",
     },
     {
-      id: '3',
-      text: 'Explique o funcionamento do sistema de imunidade adaptativa'
+      id: "3",
+      text: "Explique o funcionamento do sistema de imunidade adaptativa",
     },
     {
-      id: '4',
-      text: 'Gere um relatório de atividades ofensivas recentes'
-    }
+      id: "4",
+      text: "Gere um relatório de atividades ofensivas recentes",
+    },
   ];
 
   return (
@@ -44,22 +44,23 @@ export const ChatWindow = ({ messages, isThinking, onPromptSelect }) => {
       {messages.length === 0 && !isThinking ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyStateIcon}>🧠⚡</div>
-          <div className={styles.emptyStateTitle}>
-            Chat com Maximus AI
-          </div>
+          <div className={styles.emptyStateTitle}>Chat com Maximus AI</div>
           <div className={styles.emptyStateText}>
-            Sistema de processamento de linguagem natural integrado com os módulos de consciência,
-            análise de segurança e workflows de AI-driven operations. Pergunte o que quiser sobre
-            o estado do sistema, solicite análises ou execute comandos complexos.
+            Sistema de processamento de linguagem natural integrado com os
+            módulos de consciência, análise de segurança e workflows de
+            AI-driven operations. Pergunte o que quiser sobre o estado do
+            sistema, solicite análises ou execute comandos complexos.
           </div>
-          
+
           <div className={styles.suggestedPrompts}>
             {suggestedPrompts.map((prompt) => (
               <div
                 key={prompt.id}
                 className={styles.promptCard}
                 onClick={() => onPromptSelect(prompt.text)}
-                onKeyPress={(e) => e.key === 'Enter' && onPromptSelect(prompt.text)}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && onPromptSelect(prompt.text)
+                }
                 role="button"
                 tabIndex={0}
               >
@@ -74,12 +75,12 @@ export const ChatWindow = ({ messages, isThinking, onPromptSelect }) => {
             <MessageBubble
               key={message.id}
               message={message}
-              isUser={message.role === 'user'}
+              isUser={message.role === "user"}
             />
           ))}
-          
+
           {isThinking && <ThinkingIndicator />}
-          
+
           <div ref={messagesEndRef} />
         </>
       )}
@@ -92,14 +93,14 @@ ChatWindow.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       content: PropTypes.string.isRequired,
-      role: PropTypes.oneOf(['user', 'assistant']).isRequired,
-      timestamp: PropTypes.number.isRequired
-    })
+      role: PropTypes.oneOf(["user", "assistant"]).isRequired,
+      timestamp: PropTypes.number.isRequired,
+    }),
   ).isRequired,
   isThinking: PropTypes.bool,
-  onPromptSelect: PropTypes.func.isRequired
+  onPromptSelect: PropTypes.func.isRequired,
 };
 
 ChatWindow.defaultProps = {
-  isThinking: false
+  isThinking: false,
 };

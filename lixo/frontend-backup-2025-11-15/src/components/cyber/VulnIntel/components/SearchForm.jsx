@@ -24,11 +24,18 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React, { useState } from 'react';
-import { validateCVE } from '../../../../utils/validation';
-import { sanitizePlainText } from '../../../../utils/sanitization';
+import React, { useState } from "react";
+import { validateCVE } from "../../../../utils/validation";
+import { sanitizePlainText } from "../../../../utils/sanitization";
 
-export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearch, isLoading }) => {
+export const SearchForm = ({
+  query,
+  setQuery,
+  searchType,
+  setSearchType,
+  onSearch,
+  isLoading,
+}) => {
   // Error state for validation feedback
   const [queryError, setQueryError] = useState(null);
 
@@ -46,7 +53,7 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
     }
 
     // Only validate CVE format if searchType is 'cve'
-    if (searchType === 'cve') {
+    if (searchType === "cve") {
       const result = validateCVE(query);
       if (!result.valid) {
         setQueryError(result.error);
@@ -61,12 +68,12 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
 
     // Validate before submission
     if (!query.trim()) {
-      setQueryError('Search query is required');
+      setQueryError("Search query is required");
       return;
     }
 
     // Validate CVE format if searchType is 'cve'
-    if (searchType === 'cve') {
+    if (searchType === "cve") {
       const result = validateCVE(query);
       if (!result.valid) {
         setQueryError(result.error);
@@ -87,24 +94,38 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
   };
 
   const searchTypes = [
-    { id: 'cve', name: 'CVE ID', icon: '🔐', placeholder: 'CVE-2024-1234' },
-    { id: 'product', name: 'Product', icon: '📦', placeholder: 'Windows Server, Apache' },
-    { id: 'vendor', name: 'Vendor', icon: '🏢', placeholder: 'Microsoft, Oracle' },
+    { id: "cve", name: "CVE ID", icon: "🔐", placeholder: "CVE-2024-1234" },
+    {
+      id: "product",
+      name: "Product",
+      icon: "📦",
+      placeholder: "Windows Server, Apache",
+    },
+    {
+      id: "vendor",
+      name: "Vendor",
+      icon: "🏢",
+      placeholder: "Microsoft, Oracle",
+    },
   ];
 
-  const activeSearchType = searchTypes.find(t => t.id === searchType);
+  const activeSearchType = searchTypes.find((t) => t.id === searchType);
 
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-4"
       role="search"
-      aria-label="Vulnerability intelligence search">
-
+      aria-label="Vulnerability intelligence search"
+    >
       <fieldset>
         <legend className="sr-only">Search Type</legend>
-        <div role="radiogroup" aria-label="Search type selection" className="flex gap-2">
-          {searchTypes.map(type => (
+        <div
+          role="radiogroup"
+          aria-label="Search type selection"
+          className="flex gap-2"
+        >
+          {searchTypes.map((type) => (
             <button
               key={type.id}
               type="button"
@@ -116,8 +137,8 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
                 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2
                 ${
                   searchType === type.id
-                    ? 'bg-red-400/20 text-red-400 border-2 border-red-400'
-                    : 'bg-black/30 text-red-400/50 border-2 border-red-400/20 hover:text-red-400'
+                    ? "bg-red-400/20 text-red-400 border-2 border-red-400"
+                    : "bg-black/30 text-red-400/50 border-2 border-red-400/20 hover:text-red-400"
                 }
               `}
             >
@@ -129,7 +150,10 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
       </fieldset>
 
       <div className="relative">
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-3xl" aria-hidden="true">
+        <div
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-3xl"
+          aria-hidden="true"
+        >
           {activeSearchType?.icon}
         </div>
         <label htmlFor="vuln-search-input" className="sr-only">
@@ -141,7 +165,7 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
           value={query}
           onChange={handleQueryChange}
           onBlur={handleQueryBlur}
-          placeholder={activeSearchType?.placeholder || 'Enter search query...'}
+          placeholder={activeSearchType?.placeholder || "Enter search query..."}
           className="w-full bg-gradient-to-r from-red-900/20 to-pink-900/20 border-2 border-red-400/30 rounded-lg pl-16 pr-32 py-4 text-red-400 font-mono text-lg focus:outline-none focus:border-red-400 transition-all placeholder-red-400/30"
           disabled={isLoading}
           maxLength={500}
@@ -167,7 +191,9 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="animate-spin" aria-hidden="true">⚙️</span>
+              <span className="animate-spin" aria-hidden="true">
+                ⚙️
+              </span>
               SEARCHING...
             </span>
           ) : (
@@ -181,11 +207,15 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
 
       <fieldset id="vuln-search-quick">
         <legend className="text-red-400/50 text-sm">Quick search:</legend>
-        <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="Quick search shortcuts">
+        <div
+          className="flex items-center gap-2 flex-wrap"
+          role="group"
+          aria-label="Quick search shortcuts"
+        >
           {[
-            { label: 'CVE-2024-21412', type: 'cve' },
-            { label: 'Apache Log4j', type: 'product' },
-            { label: 'Microsoft', type: 'vendor' },
+            { label: "CVE-2024-21412", type: "cve" },
+            { label: "Apache Log4j", type: "product" },
+            { label: "Microsoft", type: "vendor" },
           ].map((quick, idx) => (
             <button
               key={idx}

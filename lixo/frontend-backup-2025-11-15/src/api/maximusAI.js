@@ -1,5 +1,5 @@
-import logger from '@/utils/logger';
-import { ServiceEndpoints, getWebSocketEndpoint } from '../config/endpoints';
+import logger from "@/utils/logger";
+import { ServiceEndpoints, getWebSocketEndpoint } from "../config/endpoints";
 
 /**
  * Maximus AI Core - API Client
@@ -33,19 +33,19 @@ const MAXIMUS_BASE_URL = ServiceEndpoints.maximus.core;
 export const analyzeWithAI = async (data, context = {}) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         data,
         context,
-        mode: 'deep_analysis',
+        mode: "deep_analysis",
       }),
     });
 
     if (!response.ok) throw new Error(`AI Analysis failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in AI analysis:', error);
+    logger.error("Error in AI analysis:", error);
     return { success: false, error: error.message };
   }
 };
@@ -53,11 +53,11 @@ export const analyzeWithAI = async (data, context = {}) => {
 /**
  * Reasoning Engine - Processamento com Chain-of-Thought
  */
-export const aiReason = async (query, reasoningType = 'chain_of_thought') => {
+export const aiReason = async (query, reasoningType = "chain_of_thought") => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/reason`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query,
         reasoning_type: reasoningType, // 'chain_of_thought' | 'step_by_step' | 'tree_of_thoughts'
@@ -67,7 +67,7 @@ export const aiReason = async (query, reasoningType = 'chain_of_thought') => {
     if (!response.ok) throw new Error(`Reasoning failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in AI reasoning:', error);
+    logger.error("Error in AI reasoning:", error);
     return { success: false, error: error.message };
   }
 };
@@ -84,8 +84,8 @@ export const aiReason = async (query, reasoningType = 'chain_of_thought') => {
 export const callTool = async (toolName, params = {}, context = {}) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/tool-call`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tool_name: toolName,
         params,
@@ -96,7 +96,7 @@ export const callTool = async (toolName, params = {}, context = {}) => {
     if (!response.ok) throw new Error(`Tool call failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error calling tool:', error);
+    logger.error("Error calling tool:", error);
     return { success: false, error: error.message };
   }
 };
@@ -107,10 +107,11 @@ export const callTool = async (toolName, params = {}, context = {}) => {
 export const getToolCatalog = async () => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/tools`);
-    if (!response.ok) throw new Error(`Failed to get tools: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to get tools: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting tool catalog:', error);
+    logger.error("Error getting tool catalog:", error);
     return { success: false, error: error.message };
   }
 };
@@ -127,15 +128,16 @@ export const getToolCatalog = async () => {
 export const orchestrateWorkflow = async (workflowConfig) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/orchestrate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(workflowConfig),
     });
 
-    if (!response.ok) throw new Error(`Orchestration failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Orchestration failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error in orchestration:', error);
+    logger.error("Error in orchestration:", error);
     return { success: false, error: error.message };
   }
 };
@@ -145,14 +147,21 @@ export const orchestrateWorkflow = async (workflowConfig) => {
  */
 export const aiFullAssessment = async (target, options = {}) => {
   const workflow = {
-    type: 'full_assessment',
+    type: "full_assessment",
     target,
     steps: [
-      { action: 'network_recon', params: { target, scan_type: options.scanType || 'quick' } },
-      { action: 'vuln_intel', params: { correlate: true } },
-      { action: 'web_attack', params: { profile: 'owasp' }, condition: 'if_http_found' },
-      { action: 'threat_intel', params: { aggregate: true } },
-      { action: 'ai_synthesis', params: { generate_report: true } },
+      {
+        action: "network_recon",
+        params: { target, scan_type: options.scanType || "quick" },
+      },
+      { action: "vuln_intel", params: { correlate: true } },
+      {
+        action: "web_attack",
+        params: { profile: "owasp" },
+        condition: "if_http_found",
+      },
+      { action: "threat_intel", params: { aggregate: true } },
+      { action: "ai_synthesis", params: { generate_report: true } },
     ],
     ai_guided: true,
   };
@@ -163,17 +172,17 @@ export const aiFullAssessment = async (target, options = {}) => {
 /**
  * AI-driven workflow: OSINT Investigation
  */
-export const aiOSINTInvestigation = async (target, type = 'email') => {
+export const aiOSINTInvestigation = async (target, type = "email") => {
   const workflow = {
-    type: 'osint_investigation',
+    type: "osint_investigation",
     target,
     target_type: type,
     steps: [
-      { action: 'breach_data_search', params: { target } },
-      { action: 'social_media_profiling', params: { target } },
-      { action: 'domain_correlation', params: { target } },
-      { action: 'threat_intel_check', params: { target } },
-      { action: 'ai_dossier_generation', params: { format: 'executive' } },
+      { action: "breach_data_search", params: { target } },
+      { action: "social_media_profiling", params: { target } },
+      { action: "domain_correlation", params: { target } },
+      { action: "threat_intel_check", params: { target } },
+      { action: "ai_dossier_generation", params: { format: "executive" } },
     ],
     ai_guided: true,
   };
@@ -184,17 +193,24 @@ export const aiOSINTInvestigation = async (target, type = 'email') => {
 /**
  * AI-driven workflow: Purple Team Exercise
  */
-export const aiPurpleTeamExercise = async (techniqueId, target, telemetrySources = []) => {
+export const aiPurpleTeamExercise = async (
+  techniqueId,
+  target,
+  telemetrySources = [],
+) => {
   const workflow = {
-    type: 'purple_team',
+    type: "purple_team",
     technique: techniqueId,
     target,
     steps: [
-      { action: 'bas_simulation', params: { technique_id: techniqueId, target } },
-      { action: 'siem_correlation', params: { sources: telemetrySources } },
-      { action: 'coverage_analysis', params: {} },
-      { action: 'gap_identification', params: {} },
-      { action: 'ai_recommendations', params: { include_mitigations: true } },
+      {
+        action: "bas_simulation",
+        params: { technique_id: techniqueId, target },
+      },
+      { action: "siem_correlation", params: { sources: telemetrySources } },
+      { action: "coverage_analysis", params: {} },
+      { action: "gap_identification", params: {} },
+      { action: "ai_recommendations", params: { include_mitigations: true } },
     ],
     ai_guided: true,
   };
@@ -211,17 +227,18 @@ export const aiPurpleTeamExercise = async (techniqueId, target, telemetrySources
 /**
  * Obtém memória/contexto da AI
  */
-export const getAIMemory = async (sessionId = null, type = 'all') => {
+export const getAIMemory = async (sessionId = null, type = "all") => {
   try {
     const params = new URLSearchParams();
-    if (sessionId) params.append('session_id', sessionId);
-    if (type !== 'all') params.append('type', type); // 'short_term' | 'long_term' | 'semantic'
+    if (sessionId) params.append("session_id", sessionId);
+    if (type !== "all") params.append("type", type); // 'short_term' | 'long_term' | 'semantic'
 
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/memory?${params}`);
-    if (!response.ok) throw new Error(`Failed to get memory: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to get memory: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting AI memory:', error);
+    logger.error("Error getting AI memory:", error);
     return { success: false, error: error.message };
   }
 };
@@ -229,11 +246,15 @@ export const getAIMemory = async (sessionId = null, type = 'all') => {
 /**
  * Adiciona informação à memória da AI
  */
-export const addToMemory = async (data, type = 'semantic', importance = 'medium') => {
+export const addToMemory = async (
+  data,
+  type = "semantic",
+  importance = "medium",
+) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/memory`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         data,
         memory_type: type,
@@ -241,10 +262,11 @@ export const addToMemory = async (data, type = 'semantic', importance = 'medium'
       }),
     });
 
-    if (!response.ok) throw new Error(`Failed to add to memory: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to add to memory: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error adding to memory:', error);
+    logger.error("Error adding to memory:", error);
     return { success: false, error: error.message };
   }
 };
@@ -258,11 +280,15 @@ export const addToMemory = async (data, type = 'semantic', importance = 'medium'
 /**
  * Chat com Maximus AI (streaming)
  */
-export const chatWithMaximus = async (message, context = {}, onChunk = null) => {
+export const chatWithMaximus = async (
+  message,
+  context = {},
+  onChunk = null,
+) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message,
         context,
@@ -276,7 +302,7 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
     if (onChunk && response.body) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let fullResponse = '';
+      let fullResponse = "";
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -295,7 +321,7 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
     const data = await response.json();
     return { success: true, ...data };
   } catch (error) {
-    logger.error('Error in chat:', error);
+    logger.error("Error in chat:", error);
     return { success: false, error: error.message };
   }
 };
@@ -334,11 +360,11 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
  * ```
  */
 export const connectMaximusStream = (onMessage, onError = null) => {
-  const wsUrl = getWebSocketEndpoint('maximus.stream');
+  const wsUrl = getWebSocketEndpoint("maximus.stream");
   const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
-    logger.debug('🤖 Maximus AI Stream connected');
+    logger.debug("🤖 Maximus AI Stream connected");
   };
 
   ws.onmessage = (event) => {
@@ -346,17 +372,17 @@ export const connectMaximusStream = (onMessage, onError = null) => {
       const data = JSON.parse(event.data);
       onMessage(data);
     } catch (error) {
-      logger.error('Error parsing WebSocket message:', error);
+      logger.error("Error parsing WebSocket message:", error);
     }
   };
 
   ws.onerror = (error) => {
-    logger.error('WebSocket error:', error);
+    logger.error("WebSocket error:", error);
     if (onError) onError(error);
   };
 
   ws.onclose = () => {
-    logger.debug('🤖 Maximus AI Stream disconnected');
+    logger.debug("🤖 Maximus AI Stream disconnected");
   };
 
   return ws;
@@ -372,18 +398,18 @@ export const connectMaximusStream = (onMessage, onError = null) => {
  * AI-powered Network Reconnaissance
  */
 export const aiNetworkRecon = async (target, options = {}) => {
-  return await callTool('network_recon_tool', {
+  return await callTool("network_recon_tool", {
     target,
-    scan_type: options.scanType || 'quick',
-    ports: options.ports || '1-1000',
+    scan_type: options.scanType || "quick",
+    ports: options.ports || "1-1000",
   });
 };
 
 /**
  * AI-powered Vulnerability Intelligence
  */
-export const aiVulnIntel = async (identifier, type = 'cve') => {
-  return await callTool('vuln_intel_tool', {
+export const aiVulnIntel = async (identifier, type = "cve") => {
+  return await callTool("vuln_intel_tool", {
     identifier,
     type, // 'cve' | 'product' | 'vendor'
   });
@@ -392,8 +418,8 @@ export const aiVulnIntel = async (identifier, type = 'cve') => {
 /**
  * AI-powered Web Attack Analysis
  */
-export const aiWebAttack = async (url, profile = 'full') => {
-  return await callTool('web_attack_tool', {
+export const aiWebAttack = async (url, profile = "full") => {
+  return await callTool("web_attack_tool", {
     url,
     profile,
   });
@@ -403,7 +429,7 @@ export const aiWebAttack = async (url, profile = 'full') => {
  * AI-powered C2 Orchestration
  */
 export const aiC2Orchestration = async (action, params = {}) => {
-  return await callTool('c2_orchestration_tool', {
+  return await callTool("c2_orchestration_tool", {
     action, // 'create_session' | 'execute_command' | 'pass_session' | 'attack_chain'
     ...params,
   });
@@ -412,8 +438,12 @@ export const aiC2Orchestration = async (action, params = {}) => {
 /**
  * AI-powered BAS Simulation
  */
-export const aiBASSimulation = async (techniqueId, target, platform = 'windows') => {
-  return await callTool('bas_simulation_tool', {
+export const aiBASSimulation = async (
+  techniqueId,
+  target,
+  platform = "windows",
+) => {
+  return await callTool("bas_simulation_tool", {
     technique_id: techniqueId,
     target,
     platform,
@@ -432,8 +462,8 @@ export const aiBASSimulation = async (techniqueId, target, platform = 'windows')
 export const synthesizeIntelligence = async (sources, query = null) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/synthesize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sources, // Array de dados de diferentes serviços
         query,
@@ -444,7 +474,7 @@ export const synthesizeIntelligence = async (sources, query = null) => {
     if (!response.ok) throw new Error(`Synthesis failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error synthesizing intelligence:', error);
+    logger.error("Error synthesizing intelligence:", error);
     return { success: false, error: error.message };
   }
 };
@@ -452,11 +482,11 @@ export const synthesizeIntelligence = async (sources, query = null) => {
 /**
  * Auto-suggest baseado em contexto
  */
-export const getAISuggestions = async (context, type = 'next_action') => {
+export const getAISuggestions = async (context, type = "next_action") => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/api/suggest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         context,
         suggestion_type: type, // 'next_action' | 'targets' | 'techniques' | 'mitigations'
@@ -466,7 +496,7 @@ export const getAISuggestions = async (context, type = 'next_action') => {
     if (!response.ok) throw new Error(`Suggestions failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting suggestions:', error);
+    logger.error("Error getting suggestions:", error);
     return { success: false, error: error.message };
   }
 };
@@ -480,8 +510,12 @@ export const getAISuggestions = async (context, type = 'next_action') => {
 /**
  * Análise de narrativas (social engineering, propaganda, bots)
  */
-export const analyzeNarrative = async (text, analysisType = 'comprehensive', options = {}) => {
-  return await callTool('analyze_narrative', {
+export const analyzeNarrative = async (
+  text,
+  analysisType = "comprehensive",
+  options = {},
+) => {
+  return await callTool("analyze_narrative", {
     text,
     analysis_type: analysisType,
     detect_bots: options.detectBots !== false,
@@ -493,7 +527,7 @@ export const analyzeNarrative = async (text, analysisType = 'comprehensive', opt
  * Predição de ameaças futuras (time-series, Bayesian inference)
  */
 export const predictThreats = async (context, options = {}) => {
-  return await callTool('predict_threats', {
+  return await callTool("predict_threats", {
     context,
     time_horizon_hours: options.timeHorizon || 24,
     min_confidence: options.minConfidence || 0.6,
@@ -504,8 +538,11 @@ export const predictThreats = async (context, options = {}) => {
 /**
  * Hunting proativo - recomendações
  */
-export const huntProactively = async (assetInventory = null, threatIntel = null) => {
-  return await callTool('hunt_proactively', {
+export const huntProactively = async (
+  assetInventory = null,
+  threatIntel = null,
+) => {
+  return await callTool("hunt_proactively", {
     asset_inventory: assetInventory || [],
     threat_intel: threatIntel || {},
   });
@@ -515,9 +552,9 @@ export const huntProactively = async (assetInventory = null, threatIntel = null)
  * Investigação autônoma com playbooks
  */
 export const investigateIncident = async (incidentId, options = {}) => {
-  return await callTool('investigate_incident', {
+  return await callTool("investigate_incident", {
     incident_id: incidentId,
-    playbook: options.playbook || 'standard',
+    playbook: options.playbook || "standard",
     enable_actor_profiling: options.actorProfiling !== false,
     enable_campaign_correlation: options.campaignCorrelation !== false,
   });
@@ -527,7 +564,7 @@ export const investigateIncident = async (incidentId, options = {}) => {
  * Correlação de campanhas de ataque
  */
 export const correlateCampaigns = async (incidents, options = {}) => {
-  return await callTool('correlate_campaigns', {
+  return await callTool("correlate_campaigns", {
     incidents,
     time_window_days: options.timeWindow || 30,
     correlation_threshold: options.threshold || 0.6,
@@ -543,8 +580,11 @@ export const correlateCampaigns = async (incidents, options = {}) => {
 /**
  * Supressão de falsos positivos (Regulatory T-Cells)
  */
-export const suppressFalsePositives = async (alerts, suppressionThreshold = 0.6) => {
-  return await callTool('suppress_false_positives', {
+export const suppressFalsePositives = async (
+  alerts,
+  suppressionThreshold = 0.6,
+) => {
+  return await callTool("suppress_false_positives", {
     alerts,
     suppression_threshold: suppressionThreshold,
   });
@@ -553,8 +593,8 @@ export const suppressFalsePositives = async (alerts, suppressionThreshold = 0.6)
 /**
  * Obtém perfil de tolerância imune para entidade
  */
-export const getToleranceProfile = async (entityId, entityType = 'ip') => {
-  return await callTool('get_tolerance_profile', {
+export const getToleranceProfile = async (entityId, entityType = "ip") => {
+  return await callTool("get_tolerance_profile", {
     entity_id: entityId,
     entity_type: entityType,
   });
@@ -564,7 +604,7 @@ export const getToleranceProfile = async (entityId, entityType = 'ip') => {
  * Trigger consolidação de memória (STM → LTM)
  */
 export const consolidateMemory = async (options = {}) => {
-  return await callTool('consolidate_memory', {
+  return await callTool("consolidate_memory", {
     trigger_manual: options.manual || false,
     importance_threshold: options.threshold || 0.6,
   });
@@ -574,7 +614,7 @@ export const consolidateMemory = async (options = {}) => {
  * Query memória imunológica de longo prazo
  */
 export const queryLongTermMemory = async (query, options = {}) => {
-  return await callTool('query_long_term_memory', {
+  return await callTool("query_long_term_memory", {
     query,
     limit: options.limit || 10,
     min_importance: options.minImportance || 0.5,
@@ -584,8 +624,11 @@ export const queryLongTermMemory = async (query, options = {}) => {
 /**
  * Diversificação de anticorpos (V(D)J recombination)
  */
-export const diversifyAntibodies = async (threatSamples, repertoireSize = 100) => {
-  return await callTool('diversify_antibodies', {
+export const diversifyAntibodies = async (
+  threatSamples,
+  repertoireSize = 100,
+) => {
+  return await callTool("diversify_antibodies", {
     threat_samples: threatSamples,
     repertoire_size: repertoireSize,
   });
@@ -595,7 +638,7 @@ export const diversifyAntibodies = async (threatSamples, repertoireSize = 100) =
  * Affinity maturation (somatic hypermutation)
  */
 export const runAffinityMaturation = async (feedbackData) => {
-  return await callTool('run_affinity_maturation', feedbackData);
+  return await callTool("run_affinity_maturation", feedbackData);
 };
 
 /**
@@ -608,7 +651,7 @@ export const runAffinityMaturation = async (feedbackData) => {
  * Status de edge agents
  */
 export const getEdgeStatus = async (agentId = null) => {
-  return await callTool('get_edge_status', {
+  return await callTool("get_edge_status", {
     agent_id: agentId,
   });
 };
@@ -617,9 +660,9 @@ export const getEdgeStatus = async (agentId = null) => {
  * Coordenação de scan multi-edge
  */
 export const coordinateMultiEdgeScan = async (targets, options = {}) => {
-  return await callTool('coordinate_multi_edge_scan', {
+  return await callTool("coordinate_multi_edge_scan", {
     targets,
-    scan_type: options.scanType || 'comprehensive',
+    scan_type: options.scanType || "comprehensive",
     distribute_load: options.distributeLoad !== false,
   });
 };
@@ -628,7 +671,7 @@ export const coordinateMultiEdgeScan = async (targets, options = {}) => {
  * Métricas globais agregadas
  */
 export const getGlobalMetrics = async (timeRangeMinutes = 60) => {
-  return await callTool('get_global_metrics', {
+  return await callTool("get_global_metrics", {
     time_range_minutes: timeRangeMinutes,
   });
 };
@@ -637,7 +680,7 @@ export const getGlobalMetrics = async (timeRangeMinutes = 60) => {
  * Topologia do organismo distribuído
  */
 export const getTopology = async () => {
-  return await callTool('get_topology', {});
+  return await callTool("get_topology", {});
 };
 
 /**
@@ -652,11 +695,12 @@ export const getTopology = async () => {
 export const getMaximusHealth = async () => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}/health`);
-    if (!response.ok) throw new Error(`Health check failed: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Health check failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Maximus health check failed:', error);
-    return { success: false, error: error.message, status: 'offline' };
+    logger.error("Maximus health check failed:", error);
+    return { success: false, error: error.message, status: "offline" };
   }
 };
 
@@ -669,7 +713,7 @@ export const getAIStats = async () => {
     if (!response.ok) throw new Error(`Stats failed: ${response.status}`);
     return await response.json();
   } catch (error) {
-    logger.error('Error getting AI stats:', error);
+    logger.error("Error getting AI stats:", error);
     return { success: false, error: error.message };
   }
 };

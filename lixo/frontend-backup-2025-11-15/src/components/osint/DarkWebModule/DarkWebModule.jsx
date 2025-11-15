@@ -9,21 +9,17 @@
  * @author Gemini
  */
 
-import React from 'react';
-import { Card } from '@/components/shared';
-import { RestrictedAccessMessage } from './components/RestrictedAccessMessage';
-import { useDarkWebAccess } from './hooks/useDarkWebAccess';
-import styles from './DarkWebModule.module.css';
+import React from "react";
+import { Card } from "@/components/shared";
+import { RestrictedAccessMessage } from "./components/RestrictedAccessMessage";
+import { useDarkWebAccess } from "./hooks/useDarkWebAccess";
+import styles from "./DarkWebModule.module.css";
 
 export const DarkWebModule = () => {
   const { isRequestingAccess, requestAccess } = useDarkWebAccess();
 
   return (
-    <Card
-      title="DARK WEB MONITOR"
-      badge="OSINT"
-      variant="osint"
-    >
+    <Card title="DARK WEB MONITOR" badge="OSINT" variant="osint">
       <div className={styles.widgetContainer}>
         <p className={styles.description}>
           Monitoramento de atividades na dark web e mercados ocultos
@@ -35,7 +31,9 @@ export const DarkWebModule = () => {
         />
 
         <div className={styles.resourcesSection}>
-          <h4 className={styles.resourcesTitle}>RECURSOS DISPONÍVEIS (COM AUTORIZAÇÃO)</h4>
+          <h4 className={styles.resourcesTitle}>
+            RECURSOS DISPONÍVEIS (COM AUTORIZAÇÃO)
+          </h4>
           <ul className={styles.resourcesList}>
             <li>Monitoramento de mercados de dados vazados</li>
             <li>Análise de fóruns de hackers</li>

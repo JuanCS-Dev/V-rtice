@@ -7,6 +7,7 @@
 ---
 
 ## Summary
+
 - **Total violations:** 89
 - **Critical (P0):** 36
 - **High (P1):** 40
@@ -19,6 +20,7 @@
 ### 1. Hardcoded Colors (49 violations)
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:30`
+
 **Found:** `background: rgba(0, 0, 0, 0.3);`
 **Expected:** `background: var(--color-bg-elevated);` or `var(--color-bg-secondary)`
 **Severity:** P0
@@ -27,6 +29,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:39`
+
 **Found:** `background: rgba(0, 0, 0, 0.5);`
 **Expected:** `background: var(--color-bg-overlay);` or `var(--color-bg-elevated)`
 **Severity:** P0
@@ -35,6 +38,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:43`
+
 **Found:** `background: linear-gradient(180deg, var(--color-accent-primary) 0%, #991b1b 100%);`
 **Expected:** Use design token gradient (no hardcoded #991b1b)
 **Severity:** P0
@@ -43,6 +47,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:7`
+
 **Found:** `background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);`
 **Expected:** Use design token gradient
 **Severity:** P0
@@ -51,6 +56,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:9`
+
 **Found:** `box-shadow: 0 4px 20px var(--shadow-glow-purple);`
 **Expected:** `box-shadow: var(--shadow-glow-purple);` (defined as `0 0 30px rgba(139, 92, 246, 0.8)`)
 **Severity:** P1
@@ -59,6 +65,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:55`
+
 **Found:** `filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));`
 **Expected:** Use design token for glow effect
 **Severity:** P1
@@ -67,6 +74,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:63`
+
 **Found:** `text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);`
 **Expected:** Use design token for text glow
 **Severity:** P1
@@ -75,6 +83,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:112`
+
 **Found:** `text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);`
 **Expected:** Use design token for text glow
 **Severity:** P1
@@ -83,6 +92,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:164`
+
 **Found:** `box-shadow: 0 -3px 10px rgba(139, 92, 246, 0.2);`
 **Expected:** Use design token for shadow
 **Severity:** P1
@@ -91,6 +101,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:173`
+
 **Found:** `filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.6));`
 **Expected:** Use design token
 **Severity:** P1
@@ -99,6 +110,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:176`
+
 **Found:** `filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8));`
 **Expected:** Use design token
 **Severity:** P1
@@ -107,6 +119,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:6`
+
 **Found:** `background: linear-gradient(180deg, rgba(139, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);`
 **Expected:** Use design token gradient (no hardcoded red #8b0000)
 **Severity:** P0
@@ -117,6 +130,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:7`
+
 **Found:** `border-left: 2px solid rgba(255, 68, 68, 0.2);`
 **Expected:** Use design token for border (no hardcoded red)
 **Severity:** P0
@@ -127,6 +141,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:15`
+
 **Found:** `border-bottom: 2px solid rgba(255, 68, 68, 0.2);`
 **Expected:** Use design token
 **Severity:** P0
@@ -135,6 +150,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:16`
+
 **Found:** `background: rgba(0, 0, 0, 0.3);`
 **Expected:** `background: var(--color-bg-elevated);` or `var(--color-bg-secondary)`
 **Severity:** P0
@@ -143,6 +159,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:25`
+
 **Found:** `color: #ff4444;`
 **Expected:** Use design token (no hardcoded red)
 **Severity:** P0
@@ -153,6 +170,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:39`
+
 **Found:** `background: linear-gradient(135deg, #ff4444 0%, #ff0000 100%);`
 **Expected:** Use `var(--gradient-red)` token
 **Severity:** P0
@@ -161,6 +179,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:45`
+
 **Found:** `box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);`
 **Expected:** Use `var(--shadow-glow-red)` token
 **Severity:** P0
@@ -169,6 +188,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:62`
+
 **Found:** `background: rgba(0, 0, 0, 0.3);`
 **Expected:** `background: var(--color-bg-elevated);`
 **Severity:** P0
@@ -177,6 +197,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:66`
+
 **Found:** `background: rgba(255, 68, 68, 0.3);`
 **Expected:** Use design token for scrollbar thumb
 **Severity:** P1
@@ -185,6 +206,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:77`
+
 **Found:** `color: rgba(255, 68, 68, 0.4);`
 **Expected:** Use design token
 **Severity:** P1
@@ -193,6 +215,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:99`
+
 **Found:** `background: rgba(0, 0, 0, 0.4);`
 **Expected:** `background: var(--color-bg-elevated);`
 **Severity:** P0
@@ -201,6 +224,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:100`
+
 **Found:** `border: 1px solid rgba(255, 68, 68, 0.2);`
 **Expected:** `border: 1px solid var(--color-border-primary);`
 **Severity:** P0
@@ -209,6 +233,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:108`
+
 **Found:** `border-color: #ff4444;`
 **Expected:** `border-color: var(--color-accent-primary);`
 **Severity:** P0
@@ -217,6 +242,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:109`
+
 **Found:** `box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);`
 **Expected:** Use design token for shadow
 **Severity:** P1
@@ -225,6 +251,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:114`
+
 **Found:** `border-left: 4px solid #ff9500;`
 **Expected:** Use design token (no hardcoded orange)
 **Severity:** P0
@@ -233,6 +260,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:115`
+
 **Found:** `background: linear-gradient(90deg, rgba(255, 149, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);`
 **Expected:** Use design token gradient
 **Severity:** P0
@@ -241,6 +269,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:119`
+
 **Found:** `border-left: 4px solid #00ff00;`
 **Expected:** Use design token
 **Severity:** P0
@@ -251,6 +280,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:120`
+
 **Found:** `background: linear-gradient(90deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);`
 **Expected:** Use design token gradient
 **Severity:** P0
@@ -259,6 +289,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:124`
+
 **Found:** `border-left: 4px solid #ff0000;`
 **Expected:** Use design token
 **Severity:** P0
@@ -269,6 +300,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:125`
+
 **Found:** `background: linear-gradient(90deg, rgba(255, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);`
 **Expected:** Use design token gradient
 **Severity:** P0
@@ -277,6 +309,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:138`
+
 **Found:** `color: #ff4444;`
 **Expected:** Use design token
 **Severity:** P0
@@ -285,6 +318,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:151`
+
 **Found:** `background: rgba(255, 149, 0, 0.2);`
 **Expected:** Use design token for warning background
 **Severity:** P1
@@ -293,6 +327,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:152`
+
 **Found:** `color: #ff9500;`
 **Expected:** Use `var(--color-accent-warning)` (which is #f59e0b)
 **Severity:** P0
@@ -303,6 +338,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:153`
+
 **Found:** `border: 1px solid rgba(255, 149, 0, 0.4);`
 **Expected:** Use design token for warning border
 **Severity:** P1
@@ -311,6 +347,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:158`
+
 **Found:** `background: rgba(0, 255, 0, 0.2);`
 **Expected:** Use design token for success background
 **Severity:** P1
@@ -319,6 +356,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:159`
+
 **Found:** `color: #00ff00;`
 **Expected:** Use `var(--color-accent-success)` (which is #10b981)
 **Severity:** P0
@@ -329,6 +367,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:160`
+
 **Found:** `border: 1px solid rgba(0, 255, 0, 0.4);`
 **Expected:** Use design token for success border
 **Severity:** P1
@@ -337,6 +376,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:164`
+
 **Found:** `background: rgba(255, 0, 0, 0.2);`
 **Expected:** Use design token for danger background
 **Severity:** P1
@@ -345,6 +385,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:165`
+
 **Found:** `color: #ff0000;`
 **Expected:** Use `var(--color-accent-danger)` (which is #ef4444)
 **Severity:** P0
@@ -355,6 +396,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:166`
+
 **Found:** `border: 1px solid rgba(255, 0, 0, 0.4);`
 **Expected:** Use design token for danger border
 **Severity:** P1
@@ -363,6 +405,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:175`
+
 **Found:** `background: rgba(0, 0, 0, 0.3);`
 **Expected:** `background: var(--color-bg-elevated);`
 **Severity:** P0
@@ -371,6 +414,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:185`
+
 **Found:** `color: rgba(255, 68, 68, 0.8);`
 **Expected:** Use design token
 **Severity:** P1
@@ -379,6 +423,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:195`
+
 **Found:** `background: rgba(0, 0, 0, 0.5);`
 **Expected:** `background: var(--color-bg-overlay);`
 **Severity:** P0
@@ -387,6 +432,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:199`
+
 **Found:** `border: 1px solid rgba(255, 68, 68, 0.2);`
 **Expected:** `border: 1px solid var(--color-border-primary);`
 **Severity:** P0
@@ -395,6 +441,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:204`
+
 **Found:** `background: linear-gradient(90deg, #ff9500 0%, #ff4444 100%);`
 **Expected:** Use design token gradient
 **Severity:** P0
@@ -403,6 +450,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:206`
+
 **Found:** `box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);`
 **Expected:** Use design token for shadow
 **Severity:** P1
@@ -411,6 +459,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:217`
+
 **Found:** `text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);`
 **Expected:** Use design token for text shadow
 **Severity:** P2
@@ -419,6 +468,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:223`
+
 **Found:** `border-top: 1px solid rgba(255, 68, 68, 0.2);`
 **Expected:** `border-top: 1px solid var(--color-border-primary);`
 **Severity:** P0
@@ -427,6 +477,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:229`
+
 **Found:** `color: rgba(255, 68, 68, 0.7);`
 **Expected:** Use design token
 **Severity:** P1
@@ -435,6 +486,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:241`
+
 **Found:** `background: rgba(0, 0, 0, 0.3);`
 **Expected:** `background: var(--color-bg-elevated);`
 **Severity:** P0
@@ -445,6 +497,7 @@
 ### 2. Hardcoded Spacing (23 violations)
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:44`
+
 **Found:** `border-radius: 5px;`
 **Expected:** `border-radius: var(--radius-md);` (0.375rem)
 **Severity:** P2
@@ -455,6 +508,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:52`
+
 **Found:** `height: 400px;`
 **Expected:** Use design token spacing or viewport units
 **Severity:** P2
@@ -463,6 +517,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:53`
+
 **Found:** `gap: 1.5rem;`
 **Expected:** `gap: var(--space-6);` (which is 1.5rem)
 **Severity:** P1
@@ -471,6 +526,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:58`
+
 **Found:** `font-size: 1.1rem;`
 **Expected:** Use design token (closest is `var(--text-lg)` which is 1.125rem)
 **Severity:** P1
@@ -479,6 +535,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:66`
+
 **Found:** `width: 60px;` and `height: 60px;`
 **Expected:** Use design token spacing
 **Severity:** P2
@@ -487,6 +544,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:68`
+
 **Found:** `border: 4px solid ...`
 **Expected:** Use design token spacing
 **Severity:** P2
@@ -495,6 +553,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:44`
+
 **Found:** `border-radius: 12px;`
 **Expected:** Use design token
 **Severity:** P2
@@ -505,6 +564,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:101`
+
 **Found:** `border-radius: 8px;`
 **Expected:** Use design token
 **Severity:** P2
@@ -515,6 +575,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:125`
+
 **Found:** `height: 4px;`
 **Expected:** Use design token spacing
 **Severity:** P2
@@ -523,6 +584,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:134`
+
 **Found:** `border-radius: 2px;`
 **Expected:** Use design token
 **Severity:** P2
@@ -531,6 +593,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:14`
+
 **Found:** `padding: 1.5rem;`
 **Expected:** `padding: var(--space-6);` (which is 1.5rem)
 **Severity:** P1
@@ -539,6 +602,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:23`
+
 **Found:** `font-size: 1.1rem;`
 **Expected:** Use design token (closest is `var(--text-lg)` which is 1.125rem)
 **Severity:** P1
@@ -547,6 +611,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:28`
+
 **Found:** `gap: 0.5rem;`
 **Expected:** `gap: var(--space-2);` (which is 0.5rem)
 **Severity:** P1
@@ -555,6 +620,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:41`
+
 **Found:** `font-size: 0.9rem;`
 **Expected:** Use design token (closest is `var(--text-sm)` which is 0.875rem)
 **Severity:** P1
@@ -563,6 +629,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:43`
+
 **Found:** `padding: 0.3rem 0.8rem;`
 **Expected:** Use design token spacing
 **Severity:** P1
@@ -571,6 +638,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:44`
+
 **Found:** `border-radius: 12px;`
 **Expected:** Use design token
 **Severity:** P2
@@ -579,6 +647,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:51`
+
 **Found:** `padding: 1rem;`
 **Expected:** `padding: var(--space-4);` (which is 1rem)
 **Severity:** P1
@@ -587,6 +656,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:54`
+
 **Found:** `gap: 1rem;`
 **Expected:** `gap: var(--space-4);` (which is 1rem)
 **Severity:** P1
@@ -595,6 +665,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:58`
+
 **Found:** `width: 6px;`
 **Expected:** Use design token spacing
 **Severity:** P2
@@ -603,6 +674,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:67`
+
 **Found:** `border-radius: 3px;`
 **Expected:** Use design token
 **Severity:** P2
@@ -611,6 +683,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:82`
+
 **Found:** `font-size: 4rem;`
 **Expected:** Use design token
 **Severity:** P1
@@ -621,6 +694,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:83`
+
 **Found:** `margin-bottom: 1rem;`
 **Expected:** `margin-bottom: var(--space-4);` (which is 1rem)
 **Severity:** P1
@@ -629,6 +703,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:88`
+
 **Found:** `font-size: 1.1rem;`
 **Expected:** Use design token
 **Severity:** P1
@@ -639,6 +714,7 @@
 ### 3. Wrong Fonts (3 violations)
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:113`
+
 **Found:** `font-family: 'Orbitron', system-ui, sans-serif;`
 **Expected:** `font-family: 'Orbitron', monospace;`
 **Severity:** P0
@@ -649,6 +725,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:66`
+
 **Found:** `font-family: 'Courier New', monospace;` in h1 element
 **Expected:** `font-family: 'Orbitron', monospace;` for titles per design system
 **Severity:** P0
@@ -657,6 +734,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/OffensiveDashboard.module.css:13`
+
 **Found:** `font-family: 'Courier New', monospace;` on root element
 **Expected:** This is correct for body, but ensure child headings override with Orbitron
 **Severity:** P2
@@ -667,13 +745,16 @@
 ### 4. Inline Styles (1 violation)
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.jsx:71`
+
 **Found:**
+
 ```jsx
 <div
   className={styles.progressFill}
   style={{ width: `${execution.progress}%` }}
 />
 ```
+
 **Expected:** Dynamic width is acceptable for progress bars
 **Severity:** P2
 **Fix:** This is acceptable - dynamic inline styles for progress are a valid use case
@@ -685,6 +766,7 @@
 ### 5. Wrong Hover Effects (13 violations)
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:44`
+
 **Found:** `transform: translateX(-5px);` (back button)
 **Expected:** Buttons should use `translateX(5px)` per design system
 **Severity:** P0
@@ -695,6 +777,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveHeader.module.css:96`
+
 **Found:** `transform: translateY(-5px);` (metric cards)
 **Expected:** Cards should use `transform: translateY(-10px) scale(1.02);`
 **Severity:** P0
@@ -705,6 +788,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/OffensiveSidebar.module.css:110`
+
 **Found:** `transform: translateX(-3px);` (execution cards)
 **Expected:** Cards should use `translateY(-10px) scale(1.02)`
 **Severity:** P1
@@ -715,6 +799,7 @@
 ---
 
 #### File: `/home/juan/vertice-dev/frontend/src/components/dashboards/OffensiveDashboard/components/ModuleContainer.module.css:13`
+
 **Found:** `transform: translateY(10px);` in animation
 **Expected:** Design system fadeIn uses Y translation but check animation pattern
 **Severity:** P2
@@ -729,6 +814,7 @@
 ### P0 - Critical Fixes (Breaking consistency) - 36 violations
 
 **Color violations (26):**
+
 1. **OffensiveDashboard.module.css:30** - Hardcoded rgba(0,0,0,0.3)
 2. **OffensiveDashboard.module.css:39** - Hardcoded rgba(0,0,0,0.5)
 3. **OffensiveDashboard.module.css:43** - Hardcoded red gradient #991b1b
@@ -762,10 +848,12 @@
 31. **OffensiveSidebar.module.css:241** - Hardcoded rgba(0,0,0,0.3)
 
 **Font violations (2):**
+
 1. **OffensiveHeader.module.css:113** - Wrong Orbitron fallback
 2. **OffensiveHeader.module.css:66** - Should use Orbitron for h1
 
 **Hover violations (3):**
+
 1. **OffensiveHeader.module.css:44** - Wrong button hover direction
 2. **OffensiveHeader.module.css:96** - Wrong card hover (missing scale)
 3. **OffensiveSidebar.module.css:110** - Wrong card hover direction
@@ -773,6 +861,7 @@
 ### P1 - High Priority (Noticeable) - 40 violations
 
 **Color violations (18):**
+
 1. **OffensiveHeader.module.css:9** - Non-standard shadow values
 2. **OffensiveHeader.module.css:55** - Hardcoded drop-shadow
 3. **OffensiveHeader.module.css:63** - Hardcoded text-shadow
@@ -794,6 +883,7 @@
 19. **OffensiveSidebar.module.css:229** - Hardcoded rgba color
 
 **Spacing violations (21):**
+
 1. **OffensiveDashboard.module.css:53** - Hardcoded 1.5rem gap
 2. **OffensiveDashboard.module.css:58** - Hardcoded 1.1rem font
 3. **OffensiveSidebar.module.css:14** - Hardcoded 1.5rem padding
@@ -808,11 +898,13 @@
 12. **OffensiveSidebar.module.css:88** - Hardcoded 1.1rem font
 
 **Hover violations (1):**
+
 1. **OffensiveSidebar.module.css:110** - Non-standard card hover pattern
 
 ### P2 - Minor Fixes - 13 violations
 
 **Spacing violations (11):**
+
 1. **OffensiveDashboard.module.css:44** - Hardcoded 5px border-radius
 2. **OffensiveDashboard.module.css:52** - Hardcoded 400px height
 3. **OffensiveDashboard.module.css:66-68** - Hardcoded spinner dimensions
@@ -825,6 +917,7 @@
 10. **OffensiveSidebar.module.css:67** - Hardcoded 3px border-radius
 
 **Other violations (2):**
+
 1. **OffensiveDashboard.module.css:13** - Font family hierarchy check
 2. **OffensiveSidebar.module.css:217** - Hardcoded text-shadow
 3. **OffensiveSidebar.jsx:71** - Acceptable inline style for progress
@@ -887,22 +980,26 @@
 The OffensiveDashboard uses a red color scheme (#ff4444, #ff0000, etc.) throughout, which **completely violates** the design system's purple/cyan theme:
 
 **Design System Colors:**
+
 - Primary: #8b5cf6 (purple)
 - Secondary: #06b6d4 (cyan)
 
 **OffensiveDashboard Colors:**
+
 - Primary: #ff4444 (red)
 - Accents: #ff0000, #ff9500 (red/orange)
 
 **Impact:** High - Creates visual inconsistency with rest of application
 
 **Recommendation:**
+
 - If red theme is intentional for "offensive" context, document it in design system as an alternative theme
 - Otherwise, migrate entirely to purple/cyan design system colors
 
 ### Pure Web Colors Used
 
 Multiple instances of pure web colors that don't match design system:
+
 - `#ff0000` (pure red) instead of `#ef4444` (danger)
 - `#00ff00` (pure green) instead of `#10b981` (success)
 - `#ff9500` (bright orange) instead of `#f59e0b` (warning)

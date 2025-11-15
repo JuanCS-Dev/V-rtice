@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './IpAnalysisResults.module.css';
+import React from "react";
+import styles from "./IpAnalysisResults.module.css";
 
 /**
  * A memoized component to display a single identified service.

@@ -14,23 +14,23 @@
  * Governed by: Constituição Vértice v2.5 - ADR-002
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDefensiveService } from '@/services/defensive';
-import logger from '@/utils/logger';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getDefensiveService } from "@/services/defensive";
+import logger from "@/utils/logger";
 
 // Query keys for cache management
 export const defensiveQueryKeys = {
-  all: ['defensive'],
-  metrics: ['defensive', 'metrics'],
-  health: ['defensive', 'health'],
-  alerts: ['defensive', 'alerts'],
-  alert: (id) => ['defensive', 'alerts', id],
-  behavioral: ['defensive', 'behavioral'],
-  traffic: ['defensive', 'traffic'],
+  all: ["defensive"],
+  metrics: ["defensive", "metrics"],
+  health: ["defensive", "health"],
+  alerts: ["defensive", "alerts"],
+  alert: (id) => ["defensive", "alerts", id],
+  behavioral: ["defensive", "behavioral"],
+  traffic: ["defensive", "traffic"],
   threatIntel: {
-    ip: (ip) => ['defensive', 'threat-intel', 'ip', ip],
-    domain: (domain) => ['defensive', 'threat-intel', 'domain', domain],
-    hash: (hash) => ['defensive', 'threat-intel', 'hash', hash],
+    ip: (ip) => ["defensive", "threat-intel", "ip", ip],
+    domain: (domain) => ["defensive", "threat-intel", "domain", domain],
+    hash: (hash) => ["defensive", "threat-intel", "hash", hash],
   },
 };
 
@@ -53,7 +53,7 @@ export const useDefensiveMetrics = (options = {}) => {
     refetchInterval: options.refetchInterval ?? 30000, // 30 seconds
     retry: 2,
     onError: (error) => {
-      logger.error('[useDefensiveMetrics] Failed to fetch metrics:', error);
+      logger.error("[useDefensiveMetrics] Failed to fetch metrics:", error);
     },
     ...options,
   });
@@ -90,7 +90,7 @@ export const useBehavioralMetrics = (options = {}) => {
   const service = getDefensiveService();
 
   return useQuery({
-    queryKey: [...defensiveQueryKeys.behavioral, 'metrics'],
+    queryKey: [...defensiveQueryKeys.behavioral, "metrics"],
     queryFn: () => service.getBehavioralMetrics(),
     staleTime: 10000,
     refetchInterval: options.refetchInterval ?? 30000,
@@ -110,11 +110,13 @@ export const useAnalyzeEvent = () => {
     mutationFn: (eventData) => service.analyzeEvent(eventData),
     onSuccess: () => {
       // Invalidate metrics after analysis
-      queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.behavioral });
+      queryClient.invalidateQueries({
+        queryKey: defensiveQueryKeys.behavioral,
+      });
       queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useAnalyzeEvent] Analysis failed:', error);
+      logger.error("[useAnalyzeEvent] Analysis failed:", error);
     },
   });
 };
@@ -130,11 +132,13 @@ export const useAnalyzeBatchEvents = () => {
   return useMutation({
     mutationFn: (events) => service.analyzeBatchEvents(events),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.behavioral });
+      queryClient.invalidateQueries({
+        queryKey: defensiveQueryKeys.behavioral,
+      });
       queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useAnalyzeBatchEvents] Batch analysis failed:', error);
+      logger.error("[useAnalyzeBatchEvents] Batch analysis failed:", error);
     },
   });
 };
@@ -150,7 +154,7 @@ export const useTrainBaseline = () => {
     mutationFn: ({ entityId, trainingEvents }) =>
       service.trainBaseline(entityId, trainingEvents),
     onError: (error) => {
-      logger.error('[useTrainBaseline] Training failed:', error);
+      logger.error("[useTrainBaseline] Training failed:", error);
     },
   });
 };
@@ -165,7 +169,7 @@ export const useBaselineStatus = (entityId, options = {}) => {
   const service = getDefensiveService();
 
   return useQuery({
-    queryKey: [...defensiveQueryKeys.behavioral, 'baseline', entityId],
+    queryKey: [...defensiveQueryKeys.behavioral, "baseline", entityId],
     queryFn: () => service.getBaselineStatus(entityId),
     enabled: !!entityId, // Only fetch if entityId exists
     staleTime: 30000,
@@ -186,7 +190,7 @@ export const useTrafficMetrics = (options = {}) => {
   const service = getDefensiveService();
 
   return useQuery({
-    queryKey: [...defensiveQueryKeys.traffic, 'metrics'],
+    queryKey: [...defensiveQueryKeys.traffic, "metrics"],
     queryFn: () => service.getTrafficMetrics(),
     staleTime: 10000,
     refetchInterval: options.refetchInterval ?? 30000,
@@ -209,7 +213,7 @@ export const useAnalyzeFlow = () => {
       queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useAnalyzeFlow] Flow analysis failed:', error);
+      logger.error("[useAnalyzeFlow] Flow analysis failed:", error);
     },
   });
 };
@@ -229,7 +233,7 @@ export const useAnalyzeBatchFlows = () => {
       queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.metrics });
     },
     onError: (error) => {
-      logger.error('[useAnalyzeBatchFlows] Batch flow analysis failed:', error);
+      logger.error("[useAnalyzeBatchFlows] Batch flow analysis failed:", error);
     },
   });
 };
@@ -290,11 +294,17 @@ export const useUpdateAlertStatus = () => {
     onMutate: async ({ alertId, status, notes }) => {
       // Cancel any outgoing refetches to prevent overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: defensiveQueryKeys.alerts });
-      await queryClient.cancelQueries({ queryKey: defensiveQueryKeys.alert(alertId) });
+      await queryClient.cancelQueries({
+        queryKey: defensiveQueryKeys.alert(alertId),
+      });
 
       // Snapshot previous values
-      const previousAlerts = queryClient.getQueryData(defensiveQueryKeys.alerts);
-      const previousAlert = queryClient.getQueryData(defensiveQueryKeys.alert(alertId));
+      const previousAlerts = queryClient.getQueryData(
+        defensiveQueryKeys.alerts,
+      );
+      const previousAlert = queryClient.getQueryData(
+        defensiveQueryKeys.alert(alertId),
+      );
 
       // Optimistically update alerts list
       if (previousAlerts) {
@@ -302,8 +312,13 @@ export const useUpdateAlertStatus = () => {
           if (!old) return old;
           return old.map((alert) =>
             alert.id === alertId
-              ? { ...alert, status, notes, updated_at: new Date().toISOString() }
-              : alert
+              ? {
+                  ...alert,
+                  status,
+                  notes,
+                  updated_at: new Date().toISOString(),
+                }
+              : alert,
           );
         });
       }
@@ -322,15 +337,18 @@ export const useUpdateAlertStatus = () => {
       return { previousAlerts, previousAlert };
     },
     onError: (error, variables, context) => {
-      logger.error('[useUpdateAlertStatus] Update failed:', error);
+      logger.error("[useUpdateAlertStatus] Update failed:", error);
       // Rollback on error
       if (context?.previousAlerts) {
-        queryClient.setQueryData(defensiveQueryKeys.alerts, context.previousAlerts);
+        queryClient.setQueryData(
+          defensiveQueryKeys.alerts,
+          context.previousAlerts,
+        );
       }
       if (context?.previousAlert) {
         queryClient.setQueryData(
           defensiveQueryKeys.alert(variables.alertId),
-          context.previousAlert
+          context.previousAlert,
         );
       }
     },
@@ -412,18 +430,18 @@ export const useSearchThreatIntel = () => {
   return useMutation({
     mutationFn: async ({ type, value }) => {
       switch (type) {
-        case 'ip':
+        case "ip":
           return await service.queryIPThreatIntel(value);
-        case 'domain':
+        case "domain":
           return await service.queryDomainThreatIntel(value);
-        case 'hash':
+        case "hash":
           return await service.queryHashThreatIntel(value);
         default:
-          throw new Error('Invalid threat intel query type');
+          throw new Error("Invalid threat intel query type");
       }
     },
     onError: (error) => {
-      logger.error('[useSearchThreatIntel] Search failed:', error);
+      logger.error("[useSearchThreatIntel] Search failed:", error);
     },
   });
 };

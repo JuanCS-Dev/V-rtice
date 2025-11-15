@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL } from "@/config/api";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * OSINT SERVICE - Unified Intelligence API
@@ -18,7 +18,7 @@ import { API_BASE_URL } from '@/config/api';
  * Glory to YHWH
  */
 
-import logger from '@/utils/logger';
+import logger from "@/utils/logger";
 
 // MAXIMUS Core Service endpoint (OSINT router está aqui)
 const OSINT_BASE_URL = API_BASE_URL;
@@ -28,11 +28,13 @@ const OSINT_BASE_URL = API_BASE_URL;
  */
 const apiRequest = async (endpoint, options = {}) => {
   try {
-    const url = endpoint.startsWith('http') ? endpoint : `${OSINT_BASE_URL}${endpoint}`;
-    
+    const url = endpoint.startsWith("http")
+      ? endpoint
+      : `${OSINT_BASE_URL}${endpoint}`;
+
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -101,8 +103,8 @@ export const executeDeepSearch = async (target, options = {}) => {
     },
   };
 
-  return apiRequest('/api/osint/deep-search', {
-    method: 'POST',
+  return apiRequest("/api/osint/deep-search", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
 };
@@ -125,8 +127,8 @@ export const executeDeepSearch = async (target, options = {}) => {
  * - related_accounts: Discovered related usernames
  */
 export const searchUsername = async (username, options = {}) => {
-  return apiRequest('/api/osint/username', {
-    method: 'POST',
+  return apiRequest("/api/osint/username", {
+    method: "POST",
     body: JSON.stringify({
       username,
       deep_analysis: options.deep_analysis || false,
@@ -151,8 +153,8 @@ export const searchUsername = async (username, options = {}) => {
  * - recommendations: Security recommendations
  */
 export const searchEmail = async (email) => {
-  return apiRequest('/api/osint/email', {
-    method: 'POST',
+  return apiRequest("/api/osint/email", {
+    method: "POST",
     body: JSON.stringify({ email }),
   });
 };
@@ -174,8 +176,8 @@ export const searchEmail = async (email) => {
  * - risk_assessment: Risk evaluation
  */
 export const searchPhone = async (phone) => {
-  return apiRequest('/api/osint/phone', {
-    method: 'POST',
+  return apiRequest("/api/osint/phone", {
+    method: "POST",
     body: JSON.stringify({ phone }),
   });
 };
@@ -199,8 +201,8 @@ export const searchPhone = async (phone) => {
  * - behavioral_patterns: AI-detected patterns
  */
 export const searchSocialMedia = async (target) => {
-  return apiRequest('/api/osint/social', {
-    method: 'POST',
+  return apiRequest("/api/osint/social", {
+    method: "POST",
     body: JSON.stringify(target),
   });
 };
@@ -222,8 +224,8 @@ export const searchSocialMedia = async (target) => {
  * - ai_summary: AI-generated findings summary
  */
 export const executeDorking = async (params) => {
-  return apiRequest('/api/osint/dorking', {
-    method: 'POST',
+  return apiRequest("/api/osint/dorking", {
+    method: "POST",
     body: JSON.stringify(params),
   });
 };
@@ -245,8 +247,8 @@ export const executeDorking = async (params) => {
  * - threat_level: Threat assessment
  */
 export const searchDarkWeb = async (target) => {
-  return apiRequest('/api/osint/darkweb', {
-    method: 'POST',
+  return apiRequest("/api/osint/darkweb", {
+    method: "POST",
     body: JSON.stringify(target),
   });
 };
@@ -259,7 +261,7 @@ export const searchDarkWeb = async (target) => {
  * Check OSINT services health status
  */
 export const checkOSINTHealth = async () => {
-  return apiRequest('/api/osint/health');
+  return apiRequest("/api/osint/health");
 };
 
 /**
@@ -267,7 +269,7 @@ export const checkOSINTHealth = async () => {
  */
 export const isOSINTAvailable = async () => {
   const health = await checkOSINTHealth();
-  return health.success && health.data?.status === 'operational';
+  return health.success && health.data?.status === "operational";
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

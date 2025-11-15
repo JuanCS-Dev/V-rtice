@@ -16,12 +16,12 @@
  * Design: Cyberpunk + Maximus theme (red/orange/green)
  */
 
-import React from 'react';
-import { ConversationSidebar } from './components/ConversationSidebar';
-import { ChatWindow } from './components/ChatWindow';
-import { MessageInput } from './components/MessageInput';
-import { useMaximusChat } from './hooks/useMaximusChat';
-import styles from './MaximusChat.module.css';
+import React from "react";
+import { ConversationSidebar } from "./components/ConversationSidebar";
+import { ChatWindow } from "./components/ChatWindow";
+import { MessageInput } from "./components/MessageInput";
+import { useMaximusChat } from "./hooks/useMaximusChat";
+import styles from "./MaximusChat.module.css";
 
 const MaximusChat = () => {
   const {
@@ -31,7 +31,7 @@ const MaximusChat = () => {
     isThinking,
     sendMessage,
     createNewConversation,
-    selectConversation
+    selectConversation,
   } = useMaximusChat();
 
   const handlePromptSelect = (promptText) => {
@@ -69,10 +69,7 @@ const MaximusChat = () => {
         />
 
         {/* Input area */}
-        <MessageInput
-          onSendMessage={sendMessage}
-          isDisabled={isThinking}
-        />
+        <MessageInput onSendMessage={sendMessage} isDisabled={isThinking} />
       </div>
     </div>
   );

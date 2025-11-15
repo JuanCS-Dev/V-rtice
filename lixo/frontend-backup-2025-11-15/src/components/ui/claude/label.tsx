@@ -8,11 +8,11 @@
  * Estilo: Clean, readable, semantic
  */
 
-import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import * as LabelPrimitive from "@radix-ui/react-label";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 const labelVariants = cva(
   [
@@ -22,8 +22,8 @@ const labelVariants = cva(
     "leading-none",
     "peer-disabled:cursor-not-allowed",
     "peer-disabled:opacity-70",
-  ].join(" ")
-)
+  ].join(" "),
+);
 
 /**
  * Label Component - Claude.ai Green Style
@@ -46,8 +46,8 @@ const Label = React.forwardRef<
     className={cn(labelVariants(), className)}
     {...props}
   />
-))
+));
 
-Label.displayName = LabelPrimitive.Root.displayName
+Label.displayName = LabelPrimitive.Root.displayName;
 
-export { Label }
+export { Label };

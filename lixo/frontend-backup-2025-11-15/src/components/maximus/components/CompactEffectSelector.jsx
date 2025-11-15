@@ -6,15 +6,15 @@
  * ✅ Matches MaximusHeader design
  */
 
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import styles from './CompactEffectSelector.module.css';
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import styles from "./CompactEffectSelector.module.css";
 
 const EFFECTS = [
-  { id: 'matrix', icon: '⋮', title: 'Matrix Rain' },
-  { id: 'scanline', icon: '━', title: 'Scanline' },
-  { id: 'particles', icon: '∴', title: 'Particles' },
-  { id: 'none', icon: '○', title: 'None' }
+  { id: "matrix", icon: "⋮", title: "Matrix Rain" },
+  { id: "scanline", icon: "━", title: "Scanline" },
+  { id: "particles", icon: "∴", title: "Particles" },
+  { id: "none", icon: "○", title: "None" },
 ];
 
 export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
@@ -30,7 +30,7 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
         aria-label="Visual effects selector"
         aria-expanded={isOpen}
       >
-        {EFFECTS.find(e => e.id === currentEffect)?.icon || '⋮'}
+        {EFFECTS.find((e) => e.id === currentEffect)?.icon || "⋮"}
       </button>
 
       {/* Dropdown Menu */}
@@ -43,21 +43,19 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
           onMouseLeave={() => setIsOpen(false)}
         >
           {/* Header */}
-          <div className={styles.dropdownHeader}>
-            🎨 Visual FX
-          </div>
+          <div className={styles.dropdownHeader}>🎨 Visual FX</div>
 
           {/* Effect Options */}
-          {EFFECTS.map(effect => (
+          {EFFECTS.map((effect) => (
             <button
               key={effect.id}
               onClick={() => {
                 onEffectChange(effect.id);
                 setIsOpen(false);
               }}
-              className={`${styles.effectButton} ${currentEffect === effect.id ? styles.active : ''}`}
+              className={`${styles.effectButton} ${currentEffect === effect.id ? styles.active : ""}`}
               role="menuitem"
-              aria-current={currentEffect === effect.id ? 'true' : undefined}
+              aria-current={currentEffect === effect.id ? "true" : undefined}
             >
               <span className={styles.effectIcon}>{effect.icon}</span>
               <span>{effect.title}</span>
@@ -74,7 +72,7 @@ export const CompactEffectSelector = ({ currentEffect, onEffectChange }) => {
 
 CompactEffectSelector.propTypes = {
   currentEffect: PropTypes.string.isRequired,
-  onEffectChange: PropTypes.func.isRequired
+  onEffectChange: PropTypes.func.isRequired,
 };
 
 export default CompactEffectSelector;

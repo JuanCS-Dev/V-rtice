@@ -26,10 +26,10 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import styles from './SovereignHeader.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
+import styles from "./SovereignHeader.module.css";
 
 export const SovereignHeader = ({
   metrics = {
@@ -39,20 +39,24 @@ export const SovereignHeader = ({
     criticalVerdicts: 0,
     alliancesDetected: 0,
     deceptionMarkers: 0,
-    avgProcessingLatency: 0
+    avgProcessingLatency: 0,
   },
   loading = false,
   onBack,
-  systemHealth = 'UNKNOWN'
+  systemHealth = "UNKNOWN",
 }) => {
   const { t } = useTranslation();
 
   const getHealthColor = (health) => {
     switch (health) {
-      case 'OPERATIONAL': return 'var(--color-success)';
-      case 'DEGRADED': return 'var(--color-warning)';
-      case 'CRITICAL': return 'var(--color-danger)';
-      default: return 'var(--color-text-secondary)';
+      case "OPERATIONAL":
+        return "var(--color-success)";
+      case "DEGRADED":
+        return "var(--color-warning)";
+      case "CRITICAL":
+        return "var(--color-danger)";
+      default:
+        return "var(--color-text-secondary)";
     }
   };
 
@@ -67,27 +71,33 @@ export const SovereignHeader = ({
       className={styles.sovereignHeader}
       role="banner"
       data-maximus-section="header"
-      data-maximus-category="command-center">
-
+      data-maximus-category="command-center"
+    >
       <div className={styles.topBar}>
         <div className={styles.titleSection}>
           {onBack && (
             <button
               className={styles.backButton}
               onClick={onBack}
-              aria-label={t('common.back', 'Back')}
-              data-maximus-action="back">
+              aria-label={t("common.back", "Back")}
+              data-maximus-action="back"
+            >
               ←
             </button>
           )}
 
           <div className={styles.titleContainer}>
             <h1 id="cockpit-soberano-title" className={styles.title}>
-              <span className={styles.titleIcon} aria-hidden="true">⚔️</span>
-              {t('cockpit.title', 'COCKPIT SOBERANO')}
+              <span className={styles.titleIcon} aria-hidden="true">
+                ⚔️
+              </span>
+              {t("cockpit.title", "COCKPIT SOBERANO")}
             </h1>
             <p className={styles.subtitle}>
-              {t('cockpit.subtitle', 'Centro de Comando & Inteligência da Célula Híbrida')}
+              {t(
+                "cockpit.subtitle",
+                "Centro de Comando & Inteligência da Célula Híbrida",
+              )}
             </p>
           </div>
         </div>
@@ -98,14 +108,15 @@ export const SovereignHeader = ({
           aria-live="polite"
           aria-atomic="true"
           data-maximus-health={systemHealth}
-          data-maximus-monitor="system-health">
-
+          data-maximus-monitor="system-health"
+        >
           <div
             className={styles.statusIndicator}
-            style={{ '--status-color': getHealthColor(systemHealth) }}>
+            style={{ "--status-color": getHealthColor(systemHealth) }}
+          >
             <span className={styles.statusPulse} aria-hidden="true"></span>
             <span className={styles.statusLabel}>
-              {systemHealth || 'UNKNOWN'}
+              {systemHealth || "UNKNOWN"}
             </span>
           </div>
         </div>
@@ -113,48 +124,55 @@ export const SovereignHeader = ({
 
       <section
         className={styles.metricsBar}
-
-        aria-label={t('cockpit.metrics.title', 'Command center metrics')}
+        aria-label={t("cockpit.metrics.title", "Command center metrics")}
         data-maximus-section="metrics"
-        data-maximus-metrics="cockpit">
-
+        data-maximus-metrics="cockpit"
+      >
         {loading ? (
-          <div className={styles.metricsLoading} role="status" aria-live="polite">
+          <div
+            className={styles.metricsLoading}
+            role="status"
+            aria-live="polite"
+          >
             <div className={styles.spinner} aria-hidden="true"></div>
-            <span>{t('common.loading', 'Loading')}...</span>
+            <span>{t("common.loading", "Loading")}...</span>
           </div>
         ) : (
           <>
             <MetricCard
               icon="🤖"
-              label={t('cockpit.metrics.agents', 'Agentes Ativos')}
+              label={t("cockpit.metrics.agents", "Agentes Ativos")}
               value={`${metrics.activeAgents}/${metrics.totalAgents}`}
-              trend={metrics.activeAgents > 0 ? 'up' : 'neutral'}
+              trend={metrics.activeAgents > 0 ? "up" : "neutral"}
             />
             <MetricCard
               icon="⚖️"
-              label={t('cockpit.metrics.verdicts', 'Veredictos')}
+              label={t("cockpit.metrics.verdicts", "Veredictos")}
               value={metrics.totalVerdicts}
               highlight={metrics.criticalVerdicts > 0}
-              subtext={metrics.criticalVerdicts > 0 ? `${metrics.criticalVerdicts} críticos` : null}
+              subtext={
+                metrics.criticalVerdicts > 0
+                  ? `${metrics.criticalVerdicts} críticos`
+                  : null
+              }
             />
             <MetricCard
               icon="🤝"
-              label={t('cockpit.metrics.alliances', 'Alianças')}
+              label={t("cockpit.metrics.alliances", "Alianças")}
               value={metrics.alliancesDetected}
-              trend={metrics.alliancesDetected > 5 ? 'up' : 'neutral'}
+              trend={metrics.alliancesDetected > 5 ? "up" : "neutral"}
             />
             <MetricCard
               icon="🎭"
-              label={t('cockpit.metrics.deception', 'Engano')}
+              label={t("cockpit.metrics.deception", "Engano")}
               value={metrics.deceptionMarkers}
               highlight={metrics.deceptionMarkers > 0}
             />
             <MetricCard
               icon="⚡"
-              label={t('cockpit.metrics.latency', 'Latência')}
+              label={t("cockpit.metrics.latency", "Latência")}
               value={formatLatency(metrics.avgProcessingLatency)}
-              trend={metrics.avgProcessingLatency < 500 ? 'down' : 'up'}
+              trend={metrics.avgProcessingLatency < 500 ? "down" : "up"}
             />
           </>
         )}
@@ -164,7 +182,9 @@ export const SovereignHeader = ({
 };
 
 const MetricCard = ({ icon, label, value, trend, highlight, subtext }) => (
-  <div className={`${styles.metricCard} ${highlight ? styles.metricHighlight : ''}`}>
+  <div
+    className={`${styles.metricCard} ${highlight ? styles.metricHighlight : ""}`}
+  >
     <div className={styles.metricIcon}>{icon}</div>
     <div className={styles.metricContent}>
       <div className={styles.metricLabel}>{label}</div>
@@ -172,7 +192,7 @@ const MetricCard = ({ icon, label, value, trend, highlight, subtext }) => (
         {value}
         {trend && (
           <span className={`${styles.metricTrend} ${styles[`trend-${trend}`]}`}>
-            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
+            {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}
           </span>
         )}
       </div>
@@ -185,9 +205,9 @@ MetricCard.propTypes = {
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  trend: PropTypes.oneOf(['up', 'down', 'neutral']),
+  trend: PropTypes.oneOf(["up", "down", "neutral"]),
   highlight: PropTypes.bool,
-  subtext: PropTypes.string
+  subtext: PropTypes.string,
 };
 
 SovereignHeader.propTypes = {
@@ -198,11 +218,11 @@ SovereignHeader.propTypes = {
     criticalVerdicts: PropTypes.number,
     alliancesDetected: PropTypes.number,
     deceptionMarkers: PropTypes.number,
-    avgProcessingLatency: PropTypes.number
+    avgProcessingLatency: PropTypes.number,
   }),
   loading: PropTypes.bool,
   onBack: PropTypes.func,
-  systemHealth: PropTypes.string
+  systemHealth: PropTypes.string,
 };
 
 // defaultProps migrated to default parameters (React 18 compatible)

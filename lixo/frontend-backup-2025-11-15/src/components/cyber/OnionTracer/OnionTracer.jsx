@@ -12,11 +12,18 @@ import logger from '@/utils/logger';
  * Inspired by: Mr. Robot, CSI Cyber, Hackers (1995), The Matrix
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import { traceOnionRoute } from '../../../api/cyberServices';
-import styles from './OnionTracer.module.css';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Polyline,
+  CircleMarker,
+  Popup,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import { traceOnionRoute } from "../../../api/cyberServices";
+import styles from "./OnionTracer.module.css";
 
 /**
  * Component que anima a câmera para seguir o trace
@@ -28,7 +35,7 @@ const CameraFollower = ({ currentNode }) => {
     if (currentNode && currentNode.lat && currentNode.lng) {
       map.flyTo([currentNode.lat, currentNode.lng], 6, {
         duration: 1.5,
-        easeLinearity: 0.25
+        easeLinearity: 0.25,
       });
     }
   }, [currentNode, map]);
@@ -42,14 +49,14 @@ const CameraFollower = ({ currentNode }) => {
 export const OnionTracer = ({
   targetIp = "185.220.101.23",
   onTraceComplete = () => {},
-  autoStart = false
+  autoStart = false,
 }) => {
   const [isTracing, setIsTracing] = useState(false);
   const [currentHop, setCurrentHop] = useState(0);
   const [nodes, setNodes] = useState([]);
   const [paths, setPaths] = useState([]);
-  const [status, setStatus] = useState('READY');
-  const [statusMessage, setStatusMessage] = useState('Ready to trace...');
+  const [status, setStatus] = useState("READY");
+  const [statusMessage, setStatusMessage] = useState("Ready to trace...");
   const [progress, setProgress] = useState(0);
   const [_packets, setPackets] = useState([]);
   const [realIp, setRealIp] = useState(null);
@@ -63,42 +70,126 @@ export const OnionTracer = ({
   const _generateOnionRoute = useCallback(() => {
     // Localizações reais de exit nodes Tor conhecidos
     const possibleNodes = [
-      { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821, type: 'entry' },
-      { city: 'Amsterdam', country: 'Netherlands', lat: 52.3676, lng: 4.9041, type: 'middle' },
-      { city: 'Stockholm', country: 'Sweden', lat: 59.3293, lng: 18.0686, type: 'middle' },
-      { city: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, type: 'middle' },
-      { city: 'Zurich', country: 'Switzerland', lat: 47.3769, lng: 8.5417, type: 'middle' },
-      { city: 'London', country: 'UK', lat: 51.5074, lng: -0.1278, type: 'middle' },
-      { city: 'Reykjavik', country: 'Iceland', lat: 64.1466, lng: -21.9426, type: 'middle' },
-      { city: 'Helsinki', country: 'Finland', lat: 60.1695, lng: 24.9354, type: 'middle' },
-      { city: 'Prague', country: 'Czech Republic', lat: 50.0755, lng: 14.4378, type: 'middle' },
-      { city: 'Warsaw', country: 'Poland', lat: 52.2297, lng: 21.0122, type: 'middle' },
-      { city: 'Vienna', country: 'Austria', lat: 48.2082, lng: 16.3738, type: 'middle' },
-      { city: 'Moscow', country: 'Russia', lat: 55.7558, lng: 37.6173, type: 'exit' },
-      { city: 'Bucharest', country: 'Romania', lat: 44.4268, lng: 26.1025, type: 'exit' },
-      { city: 'Sofia', country: 'Bulgaria', lat: 42.6977, lng: 23.3219, type: 'exit' }
+      {
+        city: "Frankfurt",
+        country: "Germany",
+        lat: 50.1109,
+        lng: 8.6821,
+        type: "entry",
+      },
+      {
+        city: "Amsterdam",
+        country: "Netherlands",
+        lat: 52.3676,
+        lng: 4.9041,
+        type: "middle",
+      },
+      {
+        city: "Stockholm",
+        country: "Sweden",
+        lat: 59.3293,
+        lng: 18.0686,
+        type: "middle",
+      },
+      {
+        city: "Paris",
+        country: "France",
+        lat: 48.8566,
+        lng: 2.3522,
+        type: "middle",
+      },
+      {
+        city: "Zurich",
+        country: "Switzerland",
+        lat: 47.3769,
+        lng: 8.5417,
+        type: "middle",
+      },
+      {
+        city: "London",
+        country: "UK",
+        lat: 51.5074,
+        lng: -0.1278,
+        type: "middle",
+      },
+      {
+        city: "Reykjavik",
+        country: "Iceland",
+        lat: 64.1466,
+        lng: -21.9426,
+        type: "middle",
+      },
+      {
+        city: "Helsinki",
+        country: "Finland",
+        lat: 60.1695,
+        lng: 24.9354,
+        type: "middle",
+      },
+      {
+        city: "Prague",
+        country: "Czech Republic",
+        lat: 50.0755,
+        lng: 14.4378,
+        type: "middle",
+      },
+      {
+        city: "Warsaw",
+        country: "Poland",
+        lat: 52.2297,
+        lng: 21.0122,
+        type: "middle",
+      },
+      {
+        city: "Vienna",
+        country: "Austria",
+        lat: 48.2082,
+        lng: 16.3738,
+        type: "middle",
+      },
+      {
+        city: "Moscow",
+        country: "Russia",
+        lat: 55.7558,
+        lng: 37.6173,
+        type: "exit",
+      },
+      {
+        city: "Bucharest",
+        country: "Romania",
+        lat: 44.4268,
+        lng: 26.1025,
+        type: "exit",
+      },
+      {
+        city: "Sofia",
+        country: "Bulgaria",
+        lat: 42.6977,
+        lng: 23.3219,
+        type: "exit",
+      },
     ];
 
     // User location (Brazil)
     const origin = {
-      city: 'São Paulo',
-      country: 'Brazil',
+      city: "São Paulo",
+      country: "Brazil",
       lat: -23.5505,
       lng: -46.6333,
-      type: 'origin',
-      ip: '201.x.x.x',
-      encrypted: true
+      type: "origin",
+      ip: "201.x.x.x",
+      encrypted: true,
     };
 
     // Seleciona 1 entry node
-    const entryNodes = possibleNodes.filter(n => n.type === 'entry');
+    const entryNodes = possibleNodes.filter((n) => n.type === "entry");
     const entry = entryNodes[Math.floor(Math.random() * entryNodes.length)];
     entry.ip = `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.101.${Math.floor(Math.random() * 255)}`;
     entry.encrypted = true;
     entry.layer = 3;
 
     // Seleciona 2-4 middle nodes
-    const middleNodes = possibleNodes.filter(n => n.type === 'middle');
+    const middleNodes = possibleNodes.filter((n) => n.type === "middle");
     const numMiddle = 2 + Math.floor(Math.random() * 3); // 2-4 nodes
     const middles = [];
     for (let i = 0; i < numMiddle; i++) {
@@ -107,28 +198,28 @@ export const OnionTracer = ({
         ...node,
         ip: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
         encrypted: true,
-        layer: 3 - i - 1
+        layer: 3 - i - 1,
       });
     }
 
     // Seleciona 1 exit node
-    const exitNodes = possibleNodes.filter(n => n.type === 'exit');
+    const exitNodes = possibleNodes.filter((n) => n.type === "exit");
     const exit = exitNodes[Math.floor(Math.random() * exitNodes.length)];
     exit.ip = targetIp;
     exit.encrypted = false;
     exit.layer = 0;
-    exit.type = 'exit';
+    exit.type = "exit";
 
     // Final destination (real IP location)
     const destination = {
-      city: 'Unknown Location',
-      country: '???',
+      city: "Unknown Location",
+      country: "???",
       lat: exit.lat + (Math.random() - 0.5) * 0.5,
       lng: exit.lng + (Math.random() - 0.5) * 0.5,
-      type: 'destination',
+      type: "destination",
       ip: targetIp,
       encrypted: false,
-      layer: 0
+      layer: 0,
     };
 
     return [origin, entry, ...middles, exit, destination];
@@ -141,8 +232,8 @@ export const OnionTracer = ({
     setIsTracing(true);
     setCurrentHop(0);
     setProgress(0);
-    setStatus('INITIALIZING');
-    setStatusMessage('Initializing Onion Router trace...');
+    setStatus("INITIALIZING");
+    setStatusMessage("Initializing Onion Router trace...");
     setRealIp(null);
     setPaths([]);
     setPackets([]);
@@ -151,13 +242,15 @@ export const OnionTracer = ({
       // ====================================
       // FASE 1: ANÁLISE REAL DO IP TARGET
       // ====================================
-      setStatus('ANALYZING');
-      setStatusMessage(`Analyzing target IP ${targetIp}... Querying real services...`);
+      setStatus("ANALYZING");
+      setStatusMessage(
+        `Analyzing target IP ${targetIp}... Querying real services...`,
+      );
 
       const traceResult = await traceOnionRoute(targetIp);
 
       if (!traceResult.success) {
-        throw new Error(traceResult.error || 'Trace failed');
+        throw new Error(traceResult.error || "Trace failed");
       }
 
       const route = traceResult.route;
@@ -174,12 +267,14 @@ export const OnionTracer = ({
           clearInterval(packetIntervalRef.current);
 
           const destination = route[route.length - 1];
-          setStatus('COMPLETE');
+          setStatus("COMPLETE");
 
           // Mensagem com dados REAIS
-          const threatInfo = destination.isMalicious ? '⚠️ MALICIOUS' : '✓ CLEAN';
+          const threatInfo = destination.isMalicious
+            ? "⚠️ MALICIOUS"
+            : "✓ CLEAN";
           setStatusMessage(
-            `✓ Trace complete! Real IP: ${targetIp} | ${destination.city}, ${destination.country} | Threat: ${threatInfo}`
+            `✓ Trace complete! Real IP: ${targetIp} | ${destination.city}, ${destination.country} | Threat: ${threatInfo}`,
           );
 
           setProgress(100);
@@ -191,7 +286,7 @@ export const OnionTracer = ({
             ...destination,
             ipAnalysis: traceResult.ipAnalysis,
             threatIntel: traceResult.threatIntel,
-            route: route
+            route: route,
           });
           return;
         }
@@ -200,39 +295,53 @@ export const OnionTracer = ({
         const toNode = route[hop + 1];
 
         // Update status com informações REAIS
-        if (toNode.type === 'entry') {
-          setStatus('CONNECTING');
-          setStatusMessage(`Connecting to entry node... ${toNode.city}, ${toNode.country}`);
-        } else if (toNode.type === 'middle') {
-          setStatus('RELAYING');
-          setStatusMessage(`Relaying through ${toNode.city}... Decrypting layer ${toNode.layer}...`);
-        } else if (toNode.type === 'exit') {
-          setStatus('DECRYPTING');
-          setStatusMessage(`Exit node reached! Bypassing final encryption... ${toNode.city}`);
-        } else if (toNode.type === 'destination') {
-          setStatus('LOCATING');
-          const isp = toNode.isp ? `ISP: ${toNode.isp}` : '';
-          setStatusMessage(`Triangulating real location... ${toNode.city}, ${toNode.country} ${isp}`);
+        if (toNode.type === "entry") {
+          setStatus("CONNECTING");
+          setStatusMessage(
+            `Connecting to entry node... ${toNode.city}, ${toNode.country}`,
+          );
+        } else if (toNode.type === "middle") {
+          setStatus("RELAYING");
+          setStatusMessage(
+            `Relaying through ${toNode.city}... Decrypting layer ${toNode.layer}...`,
+          );
+        } else if (toNode.type === "exit") {
+          setStatus("DECRYPTING");
+          setStatusMessage(
+            `Exit node reached! Bypassing final encryption... ${toNode.city}`,
+          );
+        } else if (toNode.type === "destination") {
+          setStatus("LOCATING");
+          const isp = toNode.isp ? `ISP: ${toNode.isp}` : "";
+          setStatusMessage(
+            `Triangulating real location... ${toNode.city}, ${toNode.country} ${isp}`,
+          );
         }
 
         // Adiciona path
-        setPaths(prev => [...prev, {
-          from: [fromNode.lat, fromNode.lng || fromNode.lon],
-          to: [toNode.lat, toNode.lng || toNode.lon],
-          encrypted: fromNode.encrypted
-        }]);
+        setPaths((prev) => [
+          ...prev,
+          {
+            from: [fromNode.lat, fromNode.lng || fromNode.lon],
+            to: [toNode.lat, toNode.lng || toNode.lon],
+            encrypted: fromNode.encrypted,
+          },
+        ]);
 
         // Adiciona packet animado
         const packetId = `packet_${hop}_${Date.now()}`;
-        setPackets(prev => [...prev, {
-          id: packetId,
-          from: [fromNode.lat, fromNode.lng || fromNode.lon],
-          to: [toNode.lat, toNode.lng || toNode.lon]
-        }]);
+        setPackets((prev) => [
+          ...prev,
+          {
+            id: packetId,
+            from: [fromNode.lat, fromNode.lng || fromNode.lon],
+            to: [toNode.lat, toNode.lng || toNode.lon],
+          },
+        ]);
 
         // Remove packet depois da animação
         setTimeout(() => {
-          setPackets(prev => prev.filter(p => p.id !== packetId));
+          setPackets((prev) => prev.filter((p) => p.id !== packetId));
         }, 2000);
 
         setCurrentHop(hop + 1);
@@ -240,10 +349,9 @@ export const OnionTracer = ({
 
         hop++;
       }, 2500); // 2.5s por hop para efeito cinematográfico
-
     } catch (error) {
-      logger.error('Trace error:', error);
-      setStatus('ERROR');
+      logger.error("Trace error:", error);
+      setStatus("ERROR");
       setStatusMessage(`❌ Trace failed: ${error.message}`);
       setIsTracing(false);
 
@@ -251,7 +359,6 @@ export const OnionTracer = ({
       // Clear nodes to show error state
       setNodes([]);
     }
-
   }, [targetIp, onTraceComplete]);
 
   /**
@@ -265,8 +372,8 @@ export const OnionTracer = ({
       clearInterval(packetIntervalRef.current);
     }
     setIsTracing(false);
-    setStatus('STOPPED');
-    setStatusMessage('Trace aborted by user');
+    setStatus("STOPPED");
+    setStatusMessage("Trace aborted by user");
   }, []);
 
   /**
@@ -275,7 +382,7 @@ export const OnionTracer = ({
   useEffect(() => {
     const traceInterval = traceIntervalRef.current;
     const packetInterval = packetIntervalRef.current;
-    
+
     if (autoStart) {
       startTrace();
     }
@@ -296,7 +403,9 @@ export const OnionTracer = ({
               <span className={styles.icon}>🧅</span>
               ONION ROUTER TRACER
             </h2>
-            <p className={styles.subtitle}>Real-time Tor Network Visualization</p>
+            <p className={styles.subtitle}>
+              Real-time Tor Network Visualization
+            </p>
           </div>
 
           <div className={styles.controls}>
@@ -305,7 +414,7 @@ export const OnionTracer = ({
               onClick={startTrace}
               disabled={isTracing}
             >
-              {isTracing ? '⏳ TRACING...' : '▶ START TRACE'}
+              {isTracing ? "⏳ TRACING..." : "▶ START TRACE"}
             </button>
 
             {isTracing && (
@@ -322,7 +431,9 @@ export const OnionTracer = ({
         {/* Status Display */}
         <div className={styles.statusBar}>
           <div className={styles.statusIndicator}>
-            <span className={`${styles.statusLight} ${isTracing ? styles.statusActive : ''}`} />
+            <span
+              className={`${styles.statusLight} ${isTracing ? styles.statusActive : ""}`}
+            />
             <span className={styles.statusLabel}>STATUS:</span>
             <span className={styles.statusValue}>{status}</span>
           </div>
@@ -336,7 +447,10 @@ export const OnionTracer = ({
         {/* Progress Bar */}
         {isTracing && (
           <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+            <div
+              className={styles.progressFill}
+              style={{ width: `${progress}%` }}
+            />
             <span className={styles.progressText}>{Math.round(progress)}%</span>
           </div>
         )}
@@ -345,7 +459,9 @@ export const OnionTracer = ({
         {nodes.length > 0 && (
           <div className={styles.hopInfo}>
             <span className={styles.hopLabel}>HOP:</span>
-            <span className={styles.hopValue}>{currentHop}/{nodes.length - 1}</span>
+            <span className={styles.hopValue}>
+              {currentHop}/{nodes.length - 1}
+            </span>
             <span className={styles.hopSeparator}>|</span>
             <span className={styles.hopLabel}>NODES:</span>
             <span className={styles.hopValue}>{nodes.length}</span>
@@ -361,7 +477,7 @@ export const OnionTracer = ({
         <MapContainer
           center={[50, 10]}
           zoom={4}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: "100%", width: "100%" }}
           className={styles.map}
           zoomControl={true}
         >
@@ -371,17 +487,19 @@ export const OnionTracer = ({
           />
 
           {/* Camera Follower */}
-          {nodes[currentHop] && <CameraFollower currentNode={nodes[currentHop]} />}
+          {nodes[currentHop] && (
+            <CameraFollower currentNode={nodes[currentHop]} />
+          )}
 
           {/* Draw Paths */}
           {paths.map((path, idx) => (
             <Polyline
               key={`path_${idx}`}
               positions={[path.from, path.to]}
-              color={path.encrypted ? '#00d9ff' : '#ff3366'}
+              color={path.encrypted ? "#00d9ff" : "#ff3366"}
               weight={3}
               opacity={0.8}
-              dashArray={path.encrypted ? '10, 10' : '0'}
+              dashArray={path.encrypted ? "10, 10" : "0"}
               className={styles.pathLine}
             />
           ))}
@@ -391,23 +509,29 @@ export const OnionTracer = ({
             <CircleMarker
               key={`node_${idx}`}
               center={[node.lat, node.lng]}
-              radius={node.type === 'destination' ? 15 : 8}
+              radius={node.type === "destination" ? 15 : 8}
               fillColor={
-                node.type === 'origin' ? '#00ff88' :
-                node.type === 'entry' ? '#00d9ff' :
-                node.type === 'middle' ? '#ffaa00' :
-                node.type === 'exit' ? '#ff00aa' :
-                '#ff3366'
+                node.type === "origin"
+                  ? "#00ff88"
+                  : node.type === "entry"
+                    ? "#00d9ff"
+                    : node.type === "middle"
+                      ? "#ffaa00"
+                      : node.type === "exit"
+                        ? "#ff00aa"
+                        : "#ff3366"
               }
               color="#ffffff"
               weight={2}
               opacity={1}
-              fillOpacity={node.type === 'destination' ? 1 : 0.8}
-              className={idx === currentHop ? styles.pulseNode : ''}
+              fillOpacity={node.type === "destination" ? 1 : 0.8}
+              className={idx === currentHop ? styles.pulseNode : ""}
             >
               <Popup>
                 <div className={styles.popup}>
-                  <strong>{node.city}, {node.country}</strong>
+                  <strong>
+                    {node.city}, {node.country}
+                  </strong>
                   <br />
                   <small>Type: {node.type.toUpperCase()}</small>
                   <br />
@@ -430,7 +554,9 @@ export const OnionTracer = ({
                   {node.encrypted !== undefined && (
                     <>
                       <br />
-                      <small>Encrypted: {node.encrypted ? '✓ YES' : '✗ NO'}</small>
+                      <small>
+                        Encrypted: {node.encrypted ? "✓ YES" : "✗ NO"}
+                      </small>
                     </>
                   )}
                   {node.layer !== undefined && node.layer > 0 && (
@@ -456,8 +582,10 @@ export const OnionTracer = ({
                   {node.isMalicious !== undefined && (
                     <>
                       <br />
-                      <small className={node.isMalicious ? 'malicious' : 'safe'}>
-                        {node.isMalicious ? '⚠️ MALICIOUS' : '✓ CLEAN'}
+                      <small
+                        className={node.isMalicious ? "malicious" : "safe"}
+                      >
+                        {node.isMalicious ? "⚠️ MALICIOUS" : "✓ CLEAN"}
                       </small>
                     </>
                   )}
@@ -506,12 +634,15 @@ export const OnionTracer = ({
             </div>
             <div className={styles.resultItem}>
               <span className={styles.resultLabel}>Location:</span>
-              <span className={styles.resultValue}>{realIp.city}, {realIp.country}</span>
+              <span className={styles.resultValue}>
+                {realIp.city}, {realIp.country}
+              </span>
             </div>
             <div className={styles.resultItem}>
               <span className={styles.resultLabel}>Coordinates:</span>
               <span className={styles.resultValue}>
-                {realIp.lat?.toFixed(4) || 'N/A'}, {(realIp.lng || realIp.lon)?.toFixed(4) || 'N/A'}
+                {realIp.lat?.toFixed(4) || "N/A"},{" "}
+                {(realIp.lng || realIp.lon)?.toFixed(4) || "N/A"}
               </span>
             </div>
             {realIp.isp && (
@@ -535,7 +666,9 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Threat Score:</span>
                 <span
                   className={styles.resultValue}
-                  className={realIp.threatScore > 60 ? 'threat-high' : 'threat-safe'}
+                  className={
+                    realIp.threatScore > 60 ? "threat-high" : "threat-safe"
+                  }
                 >
                   {realIp.threatScore}/100
                 </span>
@@ -548,9 +681,11 @@ export const OnionTracer = ({
                   className={styles.resultValue}
                   style={{
                     color:
-                      realIp.reputation === 'malicious' ? '#ff3366' :
-                      realIp.reputation === 'suspicious' ? '#ffaa00' :
-                      '#00ff88'
+                      realIp.reputation === "malicious"
+                        ? "#ff3366"
+                        : realIp.reputation === "suspicious"
+                          ? "#ffaa00"
+                          : "#00ff88",
                   }}
                 >
                   {realIp.reputation.toUpperCase()}
@@ -562,9 +697,13 @@ export const OnionTracer = ({
                 <span className={styles.resultLabel}>Status:</span>
                 <span
                   className={styles.resultValue}
-                  className={realIp.isMalicious ? 'malicious font-bold' : 'safe font-bold'}
+                  className={
+                    realIp.isMalicious
+                      ? "malicious font-bold"
+                      : "safe font-bold"
+                  }
                 >
-                  {realIp.isMalicious ? '⚠️ MALICIOUS DETECTED' : '✓ CLEAN'}
+                  {realIp.isMalicious ? "⚠️ MALICIOUS DETECTED" : "✓ CLEAN"}
                 </span>
               </div>
             )}

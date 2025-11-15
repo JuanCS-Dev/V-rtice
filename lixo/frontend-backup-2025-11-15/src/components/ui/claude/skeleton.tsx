@@ -8,9 +8,9 @@
  * Estilo: Shimmer effect, subtle, clean
  */
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Skeleton Component - Claude.ai Green Style
@@ -44,11 +44,11 @@ function Skeleton({
           "before:via-white/10",
           "before:to-transparent",
         ].join(" "),
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
 /**
@@ -57,13 +57,15 @@ function Skeleton({
 function CardSkeleton() {
   return (
     <div
-      className={cn([
-        "bg-[var(--card)]",
-        "border border-[var(--border)]",
-        "rounded-[var(--radius-default)]",
-        "p-[var(--space-6)]",
-        "space-y-[var(--space-4)]",
-      ].join(" "))}
+      className={cn(
+        [
+          "bg-[var(--card)]",
+          "border border-[var(--border)]",
+          "rounded-[var(--radius-default)]",
+          "p-[var(--space-6)]",
+          "space-y-[var(--space-4)]",
+        ].join(" "),
+      )}
     >
       <Skeleton className="h-6 w-[200px]" />
       <Skeleton className="h-4 w-full" />
@@ -73,7 +75,7 @@ function CardSkeleton() {
         <Skeleton className="h-10 w-[100px]" />
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -92,7 +94,7 @@ function ListSkeleton({ items = 5 }: { items?: number }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-export { Skeleton, CardSkeleton, ListSkeleton }
+export { Skeleton, CardSkeleton, ListSkeleton };

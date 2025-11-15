@@ -24,39 +24,41 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { PurpleHeader } from './components/PurpleHeader';
-import { SplitView } from './components/SplitView';
-import { UnifiedTimeline } from './components/UnifiedTimeline';
-import { GapAnalysis } from './components/GapAnalysis';
-import { DashboardFooter } from '../../shared/DashboardFooter';
-import { usePurpleTeamData } from './hooks/usePurpleTeamData';
-import SkipLink from '../../shared/SkipLink';
-import styles from './PurpleTeamDashboard.module.css';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { PurpleHeader } from "./components/PurpleHeader";
+import { SplitView } from "./components/SplitView";
+import { UnifiedTimeline } from "./components/UnifiedTimeline";
+import { GapAnalysis } from "./components/GapAnalysis";
+import { DashboardFooter } from "../../shared/DashboardFooter";
+import { usePurpleTeamData } from "./hooks/usePurpleTeamData";
+import SkipLink from "../../shared/SkipLink";
+import styles from "./PurpleTeamDashboard.module.css";
 
 export const PurpleTeamDashboard = ({ setCurrentView }) => {
   const { t } = useTranslation();
-  const [activeView, setActiveView] = useState('split'); // 'split' | 'timeline' | 'analysis'
-  const { attackData, defenseData, correlations, gaps, loading } = usePurpleTeamData();
+  const [activeView, setActiveView] = useState("split"); // 'split' | 'timeline' | 'analysis'
+  const { attackData, defenseData, correlations, gaps, loading } =
+    usePurpleTeamData();
 
   const handleBack = () => {
     if (setCurrentView) {
-      setCurrentView('main');
+      setCurrentView("main");
     }
   };
 
   return (
     <article
       className={styles.purpleDashboard}
-
       aria-labelledby="purple-team-dashboard-title"
       data-maximus-module="purple-team-dashboard"
       data-maximus-navigable="true"
       data-maximus-version="2.0"
-      data-maximus-category="purple-team">
-
-      <SkipLink href="#purple-team-content">{t('accessibility.skipToMain')}</SkipLink>
+      data-maximus-category="purple-team"
+    >
+      <SkipLink href="#purple-team-content">
+        {t("accessibility.skipToMain")}
+      </SkipLink>
 
       <PurpleHeader
         onBack={handleBack}
@@ -66,23 +68,25 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
           activeAttacks: attackData.active.length,
           detections: defenseData.detections.length,
           coverage: gaps.coveragePercentage,
-          correlations: correlations.length
+          correlations: correlations.length,
         }}
       />
 
       <section
         id="purple-team-content"
         className={styles.content}
-
-        aria-label={t('dashboard.purple.content', 'Purple team operations content')}
+        aria-label={t(
+          "dashboard.purple.content",
+          "Purple team operations content",
+        )}
         aria-live="polite"
         aria-atomic="false"
         data-maximus-section="content"
         data-maximus-view={activeView}
         data-maximus-monitor="correlations"
-        data-maximus-interactive="true">
-
-        {activeView === 'split' && (
+        data-maximus-interactive="true"
+      >
+        {activeView === "split" && (
           <SplitView
             attackData={attackData}
             defenseData={defenseData}
@@ -91,7 +95,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
           />
         )}
 
-        {activeView === 'timeline' && (
+        {activeView === "timeline" && (
           <UnifiedTimeline
             events={[...attackData.events, ...defenseData.events]}
             correlations={correlations}
@@ -99,7 +103,7 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
           />
         )}
 
-        {activeView === 'analysis' && (
+        {activeView === "analysis" && (
           <GapAnalysis
             gaps={gaps}
             attackData={attackData}
@@ -113,13 +117,25 @@ export const PurpleTeamDashboard = ({ setCurrentView }) => {
         moduleName="PURPLE TEAM OPERATIONS"
         classification="CONFIDENCIAL"
         statusItems={[
-          { label: 'RED TEAM', value: `${attackData.active.length} ACTIVE`, online: attackData.active.length > 0 },
-          { label: 'BLUE TEAM', value: `${defenseData.detections.length} DETECTIONS`, online: true },
-          { label: 'COVERAGE', value: `${gaps.coveragePercentage}%`, online: gaps.coveragePercentage > 80 }
+          {
+            label: "RED TEAM",
+            value: `${attackData.active.length} ACTIVE`,
+            online: attackData.active.length > 0,
+          },
+          {
+            label: "BLUE TEAM",
+            value: `${defenseData.detections.length} DETECTIONS`,
+            online: true,
+          },
+          {
+            label: "COVERAGE",
+            value: `${gaps.coveragePercentage}%`,
+            online: gaps.coveragePercentage > 80,
+          },
         ]}
         metricsItems={[
-          { label: 'ATTACKS', value: attackData.active.length },
-          { label: 'CORRELATIONS', value: correlations.length }
+          { label: "ATTACKS", value: attackData.active.length },
+          { label: "CORRELATIONS", value: correlations.length },
         ]}
       />
     </article>

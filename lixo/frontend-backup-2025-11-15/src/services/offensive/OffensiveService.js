@@ -20,9 +20,9 @@
  * Component → Hook → Service (THIS LAYER) → API Client
  */
 
-import { BaseService } from '../base/BaseService';
-import { ServiceEndpoints } from '@/config/endpoints';
-import logger from '@/utils/logger';
+import { BaseService } from "../base/BaseService";
+import { ServiceEndpoints } from "@/config/endpoints";
+import logger from "@/utils/logger";
 
 export class OffensiveService extends BaseService {
   constructor(client) {
@@ -35,9 +35,9 @@ export class OffensiveService extends BaseService {
       webAttack: ServiceEndpoints.offensive.webAttack,
       c2: ServiceEndpoints.offensive.c2Orchestration,
       bas: ServiceEndpoints.offensive.bas,
-      behavioral: '/api/defensive/behavioral',
-      traffic: '/api/defensive/traffic',
-      mav: '/api/social-defense/mav',
+      behavioral: "/api/defensive/behavioral",
+      traffic: "/api/defensive/traffic",
+      mav: "/api/social-defense/mav",
       gateway: ServiceEndpoints.offensive.gateway,
     };
   }
@@ -53,7 +53,7 @@ export class OffensiveService extends BaseService {
    * @param {string} ports - Port range (e.g., '1-1000')
    * @returns {Promise<Object>} Scan result with scan_id
    */
-  async scanNetwork(target, scanType = 'quick', ports = '1-1000') {
+  async scanNetwork(target, scanType = "quick", ports = "1-1000") {
     this.validateRequest({ target, scanType, ports });
 
     try {
@@ -63,12 +63,16 @@ export class OffensiveService extends BaseService {
           target,
           scan_type: scanType,
           ports,
-        }
+        },
       );
 
       return this.transformResponse(response);
     } catch (error) {
-      return this.handleError(error, 'POST', `${this.endpoints.networkRecon}/api/scan`);
+      return this.handleError(
+        error,
+        "POST",
+        `${this.endpoints.networkRecon}/api/scan`,
+      );
     }
   }
 
@@ -79,10 +83,12 @@ export class OffensiveService extends BaseService {
    */
   async getScanStatus(scanId) {
     if (!scanId) {
-      throw new Error('Scan ID is required');
+      throw new Error("Scan ID is required");
     }
 
-    return await this.client.get(`${this.endpoints.networkRecon}/api/scan/${scanId}/status`);
+    return await this.client.get(
+      `${this.endpoints.networkRecon}/api/scan/${scanId}/status`,
+    );
   }
 
   /**
@@ -104,9 +110,12 @@ export class OffensiveService extends BaseService {
   async discoverHosts(network) {
     this.validateRequest({ network });
 
-    return await this.client.post(`${this.endpoints.networkRecon}/api/discover`, {
-      network,
-    });
+    return await this.client.post(
+      `${this.endpoints.networkRecon}/api/discover`,
+      {
+        network,
+      },
+    );
   }
 
   // ============================================================================
@@ -119,11 +128,13 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} CVE details
    */
   async searchCVE(cveId) {
-    if (!cveId || !cveId.startsWith('CVE-')) {
-      throw new Error('Invalid CVE ID format');
+    if (!cveId || !cveId.startsWith("CVE-")) {
+      throw new Error("Invalid CVE ID format");
     }
 
-    return await this.client.get(`${this.endpoints.vulnIntel}/api/cve/${cveId}`);
+    return await this.client.get(
+      `${this.endpoints.vulnIntel}/api/cve/${cveId}`,
+    );
   }
 
   /**
@@ -134,7 +145,9 @@ export class OffensiveService extends BaseService {
    */
   async searchVulnerabilities(query, filters = {}) {
     const params = new URLSearchParams({ query, ...filters });
-    return await this.client.get(`${this.endpoints.vulnIntel}/api/search?${params}`);
+    return await this.client.get(
+      `${this.endpoints.vulnIntel}/api/search?${params}`,
+    );
   }
 
   /**
@@ -144,10 +157,12 @@ export class OffensiveService extends BaseService {
    */
   async getExploits(cveId) {
     if (!cveId) {
-      throw new Error('CVE ID is required');
+      throw new Error("CVE ID is required");
     }
 
-    return await this.client.get(`${this.endpoints.vulnIntel}/api/cve/${cveId}/exploits`);
+    return await this.client.get(
+      `${this.endpoints.vulnIntel}/api/cve/${cveId}/exploits`,
+    );
   }
 
   /**
@@ -156,7 +171,9 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} Correlation results
    */
   async correlateWithScan(scanId) {
-    return await this.client.post(`${this.endpoints.vulnIntel}/api/correlate/${scanId}`);
+    return await this.client.post(
+      `${this.endpoints.vulnIntel}/api/correlate/${scanId}`,
+    );
   }
 
   // ============================================================================
@@ -170,7 +187,7 @@ export class OffensiveService extends BaseService {
    * @param {Object} authConfig - Optional authentication configuration
    * @returns {Promise<Object>} Scan results
    */
-  async scanWebTarget(url, scanProfile = 'full', authConfig = null) {
+  async scanWebTarget(url, scanProfile = "full", authConfig = null) {
     this.validateRequest({ url, scanProfile });
 
     return await this.client.post(`${this.endpoints.webAttack}/api/scan`, {
@@ -190,10 +207,13 @@ export class OffensiveService extends BaseService {
   async runWebTest(url, testType, params = {}) {
     this.validateRequest({ url, testType });
 
-    return await this.client.post(`${this.endpoints.webAttack}/api/test/${testType}`, {
-      url,
-      ...params,
-    });
+    return await this.client.post(
+      `${this.endpoints.webAttack}/api/test/${testType}`,
+      {
+        url,
+        ...params,
+      },
+    );
   }
 
   /**
@@ -202,7 +222,9 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} Scan report
    */
   async getWebScanReport(scanId) {
-    return await this.client.get(`${this.endpoints.webAttack}/api/scan/${scanId}/report`);
+    return await this.client.get(
+      `${this.endpoints.webAttack}/api/scan/${scanId}/report`,
+    );
   }
 
   // ============================================================================
@@ -234,7 +256,7 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Array>} Active sessions
    */
   async listC2Sessions(framework = null) {
-    const params = framework ? `?framework=${framework}` : '';
+    const params = framework ? `?framework=${framework}` : "";
     return await this.client.get(`${this.endpoints.c2}/api/sessions${params}`);
   }
 
@@ -248,10 +270,13 @@ export class OffensiveService extends BaseService {
   async executeC2Command(sessionId, command, args = []) {
     this.validateRequest({ sessionId, command });
 
-    return await this.client.post(`${this.endpoints.c2}/api/session/${sessionId}/execute`, {
-      command,
-      args,
-    });
+    return await this.client.post(
+      `${this.endpoints.c2}/api/session/${sessionId}/execute`,
+      {
+        command,
+        args,
+      },
+    );
   }
 
   /**
@@ -261,9 +286,12 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} Pass result
    */
   async passSession(sessionId, targetFramework) {
-    return await this.client.post(`${this.endpoints.c2}/api/session/${sessionId}/pass`, {
-      target_framework: targetFramework,
-    });
+    return await this.client.post(
+      `${this.endpoints.c2}/api/session/${sessionId}/pass`,
+      {
+        target_framework: targetFramework,
+      },
+    );
   }
 
   /**
@@ -274,7 +302,10 @@ export class OffensiveService extends BaseService {
   async executeAttackChain(chainConfig) {
     this.validateRequest(chainConfig);
 
-    return await this.client.post(`${this.endpoints.c2}/api/attack-chain/execute`, chainConfig);
+    return await this.client.post(
+      `${this.endpoints.c2}/api/attack-chain/execute`,
+      chainConfig,
+    );
   }
 
   // ============================================================================
@@ -308,10 +339,12 @@ export class OffensiveService extends BaseService {
    */
   async listAttackTechniques(tactic = null, platform = null) {
     const params = new URLSearchParams();
-    if (tactic) params.append('tactic', tactic);
-    if (platform) params.append('platform', platform);
+    if (tactic) params.append("tactic", tactic);
+    if (platform) params.append("platform", platform);
 
-    return await this.client.get(`${this.endpoints.bas}/api/techniques?${params}`);
+    return await this.client.get(
+      `${this.endpoints.bas}/api/techniques?${params}`,
+    );
   }
 
   /**
@@ -321,10 +354,13 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} Validation result
    */
   async validatePurpleTeam(simulationId, telemetrySources) {
-    return await this.client.post(`${this.endpoints.bas}/api/purple-team/validate`, {
-      simulation_id: simulationId,
-      telemetry_sources: telemetrySources,
-    });
+    return await this.client.post(
+      `${this.endpoints.bas}/api/purple-team/validate`,
+      {
+        simulation_id: simulationId,
+        telemetry_sources: telemetrySources,
+      },
+    );
   }
 
   /**
@@ -333,7 +369,7 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Object>} Coverage report
    */
   async getAttackCoverage(organizationId = null) {
-    const params = organizationId ? `?org_id=${organizationId}` : '';
+    const params = organizationId ? `?org_id=${organizationId}` : "";
     return await this.client.get(`${this.endpoints.bas}/api/coverage${params}`);
   }
 
@@ -369,7 +405,7 @@ export class OffensiveService extends BaseService {
    */
   async analyzeBatchBehavioralEvents(events) {
     if (!Array.isArray(events) || events.length === 0) {
-      throw new Error('Events array is required');
+      throw new Error("Events array is required");
     }
 
     const formattedEvents = events.map((e) => ({
@@ -380,9 +416,12 @@ export class OffensiveService extends BaseService {
       metadata: e.metadata || {},
     }));
 
-    return await this.client.post(`${this.endpoints.behavioral}/analyze-batch`, {
-      events: formattedEvents,
-    });
+    return await this.client.post(
+      `${this.endpoints.behavioral}/analyze-batch`,
+      {
+        events: formattedEvents,
+      },
+    );
   }
 
   /**
@@ -393,13 +432,16 @@ export class OffensiveService extends BaseService {
    */
   async trainBehavioralBaseline(entityId, trainingEvents) {
     if (!entityId || !Array.isArray(trainingEvents)) {
-      throw new Error('Entity ID and training events are required');
+      throw new Error("Entity ID and training events are required");
     }
 
-    return await this.client.post(`${this.endpoints.behavioral}/train-baseline`, {
-      entity_id: entityId,
-      training_events: trainingEvents,
-    });
+    return await this.client.post(
+      `${this.endpoints.behavioral}/train-baseline`,
+      {
+        entity_id: entityId,
+        training_events: trainingEvents,
+      },
+    );
   }
 
   /**
@@ -435,7 +477,7 @@ export class OffensiveService extends BaseService {
       dest_ip: flowData.destIp,
       source_port: flowData.sourcePort,
       dest_port: flowData.destPort,
-      protocol: flowData.protocol || 'tcp',
+      protocol: flowData.protocol || "tcp",
       bytes_sent: flowData.bytesSent || 0,
       bytes_received: flowData.bytesReceived || 0,
       duration_seconds: flowData.duration || 0,
@@ -450,7 +492,7 @@ export class OffensiveService extends BaseService {
    */
   async analyzeBatchTrafficFlows(flows) {
     if (!Array.isArray(flows) || flows.length === 0) {
-      throw new Error('Flows array is required');
+      throw new Error("Flows array is required");
     }
 
     const formattedFlows = flows.map((f) => ({
@@ -458,7 +500,7 @@ export class OffensiveService extends BaseService {
       dest_ip: f.destIp,
       source_port: f.sourcePort,
       dest_port: f.destPort,
-      protocol: f.protocol || 'tcp',
+      protocol: f.protocol || "tcp",
       bytes_sent: f.bytesSent || 0,
       bytes_received: f.bytesReceived || 0,
       duration_seconds: f.duration || 0,
@@ -504,14 +546,14 @@ export class OffensiveService extends BaseService {
     this.validateRequest(campaignData);
 
     if (!Array.isArray(campaignData.posts) || campaignData.posts.length === 0) {
-      throw new Error('Posts array is required');
+      throw new Error("Posts array is required");
     }
 
     return await this.client.post(`${this.endpoints.mav}/detect`, {
       posts: campaignData.posts,
       accounts: campaignData.accounts || [],
-      platform: campaignData.platform || 'twitter',
-      time_window: campaignData.timeWindow || '24h',
+      platform: campaignData.platform || "twitter",
+      time_window: campaignData.timeWindow || "24h",
     });
   }
 
@@ -522,12 +564,15 @@ export class OffensiveService extends BaseService {
    */
   async analyzeTemporalCoordination(posts) {
     if (!Array.isArray(posts) || posts.length === 0) {
-      throw new Error('Posts array is required');
+      throw new Error("Posts array is required");
     }
 
-    return await this.client.post(`${this.endpoints.mav}/coordination/temporal`, {
-      posts,
-    });
+    return await this.client.post(
+      `${this.endpoints.mav}/coordination/temporal`,
+      {
+        posts,
+      },
+    );
   }
 
   /**
@@ -537,12 +582,15 @@ export class OffensiveService extends BaseService {
    */
   async analyzeContentSimilarity(posts) {
     if (!Array.isArray(posts) || posts.length === 0) {
-      throw new Error('Posts array is required');
+      throw new Error("Posts array is required");
     }
 
-    return await this.client.post(`${this.endpoints.mav}/coordination/content`, {
-      posts,
-    });
+    return await this.client.post(
+      `${this.endpoints.mav}/coordination/content`,
+      {
+        posts,
+      },
+    );
   }
 
   /**
@@ -552,12 +600,15 @@ export class OffensiveService extends BaseService {
    */
   async analyzeNetworkCoordination(accounts) {
     if (!Array.isArray(accounts) || accounts.length === 0) {
-      throw new Error('Accounts array is required');
+      throw new Error("Accounts array is required");
     }
 
-    return await this.client.post(`${this.endpoints.mav}/coordination/network`, {
-      accounts,
-    });
+    return await this.client.post(
+      `${this.endpoints.mav}/coordination/network`,
+      {
+        accounts,
+      },
+    );
   }
 
   /**
@@ -578,9 +629,9 @@ export class OffensiveService extends BaseService {
    */
   async listMAVCampaigns(filters = {}) {
     const params = new URLSearchParams();
-    if (filters.severity) params.append('severity', filters.severity);
-    if (filters.platform) params.append('platform', filters.platform);
-    if (filters.limit) params.append('limit', filters.limit);
+    if (filters.severity) params.append("severity", filters.severity);
+    if (filters.platform) params.append("platform", filters.platform);
+    if (filters.limit) params.append("limit", filters.limit);
 
     return await this.client.get(`${this.endpoints.mav}/campaigns?${params}`);
   }
@@ -597,7 +648,7 @@ export class OffensiveService extends BaseService {
   async createWorkflow(workflowConfig) {
     this.validateRequest(workflowConfig);
 
-    return await this.post('/api/workflow/create', workflowConfig);
+    return await this.post("/api/workflow/create", workflowConfig);
   }
 
   /**
@@ -624,7 +675,7 @@ export class OffensiveService extends BaseService {
    * @returns {Promise<Array>} Available workflows
    */
   async listWorkflows() {
-    return await this.get('/api/workflows');
+    return await this.get("/api/workflows");
   }
 
   // ============================================================================
@@ -649,9 +700,12 @@ export class OffensiveService extends BaseService {
         this.client.get(`${this.endpoints.networkRecon}/api/scans/active`, {
           signal: AbortSignal.timeout(3000),
         }),
-        this.client.get(`${this.endpoints.vulnIntel}/api/vulnerabilities/count`, {
-          signal: AbortSignal.timeout(3000),
-        }),
+        this.client.get(
+          `${this.endpoints.vulnIntel}/api/vulnerabilities/count`,
+          {
+            signal: AbortSignal.timeout(3000),
+          },
+        ),
         this.client.get(`${this.endpoints.webAttack}/api/targets/count`, {
           signal: AbortSignal.timeout(3000),
         }),
@@ -661,22 +715,26 @@ export class OffensiveService extends BaseService {
       ]);
 
       // Extract counts from responses
-      if (results[0].status === 'fulfilled') {
-        metrics.activeScans = results[0].value?.count || results[0].value?.total || 0;
+      if (results[0].status === "fulfilled") {
+        metrics.activeScans =
+          results[0].value?.count || results[0].value?.total || 0;
       }
-      if (results[1].status === 'fulfilled') {
-        metrics.exploitsFound = results[1].value?.count || results[1].value?.total || 0;
+      if (results[1].status === "fulfilled") {
+        metrics.exploitsFound =
+          results[1].value?.count || results[1].value?.total || 0;
       }
-      if (results[2].status === 'fulfilled') {
-        metrics.targets = results[2].value?.count || results[2].value?.total || 0;
+      if (results[2].status === "fulfilled") {
+        metrics.targets =
+          results[2].value?.count || results[2].value?.total || 0;
       }
-      if (results[3].status === 'fulfilled') {
-        metrics.c2Sessions = results[3].value?.count || results[3].value?.total || 0;
+      if (results[3].status === "fulfilled") {
+        metrics.c2Sessions =
+          results[3].value?.count || results[3].value?.total || 0;
       }
 
       return metrics;
     } catch (error) {
-      logger.error('[OffensiveService] Failed to aggregate metrics:', error);
+      logger.error("[OffensiveService] Failed to aggregate metrics:", error);
       return metrics; // Return zeros on error
     }
   }
@@ -711,15 +769,15 @@ export class OffensiveService extends BaseService {
     };
 
     await Promise.allSettled([
-      checkService('networkRecon', this.endpoints.networkRecon),
-      checkService('vulnIntel', this.endpoints.vulnIntel),
-      checkService('webAttack', this.endpoints.webAttack),
-      checkService('c2Orchestration', this.endpoints.c2),
-      checkService('bas', this.endpoints.bas),
-      checkService('behavioral', this.endpoints.behavioral),
-      checkService('traffic', this.endpoints.traffic),
-      checkService('mav', this.endpoints.mav),
-      checkService('offensiveGateway', this.endpoints.gateway),
+      checkService("networkRecon", this.endpoints.networkRecon),
+      checkService("vulnIntel", this.endpoints.vulnIntel),
+      checkService("webAttack", this.endpoints.webAttack),
+      checkService("c2Orchestration", this.endpoints.c2),
+      checkService("bas", this.endpoints.bas),
+      checkService("behavioral", this.endpoints.behavioral),
+      checkService("traffic", this.endpoints.traffic),
+      checkService("mav", this.endpoints.mav),
+      checkService("offensiveGateway", this.endpoints.gateway),
     ]);
 
     return services;
@@ -737,8 +795,8 @@ export class OffensiveService extends BaseService {
    */
   validateRequest(data) {
     // Basic validation
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid request data');
+    if (!data || typeof data !== "object") {
+      throw new Error("Invalid request data");
     }
 
     // Validate target fields (IP/CIDR/URL)
@@ -746,23 +804,23 @@ export class OffensiveService extends BaseService {
       // IP/CIDR validation with proper range checking
       const ipRegex = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
       if (!ipRegex.test(data.target)) {
-        throw new Error('Invalid target format');
+        throw new Error("Invalid target format");
       }
 
       // Validate each octet is 0-255
-      const parts = data.target.split('/')[0].split('.');
+      const parts = data.target.split("/")[0].split(".");
       for (const part of parts) {
         const num = parseInt(part, 10);
         if (num < 0 || num > 255) {
-          throw new Error('Invalid target format');
+          throw new Error("Invalid target format");
         }
       }
 
       // Validate CIDR suffix if present
-      if (data.target.includes('/')) {
-        const cidr = parseInt(data.target.split('/')[1], 10);
+      if (data.target.includes("/")) {
+        const cidr = parseInt(data.target.split("/")[1], 10);
         if (cidr < 0 || cidr > 32) {
-          throw new Error('Invalid target format');
+          throw new Error("Invalid target format");
         }
       }
     }
@@ -772,13 +830,13 @@ export class OffensiveService extends BaseService {
       try {
         new URL(data.url);
       } catch {
-        throw new Error('Invalid URL format');
+        throw new Error("Invalid URL format");
       }
     }
 
     // Validate CVE format
-    if (data.cveId && !data.cveId.startsWith('CVE-')) {
-      throw new Error('Invalid CVE ID format');
+    if (data.cveId && !data.cveId.startsWith("CVE-")) {
+      throw new Error("Invalid CVE ID format");
     }
 
     return true;
@@ -792,7 +850,7 @@ export class OffensiveService extends BaseService {
    */
   transformResponse(response) {
     // Transform common response patterns
-    if (response && typeof response === 'object') {
+    if (response && typeof response === "object") {
       // Ensure success field exists
       if (response.success === undefined) {
         response.success = true;

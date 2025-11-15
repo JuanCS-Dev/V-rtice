@@ -7,7 +7,8 @@
  */
 
 // Base URLs
-export const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL || 'https://api.vertice-maximus.com';
+export const API_BASE_URL =
+  import.meta.env.VITE_API_GATEWAY_URL || "https://api.vertice-maximus.com";
 
 // HTTP Endpoints
 export const API_ENDPOINTS = {
@@ -104,7 +105,10 @@ export const API_ENDPOINTS = {
 };
 
 // WebSocket URLs
-const WS_BASE_URL = API_BASE_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+const WS_BASE_URL = API_BASE_URL.replace("https://", "wss://").replace(
+  "http://",
+  "ws://",
+);
 
 export const WS_ENDPOINTS = {
   // Real-time streams

@@ -7,7 +7,7 @@
  * Following Boris Cherny's principle: "If it doesn't have types, it's not production"
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // REGEX PATTERNS
@@ -25,7 +25,17 @@ const DOMAIN_PATTERN =
 const URL_PATTERN =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
 
-const COMMAND_INJECTION_PATTERNS = [/&&/, /\|\|/, /;/, /\$\(/, /`/, /\|/, /</, />/, /\0/];
+const COMMAND_INJECTION_PATTERNS = [
+  /&&/,
+  /\|\|/,
+  /;/,
+  /\$\(/,
+  /`/,
+  /\|/,
+  /</,
+  />/,
+  /\0/,
+];
 
 // ============================================================================
 // IP ADDRESS SCHEMAS
@@ -39,12 +49,12 @@ const COMMAND_INJECTION_PATTERNS = [/&&/, /\|\|/, /;/, /\$\(/, /`/, /\|/, /</, /
 export const IPv4Schema = z
   .string()
   .trim()
-  .min(1, 'IPv4 address is required')
+  .min(1, "IPv4 address is required")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in IPv4 address',
+    message: "Invalid characters in IPv4 address",
   })
   .refine((val) => IPV4_PATTERN.test(val), {
-    message: 'Invalid IPv4 format. Use: xxx.xxx.xxx.xxx',
+    message: "Invalid IPv4 format. Use: xxx.xxx.xxx.xxx",
   });
 
 /**
@@ -55,12 +65,12 @@ export const IPv4Schema = z
 export const IPv6Schema = z
   .string()
   .trim()
-  .min(1, 'IPv6 address is required')
+  .min(1, "IPv6 address is required")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in IPv6 address',
+    message: "Invalid characters in IPv6 address",
   })
   .refine((val) => IPV6_PATTERN.test(val), {
-    message: 'Invalid IPv6 format',
+    message: "Invalid IPv6 format",
   });
 
 /**
@@ -71,16 +81,13 @@ export const IPv6Schema = z
 export const IPSchema = z
   .string()
   .trim()
-  .min(1, 'IP address is required')
+  .min(1, "IP address is required")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in IP address',
+    message: "Invalid characters in IP address",
   })
-  .refine(
-    (val) => IPV4_PATTERN.test(val) || IPV6_PATTERN.test(val),
-    {
-      message: 'Invalid IP address. Use IPv4 (e.g., 192.168.1.1) or IPv6',
-    }
-  );
+  .refine((val) => IPV4_PATTERN.test(val) || IPV6_PATTERN.test(val), {
+    message: "Invalid IP address. Use IPv4 (e.g., 192.168.1.1) or IPv6",
+  });
 
 export type IPAddress = z.infer<typeof IPSchema>;
 
@@ -95,9 +102,9 @@ export type IPAddress = z.infer<typeof IPSchema>;
  */
 export const PortSchema = z
   .number()
-  .int('Port must be an integer')
-  .min(1, 'Port must be at least 1')
-  .max(65535, 'Port must be at most 65535');
+  .int("Port must be an integer")
+  .min(1, "Port must be at least 1")
+  .max(65535, "Port must be at most 65535");
 
 /**
  * Port range schema (e.g., "80-443" or "8000,8080,9000")
@@ -107,18 +114,18 @@ export const PortSchema = z
 export const PortRangeSchema = z
   .string()
   .trim()
-  .min(1, 'Ports are required')
+  .min(1, "Ports are required")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in port specification',
+    message: "Invalid characters in port specification",
   })
   .refine(
     (val) => {
-      const parts = val.split(',').map((p) => p.trim());
+      const parts = val.split(",").map((p) => p.trim());
 
       for (const part of parts) {
-        if (part.includes('-')) {
+        if (part.includes("-")) {
           // Port range
-          const [start, end] = part.split('-').map((p) => p.trim());
+          const [start, end] = part.split("-").map((p) => p.trim());
           const startNum = parseInt(start, 10);
           const endNum = parseInt(end, 10);
 
@@ -136,8 +143,9 @@ export const PortRangeSchema = z
       return true;
     },
     {
-      message: 'Invalid port range. Use single ports (80), ranges (80-443), or comma-separated (80,443,8080)',
-    }
+      message:
+        "Invalid port range. Use single ports (80), ranges (80-443), or comma-separated (80,443,8080)",
+    },
   );
 
 export type PortRange = z.infer<typeof PortRangeSchema>;
@@ -155,13 +163,13 @@ export const DomainSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .min(1, 'Domain is required')
-  .max(500, 'Domain too long (max 500 characters)')
+  .min(1, "Domain is required")
+  .max(500, "Domain too long (max 500 characters)")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in domain',
+    message: "Invalid characters in domain",
   })
   .refine((val) => DOMAIN_PATTERN.test(val), {
-    message: 'Invalid domain format',
+    message: "Invalid domain format",
   });
 
 export type Domain = z.infer<typeof DomainSchema>;
@@ -170,7 +178,12 @@ export type Domain = z.infer<typeof DomainSchema>;
 // URL SCHEMA
 // ============================================================================
 
-const UNSAFE_URL_SCHEMES = [/^javascript:/i, /^data:/i, /^file:/i, /^vbscript:/i];
+const UNSAFE_URL_SCHEMES = [
+  /^javascript:/i,
+  /^data:/i,
+  /^file:/i,
+  /^vbscript:/i,
+];
 
 /**
  * URL schema
@@ -180,13 +193,13 @@ const UNSAFE_URL_SCHEMES = [/^javascript:/i, /^data:/i, /^file:/i, /^vbscript:/i
 export const URLSchema = z
   .string()
   .trim()
-  .min(1, 'URL is required')
-  .max(1000, 'URL too long (max 1000 characters)')
+  .min(1, "URL is required")
+  .max(1000, "URL too long (max 1000 characters)")
   .refine((val) => !UNSAFE_URL_SCHEMES.some((p) => p.test(val)), {
-    message: 'Unsafe URL scheme. Only http:// and https:// allowed',
+    message: "Unsafe URL scheme. Only http:// and https:// allowed",
   })
   .refine((val) => URL_PATTERN.test(val), {
-    message: 'Invalid URL format. Must start with http:// or https://',
+    message: "Invalid URL format. Must start with http:// or https://",
   });
 
 export type URL = z.infer<typeof URLSchema>;
@@ -204,9 +217,9 @@ export type URL = z.infer<typeof URLSchema>;
 export const IPOrDomainSchema = z
   .string()
   .trim()
-  .min(1, 'Target is required')
+  .min(1, "Target is required")
   .refine((val) => !COMMAND_INJECTION_PATTERNS.some((p) => p.test(val)), {
-    message: 'Invalid characters in target',
+    message: "Invalid characters in target",
   })
   .refine(
     (val) => {
@@ -215,8 +228,8 @@ export const IPOrDomainSchema = z
       return isIP || isDomain;
     },
     {
-      message: 'Must be a valid IP address or domain name',
-    }
+      message: "Must be a valid IP address or domain name",
+    },
   );
 
 export type IPOrDomain = z.infer<typeof IPOrDomainSchema>;

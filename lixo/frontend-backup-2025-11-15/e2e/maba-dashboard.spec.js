@@ -16,38 +16,40 @@
  * @license Proprietary
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('MABA Dashboard', () => {
+test.describe("MABA Dashboard", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto("/");
     await expect(page).toHaveTitle(/Vértice/);
   });
 
-  test('deve navegar da Landing Page para MABA Dashboard', async ({ page }) => {
-    const mabaCard = page.locator('text=MABA').first();
+  test("deve navegar da Landing Page para MABA Dashboard", async ({ page }) => {
+    const mabaCard = page.locator("text=MABA").first();
     await expect(mabaCard).toBeVisible();
     await mabaCard.click();
 
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
-    await expect(page.locator('text=Maximus Browser Agent')).toBeVisible();
+    await expect(page.locator("text=Maximus Browser Agent")).toBeVisible();
   });
 
-  test('deve exibir Cognitive Map com D3.js graph', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve exibir Cognitive Map com D3.js graph", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // D3.js renderiza SVG
-    const cognitiveMapSvg = page.locator('svg').first();
+    const cognitiveMapSvg = page.locator("svg").first();
     await expect(cognitiveMapSvg).toBeVisible();
 
     // Verificar que há elementos no grafo (nodes/links)
-    const graphNodes = page.locator('circle, rect').first();
+    const graphNodes = page.locator("circle, rect").first();
     await expect(graphNodes).toBeVisible();
   });
 
-  test('deve alternar entre as 3 tabs (Cognitive Map, Sessions, Timeline)', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve alternar entre as 3 tabs (Cognitive Map, Sessions, Timeline)", async ({
+    page,
+  }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // Tab 1: Cognitive Map (padrão)
@@ -69,8 +71,8 @@ test.describe('MABA Dashboard', () => {
     await expect(cognitiveTab).toHaveClass(/active/);
   });
 
-  test('deve exibir Browser Session Manager', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve exibir Browser Session Manager", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // Ir para tab Sessions
@@ -78,24 +80,30 @@ test.describe('MABA Dashboard', () => {
     await sessionsTab.click();
 
     // Verificar que o Session Manager está visível
-    await expect(page.locator('text=Browser Sessions, text=Active Sessions')).toBeVisible();
+    await expect(
+      page.locator("text=Browser Sessions, text=Active Sessions"),
+    ).toBeVisible();
   });
 
-  test('deve permitir criar nova browser session', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve permitir criar nova browser session", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     const sessionsTab = page.locator('button:has-text("🖥️ Sessions")');
     await sessionsTab.click();
 
     // Encontrar campo de input para URL
-    const urlInput = page.locator('input[type="text"], input[placeholder*="URL"]').first();
+    const urlInput = page
+      .locator('input[type="text"], input[placeholder*="URL"]')
+      .first();
 
     if (await urlInput.isVisible()) {
-      await urlInput.fill('https://example.com');
+      await urlInput.fill("https://example.com");
 
       // Encontrar botão de criar sessão
-      const createButton = page.locator('button:has-text("Criar"), button:has-text("Create")').first();
+      const createButton = page
+        .locator('button:has-text("Criar"), button:has-text("Create")')
+        .first();
 
       if (await createButton.isVisible()) {
         await createButton.click();
@@ -106,36 +114,42 @@ test.describe('MABA Dashboard', () => {
     }
   });
 
-  test('deve exibir Navigation Timeline', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve exibir Navigation Timeline", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     const timelineTab = page.locator('button:has-text("📊 Timeline")');
     await timelineTab.click();
 
     // Verificar que a timeline está visível
-    await expect(page.locator('text=Navigation Timeline, text=Timeline')).toBeVisible();
+    await expect(
+      page.locator("text=Navigation Timeline, text=Timeline"),
+    ).toBeVisible();
   });
 
-  test('deve exibir Stats Overview com métricas', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve exibir Stats Overview com métricas", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // Stats Overview deve estar visível no topo
-    const statsOverview = page.locator('text=Total Sessions, text=Active, text=Success Rate').first();
+    const statsOverview = page
+      .locator("text=Total Sessions, text=Active, text=Success Rate")
+      .first();
     await expect(statsOverview).toBeVisible();
   });
 
-  test('deve mostrar connection indicator (LIVE ou OFFLINE)', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve mostrar connection indicator (LIVE ou OFFLINE)", async ({
+    page,
+  }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
-    const connectionIndicator = page.locator('text=LIVE, text=OFFLINE').first();
+    const connectionIndicator = page.locator("text=LIVE, text=OFFLINE").first();
     await expect(connectionIndicator).toBeVisible();
   });
 
-  test('deve navegar de volta para Landing Page', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve navegar de volta para Landing Page", async ({ page }) => {
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     const backButton = page.locator('button:has-text("← Voltar")');
@@ -143,16 +157,20 @@ test.describe('MABA Dashboard', () => {
     await backButton.click();
 
     await expect(page.locator('h1:has-text("Vértice")')).toBeVisible();
-    await expect(page.locator('text=MABA').first()).toBeVisible();
+    await expect(page.locator("text=MABA").first()).toBeVisible();
   });
 
-  test('deve exibir loading state ao carregar cognitive map', async ({ page }) => {
-    await page.locator('text=MABA').first().click();
+  test("deve exibir loading state ao carregar cognitive map", async ({
+    page,
+  }) => {
+    await page.locator("text=MABA").first().click();
 
-    const loadingIndicator = page.locator('text=Carregando, [class*="spinner"]').first();
+    const loadingIndicator = page
+      .locator('text=Carregando, [class*="spinner"]')
+      .first();
 
     try {
-      await loadingIndicator.waitFor({ state: 'visible', timeout: 1000 });
+      await loadingIndicator.waitFor({ state: "visible", timeout: 1000 });
     } catch (error) {
       // Loading muito rápido
     }
@@ -161,18 +179,18 @@ test.describe('MABA Dashboard', () => {
   });
 });
 
-test.describe('MABA Dashboard - Cognitive Map Interactions', () => {
-  test('deve permitir interações com o grafo D3.js', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('text=MABA').first().click();
+test.describe("MABA Dashboard - Cognitive Map Interactions", () => {
+  test("deve permitir interações com o grafo D3.js", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // Verificar que o SVG é interativo (pode ter zoom/pan)
-    const svg = page.locator('svg').first();
+    const svg = page.locator("svg").first();
     await expect(svg).toBeVisible();
 
     // Tentar clicar em um node (se houver)
-    const nodes = page.locator('circle, rect');
+    const nodes = page.locator("circle, rect");
     const nodeCount = await nodes.count();
 
     if (nodeCount > 0) {
@@ -182,13 +200,15 @@ test.describe('MABA Dashboard - Cognitive Map Interactions', () => {
     }
   });
 
-  test('deve exibir detalhes de nodes quando clicados', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('text=MABA').first().click();
+  test("deve exibir detalhes de nodes quando clicados", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("text=MABA").first().click();
     await expect(page.locator('h1:has-text("MABA Dashboard")')).toBeVisible();
 
     // CognitiveMapViewer tem details panel
-    const detailsPanel = page.locator('text=Node Details, text=Elements, text=URL');
+    const detailsPanel = page.locator(
+      "text=Node Details, text=Elements, text=URL",
+    );
 
     // Pode não estar visível inicialmente (só após clicar em node)
     const isPanelInDom = await detailsPanel.count();

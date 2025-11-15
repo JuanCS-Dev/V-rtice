@@ -11,13 +11,17 @@ Sistema escalável e modular para criar efeitos visuais de background no MAXIMUS
 ## ✨ Efeitos Disponíveis
 
 ### 1. **Scanline** (━)
+
 Linha horizontal descendo pela tela (clássico).
+
 - **Tecnologia**: CSS puro com animation
 - **Performance**: Excelente (GPU accelerated)
 - **Complexidade**: ⭐
 
 ### 2. **Matrix Rain** (⋮) - PADRÃO
+
 Códigos binários caindo estilo Matrix.
+
 - **Tecnologia**: HTML5 Canvas + JavaScript
 - **Performance**: Boa (60 FPS)
 - **Complexidade**: ⭐⭐⭐
@@ -28,7 +32,9 @@ Códigos binários caindo estilo Matrix.
   - Texto: `01MAXIMUS` (binary + nome)
 
 ### 3. **Particles** (∴)
+
 Partículas flutuantes conectadas.
+
 - **Tecnologia**: HTML5 Canvas
 - **Performance**: Boa
 - **Complexidade**: ⭐⭐
@@ -38,6 +44,7 @@ Partículas flutuantes conectadas.
   - Bounce nas bordas
 
 ### 4. **None** (○)
+
 Desabilita efeitos de background.
 
 ---
@@ -59,7 +66,7 @@ export const WaveEffect = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     // Configuração
     const resizeCanvas = () => {
@@ -67,7 +74,7 @@ export const WaveEffect = () => {
       canvas.height = window.innerHeight;
     };
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     // Variáveis da onda
     let offset = 0;
@@ -85,7 +92,7 @@ export const WaveEffect = () => {
         ctx.lineTo(x, y);
       }
 
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.3)';
+      ctx.strokeStyle = "rgba(139, 92, 246, 0.3)";
       ctx.lineWidth = 2;
       ctx.stroke();
 
@@ -97,7 +104,7 @@ export const WaveEffect = () => {
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
 
@@ -105,13 +112,13 @@ export const WaveEffect = () => {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: 1,
-        pointerEvents: 'none'
+        pointerEvents: "none",
       }}
     />
   );
@@ -126,12 +133,12 @@ No mesmo arquivo, adicione ao array `AVAILABLE_EFFECTS`:
 export const AVAILABLE_EFFECTS = [
   // ... efeitos existentes ...
   {
-    id: 'wave',
-    name: 'Wave',
-    description: 'Ondas animadas atravessando a tela',
-    icon: '〜',
-    component: WaveEffect
-  }
+    id: "wave",
+    name: "Wave",
+    description: "Ondas animadas atravessando a tela",
+    icon: "〜",
+    component: WaveEffect,
+  },
 ];
 ```
 
@@ -149,19 +156,19 @@ Use sempre tons da paleta MAXIMUS para manter consistência:
 
 ```jsx
 // Primary (Roxo)
-'rgba(139, 92, 246, 0.X)' // #8B5CF6
+"rgba(139, 92, 246, 0.X)"; // #8B5CF6
 
 // Secondary (Cyan)
-'rgba(6, 182, 212, 0.X)'  // #06B6D4
+"rgba(6, 182, 212, 0.X)"; // #06B6D4
 
 // Success (Verde)
-'rgba(16, 185, 129, 0.X)' // #10B981
+"rgba(16, 185, 129, 0.X)"; // #10B981
 
 // Danger (Vermelho)
-'rgba(239, 68, 68, 0.X)'  // #EF4444
+"rgba(239, 68, 68, 0.X)"; // #EF4444
 
 // Warning (Laranja)
-'rgba(245, 158, 11, 0.X)' // #F59E0B
+"rgba(245, 158, 11, 0.X)"; // #F59E0B
 ```
 
 **Opacidade**: Sempre BEM sutil! Use valores entre `0.05` e `0.4`.
@@ -185,7 +192,7 @@ export const MeuEfeito = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
     // Setup
     const resizeCanvas = () => {
@@ -193,7 +200,7 @@ export const MeuEfeito = () => {
       canvas.height = window.innerHeight;
     };
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     // State do efeito
     let animationState = {};
@@ -219,7 +226,7 @@ export const MeuEfeito = () => {
     // Cleanup
     return () => {
       clearInterval(interval);
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener("resize", resizeCanvas);
     };
   }, []);
 
@@ -227,13 +234,13 @@ export const MeuEfeito = () => {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: 1,
-        pointerEvents: 'none'
+        pointerEvents: "none",
       }}
     />
   );
@@ -245,18 +252,20 @@ export const MeuEfeito = () => {
 ```jsx
 export const MeuEfeitoCSS = () => {
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      zIndex: 1,
-      pointerEvents: 'none',
-      // Seu CSS aqui
-      background: 'linear-gradient(...)',
-      animation: 'minhaAnimation 5s infinite'
-    }} />
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 1,
+        pointerEvents: "none",
+        // Seu CSS aqui
+        background: "linear-gradient(...)",
+        animation: "minhaAnimation 5s infinite",
+      }}
+    />
   );
 };
 ```
@@ -266,16 +275,19 @@ export const MeuEfeitoCSS = () => {
 ## 💡 Ideias para Novos Efeitos
 
 ### Nível Fácil (⭐)
+
 - **Gradient Shift**: Gradiente que muda de cor suavemente
 - **Pulse**: Pulsação de luz do centro
 - **Grid Lines**: Linhas de grid se movendo
 
 ### Nível Médio (⭐⭐)
+
 - **DNA Helix**: Hélice dupla rotacionando
 - **Binary Rain**: Similar ao Matrix mas mais aleatório
 - **Starfield**: Campo de estrelas se movendo
 
 ### Nível Avançado (⭐⭐⭐)
+
 - **Neural Network**: Nodes conectados como rede neural
 - **Fractal**: Padrões fractais animados
 - **3D Cube**: Cubo wireframe rotacionando (perspective CSS)
@@ -313,12 +325,12 @@ console.log(`Frame time: ${(endTime - startTime).toFixed(2)}ms`);
 
 ## 📊 Comparação de Efeitos
 
-| Efeito | Performance | Complexidade | Uso de CPU | Uso de GPU |
-|--------|-------------|--------------|------------|------------|
-| Scanline | ⭐⭐⭐⭐⭐ | ⭐ | Baixo | Alto |
-| Matrix | ⭐⭐⭐⭐ | ⭐⭐⭐ | Médio | Médio |
-| Particles | ⭐⭐⭐⭐ | ⭐⭐ | Médio | Médio |
-| None | ⭐⭐⭐⭐⭐ | - | Zero | Zero |
+| Efeito    | Performance | Complexidade | Uso de CPU | Uso de GPU |
+| --------- | ----------- | ------------ | ---------- | ---------- |
+| Scanline  | ⭐⭐⭐⭐⭐  | ⭐           | Baixo      | Alto       |
+| Matrix    | ⭐⭐⭐⭐    | ⭐⭐⭐       | Médio      | Médio      |
+| Particles | ⭐⭐⭐⭐    | ⭐⭐         | Médio      | Médio      |
+| None      | ⭐⭐⭐⭐⭐  | -            | Zero       | Zero       |
 
 ---
 
@@ -340,10 +352,11 @@ console.log(`Frame time: ${(endTime - startTime).toFixed(2)}ms`);
 ### Efeito não responde ao resize
 
 Adicionar listener:
+
 ```javascript
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener("resize", resizeCanvas);
 // Cleanup:
-return () => window.removeEventListener('resize', resizeCanvas);
+return () => window.removeEventListener("resize", resizeCanvas);
 ```
 
 ---
@@ -374,15 +387,18 @@ feat(effects): Add DNA Helix background effect
 ## 🎓 Recursos de Aprendizado
 
 ### Canvas API
+
 - [MDN Canvas Tutorial](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial)
 - [Canvas Cheat Sheet](https://simon.html5.org/dump/html5-canvas-cheat-sheet.html)
 
 ### Math para Animações
+
 - `Math.sin()` / `Math.cos()` - Ondas e rotações
 - `Math.random()` - Aleatoriedade
 - `Math.atan2()` - Ângulos entre pontos
 
 ### Performance
+
 - [Rendering Performance](https://web.dev/rendering-performance/)
 - [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
 
@@ -400,4 +416,4 @@ Melhores efeitos criados pela comunidade (espaço reservado para futuro):
 
 **Criado com 💜 para o Projeto MAXIMUS**
 
-*"Ensine a AI a sonhar visualmente"*
+_"Ensine a AI a sonhar visualmente"_

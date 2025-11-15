@@ -1,31 +1,36 @@
 /**
  * 🕸️ Reactive Fabric Dashboard - Phase 1 Intelligence Collection
- * 
+ *
  * Central intelligence fusion center for passive honeypot monitoring.
  * Implements "Decoy Bayou" visualization with real-time threat tracking.
- * 
+ *
  * @module ReactiveFabricDashboard
  * @implements {DOUTRINA_VERTICE} - Production-ready, zero placeholders
  * @phase Phase 1 - Passive Intelligence Collection Only
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import logger from "@/utils/logger";
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import styles from './ReactiveFabricDashboard.module.css';
-import { DashboardFooter } from '../shared/DashboardFooter';
-import DecoyBayouMap from './DecoyBayouMap';
-import IntelligenceFusionPanel from './IntelligenceFusionPanel';
-import ThreatTimelineWidget from './ThreatTimelineWidget';
-import HoneypotStatusGrid from './HoneypotStatusGrid';
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import styles from "./ReactiveFabricDashboard.module.css";
+import { DashboardFooter } from "../shared/DashboardFooter";
+import DecoyBayouMap from "./DecoyBayouMap";
+import IntelligenceFusionPanel from "./IntelligenceFusionPanel";
+import ThreatTimelineWidget from "./ThreatTimelineWidget";
+import HoneypotStatusGrid from "./HoneypotStatusGrid";
 
 /**
  * Main dashboard component orchestrating all reactive fabric visualizations
  */
 const ReactiveFabricDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [honeypotData, setHoneypotData] = useState([]);
   const [threatEvents, setThreatEvents] = useState([]);
   const [fusionIntel, setFusionIntel] = useState(null);
@@ -38,14 +43,14 @@ const ReactiveFabricDashboard = () => {
    */
   const fetchHoneypotStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/reactive-fabric/honeypots/status');
+      const response = await fetch("/api/reactive-fabric/honeypots/status");
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+
       const data = await response.json();
       setHoneypotData(data.honeypots || []);
       setLastUpdate(new Date().toISOString());
     } catch (err) {
-      logger.error('Failed to fetch honeypot status:', err);
+      logger.error("Failed to fetch honeypot status:", err);
       setError(err.message);
     }
   }, []);
@@ -55,13 +60,15 @@ const ReactiveFabricDashboard = () => {
    */
   const fetchThreatEvents = useCallback(async () => {
     try {
-      const response = await fetch('/api/reactive-fabric/events/recent?limit=50');
+      const response = await fetch(
+        "/api/reactive-fabric/events/recent?limit=50",
+      );
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+
       const data = await response.json();
       setThreatEvents(data.events || []);
     } catch (err) {
-      logger.error('Failed to fetch threat events:', err);
+      logger.error("Failed to fetch threat events:", err);
       setError(err.message);
     }
   }, []);
@@ -71,13 +78,13 @@ const ReactiveFabricDashboard = () => {
    */
   const fetchIntelligenceFusion = useCallback(async () => {
     try {
-      const response = await fetch('/api/reactive-fabric/intelligence/fusion');
+      const response = await fetch("/api/reactive-fabric/intelligence/fusion");
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
+
       const data = await response.json();
       setFusionIntel(data);
     } catch (err) {
-      logger.error('Failed to fetch intelligence fusion:', err);
+      logger.error("Failed to fetch intelligence fusion:", err);
       setError(err.message);
     }
   }, []);
@@ -91,7 +98,7 @@ const ReactiveFabricDashboard = () => {
       await Promise.all([
         fetchHoneypotStatus(),
         fetchThreatEvents(),
-        fetchIntelligenceFusion()
+        fetchIntelligenceFusion(),
       ]);
       setIsLoading(false);
     };
@@ -116,10 +123,11 @@ const ReactiveFabricDashboard = () => {
    * Calculate metrics
    */
   const metrics = {
-    activeHoneypots: honeypotData.filter(h => h.status === 'active').length,
+    activeHoneypots: honeypotData.filter((h) => h.status === "active").length,
     totalInteractions: threatEvents.length,
-    uniqueAttackers: new Set(threatEvents.map(e => e.source_ip)).size,
-    criticalThreats: threatEvents.filter(e => e.severity === 'critical').length
+    uniqueAttackers: new Set(threatEvents.map((e) => e.source_ip)).size,
+    criticalThreats: threatEvents.filter((e) => e.severity === "critical")
+      .length,
   };
 
   if (isLoading) {
@@ -137,7 +145,7 @@ const ReactiveFabricDashboard = () => {
         <div className={styles.errorIcon}>⚠️</div>
         <h2 className={styles.errorTitle}>Connection Failed</h2>
         <p className={styles.errorMessage}>{error}</p>
-        <button 
+        <button
           className={styles.retryButton}
           onClick={() => window.location.reload()}
         >
@@ -156,9 +164,11 @@ const ReactiveFabricDashboard = () => {
             <span className={styles.titleIcon}>🕸️</span>
             Reactive Fabric
           </h1>
-          <span className={styles.phase}>Phase 1 - Intelligence Collection</span>
+          <span className={styles.phase}>
+            Phase 1 - Intelligence Collection
+          </span>
         </div>
-        
+
         <div className={styles.headerRight}>
           <div className={styles.statusBadge}>
             <span className={styles.statusDot} />
@@ -180,7 +190,9 @@ const ReactiveFabricDashboard = () => {
         </div>
         <div className={styles.metric}>
           <span className={styles.metricLabel}>Total Interactions</span>
-          <span className={styles.metricValue}>{metrics.totalInteractions}</span>
+          <span className={styles.metricValue}>
+            {metrics.totalInteractions}
+          </span>
         </div>
         <div className={styles.metric}>
           <span className={styles.metricLabel}>Unique Attackers</span>
@@ -197,26 +209,26 @@ const ReactiveFabricDashboard = () => {
       {/* Navigation Tabs */}
       <nav className={styles.tabNav}>
         <button
-          className={`${styles.tab} ${activeTab === 'overview' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('overview')}
+          className={`${styles.tab} ${activeTab === "overview" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("overview")}
         >
           Overview
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'decoy-bayou' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('decoy-bayou')}
+          className={`${styles.tab} ${activeTab === "decoy-bayou" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("decoy-bayou")}
         >
           Decoy Bayou
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'intelligence' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('intelligence')}
+          className={`${styles.tab} ${activeTab === "intelligence" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("intelligence")}
         >
           Intelligence Fusion
         </button>
         <button
-          className={`${styles.tab} ${activeTab === 'timeline' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('timeline')}
+          className={`${styles.tab} ${activeTab === "timeline" ? styles.tabActive : ""}`}
+          onClick={() => setActiveTab("timeline")}
         >
           Threat Timeline
         </button>
@@ -224,7 +236,7 @@ const ReactiveFabricDashboard = () => {
 
       {/* Main Content */}
       <main className={styles.content}>
-        {activeTab === 'overview' && (
+        {activeTab === "overview" && (
           <div className={styles.overviewGrid}>
             <div className={styles.gridItem}>
               <HoneypotStatusGrid honeypots={honeypotData} />
@@ -235,21 +247,18 @@ const ReactiveFabricDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'decoy-bayou' && (
-          <DecoyBayouMap
-            honeypots={honeypotData}
-            threats={threatEvents}
-          />
+        {activeTab === "decoy-bayou" && (
+          <DecoyBayouMap honeypots={honeypotData} threats={threatEvents} />
         )}
 
-        {activeTab === 'intelligence' && (
+        {activeTab === "intelligence" && (
           <IntelligenceFusionPanel
             fusionData={fusionIntel}
             events={threatEvents}
           />
         )}
 
-        {activeTab === 'timeline' && (
+        {activeTab === "timeline" && (
           <div data-testid="fabric-event-stream">
             <ThreatTimelineWidget events={threatEvents} />
           </div>
@@ -261,13 +270,17 @@ const ReactiveFabricDashboard = () => {
         moduleName="REACTIVE FABRIC"
         classification="TOP SECRET"
         statusItems={[
-          { label: 'HONEYPOTS', value: `${metrics.activeHoneypots} ACTIVE`, online: metrics.activeHoneypots > 0 },
-          { label: 'PHASE', value: 'INTELLIGENCE COLLECTION', online: true }
+          {
+            label: "HONEYPOTS",
+            value: `${metrics.activeHoneypots} ACTIVE`,
+            online: metrics.activeHoneypots > 0,
+          },
+          { label: "PHASE", value: "INTELLIGENCE COLLECTION", online: true },
         ]}
         metricsItems={[
-          { label: 'INTERACTIONS', value: metrics.totalInteractions },
-          { label: 'ATTACKERS', value: metrics.uniqueAttackers },
-          { label: 'CRITICAL', value: metrics.criticalThreats }
+          { label: "INTERACTIONS", value: metrics.totalInteractions },
+          { label: "ATTACKERS", value: metrics.uniqueAttackers },
+          { label: "CRITICAL", value: metrics.criticalThreats },
         ]}
         showTimestamp={true}
       />

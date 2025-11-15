@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import logger from '@/utils/logger';
-import { socialMediaInvestigation } from '../../../../api/worldClassTools';
+import { useState, useCallback } from "react";
+import logger from "@/utils/logger";
+import { socialMediaInvestigation } from "../../../../api/worldClassTools";
 
 /**
  * Custom hook for social media investigation logic.
@@ -14,12 +14,12 @@ export const useSocialMediaInvestigation = () => {
   const investigate = useCallback(async (target, platforms) => {
     // Validate input
     if (!target?.trim()) {
-      setError('Username/Target é obrigatório');
+      setError("Username/Target é obrigatório");
       return;
     }
 
     if (!platforms || platforms.length === 0) {
-      setError('Selecione pelo menos uma plataforma');
+      setError("Selecione pelo menos uma plataforma");
       return;
     }
 
@@ -31,17 +31,20 @@ export const useSocialMediaInvestigation = () => {
     try {
       const response = await socialMediaInvestigation(target.trim(), {
         platforms,
-        deepAnalysis: true
+        deepAnalysis: true,
       });
 
       if (response && response.result) {
         setResult(response.result);
       } else {
-        throw new Error('Resposta inválida do servidor');
+        throw new Error("Resposta inválida do servidor");
       }
     } catch (err) {
-      logger.error('Social Media Investigation Error:', err);
-      setError(err.message || 'Erro ao investigar target. Verifique se o serviço está ativo.');
+      logger.error("Social Media Investigation Error:", err);
+      setError(
+        err.message ||
+          "Erro ao investigar target. Verifique se o serviço está ativo.",
+      );
     } finally {
       setLoading(false);
     }
@@ -58,7 +61,7 @@ export const useSocialMediaInvestigation = () => {
     loading,
     error,
     investigate,
-    reset
+    reset,
   };
 };
 

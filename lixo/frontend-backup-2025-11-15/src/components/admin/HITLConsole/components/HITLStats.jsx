@@ -1,6 +1,6 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './HITLStats.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import styles from "./HITLStats.module.css";
 
 const HITLStats = ({ stats, loading }) => {
   if (loading || !stats) {
@@ -10,7 +10,7 @@ const HITLStats = ({ stats, loading }) => {
   return (
     <div className={styles.container}>
       <h2 className={styles.title}>HITL STATISTICS</h2>
-      
+
       <div className={styles.grid}>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Pending Reviews</span>
@@ -30,11 +30,15 @@ const HITLStats = ({ stats, loading }) => {
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Avg Review Time</span>
-          <span className={styles.statValue}>{Math.floor(stats.average_review_time_seconds / 60)}m</span>
+          <span className={styles.statValue}>
+            {Math.floor(stats.average_review_time_seconds / 60)}m
+          </span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Agreement Rate</span>
-          <span className={styles.statValue}>{(stats.human_ai_agreement_rate * 100).toFixed(0)}%</span>
+          <span className={styles.statValue}>
+            {(stats.human_ai_agreement_rate * 100).toFixed(0)}%
+          </span>
         </div>
       </div>
 
@@ -65,7 +69,7 @@ const HITLStats = ({ stats, loading }) => {
 
 HITLStats.propTypes = {
   stats: PropTypes.object,
-  loading: PropTypes.bool
+  loading: PropTypes.bool,
 };
 
 export default HITLStats;

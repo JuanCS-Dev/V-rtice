@@ -1,22 +1,22 @@
 /**
  * Demo Component - Micro-interactions Showcase
  * MAXIMUS Vértice - Frontend Phase 3
- * 
+ *
  * Purpose: Demonstrate all animation capabilities
  * Can be removed after integration validation
  */
 
-import React, { useState } from 'react';
-import { useToast } from '../shared/Toast';
-import { 
-  Spinner, 
-  SkeletonCard, 
-  SkeletonList, 
+import React, { useState } from "react";
+import { useToast } from "../shared/Toast";
+import {
+  Spinner,
+  SkeletonCard,
+  SkeletonList,
   ProgressBar,
   PulseLoader,
-  LoadingOverlay
-} from '../shared/LoadingStates';
-import styles from './MicroInteractionsDemo.module.css';
+  LoadingOverlay,
+} from "../shared/LoadingStates";
+import styles from "./MicroInteractionsDemo.module.css";
 
 export const MicroInteractionsDemo = () => {
   const toast = useToast();
@@ -24,37 +24,37 @@ export const MicroInteractionsDemo = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSuccess = () => {
-    toast.success('✨ Operation completed successfully!', {
-      duration: 3000
+    toast.success("✨ Operation completed successfully!", {
+      duration: 3000,
     });
   };
 
   const handleError = () => {
-    toast.error('❌ Something went wrong. Please try again.', {
+    toast.error("❌ Something went wrong. Please try again.", {
       duration: 4000,
       action: {
-        label: 'Retry',
-        onClick: () => console.log('Retry clicked')
-      }
+        label: "Retry",
+        onClick: () => console.log("Retry clicked"),
+      },
     });
   };
 
   const handleWarning = () => {
-    toast.warning('⚠️ This action requires confirmation', {
-      duration: 5000
+    toast.warning("⚠️ This action requires confirmation", {
+      duration: 5000,
     });
   };
 
   const handleInfo = () => {
-    toast.info('ℹ️ System update available', {
-      duration: 4000
+    toast.info("ℹ️ System update available", {
+      duration: 4000,
     });
   };
 
   const simulateProgress = () => {
     setProgress(0);
     const interval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
@@ -133,8 +133,8 @@ export const MicroInteractionsDemo = () => {
         {/* Progress Bar */}
         <section className={styles.section}>
           <h2>Progress Bars</h2>
-          <ProgressBar 
-            progress={progress} 
+          <ProgressBar
+            progress={progress}
             label="Upload Progress"
             variant="primary"
           />
@@ -158,28 +158,28 @@ export const MicroInteractionsDemo = () => {
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             <div className={styles.formGroup}>
               <label htmlFor="demo-input">Input with focus animation</label>
-              <input 
+              <input
                 id="demo-input"
-                type="text" 
-                placeholder="Type something..." 
+                type="text"
+                placeholder="Type something..."
                 className={styles.input}
               />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="demo-error">Error state input</label>
-              <input 
+              <input
                 id="demo-error"
-                type="text" 
-                placeholder="Trigger error..." 
+                type="text"
+                placeholder="Trigger error..."
                 className={`${styles.input} ${styles.inputError}`}
               />
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="demo-success">Success state input</label>
-              <input 
+              <input
                 id="demo-success"
-                type="text" 
-                placeholder="Success..." 
+                type="text"
+                placeholder="Success..."
                 className={`${styles.input} ${styles.inputSuccess}`}
               />
             </div>
@@ -189,8 +189,8 @@ export const MicroInteractionsDemo = () => {
         {/* Loading Overlay */}
         <section className={styles.section}>
           <h2>Loading Overlay</h2>
-          <button 
-            className={styles.btnSecondary} 
+          <button
+            className={styles.btnSecondary}
             onClick={() => setIsLoading(!isLoading)}
           >
             Toggle Loading
@@ -207,11 +207,13 @@ export const MicroInteractionsDemo = () => {
         <section className={styles.section}>
           <h2>Staggered Animations</h2>
           <ul className={styles.staggeredList}>
-            {['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'].map((item, i) => (
-              <li key={i} className={`${styles.listItem} stagger-${i + 1}`}>
-                {item}
-              </li>
-            ))}
+            {["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"].map(
+              (item, i) => (
+                <li key={i} className={`${styles.listItem} stagger-${i + 1}`}>
+                  {item}
+                </li>
+              ),
+            )}
           </ul>
         </section>
       </div>

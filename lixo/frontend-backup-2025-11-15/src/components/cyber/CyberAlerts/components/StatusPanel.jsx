@@ -1,11 +1,11 @@
-import React from 'react';
-import styles from './StatusPanel.module.css';
+import React from "react";
+import styles from "./StatusPanel.module.css";
 
 const STATUS_ITEMS = [
-  { label: 'THREAT INTEL', value: 'active', showIndicator: true },
-  { label: 'APIs ATIVAS', value: '7/7' },
-  { label: 'FEEDS ATIVOS', value: '12' },
-  { label: 'LATÊNCIA', value: '89ms' }
+  { label: "THREAT INTEL", value: "active", showIndicator: true },
+  { label: "APIs ATIVAS", value: "7/7" },
+  { label: "FEEDS ATIVOS", value: "12" },
+  { label: "LATÊNCIA", value: "89ms" },
 ];
 
 export const StatusPanel = () => {

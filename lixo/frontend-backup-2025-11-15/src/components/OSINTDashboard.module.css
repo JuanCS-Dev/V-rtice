@@ -11,7 +11,7 @@
   width: 100vw;
   background: var(--dashboard-bg);
   color: var(--color-text-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
 }
 
@@ -70,7 +70,8 @@
    ANIMATIONS
    ============================================ */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

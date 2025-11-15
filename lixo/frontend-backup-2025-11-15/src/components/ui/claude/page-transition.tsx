@@ -14,27 +14,28 @@
  * ```
  */
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-animations.css"
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-animations.css";
 
-export interface PageTransitionProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface PageTransitionProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Transition type
    */
-  type?: "fade" | "slide" | "scale" | "slide-fade"
+  type?: "fade" | "slide" | "scale" | "slide-fade";
   /**
    * Transition duration in ms
    */
-  duration?: number
+  duration?: number;
   /**
    * Delay before transition starts
    */
-  delay?: number
+  delay?: number;
   /**
    * Children to animate
    */
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 /**
@@ -49,33 +50,39 @@ export interface PageTransitionProps extends React.HTMLAttributes<HTMLDivElement
  * </PageTransition>
  * ```
  */
-export const PageTransition = React.forwardRef<HTMLDivElement, PageTransitionProps>(
-  ({ className, type = "fade", duration = 400, delay = 0, children, ...props }, ref) => {
-    const [isVisible, setIsVisible] = React.useState(false)
+export const PageTransition = React.forwardRef<
+  HTMLDivElement,
+  PageTransitionProps
+>(
+  (
+    { className, type = "fade", duration = 400, delay = 0, children, ...props },
+    ref,
+  ) => {
+    const [isVisible, setIsVisible] = React.useState(false);
 
     React.useEffect(() => {
       // Trigger animation on mount
       const timer = setTimeout(() => {
-        setIsVisible(true)
-      }, delay)
+        setIsVisible(true);
+      }, delay);
 
-      return () => clearTimeout(timer)
-    }, [delay])
+      return () => clearTimeout(timer);
+    }, [delay]);
 
     const animationClass = React.useMemo(() => {
       switch (type) {
         case "fade":
-          return "page-enter"
+          return "page-enter";
         case "slide":
-          return "page-slide-enter"
+          return "page-slide-enter";
         case "scale":
-          return "animate-scale-in"
+          return "animate-scale-in";
         case "slide-fade":
-          return "page-slide-enter"
+          return "page-slide-enter";
         default:
-          return "page-enter"
+          return "page-enter";
       }
-    }, [type])
+    }, [type]);
 
     return (
       <div
@@ -87,7 +94,7 @@ export const PageTransition = React.forwardRef<HTMLDivElement, PageTransitionPro
             // Animation
             isVisible && animationClass,
           ].join(" "),
-          className
+          className,
         )}
         style={{
           animationDuration: `${duration}ms`,
@@ -96,41 +103,42 @@ export const PageTransition = React.forwardRef<HTMLDivElement, PageTransitionPro
       >
         {children}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-PageTransition.displayName = "PageTransition"
+PageTransition.displayName = "PageTransition";
 
 /* ============================================================================
    SCROLL REVEAL
    ============================================================================ */
 
-export interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ScrollRevealProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Reveal type
    */
-  type?: "fade" | "slide-up" | "slide-left" | "slide-right"
+  type?: "fade" | "slide-up" | "slide-left" | "slide-right";
   /**
    * Threshold for IntersectionObserver (0-1)
    */
-  threshold?: number
+  threshold?: number;
   /**
    * Root margin for IntersectionObserver
    */
-  rootMargin?: string
+  rootMargin?: string;
   /**
    * Trigger animation once or every time element enters viewport
    */
-  once?: boolean
+  once?: boolean;
   /**
    * Stagger delay (for sequential animations)
    */
-  stagger?: number
+  stagger?: number;
   /**
    * Children to animate
    */
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 /**
@@ -157,56 +165,56 @@ export const ScrollReveal = React.forwardRef<HTMLDivElement, ScrollRevealProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const [isVisible, setIsVisible] = React.useState(false)
-    const elementRef = React.useRef<HTMLDivElement>(null)
+    const [isVisible, setIsVisible] = React.useState(false);
+    const elementRef = React.useRef<HTMLDivElement>(null);
 
     // Combine refs
-    React.useImperativeHandle(ref, () => elementRef.current as HTMLDivElement)
+    React.useImperativeHandle(ref, () => elementRef.current as HTMLDivElement);
 
     React.useEffect(() => {
-      const element = elementRef.current
-      if (!element) return
+      const element = elementRef.current;
+      if (!element) return;
 
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
-            setIsVisible(true)
+            setIsVisible(true);
             if (once) {
-              observer.unobserve(element)
+              observer.unobserve(element);
             }
           } else if (!once) {
-            setIsVisible(false)
+            setIsVisible(false);
           }
         },
         {
           threshold,
           rootMargin,
-        }
-      )
+        },
+      );
 
-      observer.observe(element)
+      observer.observe(element);
 
       return () => {
-        observer.disconnect()
-      }
-    }, [threshold, rootMargin, once])
+        observer.disconnect();
+      };
+    }, [threshold, rootMargin, once]);
 
     const baseClass = React.useMemo(() => {
       switch (type) {
         case "fade":
-          return "scroll-fade-in"
+          return "scroll-fade-in";
         case "slide-up":
-          return "scroll-slide-up"
+          return "scroll-slide-up";
         case "slide-left":
-          return "opacity-0 translate-x-4 transition-all duration-600"
+          return "opacity-0 translate-x-4 transition-all duration-600";
         case "slide-right":
-          return "opacity-0 -translate-x-4 transition-all duration-600"
+          return "opacity-0 -translate-x-4 transition-all duration-600";
         default:
-          return "scroll-fade-in"
+          return "scroll-fade-in";
       }
-    }, [type])
+    }, [type]);
 
     return (
       <div
@@ -218,7 +226,7 @@ export const ScrollReveal = React.forwardRef<HTMLDivElement, ScrollRevealProps>(
             isVisible && type === "slide-left" && "opacity-100 translate-x-0",
             isVisible && type === "slide-right" && "opacity-100 translate-x-0",
           ].join(" "),
-          className
+          className,
         )}
         style={{
           transitionDelay: stagger ? `${stagger}ms` : undefined,
@@ -227,29 +235,30 @@ export const ScrollReveal = React.forwardRef<HTMLDivElement, ScrollRevealProps>(
       >
         {children}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-ScrollReveal.displayName = "ScrollReveal"
+ScrollReveal.displayName = "ScrollReveal";
 
 /* ============================================================================
    STAGGER CONTAINER
    ============================================================================ */
 
-export interface StaggerContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface StaggerContainerProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Stagger delay between children (ms)
    */
-  staggerDelay?: number
+  staggerDelay?: number;
   /**
    * Animation type for children
    */
-  animationType?: "fade" | "slide-up" | "scale"
+  animationType?: "fade" | "slide-up" | "scale";
   /**
    * Children to stagger
    */
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 /**
@@ -266,25 +275,37 @@ export interface StaggerContainerProps extends React.HTMLAttributes<HTMLDivEleme
  * </StaggerContainer>
  * ```
  */
-export const StaggerContainer = React.forwardRef<HTMLDivElement, StaggerContainerProps>(
-  ({ className, staggerDelay = 50, animationType = "fade", children, ...props }, ref) => {
+export const StaggerContainer = React.forwardRef<
+  HTMLDivElement,
+  StaggerContainerProps
+>(
+  (
+    {
+      className,
+      staggerDelay = 50,
+      animationType = "fade",
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const animationClass = React.useMemo(() => {
       switch (animationType) {
         case "fade":
-          return "animate-fade-in"
+          return "animate-fade-in";
         case "slide-up":
-          return "animate-slide-up"
+          return "animate-slide-up";
         case "scale":
-          return "animate-scale-in"
+          return "animate-scale-in";
         default:
-          return "animate-fade-in"
+          return "animate-fade-in";
       }
-    }, [animationType])
+    }, [animationType]);
 
     return (
       <div ref={ref} className={cn("", className)} {...props}>
         {React.Children.map(children, (child, index) => {
-          if (!React.isValidElement(child)) return child
+          if (!React.isValidElement(child)) return child;
 
           return (
             <div
@@ -295,32 +316,33 @@ export const StaggerContainer = React.forwardRef<HTMLDivElement, StaggerContaine
             >
               {child}
             </div>
-          )
+          );
         })}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-StaggerContainer.displayName = "StaggerContainer"
+StaggerContainer.displayName = "StaggerContainer";
 
 /* ============================================================================
    MODAL TRANSITION
    ============================================================================ */
 
-export interface ModalTransitionProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ModalTransitionProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Modal open state
    */
-  open: boolean
+  open: boolean;
   /**
    * Callback when animation completes
    */
-  onAnimationEnd?: () => void
+  onAnimationEnd?: () => void;
   /**
    * Children to animate
    */
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 /**
@@ -335,47 +357,48 @@ export interface ModalTransitionProps extends React.HTMLAttributes<HTMLDivElemen
  * </ModalTransition>
  * ```
  */
-export const ModalTransition = React.forwardRef<HTMLDivElement, ModalTransitionProps>(
-  ({ className, open, onAnimationEnd, children, ...props }, ref) => {
-    const [shouldRender, setShouldRender] = React.useState(open)
+export const ModalTransition = React.forwardRef<
+  HTMLDivElement,
+  ModalTransitionProps
+>(({ className, open, onAnimationEnd, children, ...props }, ref) => {
+  const [shouldRender, setShouldRender] = React.useState(open);
 
-    React.useEffect(() => {
-      if (open) {
-        setShouldRender(true)
-      }
-    }, [open])
-
-    const handleAnimationEnd = () => {
-      if (!open) {
-        setShouldRender(false)
-      }
-      onAnimationEnd?.()
+  React.useEffect(() => {
+    if (open) {
+      setShouldRender(true);
     }
+  }, [open]);
 
-    if (!shouldRender) return null
+  const handleAnimationEnd = () => {
+    if (!open) {
+      setShouldRender(false);
+    }
+    onAnimationEnd?.();
+  };
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          [
-            "fixed inset-0 z-50",
-            open ? "modal-backdrop-enter" : "modal-backdrop-exit",
-          ].join(" "),
-          className
-        )}
-        onAnimationEnd={handleAnimationEnd}
-        {...props}
-      >
-        <div className={open ? "modal-content-enter" : "modal-content-exit"}>
-          {children}
-        </div>
+  if (!shouldRender) return null;
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        [
+          "fixed inset-0 z-50",
+          open ? "modal-backdrop-enter" : "modal-backdrop-exit",
+        ].join(" "),
+        className,
+      )}
+      onAnimationEnd={handleAnimationEnd}
+      {...props}
+    >
+      <div className={open ? "modal-content-enter" : "modal-content-exit"}>
+        {children}
       </div>
-    )
-  }
-)
+    </div>
+  );
+});
 
-ModalTransition.displayName = "ModalTransition"
+ModalTransition.displayName = "ModalTransition";
 
 /* ============================================================================
    EXPORTS
@@ -386,4 +409,4 @@ export type {
   ScrollRevealProps,
   StaggerContainerProps,
   ModalTransitionProps,
-}
+};

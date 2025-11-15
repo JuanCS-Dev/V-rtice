@@ -11,24 +11,25 @@
  * - WCAG 2.1 AA compliant (keyboard nav, ARIA, screen reader)
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { LANGUAGE_METADATA } from '../../i18n/config';
-import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
-import { announcer } from '../../utils/accessibility';
-import './LanguageSwitcher.css';
+import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { LANGUAGE_METADATA } from "../../i18n/config";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
+import { useKeyboardNavigation } from "../../hooks/useKeyboardNavigation";
+import { announcer } from "../../utils/accessibility";
+import "./LanguageSwitcher.css";
 
-export const LanguageSwitcher = ({ position = 'top-right' }) => {
+export const LanguageSwitcher = ({ position = "top-right" }) => {
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef(null);
 
-  const currentLanguage = i18n.language || 'pt-BR';
-  const currentLangData = LANGUAGE_METADATA[currentLanguage] || LANGUAGE_METADATA['pt-BR'];
+  const currentLanguage = i18n.language || "pt-BR";
+  const currentLangData =
+    LANGUAGE_METADATA[currentLanguage] || LANGUAGE_METADATA["pt-BR"];
 
   const availableLanguages = Object.values(LANGUAGE_METADATA).filter(
-    lang => lang.code !== currentLanguage
+    (lang) => lang.code !== currentLanguage,
   );
 
   // Focus trap for dropdown
@@ -37,7 +38,7 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
     autoFocus: true,
     returnFocus: true,
     onEscape: () => setIsOpen(false),
-    allowOutsideClick: true
+    allowOutsideClick: true,
   });
 
   // Keyboard navigation for language options
@@ -45,9 +46,9 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
     itemCount: availableLanguages.length,
     onSelect: (index) => handleLanguageChange(availableLanguages[index].code),
     onEscape: () => setIsOpen(false),
-    orientation: 'vertical',
+    orientation: "vertical",
     loop: true,
-    autoFocus: false
+    autoFocus: false,
   });
 
   const handleLanguageChange = (langCode) => {
@@ -57,15 +58,15 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
 
     // Announce to screen readers
     announcer.announce(
-      `${t('language.change')}: ${newLangData.name}`,
-      'polite'
+      `${t("language.change")}: ${newLangData.name}`,
+      "polite",
     );
   };
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {
-      announcer.announce(t('language.selector'), 'polite');
+      announcer.announce(t("language.selector"), "polite");
     }
   };
 
@@ -83,8 +84,8 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, dropdownRef]);
 
   return (
@@ -93,7 +94,7 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
         ref={triggerRef}
         className="language-switcher-trigger"
         onClick={handleToggle}
-        aria-label={`${t('language.current')}: ${currentLangData.name}`}
+        aria-label={`${t("language.current")}: ${currentLangData.name}`}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls="language-listbox"
@@ -103,7 +104,10 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
           {currentLangData.flag}
         </span>
         <span className="language-code">{currentLanguage}</span>
-        <span className={`language-arrow ${isOpen ? 'open' : ''}`} aria-hidden="true">
+        <span
+          className={`language-arrow ${isOpen ? "open" : ""}`}
+          aria-hidden="true"
+        >
           ▼
         </span>
       </button>
@@ -120,10 +124,10 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
             id="language-listbox"
             className="language-switcher-dropdown"
             role="listbox"
-            aria-label={t('language.selector')}
+            aria-label={t("language.selector")}
           >
             <div className="language-switcher-header" aria-hidden="true">
-              {t('language.selector')}
+              {t("language.selector")}
             </div>
 
             {/* Current language */}
@@ -138,23 +142,31 @@ export const LanguageSwitcher = ({ position = 'top-right' }) => {
               </span>
               <div className="language-info">
                 <div className="language-name">{currentLangData.name}</div>
-                <div className="language-native">{currentLangData.nativeName}</div>
+                <div className="language-native">
+                  {currentLangData.nativeName}
+                </div>
               </div>
-              <span className="language-check" aria-hidden="true">✓</span>
+              <span className="language-check" aria-hidden="true">
+                ✓
+              </span>
             </div>
 
-            <div className="language-divider" role="separator" aria-hidden="true" />
+            <div
+              className="language-divider"
+              role="separator"
+              aria-hidden="true"
+            />
 
             {/* Available languages */}
             {availableLanguages.map((lang, index) => (
               <button
                 key={lang.code}
                 {...getItemProps(index, {
-                  className: 'language-option',
+                  className: "language-option",
                   onClick: () => handleLanguageChange(lang.code),
-                  role: 'option',
-                  'aria-selected': false,
-                  'aria-label': `${t('language.change')}: ${lang.name}`
+                  role: "option",
+                  "aria-selected": false,
+                  "aria-label": `${t("language.change")}: ${lang.name}`,
                 })}
               >
                 <span className="language-flag" aria-hidden="true">

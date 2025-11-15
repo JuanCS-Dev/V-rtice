@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 /**
  * AttackChains - Kill Chain Automation
@@ -6,71 +6,127 @@ import React, { useState } from 'react';
 export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
   const [selectedChain, setSelectedChain] = useState(null);
   const [customChain, setCustomChain] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     steps: [],
   });
 
   const predefinedChains = [
     {
-      id: 'recon_to_shell',
-      name: 'Recon → Shell',
-      icon: '🔍→💻',
-      color: 'cyan',
-      description: 'Network reconnaissance followed by exploitation',
+      id: "recon_to_shell",
+      name: "Recon → Shell",
+      icon: "🔍→💻",
+      color: "cyan",
+      description: "Network reconnaissance followed by exploitation",
       steps: [
-        { phase: 'Reconnaissance', action: 'Network scan', tool: 'Nmap' },
-        { phase: 'Weaponization', action: 'Generate payload', tool: 'Metasploit' },
-        { phase: 'Delivery', action: 'Deploy exploit', tool: 'Custom' },
-        { phase: 'Exploitation', action: 'Execute payload', tool: 'Metasploit' },
-        { phase: 'Installation', action: 'Establish persistence', tool: 'Meterpreter' },
+        { phase: "Reconnaissance", action: "Network scan", tool: "Nmap" },
+        {
+          phase: "Weaponization",
+          action: "Generate payload",
+          tool: "Metasploit",
+        },
+        { phase: "Delivery", action: "Deploy exploit", tool: "Custom" },
+        {
+          phase: "Exploitation",
+          action: "Execute payload",
+          tool: "Metasploit",
+        },
+        {
+          phase: "Installation",
+          action: "Establish persistence",
+          tool: "Meterpreter",
+        },
       ],
-      tactics: ['TA0001', 'TA0002', 'TA0003', 'TA0004'],
+      tactics: ["TA0001", "TA0002", "TA0003", "TA0004"],
     },
     {
-      id: 'priv_esc_lateral',
-      name: 'Privilege Escalation → Lateral Movement',
-      icon: '⬆️→➡️',
-      color: 'orange',
-      description: 'Escalate privileges and move laterally through network',
+      id: "priv_esc_lateral",
+      name: "Privilege Escalation → Lateral Movement",
+      icon: "⬆️→➡️",
+      color: "orange",
+      description: "Escalate privileges and move laterally through network",
       steps: [
-        { phase: 'Privilege Escalation', action: 'Exploit vulnerability', tool: 'MSF' },
-        { phase: 'Credential Access', action: 'Dump credentials', tool: 'Mimikatz' },
-        { phase: 'Lateral Movement', action: 'Pass-the-hash', tool: 'CrackMapExec' },
-        { phase: 'Collection', action: 'Gather data', tool: 'Custom' },
+        {
+          phase: "Privilege Escalation",
+          action: "Exploit vulnerability",
+          tool: "MSF",
+        },
+        {
+          phase: "Credential Access",
+          action: "Dump credentials",
+          tool: "Mimikatz",
+        },
+        {
+          phase: "Lateral Movement",
+          action: "Pass-the-hash",
+          tool: "CrackMapExec",
+        },
+        { phase: "Collection", action: "Gather data", tool: "Custom" },
       ],
-      tactics: ['TA0004', 'TA0006', 'TA0008', 'TA0009'],
+      tactics: ["TA0004", "TA0006", "TA0008", "TA0009"],
     },
     {
-      id: 'data_exfil',
-      name: 'Data Exfiltration Chain',
-      icon: '📦→🌐',
-      color: 'red',
-      description: 'Complete data exfiltration workflow',
+      id: "data_exfil",
+      name: "Data Exfiltration Chain",
+      icon: "📦→🌐",
+      color: "red",
+      description: "Complete data exfiltration workflow",
       steps: [
-        { phase: 'Discovery', action: 'Enumerate files', tool: 'PowerShell' },
-        { phase: 'Collection', action: 'Archive sensitive data', tool: '7zip' },
-        { phase: 'Exfiltration', action: 'Transfer over C2', tool: 'Cobalt Strike' },
-        { phase: 'Command & Control', action: 'Maintain connection', tool: 'DNS Tunnel' },
+        { phase: "Discovery", action: "Enumerate files", tool: "PowerShell" },
+        { phase: "Collection", action: "Archive sensitive data", tool: "7zip" },
+        {
+          phase: "Exfiltration",
+          action: "Transfer over C2",
+          tool: "Cobalt Strike",
+        },
+        {
+          phase: "Command & Control",
+          action: "Maintain connection",
+          tool: "DNS Tunnel",
+        },
       ],
-      tactics: ['TA0007', 'TA0009', 'TA0010', 'TA0011'],
+      tactics: ["TA0007", "TA0009", "TA0010", "TA0011"],
     },
     {
-      id: 'full_kill_chain',
-      name: 'Full Kill Chain',
-      icon: '⚔️',
-      color: 'purple',
-      description: 'Complete attack lifecycle from recon to exfil',
+      id: "full_kill_chain",
+      name: "Full Kill Chain",
+      icon: "⚔️",
+      color: "purple",
+      description: "Complete attack lifecycle from recon to exfil",
       steps: [
-        { phase: 'Reconnaissance', action: 'Target enumeration', tool: 'Multiple' },
-        { phase: 'Weaponization', action: 'Prepare exploit', tool: 'Metasploit' },
-        { phase: 'Delivery', action: 'Social engineering', tool: 'Phishing' },
-        { phase: 'Exploitation', action: 'Initial access', tool: 'Custom' },
-        { phase: 'Installation', action: 'Backdoor deployment', tool: 'Cobalt Strike' },
-        { phase: 'Command & Control', action: 'C2 channel', tool: 'HTTPS' },
-        { phase: 'Actions on Objectives', action: 'Data exfiltration', tool: 'DNScat2' },
+        {
+          phase: "Reconnaissance",
+          action: "Target enumeration",
+          tool: "Multiple",
+        },
+        {
+          phase: "Weaponization",
+          action: "Prepare exploit",
+          tool: "Metasploit",
+        },
+        { phase: "Delivery", action: "Social engineering", tool: "Phishing" },
+        { phase: "Exploitation", action: "Initial access", tool: "Custom" },
+        {
+          phase: "Installation",
+          action: "Backdoor deployment",
+          tool: "Cobalt Strike",
+        },
+        { phase: "Command & Control", action: "C2 channel", tool: "HTTPS" },
+        {
+          phase: "Actions on Objectives",
+          action: "Data exfiltration",
+          tool: "DNScat2",
+        },
       ],
-      tactics: ['TA0043', 'TA0001', 'TA0002', 'TA0003', 'TA0004', 'TA0011', 'TA0010'],
+      tactics: [
+        "TA0043",
+        "TA0001",
+        "TA0002",
+        "TA0003",
+        "TA0004",
+        "TA0011",
+        "TA0010",
+      ],
     },
   ];
 
@@ -99,7 +155,9 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
             </p>
           </div>
           <div className="bg-black/50 border border-orange-400/30 rounded px-4 py-2">
-            <span className="text-orange-400 font-bold">{allChains.length}</span>
+            <span className="text-orange-400 font-bold">
+              {allChains.length}
+            </span>
             <span className="text-orange-400/60 text-sm ml-1">chains</span>
           </div>
         </div>
@@ -108,7 +166,7 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
       {/* Attack Chains Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {allChains.map((chain, idx) => {
-          const color = chain.color || 'orange';
+          const color = chain.color || "orange";
           const isSelected = selectedChain?.id === chain.id;
 
           return (
@@ -116,17 +174,21 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
               key={idx}
               role="button"
               tabIndex={0}
-              onClick={() => setSelectedChain(selectedChain?.id === chain.id ? null : chain)}
+              onClick={() =>
+                setSelectedChain(selectedChain?.id === chain.id ? null : chain)
+              }
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  setSelectedChain(selectedChain?.id === chain.id ? null : chain);
+                if (e.key === "Enter" || e.key === " ") {
+                  setSelectedChain(
+                    selectedChain?.id === chain.id ? null : chain,
+                  );
                 }
               }}
               className={`
                 bg-gradient-to-br from-${color}-900/20 to-${color}-900/10
                 border-2 border-${color}-400/30 rounded-lg p-6
                 hover:border-${color}-400 transition-all cursor-pointer
-                ${isSelected ? `ring-2 ring-${color}-400/50` : ''}
+                ${isSelected ? `ring-2 ring-${color}-400/50` : ""}
               `}
             >
               {/* Header */}
@@ -151,7 +213,7 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
                   disabled={isExecuting}
                   className={`px-4 py-2 bg-gradient-to-r from-${color}-600 to-red-600 text-white font-bold text-sm rounded hover:from-${color}-500 hover:to-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
                 >
-                  {isExecuting ? '⚙️' : '🚀'} EXECUTE
+                  {isExecuting ? "⚙️" : "🚀"} EXECUTE
                 </button>
               </div>
 
@@ -186,7 +248,9 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
                         <div className={`text-${color}-400 font-bold text-sm`}>
                           {stepIdx + 1}. {step.phase}
                         </div>
-                        <div className={`text-${color}-400/60 text-xs font-mono`}>
+                        <div
+                          className={`text-${color}-400/60 text-xs font-mono`}
+                        >
                           {step.tool}
                         </div>
                       </div>
@@ -200,7 +264,7 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
 
               {/* Expand Indicator */}
               <div className={`text-${color}-400/50 text-xs text-center mt-3`}>
-                {isSelected ? '▲ Click to collapse' : '▼ Click to expand'}
+                {isSelected ? "▲ Click to collapse" : "▼ Click to expand"}
               </div>
             </div>
           );
@@ -219,7 +283,9 @@ export const AttackChains = ({ chains, onExecuteChain, isExecuting }) => {
             type="text"
             placeholder="Chain name..."
             value={customChain.name}
-            onChange={(e) => setCustomChain({ ...customChain, name: e.target.value })}
+            onChange={(e) =>
+              setCustomChain({ ...customChain, name: e.target.value })
+            }
             className="bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 placeholder-red-400/30 focus:outline-none focus:border-red-400 transition-all"
           />
           <button

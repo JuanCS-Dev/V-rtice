@@ -1,2 +1,2 @@
-export { NmapScanner } from './NmapScanner';
-export { default } from './NmapScanner';
+export { NmapScanner } from "./NmapScanner";
+export { default } from "./NmapScanner";

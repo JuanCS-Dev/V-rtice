@@ -6,7 +6,7 @@
   flex-direction: column;
   background-color: #000000;
   overflow: hidden;
-  font-family: 'Courier New', 'Consolas', monospace;
+  font-family: "Courier New", "Consolas", monospace;
   margin: 0;
   padding: 0;
   position: relative;
@@ -66,8 +66,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .separator {

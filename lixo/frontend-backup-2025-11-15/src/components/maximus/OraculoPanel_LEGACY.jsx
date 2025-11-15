@@ -98,7 +98,7 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
     fetchStats();
     fetchFeedsHealth();
     fetchAPVs();
-    
+
     const statsInterval = setInterval(fetchStats, 10000);
     const feedsInterval = setInterval(fetchFeedsHealth, 30000);
     const apvsInterval = setInterval(fetchAPVs, 15000);
@@ -706,14 +706,14 @@ export const OraculoPanel = ({ aiStatus, setAiStatus }) => {
               <div className="analogy-section">
                 <span className="analogy-icon">🔬</span>
                 <div className="analogy-text">
-                  <strong>Biologia:</strong> Células dendríticas patrulham tecidos periféricos, 
+                  <strong>Biologia:</strong> Células dendríticas patrulham tecidos periféricos,
                   capturando antígenos (patógenos), processando-os e apresentando a células T.
                 </div>
               </div>
               <div className="analogy-section">
                 <span className="analogy-icon">💻</span>
                 <div className="analogy-text">
-                  <strong>Digital:</strong> Oráculo ingere CVEs (antígenos digitais) de múltiplos 
+                  <strong>Digital:</strong> Oráculo ingere CVEs (antígenos digitais) de múltiplos
                   feeds, enriquece dados (CVSS, CWE), filtra relevância e gera APVs para o Eureka.
                 </div>
               </div>

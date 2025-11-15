@@ -13,7 +13,7 @@
  * - useGesture: Touch/mouse gesture detection
  */
 
-import * as React from "react"
+import * as React from "react";
 
 /* ============================================================================
    USE IN VIEW
@@ -23,19 +23,19 @@ export interface UseInViewOptions {
   /**
    * Threshold for IntersectionObserver (0-1)
    */
-  threshold?: number | number[]
+  threshold?: number | number[];
   /**
    * Root margin
    */
-  rootMargin?: string
+  rootMargin?: string;
   /**
    * Trigger once or every time
    */
-  triggerOnce?: boolean
+  triggerOnce?: boolean;
   /**
    * Root element
    */
-  root?: Element | null
+  root?: Element | null;
 }
 
 /**
@@ -50,46 +50,46 @@ export interface UseInViewOptions {
  * ```
  */
 export function useInView<T extends Element = HTMLDivElement>(
-  options: UseInViewOptions = {}
+  options: UseInViewOptions = {},
 ): [React.RefObject<T>, boolean] {
   const {
     threshold = 0,
     rootMargin = "0px",
     triggerOnce = false,
     root = null,
-  } = options
+  } = options;
 
-  const ref = React.useRef<T>(null)
-  const [isInView, setIsInView] = React.useState(false)
+  const ref = React.useRef<T>(null);
+  const [isInView, setIsInView] = React.useState(false);
 
   React.useEffect(() => {
-    const element = ref.current
-    if (!element) return
+    const element = ref.current;
+    if (!element) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const inView = entry.isIntersecting
-        setIsInView(inView)
+        const inView = entry.isIntersecting;
+        setIsInView(inView);
 
         if (inView && triggerOnce) {
-          observer.unobserve(element)
+          observer.unobserve(element);
         }
       },
       {
         threshold,
         rootMargin,
         root,
-      }
-    )
+      },
+    );
 
-    observer.observe(element)
+    observer.observe(element);
 
     return () => {
-      observer.disconnect()
-    }
-  }, [threshold, rootMargin, triggerOnce, root])
+      observer.disconnect();
+    };
+  }, [threshold, rootMargin, triggerOnce, root]);
 
-  return [ref, isInView]
+  return [ref, isInView];
 }
 
 /* ============================================================================
@@ -100,30 +100,30 @@ export interface UseScrollRevealOptions extends UseInViewOptions {
   /**
    * Animation delay (ms)
    */
-  delay?: number
+  delay?: number;
   /**
    * Animation duration (ms)
    */
-  duration?: number
+  duration?: number;
 }
 
 export interface ScrollRevealResult {
   /**
    * Ref to attach to element
    */
-  ref: React.RefObject<HTMLDivElement>
+  ref: React.RefObject<HTMLDivElement>;
   /**
    * Is element in view
    */
-  isInView: boolean
+  isInView: boolean;
   /**
    * CSS class to apply
    */
-  className: string
+  className: string;
   /**
    * Inline styles
    */
-  style: React.CSSProperties
+  style: React.CSSProperties;
 }
 
 /**
@@ -138,10 +138,10 @@ export interface ScrollRevealResult {
  * ```
  */
 export function useScrollReveal(
-  options: UseScrollRevealOptions = {}
+  options: UseScrollRevealOptions = {},
 ): ScrollRevealResult {
-  const { delay = 0, duration = 600, ...inViewOptions } = options
-  const [ref, isInView] = useInView(inViewOptions)
+  const { delay = 0, duration = 600, ...inViewOptions } = options;
+  const [ref, isInView] = useInView(inViewOptions);
 
   return {
     ref,
@@ -151,7 +151,7 @@ export function useScrollReveal(
       transitionDelay: `${delay}ms`,
       transitionDuration: `${duration}ms`,
     },
-  }
+  };
 }
 
 /* ============================================================================
@@ -162,15 +162,15 @@ export interface UseStaggerAnimationOptions {
   /**
    * Delay between items (ms)
    */
-  staggerDelay?: number
+  staggerDelay?: number;
   /**
    * Base delay before first item (ms)
    */
-  baseDelay?: number
+  baseDelay?: number;
   /**
    * Animation duration (ms)
    */
-  duration?: number
+  duration?: number;
 }
 
 /**
@@ -187,15 +187,15 @@ export interface UseStaggerAnimationOptions {
  * ```
  */
 export function useStaggerAnimation(options: UseStaggerAnimationOptions = {}) {
-  const { staggerDelay = 50, baseDelay = 0, duration = 400 } = options
+  const { staggerDelay = 50, baseDelay = 0, duration = 400 } = options;
 
   return React.useCallback(
     (index: number): React.CSSProperties => ({
       animationDelay: `${baseDelay + index * staggerDelay}ms`,
       animationDuration: `${duration}ms`,
     }),
-    [staggerDelay, baseDelay, duration]
-  )
+    [staggerDelay, baseDelay, duration],
+  );
 }
 
 /* ============================================================================
@@ -206,14 +206,14 @@ export interface UseHoverAnimationResult {
   /**
    * Is element hovered
    */
-  isHovered: boolean
+  isHovered: boolean;
   /**
    * Props to spread on element
    */
   hoverProps: {
-    onMouseEnter: () => void
-    onMouseLeave: () => void
-  }
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+  };
 }
 
 /**
@@ -228,17 +228,17 @@ export interface UseHoverAnimationResult {
  * ```
  */
 export function useHoverAnimation(): UseHoverAnimationResult {
-  const [isHovered, setIsHovered] = React.useState(false)
+  const [isHovered, setIsHovered] = React.useState(false);
 
   const hoverProps = React.useMemo(
     () => ({
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
     }),
-    []
-  )
+    [],
+  );
 
-  return { isHovered, hoverProps }
+  return { isHovered, hoverProps };
 }
 
 /* ============================================================================
@@ -249,42 +249,42 @@ export interface GestureState {
   /**
    * Is dragging/panning
    */
-  isDragging: boolean
+  isDragging: boolean;
   /**
    * Current delta from start
    */
-  delta: { x: number; y: number }
+  delta: { x: number; y: number };
   /**
    * Velocity
    */
-  velocity: { x: number; y: number }
+  velocity: { x: number; y: number };
   /**
    * Start position
    */
-  start: { x: number; y: number }
+  start: { x: number; y: number };
   /**
    * Current position
    */
-  current: { x: number; y: number }
+  current: { x: number; y: number };
 }
 
 export interface UseGestureOptions {
   /**
    * Minimum distance to activate (px)
    */
-  threshold?: number
+  threshold?: number;
   /**
    * On drag start
    */
-  onDragStart?: (state: GestureState) => void
+  onDragStart?: (state: GestureState) => void;
   /**
    * On drag
    */
-  onDrag?: (state: GestureState) => void
+  onDrag?: (state: GestureState) => void;
   /**
    * On drag end
    */
-  onDragEnd?: (state: GestureState) => void
+  onDragEnd?: (state: GestureState) => void;
 }
 
 /**
@@ -301,7 +301,7 @@ export interface UseGestureOptions {
  * ```
  */
 export function useGesture(options: UseGestureOptions = {}) {
-  const { threshold = 5, onDragStart, onDrag, onDragEnd } = options
+  const { threshold = 5, onDragStart, onDrag, onDragEnd } = options;
 
   const [state, setState] = React.useState<GestureState>({
     isDragging: false,
@@ -309,29 +309,26 @@ export function useGesture(options: UseGestureOptions = {}) {
     velocity: { x: 0, y: 0 },
     start: { x: 0, y: 0 },
     current: { x: 0, y: 0 },
-  })
+  });
 
-  const startTimeRef = React.useRef<number>(0)
-  const lastPosRef = React.useRef({ x: 0, y: 0 })
-  const lastTimeRef = React.useRef<number>(0)
+  const startTimeRef = React.useRef<number>(0);
+  const lastPosRef = React.useRef({ x: 0, y: 0 });
+  const lastTimeRef = React.useRef<number>(0);
 
-  const handleStart = React.useCallback(
-    (clientX: number, clientY: number) => {
-      const newState: GestureState = {
-        isDragging: false,
-        delta: { x: 0, y: 0 },
-        velocity: { x: 0, y: 0 },
-        start: { x: clientX, y: clientY },
-        current: { x: clientX, y: clientY },
-      }
+  const handleStart = React.useCallback((clientX: number, clientY: number) => {
+    const newState: GestureState = {
+      isDragging: false,
+      delta: { x: 0, y: 0 },
+      velocity: { x: 0, y: 0 },
+      start: { x: clientX, y: clientY },
+      current: { x: clientX, y: clientY },
+    };
 
-      setState(newState)
-      startTimeRef.current = Date.now()
-      lastPosRef.current = { x: clientX, y: clientY }
-      lastTimeRef.current = Date.now()
-    },
-    []
-  )
+    setState(newState);
+    startTimeRef.current = Date.now();
+    lastPosRef.current = { x: clientX, y: clientY };
+    lastTimeRef.current = Date.now();
+  }, []);
 
   const handleMove = React.useCallback(
     (clientX: number, clientY: number) => {
@@ -339,22 +336,22 @@ export function useGesture(options: UseGestureOptions = {}) {
         const delta = {
           x: clientX - prev.start.x,
           y: clientY - prev.start.y,
-        }
+        };
 
         // Check if exceeded threshold
-        const distance = Math.sqrt(delta.x ** 2 + delta.y ** 2)
-        const isDragging = prev.isDragging || distance > threshold
+        const distance = Math.sqrt(delta.x ** 2 + delta.y ** 2);
+        const isDragging = prev.isDragging || distance > threshold;
 
         // Calculate velocity
-        const now = Date.now()
-        const dt = now - lastTimeRef.current
+        const now = Date.now();
+        const dt = now - lastTimeRef.current;
         const velocity = {
           x: dt > 0 ? (clientX - lastPosRef.current.x) / dt : 0,
           y: dt > 0 ? (clientY - lastPosRef.current.y) / dt : 0,
-        }
+        };
 
-        lastPosRef.current = { x: clientX, y: clientY }
-        lastTimeRef.current = now
+        lastPosRef.current = { x: clientX, y: clientY };
+        lastTimeRef.current = now;
 
         const newState: GestureState = {
           isDragging,
@@ -362,101 +359,107 @@ export function useGesture(options: UseGestureOptions = {}) {
           velocity,
           start: prev.start,
           current: { x: clientX, y: clientY },
-        }
+        };
 
         // Trigger callbacks
         if (isDragging && !prev.isDragging) {
-          onDragStart?.(newState)
+          onDragStart?.(newState);
         } else if (isDragging) {
-          onDrag?.(newState)
+          onDrag?.(newState);
         }
 
-        return newState
-      })
+        return newState;
+      });
     },
-    [threshold, onDragStart, onDrag]
-  )
+    [threshold, onDragStart, onDrag],
+  );
 
   const handleEnd = React.useCallback(() => {
     setState((prev) => {
       if (prev.isDragging) {
-        onDragEnd?.(prev)
+        onDragEnd?.(prev);
       }
 
       return {
         ...prev,
         isDragging: false,
-      }
-    })
-  }, [onDragEnd])
+      };
+    });
+  }, [onDragEnd]);
 
   // Mouse handlers
   const handleMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
-      e.preventDefault()
-      handleStart(e.clientX, e.clientY)
+      e.preventDefault();
+      handleStart(e.clientX, e.clientY);
     },
-    [handleStart]
-  )
+    [handleStart],
+  );
 
   const handleMouseMove = React.useCallback(
     (e: MouseEvent) => {
       if (state.start.x !== 0 || state.start.y !== 0) {
-        handleMove(e.clientX, e.clientY)
+        handleMove(e.clientX, e.clientY);
       }
     },
-    [state.start, handleMove]
-  )
+    [state.start, handleMove],
+  );
 
   const handleMouseUp = React.useCallback(() => {
-    handleEnd()
-  }, [handleEnd])
+    handleEnd();
+  }, [handleEnd]);
 
   // Touch handlers
   const handleTouchStart = React.useCallback(
     (e: React.TouchEvent) => {
-      const touch = e.touches[0]
-      handleStart(touch.clientX, touch.clientY)
+      const touch = e.touches[0];
+      handleStart(touch.clientX, touch.clientY);
     },
-    [handleStart]
-  )
+    [handleStart],
+  );
 
   const handleTouchMove = React.useCallback(
     (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        const touch = e.touches[0]
-        handleMove(touch.clientX, touch.clientY)
+        const touch = e.touches[0];
+        handleMove(touch.clientX, touch.clientY);
       }
     },
-    [handleMove]
-  )
+    [handleMove],
+  );
 
   const handleTouchEnd = React.useCallback(() => {
-    handleEnd()
-  }, [handleEnd])
+    handleEnd();
+  }, [handleEnd]);
 
   // Add/remove event listeners
   React.useEffect(() => {
     if (state.start.x !== 0 || state.start.y !== 0) {
-      window.addEventListener("mousemove", handleMouseMove)
-      window.addEventListener("mouseup", handleMouseUp)
-      window.addEventListener("touchmove", handleTouchMove)
-      window.addEventListener("touchend", handleTouchEnd)
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleTouchEnd);
 
       return () => {
-        window.removeEventListener("mousemove", handleMouseMove)
-        window.removeEventListener("mouseup", handleMouseUp)
-        window.removeEventListener("touchmove", handleTouchMove)
-        window.removeEventListener("touchend", handleTouchEnd)
-      }
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+      };
     }
-  }, [state.start, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd])
+  }, [
+    state.start,
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchMove,
+    handleTouchEnd,
+  ]);
 
   return {
     onMouseDown: handleMouseDown,
     onTouchStart: handleTouchStart,
     gestureState: state,
-  }
+  };
 }
 
 /* ============================================================================
@@ -475,24 +478,24 @@ export function useGesture(options: UseGestureOptions = {}) {
  * ```
  */
 export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
   React.useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setPrefersReducedMotion(mediaQuery.matches)
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
+      setPrefersReducedMotion(event.matches);
+    };
 
-    mediaQuery.addEventListener("change", handleChange)
+    mediaQuery.addEventListener("change", handleChange);
 
     return () => {
-      mediaQuery.removeEventListener("change", handleChange)
-    }
-  }, [])
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
 
-  return prefersReducedMotion
+  return prefersReducedMotion;
 }
 
 /* ============================================================================
@@ -512,29 +515,29 @@ export function useReducedMotion(): boolean {
  * ```
  */
 export function useAnimationFrame(callback: (deltaTime: number) => void) {
-  const requestRef = React.useRef<number>()
-  const previousTimeRef = React.useRef<number>()
+  const requestRef = React.useRef<number>();
+  const previousTimeRef = React.useRef<number>();
 
   const animate = React.useCallback(
     (time: number) => {
       if (previousTimeRef.current !== undefined) {
-        const deltaTime = time - previousTimeRef.current
-        callback(deltaTime)
+        const deltaTime = time - previousTimeRef.current;
+        callback(deltaTime);
       }
-      previousTimeRef.current = time
-      requestRef.current = requestAnimationFrame(animate)
+      previousTimeRef.current = time;
+      requestRef.current = requestAnimationFrame(animate);
     },
-    [callback]
-  )
+    [callback],
+  );
 
   React.useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate)
+    requestRef.current = requestAnimationFrame(animate);
     return () => {
       if (requestRef.current) {
-        cancelAnimationFrame(requestRef.current)
+        cancelAnimationFrame(requestRef.current);
       }
-    }
-  }, [animate])
+    };
+  }, [animate]);
 }
 
 /* ============================================================================
@@ -549,4 +552,4 @@ export type {
   UseHoverAnimationResult,
   GestureState,
   UseGestureOptions,
-}
+};

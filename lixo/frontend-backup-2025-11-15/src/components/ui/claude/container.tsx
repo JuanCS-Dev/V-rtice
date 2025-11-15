@@ -8,19 +8,16 @@
  * Estilo: Clean, responsive, centered
  */
 
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import "../../../styles/claude-design-green.css"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import "../../../styles/claude-design-green.css";
 
 /**
  * Container Variants
  */
 const containerVariants = cva(
-  [
-    "w-full mx-auto",
-    "px-[var(--space-4)]",
-  ].join(" "),
+  ["w-full mx-auto", "px-[var(--space-4)]"].join(" "),
   {
     variants: {
       size: {
@@ -43,8 +40,8 @@ const containerVariants = cva(
       size: "xl",
       padding: "md",
     },
-  }
-)
+  },
+);
 
 export interface ContainerProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -69,43 +66,38 @@ export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
         className={cn(containerVariants({ size, padding, className }))}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-Container.displayName = "Container"
+Container.displayName = "Container";
 
 /**
  * Grid Variants
  */
-const gridVariants = cva(
-  [
-    "grid",
-  ].join(" "),
-  {
-    variants: {
-      cols: {
-        1: "grid-cols-1",
-        2: "grid-cols-1 md:grid-cols-2",
-        3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-        4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
-        6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
-        12: "grid-cols-12",
-      },
-      gap: {
-        none: "gap-0",
-        sm: "gap-[var(--space-2)]",
-        md: "gap-[var(--space-4)]",
-        lg: "gap-[var(--space-6)]",
-        xl: "gap-[var(--space-8)]",
-      },
+const gridVariants = cva(["grid"].join(" "), {
+  variants: {
+    cols: {
+      1: "grid-cols-1",
+      2: "grid-cols-1 md:grid-cols-2",
+      3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+      4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+      6: "grid-cols-2 md:grid-cols-3 lg:grid-cols-6",
+      12: "grid-cols-12",
     },
-    defaultVariants: {
-      cols: 1,
-      gap: "md",
+    gap: {
+      none: "gap-0",
+      sm: "gap-[var(--space-2)]",
+      md: "gap-[var(--space-4)]",
+      lg: "gap-[var(--space-6)]",
+      xl: "gap-[var(--space-8)]",
     },
-  }
-)
+  },
+  defaultVariants: {
+    cols: 1,
+    gap: "md",
+  },
+});
 
 export interface GridProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -133,18 +125,18 @@ export const Grid = React.forwardRef<HTMLDivElement, GridProps>(
         className={cn(gridVariants({ cols, gap, className }))}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-Grid.displayName = "Grid"
+Grid.displayName = "Grid";
 
 /**
  * Stack Component - Vertical layout with gap
  */
 export interface StackProps extends React.HTMLAttributes<HTMLDivElement> {
-  gap?: "none" | "sm" | "md" | "lg" | "xl"
-  align?: "start" | "center" | "end" | "stretch"
+  gap?: "none" | "sm" | "md" | "lg" | "xl";
+  align?: "start" | "center" | "end" | "stretch";
 }
 
 export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
@@ -155,14 +147,14 @@ export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
       md: "gap-[var(--space-4)]",
       lg: "gap-[var(--space-6)]",
       xl: "gap-[var(--space-8)]",
-    }[gap]
+    }[gap];
 
     const alignClass = {
       start: "items-start",
       center: "items-center",
       end: "items-end",
       stretch: "items-stretch",
-    }[align]
+    }[align];
 
     return (
       <div
@@ -170,20 +162,20 @@ export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
         className={cn("flex flex-col", gapClass, alignClass, className)}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-Stack.displayName = "Stack"
+Stack.displayName = "Stack";
 
 /**
  * Inline Component - Horizontal layout with gap
  */
 export interface InlineProps extends React.HTMLAttributes<HTMLDivElement> {
-  gap?: "none" | "sm" | "md" | "lg" | "xl"
-  align?: "start" | "center" | "end" | "stretch"
-  justify?: "start" | "center" | "end" | "between" | "around"
-  wrap?: boolean
+  gap?: "none" | "sm" | "md" | "lg" | "xl";
+  align?: "start" | "center" | "end" | "stretch";
+  justify?: "start" | "center" | "end" | "between" | "around";
+  wrap?: boolean;
 }
 
 export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
@@ -196,7 +188,7 @@ export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
       wrap = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const gapClass = {
       none: "gap-0",
@@ -204,14 +196,14 @@ export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
       md: "gap-[var(--space-4)]",
       lg: "gap-[var(--space-6)]",
       xl: "gap-[var(--space-8)]",
-    }[gap]
+    }[gap];
 
     const alignClass = {
       start: "items-start",
       center: "items-center",
       end: "items-end",
       stretch: "items-stretch",
-    }[align]
+    }[align];
 
     const justifyClass = {
       start: "justify-start",
@@ -219,7 +211,7 @@ export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
       end: "justify-end",
       between: "justify-between",
       around: "justify-around",
-    }[justify]
+    }[justify];
 
     return (
       <div
@@ -230,21 +222,21 @@ export const Inline = React.forwardRef<HTMLDivElement, InlineProps>(
           alignClass,
           justifyClass,
           wrap && "flex-wrap",
-          className
+          className,
         )}
         {...props}
       />
-    )
-  }
-)
+    );
+  },
+);
 
-Inline.displayName = "Inline"
+Inline.displayName = "Inline";
 
 /**
  * Section Component - Page section with spacing
  */
 export interface SectionProps extends React.HTMLAttributes<HTMLElement> {
-  spacing?: "none" | "sm" | "md" | "lg" | "xl"
+  spacing?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
 export const Section = React.forwardRef<HTMLElement, SectionProps>(
@@ -255,18 +247,14 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(
       md: "py-[var(--space-8)]",
       lg: "py-[var(--space-12)]",
       xl: "py-[var(--space-16)]",
-    }[spacing]
+    }[spacing];
 
     return (
-      <section
-        ref={ref}
-        className={cn(spacingClass, className)}
-        {...props}
-      />
-    )
-  }
-)
+      <section ref={ref} className={cn(spacingClass, className)} {...props} />
+    );
+  },
+);
 
-Section.displayName = "Section"
+Section.displayName = "Section";
 
-export { containerVariants, gridVariants }
+export { containerVariants, gridVariants };

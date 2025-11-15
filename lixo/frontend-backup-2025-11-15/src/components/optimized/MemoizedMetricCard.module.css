@@ -42,14 +42,14 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .value {
   color: #0f0;
   font-size: 24px;
   font-weight: bold;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   display: flex;
   align-items: baseline;
   gap: 8px;

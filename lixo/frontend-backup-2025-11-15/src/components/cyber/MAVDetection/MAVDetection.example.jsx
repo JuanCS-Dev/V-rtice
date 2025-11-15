@@ -5,8 +5,8 @@
  * em diferentes contextos da aplicação Vértice.
  */
 
-import React from 'react';
-import { MAVDetection } from './MAVDetection';
+import React from "react";
+import { MAVDetection } from "./MAVDetection";
 
 /**
  * Exemplo 1: Uso Básico
@@ -14,7 +14,7 @@ import { MAVDetection } from './MAVDetection';
  */
 export const BasicExample = () => {
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: "20px" }}>
       <h1>Detecção de Campanhas MAV</h1>
       <MAVDetection />
     </div>
@@ -39,9 +39,7 @@ export const DashboardIntegration = () => {
           {/* NetworkRecon component */}
         </div>
 
-        <div className="widget-vuln-intel">
-          {/* VulnIntel component */}
-        </div>
+        <div className="widget-vuln-intel">{/* VulnIntel component */}</div>
 
         {/* MAV Detection Widget */}
         <div className="widget-mav-detection">
@@ -88,16 +86,16 @@ export const ControlledExample = () => {
     setDetectionResults(results);
     // Processar resultados externamente
     // Ex: enviar para analytics, alertar usuário, etc.
-    console.log('MAV Campaign detected:', results);
+    console.log("MAV Campaign detected:", results);
   };
 
   return (
     <div>
       <MAVDetection
-        // Futuras props opcionais
-        // onDetectionComplete={handleDetectionComplete}
-        // autoRefresh={true}
-        // theme="dark"
+      // Futuras props opcionais
+      // onDetectionComplete={handleDetectionComplete}
+      // autoRefresh={true}
+      // theme="dark"
       />
 
       {detectionResults && (
@@ -124,8 +122,7 @@ export const RouteExample = () => {
   return (
     <div className="page-container">
       <nav className="breadcrumb">
-        <a href="/">Home</a> /
-        <a href="/security">Security</a> /
+        <a href="/">Home</a> /<a href="/security">Security</a> /
         <span>MAV Detection</span>
       </nav>
 
@@ -155,23 +152,23 @@ export const RouteExample = () => {
 export const TestingExample = () => {
   const mockPosts = [
     {
-      id: '1',
-      text: 'Narrativa coordenada sobre eleições #FakeNews',
-      author: 'bot_account_1',
+      id: "1",
+      text: "Narrativa coordenada sobre eleições #FakeNews",
+      author: "bot_account_1",
       timestamp: new Date(Date.now() - 120000).toISOString(),
       engagement: { likes: 500, shares: 200 },
     },
     {
-      id: '2',
-      text: 'Narrativa coordenada sobre eleições #FakeNews',
-      author: 'bot_account_2',
+      id: "2",
+      text: "Narrativa coordenada sobre eleições #FakeNews",
+      author: "bot_account_2",
       timestamp: new Date(Date.now() - 115000).toISOString(),
       engagement: { likes: 480, shares: 195 },
     },
     {
-      id: '3',
-      text: 'Narrativa coordenada sobre eleições #FakeNews',
-      author: 'bot_account_3',
+      id: "3",
+      text: "Narrativa coordenada sobre eleições #FakeNews",
+      author: "bot_account_3",
       timestamp: new Date(Date.now() - 110000).toISOString(),
       engagement: { likes: 510, shares: 205 },
     },
@@ -179,21 +176,21 @@ export const TestingExample = () => {
 
   const mockAccounts = [
     {
-      id: 'bot_account_1',
+      id: "bot_account_1",
       created_at: new Date(Date.now() - 86400000 * 15).toISOString(),
       followers_count: 50,
       following_count: 5000,
       posts_count: 1000,
     },
     {
-      id: 'bot_account_2',
+      id: "bot_account_2",
       created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
       followers_count: 48,
       following_count: 5100,
       posts_count: 1050,
     },
     {
-      id: 'bot_account_3',
+      id: "bot_account_3",
       created_at: new Date(Date.now() - 86400000 * 16).toISOString(),
       followers_count: 52,
       following_count: 4900,
@@ -274,7 +271,7 @@ export const ReportingExample = () => {
     });
     */
 
-    console.log('Report data:', reportData);
+    console.log("Report data:", reportData);
   };
 
   return (
@@ -282,15 +279,9 @@ export const ReportingExample = () => {
       <MAVDetection />
 
       <div className="export-options">
-        <button onClick={() => exportToPDF()}>
-          📄 Exportar para PDF
-        </button>
-        <button>
-          📊 Exportar para Excel
-        </button>
-        <button>
-          📧 Enviar por Email
-        </button>
+        <button onClick={() => exportToPDF()}>📄 Exportar para PDF</button>
+        <button>📊 Exportar para Excel</button>
+        <button>📧 Enviar por Email</button>
       </div>
     </div>
   );

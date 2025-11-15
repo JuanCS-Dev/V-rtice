@@ -1,2 +1,2 @@
-export { default } from './BehavioralAnalyzer';
-export { BehavioralAnalyzer } from './BehavioralAnalyzer';
+export { default } from "./BehavioralAnalyzer";
+export { BehavioralAnalyzer } from "./BehavioralAnalyzer";

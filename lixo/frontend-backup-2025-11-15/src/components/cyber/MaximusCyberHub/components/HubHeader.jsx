@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './HubHeader.module.css';
+import React from "react";
+import styles from "./HubHeader.module.css";
 
 export const HubHeader = () => {
   return (
@@ -11,7 +11,9 @@ export const HubHeader = () => {
           </div>
           <div className={styles.info}>
             <h2 className={styles.title}>AURORA CYBER INTEL HUB</h2>
-            <p className={styles.subtitle}>Autonomous investigation orchestrator</p>
+            <p className={styles.subtitle}>
+              Autonomous investigation orchestrator
+            </p>
           </div>
         </div>
         <div className={styles.status}>

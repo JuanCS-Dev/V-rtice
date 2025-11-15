@@ -1,13 +1,17 @@
-import React from 'react';
-import { Badge, Alert } from '../../../shared';
-import { getPortStateVariant, getServiceRiskVariant, getRiskIcon } from '../utils/scanUtils';
-import styles from './ScanResults.module.css';
+import React from "react";
+import { Badge, Alert } from "../../../shared";
+import {
+  getPortStateVariant,
+  getServiceRiskVariant,
+  getRiskIcon,
+} from "../utils/scanUtils";
+import styles from "./ScanResults.module.css";
 
 export const ScanResults = ({ result }) => {
   if (!result.success) {
     return (
       <Alert variant="critical">
-        Erro no scan: {result.errors?.join(', ')}
+        Erro no scan: {result.errors?.join(", ")}
       </Alert>
     );
   }
@@ -32,9 +36,11 @@ export const ScanResults = ({ result }) => {
           <div className={styles.hostHeader}>
             <div>
               <h4 className={styles.hostTitle}>{host.ip}</h4>
-              {host.hostname && <span className={styles.hostname}>{host.hostname}</span>}
+              {host.hostname && (
+                <span className={styles.hostname}>{host.hostname}</span>
+              )}
             </div>
-            <Badge variant={host.status === 'up' ? 'success' : 'default'}>
+            <Badge variant={host.status === "up" ? "success" : "default"}>
               {host.status.toUpperCase()}
             </Badge>
           </div>
@@ -48,7 +54,9 @@ export const ScanResults = ({ result }) => {
           {/* Ports */}
           {host.ports && host.ports.length > 0 && (
             <div className={styles.ports}>
-              <h5 className={styles.portsTitle}>Portas Abertas ({host.ports.length})</h5>
+              <h5 className={styles.portsTitle}>
+                Portas Abertas ({host.ports.length})
+              </h5>
               <div className={styles.portsList}>
                 {host.ports.map((port, portIdx) => (
                   <div key={portIdx} className={styles.portCard}>
@@ -56,18 +64,28 @@ export const ScanResults = ({ result }) => {
                       <span className={styles.portNumber}>
                         {getRiskIcon(port.service)} {port.port}/{port.protocol}
                       </span>
-                      <Badge variant={getPortStateVariant(port.state)} size="sm">
+                      <Badge
+                        variant={getPortStateVariant(port.state)}
+                        size="sm"
+                      >
                         {port.state}
                       </Badge>
                     </div>
                     <div className={styles.portInfo}>
                       <span className={styles.service}>
-                        <Badge variant={getServiceRiskVariant(port.service)} size="sm">
+                        <Badge
+                          variant={getServiceRiskVariant(port.service)}
+                          size="sm"
+                        >
                           {port.service}
                         </Badge>
                       </span>
-                      {port.product && <span className={styles.product}>{port.product}</span>}
-                      {port.version && <span className={styles.version}>v{port.version}</span>}
+                      {port.product && (
+                        <span className={styles.product}>{port.product}</span>
+                      )}
+                      {port.version && (
+                        <span className={styles.version}>v{port.version}</span>
+                      )}
                     </div>
                   </div>
                 ))}

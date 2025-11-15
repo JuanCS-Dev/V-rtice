@@ -5,7 +5,7 @@
  * Uses vitest-websocket-mock for scientific, behavioral testing
  */
 
-import WS from 'vitest-websocket-mock';
+import WS from "vitest-websocket-mock";
 
 /**
  * Create a mock WebSocket server for testing
@@ -24,7 +24,7 @@ import WS from 'vitest-websocket-mock';
 export function createMockWSServer(url, options = {}) {
   const defaultOptions = {
     jsonProtocol: true,
-    ...options
+    ...options,
   };
 
   return new WS(url, defaultOptions);
@@ -74,7 +74,11 @@ export async function simulateWSConnection(server, onConnected) {
  * await simulateWSDisconnection(server);
  * // Client should handle reconnection
  */
-export async function simulateWSDisconnection(server, code = 1000, reason = '') {
+export async function simulateWSDisconnection(
+  server,
+  code = 1000,
+  reason = "",
+) {
   server.close({ code, reason });
   await server.closed;
 }
@@ -111,7 +115,7 @@ export async function sendMessageSequence(server, messages, delayMs = 100) {
   for (const message of messages) {
     server.send(message);
     if (delayMs > 0) {
-      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 }

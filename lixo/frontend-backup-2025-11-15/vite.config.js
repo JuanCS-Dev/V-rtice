@@ -49,7 +49,12 @@ export default defineConfig({
           "vendor-charts": ["recharts"],
 
           // Terminal Emulator (HEAVY - only for MAXIMUS dashboard)
-          "vendor-terminal": ["@xterm/xterm", "@xterm/addon-fit", "@xterm/addon-search", "@xterm/addon-web-links"],
+          "vendor-terminal": [
+            "@xterm/xterm",
+            "@xterm/addon-fit",
+            "@xterm/addon-search",
+            "@xterm/addon-web-links",
+          ],
 
           // UI Components (frequently used)
           "vendor-ui": [
@@ -60,7 +65,11 @@ export default defineConfig({
           ],
 
           // i18n (always needed)
-          "vendor-i18n": ["i18next", "react-i18next", "i18next-browser-languagedetector"],
+          "vendor-i18n": [
+            "i18next",
+            "react-i18next",
+            "i18next-browser-languagedetector",
+          ],
 
           // Utilities
           "vendor-utils": ["axios", "clsx", "tailwind-merge"],

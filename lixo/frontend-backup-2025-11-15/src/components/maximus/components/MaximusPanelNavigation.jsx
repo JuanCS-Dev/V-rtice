@@ -10,14 +10,14 @@
  * @param {Object} getItemProps - Keyboard navigation props from useKeyboardNavigation
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
 export const MaximusPanelNavigation = ({
   panels,
   activePanel,
   setActivePanel,
-  getItemProps
+  getItemProps,
 }) => {
   return (
     <div className="panel-navigation">
@@ -26,7 +26,7 @@ export const MaximusPanelNavigation = ({
           key={panel.id}
           {...getItemProps(index, {
             onClick: () => setActivePanel(panel.id),
-            className: `panel-tab ${activePanel === panel.id ? 'panel-tab-active' : ''}`
+            className: `panel-tab ${activePanel === panel.id ? "panel-tab-active" : ""}`,
           })}
         >
           <span className="panel-icon">{panel.icon}</span>
@@ -46,12 +46,12 @@ MaximusPanelNavigation.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired
-    })
+      description: PropTypes.string.isRequired,
+    }),
   ).isRequired,
   activePanel: PropTypes.string.isRequired,
   setActivePanel: PropTypes.func.isRequired,
-  getItemProps: PropTypes.func.isRequired
+  getItemProps: PropTypes.func.isRequired,
 };
 
 export default MaximusPanelNavigation;

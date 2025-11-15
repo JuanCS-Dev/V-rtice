@@ -7,7 +7,7 @@
  * Following Boris Cherny's principle: "Good examples prevent bugs"
  */
 
-import { typedApiClient } from '../typedClient';
+import { typedApiClient } from "../typedClient";
 
 // ============================================================================
 // EXAMPLE 1: Simple GET request
@@ -22,18 +22,18 @@ import { typedApiClient } from '../typedClient';
  * - Error shape
  */
 export async function getHealthStatus() {
-  const { data, error, response } = await typedApiClient.GET('/api/v1/health');
+  const { data, error, response } = await typedApiClient.GET("/api/v1/health");
 
   if (error) {
     // TypeScript knows error has detail, error_code, request_id, etc.
-    console.error('Health check failed:', error.detail);
-    console.error('Request ID:', error.request_id);
+    console.error("Health check failed:", error.detail);
+    console.error("Request ID:", error.request_id);
     return null;
   }
 
   // TypeScript knows data has status, version, timestamp, services
   return {
-    isHealthy: data.status === 'healthy',
+    isHealthy: data.status === "healthy",
     version: data.version,
     services: data.services,
   };
@@ -51,18 +51,18 @@ export async function getHealthStatus() {
 export async function searchExample(query: string, limit: number = 10) {
   // TypeScript will autocomplete available query params
   // and show errors if you use wrong types
-  const { data, error } = await typedApiClient.GET('/api/v1/search', {
+  const { data, error } = await typedApiClient.GET("/api/v1/search", {
     params: {
       query: {
-        q: query,          // ← TypeScript validates this exists
-        limit: limit,      // ← TypeScript validates type is number
+        q: query, // ← TypeScript validates this exists
+        limit: limit, // ← TypeScript validates type is number
         // foo: 'bar'      // ← TypeScript error: unknown param
       },
     },
   });
 
   if (error) {
-    console.error('Search failed:', error);
+    console.error("Search failed:", error);
     return [];
   }
 
@@ -78,8 +78,11 @@ export async function searchExample(query: string, limit: number = 10) {
  *
  * TypeScript validates body matches OpenAPI schema
  */
-export async function startScan(target: string, scanType: 'quick' | 'full' | 'custom') {
-  const { data, error } = await typedApiClient.POST('/api/v1/scan/start', {
+export async function startScan(
+  target: string,
+  scanType: "quick" | "full" | "custom",
+) {
+  const { data, error } = await typedApiClient.POST("/api/v1/scan/start", {
     body: {
       target,
       scanType,
@@ -90,13 +93,15 @@ export async function startScan(target: string, scanType: 'quick' | 'full' | 'cu
 
   if (error) {
     // Handle validation errors
-    if ('validation_errors' in error) {
+    if ("validation_errors" in error) {
       // TypeScript knows this is ValidationErrorResponse
       error.validation_errors.forEach((validationError) => {
-        console.error(`${validationError.loc.join('.')}: ${validationError.msg}`);
+        console.error(
+          `${validationError.loc.join(".")}: ${validationError.msg}`,
+        );
       });
     } else {
-      console.error('Scan failed:', error.detail);
+      console.error("Scan failed:", error.detail);
     }
     return null;
   }
@@ -118,24 +123,27 @@ export async function startScan(target: string, scanType: 'quick' | 'full' | 'cu
  * TypeScript knows different response shapes for different codes
  */
 export async function loginExample(email: string, password: string) {
-  const { data, error, response } = await typedApiClient.POST('/api/v1/auth/login', {
-    body: { email, password },
-  });
+  const { data, error, response } = await typedApiClient.POST(
+    "/api/v1/auth/login",
+    {
+      body: { email, password },
+    },
+  );
 
   // Check specific status codes
   if (response.status === 401) {
     // Unauthorized
-    return { success: false, message: 'Invalid credentials' };
+    return { success: false, message: "Invalid credentials" };
   }
 
   if (response.status === 422) {
     // Validation error
-    return { success: false, message: 'Invalid email or password format' };
+    return { success: false, message: "Invalid email or password format" };
   }
 
   if (error) {
     // Other errors
-    return { success: false, message: error.detail || 'Login failed' };
+    return { success: false, message: error.detail || "Login failed" };
   }
 
   // Success - TypeScript knows data has access_token, etc.
@@ -150,7 +158,7 @@ export async function loginExample(email: string, password: string) {
 // EXAMPLE 5: Using with React hooks
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * Example hook using typed client
@@ -175,10 +183,10 @@ export function useHealthCheck() {
             version: result.version,
           });
         } else {
-          setError('Failed to fetch health status');
+          setError("Failed to fetch health status");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -194,16 +202,16 @@ export function useHealthCheck() {
 // EXAMPLE 6: With React Query
 // ============================================================================
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 /**
  * Example with React Query
  */
 export function useTypedHealthQuery() {
   return useQuery({
-    queryKey: ['health'],
+    queryKey: ["health"],
     queryFn: async () => {
-      const { data, error } = await typedApiClient.GET('/api/v1/health');
+      const { data, error } = await typedApiClient.GET("/api/v1/health");
 
       if (error) throw new Error(error.detail);
 
@@ -219,8 +227,11 @@ export function useTypedHealthQuery() {
  */
 export function useStartScanMutation() {
   return useMutation({
-    mutationFn: async (params: { target: string; scanType: 'quick' | 'full' | 'custom' }) => {
-      const { data, error } = await typedApiClient.POST('/api/v1/scan/start', {
+    mutationFn: async (params: {
+      target: string;
+      scanType: "quick" | "full" | "custom";
+    }) => {
+      const { data, error } = await typedApiClient.POST("/api/v1/scan/start", {
         body: params,
       });
 
@@ -244,16 +255,16 @@ export function handleApiError(error: unknown, requestId?: string) {
   console.error(`[Request ID: ${requestId}]`, error);
 
   // Handle different error types
-  if (typeof error === 'object' && error !== null) {
-    if ('detail' in error) {
+  if (typeof error === "object" && error !== null) {
+    if ("detail" in error) {
       return error.detail as string;
     }
-    if ('validation_errors' in error) {
+    if ("validation_errors" in error) {
       // Validation errors
       const errors = (error as any).validation_errors;
-      return errors.map((e: any) => `${e.loc.join('.')}: ${e.msg}`).join(', ');
+      return errors.map((e: any) => `${e.loc.join(".")}: ${e.msg}`).join(", ");
     }
   }
 
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 }

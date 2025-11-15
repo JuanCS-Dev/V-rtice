@@ -3,6 +3,7 @@
 ## Button Components Strategy
 
 ### Current State
+
 We have **three** button implementations:
 
 1. **`components/ui/button.tsx`** (Shadcn/UI - RECOMMENDED)
@@ -16,6 +17,7 @@ We have **three** button implementations:
 **File:** `/src/components/ui/button.tsx`
 
 ### When to use:
+
 - **ALL new components** should use this
 - Building UI with Radix UI primitives
 - Need TypeScript support
@@ -23,6 +25,7 @@ We have **three** button implementations:
 - Require composition via `asChild` prop
 
 ### Features:
+
 - TypeScript with proper types
 - Radix UI Slot for composition
 - CVA (Class Variance Authority) for variants
@@ -31,6 +34,7 @@ We have **three** button implementations:
 - Sizes: sm, md, lg, icon
 
 ### Example:
+
 ```tsx
 import { Button } from '@/components/ui/button';
 
@@ -47,24 +51,31 @@ import { Button } from '@/components/ui/button';
 **File:** `/src/components/shared/AccessibleButton.jsx`
 
 ### Current Status: **DEPRECATED**
+
 - Still functional but not actively developed
 - Migrate to Shadcn/UI Button when refactoring
 - OK to keep in existing code (don't rush migration)
 
 ### When it was used:
+
 - Accessibility-first implementation before Shadcn/UI
 - Components built during Phase 4C
 - Custom ARIA needs
 
 ### Migration Path:
+
 ```jsx
 // OLD
-import { Button } from '@/components/shared/AccessibleButton';
-<Button variant="danger" ariaLabel="Delete user">Delete</Button>
+import { Button } from "@/components/shared/AccessibleButton";
+<Button variant="danger" ariaLabel="Delete user">
+  Delete
+</Button>;
 
 // NEW
-import { Button } from '@/components/ui/button';
-<Button variant="destructive" aria-label="Delete user">Delete</Button>
+import { Button } from "@/components/ui/button";
+<Button variant="destructive" aria-label="Delete user">
+  Delete
+</Button>;
 ```
 
 ---
@@ -74,25 +85,28 @@ import { Button } from '@/components/ui/button';
 **File:** `/src/components/shared/Button/Button.jsx`
 
 ### Current Status: **DEPRECATED**
+
 - Simple CSS modules implementation
 - Missing proper accessibility features
 - Migrate to Shadcn/UI Button when refactoring
 
 ### When it was used:
+
 - Early components before standardization
 - Components with loading states (though Shadcn supports this too)
 
 ### Migration Path:
+
 ```jsx
 // OLD
-import { Button } from '@/components/shared/Button';
-<Button variant="primary" loading={isLoading}>Submit</Button>
+import { Button } from "@/components/shared/Button";
+<Button variant="primary" loading={isLoading}>
+  Submit
+</Button>;
 
 // NEW
-import { Button } from '@/components/ui/button';
-<Button disabled={isLoading}>
-  {isLoading ? 'Loading...' : 'Submit'}
-</Button>
+import { Button } from "@/components/ui/button";
+<Button disabled={isLoading}>{isLoading ? "Loading..." : "Submit"}</Button>;
 ```
 
 ---
@@ -100,9 +114,10 @@ import { Button } from '@/components/ui/button';
 ## Loading State Pattern
 
 ### Standardization: Use LoadingSpinner Component
+
 ```jsx
-import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
 <Button disabled={isLoading}>
   {isLoading ? (
@@ -111,9 +126,9 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
       <span>Loading...</span>
     </>
   ) : (
-    'Submit'
+    "Submit"
   )}
-</Button>
+</Button>;
 ```
 
 ---
@@ -121,6 +136,7 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 ## Modal Components Strategy
 
 ### Current State
+
 We have **two** modal implementations:
 
 1. **`components/shared/Modal/Modal.jsx`** (RECOMMENDED)
@@ -131,18 +147,15 @@ We have **two** modal implementations:
 **File:** `/src/components/shared/Modal/Modal.jsx`
 
 ```jsx
-import { Modal } from '@/components/shared/Modal';
+import { Modal } from "@/components/shared/Modal";
 
-<Modal
-  isOpen={isOpen}
-  onClose={handleClose}
-  title="Confirm Action"
->
+<Modal isOpen={isOpen} onClose={handleClose} title="Confirm Action">
   <p>Are you sure?</p>
-</Modal>
+</Modal>;
 ```
 
 ### Features:
+
 - Proper focus management
 - Escape key to close
 - Click outside to close
@@ -156,6 +169,7 @@ import { Modal } from '@/components/shared/Modal';
 ### Standard: Tailwind for Utilities, CSS Modules for Components
 
 #### Use Tailwind when:
+
 - Applying utility styles (spacing, colors, layout)
 - Rapid prototyping
 - One-off styling needs
@@ -168,6 +182,7 @@ import { Modal } from '@/components/shared/Modal';
 ```
 
 #### Use CSS Modules when:
+
 - Complex component-specific styles
 - Need scoped styles to avoid conflicts
 - Animations and transitions
@@ -190,12 +205,13 @@ import styles from './Component.module.css';
 ```
 
 #### Combining Both (Preferred):
+
 ```jsx
-import styles from './Card.module.css';
+import styles from "./Card.module.css";
 
 <div className={`${styles.card} p-4 rounded-lg`}>
   <h3 className={`${styles.title} text-xl font-bold`}>Title</h3>
-</div>
+</div>;
 ```
 
 ---
@@ -223,6 +239,7 @@ import { Alert } from '@/components/shared/Alert';
 ```
 
 ### Accessibility Requirements:
+
 - ALL error alerts MUST have `role="alert"` and `aria-live="assertive"`
 - ALL success messages MUST have `role="status"` and `aria-live="polite"`
 - Link errors to inputs using `aria-describedby`
@@ -270,6 +287,7 @@ import { Alert } from '@/components/shared/Alert';
 ```
 
 ### Usage:
+
 ```css
 .button {
   background: var(--color-primary);
@@ -287,16 +305,19 @@ import { Alert } from '@/components/shared/Alert';
 ## Migration Timeline
 
 ### Phase 1 (Current)
+
 - Document all standards (this file)
 - Stop using deprecated components in NEW code
 - All new features use Shadcn/UI buttons
 
 ### Phase 2 (Next Sprint)
+
 - Create EmptyState component
 - Standardize all loading patterns
 - Add CSS variables system
 
 ### Phase 3 (Future)
+
 - Gradually migrate legacy buttons during refactors
 - Don't do mass migration - migrate when touching files
 - Update when fixing bugs or adding features
@@ -306,6 +327,7 @@ import { Alert } from '@/components/shared/Alert';
 ---
 
 ## Form Input Standards
+
 ### Boris Cherny Standard - GAP #97 FIX
 
 #### RECOMMENDED: Use AccessibleForm Components
@@ -313,8 +335,9 @@ import { Alert } from '@/components/shared/Alert';
 **File:** `/src/components/shared/AccessibleForm.jsx`
 
 ##### Input Fields
+
 ```jsx
-import { FormInput } from '@/components/shared/AccessibleForm';
+import { FormInput } from "@/components/shared/AccessibleForm";
 
 <FormInput
   label="Email Address"
@@ -324,12 +347,13 @@ import { FormInput } from '@/components/shared/AccessibleForm';
   error={emailError}
   helperText="We'll never share your email"
   required
-/>
+/>;
 ```
 
 ##### Textarea Fields
+
 ```jsx
-import { FormTextarea } from '@/components/shared/AccessibleForm';
+import { FormTextarea } from "@/components/shared/AccessibleForm";
 
 <FormTextarea
   label="Comments"
@@ -338,10 +362,11 @@ import { FormTextarea } from '@/components/shared/AccessibleForm';
   rows={4}
   maxLength={1000}
   helperText="Maximum 1000 characters"
-/>
+/>;
 ```
 
 #### Input Validation Requirements
+
 - ALL inputs MUST have associated `<label>` elements
 - ALL required inputs MUST show `required` attribute
 - ALL error states MUST use `aria-invalid` and `aria-describedby`
@@ -352,6 +377,7 @@ import { FormTextarea } from '@/components/shared/AccessibleForm';
   - Very long text (JSON data): 5000 chars
 
 #### Standard Input Patterns
+
 ```jsx
 // Email input
 <input
@@ -397,6 +423,7 @@ import { FormTextarea } from '@/components/shared/AccessibleForm';
 ---
 
 ## HTTP Client Pattern
+
 ### Boris Cherny Standard - GAP #104 FIX
 
 #### RECOMMENDED: Use Axios via API Client
@@ -406,25 +433,26 @@ import { FormTextarea } from '@/components/shared/AccessibleForm';
 All API calls should go through the centralized API client which uses Axios:
 
 ```javascript
-import apiClient from '@/api/client';
+import apiClient from "@/api/client";
 
 // GET request
-const response = await apiClient.get('/defensive/metrics');
+const response = await apiClient.get("/defensive/metrics");
 
 // POST request
-const response = await apiClient.post('/offensive/scan', {
-  target: '192.168.1.1',
-  ports: '80,443'
+const response = await apiClient.post("/offensive/scan", {
+  target: "192.168.1.1",
+  ports: "80,443",
 });
 
 // PUT request
-const response = await apiClient.put('/hitl/decision', {
-  patchId: '123',
-  decision: 'approved'
+const response = await apiClient.put("/hitl/decision", {
+  patchId: "123",
+  decision: "approved",
 });
 ```
 
 #### Why Axios over Fetch?
+
 - **Automatic JSON parsing**: No need for `response.json()`
 - **Request/Response interceptors**: Centralized auth, error handling
 - **Timeout support**: Built-in request timeouts
@@ -433,29 +461,32 @@ const response = await apiClient.put('/hitl/decision', {
 - **Better error handling**: Rejects on HTTP errors automatically
 
 #### DO NOT Use raw fetch() for API calls
+
 ```javascript
 // ❌ WRONG - Don't use raw fetch
-fetch('/api/data')
-  .then(res => res.json())
-  .then(data => console.log(data));
+fetch("/api/data")
+  .then((res) => res.json())
+  .then((data) => console.log(data));
 
 // ✅ CORRECT - Use API client
-import apiClient from '@/api/client';
-const { data } = await apiClient.get('/data');
+import apiClient from "@/api/client";
+const { data } = await apiClient.get("/data");
 ```
 
 #### Exception: fetch() is OK for non-API calls
+
 ```javascript
 // OK: Loading static resources
-fetch('/config.json')
+fetch("/config.json");
 
 // OK: External third-party APIs (not our backend)
-fetch('https://external-api.com/data')
+fetch("https://external-api.com/data");
 ```
 
 ---
 
 ## Toast Notification Pattern
+
 ### Boris Cherny Standard - GAP #105 FIX
 
 #### Current State: Using Alert Component (No Toast Library)
@@ -465,32 +496,38 @@ We use the **Alert component** for notifications instead of a separate toast lib
 **File:** `/src/components/shared/Toast.jsx` or use inline Alert
 
 #### Pattern: Alert as Toast Alternative
+
 ```jsx
-import { Alert } from '@/components/shared/Alert';
+import { Alert } from "@/components/shared/Alert";
 
 // Success notification
-{showSuccess && (
-  <Alert variant="success" onClose={() => setShowSuccess(false)}>
-    ✓ Data saved successfully!
-  </Alert>
-)}
+{
+  showSuccess && (
+    <Alert variant="success" onClose={() => setShowSuccess(false)}>
+      ✓ Data saved successfully!
+    </Alert>
+  );
+}
 
 // Error notification
-{showError && (
-  <Alert variant="error" onClose={() => setShowError(false)}>
-    ✗ Operation failed. Please try again.
-  </Alert>
-)}
+{
+  showError && (
+    <Alert variant="error" onClose={() => setShowError(false)}>
+      ✗ Operation failed. Please try again.
+    </Alert>
+  );
+}
 
 // Warning notification
-{showWarning && (
-  <Alert variant="warning">
-    ⚠ This action cannot be undone.
-  </Alert>
-)}
+{
+  showWarning && (
+    <Alert variant="warning">⚠ This action cannot be undone.</Alert>
+  );
+}
 ```
 
 #### Accessibility Requirements for Notifications
+
 ```jsx
 // Success/Info messages - polite announcement
 <div
@@ -512,6 +549,7 @@ import { Alert } from '@/components/shared/Alert';
 ```
 
 #### DO NOT install react-toastify or similar
+
 - Adds unnecessary bundle size
 - Alert component handles all notification needs
 - Already accessible with proper ARIA attributes
@@ -519,11 +557,13 @@ import { Alert } from '@/components/shared/Alert';
 ---
 
 ## Disabled States Standard
+
 ### Boris Cherny Standard - GAP #100 FIX
 
 All disabled states documented in design-tokens.css are:
 
 ### Disabled Buttons
+
 ```css
 button:disabled {
   opacity: 0.5;
@@ -533,6 +573,7 @@ button:disabled {
 ```
 
 ### Disabled Inputs
+
 ```css
 input:disabled,
 textarea:disabled,
@@ -545,6 +586,7 @@ select:disabled {
 ```
 
 ### Usage in Components
+
 ```jsx
 // Button
 <Button disabled={isLoading || !isValid}>
@@ -568,6 +610,7 @@ select:disabled {
 ```
 
 ### Accessibility Requirements
+
 - ALL disabled elements MUST have `disabled` attribute (not just CSS)
 - ALL disabled interactive elements SHOULD have `aria-disabled="true"`
 - ALL disabled elements MUST show `cursor: not-allowed`
@@ -576,21 +619,24 @@ select:disabled {
 ---
 
 ## Design Token Usage
+
 ### Boris Cherny Standard - GAPS #94, #95, #99 FIX
 
 All design tokens are documented in `/src/styles/design-tokens.css`:
 
 ### Spacing Values (GAP #94 ✓ Already Documented)
+
 ```css
---space-xs: 0.25rem;   /* 4px */
---space-sm: 0.5rem;    /* 8px */
---space-md: 1rem;      /* 16px */
---space-lg: 1.5rem;    /* 24px */
---space-xl: 2.5rem;    /* 40px */
---space-2xl: 4rem;     /* 64px */
+--space-xs: 0.25rem; /* 4px */
+--space-sm: 0.5rem; /* 8px */
+--space-md: 1rem; /* 16px */
+--space-lg: 1.5rem; /* 24px */
+--space-xl: 2.5rem; /* 40px */
+--space-2xl: 4rem; /* 64px */
 ```
 
 Usage:
+
 ```css
 .card {
   padding: var(--space-md);
@@ -600,18 +646,20 @@ Usage:
 ```
 
 ### Typography Scale (GAP #95 ✓ Already Documented)
+
 ```css
---text-xs: 0.75rem;    /* 12px */
---text-sm: 0.875rem;   /* 14px */
---text-base: 1rem;     /* 16px */
---text-lg: 1.125rem;   /* 18px */
---text-xl: 1.25rem;    /* 20px */
---text-2xl: 1.5rem;    /* 24px */
---text-3xl: 1.875rem;  /* 30px */
---text-4xl: 2.25rem;   /* 36px */
+--text-xs: 0.75rem; /* 12px */
+--text-sm: 0.875rem; /* 14px */
+--text-base: 1rem; /* 16px */
+--text-lg: 1.125rem; /* 18px */
+--text-xl: 1.25rem; /* 20px */
+--text-2xl: 1.5rem; /* 24px */
+--text-3xl: 1.875rem; /* 30px */
+--text-4xl: 2.25rem; /* 36px */
 ```
 
 Font weights:
+
 ```css
 --font-normal: 400;
 --font-medium: 500;
@@ -620,23 +668,27 @@ Font weights:
 ```
 
 ### Responsive Breakpoints (GAP #99 ✓ Already Documented)
+
 ```css
---breakpoint-sm: 640px;   /* Mobile landscape */
---breakpoint-md: 768px;   /* Tablet */
---breakpoint-lg: 1024px;  /* Laptop */
---breakpoint-xl: 1280px;  /* Desktop */
+--breakpoint-sm: 640px; /* Mobile landscape */
+--breakpoint-md: 768px; /* Tablet */
+--breakpoint-lg: 1024px; /* Laptop */
+--breakpoint-xl: 1280px; /* Desktop */
 --breakpoint-2xl: 1536px; /* Large desktop */
 ```
 
 Usage in media queries:
+
 ```css
-@media (min-width: 768px) {  /* Tablet and up */
+@media (min-width: 768px) {
+  /* Tablet and up */
   .container {
     max-width: var(--container-md);
   }
 }
 
-@media (min-width: 1024px) {  /* Laptop and up */
+@media (min-width: 1024px) {
+  /* Laptop and up */
   .container {
     max-width: var(--container-lg);
   }

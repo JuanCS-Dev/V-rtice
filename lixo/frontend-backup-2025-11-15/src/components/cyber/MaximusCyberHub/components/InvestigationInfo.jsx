@@ -1,11 +1,13 @@
-import React from 'react';
-import { INVESTIGATION_TYPES } from '../utils/investigationUtils';
-import styles from './InvestigationInfo.module.css';
+import React from "react";
+import { INVESTIGATION_TYPES } from "../utils/investigationUtils";
+import styles from "./InvestigationInfo.module.css";
 
 export const InvestigationInfo = ({ investigation }) => {
   if (!investigation) return null;
 
-  const investigationTypeName = INVESTIGATION_TYPES.find(t => t.id === investigation.type)?.name;
+  const investigationTypeName = INVESTIGATION_TYPES.find(
+    (t) => t.id === investigation.type,
+  )?.name;
 
   return (
     <div className={styles.container}>
@@ -17,7 +19,7 @@ export const InvestigationInfo = ({ investigation }) => {
         <div className={styles.right}>
           <div className={styles.type}>{investigationTypeName}</div>
           <div className={styles.status}>
-            {investigation.status === 'running' ? 'Running...' : 'Completed'}
+            {investigation.status === "running" ? "Running..." : "Completed"}
           </div>
         </div>
       </div>

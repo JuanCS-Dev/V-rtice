@@ -21,11 +21,11 @@
  * ```
  */
 
-import createClient from 'openapi-fetch';
-import type { paths } from '@/types/api';
+import createClient from "openapi-fetch";
+import type { paths } from "@/types/api";
 
 // API base URL from environment
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 /**
  * Type-safe API client
@@ -41,7 +41,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const typedApiClient = createClient<paths>({
   baseUrl: BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -53,7 +53,7 @@ export const typedApiClient = createClient<paths>({
 export function setAuthToken(token: string) {
   typedApiClient.use({
     async onRequest({ request }) {
-      request.headers.set('Authorization', `Bearer ${token}`);
+      request.headers.set("Authorization", `Bearer ${token}`);
       return request;
     },
   });
@@ -67,9 +67,9 @@ export function setAuthToken(token: string) {
 typedApiClient.use({
   async onRequest({ request }) {
     // Generate request ID if not present
-    if (!request.headers.has('X-Request-ID')) {
+    if (!request.headers.has("X-Request-ID")) {
       const requestId = crypto.randomUUID();
-      request.headers.set('X-Request-ID', requestId);
+      request.headers.set("X-Request-ID", requestId);
     }
     return request;
   },
@@ -83,7 +83,7 @@ typedApiClient.use({
 typedApiClient.use({
   async onResponse({ response }) {
     if (!response.ok) {
-      const requestId = response.headers.get('X-Request-ID');
+      const requestId = response.headers.get("X-Request-ID");
       console.error(`API Error [Request ID: ${requestId}]:`, {
         status: response.status,
         url: response.url,

@@ -8,14 +8,14 @@
  * <SkipLink href="#main-content">Skip to main content</SkipLink>
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import './SkipLink.css';
+import React from "react";
+import PropTypes from "prop-types";
+import "./SkipLink.css";
 
 export const SkipLink = ({
-  href = '#main-content',
-  children = 'Skip to main content',
-  className = ''
+  href = "#main-content",
+  children = "Skip to main content",
+  className = "",
 }) => {
   const handleClick = (e) => {
     e.preventDefault();
@@ -23,27 +23,23 @@ export const SkipLink = ({
     const target = document.querySelector(href);
     if (target) {
       // Set tabindex to allow focus
-      target.setAttribute('tabindex', '-1');
+      target.setAttribute("tabindex", "-1");
 
       // Focus the element
       target.focus();
 
       // Remove tabindex after focus
       setTimeout(() => {
-        target.removeAttribute('tabindex');
+        target.removeAttribute("tabindex");
       }, 100);
 
       // Scroll into view
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
   return (
-    <a
-      href={href}
-      className={`skip-link ${className}`}
-      onClick={handleClick}
-    >
+    <a href={href} className={`skip-link ${className}`} onClick={handleClick}>
       {children}
     </a>
   );
@@ -52,7 +48,7 @@ export const SkipLink = ({
 SkipLink.propTypes = {
   href: PropTypes.string,
   children: PropTypes.node,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default SkipLink;

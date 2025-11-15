@@ -5,7 +5,7 @@
 ### 1. Importação Básica
 
 ```jsx
-import { MAVDetection } from '@/components/cyber/MAVDetection';
+import { MAVDetection } from "@/components/cyber/MAVDetection";
 
 function App() {
   return <MAVDetection />;
@@ -17,13 +17,13 @@ function App() {
 Adicione ao arquivo do dashboard (ex: `OffensiveDashboard.jsx`):
 
 ```jsx
-import { MAVDetection } from '@/components/cyber/MAVDetection';
+import { MAVDetection } from "@/components/cyber/MAVDetection";
 
 export const OffensiveDashboard = () => {
   return (
     <div className="dashboard">
       {/* Outros widgets */}
-      
+
       <div className="widget-container">
         <MAVDetection />
       </div>
@@ -65,7 +65,7 @@ Se necessário, ajuste o endpoint no arquivo `ServiceEndpoints`:
 export const ServiceEndpoints = {
   offensive: {
     // ... outros endpoints
-    mav: '/api/social-defense/mav', // Port 8039
+    mav: "/api/social-defense/mav", // Port 8039
   },
 };
 ```
@@ -82,6 +82,7 @@ export const ServiceEndpoints = {
 ## 📊 Formato de Dados Esperado
 
 ### Posts (Mínimo):
+
 ```json
 [
   {
@@ -98,6 +99,7 @@ export const ServiceEndpoints = {
 ```
 
 ### Accounts (Opcional):
+
 ```json
 [
   {
@@ -119,6 +121,7 @@ O componente usa CSS Modules. Para customizar:
 3. Reimporte no componente
 
 Cores principais:
+
 - Primary: `#00ff88`
 - Background gradient: `#1a1a2e → #16213e`
 - Severidade CRITICAL: `#dc2626`
@@ -144,6 +147,7 @@ Adicione as chaves ao arquivo de tradução:
 ## 🐛 Troubleshooting
 
 ### Problema: "getOffensiveService is not a function"
+
 **Solução**: Verifique se o path alias `@/services` está configurado
 
 ```javascript
@@ -158,6 +162,7 @@ Adicione as chaves ao arquivo de tradução:
 ```
 
 ### Problema: "Failed to load metrics"
+
 **Solução**: Verifique se o backend está rodando na porta 8039
 
 ```bash
@@ -167,11 +172,13 @@ curl http://localhost:8039/health
 ```
 
 ### Problema: JSON parse error
+
 **Solução**: Use o botão "Carregar Exemplo" para ver o formato correto
 
 ## 📞 Suporte
 
 Em caso de problemas:
+
 1. Verifique os logs do console do navegador
 2. Verifique os logs do backend (port 8039)
 3. Consulte o README.md completo

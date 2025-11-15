@@ -24,15 +24,15 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import { Card } from '../../shared/Card';
-import AskMaximusButton from '../../shared/AskMaximusButton';
-import NetworkMonitorHeader from './components/NetworkMonitorHeader';
-import NetworkStatistics from './components/NetworkStatistics';
-import NetworkEventStream from './components/NetworkEventStream';
-import NetworkAdvancedControls from './components/NetworkAdvancedControls';
-import { useNetworkMonitoring } from './hooks/useNetworkMonitoring';
-import styles from './NetworkMonitor.module.css';
+import React from "react";
+import { Card } from "../../shared/Card";
+import AskMaximusButton from "../../shared/AskMaximusButton";
+import NetworkMonitorHeader from "./components/NetworkMonitorHeader";
+import NetworkStatistics from "./components/NetworkStatistics";
+import NetworkEventStream from "./components/NetworkEventStream";
+import NetworkAdvancedControls from "./components/NetworkAdvancedControls";
+import { useNetworkMonitoring } from "./hooks/useNetworkMonitoring";
+import styles from "./NetworkMonitor.module.css";
 
 export const NetworkMonitor = () => {
   const {
@@ -40,7 +40,7 @@ export const NetworkMonitor = () => {
     networkEvents,
     statistics,
     toggleMonitoring,
-    getSeverityClass
+    getSeverityClass,
   } = useNetworkMonitoring();
 
   return (
@@ -50,20 +50,21 @@ export const NetworkMonitor = () => {
       variant="cyber"
       data-maximus-tool="network-monitor"
       data-maximus-category="shared"
-      data-maximus-status={isMonitoring ? 'monitoring' : 'idle'}
+      data-maximus-status={isMonitoring ? "monitoring" : "idle"}
     >
       <div className={styles.widgetBody}>
         <section
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: "1rem" }}
           role="region"
           aria-label="AI assistance"
-          data-maximus-section="ai-assistance">
+          data-maximus-section="ai-assistance"
+        >
           <AskMaximusButton
             context={{
-              type: 'network_monitor',
+              type: "network_monitor",
               data: { networkEvents, statistics },
               isMonitoring,
-              eventsCount: networkEvents.length
+              eventsCount: networkEvents.length,
             }}
             prompt="Analyze this network traffic and identify anomalies, suspicious patterns, or security concerns"
             size="medium"
@@ -74,7 +75,8 @@ export const NetworkMonitor = () => {
         <section
           role="region"
           aria-label="Monitoring controls"
-          data-maximus-section="controls">
+          data-maximus-section="controls"
+        >
           <NetworkMonitorHeader
             isMonitoring={isMonitoring}
             onToggleMonitoring={toggleMonitoring}
@@ -84,14 +86,16 @@ export const NetworkMonitor = () => {
         <section
           role="region"
           aria-label="Network statistics"
-          data-maximus-section="statistics">
+          data-maximus-section="statistics"
+        >
           <NetworkStatistics statistics={statistics} />
         </section>
 
         <section
           role="region"
           aria-label="Network events stream"
-          data-maximus-section="events">
+          data-maximus-section="events"
+        >
           <NetworkEventStream
             isMonitoring={isMonitoring}
             networkEvents={networkEvents}
@@ -102,7 +106,8 @@ export const NetworkMonitor = () => {
         <section
           role="region"
           aria-label="Advanced controls"
-          data-maximus-section="advanced-controls">
+          data-maximus-section="advanced-controls"
+        >
           <NetworkAdvancedControls isMonitoring={isMonitoring} />
         </section>
       </div>

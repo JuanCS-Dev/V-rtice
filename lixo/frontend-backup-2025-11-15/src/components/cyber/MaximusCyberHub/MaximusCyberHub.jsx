@@ -24,16 +24,16 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import AskMaximusButton from '../../shared/AskMaximusButton';
-import { HubHeader } from './components/HubHeader';
-import { TargetInput } from './components/TargetInput';
-import { ServicesStatus } from './components/ServicesStatus';
-import { InvestigationInfo } from './components/InvestigationInfo';
-import { ExecutionTimeline } from './components/ExecutionTimeline';
-import { FinalReport } from './components/FinalReport';
-import { useMaximusHub } from './hooks/useMaximusHub';
-import styles from './MaximusCyberHub.module.css';
+import React from "react";
+import AskMaximusButton from "../../shared/AskMaximusButton";
+import { HubHeader } from "./components/HubHeader";
+import { TargetInput } from "./components/TargetInput";
+import { ServicesStatus } from "./components/ServicesStatus";
+import { InvestigationInfo } from "./components/InvestigationInfo";
+import { ExecutionTimeline } from "./components/ExecutionTimeline";
+import { FinalReport } from "./components/FinalReport";
+import { useMaximusHub } from "./hooks/useMaximusHub";
+import styles from "./MaximusCyberHub.module.css";
 
 export const MaximusCyberHub = () => {
   const {
@@ -46,7 +46,7 @@ export const MaximusCyberHub = () => {
     analysisSteps,
     results,
     services,
-    startInvestigation
+    startInvestigation,
   } = useMaximusHub();
 
   return (
@@ -56,13 +56,16 @@ export const MaximusCyberHub = () => {
       aria-labelledby="maximus-cyber-hub-title"
       data-maximus-tool="maximus-cyber-hub"
       data-maximus-category="shared"
-      data-maximus-status={isAnalyzing ? 'investigating' : 'ready'}>
-
+      data-maximus-status={isAnalyzing ? "investigating" : "ready"}
+    >
       <header
         role="region"
         aria-label="Hub header"
-        data-maximus-section="header">
-        <h2 id="maximus-cyber-hub-title" className={styles.visuallyHidden}>Maximus Cyber Hub</h2>
+        data-maximus-section="header"
+      >
+        <h2 id="maximus-cyber-hub-title" className={styles.visuallyHidden}>
+          Maximus Cyber Hub
+        </h2>
         <HubHeader />
       </header>
 
@@ -71,7 +74,8 @@ export const MaximusCyberHub = () => {
           className={styles.controlPanel}
           role="region"
           aria-label="Investigation control panel"
-          data-maximus-section="control-panel">
+          data-maximus-section="control-panel"
+        >
           <TargetInput
             targetInput={targetInput}
             setTargetInput={setTargetInput}
@@ -87,19 +91,22 @@ export const MaximusCyberHub = () => {
         <div className={styles.timelinePanel}>
           {investigation && (
             <section
-              style={{ marginBottom: '1rem' }}
+              style={{ marginBottom: "1rem" }}
               role="region"
               aria-label="AI assistance"
-              data-maximus-section="ai-assistance">
+              data-maximus-section="ai-assistance"
+            >
               <AskMaximusButton
                 context={{
-                  type: 'ai_investigation',
+                  type: "ai_investigation",
                   data: investigation,
                   results,
                   services,
-                  stepsCompleted: analysisSteps.filter(s => s.status === 'completed').length,
+                  stepsCompleted: analysisSteps.filter(
+                    (s) => s.status === "completed",
+                  ).length,
                   totalSteps: analysisSteps.length,
-                  investigationType
+                  investigationType,
                 }}
                 prompt="Analyze this AI investigation. What are the key findings, security risks, and recommended next steps?"
                 size="medium"
@@ -111,14 +118,16 @@ export const MaximusCyberHub = () => {
           <section
             role="region"
             aria-label="Investigation information"
-            data-maximus-section="investigation-info">
+            data-maximus-section="investigation-info"
+          >
             <InvestigationInfo investigation={investigation} />
           </section>
 
           <section
             role="region"
             aria-label="Execution timeline"
-            data-maximus-section="timeline">
+            data-maximus-section="timeline"
+          >
             <ExecutionTimeline analysisSteps={analysisSteps} />
           </section>
 
@@ -126,7 +135,8 @@ export const MaximusCyberHub = () => {
             <section
               role="region"
               aria-label="Investigation final report"
-              data-maximus-section="final-report">
+              data-maximus-section="final-report"
+            >
               <FinalReport investigation={investigation} results={results} />
             </section>
           )}

@@ -36,18 +36,18 @@ GET requests **automatically retry** up to 3 times with exponential backoff:
 - **Total time**: ~7s maximum
 
 ```javascript
-import { OffensiveService } from './services/offensive/OffensiveService';
+import { OffensiveService } from "./services/offensive/OffensiveService";
 
 const service = new OffensiveService();
 
 // Automatic retry (3 attempts)
-const data = await service.get('/scans');
+const data = await service.get("/scans");
 
 // Disable retry
-const data = await service.get('/scans', { retry: 0 });
+const data = await service.get("/scans", { retry: 0 });
 
 // Custom retry count
-const data = await service.get('/scans', { retry: 5, retryDelay: 500 });
+const data = await service.get("/scans", { retry: 5, retryDelay: 500 });
 ```
 
 ### POST/PUT/DELETE (Non-Idempotent) ❌ No Auto-Retry
@@ -58,13 +58,13 @@ Enable retry explicitly when safe:
 
 ```javascript
 // Default: NO retry
-const result = await service.post('/create', data);
+const result = await service.post("/create", data);
 
 // Enable retry explicitly (use with caution!)
-const result = await service.post('/create', data, {
-  retry: true,       // Enable retry
-  maxRetries: 2,     // Conservative: 2 attempts
-  retryDelay: 1000   // 1s base delay
+const result = await service.post("/create", data, {
+  retry: true, // Enable retry
+  maxRetries: 2, // Conservative: 2 attempts
+  retryDelay: 1000, // 1s base delay
 });
 ```
 
@@ -81,6 +81,7 @@ The retry mechanism **skips retry** for these errors:
 These errors are thrown immediately without retry.
 
 ✅ **Retries on**:
+
 - Network errors (timeout, connection refused)
 - 500 Internal Server Error
 - 502 Bad Gateway
@@ -92,18 +93,18 @@ These errors are thrown immediately without retry.
 ### Creating a Service
 
 ```javascript
-import { BaseService } from './services/base/BaseService';
+import { BaseService } from "./services/base/BaseService";
 
 class MyService extends BaseService {
   constructor() {
-    super('/api/myservice');
+    super("/api/myservice");
   }
 
   // Optional: override transformResponse
   transformResponse(response) {
     return {
       ...response,
-      transformedAt: new Date().toISOString()
+      transformedAt: new Date().toISOString(),
     };
   }
 
@@ -112,7 +113,7 @@ class MyService extends BaseService {
     super.validateRequest(data); // Call base validation
 
     if (!data.requiredField) {
-      throw new Error('requiredField is required');
+      throw new Error("requiredField is required");
     }
   }
 
@@ -122,7 +123,7 @@ class MyService extends BaseService {
   }
 
   async create(data) {
-    return this.post('/', data);
+    return this.post("/", data);
   }
 }
 ```
@@ -133,16 +134,16 @@ class MyService extends BaseService {
 const service = new MyService();
 
 // Simple GET
-const all = await service.get('/list');
+const all = await service.get("/list");
 
 // GET with path
-const one = await service.get('/123');
+const one = await service.get("/123");
 
 // GET with custom options
-const data = await service.get('/data', {
-  retry: 5,           // 5 retry attempts
-  retryDelay: 2000,   // 2s base delay
-  timeout: 60000      // 60s timeout (passed to API client)
+const data = await service.get("/data", {
+  retry: 5, // 5 retry attempts
+  retryDelay: 2000, // 2s base delay
+  timeout: 60000, // 60s timeout (passed to API client)
 });
 ```
 
@@ -150,15 +151,15 @@ const data = await service.get('/data', {
 
 ```javascript
 // POST without retry (default, safe)
-const result = await service.post('/create', {
-  name: 'New Item',
-  value: 123
+const result = await service.post("/create", {
+  name: "New Item",
+  value: 123,
 });
 
 // POST with retry (use carefully)
-const result = await service.post('/create', data, {
+const result = await service.post("/create", data, {
   retry: true,
-  maxRetries: 2
+  maxRetries: 2,
 });
 ```
 
@@ -166,13 +167,13 @@ const result = await service.post('/create', data, {
 
 ```javascript
 // Update resource
-await service.put('/items/123', {
-  name: 'Updated Name'
+await service.put("/items/123", {
+  name: "Updated Name",
 });
 
 // With retry (if idempotent)
-await service.put('/items/123', data, {
-  retry: true
+await service.put("/items/123", data, {
+  retry: true,
 });
 ```
 
@@ -180,11 +181,11 @@ await service.put('/items/123', data, {
 
 ```javascript
 // Delete resource
-await service.delete('/items/123');
+await service.delete("/items/123");
 
 // With retry (if idempotent)
-await service.delete('/items/123', {
-  retry: true
+await service.delete("/items/123", {
+  retry: true,
 });
 ```
 
@@ -194,12 +195,12 @@ BaseService enhances all errors with context:
 
 ```javascript
 try {
-  await service.get('/failing-endpoint');
+  await service.get("/failing-endpoint");
 } catch (error) {
-  console.error(error.message);       // Original error message
-  console.error(error.method);        // "GET"
-  console.error(error.endpoint);      // "/api/myservice/failing-endpoint"
-  console.error(error.service);       // "MyService"
+  console.error(error.message); // Original error message
+  console.error(error.method); // "GET"
+  console.error(error.endpoint); // "/api/myservice/failing-endpoint"
+  console.error(error.service); // "MyService"
   console.error(error.originalError); // Original Error object
 }
 ```
@@ -209,11 +210,11 @@ try {
 BaseService intelligently extracts error messages from various formats:
 
 ```javascript
-extractErrorMessage('string error')              // → 'string error'
-extractErrorMessage({ message: 'msg' })          // → 'msg'
-extractErrorMessage({ detail: 'detail' })        // → 'detail'
-extractErrorMessage({ error: 'err' })            // → 'err'
-extractErrorMessage({})                          // → 'Unknown error occurred'
+extractErrorMessage("string error"); // → 'string error'
+extractErrorMessage({ message: "msg" }); // → 'msg'
+extractErrorMessage({ detail: "detail" }); // → 'detail'
+extractErrorMessage({ error: "err" }); // → 'err'
+extractErrorMessage({}); // → 'Unknown error occurred'
 ```
 
 ## Validation
@@ -224,19 +225,19 @@ BaseService includes automatic request validation:
 
 ```javascript
 // Maximum payload size: 5MB
-const largeData = { file: 'x'.repeat(6 * 1024 * 1024) };
+const largeData = { file: "x".repeat(6 * 1024 * 1024) };
 
-await service.post('/upload', largeData);
+await service.post("/upload", largeData);
 // ❌ Throws: "Request payload too large: 6.00MB (max: 5MB)"
 ```
 
 ### Null/Undefined Protection
 
 ```javascript
-await service.post('/create', null);
+await service.post("/create", null);
 // ❌ Throws: "Request data cannot be null or undefined"
 
-await service.post('/create', undefined);
+await service.post("/create", undefined);
 // ❌ Throws: "Request data cannot be null or undefined"
 ```
 
@@ -251,12 +252,12 @@ class MyService extends BaseService {
     super.validateRequest(data);
 
     // Custom validation
-    if (data.email && !data.email.includes('@')) {
-      throw new Error('Invalid email format');
+    if (data.email && !data.email.includes("@")) {
+      throw new Error("Invalid email format");
     }
 
     if (data.age && data.age < 0) {
-      throw new Error('Age cannot be negative');
+      throw new Error("Age cannot be negative");
     }
   }
 }
@@ -274,7 +275,7 @@ class UserService extends BaseService {
     return {
       id: response.user_id,
       name: response.user_name,
-      fullName: response.user_name.toUpperCase()
+      fullName: response.user_name.toUpperCase(),
     };
   }
 }
@@ -289,12 +290,16 @@ Use the protected `retry()` method for custom retry logic:
 ```javascript
 class MyService extends BaseService {
   async complexOperation() {
-    return this.retry(async () => {
-      // Your complex logic here
-      const step1 = await this.externalApiCall();
-      const step2 = await this.processData(step1);
-      return step2;
-    }, 5, 2000); // 5 retries, 2s base delay
+    return this.retry(
+      async () => {
+        // Your complex logic here
+        const step1 = await this.externalApiCall();
+        const step2 = await this.processData(step1);
+        return step2;
+      },
+      5,
+      2000,
+    ); // 5 retries, 2s base delay
   }
 }
 ```
@@ -305,16 +310,16 @@ class MyService extends BaseService {
 const isHealthy = await service.healthCheck();
 
 if (!isHealthy) {
-  console.error('Service is down!');
+  console.error("Service is down!");
 }
 ```
 
 ### Endpoint Building
 
 ```javascript
-service.buildEndpoint('');          // → '/api/myservice'
-service.buildEndpoint('/users');    // → '/api/myservice/users'
-service.buildEndpoint('users');     // → '/api/myservice/users' (auto-adds /)
+service.buildEndpoint(""); // → '/api/myservice'
+service.buildEndpoint("/users"); // → '/api/myservice/users'
+service.buildEndpoint("users"); // → '/api/myservice/users' (auto-adds /)
 ```
 
 ## Best Practices
@@ -364,6 +369,7 @@ npm test -- src/services/base/__tests__/BaseService.test.js
 ```
 
 Tests cover:
+
 - GET automatic retry (8 tests)
 - POST opt-in retry (5 tests)
 - PUT/DELETE opt-in retry (4 tests)
@@ -383,6 +389,7 @@ Tests cover:
 ---
 
 **Questions?** Check existing services for examples:
+
 - `frontend/src/services/offensive/OffensiveService.js`
 - `frontend/src/services/defensive/DefensiveService.js`
 - `frontend/src/services/osint/OsintService.js`

@@ -3,10 +3,10 @@
  */
 export const getSeverityVariant = (severity) => {
   const variants = {
-    critical: 'critical',
-    high: 'high',
-    medium: 'medium',
-    low: 'success'
+    critical: "critical",
+    high: "high",
+    medium: "medium",
+    low: "success",
   };
-  return variants[severity?.toLowerCase()] || 'cyber';
+  return variants[severity?.toLowerCase()] || "cyber";
 };

@@ -1,10 +1,10 @@
 // Path: frontend/src/components/HeatmapLayer.jsx
 
-import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
-import 'leaflet.heat';
-import L from 'leaflet';
-import PropTypes from 'prop-types';
+import { useEffect } from "react";
+import { useMap } from "react-leaflet";
+import "leaflet.heat";
+import L from "leaflet";
+import PropTypes from "prop-types";
 
 /**
  * Camada de heatmap adaptada para receber um array de objetos.
@@ -21,8 +21,8 @@ const HeatmapLayer = ({ points }) => {
 
     // --- CORREÇÃO: Transforma os dados do formato de objeto para o formato de array que o L.heatLayer espera ---
     const formattedPoints = points
-      .filter(p => typeof p.lat === 'number' && typeof p.lng === 'number') // Filtra pontos com dados inválidos
-      .map(p => [p.lat, p.lng, p.intensity || 0.5]); // Usa intensidade do objeto ou um padrão
+      .filter((p) => typeof p.lat === "number" && typeof p.lng === "number") // Filtra pontos com dados inválidos
+      .map((p) => [p.lat, p.lng, p.intensity || 0.5]); // Usa intensidade do objeto ou um padrão
 
     // Se após a filtragem não sobrarem pontos, não adiciona a camada.
     if (formattedPoints.length === 0) {
@@ -33,7 +33,7 @@ const HeatmapLayer = ({ points }) => {
       radius: 25,
       blur: 15,
       maxZoom: 18,
-      gradient: { 0.4: '#1A237E', 0.65: '#F9A825', 1: '#B71C1C' }
+      gradient: { 0.4: "#1A237E", 0.65: "#F9A825", 1: "#B71C1C" },
     };
 
     const heatLayer = L.heatLayer(formattedPoints, heatLayerOptions).addTo(map);
@@ -52,9 +52,9 @@ HeatmapLayer.propTypes = {
     PropTypes.shape({
       lat: PropTypes.number.isRequired,
       lng: PropTypes.number.isRequired,
-      intensity: PropTypes.number // A intensidade pode ser opcional
-    }).isRequired
-  ).isRequired
+      intensity: PropTypes.number, // A intensidade pode ser opcional
+    }).isRequired,
+  ).isRequired,
 };
 
 export default HeatmapLayer;

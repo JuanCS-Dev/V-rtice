@@ -7,18 +7,18 @@
  * Following Boris Cherny's principle: "Examples are executable documentation"
  */
 
-import React, { useState } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createQueryClient, queryKeys, mutationKeys } from '../queryClient';
-import { createIDBPersister, persistOptions } from '../queryPersister';
+import React, { useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createQueryClient, queryKeys, mutationKeys } from "../queryClient";
+import { createIDBPersister, persistOptions } from "../queryPersister";
 import {
   useOnlineStatus,
   useMutationQueue,
   useOfflineQueue,
   useAutoRetryOnReconnect,
-} from '../offlineQueue';
+} from "../offlineQueue";
 
 // ============================================================================
 // Example 1: Basic Persistence Setup
@@ -71,10 +71,10 @@ function NetworkStatusBanner() {
   return (
     <div
       style={{
-        background: '#f59e0b',
-        color: 'white',
-        padding: '0.75rem',
-        textAlign: 'center',
+        background: "#f59e0b",
+        color: "white",
+        padding: "0.75rem",
+        textAlign: "center",
       }}
     >
       ⚠️ You are offline. Changes will be saved and synced when you reconnect.
@@ -98,30 +98,30 @@ function OfflineQueueIndicator() {
   return (
     <div
       style={{
-        background: '#3b82f6',
-        color: 'white',
-        padding: '1rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        background: "#3b82f6",
+        color: "white",
+        padding: "1rem",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
       }}
     >
       <span>
-        📦 {pendingCount} action{pendingCount > 1 ? 's' : ''} queued
-        {!isOnline && ' - will sync when online'}
+        📦 {pendingCount} action{pendingCount > 1 ? "s" : ""} queued
+        {!isOnline && " - will sync when online"}
       </span>
 
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div style={{ display: "flex", gap: "0.5rem" }}>
         {isOnline && (
           <button
             onClick={retryAll}
             style={{
-              background: 'white',
-              color: '#3b82f6',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.25rem',
-              cursor: 'pointer',
+              background: "white",
+              color: "#3b82f6",
+              border: "none",
+              padding: "0.5rem 1rem",
+              borderRadius: "0.25rem",
+              cursor: "pointer",
             }}
           >
             Retry All
@@ -131,12 +131,12 @@ function OfflineQueueIndicator() {
         <button
           onClick={clearQueue}
           style={{
-            background: 'transparent',
-            color: 'white',
-            border: '1px solid white',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.25rem',
-            cursor: 'pointer',
+            background: "transparent",
+            color: "white",
+            border: "1px solid white",
+            padding: "0.5rem 1rem",
+            borderRadius: "0.25rem",
+            cursor: "pointer",
           }}
         >
           Clear Queue
@@ -152,7 +152,7 @@ function OfflineQueueIndicator() {
 
 interface ScanRequest {
   target: string;
-  scanType: 'quick' | 'full' | 'custom';
+  scanType: "quick" | "full" | "custom";
 }
 
 /**
@@ -168,14 +168,14 @@ function StartScanButton() {
   const startScanMutation = useMutation({
     mutationKey: mutationKeys.scan.start,
     mutationFn: async (data: ScanRequest) => {
-      const response = await fetch('http://localhost:8000/api/v1/scan/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:8000/api/v1/scan/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start scan');
+        throw new Error("Failed to start scan");
       }
 
       return response.json();
@@ -183,7 +183,7 @@ function StartScanButton() {
 
     // Optimistic update
     onMutate: async (newScan) => {
-      console.log('Starting scan (optimistic):', newScan);
+      console.log("Starting scan (optimistic):", newScan);
 
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: queryKeys.scan.all });
@@ -198,9 +198,9 @@ function StartScanButton() {
           scans: [
             ...(old?.scans || []),
             {
-              id: 'temp-' + Date.now(),
+              id: "temp-" + Date.now(),
               ...newScan,
-              status: 'pending',
+              status: "pending",
               created_at: new Date().toISOString(),
             },
           ],
@@ -225,8 +225,8 @@ function StartScanButton() {
 
   const handleStartScan = () => {
     startScanMutation.mutate({
-      target: '192.168.1.1',
-      scanType: 'quick',
+      target: "192.168.1.1",
+      scanType: "quick",
     });
   };
 
@@ -236,25 +236,31 @@ function StartScanButton() {
         onClick={handleStartScan}
         disabled={startScanMutation.isPending}
         style={{
-          background: isOnline ? '#10b981' : '#6b7280',
-          color: 'white',
-          padding: '0.75rem 1.5rem',
-          border: 'none',
-          borderRadius: '0.375rem',
-          cursor: startScanMutation.isPending ? 'not-allowed' : 'pointer',
+          background: isOnline ? "#10b981" : "#6b7280",
+          color: "white",
+          padding: "0.75rem 1.5rem",
+          border: "none",
+          borderRadius: "0.375rem",
+          cursor: startScanMutation.isPending ? "not-allowed" : "pointer",
         }}
       >
-        {startScanMutation.isPending ? 'Starting...' : 'Start Scan'}
+        {startScanMutation.isPending ? "Starting..." : "Start Scan"}
       </button>
 
       {!isOnline && (
-        <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.875rem' }}>
+        <p
+          style={{
+            color: "#6b7280",
+            marginTop: "0.5rem",
+            fontSize: "0.875rem",
+          }}
+        >
           Scan will start automatically when you reconnect
         </p>
       )}
 
       {startScanMutation.isError && (
-        <p style={{ color: '#ef4444', marginTop: '0.5rem' }}>
+        <p style={{ color: "#ef4444", marginTop: "0.5rem" }}>
           Error: {(startScanMutation.error as Error).message}
         </p>
       )}
@@ -275,15 +281,15 @@ function MutationQueuePanel() {
 
   if (pendingMutations.length === 0) {
     return (
-      <div style={{ padding: '1rem', color: '#6b7280' }}>
+      <div style={{ padding: "1rem", color: "#6b7280" }}>
         No pending mutations
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h3 style={{ marginBottom: '1rem' }}>
+    <div style={{ padding: "1rem" }}>
+      <h3 style={{ marginBottom: "1rem" }}>
         Pending Mutations ({pendingMutations.length})
       </h3>
 
@@ -291,24 +297,23 @@ function MutationQueuePanel() {
         <div
           key={index}
           style={{
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.375rem',
-            padding: '1rem',
-            marginBottom: '0.5rem',
+            border: "1px solid #e5e7eb",
+            borderRadius: "0.375rem",
+            padding: "1rem",
+            marginBottom: "0.5rem",
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span>
-              <strong>{mutation.mutationKey.join(' / ')}</strong>
+              <strong>{mutation.mutationKey.join(" / ")}</strong>
             </span>
             <span
               style={{
-                background:
-                  mutation.status === 'error' ? '#fecaca' : '#dbeafe',
-                color: mutation.status === 'error' ? '#991b1b' : '#1e40af',
-                padding: '0.25rem 0.5rem',
-                borderRadius: '0.25rem',
-                fontSize: '0.75rem',
+                background: mutation.status === "error" ? "#fecaca" : "#dbeafe",
+                color: mutation.status === "error" ? "#991b1b" : "#1e40af",
+                padding: "0.25rem 0.5rem",
+                borderRadius: "0.25rem",
+                fontSize: "0.75rem",
               }}
             >
               {mutation.status}
@@ -316,12 +321,24 @@ function MutationQueuePanel() {
           </div>
 
           {mutation.error && (
-            <p style={{ color: '#ef4444', marginTop: '0.5rem', fontSize: '0.875rem' }}>
+            <p
+              style={{
+                color: "#ef4444",
+                marginTop: "0.5rem",
+                fontSize: "0.875rem",
+              }}
+            >
               {mutation.error.message}
             </p>
           )}
 
-          <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+          <p
+            style={{
+              color: "#6b7280",
+              fontSize: "0.875rem",
+              marginTop: "0.5rem",
+            }}
+          >
             Queued at: {new Date(mutation.timestamp).toLocaleString()}
           </p>
         </div>
@@ -330,11 +347,11 @@ function MutationQueuePanel() {
       {!isOnline && (
         <p
           style={{
-            background: '#fef3c7',
-            color: '#92400e',
-            padding: '0.75rem',
-            borderRadius: '0.375rem',
-            marginTop: '1rem',
+            background: "#fef3c7",
+            color: "#92400e",
+            padding: "0.75rem",
+            borderRadius: "0.375rem",
+            marginTop: "1rem",
           }}
         >
           ℹ️ Mutations will automatically retry when connection is restored
@@ -353,33 +370,39 @@ function MutationQueuePanel() {
  */
 function PersistenceControls() {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
 
   const handleClearCache = async () => {
     queryClient.clear();
-    setStatus('Cache cleared');
-    setTimeout(() => setStatus(''), 2000);
+    setStatus("Cache cleared");
+    setTimeout(() => setStatus(""), 2000);
   };
 
   const handleClearMutations = () => {
     queryClient.getMutationCache().clear();
-    setStatus('Mutation queue cleared');
-    setTimeout(() => setStatus(''), 2000);
+    setStatus("Mutation queue cleared");
+    setTimeout(() => setStatus(""), 2000);
   };
 
   return (
-    <div style={{ padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '0.375rem' }}>
-      <h3 style={{ marginBottom: '1rem' }}>Persistence Controls</h3>
+    <div
+      style={{
+        padding: "1rem",
+        border: "1px solid #e5e7eb",
+        borderRadius: "0.375rem",
+      }}
+    >
+      <h3 style={{ marginBottom: "1rem" }}>Persistence Controls</h3>
 
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <button
           onClick={handleClearCache}
           style={{
-            background: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.25rem',
-            cursor: 'pointer',
+            background: "#f3f4f6",
+            border: "1px solid #d1d5db",
+            padding: "0.5rem 1rem",
+            borderRadius: "0.25rem",
+            cursor: "pointer",
           }}
         >
           Clear Query Cache
@@ -388,11 +411,11 @@ function PersistenceControls() {
         <button
           onClick={handleClearMutations}
           style={{
-            background: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.25rem',
-            cursor: 'pointer',
+            background: "#f3f4f6",
+            border: "1px solid #d1d5db",
+            padding: "0.5rem 1rem",
+            borderRadius: "0.25rem",
+            cursor: "pointer",
           }}
         >
           Clear Mutation Queue
@@ -400,7 +423,9 @@ function PersistenceControls() {
       </div>
 
       {status && (
-        <p style={{ color: '#10b981', marginTop: '1rem', fontSize: '0.875rem' }}>
+        <p
+          style={{ color: "#10b981", marginTop: "1rem", fontSize: "0.875rem" }}
+        >
           ✓ {status}
         </p>
       )}
@@ -416,9 +441,7 @@ function PersistenceControls() {
  * Complete demo showing all persistence features
  */
 export function PersistenceDemo() {
-  return (
-    <AppWithPersistence />
-  );
+  return <AppWithPersistence />;
 }
 
 /**
@@ -426,34 +449,36 @@ export function PersistenceDemo() {
  */
 function YourComponents() {
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '2rem' }}>Offline-First Mutation Persistence</h1>
+    <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+      <h1 style={{ marginBottom: "2rem" }}>
+        Offline-First Mutation Persistence
+      </h1>
 
-      <section style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>1. Try a Mutation</h2>
+      <section style={{ marginBottom: "2rem" }}>
+        <h2 style={{ marginBottom: "1rem" }}>1. Try a Mutation</h2>
         <StartScanButton />
       </section>
 
-      <section style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>2. Mutation Queue</h2>
+      <section style={{ marginBottom: "2rem" }}>
+        <h2 style={{ marginBottom: "1rem" }}>2. Mutation Queue</h2>
         <MutationQueuePanel />
       </section>
 
-      <section style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>3. Admin Controls</h2>
+      <section style={{ marginBottom: "2rem" }}>
+        <h2 style={{ marginBottom: "1rem" }}>3. Admin Controls</h2>
         <PersistenceControls />
       </section>
 
       <section
         style={{
-          background: '#f3f4f6',
-          padding: '1rem',
-          borderRadius: '0.375rem',
-          marginTop: '2rem',
+          background: "#f3f4f6",
+          padding: "1rem",
+          borderRadius: "0.375rem",
+          marginTop: "2rem",
         }}
       >
-        <h3 style={{ marginBottom: '0.5rem' }}>Test Offline Behavior:</h3>
-        <ol style={{ marginLeft: '1.5rem' }}>
+        <h3 style={{ marginBottom: "0.5rem" }}>Test Offline Behavior:</h3>
+        <ol style={{ marginLeft: "1.5rem" }}>
           <li>Open DevTools → Network tab</li>
           <li>Click "Offline" checkbox</li>
           <li>Click "Start Scan" button</li>

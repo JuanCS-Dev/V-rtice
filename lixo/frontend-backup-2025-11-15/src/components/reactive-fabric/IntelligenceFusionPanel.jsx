@@ -1,19 +1,24 @@
 /**
  * 🧠 Intelligence Fusion Panel
- * 
+ *
  * Correlates threat data across multiple honeypots to identify:
  * - Coordinated attack campaigns
  * - APT TTPs (Tactics, Techniques, Procedures)
  * - Emerging threat patterns
- * 
+ *
  * @module IntelligenceFusionPanel
  */
 
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import styles from './IntelligenceFusionPanel.module.css';
+import React, { useMemo } from "react";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
+import styles from "./IntelligenceFusionPanel.module.css";
 
 const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
   /**
@@ -21,8 +26,8 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
    */
   const patterns = useMemo(() => {
     const ipGroups = {};
-    
-    events.forEach(event => {
+
+    events.forEach((event) => {
       if (!ipGroups[event.source_ip]) {
         ipGroups[event.source_ip] = {
           ip: event.source_ip,
@@ -30,26 +35,26 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
           techniques: new Set(),
           count: 0,
           firstSeen: event.timestamp,
-          lastSeen: event.timestamp
+          lastSeen: event.timestamp,
         };
       }
-      
+
       const group = ipGroups[event.source_ip];
       group.targets.add(event.honeypot_id);
-      group.techniques.add(event.attack_type || 'unknown');
+      group.techniques.add(event.attack_type || "unknown");
       group.count++;
       group.lastSeen = event.timestamp;
     });
-    
+
     // Identify coordinated attacks (same IP, multiple targets)
     const coordinated = Object.values(ipGroups)
-      .filter(g => g.targets.size > 1)
+      .filter((g) => g.targets.size > 1)
       .sort((a, b) => b.count - a.count);
-    
+
     return {
       coordinated,
       totalIPs: Object.keys(ipGroups).length,
-      multiTarget: coordinated.length
+      multiTarget: coordinated.length,
     };
   }, [events]);
 
@@ -58,15 +63,15 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
    */
   const ttpStats = useMemo(() => {
     const ttps = {};
-    
-    events.forEach(event => {
-      const type = event.attack_type || 'unknown';
+
+    events.forEach((event) => {
+      const type = event.attack_type || "unknown";
       if (!ttps[type]) {
         ttps[type] = 0;
       }
       ttps[type]++;
     });
-    
+
     return Object.entries(ttps)
       .map(([type, count]) => ({ type, count }))
       .sort((a, b) => b.count - a.count);
@@ -76,23 +81,23 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
    * Time-based clustering (attacks within 5 minute windows)
    */
   const clusters = useMemo(() => {
-    const sorted = [...events].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)
+    const sorted = [...events].sort(
+      (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
     );
-    
+
     const clusters = [];
     let currentCluster = null;
     const CLUSTER_WINDOW = 5 * 60 * 1000; // 5 minutes
-    
-    sorted.forEach(event => {
+
+    sorted.forEach((event) => {
       const time = getTimestamp(event.timestamp);
-      
+
       if (!currentCluster || time - currentCluster.end > CLUSTER_WINDOW) {
         currentCluster = {
           start: time,
           end: time,
           events: [event],
-          ips: new Set([event.source_ip])
+          ips: new Set([event.source_ip]),
         };
         clusters.push(currentCluster);
       } else {
@@ -101,9 +106,9 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
         currentCluster.ips.add(event.source_ip);
       }
     });
-    
+
     return clusters
-      .filter(c => c.events.length >= 5) // Minimum 5 events to be significant
+      .filter((c) => c.events.length >= 5) // Minimum 5 events to be significant
       .sort((a, b) => b.events.length - a.events.length);
   }, [events]);
 
@@ -111,11 +116,11 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
    * Get confidence level for pattern
    */
   const getConfidenceLevel = (count) => {
-    if (count >= 50) return { level: 'Very High', color: '#00ff00' };
-    if (count >= 20) return { level: 'High', color: '#00ffff' };
-    if (count >= 10) return { level: 'Medium', color: '#ffaa00' };
-    if (count >= 5) return { level: 'Low', color: '#ff4000' };
-    return { level: 'Very Low', color: '#ff0040' };
+    if (count >= 50) return { level: "Very High", color: "#00ff00" };
+    if (count >= 20) return { level: "High", color: "#00ffff" };
+    if (count >= 10) return { level: "Medium", color: "#ffaa00" };
+    if (count >= 5) return { level: "Low", color: "#ff4000" };
+    return { level: "Very Low", color: "#ff0040" };
   };
 
   return (
@@ -129,7 +134,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
             <span className={styles.cardValue}>{patterns.totalIPs}</span>
           </div>
         </div>
-        
+
         <div className={styles.card}>
           <div className={styles.cardIcon}>⚡</div>
           <div className={styles.cardContent}>
@@ -139,7 +144,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
             </span>
           </div>
         </div>
-        
+
         <div className={styles.card}>
           <div className={styles.cardIcon}>🔬</div>
           <div className={styles.cardContent}>
@@ -147,7 +152,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
             <span className={styles.cardValue}>{clusters.length}</span>
           </div>
         </div>
-        
+
         <div className={styles.card}>
           <div className={styles.cardIcon}>📊</div>
           <div className={styles.cardContent}>
@@ -167,7 +172,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
             </h3>
             <span className={styles.badge}>{patterns.coordinated.length}</span>
           </div>
-          
+
           <div className={styles.panelContent}>
             {patterns.coordinated.length === 0 ? (
               <div className={styles.emptyState}>
@@ -177,37 +182,47 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
               <div className={styles.list}>
                 {patterns.coordinated.slice(0, 10).map((attack, idx) => {
                   const confidence = getConfidenceLevel(attack.count);
-                  
+
                   return (
                     <div key={idx} className={styles.listItem}>
                       <div className={styles.itemHeader}>
                         <span className={styles.itemIP}>{attack.ip}</span>
-                        <span 
+                        <span
                           className={styles.itemConfidence}
                           style={{ color: confidence.color }}
                         >
                           {confidence.level}
                         </span>
                       </div>
-                      
+
                       <div className={styles.itemStats}>
                         <span className={styles.itemStat}>
                           <span className={styles.itemStatLabel}>Targets:</span>
-                          <span className={styles.itemStatValue}>{attack.targets.size}</span>
+                          <span className={styles.itemStatValue}>
+                            {attack.targets.size}
+                          </span>
                         </span>
                         <span className={styles.itemStat}>
-                          <span className={styles.itemStatLabel}>Attempts:</span>
-                          <span className={styles.itemStatValue}>{attack.count}</span>
+                          <span className={styles.itemStatLabel}>
+                            Attempts:
+                          </span>
+                          <span className={styles.itemStatValue}>
+                            {attack.count}
+                          </span>
                         </span>
                         <span className={styles.itemStat}>
                           <span className={styles.itemStatLabel}>TTPs:</span>
-                          <span className={styles.itemStatValue}>{attack.techniques.size}</span>
+                          <span className={styles.itemStatValue}>
+                            {attack.techniques.size}
+                          </span>
                         </span>
                       </div>
-                      
+
                       <div className={styles.itemTechniques}>
                         {Array.from(attack.techniques).map((tech, i) => (
-                          <span key={i} className={styles.tag}>{tech}</span>
+                          <span key={i} className={styles.tag}>
+                            {tech}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -221,18 +236,16 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
         {/* TTP Analysis */}
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
-            <h3 className={styles.panelTitle}>
-              📊 TTP Distribution
-            </h3>
+            <h3 className={styles.panelTitle}>📊 TTP Distribution</h3>
             <span className={styles.badge}>{ttpStats.length}</span>
           </div>
-          
+
           <div className={styles.panelContent}>
             <div className={styles.chartContainer}>
               {ttpStats.map((ttp, idx) => {
                 const maxCount = ttpStats[0]?.count || 1;
                 const percentage = (ttp.count / maxCount) * 100;
-                
+
                 return (
                   <div key={idx} className={styles.barItem}>
                     <div className={styles.barLabel}>
@@ -240,7 +253,7 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
                       <span className={styles.barCount}>{ttp.count}</span>
                     </div>
                     <div className={styles.barTrack}>
-                      <div 
+                      <div
                         className={styles.barFill}
                         style={{ width: `${percentage}%` }}
                       />
@@ -255,12 +268,10 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
         {/* Attack Clusters */}
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
-            <h3 className={styles.panelTitle}>
-              🔬 Attack Clusters
-            </h3>
+            <h3 className={styles.panelTitle}>🔬 Attack Clusters</h3>
             <span className={styles.badge}>{clusters.length}</span>
           </div>
-          
+
           <div className={styles.panelContent}>
             {clusters.length === 0 ? (
               <div className={styles.emptyState}>
@@ -271,18 +282,16 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
                 {clusters.slice(0, 5).map((cluster, idx) => {
                   const duration = (cluster.end - cluster.start) / 1000;
                   const startTime = formatTime(cluster.start);
-                  
+
                   return (
                     <div key={idx} className={styles.clusterItem}>
                       <div className={styles.clusterHeader}>
-                        <span className={styles.clusterTime}>
-                          {startTime}
-                        </span>
+                        <span className={styles.clusterTime}>{startTime}</span>
                         <span className={styles.clusterDuration}>
                           {Math.round(duration)}s
                         </span>
                       </div>
-                      
+
                       <div className={styles.clusterStats}>
                         <span className={styles.clusterStat}>
                           <strong>{cluster.events.length}</strong> events
@@ -291,12 +300,12 @@ const IntelligenceFusionPanel = ({ fusionData: _fusionData, events = [] }) => {
                           <strong>{cluster.ips.size}</strong> source IPs
                         </span>
                       </div>
-                      
+
                       <div className={styles.clusterBar}>
-                        <div 
+                        <div
                           className={styles.clusterBarFill}
-                          style={{ 
-                            width: `${Math.min((cluster.events.length / 50) * 100, 100)}%` 
+                          style={{
+                            width: `${Math.min((cluster.events.length / 50) * 100, 100)}%`,
                           }}
                         />
                       </div>

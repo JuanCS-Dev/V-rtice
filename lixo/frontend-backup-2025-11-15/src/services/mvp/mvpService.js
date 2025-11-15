@@ -17,14 +17,14 @@
  * Created: 2025-10-31
  */
 
-import { BaseService } from '../base/BaseService';
-import { API_ENDPOINTS } from '../../config/api';
-import logger from '../../utils/logger';
+import { BaseService } from "../base/BaseService";
+import { API_ENDPOINTS } from "../../config/api";
+import logger from "../../utils/logger";
 
 export class MVPService extends BaseService {
   constructor() {
     super(API_ENDPOINTS.mvp);
-    this.serviceName = 'MVP';
+    this.serviceName = "MVP";
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -37,11 +37,11 @@ export class MVPService extends BaseService {
    */
   async getStatus() {
     try {
-      const response = await this.get('/status');
-      logger.debug('[MVP] Status:', response);
+      const response = await this.get("/status");
+      logger.debug("[MVP] Status:", response);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get status:', error);
+      logger.error("[MVP] Failed to get status:", error);
       throw error;
     }
   }
@@ -57,11 +57,11 @@ export class MVPService extends BaseService {
    */
   async generateNarrative(params = {}) {
     try {
-      const response = await this.post('/narratives', params);
-      logger.info('[MVP] Narrative generated:', response.narrative_id);
+      const response = await this.post("/narratives", params);
+      logger.info("[MVP] Narrative generated:", response.narrative_id);
       return response;
     } catch (error) {
-      logger.error('[MVP] Narrative generation failed:', error);
+      logger.error("[MVP] Narrative generation failed:", error);
       throw error;
     }
   }
@@ -74,10 +74,10 @@ export class MVPService extends BaseService {
   async getNarrative(narrativeId) {
     try {
       const response = await this.get(`/narratives/${narrativeId}`);
-      logger.debug('[MVP] Narrative retrieved:', narrativeId);
+      logger.debug("[MVP] Narrative retrieved:", narrativeId);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get narrative:', error);
+      logger.error("[MVP] Failed to get narrative:", error);
       throw error;
     }
   }
@@ -90,12 +90,14 @@ export class MVPService extends BaseService {
   async listNarratives(params = {}) {
     try {
       const queryParams = new URLSearchParams(params).toString();
-      const endpoint = queryParams ? `/narratives?${queryParams}` : '/narratives';
+      const endpoint = queryParams
+        ? `/narratives?${queryParams}`
+        : "/narratives";
       const response = await this.get(endpoint);
       logger.debug(`[MVP] Retrieved ${response.length} narratives`);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to list narratives:', error);
+      logger.error("[MVP] Failed to list narratives:", error);
       throw error;
     }
   }
@@ -108,10 +110,10 @@ export class MVPService extends BaseService {
   async deleteNarrative(narrativeId) {
     try {
       const response = await this.delete(`/narratives/${narrativeId}`);
-      logger.info('[MVP] Narrative deleted:', narrativeId);
+      logger.info("[MVP] Narrative deleted:", narrativeId);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to delete narrative:', error);
+      logger.error("[MVP] Failed to delete narrative:", error);
       throw error;
     }
   }
@@ -127,11 +129,11 @@ export class MVPService extends BaseService {
    */
   async queryMetrics(query = {}) {
     try {
-      const response = await this.post('/metrics', query);
-      logger.debug('[MVP] Metrics queried:', response);
+      const response = await this.post("/metrics", query);
+      logger.debug("[MVP] Metrics queried:", response);
       return response;
     } catch (error) {
-      logger.error('[MVP] Metrics query failed:', error);
+      logger.error("[MVP] Metrics query failed:", error);
       throw error;
     }
   }
@@ -143,14 +145,14 @@ export class MVPService extends BaseService {
    */
   async getAggregatedMetrics(timeRangeMinutes = 60) {
     try {
-      const response = await this.post('/metrics', {
+      const response = await this.post("/metrics", {
         time_range_minutes: timeRangeMinutes,
-        aggregation: 'avg',
+        aggregation: "avg",
       });
-      logger.debug('[MVP] Aggregated metrics:', response);
+      logger.debug("[MVP] Aggregated metrics:", response);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get aggregated metrics:', error);
+      logger.error("[MVP] Failed to get aggregated metrics:", error);
       throw error;
     }
   }
@@ -167,12 +169,12 @@ export class MVPService extends BaseService {
   async detectAnomalies(params = {}) {
     try {
       const queryParams = new URLSearchParams(params).toString();
-      const endpoint = queryParams ? `/anomalies?${queryParams}` : '/anomalies';
+      const endpoint = queryParams ? `/anomalies?${queryParams}` : "/anomalies";
       const response = await this.get(endpoint);
       logger.info(`[MVP] Detected ${response.length} anomalies`);
       return response;
     } catch (error) {
-      logger.error('[MVP] Anomaly detection failed:', error);
+      logger.error("[MVP] Anomaly detection failed:", error);
       throw error;
     }
   }
@@ -185,11 +187,13 @@ export class MVPService extends BaseService {
    */
   async getAnomaliesBySeverity(severity, limit = 50) {
     try {
-      const response = await this.get(`/anomalies?severity=${severity}&limit=${limit}`);
+      const response = await this.get(
+        `/anomalies?severity=${severity}&limit=${limit}`,
+      );
       logger.debug(`[MVP] Retrieved ${response.length} ${severity} anomalies`);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get anomalies by severity:', error);
+      logger.error("[MVP] Failed to get anomalies by severity:", error);
       throw error;
     }
   }
@@ -205,7 +209,7 @@ export class MVPService extends BaseService {
       logger.debug(`[MVP] Anomaly timeline for ${days} days`);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get anomaly timeline:', error);
+      logger.error("[MVP] Failed to get anomaly timeline:", error);
       throw error;
     }
   }
@@ -222,10 +226,10 @@ export class MVPService extends BaseService {
   async getNQSTrend(limit = 30) {
     try {
       const response = await this.get(`/narratives/nqs-trend?limit=${limit}`);
-      logger.debug('[MVP] NQS trend retrieved');
+      logger.debug("[MVP] NQS trend retrieved");
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get NQS trend:', error);
+      logger.error("[MVP] Failed to get NQS trend:", error);
       throw error;
     }
   }
@@ -236,11 +240,11 @@ export class MVPService extends BaseService {
    */
   async getNQSByTone() {
     try {
-      const response = await this.get('/narratives/nqs-by-tone');
-      logger.debug('[MVP] NQS by tone:', response);
+      const response = await this.get("/narratives/nqs-by-tone");
+      logger.debug("[MVP] NQS by tone:", response);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get NQS by tone:', error);
+      logger.error("[MVP] Failed to get NQS by tone:", error);
       throw error;
     }
   }
@@ -255,14 +259,14 @@ export class MVPService extends BaseService {
    */
   async getSystemPulse() {
     try {
-      const response = await this.post('/metrics', {
+      const response = await this.post("/metrics", {
         time_range_minutes: 1, // Last minute
-        aggregation: 'current',
+        aggregation: "current",
       });
-      logger.debug('[MVP] System pulse:', response);
+      logger.debug("[MVP] System pulse:", response);
       return response;
     } catch (error) {
-      logger.error('[MVP] Failed to get system pulse:', error);
+      logger.error("[MVP] Failed to get system pulse:", error);
       throw error;
     }
   }
@@ -278,21 +282,28 @@ export class MVPService extends BaseService {
    * @protected
    */
   validateRequest(data) {
-    if (!data || typeof data !== 'object') {
-      throw new Error('[MVP] Invalid request data: must be an object');
+    if (!data || typeof data !== "object") {
+      throw new Error("[MVP] Invalid request data: must be an object");
     }
 
     // Validate tone
     if (data.tone) {
-      const validTones = ['reflective', 'urgent', 'informative'];
+      const validTones = ["reflective", "urgent", "informative"];
       if (!validTones.includes(data.tone)) {
-        throw new Error(`[MVP] Invalid tone. Must be one of: ${validTones.join(', ')}`);
+        throw new Error(
+          `[MVP] Invalid tone. Must be one of: ${validTones.join(", ")}`,
+        );
       }
     }
 
     // Validate time_range_minutes
-    if (data.time_range_minutes && (data.time_range_minutes < 1 || data.time_range_minutes > 10080)) {
-      throw new Error('[MVP] time_range_minutes must be between 1 and 10080 (1 week)');
+    if (
+      data.time_range_minutes &&
+      (data.time_range_minutes < 1 || data.time_range_minutes > 10080)
+    ) {
+      throw new Error(
+        "[MVP] time_range_minutes must be between 1 and 10080 (1 week)",
+      );
     }
 
     return true;

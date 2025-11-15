@@ -10,11 +10,11 @@
  * Boris Cherny Standard - GAP #35 FIX: Standardized polling intervals
  */
 
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { API_ENDPOINTS } from '@/config/api';
-import { queryKeys } from '@/config/queryKeys';
-import { POLLING_INTERVALS } from '@/config/queryClient';
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
+import { queryKeys } from "@/config/queryKeys";
+import { POLLING_INTERVALS } from "@/config/queryClient";
 
 const API_BASE_URL = API_ENDPOINTS.hitl;
 

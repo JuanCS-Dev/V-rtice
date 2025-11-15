@@ -1,3 +1,3 @@
-import SocialMediaWidget from './SocialMediaWidget/SocialMediaWidget';
+import SocialMediaWidget from "./SocialMediaWidget/SocialMediaWidget";
 
 export default SocialMediaWidget;

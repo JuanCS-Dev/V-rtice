@@ -1,23 +1,23 @@
 /**
  * useAPVStream Hook - Real-time APV WebSocket Stream
  * ===================================================
- * 
+ *
  * PAGANI Quality WebSocket hook for Adaptive Immunity System
  * Connects to backend WebSocket for real-time APV updates
- * 
+ *
  * Biological Analogy: Neural pathways carrying threat signals
  * - Dendritic cells (Oráculo) → T cells (Eureka)
  * - Real-time antigen presentation
  * - Immediate immune response triggering
- * 
+ *
  * Backend Endpoint: ws://34.148.161.131:8000/ws/adaptive-immunity
- * 
+ *
  * Message Types:
  * - apv: New vulnerability detected
  * - patch: Remediation status update
  * - metrics: System health snapshot
  * - heartbeat: Keep-alive signal
- * 
+ *
  * @example
  * const { apvs, metrics, status, error } = useAPVStream({
  *   autoConnect: true,
@@ -25,22 +25,22 @@
  * });
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import logger from '@/utils/logger';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import logger from "@/utils/logger";
 
 // WebSocket connection states
 export const WS_STATES = {
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  DISCONNECTED: 'disconnected',
-  ERROR: 'error',
-  RECONNECTING: 'reconnecting'
+  CONNECTING: "connecting",
+  CONNECTED: "connected",
+  DISCONNECTED: "disconnected",
+  ERROR: "error",
+  RECONNECTING: "reconnecting",
 };
 
 /**
  * useAPVStream - Real-time APV WebSocket hook
- * 
+ *
  * @param {Object} options - Configuration options
  * @param {boolean} options.autoConnect - Auto-connect on mount (default: true)
  * @param {string} options.url - WebSocket URL (default: ws://34.148.161.131:8000/ws/adaptive-immunity)
@@ -52,12 +52,12 @@ export const WS_STATES = {
  * @param {Function} options.onConnect - Callback when connected
  * @param {Function} options.onDisconnect - Callback when disconnected
  * @param {Function} options.onError - Callback on error
- * 
+ *
  * @returns {Object} Stream state and controls
  */
 export const useAPVStream = ({
   autoConnect = true,
-  url = 'ws://34.148.161.131:8000/ws/adaptive-immunity',
+  url = "ws://34.148.161.131:8000/ws/adaptive-immunity",
   reconnectDelay = 3000,
   maxReconnectAttempts = 5,
   onApv = null,
@@ -65,7 +65,7 @@ export const useAPVStream = ({
   onMetrics = null,
   onConnect = null,
   onDisconnect = null,
-  onError = null
+  onError = null,
 } = {}) => {
   // GAP #50 FIX: Get queryClient for React Query invalidation
   // Boris Cherny Standard: Invalidate cache when WebSocket updates received
@@ -83,11 +83,25 @@ export const useAPVStream = ({
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
-  const callbacksRef = useRef({ onApv, onPatch, onMetrics, onConnect, onDisconnect, onError });
+  const callbacksRef = useRef({
+    onApv,
+    onPatch,
+    onMetrics,
+    onConnect,
+    onDisconnect,
+    onError,
+  });
 
   // Update callbacks ref when they change
   useEffect(() => {
-    callbacksRef.current = { onApv, onPatch, onMetrics, onConnect, onDisconnect, onError };
+    callbacksRef.current = {
+      onApv,
+      onPatch,
+      onMetrics,
+      onConnect,
+      onDisconnect,
+      onError,
+    };
   }, [onApv, onPatch, onMetrics, onConnect, onDisconnect, onError]);
 
   /**
@@ -96,7 +110,7 @@ export const useAPVStream = ({
   const connect = useCallback(() => {
     // Prevent multiple connections
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      logger.warn('[useAPVStream] Already connected');
+      logger.warn("[useAPVStream] Already connected");
       return;
     }
 
@@ -116,7 +130,7 @@ export const useAPVStream = ({
 
       // Connection opened
       ws.onopen = () => {
-        logger.info('[useAPVStream] ✅ Connected');
+        logger.info("[useAPVStream] ✅ Connected");
         setStatus(WS_STATES.CONNECTED);
         reconnectAttemptsRef.current = 0; // Boris Cherny Standard: Reset via ref
         setError(null);
@@ -133,8 +147,16 @@ export const useAPVStream = ({
 
           // GAP #49 FIX: Validate message format (Boris Cherny Standard)
           // Ensure message has required 'type' field
-          if (!message || typeof message !== 'object' || !message.type || typeof message.type !== 'string') {
-            logger.warn('[useAPVStream] Invalid message format: missing or invalid type field', message);
+          if (
+            !message ||
+            typeof message !== "object" ||
+            !message.type ||
+            typeof message.type !== "string"
+          ) {
+            logger.warn(
+              "[useAPVStream] Invalid message format: missing or invalid type field",
+              message,
+            );
             return;
           }
 
@@ -143,26 +165,32 @@ export const useAPVStream = ({
           logger.debug(`[useAPVStream] Message received: ${type}`, payload);
 
           switch (type) {
-            case 'apv':
+            case "apv":
               // Validate apv message has payload
-              if (!payload || typeof payload !== 'object') {
-                logger.warn('[useAPVStream] APV message missing or invalid payload');
+              if (!payload || typeof payload !== "object") {
+                logger.warn(
+                  "[useAPVStream] APV message missing or invalid payload",
+                );
                 break;
               }
               // New APV detected
-              setApvs(prev => [payload, ...prev].slice(0, 100)); // Keep last 100
+              setApvs((prev) => [payload, ...prev].slice(0, 100)); // Keep last 100
               if (callbacksRef.current.onApv) {
                 callbacksRef.current.onApv(payload);
               }
               // GAP #50 FIX: Invalidate APV queries on new detection
-              queryClient.invalidateQueries({ queryKey: ['apv'] });
-              queryClient.invalidateQueries({ queryKey: ['defensive', 'alerts'] });
+              queryClient.invalidateQueries({ queryKey: ["apv"] });
+              queryClient.invalidateQueries({
+                queryKey: ["defensive", "alerts"],
+              });
               break;
 
-            case 'patch':
+            case "patch":
               // Validate patch message has payload
-              if (!payload || typeof payload !== 'object') {
-                logger.warn('[useAPVStream] Patch message missing or invalid payload');
+              if (!payload || typeof payload !== "object") {
+                logger.warn(
+                  "[useAPVStream] Patch message missing or invalid payload",
+                );
                 break;
               }
               // Patch status update
@@ -170,14 +198,16 @@ export const useAPVStream = ({
                 callbacksRef.current.onPatch(payload);
               }
               // GAP #50 FIX: Invalidate patch queries
-              queryClient.invalidateQueries({ queryKey: ['patches'] });
-              queryClient.invalidateQueries({ queryKey: ['patch', 'status'] });
+              queryClient.invalidateQueries({ queryKey: ["patches"] });
+              queryClient.invalidateQueries({ queryKey: ["patch", "status"] });
               break;
 
-            case 'metrics':
+            case "metrics":
               // Validate metrics message has payload
-              if (!payload || typeof payload !== 'object') {
-                logger.warn('[useAPVStream] Metrics message missing or invalid payload');
+              if (!payload || typeof payload !== "object") {
+                logger.warn(
+                  "[useAPVStream] Metrics message missing or invalid payload",
+                );
                 break;
               }
               // System metrics snapshot
@@ -186,14 +216,18 @@ export const useAPVStream = ({
                 callbacksRef.current.onMetrics(payload);
               }
               // GAP #50 FIX: Invalidate metrics queries
-              queryClient.invalidateQueries({ queryKey: ['metrics'] });
-              queryClient.invalidateQueries({ queryKey: ['defensive', 'metrics'] });
+              queryClient.invalidateQueries({ queryKey: ["metrics"] });
+              queryClient.invalidateQueries({
+                queryKey: ["defensive", "metrics"],
+              });
               break;
 
-            case 'heartbeat':
+            case "heartbeat":
               // Validate timestamp exists for heartbeat
               if (!timestamp) {
-                logger.warn('[useAPVStream] Heartbeat message missing timestamp');
+                logger.warn(
+                  "[useAPVStream] Heartbeat message missing timestamp",
+                );
                 break;
               }
               // Keep-alive signal
@@ -204,7 +238,7 @@ export const useAPVStream = ({
               logger.warn(`[useAPVStream] Unknown message type: ${type}`);
           }
         } catch (err) {
-          logger.error('[useAPVStream] Failed to parse message:', err);
+          logger.error("[useAPVStream] Failed to parse message:", err);
         }
       };
 
@@ -220,37 +254,41 @@ export const useAPVStream = ({
 
         // Boris Cherny Standard: Use ref to avoid stale closure (GAP #22 fix)
         // Attempt reconnect if not at max attempts
-        if (reconnectAttemptsRef.current < maxReconnectAttempts && autoConnect) {
+        if (
+          reconnectAttemptsRef.current < maxReconnectAttempts &&
+          autoConnect
+        ) {
           reconnectAttemptsRef.current += 1;
           setStatus(WS_STATES.RECONNECTING);
 
-          logger.info(`[useAPVStream] Reconnecting in ${reconnectDelay}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`);
+          logger.info(
+            `[useAPVStream] Reconnecting in ${reconnectDelay}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`,
+          );
 
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, reconnectDelay);
         } else {
           if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-            logger.error('[useAPVStream] Max reconnect attempts reached');
-            setError('Max reconnect attempts reached');
+            logger.error("[useAPVStream] Max reconnect attempts reached");
+            setError("Max reconnect attempts reached");
           }
         }
       };
 
       // Error occurred
       ws.onerror = (event) => {
-        logger.error('[useAPVStream] WebSocket error:', event);
+        logger.error("[useAPVStream] WebSocket error:", event);
         setStatus(WS_STATES.ERROR);
-        const errorMsg = 'WebSocket connection error';
+        const errorMsg = "WebSocket connection error";
         setError(errorMsg);
 
         if (callbacksRef.current.onError) {
           callbacksRef.current.onError(errorMsg);
         }
       };
-
     } catch (err) {
-      logger.error('[useAPVStream] Failed to create WebSocket:', err);
+      logger.error("[useAPVStream] Failed to create WebSocket:", err);
       setStatus(WS_STATES.ERROR);
       setError(err.message);
     }
@@ -261,7 +299,7 @@ export const useAPVStream = ({
    * Disconnect from WebSocket
    */
   const disconnect = useCallback(() => {
-    logger.info('[useAPVStream] Disconnecting...');
+    logger.info("[useAPVStream] Disconnecting...");
 
     // Clear reconnect timeout
     if (reconnectTimeoutRef.current) {
@@ -271,7 +309,7 @@ export const useAPVStream = ({
 
     // Close WebSocket
     if (wsRef.current) {
-      wsRef.current.close(1000, 'Client disconnect');
+      wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
 
@@ -284,12 +322,13 @@ export const useAPVStream = ({
    */
   const send = useCallback((message) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      const payload = typeof message === 'string' ? message : JSON.stringify(message);
+      const payload =
+        typeof message === "string" ? message : JSON.stringify(message);
       wsRef.current.send(payload);
-      logger.debug('[useAPVStream] Message sent:', message);
+      logger.debug("[useAPVStream] Message sent:", message);
       return true;
     } else {
-      logger.warn('[useAPVStream] Cannot send message - not connected');
+      logger.warn("[useAPVStream] Cannot send message - not connected");
       return false;
     }
   }, []);
@@ -299,7 +338,7 @@ export const useAPVStream = ({
    */
   const clearApvs = useCallback(() => {
     setApvs([]);
-    logger.info('[useAPVStream] APV history cleared');
+    logger.info("[useAPVStream] APV history cleared");
   }, []);
 
   // Auto-connect on mount
@@ -335,7 +374,7 @@ export const useAPVStream = ({
     connect,
     disconnect,
     send,
-    clearApvs
+    clearApvs,
   };
 };
 

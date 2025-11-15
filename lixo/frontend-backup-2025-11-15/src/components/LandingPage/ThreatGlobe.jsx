@@ -11,11 +11,11 @@
  * - Interativo e cinematográfico
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import logger from '../../utils/logger';
-import styles from './ThreatGlobe.module.css';
+import React, { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import logger from "../../utils/logger";
+import styles from "./ThreatGlobe.module.css";
 
 export const ThreatGlobe = ({ realThreats = [] }) => {
   const mapRef = useRef(null);
@@ -28,7 +28,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
   // Without cleanup, 10 threats = 2MB+ leak, animations accumulate to 10MB+
   const timersRef = useRef({
     intervals: [],
-    timeouts: []
+    timeouts: [],
   });
 
   const [_activeTrace, _setActiveTrace] = useState(null);
@@ -37,16 +37,16 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
   // Cores por severidade/reputation
   const getSeverityColor = (severity) => {
     const colors = {
-      malicious: '#ff0040',
-      suspicious: '#ff6600',
-      questionable: '#ffaa00',
-      clean: '#00ff88',
-      critical: '#ff0040',
-      high: '#ff6600',
-      medium: '#ffaa00',
-      low: '#00ff88'
+      malicious: "#ff0040",
+      suspicious: "#ff6600",
+      questionable: "#ffaa00",
+      clean: "#00ff88",
+      critical: "#ff0040",
+      high: "#ff6600",
+      medium: "#ffaa00",
+      low: "#00ff88",
     };
-    return colors[severity] || '#00d9ff';
+    return colors[severity] || "#00d9ff";
   };
 
   // Inicializar mapa
@@ -66,14 +66,17 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
     });
 
     // Tema dark estilo cyber
-    const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-      attribution: '',
-      maxZoom: 6,
-      minZoom: 2,
-      subdomains: 'abcd',
-    });
+    const tileLayer = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+      {
+        attribution: "",
+        maxZoom: 6,
+        minZoom: 2,
+        subdomains: "abcd",
+      },
+    );
 
-    tileLayer.on('tileerror', (error) => logger.error('Tile error:', error));
+    tileLayer.on("tileerror", (error) => logger.error("Tile error:", error));
     tileLayer.addTo(map);
 
     mapInstanceRef.current = map;
@@ -106,7 +109,7 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
     const map = mapInstanceRef.current;
 
     // Limpar marcadores antigos
-    markersRef.current.forEach(marker => map.removeLayer(marker));
+    markersRef.current.forEach((marker) => map.removeLayer(marker));
     markersRef.current = [];
 
     // Atualizar contador
@@ -117,15 +120,23 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       // Usar geolocalização REAL do backend (prioridade absoluta)
       let lat, lng;
 
-      if (threat.geolocation && threat.geolocation.lat && (threat.geolocation.lng || threat.geolocation.lon)) {
+      if (
+        threat.geolocation &&
+        threat.geolocation.lat &&
+        (threat.geolocation.lng || threat.geolocation.lon)
+      ) {
         // DADOS REAIS DO BACKEND - usar sempre que disponível
         lat = threat.geolocation.lat;
         lng = threat.geolocation.lng || threat.geolocation.lon;
 
-        logger.debug(`[ThreatGlobe] Using REAL geolocation for ${threat.ip}: ${lat}, ${lng} (${threat.geolocation.country})`);
+        logger.debug(
+          `[ThreatGlobe] Using REAL geolocation for ${threat.ip}: ${lat}, ${lng} (${threat.geolocation.country})`,
+        );
       } else {
         // Fallback: posições em CIDADES REAIS conhecidas (sem oceanos!)
-        logger.warn(`[ThreatGlobe] No geolocation for ${threat.ip}, using fallback city`);
+        logger.warn(
+          `[ThreatGlobe] No geolocation for ${threat.ip}, using fallback city`,
+        );
         const fallbackCity = getRandomRealCity();
         lat = fallbackCity.lat;
         lng = fallbackCity.lng;
@@ -137,29 +148,33 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       const circle = L.circleMarker([lat, lng], {
         radius: threat.isMalicious ? 10 : 6,
         fillColor: color,
-        color: '#fff',
+        color: "#fff",
         weight: 2,
         opacity: 0.9,
         fillOpacity: 0.7,
-        className: 'threat-marker'
+        className: "threat-marker",
       }).addTo(map);
 
       // Popup com dados REAIS - TACTICAL WARFARE THEME
       const popupContent = `
         <div class="threat-popup">
           <div class="threat-popup-header" style="color: ${color}; border-bottom-color: ${color};">
-            🎯 ${threat.type.toUpperCase() || 'HOSTIL'}
+            🎯 ${threat.type.toUpperCase() || "HOSTIL"}
           </div>
           <div class="threat-popup-body">
             <div><strong>IP:</strong> ${threat.ip}</div>
             <div><strong>Ameaça:</strong> ${threat.threatScore}/100</div>
             <div><strong>Status:</strong> ${threat.severity}</div>
-            ${threat.geolocation ? `
+            ${
+              threat.geolocation
+                ? `
               <div class="threat-popup-geo">
                 <div><strong>País:</strong> ${threat.geolocation.country}</div>
-                ${threat.geolocation.isp ? `<div><strong>ISP:</strong> ${threat.geolocation.isp}</div>` : ''}
+                ${threat.geolocation.isp ? `<div><strong>ISP:</strong> ${threat.geolocation.isp}</div>` : ""}
               </div>
-            ` : ''}
+            `
+                : ""
+            }
             <div class="threat-popup-timestamp">
               Detectado: ${threat.timestamp}
             </div>
@@ -182,7 +197,10 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
             return;
           }
           circle.setRadius(circle.getRadius() * 1.3);
-          const pulseTimeout = setTimeout(() => circle.setRadius(threat.isMalicious ? 10 : 6), 300);
+          const pulseTimeout = setTimeout(
+            () => circle.setRadius(threat.isMalicious ? 10 : 6),
+            300,
+          );
           timersRef.current.timeouts.push(pulseTimeout);
           pulseCount++;
         }, 1000);
@@ -219,21 +237,27 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
 
     // Path 1: Origin -> Relay
     const path1 = L.polyline([origin, [relayLat, relayLng]], {
-      color: '#00d9ff',
+      color: "#00d9ff",
       weight: 2,
       opacity: 0,
-      dashArray: '10, 10',
-      className: 'trace-path'
+      dashArray: "10, 10",
+      className: "trace-path",
     }).addTo(map);
 
     // Path 2: Relay -> Target
-    const path2 = L.polyline([[relayLat, relayLng], [targetLat, targetLng]], {
-      color: color,
-      weight: 2,
-      opacity: 0,
-      dashArray: '5, 5',
-      className: 'trace-path'
-    }).addTo(map);
+    const path2 = L.polyline(
+      [
+        [relayLat, relayLng],
+        [targetLat, targetLng],
+      ],
+      {
+        color: color,
+        weight: 2,
+        opacity: 0,
+        dashArray: "5, 5",
+        className: "trace-path",
+      },
+    ).addTo(map);
 
     // GAP #29 FIX: Track nested animation timers for cleanup
     // Animação: fade in
@@ -261,7 +285,8 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
               clearInterval(fadeOut);
               // Remove from tracking when self-clearing
               const fadeOutIdx = timersRef.current.intervals.indexOf(fadeOut);
-              if (fadeOutIdx > -1) timersRef.current.intervals.splice(fadeOutIdx, 1);
+              if (fadeOutIdx > -1)
+                timersRef.current.intervals.splice(fadeOutIdx, 1);
               map.removeLayer(path1);
               map.removeLayer(path2);
             }
@@ -281,54 +306,69 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
     // Lista de cidades REAIS onde ameaças cyber acontecem frequentemente
     const realCities = [
       // América do Sul
-      { name: 'São Paulo', country: 'Brazil', lat: -23.5505, lng: -46.6333 },
-      { name: 'Rio de Janeiro', country: 'Brazil', lat: -22.9068, lng: -43.1729 },
-      { name: 'Buenos Aires', country: 'Argentina', lat: -34.6037, lng: -58.3816 },
-      { name: 'Bogotá', country: 'Colombia', lat: 4.7110, lng: -74.0721 },
+      { name: "São Paulo", country: "Brazil", lat: -23.5505, lng: -46.6333 },
+      {
+        name: "Rio de Janeiro",
+        country: "Brazil",
+        lat: -22.9068,
+        lng: -43.1729,
+      },
+      {
+        name: "Buenos Aires",
+        country: "Argentina",
+        lat: -34.6037,
+        lng: -58.3816,
+      },
+      { name: "Bogotá", country: "Colombia", lat: 4.711, lng: -74.0721 },
 
       // América do Norte
-      { name: 'New York', country: 'USA', lat: 40.7128, lng: -74.0060 },
-      { name: 'Los Angeles', country: 'USA', lat: 34.0522, lng: -118.2437 },
-      { name: 'Chicago', country: 'USA', lat: 41.8781, lng: -87.6298 },
-      { name: 'Miami', country: 'USA', lat: 25.7617, lng: -80.1918 },
-      { name: 'Toronto', country: 'Canada', lat: 43.6532, lng: -79.3832 },
+      { name: "New York", country: "USA", lat: 40.7128, lng: -74.006 },
+      { name: "Los Angeles", country: "USA", lat: 34.0522, lng: -118.2437 },
+      { name: "Chicago", country: "USA", lat: 41.8781, lng: -87.6298 },
+      { name: "Miami", country: "USA", lat: 25.7617, lng: -80.1918 },
+      { name: "Toronto", country: "Canada", lat: 43.6532, lng: -79.3832 },
 
       // Europa (cidades em terra firme, longe do Mar Egeu!)
-      { name: 'London', country: 'UK', lat: 51.5074, lng: -0.1278 },
-      { name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522 },
-      { name: 'Berlin', country: 'Germany', lat: 52.5200, lng: 13.4050 },
-      { name: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821 },
-      { name: 'Amsterdam', country: 'Netherlands', lat: 52.3676, lng: 4.9041 },
-      { name: 'Stockholm', country: 'Sweden', lat: 59.3293, lng: 18.0686 },
-      { name: 'Prague', country: 'Czech Republic', lat: 50.0755, lng: 14.4378 },
-      { name: 'Warsaw', country: 'Poland', lat: 52.2297, lng: 21.0122 },
-      { name: 'Vienna', country: 'Austria', lat: 48.2082, lng: 16.3738 },
+      { name: "London", country: "UK", lat: 51.5074, lng: -0.1278 },
+      { name: "Paris", country: "France", lat: 48.8566, lng: 2.3522 },
+      { name: "Berlin", country: "Germany", lat: 52.52, lng: 13.405 },
+      { name: "Frankfurt", country: "Germany", lat: 50.1109, lng: 8.6821 },
+      { name: "Amsterdam", country: "Netherlands", lat: 52.3676, lng: 4.9041 },
+      { name: "Stockholm", country: "Sweden", lat: 59.3293, lng: 18.0686 },
+      { name: "Prague", country: "Czech Republic", lat: 50.0755, lng: 14.4378 },
+      { name: "Warsaw", country: "Poland", lat: 52.2297, lng: 21.0122 },
+      { name: "Vienna", country: "Austria", lat: 48.2082, lng: 16.3738 },
 
       // Ásia
-      { name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503 },
-      { name: 'Seoul', country: 'South Korea', lat: 37.5665, lng: 126.9780 },
-      { name: 'Beijing', country: 'China', lat: 39.9042, lng: 116.4074 },
-      { name: 'Shanghai', country: 'China', lat: 31.2304, lng: 121.4737 },
-      { name: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
-      { name: 'Hong Kong', country: 'China', lat: 22.3193, lng: 114.1694 },
-      { name: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
-      { name: 'Delhi', country: 'India', lat: 28.7041, lng: 77.1025 },
+      { name: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503 },
+      { name: "Seoul", country: "South Korea", lat: 37.5665, lng: 126.978 },
+      { name: "Beijing", country: "China", lat: 39.9042, lng: 116.4074 },
+      { name: "Shanghai", country: "China", lat: 31.2304, lng: 121.4737 },
+      { name: "Singapore", country: "Singapore", lat: 1.3521, lng: 103.8198 },
+      { name: "Hong Kong", country: "China", lat: 22.3193, lng: 114.1694 },
+      { name: "Mumbai", country: "India", lat: 19.076, lng: 72.8777 },
+      { name: "Delhi", country: "India", lat: 28.7041, lng: 77.1025 },
 
       // Rússia e Leste Europeu
-      { name: 'Moscow', country: 'Russia', lat: 55.7558, lng: 37.6173 },
-      { name: 'St. Petersburg', country: 'Russia', lat: 59.9343, lng: 30.3351 },
-      { name: 'Bucharest', country: 'Romania', lat: 44.4268, lng: 26.1025 },
-      { name: 'Sofia', country: 'Bulgaria', lat: 42.6977, lng: 23.3219 },
-      { name: 'Kiev', country: 'Ukraine', lat: 50.4501, lng: 30.5234 },
+      { name: "Moscow", country: "Russia", lat: 55.7558, lng: 37.6173 },
+      { name: "St. Petersburg", country: "Russia", lat: 59.9343, lng: 30.3351 },
+      { name: "Bucharest", country: "Romania", lat: 44.4268, lng: 26.1025 },
+      { name: "Sofia", country: "Bulgaria", lat: 42.6977, lng: 23.3219 },
+      { name: "Kiev", country: "Ukraine", lat: 50.4501, lng: 30.5234 },
 
       // Oceania
-      { name: 'Sydney', country: 'Australia', lat: -33.8688, lng: 151.2093 },
-      { name: 'Melbourne', country: 'Australia', lat: -37.8136, lng: 144.9631 },
+      { name: "Sydney", country: "Australia", lat: -33.8688, lng: 151.2093 },
+      { name: "Melbourne", country: "Australia", lat: -37.8136, lng: 144.9631 },
 
       // África
-      { name: 'Johannesburg', country: 'South Africa', lat: -26.2041, lng: 28.0473 },
-      { name: 'Cairo', country: 'Egypt', lat: 30.0444, lng: 31.2357 },
-      { name: 'Lagos', country: 'Nigeria', lat: 6.5244, lng: 3.3792 }
+      {
+        name: "Johannesburg",
+        country: "South Africa",
+        lat: -26.2041,
+        lng: 28.0473,
+      },
+      { name: "Cairo", country: "Egypt", lat: 30.0444, lng: 31.2357 },
+      { name: "Lagos", country: "Nigeria", lat: 6.5244, lng: 3.3792 },
     ];
 
     return realCities[Math.floor(Math.random() * realCities.length)];
@@ -339,11 +379,11 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       <div
         ref={mapRef}
         style={{
-          width: '100%',
-          height: '100%',
-          background: '#0a0e1a',
-          position: 'relative',
-          zIndex: 1
+          width: "100%",
+          height: "100%",
+          background: "#0a0e1a",
+          position: "relative",
+          zIndex: 1,
         }}
       />
 
@@ -364,19 +404,27 @@ export const ThreatGlobe = ({ realThreats = [] }) => {
       {/* Legend */}
       <div className={styles.globeLegend}>
         <div className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${styles.legendDotCritical}`}></span>
+          <span
+            className={`${styles.legendDot} ${styles.legendDotCritical}`}
+          ></span>
           <span>Malicious</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${styles.legendDotHigh}`}></span>
+          <span
+            className={`${styles.legendDot} ${styles.legendDotHigh}`}
+          ></span>
           <span>Suspicious</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${styles.legendDotWarning}`}></span>
+          <span
+            className={`${styles.legendDot} ${styles.legendDotWarning}`}
+          ></span>
           <span>Questionable</span>
         </div>
         <div className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${styles.legendDotSuccess}`}></span>
+          <span
+            className={`${styles.legendDot} ${styles.legendDotSuccess}`}
+          ></span>
           <span>Clean</span>
         </div>
       </div>

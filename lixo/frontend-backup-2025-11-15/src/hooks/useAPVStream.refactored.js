@@ -29,17 +29,17 @@
  * });
  */
 
-import { useState, useCallback } from 'react';
-import { useWebSocketManager } from './useWebSocketManager';
-import logger from '@/utils/logger';
+import { useState, useCallback } from "react";
+import { useWebSocketManager } from "./useWebSocketManager";
+import logger from "@/utils/logger";
 
 // WebSocket connection states (for backward compatibility)
 export const WS_STATES = {
-  CONNECTING: 'connecting',
-  CONNECTED: 'connected',
-  DISCONNECTED: 'disconnected',
-  ERROR: 'error',
-  RECONNECTING: 'reconnecting',
+  CONNECTING: "connecting",
+  CONNECTED: "connected",
+  DISCONNECTED: "disconnected",
+  ERROR: "error",
+  RECONNECTING: "reconnecting",
 };
 
 /**
@@ -72,10 +72,10 @@ export const useAPVStream = ({
   // Message handler
   const handleMessage = useCallback(
     (data) => {
-      logger.debug('[useAPVStream] Message received:', data.type);
+      logger.debug("[useAPVStream] Message received:", data.type);
 
       switch (data.type) {
-        case 'apv':
+        case "apv":
           // New APV vulnerability
           setApvs((prev) => [data.data, ...prev].slice(0, 100)); // Keep last 100
           if (onApv) {
@@ -83,14 +83,14 @@ export const useAPVStream = ({
           }
           break;
 
-        case 'patch':
+        case "patch":
           // Patch status update
           if (onPatch) {
             onPatch(data.data);
           }
           break;
 
-        case 'metrics':
+        case "metrics":
           // System health metrics
           setMetrics(data.data);
           if (onMetrics) {
@@ -98,26 +98,26 @@ export const useAPVStream = ({
           }
           break;
 
-        case 'heartbeat':
-          logger.debug('[useAPVStream] Heartbeat received');
+        case "heartbeat":
+          logger.debug("[useAPVStream] Heartbeat received");
           break;
 
-        case 'pong':
-          logger.debug('[useAPVStream] Pong received');
+        case "pong":
+          logger.debug("[useAPVStream] Pong received");
           break;
 
-        case 'connection':
+        case "connection":
           // Handle connection events
-          if (data.status === 'connected') {
+          if (data.status === "connected") {
             setError(null);
             if (onConnect) {
               onConnect();
             }
-          } else if (data.status === 'disconnected') {
+          } else if (data.status === "disconnected") {
             if (onDisconnect) {
               onDisconnect();
             }
-          } else if (data.status === 'error') {
+          } else if (data.status === "error") {
             setError(data.error);
             if (onError) {
               onError(data.error);
@@ -125,8 +125,8 @@ export const useAPVStream = ({
           }
           break;
 
-        case 'error':
-          logger.error('[useAPVStream] Server error:', data.message);
+        case "error":
+          logger.error("[useAPVStream] Server error:", data.message);
           setError(data.message);
           if (onError) {
             onError(data.message);
@@ -134,10 +134,10 @@ export const useAPVStream = ({
           break;
 
         default:
-          logger.warn('[useAPVStream] Unknown message type:', data.type);
+          logger.warn("[useAPVStream] Unknown message type:", data.type);
       }
     },
-    [onApv, onPatch, onMetrics, onConnect, onDisconnect, onError]
+    [onApv, onPatch, onMetrics, onConnect, onDisconnect, onError],
   );
 
   // Use centralized WebSocketManager
@@ -149,7 +149,7 @@ export const useAPVStream = ({
     reconnectAttempts,
     send,
     reconnect,
-  } = useWebSocketManager('apv.stream', {
+  } = useWebSocketManager("apv.stream", {
     enabled: autoConnect,
     onMessage: handleMessage,
     connectionOptions: {
@@ -172,7 +172,7 @@ export const useAPVStream = ({
   // Connect/disconnect functions
   const connect = reconnect;
   const disconnect = useCallback(() => {
-    logger.info('[useAPVStream] Disconnect requested');
+    logger.info("[useAPVStream] Disconnect requested");
     // WebSocketManager handles disconnect automatically on unmount
   }, []);
 

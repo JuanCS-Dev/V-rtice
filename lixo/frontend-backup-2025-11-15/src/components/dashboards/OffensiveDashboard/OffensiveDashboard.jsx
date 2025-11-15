@@ -28,40 +28,52 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React, { lazy, Suspense } from 'react';
-import { useTranslation } from 'react-i18next';
-import { OffensiveHeader } from './components/OffensiveHeader';
-import { OffensiveSidebar } from './components/OffensiveSidebar';
-import { DashboardFooter } from '../../shared/DashboardFooter';
-import { ModuleContainer } from './components/ModuleContainer';
-import { useOffensiveMetrics } from '@/hooks/services/useOffensiveService';
-import { useRealTimeExecutions } from './hooks/useRealTimeExecutions';
-import SkipLink from '../../shared/SkipLink';
-import QueryErrorBoundary from '../../shared/QueryErrorBoundary';
-import WidgetErrorBoundary from '../../shared/WidgetErrorBoundary';
-import styles from './OffensiveDashboard.module.css';
+import React, { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
+import { OffensiveHeader } from "./components/OffensiveHeader";
+import { OffensiveSidebar } from "./components/OffensiveSidebar";
+import { DashboardFooter } from "../../shared/DashboardFooter";
+import { ModuleContainer } from "./components/ModuleContainer";
+import { useOffensiveMetrics } from "@/hooks/services/useOffensiveService";
+import { useRealTimeExecutions } from "./hooks/useRealTimeExecutions";
+import SkipLink from "../../shared/SkipLink";
+import QueryErrorBoundary from "../../shared/QueryErrorBoundary";
+import WidgetErrorBoundary from "../../shared/WidgetErrorBoundary";
+import styles from "./OffensiveDashboard.module.css";
 
 // Lazy load offensive modules
-const NetworkRecon = lazy(() => import('../../cyber/NetworkRecon/NetworkRecon'));
-const VulnIntel = lazy(() => import('../../cyber/VulnIntel/VulnIntel'));
-const WebAttack = lazy(() => import('../../cyber/WebAttack/WebAttack'));
-const C2Orchestration = lazy(() => import('../../cyber/C2Orchestration/C2Orchestration'));
-const BAS = lazy(() => import('../../cyber/BAS/BAS'));
-const OffensiveGateway = lazy(() => import('../../cyber/OffensiveGateway/OffensiveGateway'));
+const NetworkRecon = lazy(
+  () => import("../../cyber/NetworkRecon/NetworkRecon"),
+);
+const VulnIntel = lazy(() => import("../../cyber/VulnIntel/VulnIntel"));
+const WebAttack = lazy(() => import("../../cyber/WebAttack/WebAttack"));
+const C2Orchestration = lazy(
+  () => import("../../cyber/C2Orchestration/C2Orchestration"),
+);
+const BAS = lazy(() => import("../../cyber/BAS/BAS"));
+const OffensiveGateway = lazy(
+  () => import("../../cyber/OffensiveGateway/OffensiveGateway"),
+);
 
 // NEW: Offensive Arsenal Tools
-const NetworkScanner = lazy(() => import('../../cyber/NetworkScanner/NetworkScanner'));
+const NetworkScanner = lazy(
+  () => import("../../cyber/NetworkScanner/NetworkScanner"),
+);
 
 // NEW: Defensive Arsenal Tools (Active Immune System)
-const BehavioralAnalyzer = lazy(() => import('../../cyber/BehavioralAnalyzer/BehavioralAnalyzer'));
-const TrafficAnalyzer = lazy(() => import('../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer'));
+const BehavioralAnalyzer = lazy(
+  () => import("../../cyber/BehavioralAnalyzer/BehavioralAnalyzer"),
+);
+const TrafficAnalyzer = lazy(
+  () => import("../../cyber/EncryptedTrafficAnalyzer/EncryptedTrafficAnalyzer"),
+);
 
 const LoadingFallback = () => {
   const { t } = useTranslation();
   return (
     <div className={styles.loadingModule}>
-      <div className={styles.spinner} aria-label={t('common.loading')}></div>
-      <p>{t('common.loading')}...</p>
+      <div className={styles.spinner} aria-label={t("common.loading")}></div>
+      <p>{t("common.loading")}...</p>
     </div>
   );
 };
@@ -76,7 +88,7 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
     dataUpdatedAt: metricsUpdatedAt,
   } = useOffensiveMetrics();
   const { executions } = useRealTimeExecutions();
-  const [activeModule, setActiveModule] = React.useState('network-recon');
+  const [activeModule, setActiveModule] = React.useState("network-recon");
 
   // Provide default metrics if loading or undefined
   const metrics = metricsData || {
@@ -88,36 +100,82 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
 
   const handleBack = () => {
     if (setCurrentView) {
-      setCurrentView('main');
+      setCurrentView("main");
     }
   };
 
   const modules = [
-    { id: 'network-scanner', name: t('dashboard.offensive.modules.networkScanner', 'NETWORK SCANNER'), icon: '🔍', component: NetworkScanner },
-    { id: 'network-recon', name: t('dashboard.offensive.modules.networkRecon'), icon: '📡', component: NetworkRecon },
-    { id: 'vuln-intel', name: t('dashboard.offensive.modules.vulnIntel'), icon: '🎯', component: VulnIntel },
-    { id: 'web-attack', name: t('dashboard.offensive.modules.webAttack'), icon: '🌐', component: WebAttack },
-    { id: 'c2-orchestration', name: t('dashboard.offensive.modules.c2Control'), icon: '⚡', component: C2Orchestration },
-    { id: 'bas', name: t('dashboard.offensive.modules.bas'), icon: '💥', component: BAS },
-    { id: 'offensive-gateway', name: t('dashboard.offensive.modules.gateway'), icon: '⚔️', component: OffensiveGateway },
-    { id: 'behavioral-analyzer', name: t('dashboard.defensive.modules.behavioral', 'BEHAVIORAL ANALYZER'), icon: '🧠', component: BehavioralAnalyzer },
-    { id: 'traffic-analyzer', name: t('dashboard.defensive.modules.traffic', 'TRAFFIC ANALYZER'), icon: '🔒', component: TrafficAnalyzer }
+    {
+      id: "network-scanner",
+      name: t("dashboard.offensive.modules.networkScanner", "NETWORK SCANNER"),
+      icon: "🔍",
+      component: NetworkScanner,
+    },
+    {
+      id: "network-recon",
+      name: t("dashboard.offensive.modules.networkRecon"),
+      icon: "📡",
+      component: NetworkRecon,
+    },
+    {
+      id: "vuln-intel",
+      name: t("dashboard.offensive.modules.vulnIntel"),
+      icon: "🎯",
+      component: VulnIntel,
+    },
+    {
+      id: "web-attack",
+      name: t("dashboard.offensive.modules.webAttack"),
+      icon: "🌐",
+      component: WebAttack,
+    },
+    {
+      id: "c2-orchestration",
+      name: t("dashboard.offensive.modules.c2Control"),
+      icon: "⚡",
+      component: C2Orchestration,
+    },
+    {
+      id: "bas",
+      name: t("dashboard.offensive.modules.bas"),
+      icon: "💥",
+      component: BAS,
+    },
+    {
+      id: "offensive-gateway",
+      name: t("dashboard.offensive.modules.gateway"),
+      icon: "⚔️",
+      component: OffensiveGateway,
+    },
+    {
+      id: "behavioral-analyzer",
+      name: t("dashboard.defensive.modules.behavioral", "BEHAVIORAL ANALYZER"),
+      icon: "🧠",
+      component: BehavioralAnalyzer,
+    },
+    {
+      id: "traffic-analyzer",
+      name: t("dashboard.defensive.modules.traffic", "TRAFFIC ANALYZER"),
+      icon: "🔒",
+      component: TrafficAnalyzer,
+    },
   ];
 
-  const currentModule = modules.find(m => m.id === activeModule);
+  const currentModule = modules.find((m) => m.id === activeModule);
   const ModuleComponent = currentModule?.component;
 
   return (
     <article
       className={styles.offensiveDashboard}
-
       aria-labelledby="offensive-dashboard-title"
       data-maximus-module="offensive-dashboard"
       data-maximus-navigable="true"
       data-maximus-version="2.0"
-      data-maximus-category="red-team">
-
-      <SkipLink href="#offensive-tool-content">{t('accessibility.skipToMain')}</SkipLink>
+      data-maximus-category="red-team"
+    >
+      <SkipLink href="#offensive-tool-content">
+        {t("accessibility.skipToMain")}
+      </SkipLink>
 
       <QueryErrorBoundary>
         <OffensiveHeader
@@ -134,21 +192,25 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
 
       <section
         className={styles.mainContent}
-
-        aria-label={t('dashboard.offensive.workspace', 'Offensive operations workspace')}
-        data-maximus-section="workspace">
-
+        aria-label={t(
+          "dashboard.offensive.workspace",
+          "Offensive operations workspace",
+        )}
+        data-maximus-section="workspace"
+      >
         <section
           id="offensive-tool-content"
           className={styles.moduleArea}
-
-          aria-label={t('dashboard.offensive.activeTool', 'Active offensive tool')}
+          aria-label={t(
+            "dashboard.offensive.activeTool",
+            "Active offensive tool",
+          )}
           aria-live="polite"
           aria-atomic="false"
           data-maximus-section="active-tool"
           data-maximus-tool={activeModule}
-          data-maximus-interactive="true">
-
+          data-maximus-interactive="true"
+        >
           <Suspense fallback={<LoadingFallback />}>
             {ModuleComponent && (
               <WidgetErrorBoundary widgetName={currentModule.name}>
@@ -161,14 +223,19 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         </section>
 
         <aside
-
-          aria-label={t('accessibility.executionsSidebar', 'Live executions sidebar')}
+          aria-label={t(
+            "accessibility.executionsSidebar",
+            "Live executions sidebar",
+          )}
           data-maximus-section="sidebar"
           data-maximus-live="true"
-          data-maximus-monitor="executions">
-
+          data-maximus-monitor="executions"
+        >
           <WidgetErrorBoundary widgetName="Live Executions">
-            <OffensiveSidebar executions={executions} ariaLabel={t('accessibility.executionsSidebar')} />
+            <OffensiveSidebar
+              executions={executions}
+              ariaLabel={t("accessibility.executionsSidebar")}
+            />
           </WidgetErrorBoundary>
         </aside>
       </section>
@@ -177,13 +244,13 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         moduleName="OFFENSIVE OPERATIONS"
         classification="TOP SECRET"
         statusItems={[
-          { label: 'SYSTEM', value: 'ONLINE', online: true },
-          { label: 'MODE', value: 'RED TEAM', online: true },
-          { label: 'OPSEC', value: 'ENABLED', online: true }
+          { label: "SYSTEM", value: "ONLINE", online: true },
+          { label: "MODE", value: "RED TEAM", online: true },
+          { label: "OPSEC", value: "ENABLED", online: true },
         ]}
         metricsItems={[
-          { label: 'EXECUTIONS', value: executions.length },
-          { label: 'ACTIVE', value: currentModule?.name || 'N/A' }
+          { label: "EXECUTIONS", value: executions.length },
+          { label: "ACTIVE", value: currentModule?.name || "N/A" },
         ]}
         showTimestamp={true}
       />

@@ -13,8 +13,8 @@
  * Boris Cherny Standard - GAP #39 FIX: localStorage with expiration timestamps
  */
 
-import { create } from 'zustand';
-import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist, createJSONStorage } from "zustand/middleware";
 
 // Boris Cherny Standard - GAP #39 FIX: Expiration time for persisted data
 const STORE_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -30,69 +30,75 @@ export const useOffensiveStore = create(
           targets: 0,
           c2Sessions: 0,
           networkScans: 0,
-          payloadsGenerated: 0
+          payloadsGenerated: 0,
         },
         executions: [],
-        activeModule: 'network-scanner',
+        activeModule: "network-scanner",
         loading: {
           metrics: true,
           executions: false,
-          scanner: false
+          scanner: false,
         },
         error: null,
         lastUpdate: null,
-        
+
         // NEW: Offensive tools data
         scanResults: [],
         payloads: [],
 
         // Actions - Metrics
-        setMetrics: (metrics) => set({
-          metrics,
-          lastUpdate: new Date().toISOString(),
-          loading: { ...get().loading, metrics: false }
-        }),
+        setMetrics: (metrics) =>
+          set({
+            metrics,
+            lastUpdate: new Date().toISOString(),
+            loading: { ...get().loading, metrics: false },
+          }),
 
-        updateMetric: (key, value) => set((state) => ({
-          metrics: {
-            ...state.metrics,
-            [key]: value
-          },
-          lastUpdate: new Date().toISOString()
-        })),
+        updateMetric: (key, value) =>
+          set((state) => ({
+            metrics: {
+              ...state.metrics,
+              [key]: value,
+            },
+            lastUpdate: new Date().toISOString(),
+          })),
 
-        incrementMetric: (key, amount = 1) => set((state) => ({
-          metrics: {
-            ...state.metrics,
-            [key]: (state.metrics[key] || 0) + amount
-          },
-          lastUpdate: new Date().toISOString()
-        })),
+        incrementMetric: (key, amount = 1) =>
+          set((state) => ({
+            metrics: {
+              ...state.metrics,
+              [key]: (state.metrics[key] || 0) + amount,
+            },
+            lastUpdate: new Date().toISOString(),
+          })),
 
         // Actions - Executions
-        addExecution: (execution) => set((state) => ({
-          executions: [
-            {
-              ...execution,
-              id: execution.id || `exec-${Date.now()}-${Math.random()}`,
-              timestamp: execution.timestamp || new Date().toISOString(),
-              status: execution.status || 'running'
-            },
-            ...state.executions
-          ].slice(0, 100) // Keep last 100 executions
-        })),
+        addExecution: (execution) =>
+          set((state) => ({
+            executions: [
+              {
+                ...execution,
+                id: execution.id || `exec-${Date.now()}-${Math.random()}`,
+                timestamp: execution.timestamp || new Date().toISOString(),
+                status: execution.status || "running",
+              },
+              ...state.executions,
+            ].slice(0, 100), // Keep last 100 executions
+          })),
 
-        updateExecution: (executionId, updates) => set((state) => ({
-          executions: state.executions.map(exec =>
-            exec.id === executionId
-              ? { ...exec, ...updates, updated: new Date().toISOString() }
-              : exec
-          )
-        })),
+        updateExecution: (executionId, updates) =>
+          set((state) => ({
+            executions: state.executions.map((exec) =>
+              exec.id === executionId
+                ? { ...exec, ...updates, updated: new Date().toISOString() }
+                : exec,
+            ),
+          })),
 
-        removeExecution: (executionId) => set((state) => ({
-          executions: state.executions.filter(e => e.id !== executionId)
-        })),
+        removeExecution: (executionId) =>
+          set((state) => ({
+            executions: state.executions.filter((e) => e.id !== executionId),
+          })),
 
         clearExecutions: () => set({ executions: [] }),
 
@@ -100,65 +106,71 @@ export const useOffensiveStore = create(
         setActiveModule: (moduleId) => set({ activeModule: moduleId }),
 
         // Actions - Loading
-        setLoading: (key, value) => set((state) => ({
-          loading: {
-            ...state.loading,
-            [key]: value
-          }
-        })),
+        setLoading: (key, value) =>
+          set((state) => ({
+            loading: {
+              ...state.loading,
+              [key]: value,
+            },
+          })),
 
         // Actions - Error
         setError: (error) => set({ error }),
         clearError: () => set({ error: null }),
 
         // NEW: Actions - Network Scanner
-        addScanResult: (result) => set((state) => ({
-          scanResults: [result, ...state.scanResults].slice(0, 50),
-          metrics: {
-            ...state.metrics,
-            networkScans: state.metrics.networkScans + 1,
-            activeScans: result.success ? state.metrics.activeScans + 1 : state.metrics.activeScans
-          }
-        })),
+        addScanResult: (result) =>
+          set((state) => ({
+            scanResults: [result, ...state.scanResults].slice(0, 50),
+            metrics: {
+              ...state.metrics,
+              networkScans: state.metrics.networkScans + 1,
+              activeScans: result.success
+                ? state.metrics.activeScans + 1
+                : state.metrics.activeScans,
+            },
+          })),
 
         clearScanResults: () => set({ scanResults: [] }),
 
         // NEW: Actions - Payload Generator
-        addPayload: (payload) => set((state) => ({
-          payloads: [payload, ...state.payloads].slice(0, 20),
-          metrics: {
-            ...state.metrics,
-            payloadsGenerated: state.metrics.payloadsGenerated + 1
-          }
-        })),
+        addPayload: (payload) =>
+          set((state) => ({
+            payloads: [payload, ...state.payloads].slice(0, 20),
+            metrics: {
+              ...state.metrics,
+              payloadsGenerated: state.metrics.payloadsGenerated + 1,
+            },
+          })),
 
         clearPayloads: () => set({ payloads: [] }),
 
         // Actions - Reset
-        reset: () => set({
-          metrics: {
-            activeScans: 0,
-            exploitsFound: 0,
-            targets: 0,
-            c2Sessions: 0,
-            networkScans: 0,
-            payloadsGenerated: 0
-          },
-          executions: [],
-          activeModule: 'network-scanner',
-          loading: {
-            metrics: true,
-            executions: false,
-            scanner: false
-          },
-          error: null,
-          lastUpdate: null,
-          scanResults: [],
-          payloads: []
-        })
+        reset: () =>
+          set({
+            metrics: {
+              activeScans: 0,
+              exploitsFound: 0,
+              targets: 0,
+              c2Sessions: 0,
+              networkScans: 0,
+              payloadsGenerated: 0,
+            },
+            executions: [],
+            activeModule: "network-scanner",
+            loading: {
+              metrics: true,
+              executions: false,
+              scanner: false,
+            },
+            error: null,
+            lastUpdate: null,
+            scanResults: [],
+            payloads: [],
+          }),
       }),
       {
-        name: 'offensive-store',
+        name: "offensive-store",
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
           activeModule: state.activeModule,
@@ -174,7 +186,7 @@ export const useOffensiveStore = create(
           if (expiresAt && Date.now() > expiresAt) {
             // Data expired, return empty state (will use defaults)
             return {
-              activeModule: 'network-scanner',
+              activeModule: "network-scanner",
               executions: [],
             };
           }
@@ -182,10 +194,10 @@ export const useOffensiveStore = create(
           const { _expiresAt, ...validState } = persistedState || {};
           return validState;
         },
-      }
+      },
     ),
-    { name: 'OffensiveStore' }
-  )
+    { name: "OffensiveStore" },
+  ),
 );
 
 // Selectors
@@ -195,6 +207,6 @@ export const selectActiveModule = (state) => state.activeModule;
 export const selectLoading = (state) => state.loading;
 export const selectError = (state) => state.error;
 export const selectActiveExecutions = (state) =>
-  state.executions.filter(e => e.status === 'running');
+  state.executions.filter((e) => e.status === "running");
 export const selectCompletedExecutions = (state) =>
-  state.executions.filter(e => e.status === 'completed');
+  state.executions.filter((e) => e.status === "completed");

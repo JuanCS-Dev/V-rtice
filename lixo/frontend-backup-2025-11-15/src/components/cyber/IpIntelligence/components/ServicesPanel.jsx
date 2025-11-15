@@ -1,6 +1,6 @@
-import React from 'react';
-import { Badge } from '../../../shared';
-import styles from './ServicesPanel.module.css';
+import React from "react";
+import { Badge } from "../../../shared";
+import styles from "./ServicesPanel.module.css";
 
 export const ServicesPanel = ({ data }) => {
   return (
@@ -27,7 +27,9 @@ export const ServicesPanel = ({ data }) => {
             {data.services.map((service, index) => (
               <div key={index} className={styles.serviceCard}>
                 <div className={styles.serviceHeader}>
-                  <span className={styles.servicePort}>Porto {service.port}</span>
+                  <span className={styles.servicePort}>
+                    Porto {service.port}
+                  </span>
                   <span className={styles.serviceName}>{service.service}</span>
                 </div>
                 <div className={styles.serviceVersion}>{service.version}</div>

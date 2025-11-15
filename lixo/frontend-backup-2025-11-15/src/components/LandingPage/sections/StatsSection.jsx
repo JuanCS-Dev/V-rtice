@@ -15,51 +15,51 @@
  * - Mobile-responsive
  */
 
-import React, { useEffect, useState, useRef } from 'react';
-import styles from './StatsSection.module.css';
+import React, { useEffect, useState, useRef } from "react";
+import styles from "./StatsSection.module.css";
 
 export const StatsSection = ({ stats }) => {
   const statCards = [
     {
-      id: 'threats',
-      icon: '🎯',
-      label: 'Alvos Identificados',
+      id: "threats",
+      icon: "🎯",
+      label: "Alvos Identificados",
       value: stats.threatsDetected,
-      trend: '+12%',
+      trend: "+12%",
       trendUp: true,
-      color: 'danger',
-      progress: 85
+      color: "danger",
+      progress: 85,
     },
     {
-      id: 'monitoring',
-      icon: '🔭',
-      label: 'Vigilância Ativa',
+      id: "monitoring",
+      icon: "🔭",
+      label: "Vigilância Ativa",
       value: stats.activeMonitoring,
-      trend: 'Operacional',
+      trend: "Operacional",
       trendUp: null,
-      color: 'info',
-      progress: 95
+      color: "info",
+      progress: 95,
     },
     {
-      id: 'networks',
-      icon: '🌐',
-      label: 'Redes Escaneadas',
+      id: "networks",
+      icon: "🌐",
+      label: "Redes Escaneadas",
       value: stats.networksScanned,
-      trend: '+8%',
+      trend: "+8%",
       trendUp: true,
-      color: 'success',
-      progress: 78
+      color: "success",
+      progress: 78,
     },
     {
-      id: 'uptime',
-      icon: '⚡',
-      label: 'Arsenal Online',
+      id: "uptime",
+      icon: "⚡",
+      label: "Arsenal Online",
       value: stats.uptime,
-      trend: '30 dias',
+      trend: "30 dias",
       trendUp: true,
-      color: 'warning',
-      progress: 99
-    }
+      color: "warning",
+      progress: 99,
+    },
   ];
 
   return (
@@ -89,7 +89,7 @@ const StatCard = ({ stat, index }) => {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentCard = cardRef.current;
@@ -108,7 +108,7 @@ const StatCard = ({ stat, index }) => {
   useEffect(() => {
     if (!isVisible) return;
 
-    const target = typeof stat.value === 'number' ? stat.value : 0;
+    const target = typeof stat.value === "number" ? stat.value : 0;
     if (target === 0) return;
 
     const duration = 1500; // 1.5s
@@ -129,51 +129,45 @@ const StatCard = ({ stat, index }) => {
     return () => clearInterval(timer);
   }, [isVisible, stat.value]);
 
-  const displayValue = typeof stat.value === 'number' ? count : stat.value;
+  const displayValue = typeof stat.value === "number" ? count : stat.value;
 
   return (
     <div
       ref={cardRef}
-      className={`${styles.card} ${styles[stat.color]} ${isVisible ? styles.visible : ''}`}
+      className={`${styles.card} ${styles[stat.color]} ${isVisible ? styles.visible : ""}`}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       {/* Gradient Border Effect */}
       <div className={styles.borderGlow}></div>
 
       {/* Icon */}
-      <div className={styles.icon}>
-        {stat.icon}
-      </div>
+      <div className={styles.icon}>{stat.icon}</div>
 
       {/* Content */}
       <div className={styles.content}>
         {/* Value - Animated Counter */}
-        <div className={styles.value}>
-          {displayValue}
-        </div>
+        <div className={styles.value}>{displayValue}</div>
 
         {/* Label */}
-        <div className={styles.label}>
-          {stat.label}
-        </div>
+        <div className={styles.label}>{stat.label}</div>
 
         {/* Progress Bar */}
         <div className={styles.progressBar}>
           <div
             className={styles.progressFill}
             style={{
-              width: isVisible ? `${stat.progress}%` : '0%',
-              transitionDelay: `${index * 0.1 + 0.3}s`
+              width: isVisible ? `${stat.progress}%` : "0%",
+              transitionDelay: `${index * 0.1 + 0.3}s`,
             }}
           ></div>
         </div>
 
         {/* Trend */}
-        <div className={`${styles.trend} ${stat.trendUp ? styles.trendUp : ''}`}>
+        <div
+          className={`${styles.trend} ${stat.trendUp ? styles.trendUp : ""}`}
+        >
           {stat.trendUp !== null && (
-            <span className={styles.trendIcon}>
-              {stat.trendUp ? '↑' : '↓'}
-            </span>
+            <span className={styles.trendIcon}>{stat.trendUp ? "↑" : "↓"}</span>
           )}
           <span>{stat.trend}</span>
         </div>

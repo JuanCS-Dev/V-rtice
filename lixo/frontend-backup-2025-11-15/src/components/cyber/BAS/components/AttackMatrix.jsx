@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * AttackMatrix - MITRE ATT&CK Matrix interativa
@@ -19,7 +19,7 @@ export const AttackMatrix = ({
       simulationConfig.techniqueId,
       simulationConfig.targetHost,
       simulationConfig.platform,
-      simulationConfig.params
+      simulationConfig.params,
     );
   };
 
@@ -29,25 +29,27 @@ export const AttackMatrix = ({
     if (!techniques || !Array.isArray(techniques)) {
       return [];
     }
-    return techniques.filter(t => t.tactic_id === tacticId);
+    return techniques.filter((t) => t.tactic_id === tacticId);
   };
 
-  const tacticTechniques = selectedTactic ? getTechniquesForTactic(selectedTactic.id) : [];
+  const tacticTechniques = selectedTactic
+    ? getTechniquesForTactic(selectedTactic.id)
+    : [];
 
   const getSeverityColor = (severity) => {
     const colors = {
-      critical: 'red',
-      high: 'orange',
-      medium: 'yellow',
-      low: 'blue',
+      critical: "red",
+      high: "orange",
+      medium: "yellow",
+      low: "blue",
     };
-    return colors[severity] || 'gray';
+    return colors[severity] || "gray";
   };
 
   const platforms = [
-    { id: 'windows', name: 'Windows', icon: '🪟' },
-    { id: 'linux', name: 'Linux', icon: '🐧' },
-    { id: 'macos', name: 'macOS', icon: '🍎' },
+    { id: "windows", name: "Windows", icon: "🪟" },
+    { id: "linux", name: "Linux", icon: "🐧" },
+    { id: "macos", name: "macOS", icon: "🍎" },
   ];
 
   return (
@@ -71,16 +73,19 @@ export const AttackMatrix = ({
                   onClick={() => onSelectTactic(tactic)}
                   className={`
                     w-full p-3 rounded-lg border-2 transition-all text-left
-                    ${isSelected
-                      ? `bg-${color}-400/20 border-${color}-400`
-                      : 'bg-black/30 border-red-400/20 hover:border-red-400'
+                    ${
+                      isSelected
+                        ? `bg-${color}-400/20 border-${color}-400`
+                        : "bg-black/30 border-red-400/20 hover:border-red-400"
                     }
                   `}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{tactic.icon}</span>
                     <div className="flex-1">
-                      <div className={`font-bold text-sm ${isSelected ? `text-${color}-400` : 'text-red-400/80'}`}>
+                      <div
+                        className={`font-bold text-sm ${isSelected ? `text-${color}-400` : "text-red-400/80"}`}
+                      >
                         {tactic.name}
                       </div>
                       <div className="text-red-400/50 text-xs font-mono">
@@ -107,38 +112,55 @@ export const AttackMatrix = ({
                   {selectedTactic.name} Techniques
                 </h3>
                 <div className="bg-black/50 border border-red-400/30 rounded px-3 py-1">
-                  <span className="text-red-400 font-bold">{tacticTechniques.length}</span>
-                  <span className="text-red-400/60 text-xs ml-1">techniques</span>
+                  <span className="text-red-400 font-bold">
+                    {tacticTechniques.length}
+                  </span>
+                  <span className="text-red-400/60 text-xs ml-1">
+                    techniques
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {tacticTechniques.map((technique, idx) => {
                   const color = getSeverityColor(technique.severity);
-                  const isSelected = simulationConfig.techniqueId === technique.id;
-                  const wasSimulated = simulations.some(s => s.technique_id === technique.id);
+                  const isSelected =
+                    simulationConfig.techniqueId === technique.id;
+                  const wasSimulated = simulations.some(
+                    (s) => s.technique_id === technique.id,
+                  );
 
                   return (
                     <div
                       key={idx}
                       role="button"
                       tabIndex={0}
-                      onClick={() => setSimulationConfig({ ...simulationConfig, techniqueId: technique.id })}
+                      onClick={() =>
+                        setSimulationConfig({
+                          ...simulationConfig,
+                          techniqueId: technique.id,
+                        })
+                      }
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          setSimulationConfig({ ...simulationConfig, techniqueId: technique.id });
+                        if (e.key === "Enter" || e.key === " ") {
+                          setSimulationConfig({
+                            ...simulationConfig,
+                            techniqueId: technique.id,
+                          });
                         }
                       }}
                       className={`
                         bg-gradient-to-r from-${color}-900/20 to-${color}-900/10
                         border-2 border-${color}-400/30 rounded-lg p-4
                         hover:border-${color}-400 transition-all cursor-pointer
-                        ${isSelected ? `ring-2 ring-${color}-400/50` : ''}
+                        ${isSelected ? `ring-2 ring-${color}-400/50` : ""}
                       `}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <div className={`text-${color}-400 font-bold font-mono text-sm mb-1`}>
+                          <div
+                            className={`text-${color}-400 font-bold font-mono text-sm mb-1`}
+                          >
                             {technique.id}
                           </div>
                           <div className={`text-${color}-400/80 text-xs`}>
@@ -146,14 +168,19 @@ export const AttackMatrix = ({
                           </div>
                         </div>
                         {wasSimulated && (
-                          <span className="text-green-400 text-xl" title="Already simulated">
+                          <span
+                            className="text-green-400 text-xl"
+                            title="Already simulated"
+                          >
                             ✓
                           </span>
                         )}
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t border-red-400/20">
-                        <span className={`px-2 py-1 bg-${color}-400/10 border border-${color}-400/30 rounded text-${color}-400 text-xs font-bold`}>
+                        <span
+                          className={`px-2 py-1 bg-${color}-400/10 border border-${color}-400/30 rounded text-${color}-400 text-xs font-bold`}
+                        >
                           {technique.severity.toUpperCase()}
                         </span>
                         {isSelected && (
@@ -179,11 +206,22 @@ export const AttackMatrix = ({
                 <div className="space-y-4">
                   {/* Target Host */}
                   <div>
-                    <label htmlFor="input-target-host-iga50" className="text-red-400/60 text-xs mb-2 block">TARGET HOST</label>
-<input id="input-target-host-iga50"
+                    <label
+                      htmlFor="input-target-host-iga50"
+                      className="text-red-400/60 text-xs mb-2 block"
+                    >
+                      TARGET HOST
+                    </label>
+                    <input
+                      id="input-target-host-iga50"
                       type="text"
                       value={simulationConfig.targetHost}
-                      onChange={(e) => setSimulationConfig({ ...simulationConfig, targetHost: e.target.value })}
+                      onChange={(e) =>
+                        setSimulationConfig({
+                          ...simulationConfig,
+                          targetHost: e.target.value,
+                        })
+                      }
                       placeholder="192.168.1.100"
                       className="w-full bg-black/30 border border-red-400/30 rounded px-4 py-2 text-red-400 font-mono focus:outline-none focus:border-red-400 transition-all"
                       disabled={isSimulating}
@@ -192,24 +230,34 @@ export const AttackMatrix = ({
 
                   {/* Platform */}
                   <div>
-                    <span className="text-red-400/60 text-xs mb-2 block">PLATFORM</span>
+                    <span className="text-red-400/60 text-xs mb-2 block">
+                      PLATFORM
+                    </span>
                     <div className="grid grid-cols-3 gap-2">
-                      {platforms.map(platform => (
+                      {platforms.map((platform) => (
                         <button
                           key={platform.id}
-                          onClick={() => setSimulationConfig({ ...simulationConfig, platform: platform.id })}
+                          onClick={() =>
+                            setSimulationConfig({
+                              ...simulationConfig,
+                              platform: platform.id,
+                            })
+                          }
                           disabled={isSimulating}
                           className={`
                             p-3 rounded border-2 transition-all
-                            ${simulationConfig.platform === platform.id
-                              ? 'bg-red-400/20 border-red-400'
-                              : 'bg-black/30 border-red-400/20 hover:border-red-400'
+                            ${
+                              simulationConfig.platform === platform.id
+                                ? "bg-red-400/20 border-red-400"
+                                : "bg-black/30 border-red-400/20 hover:border-red-400"
                             }
-                            ${isSimulating ? 'opacity-50 cursor-not-allowed' : ''}
+                            ${isSimulating ? "opacity-50 cursor-not-allowed" : ""}
                           `}
                         >
                           <div className="text-2xl mb-1">{platform.icon}</div>
-                          <div className={`text-xs font-bold ${simulationConfig.platform === platform.id ? 'text-red-400' : 'text-red-400/60'}`}>
+                          <div
+                            className={`text-xs font-bold ${simulationConfig.platform === platform.id ? "text-red-400" : "text-red-400/60"}`}
+                          >
                             {platform.name}
                           </div>
                         </button>

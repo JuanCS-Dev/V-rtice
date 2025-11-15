@@ -1,2 +1,2 @@
-export { SystemSecurity } from './SystemSecurity';
-export { default } from './SystemSecurity';
+export { SystemSecurity } from "./SystemSecurity";
+export { default } from "./SystemSecurity";

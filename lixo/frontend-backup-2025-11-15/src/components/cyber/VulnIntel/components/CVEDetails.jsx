@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * CVEDetails - Detalhes completos de uma CVE
@@ -8,13 +8,13 @@ export const CVEDetails = ({ cve, onGetExploits }) => {
 
   const getSeverityColor = (severity) => {
     const colors = {
-      CRITICAL: 'red',
-      HIGH: 'orange',
-      MEDIUM: 'yellow',
-      LOW: 'blue',
-      NONE: 'gray',
+      CRITICAL: "red",
+      HIGH: "orange",
+      MEDIUM: "yellow",
+      LOW: "blue",
+      NONE: "gray",
     };
-    return colors[severity] || 'gray';
+    return colors[severity] || "gray";
   };
 
   const severityColor = getSeverityColor(cve.severity);
@@ -30,20 +30,24 @@ export const CVEDetails = ({ cve, onGetExploits }) => {
               <h3 className="text-3xl font-bold text-red-400 font-mono tracking-wider">
                 {cve.cve_id || cve.id}
               </h3>
-              <div className={`px-4 py-1 bg-${severityColor}-400/20 border-2 border-${severityColor}-400 rounded-full flex items-center gap-2 animate-pulse`}>
+              <div
+                className={`px-4 py-1 bg-${severityColor}-400/20 border-2 border-${severityColor}-400 rounded-full flex items-center gap-2 animate-pulse`}
+              >
                 <span className={`text-${severityColor}-400 font-bold text-sm`}>
-                  {cve.severity || 'UNKNOWN'}
+                  {cve.severity || "UNKNOWN"}
                 </span>
               </div>
             </div>
             <p className="text-red-400/80 text-lg">
-              {cve.description || cve.summary || 'No description available'}
+              {cve.description || cve.summary || "No description available"}
             </p>
           </div>
 
           {/* CVSS Score */}
           <div className="ml-6 bg-black/50 border-2 border-red-400/40 rounded-lg p-4 text-center min-w-[120px]">
-            <div className="text-red-400/60 text-xs font-bold mb-1">CVSS SCORE</div>
+            <div className="text-red-400/60 text-xs font-bold mb-1">
+              CVSS SCORE
+            </div>
             <div className={`text-4xl font-bold text-${severityColor}-400`}>
               {cvssScore.toFixed(1)}
             </div>
@@ -59,28 +63,30 @@ export const CVEDetails = ({ cve, onGetExploits }) => {
           <div className="bg-black/30 border border-red-400/20 rounded p-3">
             <div className="text-red-400/60 text-xs mb-1">PUBLISHED</div>
             <div className="text-red-400 font-bold text-sm">
-              {cve.published_date || cve.published || 'N/A'}
+              {cve.published_date || cve.published || "N/A"}
             </div>
           </div>
 
           <div className="bg-black/30 border border-red-400/20 rounded p-3">
             <div className="text-red-400/60 text-xs mb-1">LAST MODIFIED</div>
             <div className="text-red-400 font-bold text-sm">
-              {cve.modified_date || cve.last_modified || 'N/A'}
+              {cve.modified_date || cve.last_modified || "N/A"}
             </div>
           </div>
 
           <div className="bg-black/30 border border-red-400/20 rounded p-3">
             <div className="text-red-400/60 text-xs mb-1">ATTACK VECTOR</div>
             <div className="text-red-400 font-bold text-sm">
-              {cve.attack_vector || cve.access?.vector || 'N/A'}
+              {cve.attack_vector || cve.access?.vector || "N/A"}
             </div>
           </div>
 
           <div className="bg-black/30 border border-red-400/20 rounded p-3">
-            <div className="text-red-400/60 text-xs mb-1">ATTACK COMPLEXITY</div>
+            <div className="text-red-400/60 text-xs mb-1">
+              ATTACK COMPLEXITY
+            </div>
             <div className="text-red-400 font-bold text-sm">
-              {cve.attack_complexity || cve.access?.complexity || 'N/A'}
+              {cve.attack_complexity || cve.access?.complexity || "N/A"}
             </div>
           </div>
         </div>
@@ -106,14 +112,18 @@ export const CVEDetails = ({ cve, onGetExploits }) => {
               <h4 className="text-orange-400 font-bold">AFFECTED PRODUCTS</h4>
             </div>
             <div className="space-y-2">
-              {(cve.affected_products || cve.vulnerable_products || []).map((product, idx) => (
-                <div
-                  key={idx}
-                  className="bg-black/30 border border-orange-400/20 rounded px-3 py-2 text-orange-400/80 font-mono text-sm"
-                >
-                  {typeof product === 'string' ? product : `${product.vendor} ${product.product} ${product.version || ''}`}
-                </div>
-              ))}
+              {(cve.affected_products || cve.vulnerable_products || []).map(
+                (product, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-black/30 border border-orange-400/20 rounded px-3 py-2 text-orange-400/80 font-mono text-sm"
+                  >
+                    {typeof product === "string"
+                      ? product
+                      : `${product.vendor} ${product.product} ${product.version || ""}`}
+                  </div>
+                ),
+              )}
             </div>
           </div>
         )}
@@ -129,12 +139,12 @@ export const CVEDetails = ({ cve, onGetExploits }) => {
               {cve.references.map((ref, idx) => (
                 <a
                   key={idx}
-                  href={typeof ref === 'string' ? ref : ref.url}
+                  href={typeof ref === "string" ? ref : ref.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block bg-black/30 border border-red-400/20 rounded px-3 py-2 text-red-400/80 text-sm hover:border-red-400 hover:text-red-400 transition-all"
                 >
-                  {typeof ref === 'string' ? ref : ref.url}
+                  {typeof ref === "string" ? ref : ref.url}
                 </a>
               ))}
             </div>

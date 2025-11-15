@@ -11,7 +11,7 @@
  * - Use getServiceEndpoint() to access endpoints (with validation)
  */
 
-import logger from '@/utils/logger';
+import logger from "@/utils/logger";
 
 // ============================================================================
 // CONFIGURATION ERROR
@@ -20,7 +20,7 @@ import logger from '@/utils/logger';
 export class ConfigurationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ConfigurationError';
+    this.name = "ConfigurationError";
   }
 }
 
@@ -37,7 +37,7 @@ const isDev = env.DEV;
 // ============================================================================
 
 // Default fallback for development (localhost)
-const DEFAULT_API_URL = 'http://localhost:8000';
+const DEFAULT_API_URL = "http://localhost:8000";
 
 export const ServiceEndpoints = {
   // API Gateway (Single Entry Point)
@@ -69,9 +69,9 @@ export const ServiceEndpoints = {
 
   // Cockpit Soberano Services
   cockpit: {
-    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || DEFAULT_API_URL,  // GKE: 8000
-    verdictEngine: env.VITE_VERDICT_ENGINE_API || DEFAULT_API_URL,      // GKE: 8093
-    commandBus: env.VITE_COMMAND_BUS_API || DEFAULT_API_URL,            // GKE: 8092
+    narrativeFilter: env.VITE_NARRATIVE_FILTER_API || DEFAULT_API_URL, // GKE: 8000
+    verdictEngine: env.VITE_VERDICT_ENGINE_API || DEFAULT_API_URL, // GKE: 8093
+    commandBus: env.VITE_COMMAND_BUS_API || DEFAULT_API_URL, // GKE: 8092
   },
 
   // HITL (Human-in-the-Loop) Service
@@ -100,7 +100,7 @@ export const ServiceEndpoints = {
 // ============================================================================
 
 // Default fallback for development (localhost)
-const DEFAULT_WS_URL = 'ws://localhost:8000';
+const DEFAULT_WS_URL = "ws://localhost:8000";
 
 export const WebSocketEndpoints = {
   maximus: {
@@ -108,7 +108,9 @@ export const WebSocketEndpoints = {
   },
 
   consciousness: {
-    stream: env.VITE_CONSCIOUSNESS_WS_URL || `${DEFAULT_WS_URL}/stream/consciousness/ws`,
+    stream:
+      env.VITE_CONSCIOUSNESS_WS_URL ||
+      `${DEFAULT_WS_URL}/stream/consciousness/ws`,
   },
 
   apv: {
@@ -137,10 +139,10 @@ export const WebSocketEndpoints = {
 // ============================================================================
 
 export const AuthConfig = {
-  apiKey: env.VITE_API_KEY || '',
+  apiKey: env.VITE_API_KEY || "",
 
   google: {
-    clientId: env.VITE_GOOGLE_CLIENT_ID || '',
+    clientId: env.VITE_GOOGLE_CLIENT_ID || "",
   },
 } as const;
 
@@ -149,12 +151,12 @@ export const AuthConfig = {
 // ============================================================================
 
 const REQUIRED_ENV_VARS_PROD = [
-  'VITE_API_GATEWAY_URL',
-  'VITE_MAXIMUS_CORE_URL',
-  'VITE_API_KEY',
-  'VITE_SUPER_ADMIN_EMAIL',
-  'VITE_MAXIMUS_WS_URL',
-  'VITE_DEFENSIVE_WS_URL',
+  "VITE_API_GATEWAY_URL",
+  "VITE_MAXIMUS_CORE_URL",
+  "VITE_API_KEY",
+  "VITE_SUPER_ADMIN_EMAIL",
+  "VITE_MAXIMUS_WS_URL",
+  "VITE_DEFENSIVE_WS_URL",
 ] as const;
 
 const REQUIRED_ENV_VARS_DEV = [
@@ -186,7 +188,7 @@ export function validateConfiguration(): void {
 ╚═══════════════════════════════════════════════════════════════╝
 
 Missing required environment variables:
-${missing.map(v => `  ❌ ${v}`).join('\n')}
+${missing.map((v) => `  ❌ ${v}`).join("\n")}
 
 Please set these variables in your .env file.
 See .env.example for reference.
@@ -199,7 +201,7 @@ Production deployment cannot proceed without proper configuration.
 
   // Boris Cherny Standard - GAP #83: Replace console.info with logger
   if (isDev) {
-    logger.info('✅ Configuration validated (development mode)');
+    logger.info("✅ Configuration validated (development mode)");
   }
 }
 
@@ -210,21 +212,21 @@ Production deployment cannot proceed without proper configuration.
  * @throws {ConfigurationError} if endpoint not found
  */
 export function getServiceEndpoint(path: string): string {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current: any = ServiceEndpoints;
 
   for (const part of parts) {
     if (current[part] === undefined) {
       throw new ConfigurationError(
-        `Endpoint not found: ${path}\nAvailable endpoints: ${Object.keys(ServiceEndpoints).join(', ')}`
+        `Endpoint not found: ${path}\nAvailable endpoints: ${Object.keys(ServiceEndpoints).join(", ")}`,
       );
     }
     current = current[part];
   }
 
-  if (typeof current !== 'string') {
+  if (typeof current !== "string") {
     throw new ConfigurationError(
-      `Invalid endpoint path: ${path} does not point to a URL string`
+      `Invalid endpoint path: ${path} does not point to a URL string`,
     );
   }
 
@@ -238,21 +240,19 @@ export function getServiceEndpoint(path: string): string {
  * @throws {ConfigurationError} if endpoint not found
  */
 export function getWebSocketEndpoint(path: string): string {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current: any = WebSocketEndpoints;
 
   for (const part of parts) {
     if (current[part] === undefined) {
-      throw new ConfigurationError(
-        `WebSocket endpoint not found: ${path}`
-      );
+      throw new ConfigurationError(`WebSocket endpoint not found: ${path}`);
     }
     current = current[part];
   }
 
-  if (typeof current !== 'string') {
+  if (typeof current !== "string") {
     throw new ConfigurationError(
-      `Invalid WebSocket endpoint path: ${path} does not point to a URL string`
+      `Invalid WebSocket endpoint path: ${path} does not point to a URL string`,
     );
   }
 
@@ -265,7 +265,7 @@ export function getWebSocketEndpoint(path: string): string {
  * @returns WebSocket URL (ws:// or wss://)
  */
 export function httpToWs(httpUrl: string): string {
-  return httpUrl.replace(/^http/, 'ws');
+  return httpUrl.replace(/^http/, "ws");
 }
 
 /**
@@ -279,10 +279,10 @@ export function getWebSocketUrlWithApiKey(endpoint: string): string {
   const apiKey = AuthConfig.apiKey;
 
   if (!apiKey && isProd) {
-    throw new ConfigurationError('API key not configured');
+    throw new ConfigurationError("API key not configured");
   }
 
-  return `${wsUrl}${wsUrl.includes('?') ? '&' : '?'}api_key=${apiKey}`;
+  return `${wsUrl}${wsUrl.includes("?") ? "&" : "?"}api_key=${apiKey}`;
 }
 
 // ============================================================================

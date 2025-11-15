@@ -10,6 +10,7 @@
 
 **Total Violations Found:** 53
 **Severity Breakdown:**
+
 - CRITICAL: 18 (Hardcoded colors, non-standard fonts)
 - HIGH: 15 (Hardcoded spacing, wrong CSS properties)
 - MEDIUM: 12 (Missing hover effects, incorrect border-radius)
@@ -22,6 +23,7 @@
 ## Violation Type 1: Hardcoded Colors (CRITICAL)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/SplitView.module.css`
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/UnifiedTimeline.module.css`
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/GapAnalysis.module.css`
@@ -30,6 +32,7 @@
 ### Violations:
 
 #### SplitView.module.css
+
 ```css
 /* Line 24 - VIOLATION */
 border-bottom: 2px solid rgba(179, 102, 255, 0.2);
@@ -69,7 +72,11 @@ text-shadow: var(--shadow-glow-cyan);
 ```css
 /* Lines 59-67 - VIOLATION - Custom purple colors */
 color: rgba(179, 102, 255, 0.6);
-background: linear-gradient(135deg, rgba(179, 102, 255, 0.2) 0%, rgba(128, 0, 255, 0.2) 100%);
+background: linear-gradient(
+  135deg,
+  rgba(179, 102, 255, 0.2) 0%,
+  rgba(128, 0, 255, 0.2) 100%
+);
 border: 1px solid rgba(179, 102, 255, 0.3);
 color: #b366ff;
 
@@ -81,6 +88,7 @@ color: var(--color-accent-primary);
 ```
 
 #### UnifiedTimeline.module.css
+
 ```css
 /* Lines 19-28 - VIOLATION */
 border-bottom: 2px solid rgba(179, 102, 255, 0.2);
@@ -108,6 +116,7 @@ border-color: var(--color-accent-primary);
 ```
 
 #### GapAnalysis.module.css
+
 ```css
 /* Lines 19-32 - VIOLATION */
 border-bottom: 2px solid rgba(179, 102, 255, 0.2);
@@ -135,6 +144,7 @@ color: var(--color-success);
 ## Violation Type 2: Hardcoded Spacing & Typography (HIGH)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/SplitView.module.css`
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/UnifiedTimeline.module.css`
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/GapAnalysis.module.css`
@@ -180,9 +190,11 @@ font-size: var(--text-4xl);
 ## Violation Type 3: Non-Standard Font Usage (CRITICAL)
 
 ### Files Affected:
+
 - All Purple Team component files use correct fonts (Courier New)
 
 ### Violations:
+
 **NONE** - Purple Team correctly uses 'Courier New' for body text and maintains monospace family.
 
 **Total Font Violations:** 0
@@ -192,6 +204,7 @@ font-size: var(--text-4xl);
 ## Violation Type 4: Missing/Incorrect Hover Effects (MEDIUM)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/SplitView.module.css`
 
 ### Violations:
@@ -231,6 +244,7 @@ font-size: var(--text-4xl);
 ## Violation Type 5: Hardcoded Border Radius (MEDIUM)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/SplitView.module.css`
 - `/home/juan/vertice-dev/frontend/src/components/dashboards/PurpleTeamDashboard/components/GapAnalysis.module.css`
 
@@ -259,16 +273,19 @@ border-radius: var(--radius-xl);
 ## Recommendations
 
 ### Priority 1 (CRITICAL - Fix Immediately)
+
 1. Replace ALL hardcoded hex colors with design system variables
 2. Update purple theme to use var(--color-accent-primary) consistently
 3. Replace custom rgba() values with design tokens
 
 ### Priority 2 (HIGH - Fix This Sprint)
-1. Replace hardcoded spacing values (rem/px) with var(--space-*) tokens
-2. Replace font-size values with var(--text-*) tokens
-3. Standardize border-radius using var(--radius-*) tokens
+
+1. Replace hardcoded spacing values (rem/px) with var(--space-\*) tokens
+2. Replace font-size values with var(--text-\*) tokens
+3. Standardize border-radius using var(--radius-\*) tokens
 
 ### Priority 3 (MEDIUM - Fix Next Sprint)
+
 1. Update hover effects to match Landing Page standard:
    - Cards: `translateY(-10px) scale(1.02)`
    - Buttons: `translateX(5px)` + glow
@@ -276,6 +293,7 @@ border-radius: var(--radius-xl);
 3. Ensure all interactive elements have consistent transitions
 
 ### Priority 4 (LOW - Optimization)
+
 1. Add missing animations for entrance effects
 2. Optimize color contrast for accessibility
 3. Consider adding backdrop-filter for elevated components

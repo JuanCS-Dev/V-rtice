@@ -1,5 +1,5 @@
-import { API_BASE_URL } from '@/config/api';
-import logger from '@/utils/logger';
+import { API_BASE_URL } from "@/config/api";
+import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
  * MAXIMUS API SERVICE
@@ -23,7 +23,7 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${MAXIMUS_BASE_URL}${endpoint}`, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -37,7 +37,7 @@ const apiRequest = async (endpoint, options = {}) => {
 
     return {
       success: true,
-      data: data.status === 'success' ? data.data : data,
+      data: data.status === "success" ? data.data : data,
       message: data.message,
     };
   } catch (error) {
@@ -57,7 +57,7 @@ const apiRequest = async (endpoint, options = {}) => {
  * Check MAXIMUS Integration Service health
  */
 export const checkMaximusHealth = async () => {
-  return apiRequest('/health');
+  return apiRequest("/health");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -74,8 +74,8 @@ export const checkMaximusHealth = async () => {
  * @param {boolean} config.dryRun - If true, only analyze without implementing
  */
 export const runOraculoAnalysis = async (config = {}) => {
-  return apiRequest('/api/v1/oraculo/analyze', {
-    method: 'POST',
+  return apiRequest("/api/v1/oraculo/analyze", {
+    method: "POST",
     body: JSON.stringify({
       focus_category: config.focusCategory || null,
       max_suggestions: config.maxSuggestions || 5,
@@ -89,7 +89,7 @@ export const runOraculoAnalysis = async (config = {}) => {
  * Get pending approvals (suggestions waiting for human review)
  */
 export const getOraculoPendingApprovals = async () => {
-  return apiRequest('/api/v1/oraculo/pending-approvals');
+  return apiRequest("/api/v1/oraculo/pending-approvals");
 };
 
 /**
@@ -99,7 +99,7 @@ export const getOraculoPendingApprovals = async () => {
  */
 export const approveOraculoSuggestion = async (suggestionId) => {
   return apiRequest(`/api/v1/oraculo/approve/${suggestionId}`, {
-    method: 'POST',
+    method: "POST",
   });
 };
 
@@ -107,7 +107,7 @@ export const approveOraculoSuggestion = async (suggestionId) => {
  * Get Oráculo statistics
  */
 export const getOraculoStats = async () => {
-  return apiRequest('/api/v1/oraculo/stats');
+  return apiRequest("/api/v1/oraculo/stats");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -122,11 +122,12 @@ export const getOraculoStats = async () => {
  * @param {boolean} config.generatePlaybook - Generate ADR playbook
  */
 export const analyzeFileWithEureka = async (config) => {
-  return apiRequest('/api/v1/eureka/analyze', {
-    method: 'POST',
+  return apiRequest("/api/v1/eureka/analyze", {
+    method: "POST",
     body: JSON.stringify({
       file_path: config.filePath,
-      generate_playbook: config.generatePlaybook !== undefined ? config.generatePlaybook : true,
+      generate_playbook:
+        config.generatePlaybook !== undefined ? config.generatePlaybook : true,
     }),
   });
 };
@@ -135,14 +136,14 @@ export const analyzeFileWithEureka = async (config) => {
  * Get Eureka statistics
  */
 export const getEurekaStats = async () => {
-  return apiRequest('/api/v1/eureka/stats');
+  return apiRequest("/api/v1/eureka/stats");
 };
 
 /**
  * Get available malicious patterns
  */
 export const getEurekaPatterns = async () => {
-  return apiRequest('/api/v1/eureka/patterns');
+  return apiRequest("/api/v1/eureka/patterns");
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -159,12 +160,14 @@ export const getEurekaPatterns = async () => {
  * @param {boolean} config.autoFix - Auto-fix issues
  */
 export const runSupplyChainScan = async (config) => {
-  return apiRequest('/api/v1/supply-chain/scan', {
-    method: 'POST',
+  return apiRequest("/api/v1/supply-chain/scan", {
+    method: "POST",
     body: JSON.stringify({
       repository_path: config.repositoryPath,
-      scan_dependencies: config.scanDependencies !== undefined ? config.scanDependencies : true,
-      analyze_code: config.analyzeCode !== undefined ? config.analyzeCode : true,
+      scan_dependencies:
+        config.scanDependencies !== undefined ? config.scanDependencies : true,
+      analyze_code:
+        config.analyzeCode !== undefined ? config.analyzeCode : true,
       auto_fix: config.autoFix !== undefined ? config.autoFix : false,
     }),
   });
@@ -181,8 +184,8 @@ export const runSupplyChainScan = async (config) => {
  * @param {string} filePath - Path to file to analyze
  */
 export const analyzeAndRespond = async (filePath) => {
-  return apiRequest('/api/v1/integration/analyze-and-respond', {
-    method: 'POST',
+  return apiRequest("/api/v1/integration/analyze-and-respond", {
+    method: "POST",
     body: JSON.stringify({ file_path: filePath }),
   });
 };
@@ -196,7 +199,7 @@ export const analyzeAndRespond = async (filePath) => {
  */
 export const isMaximusAvailable = async () => {
   const health = await checkMaximusHealth();
-  return health.success && health.data.status === 'healthy';
+  return health.success && health.data.status === "healthy";
 };
 
 /**

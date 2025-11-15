@@ -8,9 +8,9 @@
  * Governed by: Constituição Vértice v2.5 - ADR-002
  */
 
-import { useState, useCallback } from 'react';
-import { useWebSocketManager } from './useWebSocketManager';
-import logger from '@/utils/logger';
+import { useState, useCallback } from "react";
+import { useWebSocketManager } from "./useWebSocketManager";
+import logger from "@/utils/logger";
 
 /**
  * Hook for real-time defensive alerts
@@ -26,38 +26,42 @@ export const useDefensiveAlerts = ({ enabled = true, onAlert = null } = {}) => {
   // Message handler
   const handleMessage = useCallback(
     (data) => {
-      logger.debug('[useDefensiveAlerts] Message:', data.type);
+      logger.debug("[useDefensiveAlerts] Message:", data.type);
 
-      if (data.type === 'alert' || data.type === 'new_alert') {
+      if (data.type === "alert" || data.type === "new_alert") {
         // Add new alert to list (keep last 100)
         setAlerts((prev) => [data.data || data, ...prev].slice(0, 100));
 
         if (onAlert) {
           onAlert(data.data || data);
         }
-      } else if (data.type === 'alert_update') {
+      } else if (data.type === "alert_update") {
         // Update existing alert
         setAlerts((prev) =>
           prev.map((alert) =>
-            alert.id === data.data?.id ? { ...alert, ...data.data } : alert
-          )
+            alert.id === data.data?.id ? { ...alert, ...data.data } : alert,
+          ),
         );
-      } else if (data.type === 'alert_resolved') {
+      } else if (data.type === "alert_resolved") {
         // Mark alert as resolved
         setAlerts((prev) =>
           prev.map((alert) =>
             alert.id === data.data?.id
-              ? { ...alert, status: 'resolved', resolved_at: new Date().toISOString() }
-              : alert
-          )
+              ? {
+                  ...alert,
+                  status: "resolved",
+                  resolved_at: new Date().toISOString(),
+                }
+              : alert,
+          ),
         );
       }
     },
-    [onAlert]
+    [onAlert],
   );
 
   // Use WebSocketManager
-  const { isConnected, status } = useWebSocketManager('defensive.alerts', {
+  const { isConnected, status } = useWebSocketManager("defensive.alerts", {
     enabled,
     onMessage: handleMessage,
     connectionOptions: {

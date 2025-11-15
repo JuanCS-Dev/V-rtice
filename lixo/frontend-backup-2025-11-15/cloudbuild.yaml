@@ -16,68 +16,68 @@ steps:
   # ───────────────────────────────────────────────────────────────────────
   # STEP 1: Build Docker image
   # ───────────────────────────────────────────────────────────────────────
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - 'build'
-      - '-t'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA'
-      - '-t'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest'
-      - '--build-arg'
-      - 'NODE_ENV=production'
-      - './frontend'
-    id: 'build-image'
-    timeout: '600s'
+      - "build"
+      - "-t"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA"
+      - "-t"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest"
+      - "--build-arg"
+      - "NODE_ENV=production"
+      - "./frontend"
+    id: "build-image"
+    timeout: "600s"
 
   # ───────────────────────────────────────────────────────────────────────
   # STEP 2: Push image to Artifact Registry
   # ───────────────────────────────────────────────────────────────────────
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - 'push'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA'
-    id: 'push-image'
+      - "push"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA"
+    id: "push-image"
 
-  - name: 'gcr.io/cloud-builders/docker'
+  - name: "gcr.io/cloud-builders/docker"
     args:
-      - 'push'
-      - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest'
-    id: 'push-latest'
+      - "push"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest"
+    id: "push-latest"
 
   # ───────────────────────────────────────────────────────────────────────
   # STEP 3: Deploy to Cloud Run (SECURE - Authentication Required)
   # ───────────────────────────────────────────────────────────────────────
   # SECURITY: --no-allow-unauthenticated = Only authorized users can access
   # Access control via IAM: roles/run.invoker
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
-      - 'run'
-      - 'deploy'
-      - 'vertice-frontend'
-      - '--image=$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA'
-      - '--region=$_REGION'
-      - '--platform=managed'
-      - '--no-allow-unauthenticated'
-      - '--memory=512Mi'
-      - '--cpu=1'
-      - '--min-instances=0'
-      - '--max-instances=10'
-      - '--port=8080'
-      - '--ingress=all'
-      - '--set-env-vars=VITE_ENV=production'
-      - '--set-env-vars=VITE_API_GATEWAY_URL=$_API_GATEWAY_URL'
-      - '--set-env-vars=VITE_MAXIMUS_CORE_URL=$_MAXIMUS_CORE_URL'
-      - '--set-env-vars=VITE_MAXIMUS_ORCHESTRATOR_URL=$_MAXIMUS_ORCHESTRATOR_URL'
-      - '--set-env-vars=VITE_MAXIMUS_EUREKA_URL=$_MAXIMUS_EUREKA_URL'
-      - '--set-env-vars=VITE_MAXIMUS_ORACULO_URL=$_MAXIMUS_ORACULO_URL'
-      - '--set-env-vars=VITE_HITL_API_URL=$_HITL_API_URL'
-      - '--set-env-vars=VITE_IMMUNIS_API_URL=$_IMMUNIS_API_URL'
-      - '--set-env-vars=VITE_DEFENSIVE_CORE_URL=$_DEFENSIVE_CORE_URL'
-      - '--set-env-vars=VITE_CONSCIOUSNESS_API_URL=$_CONSCIOUSNESS_API_URL'
-      - '--set-env-vars=VITE_OSINT_API_URL=$_OSINT_API_URL'
-    id: 'deploy-cloud-run'
-    timeout: '600s'
+      - "run"
+      - "deploy"
+      - "vertice-frontend"
+      - "--image=$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA"
+      - "--region=$_REGION"
+      - "--platform=managed"
+      - "--no-allow-unauthenticated"
+      - "--memory=512Mi"
+      - "--cpu=1"
+      - "--min-instances=0"
+      - "--max-instances=10"
+      - "--port=8080"
+      - "--ingress=all"
+      - "--set-env-vars=VITE_ENV=production"
+      - "--set-env-vars=VITE_API_GATEWAY_URL=$_API_GATEWAY_URL"
+      - "--set-env-vars=VITE_MAXIMUS_CORE_URL=$_MAXIMUS_CORE_URL"
+      - "--set-env-vars=VITE_MAXIMUS_ORCHESTRATOR_URL=$_MAXIMUS_ORCHESTRATOR_URL"
+      - "--set-env-vars=VITE_MAXIMUS_EUREKA_URL=$_MAXIMUS_EUREKA_URL"
+      - "--set-env-vars=VITE_MAXIMUS_ORACULO_URL=$_MAXIMUS_ORACULO_URL"
+      - "--set-env-vars=VITE_HITL_API_URL=$_HITL_API_URL"
+      - "--set-env-vars=VITE_IMMUNIS_API_URL=$_IMMUNIS_API_URL"
+      - "--set-env-vars=VITE_DEFENSIVE_CORE_URL=$_DEFENSIVE_CORE_URL"
+      - "--set-env-vars=VITE_CONSCIOUSNESS_API_URL=$_CONSCIOUSNESS_API_URL"
+      - "--set-env-vars=VITE_OSINT_API_URL=$_OSINT_API_URL"
+    id: "deploy-cloud-run"
+    timeout: "600s"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # SUBSTITUTIONS
@@ -105,7 +105,7 @@ substitutions:
 # OPTIONS
 # ═══════════════════════════════════════════════════════════════════════════
 options:
-  machineType: 'N1_HIGHCPU_8'
+  machineType: "N1_HIGHCPU_8"
   logging: CLOUD_LOGGING_ONLY
   logStreamingOption: STREAM_ON
 
@@ -113,10 +113,10 @@ options:
 # IMAGES
 # ═══════════════════════════════════════════════════════════════════════════
 images:
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest'
+  - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:$COMMIT_SHA"
+  - "$_REGION-docker.pkg.dev/$PROJECT_ID/vertice-images/vertice-frontend:latest"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # TIMEOUT
 # ═══════════════════════════════════════════════════════════════════════════
-timeout: '1800s'
+timeout: "1800s"

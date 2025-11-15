@@ -11,9 +11,9 @@
  * @returns {Object} { health, isLoading, error, isSabbath }
  */
 
-import { useState, useEffect } from 'react';
-import { penelopeService } from '../../services/penelope/penelopeService';
-import logger from '../../utils/logger';
+import { useState, useEffect } from "react";
+import { penelopeService } from "../../services/penelope/penelopeService";
+import logger from "../../utils/logger";
 
 const HEALTH_CHECK_INTERVAL = 30000; // 30s
 
@@ -29,9 +29,9 @@ export const usePenelopeHealth = () => {
         const response = await penelopeService.getHealth();
         setHealth(response);
         setIsLoading(false);
-        logger.debug('[usePenelopeHealth] Health check successful:', response);
+        logger.debug("[usePenelopeHealth] Health check successful:", response);
       } catch (err) {
-        logger.error('[usePenelopeHealth] Health check failed:', err);
+        logger.error("[usePenelopeHealth] Health check failed:", err);
         setError(err.message);
         setHealth(null);
         setIsLoading(false);
@@ -55,7 +55,7 @@ export const usePenelopeHealth = () => {
     isLoading,
     error,
     isSabbath,
-    isHealthy: health?.status === 'healthy',
+    isHealthy: health?.status === "healthy",
     uptime: health?.uptime_seconds || 0,
   };
 };

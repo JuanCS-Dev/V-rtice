@@ -1,30 +1,30 @@
-import React from 'react';
-import styles from './Alert.module.css';
+import React from "react";
+import styles from "./Alert.module.css";
 
 export const Alert = ({
   children,
-  variant = 'info',
+  variant = "info",
   title,
   icon,
   onClose,
-  className = '',
+  className = "",
   ...props
 }) => {
-  const alertClasses = [
-    styles.alert,
-    styles[variant],
-    className
-  ].filter(Boolean).join(' ');
+  const alertClasses = [styles.alert, styles[variant], className]
+    .filter(Boolean)
+    .join(" ");
 
   const getDefaultIcon = () => {
     switch (variant) {
-      case 'success':
+      case "success":
         return <i className="fas fa-check-circle" aria-hidden="true"></i>;
-      case 'warning':
-        return <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>;
-      case 'error':
+      case "warning":
+        return (
+          <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        );
+      case "error":
         return <i className="fas fa-times-circle" aria-hidden="true"></i>;
-      case 'info':
+      case "info":
       default:
         return <i className="fas fa-info-circle" aria-hidden="true"></i>;
     }
@@ -34,13 +34,11 @@ export const Alert = ({
     <div
       className={alertClasses}
       role="alert"
-      aria-live={variant === 'error' ? 'assertive' : 'polite'}
+      aria-live={variant === "error" ? "assertive" : "polite"}
       aria-atomic="true"
       {...props}
     >
-      <div className={styles.icon}>
-        {icon || getDefaultIcon()}
-      </div>
+      <div className={styles.icon}>{icon || getDefaultIcon()}</div>
 
       <div className={styles.content}>
         {title && <div className={styles.title}>{title}</div>}

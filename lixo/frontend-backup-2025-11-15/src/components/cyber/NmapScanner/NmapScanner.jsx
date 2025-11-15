@@ -23,12 +23,12 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
-import AskMaximusButton from '../../shared/AskMaximusButton';
-import { useNmapScanner } from './hooks/useNmapScanner';
-import { ScanForm } from './components/ScanForm';
-import { ScanResults } from './components/ScanResults';
-import styles from './NmapScanner.module.css';
+import React from "react";
+import AskMaximusButton from "../../shared/AskMaximusButton";
+import { useNmapScanner } from "./hooks/useNmapScanner";
+import { ScanForm } from "./components/ScanForm";
+import { ScanResults } from "./components/ScanResults";
+import styles from "./NmapScanner.module.css";
 
 export const NmapScanner = () => {
   const {
@@ -42,7 +42,7 @@ export const NmapScanner = () => {
     scanResult,
     profiles,
     scanHistory,
-    executeScan
+    executeScan,
   } = useNmapScanner();
 
   return (
@@ -52,24 +52,25 @@ export const NmapScanner = () => {
       aria-labelledby="nmap-scanner-title"
       data-maximus-tool="nmap-scanner"
       data-maximus-category="shared"
-      data-maximus-status={loading ? 'scanning' : 'ready'}>
-
+      data-maximus-status={loading ? "scanning" : "ready"}
+    >
       <header className={styles.visuallyHidden}>
         <h2 id="nmap-scanner-title">Nmap Scanner</h2>
       </header>
 
       {scanResult && (
         <section
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: "1rem" }}
           role="region"
           aria-label="AI assistance"
-          data-maximus-section="ai-assistance">
+          data-maximus-section="ai-assistance"
+        >
           <AskMaximusButton
             context={{
-              type: 'nmap_scan',
+              type: "nmap_scan",
               data: scanResult,
               target,
-              profile: selectedProfile
+              profile: selectedProfile,
             }}
             prompt="Analyze these Nmap scan results and identify security vulnerabilities, open ports risks, and recommendations"
             size="medium"
@@ -81,7 +82,8 @@ export const NmapScanner = () => {
       <section
         role="region"
         aria-label="Nmap scan configuration form"
-        data-maximus-section="scan-form">
+        data-maximus-section="scan-form"
+      >
         <ScanForm
           target={target}
           setTarget={setTarget}
@@ -100,7 +102,8 @@ export const NmapScanner = () => {
         <section
           role="region"
           aria-label="Nmap scan results"
-          data-maximus-section="results">
+          data-maximus-section="results"
+        >
           <ScanResults result={scanResult} />
         </section>
       )}

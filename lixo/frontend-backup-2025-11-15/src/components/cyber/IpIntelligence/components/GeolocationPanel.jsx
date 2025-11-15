@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './GeolocationPanel.module.css';
+import React from "react";
+import styles from "./GeolocationPanel.module.css";
 
 export const GeolocationPanel = ({ data }) => {
   return (
@@ -30,7 +30,8 @@ export const GeolocationPanel = ({ data }) => {
         <div className={styles.field}>
           <span className={styles.label}>COORDENADAS</span>
           <span className={styles.valueMono}>
-            {data.location.latitude.toFixed(3)}, {data.location.longitude.toFixed(3)}
+            {data.location.latitude.toFixed(3)},{" "}
+            {data.location.longitude.toFixed(3)}
           </span>
         </div>
       </div>

@@ -17,14 +17,14 @@
  * Created: 2025-10-31
  */
 
-import { BaseService } from '../base/BaseService';
-import { API_ENDPOINTS } from '../../config/api';
-import logger from '../../utils/logger';
+import { BaseService } from "../base/BaseService";
+import { API_ENDPOINTS } from "../../config/api";
+import logger from "../../utils/logger";
 
 export class MABAService extends BaseService {
   constructor() {
     super(API_ENDPOINTS.maba);
-    this.serviceName = 'MABA';
+    this.serviceName = "MABA";
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -37,11 +37,11 @@ export class MABAService extends BaseService {
    */
   async getStats() {
     try {
-      const response = await this.get('/stats');
-      logger.debug('[MABA] Stats:', response);
+      const response = await this.get("/stats");
+      logger.debug("[MABA] Stats:", response);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to get stats:', error);
+      logger.error("[MABA] Failed to get stats:", error);
       throw error;
     }
   }
@@ -57,11 +57,11 @@ export class MABAService extends BaseService {
    */
   async createSession(options = {}) {
     try {
-      const response = await this.post('/sessions', options);
-      logger.info('[MABA] Session created:', response.session_id);
+      const response = await this.post("/sessions", options);
+      logger.info("[MABA] Session created:", response.session_id);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to create session:', error);
+      logger.error("[MABA] Failed to create session:", error);
       throw error;
     }
   }
@@ -74,10 +74,10 @@ export class MABAService extends BaseService {
   async getSession(sessionId) {
     try {
       const response = await this.get(`/sessions/${sessionId}`);
-      logger.debug('[MABA] Session retrieved:', sessionId);
+      logger.debug("[MABA] Session retrieved:", sessionId);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to get session:', error);
+      logger.error("[MABA] Failed to get session:", error);
       throw error;
     }
   }
@@ -88,11 +88,11 @@ export class MABAService extends BaseService {
    */
   async listSessions() {
     try {
-      const response = await this.get('/sessions');
+      const response = await this.get("/sessions");
       logger.debug(`[MABA] Retrieved ${response.length} sessions`);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to list sessions:', error);
+      logger.error("[MABA] Failed to list sessions:", error);
       throw error;
     }
   }
@@ -105,10 +105,10 @@ export class MABAService extends BaseService {
   async closeSession(sessionId) {
     try {
       const response = await this.delete(`/sessions/${sessionId}`);
-      logger.info('[MABA] Session closed:', sessionId);
+      logger.info("[MABA] Session closed:", sessionId);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to close session:', error);
+      logger.error("[MABA] Failed to close session:", error);
       throw error;
     }
   }
@@ -126,7 +126,7 @@ export class MABAService extends BaseService {
    */
   async navigate(sessionId, url, options = {}) {
     try {
-      const response = await this.post('/navigate', {
+      const response = await this.post("/navigate", {
         session_id: sessionId,
         url,
         ...options,
@@ -134,7 +134,7 @@ export class MABAService extends BaseService {
       logger.info(`[MABA] Navigated to ${url}`);
       return response;
     } catch (error) {
-      logger.error('[MABA] Navigation failed:', error);
+      logger.error("[MABA] Navigation failed:", error);
       throw error;
     }
   }
@@ -147,14 +147,14 @@ export class MABAService extends BaseService {
    */
   async clickElement(sessionId, selector) {
     try {
-      const response = await this.post('/click', {
+      const response = await this.post("/click", {
         session_id: sessionId,
         selector,
       });
       logger.debug(`[MABA] Clicked element: ${selector}`);
       return response;
     } catch (error) {
-      logger.error('[MABA] Click failed:', error);
+      logger.error("[MABA] Click failed:", error);
       throw error;
     }
   }
@@ -168,7 +168,7 @@ export class MABAService extends BaseService {
    */
   async typeText(sessionId, selector, text) {
     try {
-      const response = await this.post('/type', {
+      const response = await this.post("/type", {
         session_id: sessionId,
         selector,
         text,
@@ -176,7 +176,7 @@ export class MABAService extends BaseService {
       logger.debug(`[MABA] Typed into ${selector}`);
       return response;
     } catch (error) {
-      logger.error('[MABA] Type failed:', error);
+      logger.error("[MABA] Type failed:", error);
       throw error;
     }
   }
@@ -189,14 +189,14 @@ export class MABAService extends BaseService {
    */
   async takeScreenshot(sessionId, options = {}) {
     try {
-      const response = await this.post('/screenshot', {
+      const response = await this.post("/screenshot", {
         session_id: sessionId,
         ...options,
       });
-      logger.info('[MABA] Screenshot captured');
+      logger.info("[MABA] Screenshot captured");
       return response;
     } catch (error) {
-      logger.error('[MABA] Screenshot failed:', error);
+      logger.error("[MABA] Screenshot failed:", error);
       throw error;
     }
   }
@@ -209,14 +209,14 @@ export class MABAService extends BaseService {
    */
   async extractData(sessionId, extractors) {
     try {
-      const response = await this.post('/extract', {
+      const response = await this.post("/extract", {
         session_id: sessionId,
         extractors,
       });
-      logger.info('[MABA] Data extracted');
+      logger.info("[MABA] Data extracted");
       return response;
     } catch (error) {
-      logger.error('[MABA] Extraction failed:', error);
+      logger.error("[MABA] Extraction failed:", error);
       throw error;
     }
   }
@@ -232,11 +232,11 @@ export class MABAService extends BaseService {
    */
   async queryCognitiveMap(query = {}) {
     try {
-      const response = await this.post('/cognitive-map/query', query);
-      logger.debug('[MABA] Cognitive map query:', response);
+      const response = await this.post("/cognitive-map/query", query);
+      logger.debug("[MABA] Cognitive map query:", response);
       return response;
     } catch (error) {
-      logger.error('[MABA] Cognitive map query failed:', error);
+      logger.error("[MABA] Cognitive map query failed:", error);
       throw error;
     }
   }
@@ -247,11 +247,11 @@ export class MABAService extends BaseService {
    */
   async getCognitiveMapStats() {
     try {
-      const response = await this.get('/cognitive-map/stats');
-      logger.debug('[MABA] Cognitive map stats:', response);
+      const response = await this.get("/cognitive-map/stats");
+      logger.debug("[MABA] Cognitive map stats:", response);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to get cognitive map stats:', error);
+      logger.error("[MABA] Failed to get cognitive map stats:", error);
       throw error;
     }
   }
@@ -264,10 +264,10 @@ export class MABAService extends BaseService {
   async getLearnedPage(pageId) {
     try {
       const response = await this.get(`/cognitive-map/pages/${pageId}`);
-      logger.debug('[MABA] Learned page retrieved:', pageId);
+      logger.debug("[MABA] Learned page retrieved:", pageId);
       return response;
     } catch (error) {
-      logger.error('[MABA] Failed to get learned page:', error);
+      logger.error("[MABA] Failed to get learned page:", error);
       throw error;
     }
   }
@@ -283,13 +283,13 @@ export class MABAService extends BaseService {
    * @protected
    */
   validateRequest(data) {
-    if (!data || typeof data !== 'object') {
-      throw new Error('[MABA] Invalid request data: must be an object');
+    if (!data || typeof data !== "object") {
+      throw new Error("[MABA] Invalid request data: must be an object");
     }
 
     // Validate session_id for browser actions
-    if (data.session_id && typeof data.session_id !== 'string') {
-      throw new Error('[MABA] session_id must be a string');
+    if (data.session_id && typeof data.session_id !== "string") {
+      throw new Error("[MABA] session_id must be a string");
     }
 
     // Validate URL format
@@ -297,7 +297,7 @@ export class MABAService extends BaseService {
       try {
         new URL(data.url);
       } catch (e) {
-        throw new Error('[MABA] Invalid URL format');
+        throw new Error("[MABA] Invalid URL format");
       }
     }
 

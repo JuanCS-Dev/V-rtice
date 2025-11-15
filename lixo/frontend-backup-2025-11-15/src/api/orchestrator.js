@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL } from "@/config/api";
 import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -38,7 +38,7 @@ import logger from "@/utils/logger";
  */
 const ORCHESTRATOR_API_BASE =
   import.meta.env.VITE_ORCHESTRATOR_API ||
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  (typeof window !== "undefined" && window.location.hostname !== "localhost"
     ? `${window.location.protocol}//${window.location.hostname}:8125`
     : API_BASE_URL);
 
@@ -55,7 +55,7 @@ const RETRY_DELAY_BASE = 1000; // 1 second
  * @param {number} ms - Milliseconds to sleep
  * @returns {Promise<void>}
  */
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Exponential backoff delay calculation
@@ -73,7 +73,11 @@ const getRetryDelay = (attempt) => {
  * @param {number} timeout - Timeout in ms
  * @returns {Promise<Response>}
  */
-const fetchWithTimeout = async (url, options = {}, timeout = DEFAULT_TIMEOUT) => {
+const fetchWithTimeout = async (
+  url,
+  options = {},
+  timeout = DEFAULT_TIMEOUT,
+) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -86,7 +90,7 @@ const fetchWithTimeout = async (url, options = {}, timeout = DEFAULT_TIMEOUT) =>
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    if (error.name === "AbortError") {
       throw new Error(`Request timeout after ${timeout}ms`);
     }
     throw error;
@@ -121,7 +125,7 @@ const withRetry = async (fn, maxRetries = MAX_RETRIES) => {
       const delay = getRetryDelay(attempt);
       logger.warn(
         `🔄 Orchestrator API retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`,
-        error.message
+        error.message,
       );
       await sleep(delay);
     }
@@ -158,22 +162,23 @@ export const orchestratorAPI = {
       const response = await fetchWithTimeout(
         `${ORCHESTRATOR_API_BASE}/orchestrate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             workflow_name: workflowName,
             parameters: parameters,
             priority: priority,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error = new Error(
-          errorData.detail || `Failed to start workflow: ${response.statusText}`
+          errorData.detail ||
+            `Failed to start workflow: ${response.statusText}`,
         );
         error.status = response.status;
         throw error;
@@ -181,7 +186,7 @@ export const orchestratorAPI = {
 
       const data = await response.json();
       // Boris Cherny Standard - GAP #83: Replace console.log with logger
-      logger.debug('✅ Workflow started:', data.workflow_id);
+      logger.debug("✅ Workflow started:", data.workflow_id);
       return data;
     });
   },
@@ -211,13 +216,14 @@ export const orchestratorAPI = {
   async getWorkflowStatus(workflowId) {
     return withRetry(async () => {
       const response = await fetchWithTimeout(
-        `${ORCHESTRATOR_API_BASE}/workflows/${workflowId}`
+        `${ORCHESTRATOR_API_BASE}/workflows/${workflowId}`,
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error = new Error(
-          errorData.detail || `Failed to fetch workflow status: ${response.statusText}`
+          errorData.detail ||
+            `Failed to fetch workflow status: ${response.statusText}`,
         );
         error.status = response.status;
         throw error;
@@ -237,13 +243,13 @@ export const orchestratorAPI = {
     try {
       return withRetry(async () => {
         const response = await fetchWithTimeout(
-          `${ORCHESTRATOR_API_BASE}/workflows`
+          `${ORCHESTRATOR_API_BASE}/workflows`,
         );
 
         if (!response.ok) {
           // Endpoint not implemented yet - return empty array
           if (response.status === 404) {
-            logger.warn('⚠️  /workflows endpoint not implemented yet');
+            logger.warn("⚠️  /workflows endpoint not implemented yet");
             return [];
           }
           throw new Error(`Failed to list workflows: ${response.statusText}`);
@@ -252,7 +258,7 @@ export const orchestratorAPI = {
         return await response.json();
       });
     } catch (error) {
-      logger.warn('⚠️  Failed to list workflows:', error.message);
+      logger.warn("⚠️  Failed to list workflows:", error.message);
       return []; // Graceful degradation
     }
   },
@@ -268,7 +274,7 @@ export const orchestratorAPI = {
     const response = await fetchWithTimeout(
       `${ORCHESTRATOR_API_BASE}/health`,
       {},
-      5000 // Short timeout for health check
+      5000, // Short timeout for health check
     );
 
     if (!response.ok) {
@@ -290,13 +296,13 @@ export const orchestratorAPI = {
       return withRetry(async () => {
         const response = await fetchWithTimeout(
           `${ORCHESTRATOR_API_BASE}/workflows/${workflowId}/cancel`,
-          { method: 'POST' }
+          { method: "POST" },
         );
 
         if (!response.ok) {
           if (response.status === 404) {
-            logger.warn('⚠️  /cancel endpoint not implemented yet');
-            return { success: false, message: 'Cancel not supported' };
+            logger.warn("⚠️  /cancel endpoint not implemented yet");
+            return { success: false, message: "Cancel not supported" };
           }
           throw new Error(`Failed to cancel workflow: ${response.statusText}`);
         }
@@ -304,7 +310,7 @@ export const orchestratorAPI = {
         return await response.json();
       });
     } catch (error) {
-      logger.warn('⚠️  Failed to cancel workflow:', error.message);
+      logger.warn("⚠️  Failed to cancel workflow:", error.message);
       return { success: false, message: error.message };
     }
   },
@@ -329,7 +335,7 @@ export const pollWorkflowStatus = async (
   workflowId,
   onUpdate = null,
   pollInterval = 2000,
-  maxDuration = 300000
+  maxDuration = 300000,
 ) => {
   const startTime = Date.now();
 
@@ -337,7 +343,7 @@ export const pollWorkflowStatus = async (
   while (true) {
     // Timeout check
     if (Date.now() - startTime > maxDuration) {
-      throw new Error('Workflow polling timeout');
+      throw new Error("Workflow polling timeout");
     }
 
     // Fetch status
@@ -349,7 +355,7 @@ export const pollWorkflowStatus = async (
     }
 
     // Terminal states
-    if (status.status === 'completed' || status.status === 'failed') {
+    if (status.status === "completed" || status.status === "failed") {
       return status;
     }
 

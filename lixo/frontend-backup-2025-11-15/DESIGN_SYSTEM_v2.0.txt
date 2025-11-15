@@ -91,7 +91,7 @@
 
   npm run build
   ✓ built in 7.21s
-  
+
   Errors:    0
   Warnings:  1 (chunk size - not critical)
 

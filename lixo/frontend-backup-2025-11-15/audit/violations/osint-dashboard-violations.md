@@ -10,6 +10,7 @@
 
 **Total Violations Found:** 12
 **Severity Breakdown:**
+
 - CRITICAL: 2 (Hardcoded colors)
 - HIGH: 3 (Non-standard spacing)
 - MEDIUM: 4 (Missing hover effects)
@@ -22,6 +23,7 @@
 ## Violation Type 1: Hardcoded Colors (CRITICAL)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/osint/DarkWebModule/DarkWebModule.module.css`
 
 ### Violations:
@@ -40,7 +42,7 @@ border: 1px solid var(--color-border-primary);
 
 ```css
 /* DarkWebModule.module.css Lines 50-52 - VIOLATION */
-content: '• ';
+content: "• ";
 color: var(--color-osint-primary);
 
 /* ISSUE */
@@ -56,6 +58,7 @@ color: var(--color-accent-primary);
 ## Violation Type 2: Hardcoded Spacing & Typography (HIGH)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/OSINTDashboard.module.css`
 
 ### Violations:
@@ -83,9 +86,11 @@ width: var(--sidebar-width); /* Or define in design system */
 ## Violation Type 3: Non-Standard Font Usage (CRITICAL)
 
 ### Files Affected:
+
 - All OSINT components correctly use 'Courier New'
 
 ### Violations:
+
 **NONE** - OSINT Dashboard correctly implements font-family standard.
 
 **Total Font Violations:** 0
@@ -95,6 +100,7 @@ width: var(--sidebar-width); /* Or define in design system */
 ## Violation Type 4: Missing/Incorrect Hover Effects (MEDIUM)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/OSINTDashboard.module.css`
 
 ### Violations:
@@ -102,6 +108,7 @@ width: var(--sidebar-width); /* Or define in design system */
 **ISSUE:** The main dashboard container doesn't define hover effects for interactive elements. While components like DarkWebModule have proper styling, the dashboard layout itself lacks standardized hover states.
 
 **Recommendation:**
+
 - Ensure all clickable module cards use standard hover transforms
 - Add glow effects to interactive elements
 - Implement consistent transition timing
@@ -113,6 +120,7 @@ width: var(--sidebar-width); /* Or define in design system */
 ## Violation Type 5: Hardcoded Border Radius (MEDIUM)
 
 ### Files Affected:
+
 - `/home/juan/vertice-dev/frontend/src/components/osint/DarkWebModule/DarkWebModule.module.css`
 
 ### Violations:
@@ -152,20 +160,24 @@ width: var(--sidebar-width); /* Or define in design system */
 ## Recommendations
 
 ### Priority 1 (CRITICAL - Fix Immediately)
+
 1. Replace custom purple `rgba(168, 85, 247, ...)` with design system purple `rgba(139, 92, 246, ...)`
 2. Remove or standardize `var(--color-osint-primary)` references
 
 ### Priority 2 (HIGH - Fix This Sprint)
+
 1. Replace hardcoded spacing values with design tokens
 2. Add sidebar width to design system constants
 3. Standardize all component padding/margins
 
 ### Priority 3 (MEDIUM - Fix Next Sprint)
+
 1. Add missing hover effects to module cards
 2. Implement entrance animations for content areas
 3. Add glow effects to interactive elements
 
 ### Priority 4 (LOW - Optimization)
+
 1. Consider adding backdrop-filter effects
 2. Optimize responsive breakpoints
 3. Add loading state animations
@@ -185,6 +197,7 @@ width: var(--sidebar-width); /* Or define in design system */
 The OSINTDashboard demonstrates **excellent compliance** with the design system at 88%. The violations are minimal and mostly involve custom color values and hardcoded spacing. The component structure is well-organized and follows best practices. This is one of the most compliant dashboards in the system.
 
 **Key Strengths:**
+
 - Clean, semantic CSS structure
 - Proper use of CSS custom properties
 - Good responsive design

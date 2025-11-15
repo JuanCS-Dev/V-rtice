@@ -1,2 +1,2 @@
-export { NetworkMonitor } from './NetworkMonitor';
-export { default } from './NetworkMonitor';
+export { NetworkMonitor } from "./NetworkMonitor";
+export { default } from "./NetworkMonitor";

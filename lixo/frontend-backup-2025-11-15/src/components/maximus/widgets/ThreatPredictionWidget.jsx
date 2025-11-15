@@ -9,10 +9,10 @@
  * - Vulnerability Exploitation Forecasting
  */
 
-import React, { useState } from 'react';
-import { predictThreats } from '../../../api/maximusAI';
-import logger from '@/utils/logger';
-import './ThreatPredictionWidget.css';
+import React, { useState } from "react";
+import { predictThreats } from "../../../api/maximusAI";
+import logger from "@/utils/logger";
+import "./ThreatPredictionWidget.css";
 
 export const ThreatPredictionWidget = () => {
   const [loading, setLoading] = useState(false);
@@ -26,20 +26,20 @@ export const ThreatPredictionWidget = () => {
       const context = {
         recent_alerts: [],
         historical_events: [],
-        current_environment: 'production'
+        current_environment: "production",
       };
 
       const result = await predictThreats(context, {
         timeHorizon,
         minConfidence,
-        includeVulnForecast: true
+        includeVulnForecast: true,
       });
 
       if (result.success !== false) {
         setPredictions(result);
       }
     } catch (error) {
-      logger.error('Prediction failed:', error);
+      logger.error("Prediction failed:", error);
     } finally {
       setLoading(false);
     }
@@ -54,8 +54,14 @@ export const ThreatPredictionWidget = () => {
 
       <div className="widget-controls">
         <div className="control-group">
-          <label htmlFor="select-time-horizon-hours-0p33e">Time Horizon (hours)</label>
-<select id="select-time-horizon-hours-0p33e" value={timeHorizon} onChange={(e) => setTimeHorizon(Number(e.target.value))}>
+          <label htmlFor="select-time-horizon-hours-0p33e">
+            Time Horizon (hours)
+          </label>
+          <select
+            id="select-time-horizon-hours-0p33e"
+            value={timeHorizon}
+            onChange={(e) => setTimeHorizon(Number(e.target.value))}
+          >
             <option value={12}>12h</option>
             <option value={24}>24h</option>
             <option value={48}>48h</option>
@@ -65,7 +71,11 @@ export const ThreatPredictionWidget = () => {
 
         <div className="control-group">
           <label htmlFor="select-min-confidence-bs8yn">Min Confidence</label>
-<select id="select-min-confidence-bs8yn" value={minConfidence} onChange={(e) => setMinConfidence(Number(e.target.value))}>
+          <select
+            id="select-min-confidence-bs8yn"
+            value={minConfidence}
+            onChange={(e) => setMinConfidence(Number(e.target.value))}
+          >
             <option value={0.5}>50%</option>
             <option value={0.6}>60%</option>
             <option value={0.7}>70%</option>
@@ -78,7 +88,7 @@ export const ThreatPredictionWidget = () => {
           onClick={runPrediction}
           disabled={loading}
         >
-          {loading ? '⏳ Predicting...' : '🎯 Run Prediction'}
+          {loading ? "⏳ Predicting..." : "🎯 Run Prediction"}
         </button>
       </div>
 
@@ -90,7 +100,9 @@ export const ThreatPredictionWidget = () => {
               {predictions.predicted_attacks?.length > 0 ? (
                 predictions.predicted_attacks.map((attack, idx) => (
                   <div key={idx} className="threat-item">
-                    <span className="threat-type">{attack.type || 'Unknown'}</span>
+                    <span className="threat-type">
+                      {attack.type || "Unknown"}
+                    </span>
                     <span className="confidence">
                       {Math.round((attack.confidence || 0) * 100)}%
                     </span>
@@ -108,7 +120,7 @@ export const ThreatPredictionWidget = () => {
               {predictions.vuln_forecast?.length > 0 ? (
                 predictions.vuln_forecast.map((vuln, idx) => (
                   <div key={idx} className="vuln-item">
-                    <span className="vuln-id">{vuln.cve || 'N/A'}</span>
+                    <span className="vuln-id">{vuln.cve || "N/A"}</span>
                     <span className="exploit-prob">
                       {Math.round((vuln.exploit_probability || 0) * 100)}%
                     </span>

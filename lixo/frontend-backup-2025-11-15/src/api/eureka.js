@@ -1,4 +1,4 @@
-import { ServiceEndpoints } from '../config/endpoints';
+import { ServiceEndpoints } from "../config/endpoints";
 import logger from "@/utils/logger";
 /**
  * ═══════════════════════════════════════════════════════════════════════════
@@ -43,11 +43,15 @@ const RETRY_DELAY_BASE = 1000;
 // UTILITIES
 // ═══════════════════════════════════════════════════════════════════════════
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getRetryDelay = (attempt) => RETRY_DELAY_BASE * Math.pow(2, attempt);
 
-const fetchWithTimeout = async (url, options = {}, timeout = DEFAULT_TIMEOUT) => {
+const fetchWithTimeout = async (
+  url,
+  options = {},
+  timeout = DEFAULT_TIMEOUT,
+) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -60,7 +64,7 @@ const fetchWithTimeout = async (url, options = {}, timeout = DEFAULT_TIMEOUT) =>
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    if (error.name === "AbortError") {
       throw new Error(`Request timeout after ${timeout}ms`);
     }
     throw error;
@@ -86,7 +90,7 @@ const withRetry = async (fn, maxRetries = MAX_RETRIES) => {
       const delay = getRetryDelay(attempt);
       logger.warn(
         `🔄 Eureka API retry ${attempt + 1}/${maxRetries} after ${delay}ms`,
-        error.message
+        error.message,
       );
       await sleep(delay);
     }
@@ -151,24 +155,25 @@ export const eurekaAPI = {
    * console.log(`ML Usage: ${metrics.usage_breakdown.ml_usage_rate}%`);
    * console.log(`Avg Confidence: ${(metrics.avg_confidence * 100).toFixed(1)}%`);
    */
-  async getMLMetrics(timeframe = '24h') {
+  async getMLMetrics(timeframe = "24h") {
     // Validate timeframe
-    const validTimeframes = ['1h', '24h', '7d', '30d'];
+    const validTimeframes = ["1h", "24h", "7d", "30d"];
     if (!validTimeframes.includes(timeframe)) {
       throw new Error(
-        `Invalid timeframe: ${timeframe}. Must be one of: ${validTimeframes.join(', ')}`
+        `Invalid timeframe: ${timeframe}. Must be one of: ${validTimeframes.join(", ")}`,
       );
     }
 
     return withRetry(async () => {
       const response = await fetchWithTimeout(
-        `${EUREKA_API_BASE}/api/v1/eureka/ml-metrics?timeframe=${timeframe}`
+        `${EUREKA_API_BASE}/api/v1/eureka/ml-metrics?timeframe=${timeframe}`,
       );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error = new Error(
-          errorData.detail || `Failed to fetch ML metrics: ${response.statusText}`
+          errorData.detail ||
+            `Failed to fetch ML metrics: ${response.statusText}`,
         );
         error.status = response.status;
         throw error;
@@ -190,11 +195,13 @@ export const eurekaAPI = {
     const response = await fetchWithTimeout(
       `${EUREKA_API_BASE}/api/v1/eureka/ml-metrics/health`,
       {},
-      5000 // Short timeout
+      5000, // Short timeout
     );
 
     if (!response.ok) {
-      throw new Error(`Eureka ML Metrics API unhealthy: ${response.statusText}`);
+      throw new Error(
+        `Eureka ML Metrics API unhealthy: ${response.statusText}`,
+      );
     }
 
     return await response.json();
@@ -210,16 +217,16 @@ export const eurekaAPI = {
       const response = await fetchWithTimeout(
         `${EUREKA_API_BASE}/health`,
         {},
-        5000
+        5000,
       );
 
       if (!response.ok) {
-        return { status: 'unhealthy', message: response.statusText };
+        return { status: "unhealthy", message: response.statusText };
       }
 
       return await response.json();
     } catch (error) {
-      return { status: 'unreachable', message: error.message };
+      return { status: "unreachable", message: error.message };
     }
   },
 };
@@ -235,7 +242,8 @@ export const eurekaAPI = {
  * @returns {number} Accuracy (0.0 to 1.0)
  */
 export const calculateAccuracy = (confusionMatrix) => {
-  const { true_positive, false_positive, false_negative, true_negative } = confusionMatrix;
+  const { true_positive, false_positive, false_negative, true_negative } =
+    confusionMatrix;
   const total = true_positive + false_positive + false_negative + true_negative;
 
   if (total === 0) return 0;
@@ -319,11 +327,11 @@ export const formatTimeSavings = (minutes) => {
  * @returns {string} Label: 'Very Low', 'Low', 'Medium', 'High', 'Very High'
  */
 export const getConfidenceLabel = (confidence) => {
-  if (confidence >= 0.95) return 'Very High';
-  if (confidence >= 0.85) return 'High';
-  if (confidence >= 0.70) return 'Medium';
-  if (confidence >= 0.50) return 'Low';
-  return 'Very Low';
+  if (confidence >= 0.95) return "Very High";
+  if (confidence >= 0.85) return "High";
+  if (confidence >= 0.7) return "Medium";
+  if (confidence >= 0.5) return "Low";
+  return "Very Low";
 };
 
 /**
@@ -333,11 +341,11 @@ export const getConfidenceLabel = (confidence) => {
  * @returns {string} Color: 'green', 'blue', 'yellow', 'orange', 'red'
  */
 export const getConfidenceColor = (confidence) => {
-  if (confidence >= 0.95) return 'green';
-  if (confidence >= 0.85) return 'blue';
-  if (confidence >= 0.70) return 'yellow';
-  if (confidence >= 0.50) return 'orange';
-  return 'red';
+  if (confidence >= 0.95) return "green";
+  if (confidence >= 0.85) return "blue";
+  if (confidence >= 0.7) return "yellow";
+  if (confidence >= 0.5) return "orange";
+  return "red";
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

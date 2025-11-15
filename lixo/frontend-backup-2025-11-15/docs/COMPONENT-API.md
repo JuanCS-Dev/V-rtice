@@ -29,6 +29,7 @@ import { Button, IconButton } from '@/components/shared/AccessibleButton';
 ```
 
 **Props**:
+
 - `variant`: Button style (default: 'primary')
 - `size`: Button size (default: 'md')
 - `onClick`: Click handler
@@ -93,33 +94,35 @@ import { Input, Textarea, Select, Checkbox } from '@/components/shared/Accessibl
 ## Toast Notifications
 
 ```jsx
-import { useToast } from '@/components/shared/Toast';
+import { useToast } from "@/components/shared/Toast";
 
 const toast = useToast();
 
 // Show toast
-toast.success('Operation successful!');
-toast.error('Something went wrong');
-toast.warning('Please check your input');
-toast.info('New feature available');
+toast.success("Operation successful!");
+toast.error("Something went wrong");
+toast.warning("Please check your input");
+toast.info("New feature available");
 
 // With options
-toast.success('Saved!', {
+toast.success("Saved!", {
   duration: 5000,
   action: {
-    label: 'Undo',
-    onClick: handleUndo
-  }
+    label: "Undo",
+    onClick: handleUndo,
+  },
 });
 ```
 
 **Methods**:
+
 - `success(message, options)`: Success toast
 - `error(message, options)`: Error toast
 - `warning(message, options)`: Warning toast
 - `info(message, options)`: Info toast
 
 **Options**:
+
 - `duration`: Display duration in ms (default: 3000)
 - `action`: Object with `label` and `onClick` for action button
 
@@ -134,8 +137,8 @@ import { Spinner, ProgressBar, SkeletonCard } from '@/components/shared/LoadingS
 <Spinner size="sm|md|lg" />
 
 // Progress Bar
-<ProgressBar 
-  progress={75} 
+<ProgressBar
+  progress={75}
   showLabel={true}
   variant="primary|success|warning"
 />
@@ -150,7 +153,7 @@ import { Spinner, ProgressBar, SkeletonCard } from '@/components/shared/LoadingS
 ## Modal
 
 ```jsx
-import { Modal } from '@/components/shared/Modal';
+import { Modal } from "@/components/shared/Modal";
 
 <Modal
   isOpen={isOpen}
@@ -159,15 +162,20 @@ import { Modal } from '@/components/shared/Modal';
   size="sm|md|lg|xl"
 >
   <p>Modal content</p>
-  
+
   <div className="modal-actions">
-    <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-    <Button variant="primary" onClick={handleSave}>Save</Button>
+    <Button variant="ghost" onClick={handleClose}>
+      Cancel
+    </Button>
+    <Button variant="primary" onClick={handleSave}>
+      Save
+    </Button>
   </div>
-</Modal>
+</Modal>;
 ```
 
 **Features**:
+
 - Auto focus management
 - Keyboard support (Esc to close)
 - Click outside to close
@@ -179,7 +187,7 @@ import { Modal } from '@/components/shared/Modal';
 ## Accessibility Utilities
 
 ```jsx
-import { 
+import {
   handleKeyboardClick,
   makeAccessibleButton,
   announcer
@@ -211,7 +219,7 @@ announcer.announceError('Failed to save');
 ## Theme Hook
 
 ```jsx
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from "@/hooks/useTheme";
 
 const { theme, setTheme, themes } = useTheme();
 
@@ -219,10 +227,10 @@ const { theme, setTheme, themes } = useTheme();
 console.log(theme); // 'matrix-green'
 
 // Change theme
-setTheme('cyber-blue');
+setTheme("cyber-blue");
 
 // Available themes
-themes.forEach(t => {
+themes.forEach((t) => {
   console.log(t.id, t.name);
 });
 ```

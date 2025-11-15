@@ -13,20 +13,29 @@
  * Governed by: Constituição Vértice v2.5 - Phase 3 Optimizations
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './MemoizedMetricCard.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import styles from "./MemoizedMetricCard.module.css";
 
 /**
  * MetricCard - Internal component
  */
-const MetricCardInternal = ({ label, value, icon, trend, loading, className = '' }) => {
+const MetricCardInternal = ({
+  label,
+  value,
+  icon,
+  trend,
+  loading,
+  className = "",
+}) => {
   // Determine trend direction
-  const trendDirection = trend > 0 ? 'up' : trend < 0 ? 'down' : 'neutral';
+  const trendDirection = trend > 0 ? "up" : trend < 0 ? "down" : "neutral";
   const trendClass = styles[`trend-${trendDirection}`];
 
   return (
-    <div className={`${styles.card} ${loading ? styles.loading : ''} ${className}`}>
+    <div
+      className={`${styles.card} ${loading ? styles.loading : ""} ${className}`}
+    >
       {icon && <div className={styles.icon}>{icon}</div>}
 
       <div className={styles.content}>
@@ -40,7 +49,7 @@ const MetricCardInternal = ({ label, value, icon, trend, loading, className = ''
               {value}
               {trend !== undefined && trend !== 0 && (
                 <span className={`${styles.trend} ${trendClass}`}>
-                  {trend > 0 ? '▲' : '▼'} {Math.abs(trend)}%
+                  {trend > 0 ? "▲" : "▼"} {Math.abs(trend)}%
                 </span>
               )}
             </>
@@ -81,6 +90,6 @@ const areEqual = (prevProps, nextProps) => {
  */
 export const MemoizedMetricCard = React.memo(MetricCardInternal, areEqual);
 
-MemoizedMetricCard.displayName = 'MemoizedMetricCard';
+MemoizedMetricCard.displayName = "MemoizedMetricCard";
 
 export default MemoizedMetricCard;

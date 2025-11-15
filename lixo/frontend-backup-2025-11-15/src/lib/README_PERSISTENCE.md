@@ -27,10 +27,10 @@ npm install @tanstack/react-query-persist-client idb-keyval
 ### 2. Wrap App with Persistence Provider
 
 ```tsx
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createQueryClient } from '@/lib/queryClient';
-import { createIDBPersister, persistOptions } from '@/lib/queryPersister';
-import { useAutoRetryOnReconnect } from '@/lib/offlineQueue';
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createQueryClient } from "@/lib/queryClient";
+import { createIDBPersister, persistOptions } from "@/lib/queryPersister";
+import { useAutoRetryOnReconnect } from "@/lib/offlineQueue";
 
 const queryClient = createQueryClient();
 const persister = createIDBPersister();
@@ -128,8 +128,8 @@ YES        NO
 ### Basic Mutation with Persistence
 
 ```tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { mutationKeys, queryKeys } from '@/lib/queryClient';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { mutationKeys, queryKeys } from "@/lib/queryClient";
 
 function StartScanButton() {
   const queryClient = useQueryClient();
@@ -139,8 +139,8 @@ function StartScanButton() {
     mutationKey: mutationKeys.scan.start,
 
     mutationFn: async (data: ScanRequest) => {
-      const response = await fetch('/api/v1/scan/start', {
-        method: 'POST',
+      const response = await fetch("/api/v1/scan/start", {
+        method: "POST",
         body: JSON.stringify(data),
       });
       return response.json();
@@ -174,7 +174,7 @@ function StartScanButton() {
   });
 
   return (
-    <button onClick={() => startScan.mutate({ target: '192.168.1.1' })}>
+    <button onClick={() => startScan.mutate({ target: "192.168.1.1" })}>
       Start Scan
     </button>
   );
@@ -184,7 +184,7 @@ function StartScanButton() {
 ### Network Status Indicator
 
 ```tsx
-import { useOnlineStatus } from '@/lib/offlineQueue';
+import { useOnlineStatus } from "@/lib/offlineQueue";
 
 function NetworkStatus() {
   const isOnline = useOnlineStatus();
@@ -192,9 +192,11 @@ function NetworkStatus() {
   return (
     <div>
       {isOnline ? (
-        <span style={{ color: 'green' }}>✓ Online</span>
+        <span style={{ color: "green" }}>✓ Online</span>
       ) : (
-        <span style={{ color: 'orange' }}>⚠️ Offline - Changes will be queued</span>
+        <span style={{ color: "orange" }}>
+          ⚠️ Offline - Changes will be queued
+        </span>
       )}
     </div>
   );
@@ -204,7 +206,7 @@ function NetworkStatus() {
 ### Offline Queue Display
 
 ```tsx
-import { useMutationQueue } from '@/lib/offlineQueue';
+import { useMutationQueue } from "@/lib/offlineQueue";
 
 function OfflineQueueBadge() {
   const pendingMutations = useMutationQueue();
@@ -212,7 +214,7 @@ function OfflineQueueBadge() {
   if (pendingMutations.length === 0) return null;
 
   return (
-    <div style={{ background: 'blue', color: 'white', padding: '0.5rem' }}>
+    <div style={{ background: "blue", color: "white", padding: "0.5rem" }}>
       📦 {pendingMutations.length} action(s) queued
     </div>
   );
@@ -222,7 +224,7 @@ function OfflineQueueBadge() {
 ### Queue Management
 
 ```tsx
-import { useOfflineQueue } from '@/lib/offlineQueue';
+import { useOfflineQueue } from "@/lib/offlineQueue";
 
 function QueueControls() {
   const { pendingCount, retryAll, clearQueue, isOnline } = useOfflineQueue();
@@ -251,15 +253,15 @@ export function createQueryClient(): QueryClient {
     defaultOptions: {
       mutations: {
         // CRITICAL: Enable offline queue
-        networkMode: 'offlineFirst',
+        networkMode: "offlineFirst",
 
         // Retry failed mutations
         retry: shouldRetry,
         retryDelay: getRetryDelay,
 
         // Callbacks
-        onError: (error) => console.error('Mutation failed:', error),
-        onSuccess: () => console.info('Mutation succeeded'),
+        onError: (error) => console.error("Mutation failed:", error),
+        onSuccess: () => console.info("Mutation succeeded"),
       },
     },
   });
@@ -280,7 +282,7 @@ function shouldRetry(failureCount: number, error: any): boolean {
 
   // Don't retry auth/validation errors
   const errorCode = error?.error_code;
-  if (errorCode?.startsWith('AUTH_') || errorCode?.startsWith('VAL_')) {
+  if (errorCode?.startsWith("AUTH_") || errorCode?.startsWith("VAL_")) {
     return false;
   }
 
@@ -301,7 +303,7 @@ function getRetryDelay(attemptIndex: number): number {
 
 export const persistOptions = {
   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-  buster: '', // Change to invalidate all cached data
+  buster: "", // Change to invalidate all cached data
 };
 ```
 
@@ -325,27 +327,27 @@ export const persistOptions = {
 ### Programmatic Testing
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useMutation } from '@tanstack/react-query';
-import { mutationKeys } from '@/lib/queryClient';
+import { describe, it, expect } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { useMutation } from "@tanstack/react-query";
+import { mutationKeys } from "@/lib/queryClient";
 
-describe('Mutation Persistence', () => {
-  it('should queue mutation when offline', async () => {
+describe("Mutation Persistence", () => {
+  it("should queue mutation when offline", async () => {
     // Simulate offline
-    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
 
     const { result } = renderHook(() =>
       useMutation({
         mutationKey: mutationKeys.scan.start,
         mutationFn: async () => {
-          throw new Error('Network error');
+          throw new Error("Network error");
         },
-        networkMode: 'offlineFirst',
-      })
+        networkMode: "offlineFirst",
+      }),
     );
 
-    result.current.mutate({ target: '192.168.1.1' });
+    result.current.mutate({ target: "192.168.1.1" });
 
     await waitFor(() => {
       expect(result.current.isPending).toBe(true);
@@ -355,7 +357,7 @@ describe('Mutation Persistence', () => {
     expect(result.current.isError).toBe(false);
   });
 
-  it('should retry when connection restored', async () => {
+  it("should retry when connection restored", async () => {
     // Test auto-retry on reconnect
     // (Implementation depends on test setup)
   });
@@ -395,7 +397,10 @@ useMutation({
     const previous = queryClient.getQueryData(queryKeys.scan.lists());
 
     // Update optimistically
-    queryClient.setQueryData(queryKeys.scan.lists(), (old) => [...old, newScan]);
+    queryClient.setQueryData(queryKeys.scan.lists(), (old) => [
+      ...old,
+      newScan,
+    ]);
 
     return { previous };
   },
@@ -433,7 +438,7 @@ useMutation({
 
   onError: (error, variables, context) => {
     // Log for debugging
-    console.error('[Mutation Error]', {
+    console.error("[Mutation Error]", {
       error,
       variables,
       requestId: error.request_id,
@@ -453,7 +458,7 @@ useMutation({
 ### 5. Clear Cache on Logout
 
 ```typescript
-import { clearPersistedQueries } from '@/lib/queryPersister';
+import { clearPersistedQueries } from "@/lib/queryPersister";
 
 async function handleLogout() {
   // Clear persisted state
@@ -463,7 +468,7 @@ async function handleLogout() {
   queryClient.clear();
 
   // Redirect to login
-  window.location.href = '/login';
+  window.location.href = "/login";
 }
 ```
 
@@ -481,26 +486,24 @@ indexedDB.databases().then(console.log);
 ### Check Mutation State
 
 ```tsx
-import { useMutationState } from '@tanstack/react-query';
+import { useMutationState } from "@tanstack/react-query";
 
 function DebugPanel() {
   const mutations = useMutationState();
 
-  return (
-    <pre>{JSON.stringify(mutations, null, 2)}</pre>
-  );
+  return <pre>{JSON.stringify(mutations, null, 2)}</pre>;
 }
 ```
 
 ### Monitor Network Events
 
 ```typescript
-window.addEventListener('online', () => {
-  console.log('🟢 Connection restored');
+window.addEventListener("online", () => {
+  console.log("🟢 Connection restored");
 });
 
-window.addEventListener('offline', () => {
-  console.log('🔴 Connection lost');
+window.addEventListener("offline", () => {
+  console.log("🔴 Connection lost");
 });
 ```
 
@@ -511,13 +514,14 @@ window.addEventListener('offline', () => {
 **Cause**: Missing `mutationKey`
 
 **Fix**:
+
 ```tsx
 // ❌ Won't persist
 useMutation({ mutationFn: doSomething });
 
 // ✅ Will persist
 useMutation({
-  mutationKey: ['myMutation'],
+  mutationKey: ["myMutation"],
   mutationFn: doSomething,
 });
 ```
@@ -527,6 +531,7 @@ useMutation({
 **Cause**: Mutation succeeded but UI didn't update before reload
 
 **Fix**: Use `onSuccess` to invalidate queries
+
 ```tsx
 useMutation({
   mutationKey: mutationKeys.scan.start,

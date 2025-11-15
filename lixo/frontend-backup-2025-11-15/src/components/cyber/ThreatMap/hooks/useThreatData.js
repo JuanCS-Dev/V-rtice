@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import logger from '@/utils/logger';
-import { analyzeIP } from '../../../../api/cyberServices';
+import { useState, useEffect, useCallback } from "react";
+import logger from "@/utils/logger";
+import { analyzeIP } from "../../../../api/cyberServices";
 
 /**
  * Custom hook for managing threat data - INTEGRADO COM SERVIÇOS REAIS
@@ -13,7 +13,7 @@ export const useThreatData = () => {
   const [filters, setFilters] = useState({
     severity: [],
     type: [],
-    timeRange: '24h'
+    timeRange: "24h",
   });
 
   /**
@@ -23,17 +23,19 @@ export const useThreatData = () => {
   const getKnownThreatsIPs = useCallback(() => {
     // Apenas IPs de threat feeds conhecidos (OTIMIZADO)
     return [
-      '185.220.101.23', // Tor exit node
-      '45.142.212.61',  // Known botnet
-      '89.248.165.201', // Malware C2
-      '185.234.218.27', // Phishing
-      '104.244.76.61',  // Twitter phishing
-      '8.8.8.8',        // Google DNS (teste)
-      '1.1.1.1',        // Cloudflare DNS (teste)
+      "185.220.101.23", // Tor exit node
+      "45.142.212.61", // Known botnet
+      "89.248.165.201", // Malware C2
+      "185.234.218.27", // Phishing
+      "104.244.76.61", // Twitter phishing
+      "8.8.8.8", // Google DNS (teste)
+      "1.1.1.1", // Cloudflare DNS (teste)
       // Reduzido de 20 para 5 IPs aleatórios
-      ...Array.from({ length: 5 }, () =>
-        `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
-      )
+      ...Array.from(
+        { length: 5 },
+        () =>
+          `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+      ),
     ];
   }, []);
 
@@ -66,14 +68,17 @@ export const useThreatData = () => {
 
                 // Determina severidade baseada no reputation score
                 const score = ipData.reputation?.score || 50;
-                let severity = 'low';
-                if (score >= 80) severity = 'critical';
-                else if (score >= 60) severity = 'high';
-                else if (score >= 40) severity = 'medium';
+                let severity = "low";
+                if (score >= 80) severity = "critical";
+                else if (score >= 60) severity = "high";
+                else if (score >= 40) severity = "medium";
 
                 // Tipo baseado em heurística simples
-                const type = ipData.ptr_record?.includes('tor') ? 'tor' :
-                             score < 40 ? 'malicious' : 'unknown';
+                const type = ipData.ptr_record?.includes("tor")
+                  ? "tor"
+                  : score < 40
+                    ? "malicious"
+                    : "unknown";
 
                 return {
                   id: `threat_${ip}`,
@@ -83,32 +88,34 @@ export const useThreatData = () => {
                   type,
                   timestamp: new Date().toISOString(),
                   source: ip,
-                  description: ipData.reputation?.threat_level || 'Unknown threat',
+                  description:
+                    ipData.reputation?.threat_level || "Unknown threat",
                   country: ipData.geolocation.country,
                   city: ipData.geolocation.city,
                   isp: ipData.geolocation.isp,
                   asn: ipData.geolocation.asn,
                   threatScore: score,
                   isMalicious: score < 50,
-                  confidence: score > 70 ? 'high' : score > 40 ? 'medium' : 'low'
+                  confidence:
+                    score > 70 ? "high" : score > 40 ? "medium" : "low",
                 };
               } catch (error) {
                 logger.error(`Failed to analyze ${ip}:`, error);
                 return null;
               }
-            })
+            }),
           ),
           // Timeout protection
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Batch timeout')), timeout)
-          )
-        ]).catch(err => {
-          logger.warn('Batch failed:', err.message);
+            setTimeout(() => reject(new Error("Batch timeout")), timeout),
+          ),
+        ]).catch((err) => {
+          logger.warn("Batch failed:", err.message);
           return [];
         });
 
         // Filtra nulls e adiciona à lista
-        const validThreats = (batchResults || []).filter(t => t !== null);
+        const validThreats = (batchResults || []).filter((t) => t !== null);
         threats.push(...validThreats);
 
         // Atualiza progressivamente para feedback visual
@@ -118,10 +125,12 @@ export const useThreatData = () => {
       }
 
       logger.debug(`Loaded ${threats.length} threats from real services`);
-
     } catch (err) {
-      logger.error('Error fetching threats:', err);
-      setError(err.message || 'Erro ao carregar ameaças. Serviços de threat intelligence podem estar offline.');
+      logger.error("Error fetching threats:", err);
+      setError(
+        err.message ||
+          "Erro ao carregar ameaças. Serviços de threat intelligence podem estar offline.",
+      );
 
       // Graceful degradation: retorna lista vazia em vez de mocks
       // UI deve mostrar empty state apropriado baseado em error !== null
@@ -135,8 +144,11 @@ export const useThreatData = () => {
     fetchThreats();
   }, [fetchThreats]);
 
-  const filteredThreats = threats.filter(threat => {
-    if (filters.severity.length > 0 && !filters.severity.includes(threat.severity)) {
+  const filteredThreats = threats.filter((threat) => {
+    if (
+      filters.severity.length > 0 &&
+      !filters.severity.includes(threat.severity)
+    ) {
       return false;
     }
     if (filters.type.length > 0 && !filters.type.includes(threat.type)) {
@@ -151,7 +163,7 @@ export const useThreatData = () => {
     error,
     filters,
     setFilters,
-    refresh: fetchThreats
+    refresh: fetchThreats,
   };
 };
 

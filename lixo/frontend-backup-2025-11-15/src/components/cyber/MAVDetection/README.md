@@ -42,10 +42,10 @@ Widget essencial para defesa democrática brasileira contra fake news e ataques 
 ### Importação
 
 ```javascript
-import { MAVDetection } from '@/components/cyber/MAVDetection';
+import { MAVDetection } from "@/components/cyber/MAVDetection";
 
 // Em seu componente
-<MAVDetection />
+<MAVDetection />;
 ```
 
 ### Formato dos Dados
@@ -68,6 +68,7 @@ import { MAVDetection } from '@/components/cyber/MAVDetection';
 ```
 
 **Campos obrigatórios:**
+
 - `id`: Identificador único do post
 - `text`: Conteúdo textual
 - `author`: ID do autor
@@ -89,6 +90,7 @@ import { MAVDetection } from '@/components/cyber/MAVDetection';
 ```
 
 **Campos obrigatórios:**
+
 - `id`: Identificador único da conta
 - `created_at`: Data de criação no formato ISO 8601
 - `followers_count`: Número de seguidores
@@ -182,8 +184,8 @@ import { MAVDetection } from '@/components/cyber/MAVDetection';
 ### Chaves de Tradução
 
 ```javascript
-t('defensive.mav.title', 'MAV Detection')
-t('defensive.mav.subtitle', 'Detecção de Manipulação...')
+t("defensive.mav.title", "MAV Detection");
+t("defensive.mav.subtitle", "Detecção de Manipulação...");
 ```
 
 ## Estilos
@@ -258,18 +260,21 @@ LOW:      #10b981
 ## Roadmap
 
 ### Fase 1 - ✅ Completo
+
 - [x] Componente base
 - [x] Formulário de análise
 - [x] Display de resultados
 - [x] Métricas em tempo real
 
 ### Fase 2 - Planejado
+
 - [ ] Visualização de grafos de rede
 - [ ] Timeline de propagação
 - [ ] Exportação de relatórios (PDF)
 - [ ] Integração com TSE/PF
 
 ### Fase 3 - Futuro
+
 - [ ] Real-time monitoring
 - [ ] Alertas automáticos
 - [ ] Dashboard executivo

@@ -3,8 +3,8 @@
  * Identifies attacks that were NOT detected, showing blind spots in defenses
  */
 
-import React from 'react';
-import styles from './GapAnalysis.module.css';
+import React from "react";
+import styles from "./GapAnalysis.module.css";
 
 export const GapAnalysis = ({ gaps, attackData, loading }) => {
   return (
@@ -15,7 +15,9 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
           DETECTION GAP ANALYSIS
         </h2>
         <div className={styles.coverageBadge}>
-          <span className={styles.coverageValue}>{gaps.coveragePercentage || 0}%</span>
+          <span className={styles.coverageValue}>
+            {gaps.coveragePercentage || 0}%
+          </span>
           <span className={styles.coverageLabel}>COVERAGE</span>
         </div>
       </div>
@@ -32,7 +34,9 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
             <div className={styles.summaryGrid}>
               <div className={`${styles.summaryCard} ${styles.totalAttacks}`}>
                 <div className={styles.summaryIcon}>⚔️</div>
-                <div className={styles.summaryValue}>{attackData.total || 0}</div>
+                <div className={styles.summaryValue}>
+                  {attackData.total || 0}
+                </div>
                 <div className={styles.summaryLabel}>TOTAL ATTACKS</div>
               </div>
 
@@ -44,13 +48,17 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
 
               <div className={`${styles.summaryCard} ${styles.undetected}`}>
                 <div className={styles.summaryIcon}>⚠️</div>
-                <div className={styles.summaryValue}>{gaps.undetected || 0}</div>
+                <div className={styles.summaryValue}>
+                  {gaps.undetected || 0}
+                </div>
                 <div className={styles.summaryLabel}>MISSED</div>
               </div>
 
               <div className={`${styles.summaryCard} ${styles.falsePositives}`}>
                 <div className={styles.summaryIcon}>⚡</div>
-                <div className={styles.summaryValue}>{gaps.falsePositives || 0}</div>
+                <div className={styles.summaryValue}>
+                  {gaps.falsePositives || 0}
+                </div>
                 <div className={styles.summaryLabel}>FALSE POSITIVES</div>
               </div>
             </div>
@@ -74,15 +82,21 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
                       <div className={styles.gapBody}>
                         <div className={styles.gapField}>
                           <span className={styles.gapLabel}>Target:</span>
-                          <span className={styles.gapValue}>{attack.target}</span>
+                          <span className={styles.gapValue}>
+                            {attack.target}
+                          </span>
                         </div>
                         <div className={styles.gapField}>
                           <span className={styles.gapLabel}>Technique:</span>
-                          <span className={styles.gapValue}>{attack.technique}</span>
+                          <span className={styles.gapValue}>
+                            {attack.technique}
+                          </span>
                         </div>
                         <div className={styles.gapField}>
                           <span className={styles.gapLabel}>MITRE ATT&CK:</span>
-                          <span className={styles.gapValue}>{attack.mitreId || 'N/A'}</span>
+                          <span className={styles.gapValue}>
+                            {attack.mitreId || "N/A"}
+                          </span>
                         </div>
                       </div>
 
@@ -90,7 +104,7 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
                         <div className={styles.recommendationIcon}>💡</div>
                         <div className={styles.recommendationText}>
                           {attack.recommendation ||
-                            'Review detection rules for this attack technique'}
+                            "Review detection rules for this attack technique"}
                         </div>
                       </div>
                     </div>
@@ -124,15 +138,17 @@ export const GapAnalysis = ({ gaps, attackData, loading }) => {
                               coverage >= 80
                                 ? styles.good
                                 : coverage >= 50
-                                ? styles.medium
-                                : styles.poor
+                                  ? styles.medium
+                                  : styles.poor
                             }`}
                             style={{ width: `${coverage}%` }}
                           />
-                          <span className={styles.coverageText}>{coverage}%</span>
+                          <span className={styles.coverageText}>
+                            {coverage}%
+                          </span>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>

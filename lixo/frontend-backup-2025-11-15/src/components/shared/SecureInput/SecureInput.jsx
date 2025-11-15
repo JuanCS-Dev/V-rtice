@@ -5,9 +5,9 @@
  * Addresses ALL input security gaps: #9-16
  */
 
-import React, { useState, useCallback } from 'react';
-import { Input } from '../Input';
-import styles from './SecureInput.module.css';
+import React, { useState, useCallback } from "react";
+import { Input } from "../Input";
+import styles from "./SecureInput.module.css";
 
 /**
  * Secure input component with automatic sanitization and validation
@@ -49,31 +49,35 @@ export const SecureInput = ({
   required = false,
   validateOnBlur = true,
   showError = true,
-  errorPrefix = '⚠️',
+  errorPrefix = "⚠️",
   id,
   ...rest
 }) => {
   const [error, setError] = useState(null);
 
   // Generate unique ID if not provided
-  const inputId = id || `secure-input-${label?.replace(/\s/g, '-').toLowerCase()}`;
+  const inputId =
+    id || `secure-input-${label?.replace(/\s/g, "-").toLowerCase()}`;
   const errorId = `${inputId}-error`;
 
   // Handle change with sanitization
-  const handleChange = useCallback((e) => {
-    const rawValue = e.target?.value ?? e;
+  const handleChange = useCallback(
+    (e) => {
+      const rawValue = e.target?.value ?? e;
 
-    // Sanitize if sanitizer provided
-    const sanitized = sanitizer ? sanitizer(rawValue) : rawValue;
+      // Sanitize if sanitizer provided
+      const sanitized = sanitizer ? sanitizer(rawValue) : rawValue;
 
-    // Update parent state
-    onChange(sanitized);
+      // Update parent state
+      onChange(sanitized);
 
-    // Clear error on change (will re-validate on blur)
-    if (error) {
-      setError(null);
-    }
-  }, [onChange, sanitizer, error]);
+      // Clear error on change (will re-validate on blur)
+      if (error) {
+        setError(null);
+      }
+    },
+    [onChange, sanitizer, error],
+  );
 
   // Handle blur with validation
   const handleBlur = useCallback(() => {
@@ -89,7 +93,7 @@ export const SecureInput = ({
 
     // Validate required empty fields
     if (required && !value?.trim()) {
-      setError(`${label || 'This field'} is required`);
+      setError(`${label || "This field"} is required`);
       return;
     }
 

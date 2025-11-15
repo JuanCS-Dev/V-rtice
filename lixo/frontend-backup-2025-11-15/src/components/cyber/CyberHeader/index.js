@@ -1,2 +1,2 @@
-export { CyberHeader } from './CyberHeader';
-export { default } from './CyberHeader';
+export { CyberHeader } from "./CyberHeader";
+export { default } from "./CyberHeader";

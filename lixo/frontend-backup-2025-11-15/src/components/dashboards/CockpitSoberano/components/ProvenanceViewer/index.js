@@ -1,1 +1,1 @@
-export { ProvenanceModal } from './ProvenanceModal';
+export { ProvenanceModal } from "./ProvenanceModal";

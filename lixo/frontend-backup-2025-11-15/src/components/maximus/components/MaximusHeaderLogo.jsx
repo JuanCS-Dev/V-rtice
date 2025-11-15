@@ -4,8 +4,8 @@
  * Displays animated brain logo with pulsing effect and title.
  */
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 export const MaximusHeaderLogo = () => {
   const { t } = useTranslation();
@@ -20,10 +20,10 @@ export const MaximusHeaderLogo = () => {
       </div>
       <div className="header-title-section">
         <h1 className="maximus-title">
-          {t('dashboard.maximus.title')}
+          {t("dashboard.maximus.title")}
           <span className="title-version">v1.0.0</span>
         </h1>
-        <p className="maximus-subtitle">{t('dashboard.maximus.subtitle')}</p>
+        <p className="maximus-subtitle">{t("dashboard.maximus.subtitle")}</p>
       </div>
     </div>
   );

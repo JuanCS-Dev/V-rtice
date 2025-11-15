@@ -22,13 +22,13 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React from 'react';
-import { Alert } from '../../shared';
-import { useSocialEngineering } from './hooks/useSocialEngineering';
-import { AccessDenied } from './components/AccessDenied';
-import { CampaignForm } from './components/CampaignForm';
-import { AwarenessForm } from './components/AwarenessForm';
-import styles from './SocialEngineering.module.css';
+import React from "react";
+import { Alert } from "../../shared";
+import { useSocialEngineering } from "./hooks/useSocialEngineering";
+import { AccessDenied } from "./components/AccessDenied";
+import { CampaignForm } from "./components/CampaignForm";
+import { AwarenessForm } from "./components/AwarenessForm";
+import styles from "./SocialEngineering.module.css";
 
 export const SocialEngineering = () => {
   const {
@@ -36,7 +36,7 @@ export const SocialEngineering = () => {
     loading,
     hasOffensivePermission,
     createCampaign,
-    createAwarenessCampaign
+    createAwarenessCampaign,
   } = useSocialEngineering();
 
   if (!hasOffensivePermission) {
@@ -50,14 +50,16 @@ export const SocialEngineering = () => {
       aria-labelledby="social-engineering-title"
       data-maximus-tool="social-engineering"
       data-maximus-category="offensive"
-      data-maximus-status={loading.campaign || loading.awareness ? 'creating' : 'ready'}>
-
+      data-maximus-status={
+        loading.campaign || loading.awareness ? "creating" : "ready"
+      }
+    >
       {/* Header */}
-      <header
-        className={styles.header}
-        data-maximus-section="tool-header">
+      <header className={styles.header} data-maximus-section="tool-header">
         <div>
-          <h2 id="social-engineering-title" className={styles.title}><span aria-hidden="true">🎭</span> Social Engineering</h2>
+          <h2 id="social-engineering-title" className={styles.title}>
+            <span aria-hidden="true">🎭</span> Social Engineering
+          </h2>
           <p className={styles.description}>
             Ferramentas para testes de engenharia social e awareness training
           </p>
@@ -72,7 +74,8 @@ export const SocialEngineering = () => {
         className={styles.forms}
         role="region"
         aria-label="Campaign and awareness forms"
-        data-maximus-section="forms">
+        data-maximus-section="forms"
+      >
         <CampaignForm
           templates={socialEngData.templates}
           onSubmit={createCampaign}

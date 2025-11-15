@@ -5,6 +5,7 @@
 Migrate from direct `new WebSocket()` usage to centralized `WebSocketManager`.
 
 **Benefits:**
+
 - ✅ Connection pooling (no duplicate connections)
 - ✅ Automatic reconnection with exponential backoff
 - ✅ Heartbeat/ping-pong (keeps connections alive)
@@ -18,7 +19,7 @@ Migrate from direct `new WebSocket()` usage to centralized `WebSocketManager`.
 ### Before (Direct WebSocket - 330 lines of duplicated logic)
 
 ```javascript
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 const MyComponent = () => {
   const [data, setData] = useState(null);
@@ -26,7 +27,7 @@ const MyComponent = () => {
   const wsRef = useRef(null);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://api:8000/api/stream');
+    const ws = new WebSocket("ws://api:8000/api/stream");
 
     ws.onopen = () => {
       setIsConnected(true);
@@ -70,16 +71,17 @@ const MyComponent = () => {
 ### After (useWebSocketManager - 10 lines, zero duplication)
 
 ```javascript
-import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+import { useWebSocketManager } from "@/hooks/useWebSocketManager";
 
 const MyComponent = () => {
-  const { data, isConnected, send } = useWebSocketManager('/api/stream');
+  const { data, isConnected, send } = useWebSocketManager("/api/stream");
 
   return <div>{data?.message}</div>;
 };
 ```
 
-**Result:** 
+**Result:**
+
 - 97% less code (330 lines → 10 lines)
 - All features included (reconnection, heartbeat, queuing, fallback)
 - Production-ready out of the box
@@ -95,6 +97,7 @@ grep -r "new WebSocket(" frontend/src/
 ```
 
 **Found 11 files:**
+
 1. `frontend/src/hooks/useHITLWebSocket.js`
 2. `frontend/src/hooks/useWebSocket.js`
 3. `frontend/src/hooks/useAPVStream.js`
@@ -115,7 +118,7 @@ For each file, follow this pattern:
 
 ```javascript
 // BEFORE
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 export const useMyWebSocket = (url) => {
   const [data, setData] = useState(null);
@@ -131,7 +134,7 @@ export const useMyWebSocket = (url) => {
 };
 
 // AFTER
-import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+import { useWebSocketManager } from "@/hooks/useWebSocketManager";
 
 export const useMyWebSocket = (endpointPath) => {
   // WebSocketManager handles all the complexity
@@ -145,17 +148,17 @@ export const useMyWebSocket = (endpointPath) => {
 // BEFORE
 const MyComponent = () => {
   useEffect(() => {
-    const ws = new WebSocket('ws://api:8000/api/stream');
+    const ws = new WebSocket("ws://api:8000/api/stream");
     ws.onmessage = (e) => setData(JSON.parse(e.data));
     return () => ws.close();
   }, []);
 };
 
 // AFTER
-import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+import { useWebSocketManager } from "@/hooks/useWebSocketManager";
 
 const MyComponent = () => {
-  const { data } = useWebSocketManager('/api/stream');
+  const { data } = useWebSocketManager("/api/stream");
   // Data is automatically parsed and managed
 };
 ```
@@ -165,16 +168,16 @@ const MyComponent = () => {
 ```javascript
 // BEFORE (in api/something.js)
 export const streamData = (callback) => {
-  const ws = new WebSocket('ws://api:8000/api/stream');
+  const ws = new WebSocket("ws://api:8000/api/stream");
   ws.onmessage = (e) => callback(JSON.parse(e.data));
   return ws;
 };
 
 // AFTER
-import WebSocketManager from '@/services/websocket/WebSocketManager';
+import WebSocketManager from "@/services/websocket/WebSocketManager";
 
 export const streamData = (callback) => {
-  const unsubscribe = WebSocketManager.subscribe('/api/stream', callback);
+  const unsubscribe = WebSocketManager.subscribe("/api/stream", callback);
   return unsubscribe; // Call this to cleanup
 };
 ```
@@ -196,7 +199,7 @@ ws.onclose = handleClose;
 // Manual queuing logic (40+ lines)
 
 // AFTER
-const { data } = useWebSocketManager('/api/stream', {
+const { data } = useWebSocketManager("/api/stream", {
   onOpen: handleOpen,
   onMessage: handleMessage,
   onError: handleError,
@@ -235,7 +238,7 @@ const useHITLWebSocket = (url) => {
 };
 
 // AFTER (5 lines)
-import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+import { useWebSocketManager } from "@/hooks/useWebSocketManager";
 
 const useHITLWebSocket = (endpointPath) => {
   return useWebSocketManager(endpointPath, {
@@ -249,16 +252,16 @@ const useHITLWebSocket = (endpointPath) => {
 ```javascript
 // BEFORE
 const streamVerdicts = (onVerdict) => {
-  const ws = new WebSocket('ws://api:8000/api/verdicts');
+  const ws = new WebSocket("ws://api:8000/api/verdicts");
   ws.onmessage = (e) => onVerdict(JSON.parse(e.data));
   return () => ws.close();
 };
 
 // AFTER
-import WebSocketManager from '@/services/websocket/WebSocketManager';
+import WebSocketManager from "@/services/websocket/WebSocketManager";
 
 const streamVerdicts = (onVerdict) => {
-  return WebSocketManager.subscribe('/api/verdicts', onVerdict);
+  return WebSocketManager.subscribe("/api/verdicts", onVerdict);
   // Returns unsubscribe function automatically
 };
 ```
@@ -269,25 +272,25 @@ const streamVerdicts = (onVerdict) => {
 // BEFORE - Each component creates its own WebSocket (BAD!)
 const Component1 = () => {
   useEffect(() => {
-    const ws1 = new WebSocket('ws://api:8000/api/stream'); // Connection 1
+    const ws1 = new WebSocket("ws://api:8000/api/stream"); // Connection 1
     // ...
   }, []);
 };
 
 const Component2 = () => {
   useEffect(() => {
-    const ws2 = new WebSocket('ws://api:8000/api/stream'); // Connection 2 (duplicate!)
+    const ws2 = new WebSocket("ws://api:8000/api/stream"); // Connection 2 (duplicate!)
     // ...
   }, []);
 };
 
 // AFTER - Single connection, multiple subscribers (GOOD!)
 const Component1 = () => {
-  const { data } = useWebSocketManager('/api/stream'); // Shares connection
+  const { data } = useWebSocketManager("/api/stream"); // Shares connection
 };
 
 const Component2 = () => {
-  const { data } = useWebSocketManager('/api/stream'); // Same connection!
+  const { data } = useWebSocketManager("/api/stream"); // Same connection!
 };
 
 // WebSocketManager automatically pools connections
@@ -316,10 +319,10 @@ For each file:
 
 ```javascript
 // Correct
-import WebSocketManager from '@/services/websocket/WebSocketManager';
+import WebSocketManager from "@/services/websocket/WebSocketManager";
 
 // Or use the hook
-import { useWebSocketManager } from '@/hooks/useWebSocketManager';
+import { useWebSocketManager } from "@/hooks/useWebSocketManager";
 ```
 
 ### Issue: "Connection not establishing"
@@ -328,10 +331,10 @@ import { useWebSocketManager } from '@/hooks/useWebSocketManager';
 
 ```javascript
 // WRONG (full URL)
-useWebSocketManager('ws://api:8000/api/stream');
+useWebSocketManager("ws://api:8000/api/stream");
 
 // CORRECT (path only, WebSocketManager handles base URL)
-useWebSocketManager('/api/stream');
+useWebSocketManager("/api/stream");
 ```
 
 ### Issue: "Messages not received"
@@ -340,9 +343,9 @@ useWebSocketManager('/api/stream');
 
 ```javascript
 // Correct usage
-const { data } = useWebSocketManager('/api/stream', {
+const { data } = useWebSocketManager("/api/stream", {
   onMessage: (message) => {
-    console.log('Received:', message);
+    console.log("Received:", message);
     // message is already parsed JSON
   },
 });
@@ -352,18 +355,18 @@ const { data } = useWebSocketManager('/api/stream', {
 
 ## Benefits Summary
 
-| Feature | Direct WebSocket | WebSocketManager |
-|---------|------------------|------------------|
-| Lines of code | 200-330 per hook | 5-10 per hook |
-| Reconnection | Manual (50+ lines) | ✅ Automatic |
-| Heartbeat | Manual (30+ lines) | ✅ Automatic |
-| Message queue | Manual (40+ lines) | ✅ Automatic |
-| SSE fallback | Not implemented | ✅ Automatic |
-| Polling fallback | Manual | ✅ Automatic |
-| Connection pooling | No (duplicates) | ✅ Yes |
-| Pub/sub | No | ✅ Yes |
-| Error handling | Manual | ✅ Robust |
-| **Total complexity** | **High** | **Low** |
+| Feature              | Direct WebSocket   | WebSocketManager |
+| -------------------- | ------------------ | ---------------- |
+| Lines of code        | 200-330 per hook   | 5-10 per hook    |
+| Reconnection         | Manual (50+ lines) | ✅ Automatic     |
+| Heartbeat            | Manual (30+ lines) | ✅ Automatic     |
+| Message queue        | Manual (40+ lines) | ✅ Automatic     |
+| SSE fallback         | Not implemented    | ✅ Automatic     |
+| Polling fallback     | Manual             | ✅ Automatic     |
+| Connection pooling   | No (duplicates)    | ✅ Yes           |
+| Pub/sub              | No                 | ✅ Yes           |
+| Error handling       | Manual             | ✅ Robust        |
+| **Total complexity** | **High**           | **Low**          |
 
 ## Next Steps
 
@@ -376,6 +379,7 @@ const { data } = useWebSocketManager('/api/stream', {
 **Estimated effort:** 2-4 hours total (15-20 minutes per file)
 
 **Priority order:**
+
 1. High-traffic hooks (`useWebSocket.js`, `useHITLWebSocket.js`)
 2. Critical components (HITL Console, dashboards)
 3. Example/demo components

@@ -16,11 +16,11 @@
  * - Responsivo mobile-first
  */
 
-import React from 'react';
-import { ThreatGlobe } from '../ThreatGlobe';
-import { AuthBadge } from '../components/AuthBadge';
-import { ThemeToggle } from '../components/ThemeToggle';
-import styles from './HeroSection.module.css';
+import React from "react";
+import { ThreatGlobe } from "../ThreatGlobe";
+import { AuthBadge } from "../components/AuthBadge";
+import { ThemeToggle } from "../components/ThemeToggle";
+import styles from "./HeroSection.module.css";
 
 export const HeroSection = ({
   isAuthenticated,
@@ -29,7 +29,7 @@ export const HeroSection = ({
   onLogout,
   realThreats,
   servicesStatus,
-  stats
+  stats,
 }) => {
   return (
     <section className={styles.hero} role="banner">
@@ -76,7 +76,8 @@ export const HeroSection = ({
 
           {/* Subtitle */}
           <p className={styles.subtitle}>
-            Guerra Total Contra Criminosos e Terroristas Digitais<br />
+            Guerra Total Contra Criminosos e Terroristas Digitais
+            <br />
             Plataforma de Combate Cibernético
           </p>
 
@@ -121,10 +122,7 @@ export const HeroSection = ({
                 name="Malware"
                 online={servicesStatus.malwareAnalysis}
               />
-              <ServiceIndicator
-                name="SSL"
-                online={servicesStatus.sslMonitor}
-              />
+              <ServiceIndicator name="SSL" online={servicesStatus.sslMonitor} />
             </div>
           </div>
         </div>
@@ -142,7 +140,9 @@ export const HeroSection = ({
 
 // Sub-component: Service Indicator
 const ServiceIndicator = ({ name, online }) => (
-  <div className={`${styles.serviceItem} ${online ? styles.online : styles.offline}`}>
+  <div
+    className={`${styles.serviceItem} ${online ? styles.online : styles.offline}`}
+  >
     <span className={styles.serviceDot}></span>
     <span className={styles.serviceName}>{name}</span>
   </div>

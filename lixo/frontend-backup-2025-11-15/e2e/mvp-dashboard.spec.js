@@ -17,34 +17,40 @@
  * @license Proprietary
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('MVP Dashboard', () => {
+test.describe("MVP Dashboard", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto("/");
     await expect(page).toHaveTitle(/Vértice/);
   });
 
-  test('deve navegar da Landing Page para MVP Dashboard', async ({ page }) => {
-    const mvpCard = page.locator('text=MVP').first();
+  test("deve navegar da Landing Page para MVP Dashboard", async ({ page }) => {
+    const mvpCard = page.locator("text=MVP").first();
     await expect(mvpCard).toBeVisible();
     await mvpCard.click();
 
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
-    await expect(page.locator('text=Vision Protocol, text=Narrativas')).toBeVisible();
+    await expect(
+      page.locator("text=Vision Protocol, text=Narrativas"),
+    ).toBeVisible();
   });
 
-  test('deve exibir Narrative Feed com story cards', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir Narrative Feed com story cards", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // Verificar que há narrativas na feed
-    const narrativeFeed = page.locator('text=Narrativas, text=Narrative Feed').first();
+    const narrativeFeed = page
+      .locator("text=Narrativas, text=Narrative Feed")
+      .first();
     await expect(narrativeFeed).toBeVisible();
   });
 
-  test('deve alternar entre as 3 tabs (Narrativas, Anomalias, Pulse)', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve alternar entre as 3 tabs (Narrativas, Anomalias, Pulse)", async ({
+    page,
+  }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // Tab 1: Narrativas (padrão)
@@ -66,15 +72,17 @@ test.describe('MVP Dashboard', () => {
     await expect(narrativasTab).toHaveClass(/active/);
   });
 
-  test('deve exibir Anomaly Heatmap estilo GitHub', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir Anomaly Heatmap estilo GitHub", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     const anomaliasTab = page.locator('button:has-text("🔥 Anomalias")');
     await anomaliasTab.click();
 
     // Heatmap renderiza grid de células (12 semanas x 7 dias)
-    await expect(page.locator('text=Anomaly Heatmap, text=Anomalias')).toBeVisible();
+    await expect(
+      page.locator("text=Anomaly Heatmap, text=Anomalias"),
+    ).toBeVisible();
 
     // Verificar que há células no heatmap
     const heatmapCells = page.locator('[class*="heatmapCell"], [class*="day"]');
@@ -84,36 +92,42 @@ test.describe('MVP Dashboard', () => {
     expect(cellCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('deve exibir System Pulse com métricas vitais', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir System Pulse com métricas vitais", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     const pulseTab = page.locator('button:has-text("💓 System Pulse")');
     await pulseTab.click();
 
     // System Pulse tem círculo pulsante + vital signs
-    await expect(page.locator('text=System Pulse, text=Health')).toBeVisible();
+    await expect(page.locator("text=System Pulse, text=Health")).toBeVisible();
 
     // Verificar vital signs
-    const vitalSigns = page.locator('text=CPU, text=Memory, text=Latency, text=Error Rate').first();
+    const vitalSigns = page
+      .locator("text=CPU, text=Memory, text=Latency, text=Error Rate")
+      .first();
     await expect(vitalSigns).toBeVisible();
   });
 
-  test('deve exibir Stats Overview por tone', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir Stats Overview por tone", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // Stats Overview mostra métricas por tone (analytical, poetic, technical)
-    const statsOverview = page.locator('text=Total Narratives, text=NQS Score').first();
+    const statsOverview = page
+      .locator("text=Total Narratives, text=NQS Score")
+      .first();
     await expect(statsOverview).toBeVisible();
   });
 
-  test('deve permitir gerar nova narrativa', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve permitir gerar nova narrativa", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // Botão "Nova Narrativa"
-    const generateButton = page.locator('button:has-text("✍️ Nova Narrativa"), button:has-text("Nova Narrativa")');
+    const generateButton = page.locator(
+      'button:has-text("✍️ Nova Narrativa"), button:has-text("Nova Narrativa")',
+    );
 
     if (await generateButton.isVisible()) {
       await generateButton.click();
@@ -123,8 +137,8 @@ test.describe('MVP Dashboard', () => {
     }
   });
 
-  test('deve exibir StoryCards com expand/collapse', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir StoryCards com expand/collapse", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // StoryCards renderizam narrativas estilo Medium
@@ -141,16 +155,18 @@ test.describe('MVP Dashboard', () => {
     }
   });
 
-  test('deve mostrar connection indicator (LIVE ou OFFLINE)', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve mostrar connection indicator (LIVE ou OFFLINE)", async ({
+    page,
+  }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
-    const connectionIndicator = page.locator('text=LIVE, text=OFFLINE').first();
+    const connectionIndicator = page.locator("text=LIVE, text=OFFLINE").first();
     await expect(connectionIndicator).toBeVisible();
   });
 
-  test('deve navegar de volta para Landing Page', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve navegar de volta para Landing Page", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     const backButton = page.locator('button:has-text("← Voltar")');
@@ -158,16 +174,18 @@ test.describe('MVP Dashboard', () => {
     await backButton.click();
 
     await expect(page.locator('h1:has-text("Vértice")')).toBeVisible();
-    await expect(page.locator('text=MVP').first()).toBeVisible();
+    await expect(page.locator("text=MVP").first()).toBeVisible();
   });
 
-  test('deve exibir loading state ao carregar narrativas', async ({ page }) => {
-    await page.locator('text=MVP').first().click();
+  test("deve exibir loading state ao carregar narrativas", async ({ page }) => {
+    await page.locator("text=MVP").first().click();
 
-    const loadingIndicator = page.locator('text=Carregando, [class*="spinner"]').first();
+    const loadingIndicator = page
+      .locator('text=Carregando, [class*="spinner"]')
+      .first();
 
     try {
-      await loadingIndicator.waitFor({ state: 'visible', timeout: 1000 });
+      await loadingIndicator.waitFor({ state: "visible", timeout: 1000 });
     } catch (error) {
       // Loading muito rápido
     }
@@ -176,10 +194,10 @@ test.describe('MVP Dashboard', () => {
   });
 });
 
-test.describe('MVP Dashboard - Narrative Quality', () => {
-  test('deve exibir NQS (Narrative Quality Score) badges', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('text=MVP').first().click();
+test.describe("MVP Dashboard - Narrative Quality", () => {
+  test("deve exibir NQS (Narrative Quality Score) badges", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // NQS badges nos StoryCards
@@ -190,13 +208,15 @@ test.describe('MVP Dashboard - Narrative Quality', () => {
     expect(badgeCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('deve filtrar narrativas por tone', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('text=MVP').first().click();
+  test("deve filtrar narrativas por tone", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("text=MVP").first().click();
     await expect(page.locator('h1:has-text("MVP Dashboard")')).toBeVisible();
 
     // Verificar que há indicadores de tone (analytical, poetic, technical)
-    const toneIndicators = page.locator('text=analytical, text=poetic, text=technical').first();
+    const toneIndicators = page
+      .locator("text=analytical, text=poetic, text=technical")
+      .first();
 
     const hasTones = await toneIndicators.isVisible().catch(() => false);
     expect(hasTones).toBeDefined();

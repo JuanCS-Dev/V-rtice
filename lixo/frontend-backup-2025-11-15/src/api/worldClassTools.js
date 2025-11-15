@@ -1,5 +1,5 @@
-import { API_BASE_URL } from '@/config/api';
-import logger from '@/utils/logger';
+import { API_BASE_URL } from "@/config/api";
+import logger from "@/utils/logger";
 /**
  * World-Class Tools API Client
  *
@@ -18,20 +18,25 @@ const AI_AGENT_BASE_URL = API_BASE_URL;
  */
 export const executeTool = async (toolName, toolInput) => {
   try {
-    const response = await fetch(`${AI_AGENT_BASE_URL}/tools/world-class/execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${AI_AGENT_BASE_URL}/tools/world-class/execute`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tool_name: toolName,
+          tool_input: toolInput,
+        }),
       },
-      body: JSON.stringify({
-        tool_name: toolName,
-        tool_input: toolInput
-      })
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.detail || `HTTP ${response.status}: ${response.statusText}`,
+      );
     }
 
     return await response.json();
@@ -50,16 +55,19 @@ export const executeTool = async (toolName, toolInput) => {
  */
 export const executeParallel = async (executions, failFast = false) => {
   try {
-    const response = await fetch(`${AI_AGENT_BASE_URL}/tools/world-class/execute-parallel`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${AI_AGENT_BASE_URL}/tools/world-class/execute-parallel`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          executions,
+          fail_fast: failFast,
+        }),
       },
-      body: JSON.stringify({
-        executions,
-        fail_fast: failFast
-      })
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -68,7 +76,7 @@ export const executeParallel = async (executions, failFast = false) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[WorldClassTools] Error executing parallel:', error);
+    logger.error("[WorldClassTools] Error executing parallel:", error);
     throw error;
   }
 };
@@ -88,7 +96,7 @@ export const getToolCatalog = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[WorldClassTools] Error fetching catalog:', error);
+    logger.error("[WorldClassTools] Error fetching catalog:", error);
     throw error;
   }
 };
@@ -100,7 +108,9 @@ export const getToolCatalog = async () => {
  */
 export const getOrchestratorStats = async () => {
   try {
-    const response = await fetch(`${AI_AGENT_BASE_URL}/tools/orchestrator/stats`);
+    const response = await fetch(
+      `${AI_AGENT_BASE_URL}/tools/orchestrator/stats`,
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -108,7 +118,7 @@ export const getOrchestratorStats = async () => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[WorldClassTools] Error fetching stats:', error);
+    logger.error("[WorldClassTools] Error fetching stats:", error);
     throw error;
   }
 };
@@ -122,10 +132,10 @@ export const getOrchestratorStats = async () => {
  * Busca exploits conhecidos para um CVE
  */
 export const searchExploits = async (cveId, options = {}) => {
-  return executeTool('exploit_search', {
+  return executeTool("exploit_search", {
     cve_id: cveId,
     include_poc: options.includePoc ?? true,
-    include_metasploit: options.includeMetasploit ?? true
+    include_metasploit: options.includeMetasploit ?? true,
   });
 };
 
@@ -134,10 +144,10 @@ export const searchExploits = async (cveId, options = {}) => {
  * Análise profunda de DNS com security scoring
  */
 export const enumerateDNS = async (domain, options = {}) => {
-  return executeTool('dns_enumeration', {
+  return executeTool("dns_enumeration", {
     domain,
     check_dnssec: options.checkDnssec ?? true,
-    check_blacklists: options.checkBlacklists ?? true
+    check_blacklists: options.checkBlacklists ?? true,
   });
 };
 
@@ -146,10 +156,10 @@ export const enumerateDNS = async (domain, options = {}) => {
  * Descobre subdomínios usando múltiplas técnicas
  */
 export const discoverSubdomains = async (domain, options = {}) => {
-  return executeTool('subdomain_discovery', {
+  return executeTool("subdomain_discovery", {
     domain,
-    methods: options.methods ?? ['certificate_transparency', 'brute_force'],
-    wordlist_size: options.wordlistSize ?? 'medium'
+    methods: options.methods ?? ["certificate_transparency", "brute_force"],
+    wordlist_size: options.wordlistSize ?? "medium",
   });
 };
 
@@ -158,10 +168,10 @@ export const discoverSubdomains = async (domain, options = {}) => {
  * Crawling inteligente com tech fingerprinting
  */
 export const crawlWebsite = async (url, options = {}) => {
-  return executeTool('web_crawler', {
+  return executeTool("web_crawler", {
     url,
     max_depth: options.maxDepth ?? 3,
-    follow_external: options.followExternal ?? false
+    follow_external: options.followExternal ?? false,
   });
 };
 
@@ -170,9 +180,9 @@ export const crawlWebsite = async (url, options = {}) => {
  * Detecta secrets/API keys em código JS
  */
 export const analyzeJavaScript = async (url, options = {}) => {
-  return executeTool('javascript_analysis', {
+  return executeTool("javascript_analysis", {
     url,
-    scan_type: options.scanType ?? 'deep'
+    scan_type: options.scanType ?? "deep",
   });
 };
 
@@ -181,9 +191,9 @@ export const analyzeJavaScript = async (url, options = {}) => {
  * Escaneia containers Docker/K8s
  */
 export const scanContainer = async (image, options = {}) => {
-  return executeTool('container_scan', {
+  return executeTool("container_scan", {
     image,
-    check_compliance: options.checkCompliance ?? ['CIS', 'HIPAA']
+    check_compliance: options.checkCompliance ?? ["CIS", "HIPAA"],
   });
 };
 
@@ -198,10 +208,10 @@ const OSINT_SERVICE_URL = API_BASE_URL;
  * OSINT em 20+ plataformas sociais
  */
 export const socialMediaInvestigation = async (target, options = {}) => {
-  return executeTool('social_media_deep_dive', {
+  return executeTool("social_media_deep_dive", {
     target,
-    platforms: options.platforms ?? ['twitter', 'linkedin', 'github'],
-    deep_analysis: options.deepAnalysis ?? true
+    platforms: options.platforms ?? ["twitter", "linkedin", "github"],
+    deep_analysis: options.deepAnalysis ?? true,
   });
 };
 
@@ -210,9 +220,9 @@ export const socialMediaInvestigation = async (target, options = {}) => {
  * Busca em 12B+ registros de vazamentos
  */
 export const searchBreachData = async (query, options = {}) => {
-  return executeTool('breach_data_search', {
+  return executeTool("breach_data_search", {
     query,
-    query_type: options.queryType ?? 'email'
+    query_type: options.queryType ?? "email",
   });
 };
 
@@ -223,17 +233,20 @@ export const searchBreachData = async (query, options = {}) => {
  */
 export const analyzeBreachData = async (target, options = {}) => {
   try {
-    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/breach-data/analyze`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${OSINT_SERVICE_URL}/api/tools/breach-data/analyze`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          target,
+          search_type: options.searchType ?? "email",
+          include_unverified: options.includeUnverified ?? false,
+        }),
       },
-      body: JSON.stringify({
-        target,
-        search_type: options.searchType ?? 'email',
-        include_unverified: options.includeUnverified ?? false,
-      })
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -242,7 +255,7 @@ export const analyzeBreachData = async (target, options = {}) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[BreachDataAnalyzer] Error:', error);
+    logger.error("[BreachDataAnalyzer] Error:", error);
     throw error;
   }
 };
@@ -254,18 +267,21 @@ export const analyzeBreachData = async (target, options = {}) => {
  */
 export const scanWithGoogleDorks = async (target, options = {}) => {
   try {
-    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/google-dork/scan`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${OSINT_SERVICE_URL}/api/tools/google-dork/scan`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          target,
+          categories: options.categories ?? null, // null = all categories
+          engines: options.engines ?? null, // null = all engines
+          max_results_per_dork: options.maxResultsPerDork ?? 10,
+        }),
       },
-      body: JSON.stringify({
-        target,
-        categories: options.categories ?? null,  // null = all categories
-        engines: options.engines ?? null,  // null = all engines
-        max_results_per_dork: options.maxResultsPerDork ?? 10,
-      })
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -274,7 +290,7 @@ export const scanWithGoogleDorks = async (target, options = {}) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[GoogleDorkScanner] Error:', error);
+    logger.error("[GoogleDorkScanner] Error:", error);
     throw error;
   }
 };
@@ -286,16 +302,19 @@ export const scanWithGoogleDorks = async (target, options = {}) => {
  */
 export const monitorDarkWeb = async (target, options = {}) => {
   try {
-    const response = await fetch(`${OSINT_SERVICE_URL}/api/tools/darkweb/monitor`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${OSINT_SERVICE_URL}/api/tools/darkweb/monitor`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          target,
+          search_depth: options.searchDepth ?? "surface",
+        }),
       },
-      body: JSON.stringify({
-        target,
-        search_depth: options.searchDepth ?? 'surface',
-      })
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -304,7 +323,7 @@ export const monitorDarkWeb = async (target, options = {}) => {
 
     return await response.json();
   } catch (error) {
-    logger.error('[DarkWebMonitor] Error:', error);
+    logger.error("[DarkWebMonitor] Error:", error);
     throw error;
   }
 };
@@ -318,10 +337,10 @@ export const monitorDarkWeb = async (target, options = {}) => {
  * Detecta padrões usando ML (clustering)
  */
 export const recognizePatterns = async (data, options = {}) => {
-  return executeTool('pattern_recognition', {
+  return executeTool("pattern_recognition", {
     data,
-    algorithm: options.algorithm ?? 'kmeans',
-    n_clusters: options.nClusters ?? 5
+    algorithm: options.algorithm ?? "kmeans",
+    n_clusters: options.nClusters ?? 5,
   });
 };
 
@@ -330,10 +349,10 @@ export const recognizePatterns = async (data, options = {}) => {
  * Detecta anomalias usando statistical + ML
  */
 export const detectAnomalies = async (data, options = {}) => {
-  return executeTool('anomaly_detection', {
+  return executeTool("anomaly_detection", {
     data,
-    method: options.method ?? 'isolation_forest',
-    sensitivity: options.sensitivity ?? 0.05
+    method: options.method ?? "isolation_forest",
+    sensitivity: options.sensitivity ?? 0.05,
   });
 };
 
@@ -342,10 +361,10 @@ export const detectAnomalies = async (data, options = {}) => {
  * Forecasting com confidence intervals
  */
 export const analyzeTimeSeries = async (data, options = {}) => {
-  return executeTool('time_series_analysis', {
+  return executeTool("time_series_analysis", {
     data,
     forecast_horizon: options.forecastHorizon ?? 30,
-    confidence_level: options.confidenceLevel ?? 0.95
+    confidence_level: options.confidenceLevel ?? 0.95,
   });
 };
 
@@ -354,9 +373,9 @@ export const analyzeTimeSeries = async (data, options = {}) => {
  * Análise de grafos (redes, relações)
  */
 export const analyzeGraph = async (nodes, edges) => {
-  return executeTool('graph_analysis', {
+  return executeTool("graph_analysis", {
     nodes,
-    edges
+    edges,
   });
 };
 
@@ -365,9 +384,9 @@ export const analyzeGraph = async (nodes, edges) => {
  * Named Entity Recognition
  */
 export const extractEntities = async (text, options = {}) => {
-  return executeTool('nlp_entity_extraction', {
+  return executeTool("nlp_entity_extraction", {
     text,
-    language: options.language ?? 'en'
+    language: options.language ?? "en",
   });
 };
 
@@ -387,11 +406,15 @@ export const isResultActionable = (result) => {
  * Retorna className para usar com utility classes
  */
 export const getConfidenceBadge = (confidence) => {
-  if (confidence >= 90) return { label: 'VERY HIGH', className: 'confidence-high', icon: '🟢' };
-  if (confidence >= 75) return { label: 'HIGH', className: 'confidence-high', icon: '🔵' };
-  if (confidence >= 50) return { label: 'MEDIUM', className: 'confidence-medium', icon: '🟡' };
-  if (confidence >= 25) return { label: 'LOW', className: 'confidence-low', icon: '🟠' };
-  return { label: 'VERY LOW', className: 'confidence-low', icon: '🔴' };
+  if (confidence >= 90)
+    return { label: "VERY HIGH", className: "confidence-high", icon: "🟢" };
+  if (confidence >= 75)
+    return { label: "HIGH", className: "confidence-high", icon: "🔵" };
+  if (confidence >= 50)
+    return { label: "MEDIUM", className: "confidence-medium", icon: "🟡" };
+  if (confidence >= 25)
+    return { label: "LOW", className: "confidence-low", icon: "🟠" };
+  return { label: "VERY LOW", className: "confidence-low", icon: "🔴" };
 };
 
 /**
@@ -407,11 +430,11 @@ export const formatExecutionTime = (ms) => {
  */
 export const getSeverityColor = (severity) => {
   const colors = {
-    'CRITICAL': '#ff0040',
-    'HIGH': '#ff4000',
-    'MEDIUM': '#ffaa00',
-    'LOW': '#00aa00',
-    'INFO': '#00aaff'
+    CRITICAL: "#ff0040",
+    HIGH: "#ff4000",
+    MEDIUM: "#ffaa00",
+    LOW: "#00aa00",
+    INFO: "#00aaff",
   };
   return colors[severity] || colors.INFO;
 };
@@ -434,9 +457,9 @@ export default {
   // OSINT (World-Class Suite)
   socialMediaInvestigation,
   searchBreachData,
-  analyzeBreachData,        // NEW: BreachDataAnalyzer
-  scanWithGoogleDorks,      // NEW: GoogleDorkScanner
-  monitorDarkWeb,           // NEW: DarkWebMonitor
+  analyzeBreachData, // NEW: BreachDataAnalyzer
+  scanWithGoogleDorks, // NEW: GoogleDorkScanner
+  monitorDarkWeb, // NEW: DarkWebMonitor
 
   // Analytics
   recognizePatterns,
@@ -449,5 +472,5 @@ export default {
   isResultActionable,
   getConfidenceBadge,
   formatExecutionTime,
-  getSeverityColor
+  getSeverityColor,
 };

@@ -16,9 +16,19 @@
  * Version: 1.0.0 - FASE VII Week 9-10
  */
 
-import logger from '@/utils/logger';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
+import logger from "@/utils/logger";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  RadialBarChart,
+  RadialBar,
+  PolarAngleAxis,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 import {
   getSafetyStatus,
   getSafetyViolations,
@@ -31,9 +41,9 @@ import {
   calculateThresholdPercentage,
   isCriticalState,
   formatUptime,
-  validateShutdownReason
-} from '../../../api/safety';
-import './SafetyMonitorWidget.css';
+  validateShutdownReason,
+} from "../../../api/safety";
+import "./SafetyMonitorWidget.css";
 
 export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
   // ═══════════════════════════════════════════════════════════════════════
@@ -41,7 +51,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
   // ═══════════════════════════════════════════════════════════════════════
   const [safetyStatus, setSafetyStatus] = useState(null);
   const [violations, setViolations] = useState([]);
-  const [selectedView, setSelectedView] = useState('overview'); // overview, violations, controls
+  const [selectedView, setSelectedView] = useState("overview"); // overview, violations, controls
   const [loading, setLoading] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -50,7 +60,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
   // STATE - Emergency Shutdown Controls
   // ═══════════════════════════════════════════════════════════════════════
   const [showShutdownModal, setShowShutdownModal] = useState(false);
-  const [shutdownReason, setShutdownReason] = useState('');
+  const [shutdownReason, setShutdownReason] = useState("");
   const [shutdownInProgress, setShutdownInProgress] = useState(false);
   const [shutdownResult, setShutdownResult] = useState(null);
 
@@ -66,7 +76,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
     const [status, viols] = await Promise.all([
       getSafetyStatus(),
-      getSafetyViolations(50)
+      getSafetyViolations(50),
     ]);
 
     if (status && !status.error) {
@@ -87,14 +97,17 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
         setWsConnected(true);
 
         // Handle different message types
-        if (message.type === 'safety_update' || message.type === 'initial_state') {
+        if (
+          message.type === "safety_update" ||
+          message.type === "initial_state"
+        ) {
           loadSafetyData();
         }
       },
       (error) => {
-        logger.error('WebSocket error:', error);
+        logger.error("WebSocket error:", error);
         setWsConnected(false);
-      }
+      },
     );
   }, [loadSafetyData]);
 
@@ -123,13 +136,13 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
   const handleOpenShutdownModal = () => {
     setShowShutdownModal(true);
-    setShutdownReason('');
+    setShutdownReason("");
     setShutdownResult(null);
   };
 
   const handleCloseShutdownModal = () => {
     setShowShutdownModal(false);
-    setShutdownReason('');
+    setShutdownReason("");
     setShutdownResult(null);
   };
 
@@ -170,10 +183,10 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
     return (
       <div className="safety-status-indicator">
-        <div className={`status-badge ${isActive ? 'active' : 'inactive'}`}>
+        <div className={`status-badge ${isActive ? "active" : "inactive"}`}>
           <span className="status-icon">🛡️</span>
           <span className="status-text">
-            {isActive ? 'MONITORING ACTIVE' : 'MONITORING INACTIVE'}
+            {isActive ? "MONITORING ACTIVE" : "MONITORING INACTIVE"}
           </span>
         </div>
 
@@ -204,41 +217,51 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
     // Metrics cards data
     const metricsCards = [
       {
-        title: 'Violations Total',
+        title: "Violations Total",
         value: violationsTotal,
-        subtitle: 'All time',
-        color: violationsTotal > 0 ? '#f97316' : '#4ade80',
-        borderClass: violationsTotal > 0 ? 'border-warning' : 'border-success',
-        textClass: violationsTotal > 0 ? 'text-warning' : 'text-success',
-        icon: '⚠️'
+        subtitle: "All time",
+        color: violationsTotal > 0 ? "#f97316" : "#4ade80",
+        borderClass: violationsTotal > 0 ? "border-warning" : "border-success",
+        textClass: violationsTotal > 0 ? "text-warning" : "text-success",
+        icon: "⚠️",
       },
       {
-        title: 'Critical/Emergency',
-        value: (violationsBySeverity.critical || 0) + (violationsBySeverity.emergency || 0),
-        subtitle: 'High severity',
-        color: violationsBySeverity.emergency > 0 ? '#ef4444' : '#fbbf24',
-        borderClass: violationsBySeverity.emergency > 0 ? 'border-critical' : 'border-warning',
-        textClass: violationsBySeverity.emergency > 0 ? 'text-critical' : 'text-warning',
-        icon: '🚨'
+        title: "Critical/Emergency",
+        value:
+          (violationsBySeverity.critical || 0) +
+          (violationsBySeverity.emergency || 0),
+        subtitle: "High severity",
+        color: violationsBySeverity.emergency > 0 ? "#ef4444" : "#fbbf24",
+        borderClass:
+          violationsBySeverity.emergency > 0
+            ? "border-critical"
+            : "border-warning",
+        textClass:
+          violationsBySeverity.emergency > 0 ? "text-critical" : "text-warning",
+        icon: "🚨",
       },
       {
-        title: 'Kill Switch',
-        value: safetyStatus.kill_switch_active ? 'ACTIVE' : 'ARMED',
-        subtitle: '<1s response',
-        color: safetyStatus.kill_switch_active ? '#ef4444' : '#4ade80',
-        borderClass: safetyStatus.kill_switch_active ? 'border-critical' : 'border-success',
-        textClass: safetyStatus.kill_switch_active ? 'text-critical' : 'text-success',
-        icon: '🔴'
+        title: "Kill Switch",
+        value: safetyStatus.kill_switch_active ? "ACTIVE" : "ARMED",
+        subtitle: "<1s response",
+        color: safetyStatus.kill_switch_active ? "#ef4444" : "#4ade80",
+        borderClass: safetyStatus.kill_switch_active
+          ? "border-critical"
+          : "border-success",
+        textClass: safetyStatus.kill_switch_active
+          ? "text-critical"
+          : "text-success",
+        icon: "🔴",
       },
       {
-        title: 'Uptime',
+        title: "Uptime",
         value: formatUptime(uptime),
-        subtitle: 'System running',
-        color: '#f97316',
-        borderClass: 'border-info',
-        textClass: 'text-info',
-        icon: '⏱️'
-      }
+        subtitle: "System running",
+        color: "#f97316",
+        borderClass: "border-info",
+        textClass: "text-info",
+        icon: "⏱️",
+      },
     ];
 
     return (
@@ -249,9 +272,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
               <span className="metric-icon">{card.icon}</span>
               <span className="metric-title">{card.title}</span>
             </div>
-            <div className={`metric-value ${card.textClass}`}>
-              {card.value}
-            </div>
+            <div className={`metric-value ${card.textClass}`}>{card.value}</div>
             <div className="metric-subtitle">{card.subtitle}</div>
           </div>
         ))}
@@ -266,11 +287,11 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
     const total = safetyStatus.violations_total || 1; // Avoid division by 0
 
     const severityData = [
-      { name: 'Normal', count: severities.normal || 0, color: '#4ade80' },
-      { name: 'Warning', count: severities.warning || 0, color: '#fbbf24' },
-      { name: 'Critical', count: severities.critical || 0, color: '#f97316' },
-      { name: 'Emergency', count: severities.emergency || 0, color: '#ef4444' }
-    ].filter(s => s.count > 0);
+      { name: "Normal", count: severities.normal || 0, color: "#4ade80" },
+      { name: "Warning", count: severities.warning || 0, color: "#fbbf24" },
+      { name: "Critical", count: severities.critical || 0, color: "#f97316" },
+      { name: "Emergency", count: severities.emergency || 0, color: "#ef4444" },
+    ].filter((s) => s.count > 0);
 
     if (severityData.length === 0) {
       return (
@@ -298,7 +319,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
                     className="severity-bar-fill"
                     style={{
                       width: `${percentage}%`,
-                      backgroundColor: severity.color
+                      backgroundColor: severity.color,
                     }}
                   />
                 </div>
@@ -322,44 +343,54 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
     return (
       <div className="violations-timeline">
-        <h3 className="section-title">Recent Violations ({violations.length})</h3>
+        <h3 className="section-title">
+          Recent Violations ({violations.length})
+        </h3>
         <div className="violations-list">
-          {violations.slice().reverse().map((violation, index) => {
-            const severity = formatSeverity(violation.severity);
-            const vType = formatViolationType(violation.violation_type);
-            const timestamp = formatTimestamp(violation.timestamp);
-            const relTime = formatRelativeTime(violation.timestamp);
+          {violations
+            .slice()
+            .reverse()
+            .map((violation, index) => {
+              const severity = formatSeverity(violation.severity);
+              const vType = formatViolationType(violation.violation_type);
+              const timestamp = formatTimestamp(violation.timestamp);
+              const relTime = formatRelativeTime(violation.timestamp);
 
-            return (
-              <div
-                key={index}
-                className={`violation-item ${severity.borderClass}`}
-              >
-                <div className="violation-header">
-                  <span className={`violation-severity ${severity.className}`}>
-                    {severity.label.toUpperCase()}
-                  </span>
-                  <span className="violation-time" title={timestamp}>
-                    {relTime}
-                  </span>
+              return (
+                <div
+                  key={index}
+                  className={`violation-item ${severity.borderClass}`}
+                >
+                  <div className="violation-header">
+                    <span
+                      className={`violation-severity ${severity.className}`}
+                    >
+                      {severity.label.toUpperCase()}
+                    </span>
+                    <span className="violation-time" title={timestamp}>
+                      {relTime}
+                    </span>
+                  </div>
+                  <div className="violation-type">{vType}</div>
+                  <div className="violation-message">{violation.message}</div>
+                  <div className="violation-details">
+                    <span>Value: {violation.value_observed.toFixed(2)}</span>
+                    <span className="violation-separator">|</span>
+                    <span>
+                      Threshold: {violation.threshold_violated.toFixed(2)}
+                    </span>
+                    <span className="violation-separator">|</span>
+                    <span>
+                      {calculateThresholdPercentage(
+                        violation.value_observed,
+                        violation.threshold_violated,
+                      )}
+                      % of limit
+                    </span>
+                  </div>
                 </div>
-                <div className="violation-type">{vType}</div>
-                <div className="violation-message">{violation.message}</div>
-                <div className="violation-details">
-                  <span>Value: {violation.value_observed.toFixed(2)}</span>
-                  <span className="violation-separator">|</span>
-                  <span>Threshold: {violation.threshold_violated.toFixed(2)}</span>
-                  <span className="violation-separator">|</span>
-                  <span>
-                    {calculateThresholdPercentage(
-                      violation.value_observed,
-                      violation.threshold_violated
-                    )}% of limit
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
           <div ref={violationsEndRef} />
         </div>
       </div>
@@ -388,7 +419,9 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
           >
             <span className="button-icon">🔴</span>
             <span className="button-text">
-              {safetyStatus?.kill_switch_active ? 'System Already Shutdown' : 'Execute Emergency Shutdown'}
+              {safetyStatus?.kill_switch_active
+                ? "System Already Shutdown"
+                : "Execute Emergency Shutdown"}
             </span>
           </button>
         </div>
@@ -410,21 +443,23 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
     if (!showShutdownModal) return null;
 
     return (
-      <div 
-        className="modal-overlay" 
+      <div
+        className="modal-overlay"
         onClick={handleCloseShutdownModal}
         role="presentation"
       >
-        <div 
+        <div
           className="modal-content"
           role="dialog"
           aria-modal="true"
           aria-labelledby="shutdown-modal-title"
         >
           <div className="modal-header">
-            <h2 id="shutdown-modal-title" className="modal-title">🚨 Emergency Shutdown</h2>
-            <button 
-              className="modal-close" 
+            <h2 id="shutdown-modal-title" className="modal-title">
+              🚨 Emergency Shutdown
+            </h2>
+            <button
+              className="modal-close"
               onClick={handleCloseShutdownModal}
               aria-label="Close shutdown modal"
             >
@@ -472,7 +507,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
               <div className="modal-success">
                 <span className="success-icon">✅</span>
                 <span className="success-text">
-                  {shutdownResult.message || 'Emergency shutdown executed'}
+                  {shutdownResult.message || "Emergency shutdown executed"}
                 </span>
               </div>
             )}
@@ -531,8 +566,10 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
           <span className="title-text">Safety Protocol Monitor</span>
         </div>
         <div className="safety-meta">
-          <span className={`ws-status ${wsConnected ? 'connected' : 'disconnected'}`}>
-            {wsConnected ? '🟢 Live' : '🔴 Polling'}
+          <span
+            className={`ws-status ${wsConnected ? "connected" : "disconnected"}`}
+          >
+            {wsConnected ? "🟢 Live" : "🔴 Polling"}
           </span>
           {lastUpdate && (
             <span className="last-update">
@@ -548,20 +585,20 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
       {/* View Tabs */}
       <div className="safety-tabs">
         <button
-          className={`tab ${selectedView === 'overview' ? 'active' : ''}`}
-          onClick={() => setSelectedView('overview')}
+          className={`tab ${selectedView === "overview" ? "active" : ""}`}
+          onClick={() => setSelectedView("overview")}
         >
           Overview
         </button>
         <button
-          className={`tab ${selectedView === 'violations' ? 'active' : ''}`}
-          onClick={() => setSelectedView('violations')}
+          className={`tab ${selectedView === "violations" ? "active" : ""}`}
+          onClick={() => setSelectedView("violations")}
         >
           Violations ({violations.length})
         </button>
         <button
-          className={`tab ${selectedView === 'controls' ? 'active' : ''}`}
-          onClick={() => setSelectedView('controls')}
+          className={`tab ${selectedView === "controls" ? "active" : ""}`}
+          onClick={() => setSelectedView("controls")}
         >
           Emergency Controls
         </button>
@@ -569,24 +606,16 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
 
       {/* View Content */}
       <div className="safety-content">
-        {selectedView === 'overview' && (
+        {selectedView === "overview" && (
           <>
             {renderMetricsGrid()}
             {renderViolationsByseverity()}
           </>
         )}
 
-        {selectedView === 'violations' && (
-          <>
-            {renderViolationsTimeline()}
-          </>
-        )}
+        {selectedView === "violations" && <>{renderViolationsTimeline()}</>}
 
-        {selectedView === 'controls' && (
-          <>
-            {renderEmergencyControls()}
-          </>
-        )}
+        {selectedView === "controls" && <>{renderEmergencyControls()}</>}
       </div>
 
       {/* Shutdown Modal */}

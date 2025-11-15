@@ -1,15 +1,15 @@
 /**
  * useCockpitMetrics - Real-time Cockpit Metrics Hook
- * 
+ *
  * Fetches aggregated metrics from Narrative Filter + Verdict Engine
  * NO MOCKS - Real API calls
- * 
+ *
  * @version 1.0.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { API_ENDPOINTS } from '@/config/api';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { API_ENDPOINTS } from "@/config/api";
 
 const NARRATIVE_FILTER_API = API_ENDPOINTS.narrativeFilter;
 const VERDICT_ENGINE_API = API_ENDPOINTS.verdictEngine;
@@ -24,7 +24,7 @@ export const useCockpitMetrics = () => {
     alliancesDetected: 0,
     deceptionMarkers: 0,
     avgProcessingLatency: 0,
-    systemHealth: 'UNKNOWN'
+    systemHealth: "UNKNOWN",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,7 +33,7 @@ export const useCockpitMetrics = () => {
     try {
       const [narrativeStats, verdictStats] = await Promise.all([
         axios.get(`${NARRATIVE_FILTER_API}/stats`, { timeout: 5000 }),
-        axios.get(`${VERDICT_ENGINE_API}/stats`, { timeout: 5000 })
+        axios.get(`${VERDICT_ENGINE_API}/stats`, { timeout: 5000 }),
       ]);
 
       setMetrics({
@@ -44,12 +44,12 @@ export const useCockpitMetrics = () => {
         alliancesDetected: narrativeStats.data.alliances_count || 0,
         deceptionMarkers: narrativeStats.data.deception_count || 0,
         avgProcessingLatency: narrativeStats.data.avg_latency_ms || 0,
-        systemHealth: verdictStats.data.health_status || 'OPERATIONAL'
+        systemHealth: verdictStats.data.health_status || "OPERATIONAL",
       });
 
       setError(null);
     } catch (err) {
-      logger.error('[CockpitMetrics] Failed to fetch:', err);
+      logger.error("[CockpitMetrics] Failed to fetch:", err);
       setError(err.message);
     } finally {
       setLoading(false);

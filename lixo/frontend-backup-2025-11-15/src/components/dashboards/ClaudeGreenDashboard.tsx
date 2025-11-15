@@ -15,7 +15,7 @@
  * VERDE (#10b981), NÃO LARANJA
  */
 
-import React from 'react'
+import React from "react";
 import {
   // Layout
   Navbar,
@@ -41,7 +41,7 @@ import {
   AlertTitle,
   AlertDescription,
   Spinner,
-} from '../ui/claude'
+} from "../ui/claude";
 import {
   Home,
   BarChart3,
@@ -54,7 +54,7 @@ import {
   Search,
   Bell,
   User,
-} from 'lucide-react'
+} from "lucide-react";
 
 /**
  * Claude Green Dashboard - EXEMPLO COMPLETO
@@ -69,54 +69,94 @@ import {
  * - ZERO laranja/vermelho
  */
 export function ClaudeGreenDashboard() {
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   // Navigation items
   const navItems = [
-    { label: 'Dashboard', href: '#', active: true },
-    { label: 'Analytics', href: '#' },
-    { label: 'Reports', href: '#', badge: '3' },
+    { label: "Dashboard", href: "#", active: true },
+    { label: "Analytics", href: "#" },
+    { label: "Reports", href: "#", badge: "3" },
     {
-      label: 'More',
+      label: "More",
       children: [
-        { label: 'Settings', href: '#' },
-        { label: 'Help', href: '#' },
+        { label: "Settings", href: "#" },
+        { label: "Help", href: "#" },
       ],
     },
-  ]
+  ];
 
   const sidebarItems = [
-    { label: 'Home', icon: <Home className="w-5 h-5" />, href: '#', active: true },
-    { label: 'Analytics', icon: <BarChart3 className="w-5 h-5" />, href: '#' },
-    { label: 'Users', icon: <Users className="w-5 h-5" />, href: '#', badge: '12' },
-    { label: 'Activity', icon: <Activity className="w-5 h-5" />, href: '#' },
-    { label: 'Security', icon: <Shield className="w-5 h-5" />, href: '#', badge: '2', badgeVariant: 'warning' as const },
-    { label: 'Settings', icon: <Settings className="w-5 h-5" />, href: '#' },
-  ]
+    {
+      label: "Home",
+      icon: <Home className="w-5 h-5" />,
+      href: "#",
+      active: true,
+    },
+    { label: "Analytics", icon: <BarChart3 className="w-5 h-5" />, href: "#" },
+    {
+      label: "Users",
+      icon: <Users className="w-5 h-5" />,
+      href: "#",
+      badge: "12",
+    },
+    { label: "Activity", icon: <Activity className="w-5 h-5" />, href: "#" },
+    {
+      label: "Security",
+      icon: <Shield className="w-5 h-5" />,
+      href: "#",
+      badge: "2",
+      badgeVariant: "warning" as const,
+    },
+    { label: "Settings", icon: <Settings className="w-5 h-5" />, href: "#" },
+  ];
 
   // Sample data for table
   const tableData = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active', role: 'Admin' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Active', role: 'User' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', status: 'Inactive', role: 'User' },
-    { id: 4, name: 'Alice Brown', email: 'alice@example.com', status: 'Active', role: 'Moderator' },
-  ]
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      status: "Active",
+      role: "Admin",
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane@example.com",
+      status: "Active",
+      role: "User",
+    },
+    {
+      id: 3,
+      name: "Bob Johnson",
+      email: "bob@example.com",
+      status: "Inactive",
+      role: "User",
+    },
+    {
+      id: 4,
+      name: "Alice Brown",
+      email: "alice@example.com",
+      status: "Active",
+      role: "Moderator",
+    },
+  ];
 
   const tableColumns = [
-    { key: 'name', title: 'Name', sortable: true },
-    { key: 'email', title: 'Email', sortable: true },
+    { key: "name", title: "Name", sortable: true },
+    { key: "email", title: "Email", sortable: true },
     {
-      key: 'status',
-      title: 'Status',
+      key: "status",
+      title: "Status",
       render: (value: string) => (
-        <Badge variant={value === 'Active' ? 'success' : 'secondary'}>
+        <Badge variant={value === "Active" ? "success" : "secondary"}>
           {value}
         </Badge>
       ),
     },
-    { key: 'role', title: 'Role' },
-  ]
+    { key: "role", title: "Role" },
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -124,8 +164,11 @@ export function ClaudeGreenDashboard() {
       <Navbar
         logo={
           <div className="flex items-center gap-2">
-            <Shield className="w-6 h-6" style={{ color: 'var(--primary)' }} />
-            <span className="text-xl font-bold font-[var(--font-display)]" style={{ color: 'var(--primary)' }}>
+            <Shield className="w-6 h-6" style={{ color: "var(--primary)" }} />
+            <span
+              className="text-xl font-bold font-[var(--font-display)]"
+              style={{ color: "var(--primary)" }}
+            >
               VÉRTICE 💚
             </span>
           </div>
@@ -176,8 +219,8 @@ export function ClaudeGreenDashboard() {
               <Alert variant="success">
                 <AlertTitle>Sistema Migrado com Sucesso! 💚</AlertTitle>
                 <AlertDescription>
-                  Todos os componentes agora usam VERDE (#10b981) ao invés de laranja.
-                  Design system Claude.ai aplicado com perfeição.
+                  Todos os componentes agora usam VERDE (#10b981) ao invés de
+                  laranja. Design system Claude.ai aplicado com perfeição.
                 </AlertDescription>
               </Alert>
 
@@ -186,27 +229,35 @@ export function ClaudeGreenDashboard() {
                 <StatCard
                   title="Total Users"
                   value="2,543"
-                  trend={{ value: 12.5, direction: 'up', label: 'vs last month' }}
+                  trend={{
+                    value: 12.5,
+                    direction: "up",
+                    label: "vs last month",
+                  }}
                   icon={Users}
                 />
                 <StatCard
                   title="Active Sessions"
                   value="1,234"
-                  trend={{ value: 8.2, direction: 'up' }}
+                  trend={{ value: 8.2, direction: "up" }}
                   icon={Activity}
                   variant="success"
                 />
                 <StatCard
                   title="Security Alerts"
                   value="23"
-                  trend={{ value: -15.3, direction: 'down', label: 'improvement' }}
+                  trend={{
+                    value: -15.3,
+                    direction: "down",
+                    label: "improvement",
+                  }}
                   icon={AlertCircle}
                   variant="warning"
                 />
                 <StatCard
                   title="System Health"
                   value="98.9%"
-                  trend={{ value: 0.5, direction: 'up' }}
+                  trend={{ value: 0.5, direction: "up" }}
                   icon={TrendingUp}
                 />
               </Grid>
@@ -248,7 +299,7 @@ export function ClaudeGreenDashboard() {
                   <DataTable
                     columns={tableColumns}
                     data={tableData}
-                    onRowClick={(row) => console.log('Clicked:', row)}
+                    onRowClick={(row) => console.log("Clicked:", row)}
                   />
                 </CardContent>
               </Card>
@@ -275,8 +326,11 @@ export function ClaudeGreenDashboard() {
               {/* Footer */}
               <div className="text-center py-8 border-t border-[var(--border)]">
                 <p className="text-[var(--muted-foreground)] font-[var(--font-primary)]">
-                  <strong style={{ color: 'var(--primary)' }}>VERDE (#10b981)</strong> em todos os accents |
-                  ZERO laranja/vermelho | Claude.ai aesthetic | SOLI DEO GLORIA 💚
+                  <strong style={{ color: "var(--primary)" }}>
+                    VERDE (#10b981)
+                  </strong>{" "}
+                  em todos os accents | ZERO laranja/vermelho | Claude.ai
+                  aesthetic | SOLI DEO GLORIA 💚
                 </p>
               </div>
             </Stack>
@@ -284,7 +338,7 @@ export function ClaudeGreenDashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
-export default ClaudeGreenDashboard
+export default ClaudeGreenDashboard;

@@ -1,7 +1,7 @@
 /**
  * Micro-interactions & Interactive Element Styles
  * MAXIMUS Vértice - Frontend Phase 3
- * 
+ *
  * Purpose: Add soul to the interface. Every interaction provides feedback.
  * Principles:
  * - Tactile: User feels the interface responding
@@ -27,8 +27,9 @@ button,
 button:not(:disabled):hover,
 .btn:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15),
-              0 0 20px var(--color-primary, rgba(0, 123, 255, 0.3));
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 20px var(--color-primary, rgba(0, 123, 255, 0.3));
   transition: var(--transition-fast);
 }
 
@@ -42,7 +43,7 @@ button:not(:disabled):active,
 /* Ripple effect on click */
 button::after,
 .btn::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -51,7 +52,9 @@ button::after,
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.4);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
   pointer-events: none;
   opacity: 0;
 }
@@ -87,8 +90,9 @@ button:disabled,
 .card:hover,
 .module-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2),
-              0 0 30px var(--color-primary, rgba(0, 123, 255, 0.2));
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.2),
+    0 0 30px var(--color-primary, rgba(0, 123, 255, 0.2));
 }
 
 /* Hacker theme - border glow */
@@ -97,16 +101,18 @@ button:disabled,
 [data-theme="purple-haze"] .card:hover,
 [data-theme="red-alert"] .card:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3),
-              0 0 40px var(--color-primary),
-              inset 0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.1);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.3),
+    0 0 40px var(--color-primary),
+    inset 0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.1);
 }
 
 /* Enterprise theme - subtle shadow */
 [data-theme="windows11"] .card:hover,
 [data-theme="stealth"] .card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1),
-              0 2px 4px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* ========================================
@@ -126,8 +132,9 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 0, 123, 255), 0.2),
-              0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.3);
+  box-shadow:
+    0 0 0 3px rgba(var(--color-primary-rgb, 0, 123, 255), 0.2),
+    0 0 20px rgba(var(--color-primary-rgb, 0, 123, 255), 0.3);
   animation: focus-pulse 0.3s ease-out;
 }
 
@@ -151,8 +158,9 @@ textarea:invalid {
 
 input.error:focus,
 textarea.error:focus {
-  box-shadow: 0 0 0 3px rgba(255, 10, 84, 0.2),
-              0 0 20px rgba(255, 10, 84, 0.3);
+  box-shadow:
+    0 0 0 3px rgba(255, 10, 84, 0.2),
+    0 0 20px rgba(255, 10, 84, 0.3);
 }
 
 /* Success state - checkmark animation */
@@ -163,8 +171,9 @@ textarea.success {
 
 input.success:focus,
 textarea.success:focus {
-  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2),
-              0 0 20px rgba(0, 255, 136, 0.3);
+  box-shadow:
+    0 0 0 3px rgba(0, 255, 136, 0.2),
+    0 0 20px rgba(0, 255, 136, 0.3);
 }
 
 /* Placeholder animation */
@@ -189,7 +198,7 @@ a {
 
 /* Underline animation */
 a::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -389,14 +398,30 @@ input[type="radio"]:checked {
   animation: slide-in-left 0.3s var(--ease-decelerate) backwards;
 }
 
-.list-item:nth-child(1) { animation-delay: 0ms; }
-.list-item:nth-child(2) { animation-delay: 50ms; }
-.list-item:nth-child(3) { animation-delay: 100ms; }
-.list-item:nth-child(4) { animation-delay: 150ms; }
-.list-item:nth-child(5) { animation-delay: 200ms; }
-.list-item:nth-child(6) { animation-delay: 250ms; }
-.list-item:nth-child(7) { animation-delay: 300ms; }
-.list-item:nth-child(8) { animation-delay: 350ms; }
+.list-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.list-item:nth-child(2) {
+  animation-delay: 50ms;
+}
+.list-item:nth-child(3) {
+  animation-delay: 100ms;
+}
+.list-item:nth-child(4) {
+  animation-delay: 150ms;
+}
+.list-item:nth-child(5) {
+  animation-delay: 200ms;
+}
+.list-item:nth-child(6) {
+  animation-delay: 250ms;
+}
+.list-item:nth-child(7) {
+  animation-delay: 300ms;
+}
+.list-item:nth-child(8) {
+  animation-delay: 350ms;
+}
 
 /* Table row hover */
 tr {
@@ -418,7 +443,7 @@ tr:hover {
 
 /* Active tab indicator */
 .tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -456,8 +481,9 @@ html {
 .fade-in-on-scroll {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.6s var(--ease-decelerate),
-              transform 0.6s var(--ease-decelerate);
+  transition:
+    opacity 0.6s var(--ease-decelerate),
+    transform 0.6s var(--ease-decelerate);
 }
 
 .fade-in-on-scroll.visible {
@@ -528,8 +554,9 @@ html {
 .reveal-on-hover > * {
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity var(--duration-normal) var(--ease-decelerate),
-              transform var(--duration-normal) var(--ease-decelerate);
+  transition:
+    opacity var(--duration-normal) var(--ease-decelerate),
+    transform var(--duration-normal) var(--ease-decelerate);
 }
 
 .reveal-on-hover:hover > * {
@@ -543,8 +570,9 @@ html {
 }
 
 .glow-on-hover:hover {
-  box-shadow: 0 0 20px var(--color-primary),
-              0 0 40px var(--color-primary);
+  box-shadow:
+    0 0 20px var(--color-primary),
+    0 0 40px var(--color-primary);
 }
 
 /* Scale on hover */

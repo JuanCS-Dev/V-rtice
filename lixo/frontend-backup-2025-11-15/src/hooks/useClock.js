@@ -7,7 +7,7 @@
  * @returns {Date} currentTime - Current time updated every second
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export const useClock = () => {
   const [currentTime, setCurrentTime] = useState(new Date());

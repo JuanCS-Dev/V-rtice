@@ -13,9 +13,9 @@
  * @returns {Object} { metrics, pulse, isLoading, error, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mvpService } from '../../services/mvp/mvpService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mvpService } from "../../services/mvp/mvpService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 15000; // 15s (frequent for real-time pulse)
 
@@ -51,9 +51,9 @@ export const useSystemMetrics = (query = {}, options = {}) => {
       }
 
       setIsLoading(false);
-      logger.debug('[useSystemMetrics] Metrics updated');
+      logger.debug("[useSystemMetrics] Metrics updated");
     } catch (err) {
-      logger.error('[useSystemMetrics] Failed to fetch metrics:', err);
+      logger.error("[useSystemMetrics] Failed to fetch metrics:", err);
       setError(err.message);
       setIsLoading(false);
     }

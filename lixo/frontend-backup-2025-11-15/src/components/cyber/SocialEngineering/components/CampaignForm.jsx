@@ -24,20 +24,23 @@
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React, { useState } from 'react';
-import { Input, Button } from '../../../shared';
-import { validateEmail, validateURL } from '../../../../utils/validation';
-import { sanitizeEmail, sanitizePlainText } from '../../../../utils/sanitization';
-import styles from './CampaignForm.module.css';
+import React, { useState } from "react";
+import { Input, Button } from "../../../shared";
+import { validateEmail, validateURL } from "../../../../utils/validation";
+import {
+  sanitizeEmail,
+  sanitizePlainText,
+} from "../../../../utils/sanitization";
+import styles from "./CampaignForm.module.css";
 
 export const CampaignForm = ({ templates, onSubmit, loading }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    template_id: '',
-    target_emails: '',
-    sender_name: '',
-    sender_email: '',
-    landing_page_url: ''
+    name: "",
+    template_id: "",
+    target_emails: "",
+    sender_name: "",
+    sender_email: "",
+    landing_page_url: "",
   });
 
   // Error states for validation feedback
@@ -70,7 +73,7 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
       return;
     }
 
-    const emails = formData.target_emails.split(',').map(e => e.trim());
+    const emails = formData.target_emails.split(",").map((e) => e.trim());
     for (const email of emails) {
       if (email) {
         const result = validateEmail(email);
@@ -120,7 +123,7 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
 
     // Validate target emails
     if (formData.target_emails.trim()) {
-      const emails = formData.target_emails.split(',').map(e => e.trim());
+      const emails = formData.target_emails.split(",").map((e) => e.trim());
       for (const email of emails) {
         if (email) {
           const result = validateEmail(email);
@@ -159,12 +162,12 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
     const success = await onSubmit(formData);
     if (success) {
       setFormData({
-        name: '',
-        template_id: '',
-        target_emails: '',
-        sender_name: '',
-        sender_email: '',
-        landing_page_url: ''
+        name: "",
+        template_id: "",
+        target_emails: "",
+        sender_name: "",
+        sender_email: "",
+        landing_page_url: "",
       });
       setTargetEmailsError(null);
       setSenderEmailError(null);
@@ -178,7 +181,11 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
         <span aria-hidden="true">🎯</span> Criar Campanha de Phishing
       </h3>
 
-      <form onSubmit={handleSubmit} className={styles.form} aria-label="Phishing campaign configuration">
+      <form
+        onSubmit={handleSubmit}
+        className={styles.form}
+        aria-label="Phishing campaign configuration"
+      >
         <Input
           label="Nome da Campanha"
           variant="cyber"
@@ -195,13 +202,16 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
           <select
             id="campaign-template"
             value={formData.template_id}
-            onChange={(e) => setFormData({ ...formData, template_id: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, template_id: e.target.value })
+            }
             className={styles.select}
             required
             aria-required="true"
-            aria-label="Select phishing template">
+            aria-label="Select phishing template"
+          >
             <option value="">Selecione um template...</option>
-            {templates.map(template => (
+            {templates.map((template) => (
               <option key={template.id} value={template.id}>
                 {template.name}
               </option>
@@ -221,7 +231,9 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
             fullWidth
             maxLength={500}
             aria-invalid={!!targetEmailsError}
-            aria-describedby={targetEmailsError ? "target-emails-error" : undefined}
+            aria-describedby={
+              targetEmailsError ? "target-emails-error" : undefined
+            }
           />
           {targetEmailsError && (
             <div
@@ -239,7 +251,9 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
           label="Nome do Remetente"
           variant="cyber"
           value={formData.sender_name}
-          onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, sender_name: e.target.value })
+          }
           required
           fullWidth
           maxLength={200}
@@ -257,7 +271,9 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
             fullWidth
             maxLength={500}
             aria-invalid={!!senderEmailError}
-            aria-describedby={senderEmailError ? "sender-email-error" : undefined}
+            aria-describedby={
+              senderEmailError ? "sender-email-error" : undefined
+            }
           />
           {senderEmailError && (
             <div
@@ -301,8 +317,9 @@ export const CampaignForm = ({ templates, onSubmit, loading }) => {
           variant="warning"
           loading={loading}
           fullWidth
-          aria-label="Create phishing campaign">
-          {loading ? 'Criando Campanha...' : 'Criar Campanha'}
+          aria-label="Create phishing campaign"
+        >
+          {loading ? "Criando Campanha..." : "Criar Campanha"}
         </Button>
       </form>
 

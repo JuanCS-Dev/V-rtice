@@ -24,11 +24,11 @@ const UsernameModule = () => {
       if (data.success && data.data) {
         // Estrutura retornada pelo /api/investigate/auto
         const investigationData = data.data;
-        
+
         // Extrair dados detalhados do username hunter se disponível
         let platformsFound = [];
         let totalFound = 0;
-        
+
         if (investigationData.username_analysis) {
           const usernameData = investigationData.username_analysis;
           platformsFound = (usernameData.found_platforms || []).map(p => ({
@@ -40,7 +40,7 @@ const UsernameModule = () => {
           }));
           totalFound = usernameData.found_count || 0;
         }
-        
+
         const adaptedResults = {
           username: username,
           platforms_found: platformsFound,

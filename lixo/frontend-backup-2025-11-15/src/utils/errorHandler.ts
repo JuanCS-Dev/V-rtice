@@ -7,7 +7,7 @@
  * Following Boris Cherny's principle: "Errors should be actionable"
  */
 
-import type { ErrorResponse } from '../types/errors';
+import type { ErrorResponse } from "../types/errors";
 
 // ============================================================================
 // Error Code to User Message Mapping
@@ -20,38 +20,39 @@ import type { ErrorResponse } from '../types/errors';
  */
 export const ERROR_MESSAGES: Record<string, string> = {
   // Authentication errors
-  AUTH_001: 'Please log in to continue.',
-  AUTH_002: 'Invalid authentication token. Please log in again.',
-  AUTH_003: 'Your session has expired. Please log in again.',
-  AUTH_004: 'You do not have permission to perform this action.',
+  AUTH_001: "Please log in to continue.",
+  AUTH_002: "Invalid authentication token. Please log in again.",
+  AUTH_003: "Your session has expired. Please log in again.",
+  AUTH_004: "You do not have permission to perform this action.",
 
   // Validation errors
-  VAL_422: 'Please check your input and try again.',
-  VAL_001: 'Required field is missing.',
-  VAL_002: 'Invalid format provided.',
-  VAL_003: 'Value out of acceptable range.',
+  VAL_422: "Please check your input and try again.",
+  VAL_001: "Required field is missing.",
+  VAL_002: "Invalid format provided.",
+  VAL_003: "Value out of acceptable range.",
 
   // Rate limiting
-  RATE_429: 'Too many requests. Please wait a moment and try again.',
-  RATE_001: 'Request quota exceeded. Please try again later.',
+  RATE_429: "Too many requests. Please wait a moment and try again.",
+  RATE_001: "Request quota exceeded. Please try again later.",
 
   // System errors
-  SYS_500: 'An unexpected error occurred. Please try again later.',
-  SYS_503: 'Service temporarily unavailable. Please try again in a few moments.',
-  SYS_504: 'Request timed out. Please try again.',
+  SYS_500: "An unexpected error occurred. Please try again later.",
+  SYS_503:
+    "Service temporarily unavailable. Please try again in a few moments.",
+  SYS_504: "Request timed out. Please try again.",
 
   // External service errors
-  EXT_001: 'External service is temporarily unavailable.',
-  EXT_002: 'External service request timed out.',
-  EXT_003: 'Received invalid response from external service.',
+  EXT_001: "External service is temporarily unavailable.",
+  EXT_002: "External service request timed out.",
+  EXT_003: "Received invalid response from external service.",
 
   // Resource errors
-  RES_001: 'Requested resource not found.',
-  RES_002: 'Resource already exists.',
-  RES_003: 'Resource is locked and cannot be modified.',
+  RES_001: "Requested resource not found.",
+  RES_002: "Resource already exists.",
+  RES_003: "Resource is locked and cannot be modified.",
 
   // Default fallback
-  UNKNOWN: 'An error occurred. Please try again or contact support.',
+  UNKNOWN: "An error occurred. Please try again or contact support.",
 };
 
 // ============================================================================
@@ -59,29 +60,29 @@ export const ERROR_MESSAGES: Record<string, string> = {
 // ============================================================================
 
 export enum ErrorSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-  CRITICAL = 'critical',
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  CRITICAL = "critical",
 }
 
 /**
  * Map error codes to severity levels
  */
 export function getErrorSeverity(errorCode: string): ErrorSeverity {
-  if (errorCode.startsWith('AUTH_')) {
+  if (errorCode.startsWith("AUTH_")) {
     return ErrorSeverity.WARNING;
   }
 
-  if (errorCode.startsWith('VAL_')) {
+  if (errorCode.startsWith("VAL_")) {
     return ErrorSeverity.INFO;
   }
 
-  if (errorCode.startsWith('RATE_')) {
+  if (errorCode.startsWith("RATE_")) {
     return ErrorSeverity.WARNING;
   }
 
-  if (errorCode.startsWith('SYS_') || errorCode.startsWith('EXT_')) {
+  if (errorCode.startsWith("SYS_") || errorCode.startsWith("EXT_")) {
     return ErrorSeverity.ERROR;
   }
 
@@ -120,17 +121,18 @@ export interface ApiError {
  */
 export function parseApiError(error: any): ApiError {
   // Extract error details
-  const errorCode = error?.error_code || error?.errorCode || 'UNKNOWN';
-  const requestId = error?.request_id || error?.requestId || 'unknown';
-  const path = error?.path || 'unknown';
+  const errorCode = error?.error_code || error?.errorCode || "UNKNOWN";
+  const requestId = error?.request_id || error?.requestId || "unknown";
+  const path = error?.path || "unknown";
   const timestamp = error?.timestamp || new Date().toISOString();
 
   // Get user-friendly message
-  const message = ERROR_MESSAGES[errorCode] || error?.detail || ERROR_MESSAGES.UNKNOWN;
+  const message =
+    ERROR_MESSAGES[errorCode] || error?.detail || ERROR_MESSAGES.UNKNOWN;
 
   // Parse validation errors if present
   const validationErrors = error?.validation_errors?.map((ve: any) => ({
-    field: ve.loc.join('.'),
+    field: ve.loc.join("."),
     message: ve.msg,
   }));
 
@@ -152,17 +154,17 @@ export function parseApiError(error: any): ApiError {
  * @returns Formatted error message
  */
 export function formatValidationErrors(
-  validationErrors: Array<{ field: string; message: string }>
+  validationErrors: Array<{ field: string; message: string }>,
 ): string {
   if (validationErrors.length === 0) {
-    return 'Please check your input and try again.';
+    return "Please check your input and try again.";
   }
 
   if (validationErrors.length === 1) {
     return validationErrors[0].message;
   }
 
-  return validationErrors.map((e) => `${e.field}: ${e.message}`).join('\n');
+  return validationErrors.map((e) => `${e.field}: ${e.message}`).join("\n");
 }
 
 // ============================================================================
@@ -212,13 +214,13 @@ export function logError(error: ApiError, context?: string) {
   };
 
   if (error.severity === ErrorSeverity.CRITICAL) {
-    console.error('[CRITICAL ERROR]', logData);
+    console.error("[CRITICAL ERROR]", logData);
   } else if (error.severity === ErrorSeverity.ERROR) {
-    console.error('[ERROR]', logData);
+    console.error("[ERROR]", logData);
   } else if (error.severity === ErrorSeverity.WARNING) {
-    console.warn('[WARNING]', logData);
+    console.warn("[WARNING]", logData);
   } else {
-    console.info('[INFO]', logData);
+    console.info("[INFO]", logData);
   }
 }
 
@@ -230,11 +232,11 @@ export function logError(error: ApiError, context?: string) {
  */
 export function isRetryableError(errorCode: string): boolean {
   const retryableErrors = [
-    'SYS_503', // Service unavailable
-    'SYS_504', // Timeout
-    'EXT_001', // External service unavailable
-    'EXT_002', // External service timeout
-    'RATE_429', // Rate limit (can retry after delay)
+    "SYS_503", // Service unavailable
+    "SYS_504", // Timeout
+    "EXT_001", // External service unavailable
+    "EXT_002", // External service timeout
+    "RATE_429", // Rate limit (can retry after delay)
   ];
 
   return retryableErrors.includes(errorCode);
@@ -259,7 +261,7 @@ export function getRetryDelay(errorCode: string, attempt: number = 0): number {
 // React Hook for Error Handling
 // ============================================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 /**
  * Hook for handling API errors

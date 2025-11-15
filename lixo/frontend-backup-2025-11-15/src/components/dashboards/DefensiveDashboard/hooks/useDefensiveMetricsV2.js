@@ -15,9 +15,9 @@
  * - Optimized re-renders
  */
 
-import { useEffect } from 'react';
-import { useDefensiveMetricsQuery } from '../../../../hooks/queries/useDefensiveMetricsQuery';
-import { useDefensiveStore } from '../../../../stores/defensiveStore';
+import { useEffect } from "react";
+import { useDefensiveMetricsQuery } from "../../../../hooks/queries/useDefensiveMetricsQuery";
+import { useDefensiveStore } from "../../../../stores/defensiveStore";
 
 /**
  * Hook that combines React Query + Zustand
@@ -35,38 +35,32 @@ export const useDefensiveMetricsV2 = (options = {}) => {
   const setError = useDefensiveStore((state) => state.setError);
 
   // React Query
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-    isRefetching,
-    dataUpdatedAt
-  } = useDefensiveMetricsQuery({
-    ...options,
-    onSuccess: (data) => {
-      // Sync to Zustand store on successful fetch
-      setMetrics(data);
+  const { data, isLoading, error, refetch, isRefetching, dataUpdatedAt } =
+    useDefensiveMetricsQuery({
+      ...options,
+      onSuccess: (data) => {
+        // Sync to Zustand store on successful fetch
+        setMetrics(data);
 
-      // Call custom callback if provided
-      if (options.onSuccess) {
-        options.onSuccess(data);
-      }
-    },
-    onError: (err) => {
-      // Sync error to Zustand store
-      setError(err.message);
+        // Call custom callback if provided
+        if (options.onSuccess) {
+          options.onSuccess(data);
+        }
+      },
+      onError: (err) => {
+        // Sync error to Zustand store
+        setError(err.message);
 
-      // Call custom callback if provided
-      if (options.onError) {
-        options.onError(err);
-      }
-    }
-  });
+        // Call custom callback if provided
+        if (options.onError) {
+          options.onError(err);
+        }
+      },
+    });
 
   // Sync loading state to Zustand
   useEffect(() => {
-    setLoading('metrics', isLoading || isRefetching);
+    setLoading("metrics", isLoading || isRefetching);
   }, [isLoading, isRefetching, setLoading]);
 
   return {
@@ -85,7 +79,7 @@ export const useDefensiveMetricsV2 = (options = {}) => {
     refetch,
 
     // Metadata
-    lastUpdate: dataUpdatedAt ? new Date(dataUpdatedAt).toISOString() : null
+    lastUpdate: dataUpdatedAt ? new Date(dataUpdatedAt).toISOString() : null,
   };
 };
 

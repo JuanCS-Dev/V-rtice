@@ -11,18 +11,18 @@
  * />
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import styles from './EmptyState.module.css';
+import React from "react";
+import PropTypes from "prop-types";
+import styles from "./EmptyState.module.css";
 
 export const EmptyState = ({
-  icon = '📭',
-  title = 'No data available',
+  icon = "📭",
+  title = "No data available",
   message,
   action,
-  variant = 'default',
-  size = 'md',
-  className = '',
+  variant = "default",
+  size = "md",
+  className = "",
 }) => {
   const sizeClasses = {
     sm: styles.sm,
@@ -55,8 +55,8 @@ EmptyState.propTypes = {
   title: PropTypes.string.isRequired,
   message: PropTypes.string,
   action: PropTypes.node,
-  variant: PropTypes.oneOf(['default', 'cyber', 'osint', 'analytics']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  variant: PropTypes.oneOf(["default", "cyber", "osint", "analytics"]),
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
   className: PropTypes.string,
 };
 

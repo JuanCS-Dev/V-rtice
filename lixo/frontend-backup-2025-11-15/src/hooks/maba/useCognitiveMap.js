@@ -13,17 +13,15 @@
  * @returns {Object} { graph, isLoading, error, refetch }
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { mabaService } from '../../services/maba/mabaService';
-import logger from '../../utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { mabaService } from "../../services/maba/mabaService";
+import logger from "../../utils/logger";
 
 const DEFAULT_POLLING_INTERVAL = 60000; // 60s (less frequent, large data)
 
 export const useCognitiveMap = (query = {}, options = {}) => {
-  const {
-    pollingInterval = DEFAULT_POLLING_INTERVAL,
-    enabled = true,
-  } = options;
+  const { pollingInterval = DEFAULT_POLLING_INTERVAL, enabled = true } =
+    options;
 
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [isLoading, setIsLoading] = useState(true);
@@ -44,12 +42,12 @@ export const useCognitiveMap = (query = {}, options = {}) => {
 
       setGraph(graphData);
       setIsLoading(false);
-      logger.debug('[useCognitiveMap] Graph updated:', {
+      logger.debug("[useCognitiveMap] Graph updated:", {
         nodes: graphData.nodes.length,
         edges: graphData.edges.length,
       });
     } catch (err) {
-      logger.error('[useCognitiveMap] Failed to fetch cognitive map:', err);
+      logger.error("[useCognitiveMap] Failed to fetch cognitive map:", err);
       setError(err.message);
       setIsLoading(false);
     }

@@ -22,15 +22,15 @@
  * });
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import logger from '@/utils/logger';
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import logger from "@/utils/logger";
 
 const DEFAULT_OPTIONS = {
   reconnect: true,
   reconnectInterval: 1000,
   maxReconnectAttempts: 5,
   heartbeatInterval: 30000, // 30s
-  heartbeatMessage: JSON.stringify({ type: 'ping' }),
+  heartbeatMessage: JSON.stringify({ type: "ping" }),
   onOpen: null,
   onMessage: null,
   onClose: null,
@@ -38,7 +38,7 @@ const DEFAULT_OPTIONS = {
   onReconnect: null, // GAP #73 FIX: Callback to fetch missed data on reconnect
   fallbackToPolling: true,
   pollingInterval: 5000,
-  debug: false
+  debug: false,
 };
 
 export const useWebSocket = (url, options = {}) => {
@@ -60,11 +60,14 @@ export const useWebSocket = (url, options = {}) => {
   const lastMessageTimeRef = useRef(Date.now()); // GAP #73 FIX: Track last message time
 
   // Log helper
-  const log = useCallback((...args) => {
-    if (opts.debug) {
-      logger.debug('[useWebSocket]', ...args);
-    }
-  }, [opts.debug]);
+  const log = useCallback(
+    (...args) => {
+      if (opts.debug) {
+        logger.debug("[useWebSocket]", ...args);
+      }
+    },
+    [opts.debug],
+  );
 
   // Start heartbeat
   const startHeartbeat = useCallback(() => {
@@ -72,7 +75,7 @@ export const useWebSocket = (url, options = {}) => {
 
     heartbeatIntervalRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        log('Sending heartbeat');
+        log("Sending heartbeat");
         wsRef.current.send(opts.heartbeatMessage);
       }
     }, opts.heartbeatInterval);
@@ -91,32 +94,42 @@ export const useWebSocket = (url, options = {}) => {
     const attempt = reconnectAttemptsRef.current;
     const delay = Math.min(
       opts.reconnectInterval * Math.pow(2, attempt),
-      30000 // Max 30s
+      30000, // Max 30s
     );
     log(`Reconnect delay: ${delay}ms (attempt ${attempt + 1})`);
     return delay;
   }, [opts.reconnectInterval, log]);
 
   // Send message
-  const send = useCallback((message) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(typeof message === 'string' ? message : JSON.stringify(message));
-      log('Message sent:', message);
-    } else {
-      // Queue message for when connection is restored
-      messageQueueRef.current.push(message);
-      setQueuedMessages(messageQueueRef.current.length);
-      log('Message queued (offline):', message);
-    }
-  }, [log]);
+  const send = useCallback(
+    (message) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          typeof message === "string" ? message : JSON.stringify(message),
+        );
+        log("Message sent:", message);
+      } else {
+        // Queue message for when connection is restored
+        messageQueueRef.current.push(message);
+        setQueuedMessages(messageQueueRef.current.length);
+        log("Message queued (offline):", message);
+      }
+    },
+    [log],
+  );
 
   // Process queued messages
   const processQueue = useCallback(() => {
-    if (messageQueueRef.current.length > 0 && wsRef.current?.readyState === WebSocket.OPEN) {
+    if (
+      messageQueueRef.current.length > 0 &&
+      wsRef.current?.readyState === WebSocket.OPEN
+    ) {
       log(`Processing ${messageQueueRef.current.length} queued messages`);
       while (messageQueueRef.current.length > 0) {
         const message = messageQueueRef.current.shift();
-        wsRef.current.send(typeof message === 'string' ? message : JSON.stringify(message));
+        wsRef.current.send(
+          typeof message === "string" ? message : JSON.stringify(message),
+        );
       }
       setQueuedMessages(0);
     }
@@ -126,11 +139,13 @@ export const useWebSocket = (url, options = {}) => {
   const startPolling = useCallback(() => {
     if (!opts.fallbackToPolling || pollingIntervalRef.current) return;
 
-    log('Starting polling fallback');
+    log("Starting polling fallback");
     setUsePolling(true);
 
     // Extract base URL from WebSocket URL
-    const pollingUrl = url.replace('ws://', 'http://').replace('wss://', 'https://');
+    const pollingUrl = url
+      .replace("ws://", "http://")
+      .replace("wss://", "https://");
 
     pollingIntervalRef.current = setInterval(async () => {
       try {
@@ -138,10 +153,11 @@ export const useWebSocket = (url, options = {}) => {
         if (response.ok) {
           const pollingData = await response.json();
           setData(pollingData);
-          if (opts.onMessage) opts.onMessage({ data: JSON.stringify(pollingData) });
+          if (opts.onMessage)
+            opts.onMessage({ data: JSON.stringify(pollingData) });
         }
       } catch (err) {
-        log('Polling error:', err);
+        log("Polling error:", err);
       }
     }, opts.pollingInterval);
   }, [url, opts, log]);
@@ -152,24 +168,24 @@ export const useWebSocket = (url, options = {}) => {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
       setUsePolling(false);
-      log('Stopped polling');
+      log("Stopped polling");
     }
   }, [log]);
 
   // Connect WebSocket
   const connect = useCallback(() => {
     if (!url) {
-      log('No URL provided');
+      log("No URL provided");
       return;
     }
 
     try {
-      log('Connecting to', url);
+      log("Connecting to", url);
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onopen = async () => {
-        log('Connected');
+        log("Connected");
         setIsConnected(true);
         setError(null);
 
@@ -188,20 +204,20 @@ export const useWebSocket = (url, options = {}) => {
 
         // GAP #73 FIX: Sync missed data if this is a reconnection
         if (wasReconnect && opts.onReconnect && lastDisconnectTime) {
-          log('Fetching missed data since disconnect...');
+          log("Fetching missed data since disconnect...");
           try {
             const missedData = await opts.onReconnect({
               lastDisconnectTime,
               lastMessageTime: lastMessageTimeRef.current,
-              downtime: Date.now() - lastDisconnectTime
+              downtime: Date.now() - lastDisconnectTime,
             });
 
             if (missedData) {
-              log('Received missed data:', missedData);
+              log("Received missed data:", missedData);
               setData(missedData);
             }
           } catch (err) {
-            logger.error('[useWebSocket] Failed to fetch missed data:', err);
+            logger.error("[useWebSocket] Failed to fetch missed data:", err);
           }
         }
 
@@ -216,7 +232,7 @@ export const useWebSocket = (url, options = {}) => {
           const parsedData = JSON.parse(event.data);
 
           // Ignore pong responses
-          if (parsedData.type === 'pong') return;
+          if (parsedData.type === "pong") return;
 
           // GAP #73 FIX: Track last message time for data sync
           lastMessageTimeRef.current = Date.now();
@@ -224,20 +240,20 @@ export const useWebSocket = (url, options = {}) => {
           setData(parsedData);
           if (opts.onMessage) opts.onMessage(event);
         } catch (err) {
-          log('Message parsing error:', err);
+          log("Message parsing error:", err);
           setData(event.data);
           if (opts.onMessage) opts.onMessage(event);
         }
       };
 
       ws.onerror = (event) => {
-        log('WebSocket error:', event);
+        log("WebSocket error:", event);
         setError(event);
         if (opts.onError) opts.onError(event);
       };
 
       ws.onclose = (event) => {
-        log('Disconnected', event.code, event.reason);
+        log("Disconnected", event.code, event.reason);
         setIsConnected(false);
         stopHeartbeat();
 
@@ -247,7 +263,10 @@ export const useWebSocket = (url, options = {}) => {
         if (opts.onClose) opts.onClose(event);
 
         // Reconnect logic
-        if (opts.reconnect && reconnectAttemptsRef.current < opts.maxReconnectAttempts) {
+        if (
+          opts.reconnect &&
+          reconnectAttemptsRef.current < opts.maxReconnectAttempts
+        ) {
           const delay = getReconnectDelay();
           log(`Reconnecting in ${delay}ms...`);
 
@@ -256,22 +275,32 @@ export const useWebSocket = (url, options = {}) => {
             connect();
           }, delay);
         } else if (reconnectAttemptsRef.current >= opts.maxReconnectAttempts) {
-          log('Max reconnect attempts reached. Falling back to polling.');
+          log("Max reconnect attempts reached. Falling back to polling.");
           startPolling();
         }
       };
     } catch (err) {
-      log('Connection error:', err);
+      log("Connection error:", err);
       setError(err);
       if (opts.fallbackToPolling) {
         startPolling();
       }
     }
-  }, [url, opts, log, startHeartbeat, stopHeartbeat, processQueue, getReconnectDelay, startPolling, stopPolling]);
+  }, [
+    url,
+    opts,
+    log,
+    startHeartbeat,
+    stopHeartbeat,
+    processQueue,
+    getReconnectDelay,
+    startPolling,
+    stopPolling,
+  ]);
 
   // Manual reconnect
   const reconnect = useCallback(() => {
-    log('Manual reconnect triggered');
+    log("Manual reconnect triggered");
     reconnectAttemptsRef.current = 0;
 
     // Close existing connection
@@ -285,7 +314,7 @@ export const useWebSocket = (url, options = {}) => {
 
   // Disconnect
   const disconnect = useCallback(() => {
-    log('Disconnecting');
+    log("Disconnecting");
 
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
@@ -322,7 +351,7 @@ export const useWebSocket = (url, options = {}) => {
     send,
     reconnect,
     disconnect,
-    queuedMessages
+    queuedMessages,
   };
 };
 

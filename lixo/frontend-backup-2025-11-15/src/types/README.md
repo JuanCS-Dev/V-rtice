@@ -16,6 +16,7 @@ npm install --save-dev openapi-typescript
 ### 2. Generate Types
 
 **From local development server:**
+
 ```bash
 # Start backend first
 cd backend/api_gateway && python main.py
@@ -25,6 +26,7 @@ npm run generate:types
 ```
 
 **From production:**
+
 ```bash
 npm run generate:types:prod
 ```
@@ -32,14 +34,15 @@ npm run generate:types:prod
 ### 3. Use Type-safe Client
 
 ```typescript
-import { typedApiClient } from '@/api/typedClient';
+import { typedApiClient } from "@/api/typedClient";
 
-const { data, error } = await typedApiClient.GET('/api/v1/health');
+const { data, error } = await typedApiClient.GET("/api/v1/health");
 ```
 
 ## 🚀 How It Works
 
 ### 1. OpenAPI Schema (Source of Truth)
+
 ```yaml
 # backend/api_gateway generates this
 openapi: 3.1.0
@@ -59,6 +62,7 @@ paths:
 ```
 
 ### 2. Generated TypeScript Types
+
 ```typescript
 // src/types/api.ts (auto-generated)
 export interface paths {
@@ -81,13 +85,14 @@ export interface paths {
 ```
 
 ### 3. Type-safe Client Usage
+
 ```typescript
-const { data } = await typedApiClient.GET('/api/v1/health');
+const { data } = await typedApiClient.GET("/api/v1/health");
 
 // TypeScript knows:
-console.log(data.status);    // ✅ string
-console.log(data.version);   // ✅ string
-console.log(data.foo);       // ❌ Error: Property 'foo' does not exist
+console.log(data.status); // ✅ string
+console.log(data.version); // ✅ string
+console.log(data.foo); // ❌ Error: Property 'foo' does not exist
 ```
 
 ## 📚 Usage Examples
@@ -95,10 +100,10 @@ console.log(data.foo);       // ❌ Error: Property 'foo' does not exist
 ### Basic GET Request
 
 ```typescript
-import { typedApiClient } from '@/api/typedClient';
+import { typedApiClient } from "@/api/typedClient";
 
 async function getHealth() {
-  const { data, error, response } = await typedApiClient.GET('/api/v1/health');
+  const { data, error, response } = await typedApiClient.GET("/api/v1/health");
 
   if (error) {
     // Error is typed!
@@ -109,7 +114,7 @@ async function getHealth() {
 
   // Data is typed!
   return {
-    isHealthy: data.status === 'healthy',
+    isHealthy: data.status === "healthy",
     version: data.version,
   };
 }
@@ -119,10 +124,10 @@ async function getHealth() {
 
 ```typescript
 async function startScan(target: string) {
-  const { data, error } = await typedApiClient.POST('/api/v1/scan/start', {
+  const { data, error } = await typedApiClient.POST("/api/v1/scan/start", {
     body: {
       target,
-      scanType: 'quick', // ← Autocomplete available!
+      scanType: "quick", // ← Autocomplete available!
       // foo: 'bar'       // ← TypeScript error: unknown field
     },
   });
@@ -138,11 +143,11 @@ async function startScan(target: string) {
 ### Query Parameters
 
 ```typescript
-const { data } = await typedApiClient.GET('/api/v1/search', {
+const { data } = await typedApiClient.GET("/api/v1/search", {
   params: {
     query: {
-      q: 'test',
-      limit: 10,        // ← TypeScript validates type
+      q: "test",
+      limit: 10, // ← TypeScript validates type
       // foo: 'bar'     // ← Error: unknown param
     },
   },
@@ -205,38 +210,43 @@ graph LR
 
 ## ✅ Benefits
 
-| Before | After |
-|--------|-------|
-| ❌ Manual type definitions | ✅ Auto-generated from OpenAPI |
-| ❌ Types can diverge from API | ✅ Types always match API |
-| ❌ Runtime errors | ✅ Compile-time errors |
-| ❌ No autocomplete | ✅ Full autocomplete |
+| Before                         | After                                   |
+| ------------------------------ | --------------------------------------- |
+| ❌ Manual type definitions     | ✅ Auto-generated from OpenAPI          |
+| ❌ Types can diverge from API  | ✅ Types always match API               |
+| ❌ Runtime errors              | ✅ Compile-time errors                  |
+| ❌ No autocomplete             | ✅ Full autocomplete                    |
 | ❌ Breaking changes undetected | ✅ Breaking changes = TypeScript errors |
 
 ## 🎯 Type Safety Guarantees
 
 ### Endpoints
+
 - ✅ Only valid endpoints can be called
 - ✅ TypeScript error for non-existent endpoints
 - ✅ Autocomplete shows all available endpoints
 
 ### Request Bodies
+
 - ✅ Only valid fields can be sent
 - ✅ TypeScript error for unknown fields
 - ✅ Required fields enforced
 - ✅ Field types validated
 
 ### Query Parameters
+
 - ✅ Only valid params can be used
 - ✅ Param types validated
 - ✅ Required params enforced
 
 ### Responses
+
 - ✅ Response shape known at compile time
 - ✅ Accessing non-existent fields = TypeScript error
 - ✅ Different status codes have different types
 
 ### Error Handling
+
 - ✅ Error shapes typed
 - ✅ Validation errors typed with field details
 - ✅ Request IDs always available
@@ -246,11 +256,11 @@ graph LR
 ### Custom Fetch Options
 
 ```typescript
-const { data } = await typedApiClient.GET('/api/v1/health', {
+const { data } = await typedApiClient.GET("/api/v1/health", {
   // All fetch options supported
   signal: abortController.signal,
   headers: {
-    'Custom-Header': 'value',
+    "Custom-Header": "value",
   },
 });
 ```
@@ -261,14 +271,14 @@ const { data } = await typedApiClient.GET('/api/v1/health', {
 typedApiClient.use({
   async onRequest({ request }) {
     // Add auth token
-    request.headers.set('Authorization', `Bearer ${token}`);
+    request.headers.set("Authorization", `Bearer ${token}`);
     return request;
   },
 
   async onResponse({ response }) {
     // Log errors
     if (!response.ok) {
-      console.error('Request failed:', response.status);
+      console.error("Request failed:", response.status);
     }
     return response;
   },
@@ -278,12 +288,14 @@ typedApiClient.use({
 ### Type Extraction
 
 ```typescript
-import type { paths } from '@/types/api';
+import type { paths } from "@/types/api";
 
 // Extract specific types
-type HealthResponse = paths['/api/v1/health']['get']['responses'][200]['content']['application/json'];
+type HealthResponse =
+  paths["/api/v1/health"]["get"]["responses"][200]["content"]["application/json"];
 
-type ScanRequest = paths['/api/v1/scan/start']['post']['requestBody']['content']['application/json'];
+type ScanRequest =
+  paths["/api/v1/scan/start"]["post"]["requestBody"]["content"]["application/json"];
 ```
 
 ## 📝 Maintenance
@@ -291,11 +303,13 @@ type ScanRequest = paths['/api/v1/scan/start']['post']['requestBody']['content']
 ### Regenerate Types
 
 **When to regenerate:**
+
 - After backend API changes
 - After pulling changes that modify backend
 - Before deploying frontend
 
 **How to regenerate:**
+
 ```bash
 # 1. Ensure backend is running
 cd backend/api_gateway && python main.py
@@ -316,11 +330,13 @@ npm run type-check
 If types generation shows breaking changes:
 
 1. **Review the diff**
+
    ```bash
    git diff src/types/api.ts
    ```
 
 2. **Find usages**
+
    ```bash
    # TypeScript will show all errors
    npm run type-check
@@ -361,6 +377,7 @@ npm run generate:types
 ### Type Mismatch
 
 If you see TypeScript errors after regenerating:
+
 - This means the API changed
 - Fix frontend code to match new API
 - Or fix backend if change was unintentional

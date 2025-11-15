@@ -26,37 +26,46 @@
  * Glory to YHWH - Judge of All Decisions
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import logger from "@/utils/logger";
-import { WS_ENDPOINTS } from '@/config/api';
-import styles from './HITLDecisionConsole.module.css';
+import { WS_ENDPOINTS } from "@/config/api";
+import styles from "./HITLDecisionConsole.module.css";
 
 /**
  * Priority levels with tactical color coding
  */
 const PRIORITY_CONFIG = {
-  CRITICAL: { color: '#dc2626', icon: '🔴', label: 'CRITICAL', soundAlert: true },
-  HIGH: { color: '#f59e0b', icon: '🟠', label: 'HIGH', soundAlert: false },
-  MEDIUM: { color: '#f97316', icon: '🟠', label: 'MEDIUM', soundAlert: false },
-  LOW: { color: '#10b981', icon: '🟢', label: 'LOW', soundAlert: false },
+  CRITICAL: {
+    color: "#dc2626",
+    icon: "🔴",
+    label: "CRITICAL",
+    soundAlert: true,
+  },
+  HIGH: { color: "#f59e0b", icon: "🟠", label: "HIGH", soundAlert: false },
+  MEDIUM: { color: "#f97316", icon: "🟠", label: "MEDIUM", soundAlert: false },
+  LOW: { color: "#10b981", icon: "🟢", label: "LOW", soundAlert: false },
 };
 
 /**
  * Action types with clear descriptions
  */
 const ACTION_TYPES = {
-  BLOCK_IP: { icon: '🚫', label: 'Block IP Address', reversible: true },
-  ISOLATE_HOST: { icon: '🔒', label: 'Isolate Host', reversible: true },
-  QUARANTINE_SYSTEM: { icon: '🛡️', label: 'Quarantine System', reversible: true },
-  KILL_PROCESS: { icon: '⚔️', label: 'Terminate Process', reversible: false },
-  ACTIVATE_KILLSWITCH: { icon: '🆘', label: 'KILL SWITCH', reversible: false },
-  DEPLOY_HONEYPOT: { icon: '🍯', label: 'Deploy Honeypot', reversible: true },
-  UPDATE_FIREWALL: { icon: '🔥', label: 'Update Firewall', reversible: true },
-  REVOKE_ACCESS: { icon: '🔐', label: 'Revoke Access', reversible: true },
-  ESCALATE_TO_SOC: { icon: '📢', label: 'Escalate to SOC', reversible: false },
-  NO_ACTION: { icon: '⏸️', label: 'No Action (Monitor)', reversible: true },
+  BLOCK_IP: { icon: "🚫", label: "Block IP Address", reversible: true },
+  ISOLATE_HOST: { icon: "🔒", label: "Isolate Host", reversible: true },
+  QUARANTINE_SYSTEM: {
+    icon: "🛡️",
+    label: "Quarantine System",
+    reversible: true,
+  },
+  KILL_PROCESS: { icon: "⚔️", label: "Terminate Process", reversible: false },
+  ACTIVATE_KILLSWITCH: { icon: "🆘", label: "KILL SWITCH", reversible: false },
+  DEPLOY_HONEYPOT: { icon: "🍯", label: "Deploy Honeypot", reversible: true },
+  UPDATE_FIREWALL: { icon: "🔥", label: "Update Firewall", reversible: true },
+  REVOKE_ACCESS: { icon: "🔐", label: "Revoke Access", reversible: true },
+  ESCALATE_TO_SOC: { icon: "📢", label: "Escalate to SOC", reversible: false },
+  NO_ACTION: { icon: "⏸️", label: "No Action (Monitor)", reversible: true },
 };
 
 /**
@@ -66,13 +75,13 @@ const HITLDecisionConsole = () => {
   // State management
   const [pendingDecisions, setPendingDecisions] = useState([]);
   const [selectedDecision, setSelectedDecision] = useState(null);
-  const [filterPriority, setFilterPriority] = useState('all');
+  const [filterPriority, setFilterPriority] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [decisionNotes, setDecisionNotes] = useState('');
+  const [decisionNotes, setDecisionNotes] = useState("");
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
@@ -84,8 +93,8 @@ const HITLDecisionConsole = () => {
   const fetchPendingDecisions = useCallback(async () => {
     try {
       const params = new URLSearchParams();
-      if (filterPriority !== 'all') {
-        params.append('priority', filterPriority);
+      if (filterPriority !== "all") {
+        params.append("priority", filterPriority);
       }
 
       const response = await fetch(`/api/hitl/decisions/pending?${params}`);
@@ -95,7 +104,7 @@ const HITLDecisionConsole = () => {
       setPendingDecisions(data || []);
       setError(null);
     } catch (err) {
-      logger.error('Failed to fetch pending decisions:', err);
+      logger.error("Failed to fetch pending decisions:", err);
       setError(err.message);
     }
   }, [filterPriority]);
@@ -105,13 +114,13 @@ const HITLDecisionConsole = () => {
    */
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch('/api/hitl/decisions/stats/summary');
+      const response = await fetch("/api/hitl/decisions/stats/summary");
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const data = await response.json();
       setStats(data);
     } catch (err) {
-      logger.error('Failed to fetch stats:', err);
+      logger.error("Failed to fetch stats:", err);
     }
   }, []);
 
@@ -119,12 +128,12 @@ const HITLDecisionConsole = () => {
    * WebSocket connection for real-time updates
    */
   useEffect(() => {
-    const username = localStorage.getItem('hitl_username') || 'analyst';
+    const username = localStorage.getItem("hitl_username") || "analyst";
     const ws = new WebSocket(`${WS_ENDPOINTS.hitl}/${username}`);
 
     // Boris Cherny Standard - GAP #83: Replace console.log with logger
     ws.onopen = () => {
-      logger.debug('🔗 WebSocket connected');
+      logger.debug("🔗 WebSocket connected");
       setWsConnected(true);
     };
 
@@ -132,30 +141,30 @@ const HITLDecisionConsole = () => {
       // Boris Cherny Standard: Protected JSON.parse (GAP #19 fix)
       try {
         const data = JSON.parse(event.data);
-        logger.debug('📨 WebSocket message:', data);
+        logger.debug("📨 WebSocket message:", data);
 
-        if (data.type === 'alert' && data.alert.alert_type === 'new_decision') {
+        if (data.type === "alert" && data.alert.alert_type === "new_decision") {
           // New decision arrived - refetch
           fetchPendingDecisions();
           fetchStats();
 
           // Play sound for critical decisions
-          if (data.alert.priority === 'critical') {
+          if (data.alert.priority === "critical") {
             playAlertSound();
           }
         }
       } catch (error) {
-        logger.error('Failed to parse WebSocket message:', error);
+        logger.error("Failed to parse WebSocket message:", error);
       }
     };
 
     ws.onerror = (error) => {
-      logger.error('WebSocket error:', error);
+      logger.error("WebSocket error:", error);
       setWsConnected(false);
     };
 
     ws.onclose = () => {
-      logger.debug('WebSocket closed');
+      logger.debug("WebSocket closed");
       setWsConnected(false);
     };
 
@@ -163,8 +172,11 @@ const HITLDecisionConsole = () => {
 
     // Boris Cherny Standard: Proper cleanup on unmount (GAP #20 fix)
     return () => {
-      if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
-        ws.close(1000, 'Component unmount');
+      if (
+        ws?.readyState === WebSocket.OPEN ||
+        ws?.readyState === WebSocket.CONNECTING
+      ) {
+        ws.close(1000, "Component unmount");
       }
     };
   }, [fetchPendingDecisions, fetchStats]);
@@ -175,10 +187,7 @@ const HITLDecisionConsole = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       setIsLoading(true);
-      await Promise.all([
-        fetchPendingDecisions(),
-        fetchStats()
-      ]);
+      await Promise.all([fetchPendingDecisions(), fetchStats()]);
       setIsLoading(false);
     };
 
@@ -202,7 +211,8 @@ const HITLDecisionConsole = () => {
    */
   const playAlertSound = () => {
     // Create subtle alert tone (optional)
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -210,9 +220,12 @@ const HITLDecisionConsole = () => {
     gainNode.connect(audioContext.destination);
 
     oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
+    oscillator.type = "sine";
     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.5,
+    );
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
@@ -226,19 +239,22 @@ const HITLDecisionConsole = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/hitl/decisions/${selectedDecision.analysis_id}/decide`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('hitl_token')}`
+      const response = await fetch(
+        `/api/hitl/decisions/${selectedDecision.analysis_id}/decide`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("hitl_token")}`,
+          },
+          body: JSON.stringify({
+            decision_id: selectedDecision.analysis_id,
+            status: "approved",
+            approved_actions: selectedDecision.recommended_actions || [],
+            notes: decisionNotes || null,
+          }),
         },
-        body: JSON.stringify({
-          decision_id: selectedDecision.analysis_id,
-          status: 'approved',
-          approved_actions: selectedDecision.recommended_actions || [],
-          notes: decisionNotes || null
-        })
-      });
+      );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -246,10 +262,10 @@ const HITLDecisionConsole = () => {
       await fetchPendingDecisions();
       await fetchStats();
       setSelectedDecision(null);
-      setDecisionNotes('');
+      setDecisionNotes("");
       setShowApprovalModal(false);
     } catch (err) {
-      logger.error('Failed to approve decision:', err);
+      logger.error("Failed to approve decision:", err);
       alert(`Failed to approve: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -264,19 +280,22 @@ const HITLDecisionConsole = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/hitl/decisions/${selectedDecision.analysis_id}/decide`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('hitl_token')}`
+      const response = await fetch(
+        `/api/hitl/decisions/${selectedDecision.analysis_id}/decide`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("hitl_token")}`,
+          },
+          body: JSON.stringify({
+            decision_id: selectedDecision.analysis_id,
+            status: "rejected",
+            approved_actions: [],
+            notes: `REJECTED: ${rejectionReason}${decisionNotes ? `\n\n${decisionNotes}` : ""}`,
+          }),
         },
-        body: JSON.stringify({
-          decision_id: selectedDecision.analysis_id,
-          status: 'rejected',
-          approved_actions: [],
-          notes: `REJECTED: ${rejectionReason}${decisionNotes ? `\n\n${decisionNotes}` : ''}`
-        })
-      });
+      );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -284,11 +303,11 @@ const HITLDecisionConsole = () => {
       await fetchPendingDecisions();
       await fetchStats();
       setSelectedDecision(null);
-      setDecisionNotes('');
-      setRejectionReason('');
+      setDecisionNotes("");
+      setRejectionReason("");
       setShowRejectionModal(false);
     } catch (err) {
-      logger.error('Failed to reject decision:', err);
+      logger.error("Failed to reject decision:", err);
       alert(`Failed to reject: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -303,17 +322,21 @@ const HITLDecisionConsole = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/hitl/decisions/${selectedDecision.analysis_id}/escalate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('hitl_token')}`
+      const response = await fetch(
+        `/api/hitl/decisions/${selectedDecision.analysis_id}/escalate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("hitl_token")}`,
+          },
+          body: JSON.stringify({
+            escalation_reason:
+              decisionNotes || "Requires senior analyst review",
+            urgency: selectedDecision.priority,
+          }),
         },
-        body: JSON.stringify({
-          escalation_reason: decisionNotes || 'Requires senior analyst review',
-          urgency: selectedDecision.priority
-        })
-      });
+      );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -321,9 +344,9 @@ const HITLDecisionConsole = () => {
       await fetchPendingDecisions();
       await fetchStats();
       setSelectedDecision(null);
-      setDecisionNotes('');
+      setDecisionNotes("");
     } catch (err) {
-      logger.error('Failed to escalate decision:', err);
+      logger.error("Failed to escalate decision:", err);
       alert(`Failed to escalate: ${err.message}`);
     } finally {
       setIsSubmitting(false);
@@ -340,10 +363,11 @@ const HITLDecisionConsole = () => {
 
     return {
       total: pendingDecisions.length,
-      critical: pendingDecisions.filter(d => d.priority === 'critical').length,
-      high: pendingDecisions.filter(d => d.priority === 'high').length,
-      medium: pendingDecisions.filter(d => d.priority === 'medium').length,
-      low: pendingDecisions.filter(d => d.priority === 'low').length,
+      critical: pendingDecisions.filter((d) => d.priority === "critical")
+        .length,
+      high: pendingDecisions.filter((d) => d.priority === "high").length,
+      medium: pendingDecisions.filter((d) => d.priority === "medium").length,
+      low: pendingDecisions.filter((d) => d.priority === "low").length,
     };
   }, [pendingDecisions]);
 
@@ -354,8 +378,12 @@ const HITLDecisionConsole = () => {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner} />
-        <p className={styles.loadingText}>Initializing HITL Decision Console...</p>
-        <p className={styles.loadingSubtext}>Connecting to Command Authorization System</p>
+        <p className={styles.loadingText}>
+          Initializing HITL Decision Console...
+        </p>
+        <p className={styles.loadingSubtext}>
+          Connecting to Command Authorization System
+        </p>
       </div>
     );
   }
@@ -369,7 +397,9 @@ const HITLDecisionConsole = () => {
         <div className={styles.errorIcon}>⚠️</div>
         <h2 className={styles.errorTitle}>HITL Service Unavailable</h2>
         <p className={styles.errorMessage}>{error}</p>
-        <p className={styles.errorHint}>Ensure HITL Backend is running on port 8000</p>
+        <p className={styles.errorHint}>
+          Ensure HITL Backend is running on port 8000
+        </p>
         <button
           className={styles.retryButton}
           onClick={() => window.location.reload()}
@@ -399,10 +429,12 @@ const HITLDecisionConsole = () => {
 
         <div className={styles.headerRight}>
           {/* WebSocket Status */}
-          <div className={`${styles.wsStatus} ${wsConnected ? styles.wsConnected : styles.wsDisconnected}`}>
+          <div
+            className={`${styles.wsStatus} ${wsConnected ? styles.wsConnected : styles.wsDisconnected}`}
+          >
             <div className={styles.wsIndicator} />
             <span className={styles.wsLabel}>
-              {wsConnected ? 'LIVE FEED' : 'OFFLINE'}
+              {wsConnected ? "LIVE FEED" : "OFFLINE"}
             </span>
           </div>
 
@@ -411,12 +443,16 @@ const HITLDecisionConsole = () => {
             <div className={styles.quickStats}>
               <div className={styles.quickStat}>
                 <span className={styles.quickStatLabel}>Today:</span>
-                <span className={styles.quickStatValue}>{stats.decisions_today || 0}</span>
+                <span className={styles.quickStatValue}>
+                  {stats.decisions_today || 0}
+                </span>
               </div>
               <div className={styles.quickStat}>
                 <span className={styles.quickStatLabel}>Approval Rate:</span>
                 <span className={styles.quickStatValue}>
-                  {stats.approval_rate ? `${(stats.approval_rate * 100).toFixed(0)}%` : '—'}
+                  {stats.approval_rate
+                    ? `${(stats.approval_rate * 100).toFixed(0)}%`
+                    : "—"}
                 </span>
               </div>
             </div>
@@ -471,10 +507,10 @@ const HITLDecisionConsole = () => {
       <div className={styles.filterBar}>
         <div className={styles.filterLabel}>FILTER BY PRIORITY:</div>
         <div className={styles.filterButtons}>
-          {['all', 'critical', 'high', 'medium', 'low'].map((priority) => (
+          {["all", "critical", "high", "medium", "low"].map((priority) => (
             <button
               key={priority}
-              className={`${styles.filterButton} ${filterPriority === priority ? styles.filterButtonActive : ''}`}
+              className={`${styles.filterButton} ${filterPriority === priority ? styles.filterButtonActive : ""}`}
               onClick={() => setFilterPriority(priority)}
             >
               {priority.toUpperCase()}
@@ -508,14 +544,18 @@ const HITLDecisionConsole = () => {
               <div className={styles.emptyQueue}>
                 <div className={styles.emptyIcon}>✅</div>
                 <p className={styles.emptyText}>No Pending Decisions</p>
-                <p className={styles.emptySubtext}>All threats have been reviewed</p>
+                <p className={styles.emptySubtext}>
+                  All threats have been reviewed
+                </p>
               </div>
             ) : (
               pendingDecisions.map((decision) => (
                 <DecisionCard
                   key={decision.analysis_id}
                   decision={decision}
-                  isSelected={selectedDecision?.analysis_id === decision.analysis_id}
+                  isSelected={
+                    selectedDecision?.analysis_id === decision.analysis_id
+                  }
                   onClick={() => setSelectedDecision(decision)}
                 />
               ))
@@ -530,8 +570,12 @@ const HITLDecisionConsole = () => {
           ) : (
             <div className={styles.noSelection}>
               <div className={styles.noSelectionIcon}>👈</div>
-              <p className={styles.noSelectionText}>Select a decision from the queue</p>
-              <p className={styles.noSelectionSubtext}>Review threat context before authorization</p>
+              <p className={styles.noSelectionText}>
+                Select a decision from the queue
+              </p>
+              <p className={styles.noSelectionSubtext}>
+                Review threat context before authorization
+              </p>
             </div>
           )}
         </section>
@@ -551,8 +595,12 @@ const HITLDecisionConsole = () => {
           ) : (
             <div className={styles.authPanelEmpty}>
               <div className={styles.authPanelEmptyIcon}>🔐</div>
-              <p className={styles.authPanelEmptyText}>Authorization Required</p>
-              <p className={styles.authPanelEmptySubtext}>Select a decision to authorize</p>
+              <p className={styles.authPanelEmptyText}>
+                Authorization Required
+              </p>
+              <p className={styles.authPanelEmptySubtext}>
+                Select a decision to authorize
+              </p>
             </div>
           )}
         </aside>
@@ -578,7 +626,7 @@ const HITLDecisionConsole = () => {
           onConfirm={handleReject}
           onCancel={() => {
             setShowRejectionModal(false);
-            setRejectionReason('');
+            setRejectionReason("");
           }}
           isSubmitting={isSubmitting}
         />
@@ -591,20 +639,29 @@ const HITLDecisionConsole = () => {
  * Decision Card Component - Queue item
  */
 const DecisionCard = ({ decision, isSelected, onClick }) => {
-  const priorityConfig = PRIORITY_CONFIG[decision.priority?.toUpperCase()] || PRIORITY_CONFIG.MEDIUM;
+  const priorityConfig =
+    PRIORITY_CONFIG[decision.priority?.toUpperCase()] || PRIORITY_CONFIG.MEDIUM;
   const age = calculateAge(decision.created_at);
 
   return (
     <div
-      className={`${styles.decisionCard} ${isSelected ? styles.decisionCardSelected : ''}`}
+      className={`${styles.decisionCard} ${isSelected ? styles.decisionCardSelected : ""}`}
       onClick={onClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       role="button"
       tabIndex={0}
       style={{ borderLeftColor: priorityConfig.color }}
     >
       <div className={styles.cardHeader}>
-        <span className={styles.cardPriority} style={{ color: priorityConfig.color }}>
+        <span
+          className={styles.cardPriority}
+          style={{ color: priorityConfig.color }}
+        >
           {priorityConfig.icon} {priorityConfig.label}
         </span>
         <span className={styles.cardAge}>{age}</span>
@@ -615,11 +672,10 @@ const DecisionCard = ({ decision, isSelected, onClick }) => {
           {decision.incident_id || decision.analysis_id}
         </div>
         <div className={styles.cardThreat}>
-          {decision.threat_level} - {decision.attributed_actor || 'Unknown Actor'}
+          {decision.threat_level} -{" "}
+          {decision.attributed_actor || "Unknown Actor"}
         </div>
-        <div className={styles.cardSource}>
-          {decision.source_ip}
-        </div>
+        <div className={styles.cardSource}>{decision.source_ip}</div>
       </div>
 
       <div className={styles.cardFooter}>
@@ -627,7 +683,9 @@ const DecisionCard = ({ decision, isSelected, onClick }) => {
           {decision.recommended_actions?.length || 0} actions
         </span>
         <span className={styles.cardConfidence}>
-          {decision.confidence ? `${decision.confidence.toFixed(1)}% confidence` : '—'}
+          {decision.confidence
+            ? `${decision.confidence.toFixed(1)}% confidence`
+            : "—"}
         </span>
       </div>
     </div>
@@ -651,7 +709,9 @@ const DecisionDetails = ({ decision }) => {
         <div className={styles.detailsGrid}>
           <div className={styles.detailItem}>
             <span className={styles.detailLabel}>Incident ID:</span>
-            <span className={styles.detailValue}>{decision.incident_id || '—'}</span>
+            <span className={styles.detailValue}>
+              {decision.incident_id || "—"}
+            </span>
           </div>
           <div className={styles.detailItem}>
             <span className={styles.detailLabel}>Threat Level:</span>
@@ -666,7 +726,7 @@ const DecisionDetails = ({ decision }) => {
           <div className={styles.detailItem}>
             <span className={styles.detailLabel}>Attribution:</span>
             <span className={styles.detailValue}>
-              {decision.attributed_actor || 'Unknown'}
+              {decision.attributed_actor || "Unknown"}
               {decision.confidence && ` (${decision.confidence.toFixed(1)}%)`}
             </span>
           </div>
@@ -676,7 +736,9 @@ const DecisionDetails = ({ decision }) => {
       {/* IOCs */}
       {decision.iocs && decision.iocs.length > 0 && (
         <section className={styles.detailsSection}>
-          <h3 className={styles.sectionTitle}>Indicators of Compromise (IOCs)</h3>
+          <h3 className={styles.sectionTitle}>
+            Indicators of Compromise (IOCs)
+          </h3>
           <div className={styles.iocList}>
             {decision.iocs.map((ioc, idx) => (
               <div key={idx} className={styles.iocItem}>
@@ -690,7 +752,9 @@ const DecisionDetails = ({ decision }) => {
       {/* TTPs */}
       {decision.ttps && decision.ttps.length > 0 && (
         <section className={styles.detailsSection}>
-          <h3 className={styles.sectionTitle}>Tactics, Techniques & Procedures (MITRE ATT&CK)</h3>
+          <h3 className={styles.sectionTitle}>
+            Tactics, Techniques & Procedures (MITRE ATT&CK)
+          </h3>
           <div className={styles.ttpList}>
             {decision.ttps.map((ttp, idx) => (
               <div key={idx} className={styles.ttpItem}>
@@ -702,18 +766,19 @@ const DecisionDetails = ({ decision }) => {
       )}
 
       {/* Recommended Actions */}
-      {decision.recommended_actions && decision.recommended_actions.length > 0 && (
-        <section className={styles.detailsSection}>
-          <h3 className={styles.sectionTitle}>Recommended Actions</h3>
-          <div className={styles.actionsList}>
-            {decision.recommended_actions.map((action, idx) => (
-              <div key={idx} className={styles.actionItem}>
-                {action}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {decision.recommended_actions &&
+        decision.recommended_actions.length > 0 && (
+          <section className={styles.detailsSection}>
+            <h3 className={styles.sectionTitle}>Recommended Actions</h3>
+            <div className={styles.actionsList}>
+              {decision.recommended_actions.map((action, idx) => (
+                <div key={idx} className={styles.actionItem}>
+                  {action}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
       {/* Forensic Summary */}
       {decision.forensic_summary && (
@@ -738,7 +803,7 @@ const AuthorizationPanel = ({
   onApprove,
   onReject,
   onEscalate,
-  isSubmitting
+  isSubmitting,
 }) => {
   return (
     <div className={styles.authContent}>
@@ -750,7 +815,9 @@ const AuthorizationPanel = ({
       {/* Notes */}
       {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
       <div className={styles.authNotes}>
-        <label htmlFor="decision-notes-textarea" className={styles.notesLabel}>Decision Notes (Optional):</label>
+        <label htmlFor="decision-notes-textarea" className={styles.notesLabel}>
+          Decision Notes (Optional):
+        </label>
         <textarea
           id="decision-notes-textarea"
           className={styles.notesTextarea}
@@ -797,8 +864,8 @@ const AuthorizationPanel = ({
       <div className={styles.authWarning}>
         <div className={styles.warningIcon}>⚠️</div>
         <p className={styles.warningText}>
-          This decision will trigger automated response actions in production systems.
-          All actions are logged and audited.
+          This decision will trigger automated response actions in production
+          systems. All actions are logged and audited.
         </p>
       </div>
     </div>
@@ -808,26 +875,31 @@ const AuthorizationPanel = ({
 /**
  * Approval Confirmation Modal
  */
-const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) => {
+const ApprovalModal = ({
+  decision,
+  notes,
+  onConfirm,
+  onCancel,
+  isSubmitting,
+}) => {
   return (
     <div
       className={styles.modalOverlay}
       onClick={onCancel}
-      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel();
+      }}
       role="presentation"
     >
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className={styles.modal} role="dialog" aria-modal="true">
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>⚠️ CONFIRM APPROVAL</h2>
         </div>
 
         <div className={styles.modalBody}>
           <p className={styles.modalText}>
-            You are about to <strong>APPROVE</strong> the following response actions:
+            You are about to <strong>APPROVE</strong> the following response
+            actions:
           </p>
 
           <div className={styles.modalActionsList}>
@@ -839,7 +911,8 @@ const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) =
           </div>
 
           <p className={styles.modalWarning}>
-            These actions will execute <strong>immediately</strong> and affect production systems.
+            These actions will execute <strong>immediately</strong> and affect
+            production systems.
           </p>
 
           {notes && (
@@ -862,7 +935,7 @@ const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) =
             onClick={onConfirm}
             disabled={isSubmitting}
           >
-            {isSubmitting ? '⏳ Approving...' : '✓ CONFIRM APPROVAL'}
+            {isSubmitting ? "⏳ Approving..." : "✓ CONFIRM APPROVAL"}
           </button>
         </div>
       </div>
@@ -873,26 +946,32 @@ const ApprovalModal = ({ decision, notes, onConfirm, onCancel, isSubmitting }) =
 /**
  * Rejection Modal
  */
-const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm, onCancel, isSubmitting }) => {
+const RejectionModal = ({
+  decision: _decision,
+  reason,
+  onReasonChange,
+  onConfirm,
+  onCancel,
+  isSubmitting,
+}) => {
   return (
     <div
       className={styles.modalOverlay}
       onClick={onCancel}
-      onKeyDown={(e) => { if (e.key === 'Escape') onCancel(); }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel();
+      }}
       role="presentation"
     >
-      <div
-        className={styles.modal}
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className={styles.modal} role="dialog" aria-modal="true">
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>✗ REJECT DECISION</h2>
         </div>
 
         <div className={styles.modalBody}>
           <p className={styles.modalText}>
-            Please provide a reason for rejecting this decision (required for audit trail):
+            Please provide a reason for rejecting this decision (required for
+            audit trail):
           </p>
 
           {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
@@ -909,7 +988,8 @@ const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm
           />
 
           <p className={styles.modalWarning}>
-            Rejection will <strong>prevent all automated actions</strong> and require manual investigation.
+            Rejection will <strong>prevent all automated actions</strong> and
+            require manual investigation.
           </p>
         </div>
 
@@ -926,7 +1006,7 @@ const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm
             onClick={onConfirm}
             disabled={!reason.trim() || isSubmitting}
           >
-            {isSubmitting ? '⏳ Rejecting...' : '✗ CONFIRM REJECTION'}
+            {isSubmitting ? "⏳ Rejecting..." : "✗ CONFIRM REJECTION"}
           </button>
         </div>
       </div>
@@ -938,14 +1018,14 @@ const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm
  * Utility: Calculate age in human-readable format
  */
 function calculateAge(timestamp) {
-  if (!timestamp) return '—';
+  if (!timestamp) return "—";
 
   const now = new Date();
   const created = new Date(timestamp);
   const diffMs = now - created;
   const diffMins = Math.floor(diffMs / 60000);
 
-  if (diffMins < 1) return 'Just now';
+  if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins}m ago`;
 
   const diffHours = Math.floor(diffMins / 60);

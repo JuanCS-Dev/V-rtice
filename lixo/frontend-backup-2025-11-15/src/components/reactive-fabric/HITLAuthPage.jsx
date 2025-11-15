@@ -21,18 +21,18 @@
  * Glory to YHWH - Guardian of All Gates
  */
 
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { API_ENDPOINTS } from '@/config/api';
-import styles from './HITLAuthPage.module.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "@/config/api";
+import styles from "./HITLAuthPage.module.css";
 
 const HITLAuthPage = ({ onAuthSuccess }) => {
-  const [step, setStep] = useState('login'); // 'login' | '2fa' | 'success'
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [step, setStep] = useState("login"); // 'login' | '2fa' | 'success'
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
@@ -48,15 +48,15 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
 
     try {
       const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
+      formData.append("username", username);
+      formData.append("password", password);
 
       const response = await fetch(`${API_ENDPOINTS.auth}/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
@@ -69,24 +69,24 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
       // Check if 2FA is required
       if (data.requires_2fa) {
         setAccessToken(data.access_token); // Partial token
-        setStep('2fa');
+        setStep("2fa");
       } else {
         // No 2FA - proceed directly
-        localStorage.setItem('hitl_token', data.access_token);
-        localStorage.setItem('hitl_refresh_token', data.refresh_token || '');
-        localStorage.setItem('hitl_username', username);
-        setStep('success');
+        localStorage.setItem("hitl_token", data.access_token);
+        localStorage.setItem("hitl_refresh_token", data.refresh_token || "");
+        localStorage.setItem("hitl_username", username);
+        setStep("success");
 
         setTimeout(() => {
           if (onAuthSuccess) {
             onAuthSuccess();
           } else {
-            navigate('/reactive-fabric/hitl');
+            navigate("/reactive-fabric/hitl");
           }
         }, 1500);
       }
     } catch (err) {
-      logger.error('Login failed:', err);
+      logger.error("Login failed:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -103,38 +103,38 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
 
     try {
       const response = await fetch(`${API_ENDPOINTS.auth}/2fa/verify`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          code: twoFactorCode
-        })
+          code: twoFactorCode,
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Invalid 2FA code');
+        throw new Error(errorData.detail || "Invalid 2FA code");
       }
 
       const data = await response.json();
 
       // Success - store tokens
-      localStorage.setItem('hitl_token', data.access_token);
-      localStorage.setItem('hitl_refresh_token', data.refresh_token || '');
-      localStorage.setItem('hitl_username', username);
-      setStep('success');
+      localStorage.setItem("hitl_token", data.access_token);
+      localStorage.setItem("hitl_refresh_token", data.refresh_token || "");
+      localStorage.setItem("hitl_username", username);
+      setStep("success");
 
       setTimeout(() => {
         if (onAuthSuccess) {
           onAuthSuccess();
         } else {
-          navigate('/reactive-fabric/hitl');
+          navigate("/reactive-fabric/hitl");
         }
       }, 1500);
     } catch (err) {
-      logger.error('2FA verification failed:', err);
+      logger.error("2FA verification failed:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -144,7 +144,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
   /**
    * Render login form
    */
-  if (step === 'login') {
+  if (step === "login") {
     return (
       <div className={styles.authPage}>
         <div className={styles.scanLine} aria-hidden="true" />
@@ -158,7 +158,9 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
           <header className={styles.authHeader}>
             <div className={styles.logoIcon}>🎯</div>
             <h1 className={styles.authTitle}>HITL CONSOLE</h1>
-            <p className={styles.authSubtitle}>HUMAN-IN-THE-LOOP AUTHORIZATION SYSTEM</p>
+            <p className={styles.authSubtitle}>
+              HUMAN-IN-THE-LOOP AUTHORIZATION SYSTEM
+            </p>
           </header>
 
           {/* Login Form */}
@@ -176,7 +178,9 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
             )}
 
             <div className={styles.formGroup}>
-              <label htmlFor="hitl-username" className={styles.formLabel}>USERNAME</label>
+              <label htmlFor="hitl-username" className={styles.formLabel}>
+                USERNAME
+              </label>
               <input
                 id="hitl-username"
                 type="text"
@@ -187,14 +191,16 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 autoComplete="username"
                 required
                 aria-invalid={!!error}
-                aria-describedby={error ? 'login-error' : undefined}
+                aria-describedby={error ? "login-error" : undefined}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="hitl-password" className={styles.formLabel}>PASSWORD</label>
+              <label htmlFor="hitl-password" className={styles.formLabel}>
+                PASSWORD
+              </label>
               <input
                 id="hitl-password"
                 type="password"
@@ -205,7 +211,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 autoComplete="current-password"
                 required
                 aria-invalid={!!error}
-                aria-describedby={error ? 'login-error' : undefined}
+                aria-describedby={error ? "login-error" : undefined}
               />
             </div>
 
@@ -237,7 +243,8 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
               </span>
             </div>
             <div className={styles.footerHint}>
-              Default credentials: <code>admin</code> / <code>ChangeMe123!</code>
+              Default credentials: <code>admin</code> /{" "}
+              <code>ChangeMe123!</code>
             </div>
           </footer>
         </div>
@@ -253,7 +260,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
   /**
    * Render 2FA form
    */
-  if (step === '2fa') {
+  if (step === "2fa") {
     return (
       <div className={styles.authPage}>
         <div className={styles.scanLine} aria-hidden="true" />
@@ -280,20 +287,26 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
             )}
 
             <div className={styles.formGroup}>
-              <label htmlFor="hitl-2fa-code" className={styles.formLabel}>2FA CODE</label>
+              <label htmlFor="hitl-2fa-code" className={styles.formLabel}>
+                2FA CODE
+              </label>
               <input
                 id="hitl-2fa-code"
                 type="text"
                 className={`${styles.formInput} ${styles.formInputCode}`}
                 value={twoFactorCode}
-                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) =>
+                  setTwoFactorCode(
+                    e.target.value.replace(/\D/g, "").slice(0, 6),
+                  )
+                }
                 placeholder="000000"
                 maxLength={6}
                 pattern="[0-9]{6}"
                 autoComplete="one-time-code"
                 required
                 aria-invalid={!!error}
-                aria-describedby={error ? '2fa-error' : undefined}
+                aria-describedby={error ? "2fa-error" : undefined}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
@@ -321,8 +334,8 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
               type="button"
               className={styles.backButton}
               onClick={() => {
-                setStep('login');
-                setTwoFactorCode('');
+                setStep("login");
+                setTwoFactorCode("");
                 setError(null);
               }}
               disabled={isLoading}
@@ -348,7 +361,7 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
   /**
    * Render success state
    */
-  if (step === 'success') {
+  if (step === "success") {
     return (
       <div className={styles.authPage}>
         <div className={styles.scanLine} aria-hidden="true" />
@@ -358,7 +371,9 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
           <div className={styles.successContainer}>
             <div className={styles.successIcon}>✓</div>
             <h2 className={styles.successTitle}>AUTHENTICATION SUCCESSFUL</h2>
-            <p className={styles.successText}>Access granted. Redirecting to HITL Console...</p>
+            <p className={styles.successText}>
+              Access granted. Redirecting to HITL Console...
+            </p>
             <div className={styles.successSpinner} />
           </div>
         </div>

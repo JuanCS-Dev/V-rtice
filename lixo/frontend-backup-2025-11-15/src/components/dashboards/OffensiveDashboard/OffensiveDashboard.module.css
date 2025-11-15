@@ -10,7 +10,7 @@
   flex-direction: column;
   background: var(--dashboard-bg);
   color: var(--color-text-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
   margin: 0;
   padding: 0;
@@ -44,7 +44,11 @@
 }
 
 .moduleArea::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--color-accent-primary) 0%, var(--color-accent-secondary) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-primary) 0%,
+    var(--color-accent-secondary) 100%
+  );
   border-radius: 5px;
 }
 
@@ -76,12 +80,19 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Responsive */

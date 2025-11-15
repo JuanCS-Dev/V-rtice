@@ -52,9 +52,12 @@ const DefensiveHeader = React.memo(
       setCurrentView("main");
     }, [setCurrentView]);
 
-    const handleModuleClick = useCallback((moduleId) => {
-      setActiveModule(moduleId);
-    }, [setActiveModule]);
+    const handleModuleClick = useCallback(
+      (moduleId) => {
+        setActiveModule(moduleId);
+      },
+      [setActiveModule],
+    );
 
     // Boris Cherny Standard - GAP #38 FIX: Format last update time
     const formatLastUpdate = (timestamp) => {
@@ -124,7 +127,9 @@ const DefensiveHeader = React.memo(
                 aria-live="polite"
                 data-maximus-status="updating"
               >
-                <span className={styles.spinner} aria-hidden="true">⟳</span>
+                <span className={styles.spinner} aria-hidden="true">
+                  ⟳
+                </span>
                 <span>{t("common.updating", "Updating")}...</span>
               </div>
             )}

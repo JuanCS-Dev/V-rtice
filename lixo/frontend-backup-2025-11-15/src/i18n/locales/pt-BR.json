@@ -262,12 +262,7 @@
     "admin": {
       "name": "ADMINISTRAÇÃO",
       "description": "Gerenciamento do Sistema",
-      "features": [
-        "Configurações",
-        "Usuários",
-        "Logs",
-        "Auditoria"
-      ]
+      "features": ["Configurações", "Usuários", "Logs", "Auditoria"]
     },
     "reactive_fabric": {
       "name": "REACTIVE FABRIC",

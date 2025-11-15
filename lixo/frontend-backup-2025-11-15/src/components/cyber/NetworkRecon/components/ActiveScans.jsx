@@ -1,5 +1,10 @@
-import React from 'react';
-import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
+import React from "react";
+import {
+  formatDateTime,
+  formatDate,
+  formatTime,
+  getTimestamp,
+} from "@/utils/dateHelpers";
 
 /**
  * ActiveScans - Lista de scans em andamento
@@ -10,7 +15,9 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="text-6xl mb-4 opacity-50">⚡</div>
-          <div className="text-red-400/50 text-xl font-bold">No Active Scans</div>
+          <div className="text-red-400/50 text-xl font-bold">
+            No Active Scans
+          </div>
           <div className="text-red-400/30 text-sm mt-2">
             Start a new scan to see real-time progress here
           </div>
@@ -20,9 +27,16 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
   }
 
   return (
-    <div className="space-y-4" role="region" aria-live="polite" aria-atomic="false">
+    <div
+      className="space-y-4"
+      role="region"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       <div className="text-orange-400 font-bold mb-4 flex items-center gap-2">
-        <span className="text-2xl animate-pulse" aria-hidden="true">⚡</span>
+        <span className="text-2xl animate-pulse" aria-hidden="true">
+          ⚡
+        </span>
         <span>ACTIVE SCANS ({scans.length})</span>
       </div>
 
@@ -34,7 +48,7 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
           className="border-2 border-orange-400/50 rounded-lg p-6 bg-gradient-to-br from-orange-900/10 to-red-900/10 cursor-pointer hover:border-orange-400 transition-all"
           onClick={() => onSelectScan(scan.scan_id)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === "Enter" || e.key === " ") {
               onSelectScan(scan.scan_id);
             }
           }}
@@ -45,7 +59,7 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
                 <span className="text-2xl animate-spin">⚙️</span>
                 <div>
                   <h3 className="text-orange-400 font-bold text-lg">
-                    {scan.target || 'Unknown Target'}
+                    {scan.target || "Unknown Target"}
                   </h3>
                   <p className="text-orange-400/60 text-sm font-mono">
                     ID: {scan.scan_id?.slice(0, 12)}...
@@ -57,7 +71,7 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
             <div className="text-right">
               <div className="text-orange-400/60 text-xs">Status</div>
               <div className="text-orange-400 font-bold text-xl animate-pulse">
-                {scan.status?.toUpperCase() || 'RUNNING'}
+                {scan.status?.toUpperCase() || "RUNNING"}
               </div>
             </div>
           </div>
@@ -102,7 +116,7 @@ export const ActiveScans = ({ scans, onSelectScan }) => {
             </div>
             <div className="bg-black/50 border border-orange-400/30 rounded p-3 text-center">
               <div className="text-orange-400 text-xl font-bold">
-                {scan.elapsed_time || '--'}
+                {scan.elapsed_time || "--"}
               </div>
               <div className="text-orange-400/60 text-xs">Elapsed</div>
             </div>

@@ -22,15 +22,15 @@ class ScreenReaderAnnouncer {
 
   init() {
     // Check if already exists
-    if (document.getElementById('sr-announcer')) return;
+    if (document.getElementById("sr-announcer")) return;
 
     // Create live region
-    this.liveRegion = document.createElement('div');
-    this.liveRegion.id = 'sr-announcer';
-    this.liveRegion.setAttribute('role', 'status');
-    this.liveRegion.setAttribute('aria-live', 'polite');
-    this.liveRegion.setAttribute('aria-atomic', 'true');
-    this.liveRegion.className = 'sr-only';
+    this.liveRegion = document.createElement("div");
+    this.liveRegion.id = "sr-announcer";
+    this.liveRegion.setAttribute("role", "status");
+    this.liveRegion.setAttribute("aria-live", "polite");
+    this.liveRegion.setAttribute("aria-atomic", "true");
+    this.liveRegion.className = "sr-only";
 
     // Add styles (visually hidden but accessible)
     this.liveRegion.style.cssText = `
@@ -49,20 +49,20 @@ class ScreenReaderAnnouncer {
    * @param {string} message - Message to announce
    * @param {string} priority - 'polite' | 'assertive'
    */
-  announce(message, priority = 'polite') {
+  announce(message, priority = "polite") {
     if (!this.liveRegion) this.init();
 
-    this.liveRegion.setAttribute('aria-live', priority);
+    this.liveRegion.setAttribute("aria-live", priority);
 
     // Clear and set message (force re-announcement)
-    this.liveRegion.textContent = '';
+    this.liveRegion.textContent = "";
     setTimeout(() => {
       this.liveRegion.textContent = message;
     }, 100);
 
     // Auto-clear after 5 seconds
     setTimeout(() => {
-      this.liveRegion.textContent = '';
+      this.liveRegion.textContent = "";
     }, 5000);
   }
 
@@ -70,14 +70,14 @@ class ScreenReaderAnnouncer {
    * Announce error (assertive)
    */
   announceError(message) {
-    this.announce(`Error: ${message}`, 'assertive');
+    this.announce(`Error: ${message}`, "assertive");
   }
 
   /**
    * Announce success (polite)
    */
   announceSuccess(message) {
-    this.announce(`Success: ${message}`, 'polite');
+    this.announce(`Success: ${message}`, "polite");
   }
 }
 
@@ -94,11 +94,10 @@ export const announcer = new ScreenReaderAnnouncer();
  * @param {boolean} preventScroll - Prevent scroll on focus
  */
 export const focusElement = (element, preventScroll = false) => {
-  const el = typeof element === 'string'
-    ? document.querySelector(element)
-    : element;
+  const el =
+    typeof element === "string" ? document.querySelector(element) : element;
 
-  if (el && typeof el.focus === 'function') {
+  if (el && typeof el.focus === "function") {
     el.focus({ preventScroll });
   }
 };
@@ -108,17 +107,18 @@ export const focusElement = (element, preventScroll = false) => {
  */
 export const getFirstFocusable = (container) => {
   const focusableSelectors = [
-    'a[href]',
-    'button:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])'
-  ].join(',');
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(",");
 
-  const el = typeof container === 'string'
-    ? document.querySelector(container)
-    : container;
+  const el =
+    typeof container === "string"
+      ? document.querySelector(container)
+      : container;
 
   if (!el) return null;
 
@@ -129,10 +129,10 @@ export const getFirstFocusable = (container) => {
  * Trap focus within container (manual version)
  */
 export const trapFocus = (container, event) => {
-  if (event.key !== 'Tab') return;
+  if (event.key !== "Tab") return;
 
   const focusableElements = container.querySelectorAll(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
   );
 
   const firstElement = focusableElements[0];
@@ -157,11 +157,9 @@ export const trapFocus = (container, event) => {
  * https://www.w3.org/TR/WCAG20/#relativeluminancedef
  */
 const getRelativeLuminance = (rgb) => {
-  const [r, g, b] = rgb.map(val => {
+  const [r, g, b] = rgb.map((val) => {
     val = val / 255;
-    return val <= 0.03928
-      ? val / 12.92
-      : Math.pow((val + 0.055) / 1.055, 2.4);
+    return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   });
 
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -172,7 +170,7 @@ const getRelativeLuminance = (rgb) => {
  */
 const parseColor = (color) => {
   // Create temporary element
-  const temp = document.createElement('div');
+  const temp = document.createElement("div");
   temp.style.color = color;
   document.body.appendChild(temp);
 
@@ -206,7 +204,11 @@ export const getContrastRatio = (color1, color2) => {
  * @param {boolean} isLargeText - Text is >= 18pt or >= 14pt bold
  * @returns {boolean}
  */
-export const meetsContrastAA = (foreground, background, isLargeText = false) => {
+export const meetsContrastAA = (
+  foreground,
+  background,
+  isLargeText = false,
+) => {
   const ratio = getContrastRatio(foreground, background);
   const requiredRatio = isLargeText ? 3 : 4.5;
   return ratio >= requiredRatio;
@@ -215,7 +217,11 @@ export const meetsContrastAA = (foreground, background, isLargeText = false) => 
 /**
  * Check if contrast meets WCAG AAA standard
  */
-export const meetsContrastAAA = (foreground, background, isLargeText = false) => {
+export const meetsContrastAAA = (
+  foreground,
+  background,
+  isLargeText = false,
+) => {
   const ratio = getContrastRatio(foreground, background);
   const requiredRatio = isLargeText ? 4.5 : 7;
   return ratio >= requiredRatio;
@@ -229,7 +235,7 @@ export const meetsContrastAAA = (foreground, background, isLargeText = false) =>
  * Generate unique ID for ARIA relationships
  */
 let idCounter = 0;
-export const generateId = (prefix = 'a11y') => {
+export const generateId = (prefix = "a11y") => {
   return `${prefix}-${++idCounter}-${Date.now()}`;
 };
 
@@ -238,11 +244,11 @@ export const generateId = (prefix = 'a11y') => {
  */
 export const getAriaLabel = (element) => {
   return (
-    element.getAttribute('aria-label') ||
-    element.getAttribute('aria-labelledby') ||
+    element.getAttribute("aria-label") ||
+    element.getAttribute("aria-labelledby") ||
     element.textContent?.trim() ||
-    element.getAttribute('title') ||
-    ''
+    element.getAttribute("title") ||
+    ""
   );
 };
 
@@ -250,16 +256,16 @@ export const getAriaLabel = (element) => {
  * Check if element is hidden from screen readers
  */
 export const isAriaHidden = (element) => {
-  if (element.getAttribute('aria-hidden') === 'true') return true;
-  if (element.hasAttribute('hidden')) return true;
-  if (element.style.display === 'none') return true;
-  if (element.style.visibility === 'hidden') return true;
+  if (element.getAttribute("aria-hidden") === "true") return true;
+  if (element.hasAttribute("hidden")) return true;
+  if (element.style.display === "none") return true;
+  if (element.style.visibility === "hidden") return true;
 
   // Check parents
   let parent = element.parentElement;
   while (parent) {
-    if (parent.getAttribute('aria-hidden') === 'true') return true;
-    if (parent.hasAttribute('hidden')) return true;
+    if (parent.getAttribute("aria-hidden") === "true") return true;
+    if (parent.hasAttribute("hidden")) return true;
     parent = parent.parentElement;
   }
 
@@ -273,12 +279,12 @@ export const isAriaHidden = (element) => {
 /**
  * Creates keyboard event handler that triggers on Enter or Space
  * Use this for onClick elements that need keyboard support
- * 
+ *
  * @param {Function} callback - Function to call on activation
  * @returns {Function} Keyboard event handler
- * 
+ *
  * @example
- * <div 
+ * <div
  *   onClick={handleClick}
  *   onKeyDown={handleKeyboardClick(handleClick)}
  *   role="button"
@@ -288,7 +294,7 @@ export const isAriaHidden = (element) => {
  * </div>
  */
 export const handleKeyboardClick = (callback) => (event) => {
-  if (event.key === 'Enter' || event.key === ' ') {
+  if (event.key === "Enter" || event.key === " ") {
     event.preventDefault(); // Prevent space from scrolling
     callback(event);
   }
@@ -297,21 +303,21 @@ export const handleKeyboardClick = (callback) => (event) => {
 /**
  * Creates props object for making a div behave like a button
  * Includes role, tabIndex, and keyboard handlers
- * 
+ *
  * @param {Function} onClick - Click handler function
  * @param {Object} options - Additional options
  * @param {string} options.role - ARIA role (default: 'button')
  * @param {number} options.tabIndex - Tab index (default: 0)
  * @returns {Object} Props to spread on element
- * 
+ *
  * @example
  * <div {...makeAccessibleButton(handleClick)}>
  *   Click me
  * </div>
  */
 export const makeAccessibleButton = (onClick, options = {}) => {
-  const { role = 'button', tabIndex = 0 } = options;
-  
+  const { role = "button", tabIndex = 0 } = options;
+
   return {
     role,
     tabIndex,
@@ -324,16 +330,16 @@ export const makeAccessibleButton = (onClick, options = {}) => {
  * Check if element is keyboard focusable
  */
 export const isFocusable = (element) => {
-  if (element.disabled || element.hasAttribute('disabled')) return false;
+  if (element.disabled || element.hasAttribute("disabled")) return false;
   if (element.tabIndex < 0) return false;
 
   const tagName = element.tagName.toLowerCase();
-  const focusableTags = ['a', 'button', 'input', 'select', 'textarea'];
+  const focusableTags = ["a", "button", "input", "select", "textarea"];
 
   return (
     focusableTags.includes(tagName) ||
-    element.hasAttribute('tabindex') ||
-    element.hasAttribute('contenteditable')
+    element.hasAttribute("tabindex") ||
+    element.hasAttribute("contenteditable")
   );
 };
 
@@ -342,18 +348,18 @@ export const isFocusable = (element) => {
  */
 export const getAllFocusable = (container = document) => {
   const selector = [
-    'a[href]',
-    'area[href]',
-    'button:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
+    "a[href]",
+    "area[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
     '[tabindex]:not([tabindex="-1"])',
-    '[contenteditable]'
-  ].join(',');
+    "[contenteditable]",
+  ].join(",");
 
   return Array.from(container.querySelectorAll(selector)).filter(
-    el => !isAriaHidden(el)
+    (el) => !isAriaHidden(el),
   );
 };
 
@@ -363,9 +369,9 @@ export const getAllFocusable = (container = document) => {
 export const skipToMain = () => {
   const main = document.querySelector('main, [role="main"], #main-content');
   if (main) {
-    main.setAttribute('tabindex', '-1');
+    main.setAttribute("tabindex", "-1");
     main.focus();
-    main.removeAttribute('tabindex');
+    main.removeAttribute("tabindex");
   }
 };
 
@@ -378,19 +384,21 @@ export const validateAccessibility = {
    */
   hasSkipLink: () => {
     const skipLink = document.querySelector('a[href^="#"]:first-of-type');
-    return skipLink && skipLink.textContent.toLowerCase().includes('skip');
+    return skipLink && skipLink.textContent.toLowerCase().includes("skip");
   },
 
   /**
    * Check if images have alt text
    */
   imagesHaveAlt: () => {
-    const images = document.querySelectorAll('img');
-    const missing = Array.from(images).filter(img => !img.hasAttribute('alt'));
+    const images = document.querySelectorAll("img");
+    const missing = Array.from(images).filter(
+      (img) => !img.hasAttribute("alt"),
+    );
     return {
       pass: missing.length === 0,
       missing: missing.length,
-      total: images.length
+      total: images.length,
     };
   },
 
@@ -398,14 +406,14 @@ export const validateAccessibility = {
    * Check if form inputs have labels
    */
   inputsHaveLabels: () => {
-    const inputs = document.querySelectorAll('input, select, textarea');
-    const missing = Array.from(inputs).filter(input => {
+    const inputs = document.querySelectorAll("input, select, textarea");
+    const missing = Array.from(inputs).filter((input) => {
       const id = input.id;
       if (!id) return true;
 
       const label = document.querySelector(`label[for="${id}"]`);
-      const ariaLabel = input.getAttribute('aria-label');
-      const ariaLabelledBy = input.getAttribute('aria-labelledby');
+      const ariaLabel = input.getAttribute("aria-label");
+      const ariaLabelledBy = input.getAttribute("aria-labelledby");
 
       return !label && !ariaLabel && !ariaLabelledBy;
     });
@@ -413,7 +421,7 @@ export const validateAccessibility = {
     return {
       pass: missing.length === 0,
       missing: missing.length,
-      total: inputs.length
+      total: inputs.length,
     };
   },
 
@@ -421,11 +429,11 @@ export const validateAccessibility = {
    * Check if page has proper heading structure
    */
   hasProperHeadings: () => {
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    const levels = Array.from(headings).map(h => parseInt(h.tagName[1]));
+    const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    const levels = Array.from(headings).map((h) => parseInt(h.tagName[1]));
 
     const hasH1 = levels.includes(1);
-    const h1Count = levels.filter(l => l === 1).length;
+    const h1Count = levels.filter((l) => l === 1).length;
     const skipsLevels = levels.some((level, i) => {
       if (i === 0) return false;
       return level - levels[i - 1] > 1;
@@ -435,7 +443,7 @@ export const validateAccessibility = {
       pass: hasH1 && h1Count === 1 && !skipsLevels,
       hasH1,
       h1Count,
-      skipsLevels
+      skipsLevels,
     };
   },
 
@@ -447,9 +455,9 @@ export const validateAccessibility = {
       skipLink: validateAccessibility.hasSkipLink(),
       images: validateAccessibility.imagesHaveAlt(),
       inputs: validateAccessibility.inputsHaveLabels(),
-      headings: validateAccessibility.hasProperHeadings()
+      headings: validateAccessibility.hasProperHeadings(),
     };
-  }
+  },
 };
 
 export default {
@@ -468,5 +476,5 @@ export default {
   isFocusable,
   getAllFocusable,
   skipToMain,
-  validateAccessibility
+  validateAccessibility,
 };

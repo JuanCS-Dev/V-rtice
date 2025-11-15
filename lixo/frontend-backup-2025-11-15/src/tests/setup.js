@@ -5,12 +5,15 @@
  */
 
 // Ensure NODE_ENV is set to test
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = "test";
 
-import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { toReceiveMessage, toHaveReceivedMessages } from 'vitest-websocket-mock';
+import { expect, afterEach, beforeAll, afterAll, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import {
+  toReceiveMessage,
+  toHaveReceivedMessages,
+} from "vitest-websocket-mock";
 
 // Add custom WebSocket matchers
 expect.extend({ toReceiveMessage, toHaveReceivedMessages });
@@ -19,13 +22,13 @@ expect.extend({ toReceiveMessage, toHaveReceivedMessages });
 afterEach(async () => {
   cleanup();
   // Wait for any pending promises to resolve
-  await new Promise(resolve => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
 });
 
 // Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -57,11 +60,11 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Fix jsdom offset properties for virtualized lists
-Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
   configurable: true,
   value: 600,
 });
-Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
   configurable: true,
   value: 800,
 });
@@ -74,7 +77,7 @@ Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
 global.fetch = vi.fn();
 
 // Mock logger globally
-vi.mock('@/utils/logger', () => ({
+vi.mock("@/utils/logger", () => ({
   default: {
     debug: vi.fn(),
     info: vi.fn(),
@@ -82,18 +85,18 @@ vi.mock('@/utils/logger', () => ({
     error: vi.fn(),
     group: vi.fn(),
     table: vi.fn(),
-    setLevel: vi.fn()
-  }
+    setLevel: vi.fn(),
+  },
 }));
 
 // Mock i18next globally to fix NO_I18NEXT_INSTANCE errors
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key, options) => {
       // Support interpolation for realistic translations
-      if (options && typeof options === 'object') {
+      if (options && typeof options === "object") {
         let result = key;
-        Object.keys(options).forEach(optKey => {
+        Object.keys(options).forEach((optKey) => {
           result = result.replace(`{{${optKey}}}`, options[optKey]);
         });
         return result;
@@ -102,8 +105,8 @@ vi.mock('react-i18next', () => ({
     },
     i18n: {
       changeLanguage: vi.fn(),
-      language: 'en',
-      languages: ['en', 'pt'],
+      language: "en",
+      languages: ["en", "pt"],
       exists: vi.fn(() => true),
     },
   }),
@@ -111,7 +114,7 @@ vi.mock('react-i18next', () => ({
   Translation: ({ children }) => children((key) => key),
   I18nextProvider: ({ children }) => children,
   initReactI18next: {
-    type: '3rdParty',
+    type: "3rdParty",
     init: vi.fn(),
   },
 }));
@@ -122,8 +125,8 @@ beforeAll(() => {
   console.error = (...args) => {
     // Filter out React warnings we don't care about in tests
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render')
+      typeof args[0] === "string" &&
+      args[0].includes("Warning: ReactDOM.render")
     ) {
       return;
     }

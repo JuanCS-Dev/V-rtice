@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL } from "@/config/api";
 /**
 import logger from '@/utils/logger';
  * useDefensiveMetricsQuery Hook
@@ -13,40 +13,41 @@ import logger from '@/utils/logger';
  * - Loading and error states
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../config/queryClient';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../config/queryClient";
 
 const API_BASE = API_BASE_URL;
 
 // Fetcher function
 const fetchDefensiveMetrics = async () => {
   const endpoints = [
-    { name: 'malware', url: `${API_BASE}/health`, field: 'threats' },
-    { name: 'ip-intel', url: `${API_BASE}/api/health`, field: 'suspiciousIPs' },
-    { name: 'domain', url: `${API_BASE}/api/health`, field: 'domains' },
-    { name: 'network', url: `${API_BASE}/api/health`, field: 'monitored' }
+    { name: "malware", url: `${API_BASE}/health`, field: "threats" },
+    { name: "ip-intel", url: `${API_BASE}/api/health`, field: "suspiciousIPs" },
+    { name: "domain", url: `${API_BASE}/api/health`, field: "domains" },
+    { name: "network", url: `${API_BASE}/api/health`, field: "monitored" },
   ];
 
   const results = await Promise.allSettled(
-    endpoints.map(ep =>
-      fetch(ep.url, { signal: AbortSignal.timeout(5000) })
-        .then(res => res.ok ? res.json() : null)
-    )
+    endpoints.map((ep) =>
+      fetch(ep.url, { signal: AbortSignal.timeout(5000) }).then((res) =>
+        res.ok ? res.json() : null,
+      ),
+    ),
   );
 
   const metrics = {
     threats: 0,
     suspiciousIPs: 0,
     domains: 0,
-    monitored: 0
+    monitored: 0,
   };
 
   results.forEach((result, index) => {
-    if (result.status === 'fulfilled' && result.value) {
+    if (result.status === "fulfilled" && result.value) {
       const endpoint = endpoints[index];
 
       // Count based on service health
-      if (result.value.status === 'healthy' || result.value.llm_ready) {
+      if (result.value.status === "healthy" || result.value.llm_ready) {
         metrics[endpoint.field] = Math.floor(Math.random() * 50) + 10;
       }
     }
@@ -89,11 +90,11 @@ export const useDefensiveMetricsQuery = (options = {}) => {
 
     // Error callback
     onError: (error) => {
-      logger.error('[useDefensiveMetricsQuery] Error:', error);
+      logger.error("[useDefensiveMetricsQuery] Error:", error);
       if (options.onError) {
         options.onError(error);
       }
-    }
+    },
   });
 };
 
