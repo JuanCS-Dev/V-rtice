@@ -59,46 +59,137 @@ export const setTokenRefreshHandler = (handler) => {
  */
 const corsPreflightCache = new Map();
 const PREFLIGHT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const PREFLIGHT_TIMEOUT = 3000; // 3s timeout for preflight
+const CORS_STRICT_MODE = false; // Set true to block on CORS failures
 
 /**
  * Check CORS preflight (OPTIONS) for an endpoint
- * Phase 1.5: Detect CORS issues before actual requests fail
+ *
+ * Boris Cherny Pattern: Fail fast on CORS issues
+ *
+ * Features:
+ * - Cache preflight results (5 min TTL)
+ * - Timeout protection (3s)
+ * - Retry on network errors (1 retry)
+ * - Strict mode option (block on failure)
+ *
+ * @param {string} endpoint - Endpoint to check
+ * @returns {Promise<boolean>} Whether CORS is allowed
+ * @throws {Error} In strict mode, throws on CORS failure
  */
 const checkCORSPreflight = async (endpoint) => {
   // Check cache first
   const cached = corsPreflightCache.get(endpoint);
   if (cached && Date.now() - cached.timestamp < PREFLIGHT_CACHE_TTL) {
+    logger.debug(`CORS preflight cache hit for ${endpoint}`);
     return cached.allowed;
   }
 
-  try {
-    const url = `${API_BASE}${endpoint}`;
-    const response = await fetch(url, {
-      method: "OPTIONS",
-      headers: {
-        "Access-Control-Request-Method": "POST",
-        "Access-Control-Request-Headers": "content-type,x-api-key,x-csrf-token",
-      },
-    });
+  const url = `${API_BASE}${endpoint}`;
+  let lastError = null;
 
-    const allowed = response.ok || response.status === 204;
+  // Try up to 2 times (1 retry) for network resilience
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), PREFLIGHT_TIMEOUT);
 
-    // Cache result
-    corsPreflightCache.set(endpoint, {
-      allowed,
-      timestamp: Date.now(),
-    });
+      const response = await fetch(url, {
+        method: "OPTIONS",
+        signal: controller.signal,
+        headers: {
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers": "content-type,x-api-key,x-csrf-token",
+        },
+      });
 
-    if (!allowed) {
-      logger.warn(`CORS preflight failed for ${endpoint}: ${response.status}`);
+      clearTimeout(timeoutId);
+
+      // Check if CORS is allowed
+      const allowed = response.ok || response.status === 204;
+
+      // Cache result (even failures - avoid hammering)
+      corsPreflightCache.set(endpoint, {
+        allowed,
+        timestamp: Date.now(),
+      });
+
+      if (!allowed) {
+        logger.warn(
+          `CORS preflight failed for ${endpoint}`,
+          {
+            status: response.status,
+            statusText: response.statusText,
+            attempt: attempt + 1,
+          }
+        );
+
+        if (CORS_STRICT_MODE) {
+          throw new Error(
+            `CORS preflight failed: ${response.status} ${response.statusText}`
+          );
+        }
+      } else {
+        if (attempt > 0) {
+          logger.info(`CORS preflight succeeded on retry for ${endpoint}`);
+        }
+      }
+
+      return allowed;
+
+    } catch (error) {
+      lastError = error;
+
+      // Timeout error
+      if (error.name === 'AbortError') {
+        logger.warn(`CORS preflight timeout for ${endpoint} (attempt ${attempt + 1}/2)`);
+
+        if (attempt === 0) {
+          // Retry once on timeout
+          await new Promise(resolve => setTimeout(resolve, 500));
+          continue;
+        }
+
+        if (CORS_STRICT_MODE) {
+          throw new Error(`CORS preflight timeout after ${PREFLIGHT_TIMEOUT}ms`);
+        }
+      }
+
+      // Network error
+      logger.warn(
+        `CORS preflight network error for ${endpoint} (attempt ${attempt + 1}/2)`,
+        { error: error.message }
+      );
+
+      if (attempt === 0) {
+        // Retry once on network error
+        await new Promise(resolve => setTimeout(resolve, 500));
+        continue;
+      }
     }
-
-    return allowed;
-  } catch (error) {
-    logger.warn(`CORS preflight check failed for ${endpoint}:`, error);
-    // Don't block the request - let it proceed and fail naturally if CORS is really broken
-    return true;
   }
+
+  // All attempts failed
+  logger.error(
+    `CORS preflight failed after all attempts for ${endpoint}`,
+    { error: lastError?.message }
+  );
+
+  if (CORS_STRICT_MODE) {
+    throw new Error(
+      `CORS preflight failed: ${lastError?.message || 'Unknown error'}`
+    );
+  }
+
+  // Permissive mode: allow request to proceed (it will fail naturally if CORS is really broken)
+  // Cache negative result to avoid repeated failed checks
+  corsPreflightCache.set(endpoint, {
+    allowed: true, // Permissive: let request try
+    timestamp: Date.now(),
+  });
+
+  return true;
 };
 
 /**
