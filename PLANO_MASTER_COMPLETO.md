@@ -436,29 +436,31 @@ frontend/
 **API Version**: v3.3.1
 **Base URL**: `http://localhost:8000`
 
-### 6.2 Categorias e Páginas
+### 6.2 Categorias e Páginas (REVISADO - OPÇÃO B)
 
-| Backend Category        | Frontend Page/Feature | Endpoints           | Prioridade      |
-| ----------------------- | --------------------- | ------------------- | --------------- |
-| **Auth**                | `/login`, `/auth`     | 5 endpoints         | ✅ FASE 2       |
-| **Dashboard**           | `/dashboard`          | Métricas agregadas  | ✅ **COMPLETO** |
-| **Offensive Security**  | `/offensive`          | 11 endpoints        | FASE 5-6        |
-| **Defensive Security**  | `/defensive`          | 9 endpoints         | FASE 7-8        |
-| **OSINT**               | `/osint`              | 17 endpoints        | FASE 9-10       |
-| **Google OSINT**        | `/osint/google`       | 8 endpoints         | FASE 9-10       |
-| **Network Scanning**    | `/offensive/network`  | 3 endpoints         | FASE 5-6        |
-| **IP Intelligence**     | `/osint/ip`           | 4 endpoints         | FASE 9-10       |
-| **Domain Intelligence** | `/osint/domain`       | 2 endpoints         | FASE 9-10       |
-| **Malware Analysis**    | `/offensive/malware`  | 4 endpoints         | FASE 5-6        |
-| **Threat Intelligence** | `/threat-intel`       | 2 endpoints         | FASE 7-8        |
-| **SSL Monitoring**      | `/ssl`                | 2 endpoints         | FASE 9-10       |
-| **AI Agent**            | `/ai`, `/maximus`     | 4 endpoints         | FASE 11-12      |
-| **Aurora Orchestrator** | `/maximus/aurora`     | 4 endpoints         | FASE 11-12      |
-| **Immunis System**      | `/immunis`            | 14 endpoints        | FASE 13-14      |
-| **Reactive Fabric**     | `/reactive-fabric`    | WebSocket RT        | FASE 15         |
-| **SINESP (Brasil)**     | `/sinesp`             | 3 endpoints         | FASE 16         |
-| **Admin**               | `/admin`              | User/Roles CRUD     | FASE 17         |
-| **Settings**            | `/settings`           | Profile/Preferences | FASE 17         |
+**NOTA**: Plano revisado para **65-70 páginas** após análise detalhada do backend (100+ serviços).
+
+| Backend Category             | Frontend Page/Feature      | Endpoints/Serviços     | Páginas | Prioridade  |
+| ---------------------------- | -------------------------- | ---------------------- | ------- | ----------- |
+| **Auth**                     | `/login`, `/auth`          | 5 endpoints            | 2       | ✅ FASE 2   |
+| **Dashboard**                | `/dashboard`               | Métricas agregadas     | 1       | ✅ COMPLETO |
+| **Offensive Security**       | `/offensive`               | 11 endpoints           | 7       | FASE 5-6    |
+| **Defensive Security**       | `/defensive`               | 9 endpoints            | 4       | FASE 7-8    |
+| **OSINT**                    | `/osint`                   | 17 endpoints           | 8       | FASE 9-10   |
+| **Maximus AI Ecosystem** ⭐  | `/maximus`                 | 8 serviços + WS        | **9**   | FASE 11-12  |
+| **Adaptive Immune System** ⭐ | `/immunis`                 | 12 serviços, 14 endp.  | **10**  | FASE 13-14  |
+| **HCL/HITL Workflow** ⭐      | `/hitl`                    | 6 serviços             | **5**   | FASE 15     |
+| **Reactive Fabric** ⭐        | `/reactive-fabric`         | WebSocket RT           | **6**   | FASE 16     |
+| **Aurora Orchestrator** ⭐    | `/aurora`                  | 4 endpoints            | **3**   | FASE 17     |
+| **Digital Thalamus** ⭐       | `/thalamus`                | 1 serviço              | **2**   | FASE 18     |
+| **Narrative Analysis** ⭐     | `/narrative`               | 4 serviços             | **3**   | FASE 19     |
+| **Wargaming/Simulation** ⭐   | `/wargaming`               | 3 serviços             | **2**   | FASE 20     |
+| **SINESP (Brasil)**          | `/sinesp`                  | 3 endpoints            | 2       | FASE 21     |
+| **Admin**                    | `/admin`                   | User/Roles CRUD        | 2       | FASE 22     |
+| **Settings**                 | `/settings`                | Profile/Preferences    | 3       | FASE 22     |
+|                              |                            | **TOTAL**              | **65-70** | 22 fases    |
+
+⭐ = Expandido ou Novo na Revisão
 
 ### 6.3 Detalhamento de Endpoints (Principais)
 
@@ -570,7 +572,9 @@ GET  /ocorrencias/heatmap          # Crime heatmap
 </AppLayout>
 ```
 
-### 7.2 Páginas por Módulo
+### 7.2 Páginas por Módulo (REVISADO - OPÇÃO B)
+
+**TOTAL REVISADO: 65-70 PÁGINAS**
 
 ```
 📊 DASHBOARD (1 página)
@@ -605,26 +609,61 @@ GET  /ocorrencias/heatmap          # Crime heatmap
 ⬜ Username Search
 ⬜ Comprehensive Investigation
 
-🧠 MAXIMUS AI (6 páginas)
-⬜ Maximus Core Dashboard
-⬜ Orchestrator
-⬜ Eureka (Discovery)
-⬜ Oráculo (Predictions)
-⬜ AI Chat Interface
-⬜ Consciousness Monitor
+🧠 MAXIMUS AI ECOSYSTEM (9 páginas) ⭐ EXPANDIDO
+⬜ Maximus Core Dashboard               # Central hub
+⬜ AI Orchestrator                      # Workflow orchestration
+⬜ Eureka Service Discovery             # Services mesh
+⬜ Oráculo V2 Predictions               # Advanced AI predictions
+⬜ Aurora Predict (ML)                  # Machine learning forecasting
+⬜ Integration Layer                    # Service integration status
+⬜ DLQ Monitor                          # Dead Letter Queue monitoring
+⬜ AI Chat Interface                    # Chat with MAXIMUS
+⬜ Consciousness Monitor                # Arousal, ESGT events (WebSocket)
 
-🦠 IMMUNIS SYSTEM (5 páginas)
-⬜ Immunis Overview
-⬜ Threats Dashboard
-⬜ Immune Agents
-⬜ Homeostasis Control
-⬜ Memory Bank
+🦠 ADAPTIVE IMMUNE SYSTEM (10 páginas) ⭐ EXPANDIDO
+⬜ Immunis Main Dashboard               # Overview do sistema inteiro
+⬜ Threats Detection & Response         # Threat lifecycle completo
+⬜ Immune Agents Overview               # Todos os 7 tipos de células
+⬜ B-Cells Dashboard                    # Antibody production específica
+⬜ T-Cells Dashboard                    # Helper, Cytotoxic, Regulatory
+⬜ Dendritic Cells Dashboard            # Antigen presentation
+⬜ Phagocytes Dashboard                 # Macrophages + Neutrophils
+⬜ Homeostasis Control                  # System balance
+⬜ Memory Bank & Antibodies             # Immunological memory
+⬜ Lymph Nodes Network                  # Communication network
 
-⚡ REACTIVE FABRIC (4 páginas)
-⬜ Reactive Fabric Overview
-⬜ Threat Timeline (WebSocket)
-⬜ Intelligence Fusion
-⬜ HITL Decision Console
+👤 HCL/HITL WORKFLOW (5 páginas) ⭐ NOVA
+⬜ HITL Main Dashboard                  # Workflow overview
+⬜ Analysis Queue                       # Tasks for analysis
+⬜ Planning & Execution                 # Automated plans + execution
+⬜ Human Decision Console               # Approval/rejection interface
+⬜ Knowledge Base                       # Historical decisions, patterns
+
+⚡ REACTIVE FABRIC (6 páginas) ⭐ EXPANDIDO
+⬜ Reactive Fabric Main                 # Orchestration hub
+⬜ Threat Timeline (WebSocket)          # Real-time threats
+⬜ Intelligence Fusion                  # Multi-source correlation
+⬜ HITL Decision Console                # Human decisions (link to HITL)
+⬜ Honeypot Grid                        # Honeypot status
+⬜ Decoy Bayou Map                      # Decoy network visualization
+
+🌅 AURORA ORCHESTRATOR (3 páginas) ⭐ NOVA
+⬜ Aurora Main Dashboard                # Investigation orchestration
+⬜ Active Investigations                # Running investigations
+⬜ Services Mesh                        # Available services for orchestration
+
+🧠 DIGITAL THALAMUS (2 páginas) ⭐ NOVA
+⬜ Thalamus Dashboard                   # Neural routing overview
+⬜ Signal Routing Map                   # Real-time signal flow
+
+📰 NARRATIVE ANALYSIS (3 páginas) ⭐ NOVA
+⬜ Narrative Dashboard                  # Manipulation detection
+⬜ Propaganda Techniques                # Detected techniques
+⬜ Seriema Graph Viz                    # Graph visualization
+
+🎮 WARGAMING & SIMULATION (2 páginas) ⭐ NOVA
+⬜ Wargaming Dashboard                  # Scenario simulation
+⬜ Strategic Planning                   # Strategic decisions
 
 🇧🇷 SINESP (2 páginas)
 ⬜ Vehicle Query
@@ -639,7 +678,8 @@ GET  /ocorrencias/heatmap          # Crime heatmap
 ⬜ Preferences
 ⬜ API Keys
 
-TOTAL: 45 páginas estimadas
+TOTAL: 65-70 páginas (22 fases de implementação)
+⭐ = Expandido ou Novo na Revisão
 ```
 
 ---
@@ -1521,19 +1561,21 @@ npm run lint
 
 ## RESUMO EXECUTIVO
 
-### Números do Projeto
+### Números do Projeto (REVISADO - OPÇÃO B)
 
-| Métrica                         | Valor                   |
-| ------------------------------- | ----------------------- |
-| **Total de Páginas Planejadas** | 45-50 páginas           |
-| **Backend Endpoints Mapeados**  | 250+ endpoints          |
-| **Backend Services Integrados** | 100+ serviços           |
-| **Componentes UI Planejados**   | 30+ componentes base    |
-| **Features Principais**         | 9 módulos completos     |
-| **Páginas Completas**           | 1 (Dashboard)           |
-| **Fases Totais**                | 18 fases                |
-| **Tempo Estimado Total**        | 20 semanas              |
-| **Progresso Atual**             | ~5% (Fase 1.5 completa) |
+| Métrica                         | Valor Anterior   | **Valor Revisado**     | Diferença  |
+| ------------------------------- | ---------------- | ---------------------- | ---------- |
+| **Total de Páginas Planejadas** | 45-50 páginas    | **65-70 páginas** ⭐    | +20 págs   |
+| **Backend Endpoints Mapeados**  | 250+ endpoints   | 250+ endpoints         | -          |
+| **Backend Services Integrados** | 100+ serviços    | 100+ serviços          | -          |
+| **Componentes UI Planejados**   | 30+ componentes  | 30+ componentes        | -          |
+| **Features Principais**         | 9 módulos        | **15 módulos** ⭐       | +6 módulos |
+| **Páginas Completas**           | 1 (Dashboard)    | 1 (Dashboard)          | -          |
+| **Fases Totais**                | 18 fases         | **22 fases** ⭐         | +4 fases   |
+| **Tempo Estimado Total**        | 20 semanas       | **26-28 semanas** ⭐    | +6-8 sem   |
+| **Progresso Atual**             | ~5%              | **~2%** (proporc.)     | -          |
+
+⭐ = Alterado na Revisão (OPÇÃO B escolhida)
 
 ### Stack Final
 
@@ -1572,14 +1614,37 @@ Tables: TanStack Table (futuro)
 
 1. ✅ **COMPLETO**: Dashboard inicial refinado
 2. ✅ **COMPLETO**: Documentação master plan
-3. **PRÓXIMO**: Implementar autenticação (FASE 2)
-4. **PRÓXIMO**: Componentes UI restantes (FASE 4)
-5. **PRÓXIMO**: Páginas de serviços (FASE 5+)
+3. ✅ **COMPLETO**: Análise e revisão de dashboards (OPÇÃO B escolhida)
+4. **PRÓXIMO**: Implementar autenticação (FASE 2)
+5. **PRÓXIMO**: Componentes UI restantes (FASE 4)
+6. **PRÓXIMO**: Páginas de serviços (FASE 5+)
+7. **PRIORITÁRIO**: Adaptive Immune System (10 páginas - P0)
+8. **PRIORITÁRIO**: Maximus AI Ecosystem (9 páginas - P0)
+9. **PRIORITÁRIO**: HCL/HITL Workflow (5 páginas - P0)
 
 ---
 
-**Versão**: 2.0
+## NOVIDADES NESTA REVISÃO (v2.1 - OPÇÃO B)
+
+### Adicionado:
+- ⭐ **+20 páginas** para melhor representação do backend
+- ⭐ **6 novos módulos**: HITL, Aurora, Thalamus, Narrative, Wargaming
+- ⭐ **Expansões**: Maximus (6→9), Immunis (5→10), Reactive Fabric (4→6)
+- ⭐ **+4 fases** de implementação (18→22 fases)
+- ⭐ **DASHBOARDS_PROPOSAL.md** com análise detalhada
+
+### Justificativa:
+O Vértice possui **100+ serviços** e sistemas extremamente complexos como:
+- Adaptive Immune System (12 serviços especializados)
+- Maximus AI (8 serviços distintos)
+- HCL/HITL (6 serviços de workflow)
+
+Dashboards genéricas não fariam jus à arquitetura. A filosofia **"Cada pixel importa"** se aplica também à **arquitetura de dashboards** - cada sistema complexo merece sua dashboard especializada.
+
+---
+
+**Versão**: 2.1 (REVISADO - OPÇÃO B)
 **Data**: 2025-01-16
 **Autor**: Claude + Juan
-**Filosofia**: "Cada pixel importa. Cada transição encanta."
+**Filosofia**: "Cada pixel importa. Cada transição encanta. Cada dashboard representa fielmente seu sistema."
 **SOLI DEO GLORIA**
