@@ -95,19 +95,48 @@ const checkCORSPreflight = async (endpoint) => {
 };
 
 /**
+ * Generate a unique request ID (UUID v4)
+ * Used for distributed tracing across frontend and backend
+ */
+const generateRequestId = () => {
+  // Use crypto.randomUUID if available (modern browsers)
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  // Fallback to manual UUID v4 generation
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+/**
  * Internal request function with auth interceptor
  * Boris Cherny Pattern: Single Responsibility - handles HTTP only
+ * P0-4: Added X-Request-ID for distributed tracing
  */
 const makeRequest = async (url, options) => {
+  // Generate request ID if not provided
+  const requestId = options.requestId || generateRequestId();
+
   const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
       "X-API-Key": API_KEY,
       "X-CSRF-Token": getCSRFToken(),
+      "X-Request-ID": requestId, // P0-4: Add request ID for tracing
       ...options.headers,
     },
   });
+
+  // Extract request ID from response headers for logging
+  const responseRequestId = response.headers.get("X-Request-ID") || requestId;
+
+  // Store request ID in response for error handling
+  response.requestId = responseRequestId;
 
   return response;
 };
@@ -187,9 +216,26 @@ const request = async (endpoint, options = {}, isRetry = false) => {
         logger.warn("Failed to parse error response:", parseError);
         return {};
       });
-      throw new Error(
+
+      // P0-4: Log request ID for debugging
+      const requestId = response.requestId || error.request_id || "unknown";
+      logger.error(`API Error [Request ID: ${requestId}]:`, {
+        status: response.status,
+        endpoint,
+        detail: error.detail,
+        error_code: error.error_code,
+        request_id: requestId,
+      });
+
+      // Create enhanced error with request ID
+      const enhancedError = new Error(
         error.detail || `API Error: ${response.status} ${response.statusText}`,
       );
+      enhancedError.requestId = requestId;
+      enhancedError.errorCode = error.error_code;
+      enhancedError.status = response.status;
+
+      throw enhancedError;
     }
 
     return await response.json();
@@ -241,14 +287,22 @@ export const directClient = {
     const url = `${baseUrl}${path}`;
 
     try {
+      // P0-4: Add request ID for direct client as well
+      const requestId = options.requestId || generateRequestId();
+
       const response = await fetch(url, {
         ...options,
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": API_KEY,
+          "X-Request-ID": requestId, // P0-4: Add request ID
           ...options.headers,
         },
       });
+
+      // Store request ID in response
+      response.requestId =
+        response.headers.get("X-Request-ID") || requestId;
 
       // Apply same auth error handling as main client
       if (response.status === 401) {
@@ -266,7 +320,25 @@ export const directClient = {
           logger.warn("Failed to parse direct API error response:", parseError);
           return {};
         });
-        throw new Error(error.detail || `API Error: ${response.status}`);
+
+        // P0-4: Log request ID for debugging
+        const requestId = response.requestId || error.request_id || "unknown";
+        logger.error(`Direct API Error [Request ID: ${requestId}]:`, {
+          status: response.status,
+          url,
+          detail: error.detail,
+          error_code: error.error_code,
+          request_id: requestId,
+        });
+
+        const enhancedError = new Error(
+          error.detail || `API Error: ${response.status}`,
+        );
+        enhancedError.requestId = requestId;
+        enhancedError.errorCode = error.error_code;
+        enhancedError.status = response.status;
+
+        throw enhancedError;
       }
 
       return await response.json();

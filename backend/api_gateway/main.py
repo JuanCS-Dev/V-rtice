@@ -27,6 +27,18 @@ from reactive_fabric_integration import (
     register_reactive_fabric_routes,
 )
 
+# P0-4: Request ID Tracing and Error Standardization
+from middleware.tracing import RequestTracingMiddleware, get_request_id
+from models.errors import (
+    ErrorCodes,
+    ErrorResponse,
+    ValidationErrorDetail,
+    ValidationErrorResponse,
+    create_error_response,
+)
+from starlette.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+
 # Configuração de logs estruturados
 structlog.configure(
     processors=[
@@ -202,6 +214,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============================================================================
+# Request Tracing Middleware (P0-4)
+# ============================================================================
+# IMPORTANT: Add RequestTracingMiddleware AFTER CORS so it runs FIRST
+# Middleware execution order is LIFO (Last In, First Out)
+app.add_middleware(RequestTracingMiddleware)
 
 
 # ============================================================================
@@ -385,6 +404,152 @@ def custom_openapi():
 
 # Override the default OpenAPI schema
 app.openapi = custom_openapi
+
+
+# ============================================================================
+# Exception Handlers (P0-4)
+# ============================================================================
+# Standardized error responses with request ID tracing
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Handle Pydantic validation errors (422 Unprocessable Entity).
+
+    This handler converts Pydantic validation errors into standardized
+    ValidationErrorResponse format with request ID for debugging.
+
+    Args:
+        request: The request that failed validation
+        exc: The validation exception
+
+    Returns:
+        JSONResponse with ValidationErrorResponse payload
+    """
+    request_id = get_request_id(request)
+
+    # Convert Pydantic errors to our format
+    validation_errors = [
+        ValidationErrorDetail(
+            loc=[str(loc) for loc in error["loc"]],
+            msg=error["msg"],
+            type=error["type"],
+        )
+        for error in exc.errors()
+    ]
+
+    error_response = ValidationErrorResponse(
+        detail="Request validation failed",
+        error_code=ErrorCodes.VAL_UNPROCESSABLE_ENTITY,
+        request_id=request_id,
+        path=str(request.url.path),
+        validation_errors=validation_errors,
+    )
+
+    log.warning(
+        "validation_error",
+        request_id=request_id,
+        path=str(request.url.path),
+        errors=validation_errors,
+    )
+
+    return JSONResponse(
+        status_code=422,
+        content=error_response.model_dump(),
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(
+    request: Request, exc: HTTPException
+) -> JSONResponse:
+    """Handle FastAPI HTTPException with standardized error format.
+
+    Args:
+        request: The request that triggered the exception
+        exc: The HTTP exception
+
+    Returns:
+        JSONResponse with ErrorResponse payload
+    """
+    request_id = get_request_id(request)
+
+    # Map HTTP status codes to error codes
+    status_to_error_code = {
+        401: ErrorCodes.AUTH_MISSING_TOKEN,
+        403: ErrorCodes.AUTH_INSUFFICIENT_PERMISSIONS,
+        404: "NOT_FOUND",
+        429: ErrorCodes.RATE_LIMIT_EXCEEDED,
+        500: ErrorCodes.SYS_INTERNAL_ERROR,
+        503: ErrorCodes.SYS_SERVICE_UNAVAILABLE,
+        504: ErrorCodes.SYS_TIMEOUT,
+    }
+
+    error_code = status_to_error_code.get(
+        exc.status_code, f"HTTP_{exc.status_code}"
+    )
+
+    error_response = create_error_response(
+        detail=str(exc.detail),
+        error_code=error_code,
+        request_id=request_id,
+        path=str(request.url.path),
+    )
+
+    log.error(
+        "http_exception",
+        request_id=request_id,
+        status_code=exc.status_code,
+        detail=str(exc.detail),
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=error_response.model_dump(),
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Handle all unhandled exceptions with standardized error format.
+
+    This is the last-resort handler for any exception not caught by
+    more specific handlers. It ensures all errors are logged with
+    request IDs and returned in consistent format.
+
+    Args:
+        request: The request that triggered the exception
+        exc: The unhandled exception
+
+    Returns:
+        JSONResponse with ErrorResponse payload (500 Internal Server Error)
+    """
+    request_id = get_request_id(request)
+
+    error_response = create_error_response(
+        detail="Internal server error. Please contact support with this request ID.",
+        error_code=ErrorCodes.SYS_INTERNAL_ERROR,
+        request_id=request_id,
+        path=str(request.url.path),
+    )
+
+    log.error(
+        "unhandled_exception",
+        request_id=request_id,
+        error_type=type(exc).__name__,
+        error_message=str(exc),
+        path=str(request.url.path),
+        exc_info=True,
+    )
+
+    return JSONResponse(
+        status_code=500,
+        content=error_response.model_dump(),
+    )
 
 
 # ============================
