@@ -1,0 +1,89 @@
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* Import Design Tokens - PAGANI Level Design System */
+@import "./styles/design-tokens.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * CLAUDE.AI GREEN DESIGN SYSTEM - Nova Paleta Verde
+ * ═══════════════════════════════════════════════════════════════════════
+ * CRITICAL: Este design system SOBRESCREVE variáveis do sistema antigo
+ * Cores: VERDE (#10b981) ao invés de Vermelho/Laranja
+ * Estilo: Claude.ai - Clean, Calm, Focused
+ * OKLCH color space para consistência visual
+ */
+@import "./styles/claude-design-green.css";
+
+/* Claude.ai Animations & Micro-interactions - Verde accent */
+@import "./styles/claude-animations.css";
+
+/* Import Theme System - must come before Tailwind directives */
+/* @import './styles/themes.css'; */ /* DISABLED - Old cyberpunk dark theme conflicts with claude-design-green.css */
+
+/* Import Utility Classes */
+@import "./styles/utilities.css";
+
+/* Import Mixins - PAGANI Quality */
+@import "./styles/mixins/theme-transitions.css";
+@import "./styles/mixins/micro-interactions.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * CLAUDE CODE WEB - GLOBAL OVERRIDES (MUST BE LAST!)
+ * ═══════════════════════════════════════════════════════════════════════
+ * CRITICAL: Loaded LAST to override everything with !important
+ * Forces Claude Code web aesthetic: clean, light, serif, green
+ */
+@import "./styles/claude-global-overrides.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * GLOBAL RESET - Remove espaço no topo e garantir 100% viewport
+ * ═══════════════════════════════════════════════════════════════════════ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  height: 100%;
+}
+
+main {
+  margin: 0;
+  padding: 0;
+}
+
+/* Hide scrollbar but keep functionality */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}

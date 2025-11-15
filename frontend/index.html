@@ -4,47 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self';
-                   script-src 'self' 'unsafe-inline' 'unsafe-eval';
-                   style-src 'self' 'unsafe-inline' https://unpkg.com;
-                   img-src 'self' data: blob: https: http:;
-                   font-src 'self' data:;
-                   connect-src 'self' http://localhost:* ws://localhost:* https://api.vertice-maximus.com wss://api.vertice-maximus.com;
-                   frame-src 'none';
-                   object-src 'none';
-                   frame-ancestors 'none';
-                   base-uri 'self';
-                   form-action 'self';
-                   upgrade-insecure-requests;">
-
-    <!-- Security Headers -->
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=()">
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-
-    <!-- iOS PWA Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Vértice">
-    <link rel="apple-touch-icon" href="/vite.svg">
-
-    <title>Vértice - Cybersecurity Platform</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
+    <title>frontend</title>
   </head>
   <body>
     <div id="root"></div>
-    <!-- Ponto de Aterrissagem para o Modal -->
-    <div id="modal-root"></div> 
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
