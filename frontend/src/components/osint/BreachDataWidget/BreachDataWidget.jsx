@@ -86,12 +86,13 @@ export const BreachDataWidget = () => {
                 <h4>
                   <i
                     className={`fas ${result.queryType === "email" ? "fa-envelope" : "fa-user"}`}
+                    aria-hidden="true"
                   ></i>
                   {result.query}
                 </h4>
                 {result.credentials_exposed && (
                   <div className={styles.exposedBadge}>
-                    <i className="fas fa-exclamation-circle"></i>
+                    <i className="fas fa-exclamation-circle" aria-hidden="true"></i>
                     CREDENCIAIS EXPOSTAS
                   </div>
                 )}
@@ -99,7 +100,7 @@ export const BreachDataWidget = () => {
               <div className={styles.exposureSummary}>
                 <div className={styles.summaryStat}>
                   <div className={`${styles.statIcon} text-critical`}>
-                    <i className="fas fa-database"></i>
+                    <i className="fas fa-database" aria-hidden="true"></i>
                   </div>
                   <div className={styles.statContent}>
                     <span className={styles.statValue}>
@@ -110,7 +111,7 @@ export const BreachDataWidget = () => {
                 </div>
                 <div className={styles.summaryStat}>
                   <div className={`${styles.statIcon} text-high`}>
-                    <i className="fas fa-key"></i>
+                    <i className="fas fa-key" aria-hidden="true"></i>
                   </div>
                   <div className={styles.statContent}>
                     <span className={styles.statValue}>
@@ -144,7 +145,7 @@ export const BreachDataWidget = () => {
             {result.breaches?.length > 0 ? (
               <div className={styles.breachesList}>
                 <h5>
-                  <i className="fas fa-exclamation-triangle"></i> Vazamentos
+                  <i className="fas fa-exclamation-triangle" aria-hidden="true"></i> Vazamentos
                   Detectados ({result.breaches.length})
                 </h5>
                 {result.breaches.map((breach, index) => (
@@ -156,7 +157,7 @@ export const BreachDataWidget = () => {
                       }}
                     >
                       <div className={styles.breachSource}>
-                        <i className="fas fa-database"></i>
+                        <i className="fas fa-database" aria-hidden="true"></i>
                         <span>{breach.source}</span>
                       </div>
                       <div className={styles.breachMeta}>
@@ -179,7 +180,7 @@ export const BreachDataWidget = () => {
                     <div className={styles.breachBody}>
                       <div className={styles.breachStats}>
                         <div className={styles.statItem}>
-                          <i className="fas fa-users"></i>{" "}
+                          <i className="fas fa-users" aria-hidden="true"></i>{" "}
                           <span>
                             {breach.records_leaked?.toLocaleString() || "N/A"}{" "}
                             registros
@@ -195,7 +196,7 @@ export const BreachDataWidget = () => {
               </div>
             ) : (
               <div className={styles.noBreaches}>
-                <i className="fas fa-shield-alt"></i>
+                <i className="fas fa-shield-alt" aria-hidden="true"></i>
                 <p>Nenhum vazamento encontrado. Dados aparentemente seguros.</p>
               </div>
             )}
@@ -203,7 +204,7 @@ export const BreachDataWidget = () => {
             {result.recommendations?.length > 0 && (
               <div className={styles.recommendations}>
                 <h5>
-                  <i className="fas fa-shield-alt"></i> Recomendações de
+                  <i className="fas fa-shield-alt" aria-hidden="true"></i> Recomendações de
                   Segurança
                 </h5>
                 {result.recommendations.map((rec, index) => (

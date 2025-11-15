@@ -15,24 +15,24 @@ const AnomalyResults = ({ result, dataInput }) => {
         <div className={styles.resultsContainer}>
             {/* Summary Card */}
             <div className={styles.card}>
-                <h5><i className="fas fa-chart-bar"></i> Resumo da Análise</h5>
+                <h5><i className="fas fa-chart-bar" aria-hidden="true"></i> Resumo da Análise</h5>
                 <div className={styles.summaryGrid}>
                     <div className={styles.summaryStat}>
-                        <span className={`${styles.statIcon} icon-critical`}><i className="fas fa-exclamation-circle"></i></span>
+                        <span className={`${styles.statIcon} icon-critical`}><i className="fas fa-exclamation-circle" aria-hidden="true"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{result.anomalies_found || 0}</span>
                             <span className={styles.statLabel}>Anomalias Detectadas</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <span className={`${styles.statIcon} icon-analytics`}><i className="fas fa-database"></i></span>
+                        <span className={`${styles.statIcon} icon-analytics`}><i className="fas fa-database" aria-hidden="true"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>{dataPointCount}</span>
                             <span className={styles.statLabel}>Pontos Analisados</span>
                         </div>
                     </div>
                     <div className={styles.summaryStat}>
-                        <span className={`${styles.statIcon} icon-warning`}><i className="fas fa-percentage"></i></span>
+                        <span className={`${styles.statIcon} icon-warning`}><i className="fas fa-percentage" aria-hidden="true"></i></span>
                         <div className={styles.statContent}>
                             <span className={styles.statValue}>
                                 {result.anomalies_found && dataPointCount > 0
@@ -48,7 +48,7 @@ const AnomalyResults = ({ result, dataInput }) => {
             {/* Baseline Statistics */}
             {result.baseline_stats && (
                 <div className={styles.card}>
-                    <h5><i className="fas fa-chart-area"></i> Estatísticas de Baseline</h5>
+                    <h5><i className="fas fa-chart-area" aria-hidden="true"></i> Estatísticas de Baseline</h5>
                     <div className={styles.baselineGrid}>
                         <div className={styles.baselineStat}>
                             <span className={styles.label}>Média:</span>
@@ -69,7 +69,7 @@ const AnomalyResults = ({ result, dataInput }) => {
             {/* Anomalies List */}
             {result.anomalies && result.anomalies.length > 0 && (
                 <div className={`${styles.card} ${styles.anomaliesList}`}>
-                    <h5><i className="fas fa-exclamation-triangle"></i> Anomalias Detectadas ({result.anomalies.length})</h5>
+                    <h5><i className="fas fa-exclamation-triangle" aria-hidden="true"></i> Anomalias Detectadas ({result.anomalies.length})</h5>
                     {result.anomalies.map((anomaly, index) => (
                         <div key={index} className={styles.anomalyCard}>
                             <div className={styles.anomalyHeader}>
@@ -102,7 +102,7 @@ const AnomalyResults = ({ result, dataInput }) => {
 
             {result.anomalies_found === 0 && (
                 <div className={styles.noAnomalies}>
-                    <i className="fas fa-check-circle"></i>
+                    <i className="fas fa-check-circle" aria-hidden="true"></i>
                     <p>Nenhuma anomalia detectada. Dados dentro do padrão esperado.</p>
                 </div>
             )}
@@ -110,7 +110,7 @@ const AnomalyResults = ({ result, dataInput }) => {
             {/* Recommendations */}
             {result.recommendations && result.recommendations.length > 0 && (
                 <div className={`${styles.card} ${styles.recommendations}`}>
-                    <h5><i className="fas fa-lightbulb"></i> Recomendações</h5>
+                    <h5><i className="fas fa-lightbulb" aria-hidden="true"></i> Recomendações</h5>
                     {result.recommendations.map((rec, index) => (
                         <Alert key={index} variant="info">{rec}</Alert>
                     ))}

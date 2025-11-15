@@ -89,7 +89,7 @@ export const SocialMediaWidget = () => {
             {result.platforms_found?.length > 0 && (
               <div className={styles.section}>
                 <h5 className={styles.sectionTitle}>
-                  <i className="fas fa-check-circle"></i>
+                  <i className="fas fa-check-circle" aria-hidden="true"></i>
                   Plataformas Encontradas ({result.platforms_found.length})
                 </h5>
                 <div className={styles.platformList}>
@@ -99,7 +99,7 @@ export const SocialMediaWidget = () => {
                         <Badge variant="osint" size="sm">{platform.platform}</Badge>
                         {platform.verified && (
                           <Badge variant="success" size="sm">
-                            <i className="fas fa-check"></i> VERIFICADO
+                            <i className="fas fa-check" aria-hidden="true"></i> VERIFICADO
                           </Badge>
                         )}
                       </div>
@@ -110,7 +110,7 @@ export const SocialMediaWidget = () => {
                           rel="noopener noreferrer"
                           className={styles.platformLink}
                         >
-                          <i className="fas fa-external-link-alt"></i>
+                          <i className="fas fa-external-link-alt" aria-hidden="true"></i>
                           {platform.url}
                           <span className={styles.visuallyHidden}>(opens in a new tab)</span>
                         </a>
@@ -125,12 +125,12 @@ export const SocialMediaWidget = () => {
             {result.insights?.length > 0 && (
               <div className={styles.section}>
                 <h5 className={styles.sectionTitle}>
-                  <i className="fas fa-brain"></i>
+                  <i className="fas fa-brain" aria-hidden="true"></i>
                   Insights
                 </h5>
                 <div className={styles.insightsList}>
                   {result.insights.map((insight, index) => (
-                    <Alert key={index} variant="info" icon={<i className="fas fa-lightbulb"></i>}>
+                    <Alert key={index} variant="info" icon={<i className="fas fa-lightbulb" aria-hidden="true"></i>}>
                       {insight}
                     </Alert>
                   ))}
@@ -141,7 +141,7 @@ export const SocialMediaWidget = () => {
             {result.warnings?.length > 0 && (
               <div className={styles.section}>
                  <h5 className={styles.sectionTitle}>
-                  <i className="fas fa-exclamation-triangle"></i>
+                  <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
                   Warnings
                 </h5>
                 {result.warnings.map((warning, index) => (

@@ -52,7 +52,7 @@ export const AnomalyDetectionWidget = () => {
                 {error && (
                     <Alert
                         variant="error"
-                        icon={<i className="fas fa-exclamation-triangle"></i>}
+                        icon={<i className="fas fa-exclamation-triangle" aria-hidden="true"></i>}
                         role="alert"
                         aria-live="assertive"
                     >

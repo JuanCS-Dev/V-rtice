@@ -128,7 +128,7 @@ export const BreachSearchForm = ({ onSearch, loading, error }) => {
                 disabled={loading}
                 variant="critical"
                 size="lg"
-                icon={<i className="fas fa-search"></i>}
+                icon={<i className="fas fa-search" aria-hidden="true"></i>}
                 error={error}
                 maxLength={500}
                 aria-invalid={!!validationError}
@@ -157,7 +157,7 @@ export const BreachSearchForm = ({ onSearch, loading, error }) => {
         </form>
 
         <p className={styles.hint}>
-            <i className="fas fa-shield-alt"></i>
+            <i className="fas fa-shield-alt" aria-hidden="true"></i>
             Busca em fontes: HIBP, DeHashed, Snusbase, IntelX
         </p>
     </div>

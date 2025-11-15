@@ -24,7 +24,7 @@ const RestrictedAccessMessageComponent = React.memo(function RestrictedAccessMes
         loading={isRequestingAccess}
         disabled={isRequestingAccess}
         className={styles.requestButton}
-        icon={<i className="fas fa-lock"></i>}
+        icon={<i className="fas fa-lock" aria-hidden="true"></i>}
       >
         {isRequestingAccess ? 'SOLICITANDO...' : 'SOLICITAR ACESSO'}
       </Button>

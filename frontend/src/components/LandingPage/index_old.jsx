@@ -397,19 +397,19 @@ export const LandingPage = ({ setCurrentView }) => {
       {/* Footer Info */}
       <div className="landing-footer">
         <div className="footer-item">
-          <i className="fas fa-shield-alt"></i>
+          <i className="fas fa-shield-alt" aria-hidden="true"></i>
           <span>Criptografia de Ponta a Ponta</span>
         </div>
         <div className="footer-item">
-          <i className="fas fa-server"></i>
+          <i className="fas fa-server" aria-hidden="true"></i>
           <span>Infraestrutura Distribuída</span>
         </div>
         <div className="footer-item">
-          <i className="fas fa-clock"></i>
+          <i className="fas fa-clock" aria-hidden="true"></i>
           <span>Uptime: {stats.uptime}</span>
         </div>
         <div className="footer-item">
-          <i className="fas fa-certificate"></i>
+          <i className="fas fa-certificate" aria-hidden="true"></i>
           <span>Classificação: CONFIDENCIAL</span>
         </div>
       </div>

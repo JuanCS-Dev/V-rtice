@@ -16,7 +16,7 @@ export const EventsList = ({ events }) => {
   if (events.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <i className="fas fa-satellite-dish"></i>
+        <i className="fas fa-satellite-dish" aria-hidden="true"></i>
         <p>Aguardando eventos de rede...</p>
         <span className={styles.hint}>Inicie o monitoramento para ver eventos em tempo real</span>
       </div>
@@ -27,7 +27,7 @@ export const EventsList = ({ events }) => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h5 className={styles.title}>
-          <i className="fas fa-stream"></i>
+          <i className="fas fa-stream" aria-hidden="true"></i>
           Eventos em Tempo Real ({events.length})
         </h5>
       </div>
@@ -46,11 +46,11 @@ export const EventsList = ({ events }) => {
               <p className={styles.action}>{event.action}</p>
               <div className={styles.eventDetails}>
                 <span className={styles.detail}>
-                  <i className="fas fa-network-wired"></i>
+                  <i className="fas fa-network-wired" aria-hidden="true"></i>
                   {event.source_ip}
                 </span>
                 <span className={styles.detail}>
-                  <i className="fas fa-ethernet"></i>
+                  <i className="fas fa-ethernet" aria-hidden="true"></i>
                   Port: {event.destination_port}
                 </span>
               </div>

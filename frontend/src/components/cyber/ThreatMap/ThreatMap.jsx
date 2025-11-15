@@ -121,7 +121,7 @@ export const ThreatMap = () => {
 
           {error && (
             <div className={styles.errorOverlay}>
-              <i className="fas fa-exclamation-triangle"></i>
+              <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
               <p>{error}</p>
             </div>
           )}
@@ -198,7 +198,7 @@ export const ThreatMap = () => {
                 className={styles.closeButton}
                 onClick={() => setSelectedThreat(null)}
               >
-                <i className="fas fa-times"></i>
+                <i className="fas fa-times" aria-hidden="true"></i>
               </button>
             </div>
             <div className={styles.detailsBody}>

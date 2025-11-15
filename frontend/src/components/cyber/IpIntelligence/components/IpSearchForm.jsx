@@ -140,7 +140,7 @@ const IpSearchForm = ({
             variant="warning"
             size="lg"
             className={styles.myIpButton}
-            icon={loadingMyIp ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-crosshairs"></i>}
+            icon={loadingMyIp ? <i className="fas fa-spinner fa-spin" aria-hidden="true"></i> : <i className="fas fa-crosshairs" aria-hidden="true"></i>}
             aria-label="Analyze my IP address">
             MEU IP
           </Button>

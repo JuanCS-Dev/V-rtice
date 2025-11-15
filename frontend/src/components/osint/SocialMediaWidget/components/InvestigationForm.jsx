@@ -130,7 +130,7 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
           size="lg"
           loading={loading}
           disabled={!target.trim() || platforms.length === 0}
-          icon={loading ? null : <i className="fas fa-search"></i>}
+          icon={loading ? null : <i className="fas fa-search" aria-hidden="true"></i>}
         >
           {loading ? 'INVESTIGANDO...' : 'INVESTIGAR'}
         </Button>
@@ -161,7 +161,7 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
       </div>
 
       <p className={styles.hint}>
-        <i className="fas fa-info-circle"></i>
+        <i className="fas fa-info-circle" aria-hidden="true"></i>
         Busca em 20+ redes sociais e plataformas públicas
       </p>
     </div>

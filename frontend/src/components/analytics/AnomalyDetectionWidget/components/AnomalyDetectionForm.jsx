@@ -111,7 +111,7 @@ const AnomalyDetectionForm = ({
           onClick={onGenerateSample}
           disabled={loading}
         >
-          <i className="fas fa-magic"></i> Gerar Dados de Exemplo
+          <i className="fas fa-magic" aria-hidden="true"></i> Gerar Dados de Exemplo
         </button>
       </div>
 
@@ -164,7 +164,7 @@ const AnomalyDetectionForm = ({
         size="lg"
         loading={loading}
         disabled={!dataInput.trim()}
-        icon={<i className="fas fa-brain"></i>}
+        icon={<i className="fas fa-brain" aria-hidden="true"></i>}
       >
         {loading ? "ANALISANDO..." : "DETECTAR ANOMALIAS"}
       </Button>

@@ -19,14 +19,14 @@ export const Alert = ({
   const getDefaultIcon = () => {
     switch (variant) {
       case 'success':
-        return <i className="fas fa-check-circle"></i>;
+        return <i className="fas fa-check-circle" aria-hidden="true"></i>;
       case 'warning':
-        return <i className="fas fa-exclamation-triangle"></i>;
+        return <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>;
       case 'error':
-        return <i className="fas fa-times-circle"></i>;
+        return <i className="fas fa-times-circle" aria-hidden="true"></i>;
       case 'info':
       default:
-        return <i className="fas fa-info-circle"></i>;
+        return <i className="fas fa-info-circle" aria-hidden="true"></i>;
     }
   };
 
@@ -54,7 +54,7 @@ export const Alert = ({
           onClick={onClose}
           aria-label="Fechar"
         >
-          <i className="fas fa-times"></i>
+          <i className="fas fa-times" aria-hidden="true"></i>
         </button>
       )}
     </div>

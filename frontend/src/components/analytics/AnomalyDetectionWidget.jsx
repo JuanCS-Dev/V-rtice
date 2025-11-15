@@ -76,7 +76,7 @@ const AnomalyDetectionWidget = () => {
       {/* Header */}
       <div className="widget-header">
         <div className="header-left">
-          <i className="fas fa-chart-line"></i>
+          <i className="fas fa-chart-line" aria-hidden="true"></i>
           <h3>ANOMALY DETECTION</h3>
         </div>
         <div className="header-badge">
@@ -102,7 +102,7 @@ const AnomalyDetectionWidget = () => {
               disabled={loading}
             />
             <button className="sample-button" onClick={generateSampleData} disabled={loading}>
-              <i className="fas fa-magic"></i> Gerar Dados de Exemplo
+              <i className="fas fa-magic" aria-hidden="true"></i> Gerar Dados de Exemplo
             </button>
           </div>
 
@@ -149,9 +149,9 @@ const AnomalyDetectionWidget = () => {
             disabled={loading || !dataInput.trim()}
           >
             {loading ? (
-              <><i className="fas fa-spinner fa-spin"></i> ANALISANDO...</>
+              <><i className="fas fa-spinner fa-spin" aria-hidden="true"></i> ANALISANDO...</>
             ) : (
-              <><i className="fas fa-brain"></i> DETECTAR ANOMALIAS</>
+              <><i className="fas fa-brain" aria-hidden="true"></i> DETECTAR ANOMALIAS</>
             )}
           </button>
         </div>
@@ -159,7 +159,7 @@ const AnomalyDetectionWidget = () => {
         {/* Error */}
         {error && (
           <div className="alert error">
-            <i className="fas fa-exclamation-triangle"></i>
+            <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
             <span>{error}</span>
           </div>
         )}
@@ -190,12 +190,12 @@ const AnomalyDetectionWidget = () => {
             {/* Summary Card */}
             <div className="summary-card">
               <div className="summary-header">
-                <h4><i className="fas fa-chart-bar"></i> Resumo da Análise</h4>
+                <h4><i className="fas fa-chart-bar" aria-hidden="true"></i> Resumo da Análise</h4>
               </div>
               <div className="summary-grid">
                 <div className="summary-stat">
                   <span className="stat-icon icon-danger">
-                    <i className="fas fa-exclamation-circle"></i>
+                    <i className="fas fa-exclamation-circle" aria-hidden="true"></i>
                   </span>
                   <div className="stat-content">
                     <span className="stat-value">{result.anomalies_found || 0}</span>
@@ -205,7 +205,7 @@ const AnomalyDetectionWidget = () => {
 
                 <div className="summary-stat">
                   <span className="stat-icon icon-info">
-                    <i className="fas fa-database"></i>
+                    <i className="fas fa-database" aria-hidden="true"></i>
                   </span>
                   <div className="stat-content">
                     <span className="stat-value">
@@ -217,7 +217,7 @@ const AnomalyDetectionWidget = () => {
 
                 <div className="summary-stat">
                   <span className="stat-icon icon-warning">
-                    <i className="fas fa-percentage"></i>
+                    <i className="fas fa-percentage" aria-hidden="true"></i>
                   </span>
                   <div className="stat-content">
                     <span className="stat-value">
@@ -234,7 +234,7 @@ const AnomalyDetectionWidget = () => {
             {/* Baseline Statistics */}
             {result.baseline_stats && (
               <div className="baseline-card">
-                <h5><i className="fas fa-chart-area"></i> Estatísticas de Baseline</h5>
+                <h5><i className="fas fa-chart-area" aria-hidden="true"></i> Estatísticas de Baseline</h5>
                 <div className="baseline-grid">
                   <div className="baseline-stat">
                     <span className="label">Média:</span>
@@ -256,7 +256,7 @@ const AnomalyDetectionWidget = () => {
             {result.anomalies && result.anomalies.length > 0 && (
               <div className="anomalies-list">
                 <h5>
-                  <i className="fas fa-exclamation-triangle"></i>
+                  <i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
                   Anomalias Detectadas ({result.anomalies.length})
                 </h5>
                 {result.anomalies.map((anomaly, index) => (
@@ -294,7 +294,7 @@ const AnomalyDetectionWidget = () => {
             {/* No Anomalies Found */}
             {result.anomalies_found === 0 && (
               <div className="no-anomalies">
-                <i className="fas fa-check-circle"></i>
+                <i className="fas fa-check-circle" aria-hidden="true"></i>
                 <p>Nenhuma anomalia detectada. Dados dentro do padrão esperado.</p>
               </div>
             )}
@@ -303,7 +303,7 @@ const AnomalyDetectionWidget = () => {
             {result.recommendations && result.recommendations.length > 0 && (
               <div className="recommendations">
                 <h5>
-                  <i className="fas fa-lightbulb"></i>
+                  <i className="fas fa-lightbulb" aria-hidden="true"></i>
                   Recomendações
                 </h5>
                 {result.recommendations.map((rec, index) => (

@@ -145,7 +145,7 @@ export const LiveFeed = ({ realThreats = [] }) => {
       <div className="live-feed">
         {activities.length === 0 ? (
           <div className="feed-empty">
-            <i className="fas fa-satellite-dish"></i>
+            <i className="fas fa-satellite-dish" aria-hidden="true"></i>
             <p>Aguardando atividades...</p>
             <p className="feed-hint">Sistema monitorando ameaças globais...</p>
           </div>
