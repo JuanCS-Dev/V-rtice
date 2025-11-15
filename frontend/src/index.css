@@ -1,7 +1,7 @@
-@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 /* Import Design Tokens - PAGANI Level Design System */
-@import './styles/design-tokens.css';
+@import "./styles/design-tokens.css";
 
 /* ═══════════════════════════════════════════════════════════════════════
  * CLAUDE.AI GREEN DESIGN SYSTEM - Nova Paleta Verde
@@ -11,20 +11,20 @@
  * Estilo: Claude.ai - Clean, Calm, Focused
  * OKLCH color space para consistência visual
  */
-@import './styles/claude-design-green.css';
+@import "./styles/claude-design-green.css";
 
 /* Claude.ai Animations & Micro-interactions - Verde accent */
-@import './styles/claude-animations.css';
+@import "./styles/claude-animations.css";
 
 /* Import Theme System - must come before Tailwind directives */
-@import './styles/themes.css';
+/* @import './styles/themes.css'; */ /* DISABLED - Old cyberpunk dark theme conflicts with claude-design-green.css */
 
 /* Import Utility Classes */
-@import './styles/utilities.css';
+@import "./styles/utilities.css";
 
 /* Import Mixins - PAGANI Quality */
-@import './styles/mixins/theme-transitions.css';
-@import './styles/mixins/micro-interactions.css';
+@import "./styles/mixins/theme-transitions.css";
+@import "./styles/mixins/micro-interactions.css";
 
 @tailwind base;
 @tailwind components;
@@ -52,7 +52,9 @@ body {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-primary);
-  transition: background-color var(--transition-normal), color var(--transition-normal);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
 }
 
 #root {
@@ -70,10 +72,10 @@ main {
 /* Hide scrollbar but keep functionality */
 @layer utilities {
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none; /* Chrome, Safari and Opera */
   }
 }

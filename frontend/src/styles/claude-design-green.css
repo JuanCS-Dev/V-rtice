@@ -29,18 +29,18 @@
    */
 
   /* Primary Green (substitui Terra Cotta) */
-  --brand-green-primary: #10b981;        /* Verde principal - emerald-500 */
-  --brand-green-hover: #059669;          /* Verde hover - emerald-600 */
-  --brand-green-active: #047857;         /* Verde active - emerald-700 */
-  --brand-green-light: #34d399;          /* Verde light - emerald-400 */
-  --brand-green-dark: #065f46;           /* Verde dark - emerald-800 */
+  --brand-green-primary: #10b981; /* Verde principal - emerald-500 */
+  --brand-green-hover: #059669; /* Verde hover - emerald-600 */
+  --brand-green-active: #047857; /* Verde active - emerald-700 */
+  --brand-green-light: #34d399; /* Verde light - emerald-400 */
+  --brand-green-dark: #065f46; /* Verde dark - emerald-800 */
 
   /* Supporting Neutrals (Claude.ai style) */
   --brand-black: #000000;
   --brand-white: #ffffff;
-  --brand-cream: #f4f3ee;                /* Background claro - mantém do Claude */
-  --brand-warm-gray: #b1ada1;            /* Gray neutro - mantém do Claude */
-  --brand-dark-text: #3d3929;            /* Text escuro - mantém do Claude */
+  --brand-cream: #f4f3ee; /* Background claro - mantém do Claude */
+  --brand-warm-gray: #b1ada1; /* Gray neutro - mantém do Claude */
+  --brand-dark-text: #3d3929; /* Text escuro - mantém do Claude */
 
   /* ═══════════════════════════════════════════════════════════════════════
    * LIGHT MODE - OKLCH Color Space
@@ -49,41 +49,41 @@
    */
 
   /* Backgrounds */
-  --background: oklch(0.98 0.01 95.10);              /* Quase branco, warm */
-  --foreground: oklch(0.34 0.03 95.72);              /* Text dark */
+  --background: oklch(0.98 0.01 95.1); /* Quase branco, warm */
+  --foreground: oklch(0.34 0.03 95.72); /* Text dark */
 
   /* Cards & Elevated Surfaces */
-  --card: oklch(0.98 0.01 95.10);                    /* Card background */
-  --card-foreground: oklch(0.19 0.00 106.59);        /* Card text */
+  --card: oklch(0.98 0.01 95.1); /* Card background */
+  --card-foreground: oklch(0.19 0 106.59); /* Card text */
 
   /* Popovers & Overlays */
-  --popover: oklch(1.00 0 0);                        /* Pure white */
-  --popover-foreground: oklch(0.27 0.02 98.94);      /* Popover text */
+  --popover: oklch(1 0 0); /* Pure white */
+  --popover-foreground: oklch(0.27 0.02 98.94); /* Popover text */
 
   /* PRIMARY - VERDE (ao invés de laranja) */
-  --primary: oklch(0.62 0.14 155.00);                /* Verde - hue ~155° */
-  --primary-foreground: oklch(1.00 0 0);             /* White text on green */
+  --primary: oklch(0.62 0.14 155); /* Verde - hue ~155° */
+  --primary-foreground: oklch(1 0 0); /* White text on green */
 
   /* Secondary */
-  --secondary: oklch(0.92 0.01 92.99);               /* Light gray */
-  --secondary-foreground: oklch(0.43 0.02 98.60);    /* Secondary text */
+  --secondary: oklch(0.92 0.01 92.99); /* Light gray */
+  --secondary-foreground: oklch(0.43 0.02 98.6); /* Secondary text */
 
   /* Muted */
-  --muted: oklch(0.93 0.02 90.24);                   /* Muted background */
-  --muted-foreground: oklch(0.61 0.01 97.42);        /* Muted text */
+  --muted: oklch(0.93 0.02 90.24); /* Muted background */
+  --muted-foreground: oklch(0.61 0.01 97.42); /* Muted text */
 
   /* Accent - VERDE */
-  --accent: oklch(0.67 0.13 150.00);                 /* Accent verde */
-  --accent-foreground: oklch(0.27 0.02 98.94);       /* Accent text */
+  --accent: oklch(0.67 0.13 150); /* Accent verde */
+  --accent-foreground: oklch(0.27 0.02 98.94); /* Accent text */
 
   /* Destructive */
-  --destructive: oklch(0.55 0.22 25.00);             /* Red for errors */
-  --destructive-foreground: oklch(1.00 0 0);         /* White on red */
+  --destructive: oklch(0.55 0.22 25); /* Red for errors */
+  --destructive-foreground: oklch(1 0 0); /* White on red */
 
   /* Borders & Inputs */
-  --border: oklch(0.88 0.01 97.36);                  /* Subtle border */
-  --input: oklch(0.76 0.02 98.35);                   /* Input border */
-  --ring: oklch(0.59 0.17 155.00);                   /* Focus ring - VERDE */
+  --border: oklch(0.88 0.01 97.36); /* Subtle border */
+  --input: oklch(0.76 0.02 98.35); /* Input border */
+  --ring: oklch(0.59 0.17 155); /* Focus ring - VERDE */
 
   /* ═══════════════════════════════════════════════════════════════════════
    * DARK MODE - OKLCH Color Space
@@ -94,41 +94,41 @@
 [data-theme="dark"],
 .dark {
   /* Backgrounds */
-  --background: oklch(0.27 0.00 106.64);             /* Dark background */
-  --foreground: oklch(0.81 0.01 93.01);              /* Light text */
+  --background: oklch(0.27 0 106.64); /* Dark background */
+  --foreground: oklch(0.81 0.01 93.01); /* Light text */
 
   /* Cards */
-  --card: oklch(0.27 0.00 106.64);                   /* Dark card */
-  --card-foreground: oklch(0.98 0.01 95.10);         /* Light text */
+  --card: oklch(0.27 0 106.64); /* Dark card */
+  --card-foreground: oklch(0.98 0.01 95.1); /* Light text */
 
   /* Popovers */
-  --popover: oklch(0.31 0.00 106.60);                /* Dark popover */
-  --popover-foreground: oklch(0.92 0.00 106.48);     /* Light text */
+  --popover: oklch(0.31 0 106.6); /* Dark popover */
+  --popover-foreground: oklch(0.92 0 106.48); /* Light text */
 
   /* PRIMARY - VERDE (dark mode) */
-  --primary: oklch(0.67 0.13 155.00);                /* Verde mais claro */
-  --primary-foreground: oklch(1.00 0 0);             /* White */
+  --primary: oklch(0.67 0.13 155); /* Verde mais claro */
+  --primary-foreground: oklch(1 0 0); /* White */
 
   /* Secondary */
-  --secondary: oklch(0.98 0.01 95.10);               /* Light */
-  --secondary-foreground: oklch(0.31 0.00 106.60);   /* Dark */
+  --secondary: oklch(0.98 0.01 95.1); /* Light */
+  --secondary-foreground: oklch(0.31 0 106.6); /* Dark */
 
   /* Muted */
-  --muted: oklch(0.22 0.00 106.71);                  /* Dark muted */
-  --muted-foreground: oklch(0.77 0.02 99.07);        /* Light muted text */
+  --muted: oklch(0.22 0 106.71); /* Dark muted */
+  --muted-foreground: oklch(0.77 0.02 99.07); /* Light muted text */
 
   /* Accent - VERDE */
-  --accent: oklch(0.72 0.15 150.00);                 /* Accent verde claro */
-  --accent-foreground: oklch(0.27 0.02 98.94);       /* Dark text */
+  --accent: oklch(0.72 0.15 150); /* Accent verde claro */
+  --accent-foreground: oklch(0.27 0.02 98.94); /* Dark text */
 
   /* Destructive */
-  --destructive: oklch(0.64 0.21 25.33);             /* Red */
-  --destructive-foreground: oklch(1.00 0 0);         /* White */
+  --destructive: oklch(0.64 0.21 25.33); /* Red */
+  --destructive-foreground: oklch(1 0 0); /* White */
 
   /* Borders */
-  --border: oklch(0.36 0.01 106.89);                 /* Dark border */
-  --input: oklch(0.43 0.01 100.22);                  /* Dark input */
-  --ring: oklch(0.67 0.15 155.00);                   /* Focus ring verde */
+  --border: oklch(0.36 0.01 106.89); /* Dark border */
+  --input: oklch(0.43 0.01 100.22); /* Dark input */
+  --ring: oklch(0.67 0.15 155); /* Focus ring verde */
 }
 
 :root {
@@ -168,9 +168,13 @@
    */
 
   /* Font Families */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "Courier New", monospace;
+  --font-mono:
+    ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
+    "Courier New", monospace;
 
   /* CRITICAL: Claude.ai usa serif para body text */
   --font-primary: var(--font-serif);
@@ -178,16 +182,16 @@
   --font-code: var(--font-mono);
 
   /* Font Sizes - Modular Scale */
-  --text-xs: 0.75rem;        /* 12px */
-  --text-sm: 0.875rem;       /* 14px */
-  --text-base: 1rem;         /* 16px */
-  --text-lg: 1.125rem;       /* 18px */
-  --text-xl: 1.25rem;        /* 20px */
-  --text-2xl: 1.5rem;        /* 24px */
-  --text-3xl: 1.875rem;      /* 30px */
-  --text-4xl: 2.25rem;       /* 36px */
-  --text-5xl: 3rem;          /* 48px */
-  --text-6xl: 3.75rem;       /* 60px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
 
   /* Font Weights */
   --font-normal: 400;
@@ -212,50 +216,55 @@
    */
   --space-0: 0;
   --space-px: 1px;
-  --space-0-5: 0.125rem;     /* 2px */
-  --space-1: 0.25rem;        /* 4px */
-  --space-1-5: 0.375rem;     /* 6px */
-  --space-2: 0.5rem;         /* 8px */
-  --space-2-5: 0.625rem;     /* 10px */
-  --space-3: 0.75rem;        /* 12px */
-  --space-3-5: 0.875rem;     /* 14px */
-  --space-4: 1rem;           /* 16px */
-  --space-5: 1.25rem;        /* 20px */
-  --space-6: 1.5rem;         /* 24px */
-  --space-7: 1.75rem;        /* 28px */
-  --space-8: 2rem;           /* 32px */
-  --space-10: 2.5rem;        /* 40px */
-  --space-12: 3rem;          /* 48px */
-  --space-16: 4rem;          /* 64px */
-  --space-20: 5rem;          /* 80px */
-  --space-24: 6rem;          /* 96px */
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem; /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem; /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem; /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
 
   /* ═══════════════════════════════════════════════════════════════════════
    * BORDER RADIUS - Claude.ai Style
    * ═══════════════════════════════════════════════════════════════════════
    */
   --radius-none: 0;
-  --radius-sm: 0.25rem;      /* 4px */
-  --radius-md: 0.375rem;     /* 6px */
-  --radius-default: 0.5rem;  /* 8px - Claude.ai padrão */
-  --radius-lg: 0.75rem;      /* 12px */
-  --radius-xl: 1rem;         /* 16px */
-  --radius-2xl: 1.5rem;      /* 24px */
-  --radius-full: 9999px;     /* Circular */
+  --radius-sm: 0.25rem; /* 4px */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-default: 0.5rem; /* 8px - Claude.ai padrão */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+  --radius-2xl: 1.5rem; /* 24px */
+  --radius-full: 9999px; /* Circular */
 
   /* ═══════════════════════════════════════════════════════════════════════
    * SHADOWS - Subtle Claude.ai Style
    * ═══════════════════════════════════════════════════════════════════════
    */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-sm:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
   /* Glow Effects - VERDE */
-  --shadow-glow-green: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
+  --shadow-glow-green:
+    0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
   --shadow-glow-green-soft: 0 0 15px rgba(16, 185, 129, 0.3);
 
   /* Inner Shadow */
@@ -296,7 +305,7 @@
    */
   --sidebar-background: oklch(0.97 0.01 98.88);
   --sidebar-foreground: oklch(0.36 0.01 106.65);
-  --sidebar-primary: oklch(0.62 0.14 155.00);        /* VERDE */
+  --sidebar-primary: oklch(0.62 0.14 155); /* VERDE */
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.92 0.01 92.99);
   --sidebar-accent-foreground: oklch(0.33 0 0);
@@ -307,11 +316,67 @@
    * CHART COLORS - Verde Theme
    * ═══════════════════════════════════════════════════════════════════════
    */
-  --chart-1: oklch(0.62 0.14 155.00);                /* Verde principal */
-  --chart-2: oklch(0.69 0.16 290.41);                /* Purple */
-  --chart-3: oklch(0.88 0.03 93.13);                 /* Cream */
-  --chart-4: oklch(0.88 0.04 298.18);                /* Pink */
-  --chart-5: oklch(0.56 0.13 42.06);                 /* Orange accent */
+  --chart-1: oklch(0.62 0.14 155); /* Verde principal */
+  --chart-2: oklch(0.69 0.16 290.41); /* Purple */
+  --chart-3: oklch(0.88 0.03 93.13); /* Cream */
+  --chart-4: oklch(0.88 0.04 298.18); /* Pink */
+  --chart-5: oklch(0.56 0.13 42.06); /* Orange accent */
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * COMPATIBILITY MAPPING - Override design-tokens.css dark defaults
+   * ═══════════════════════════════════════════════════════════════════════
+   * Map shadcn/OKLCH variables to legacy --color-* variables
+   * This ensures components using old naming convention get light theme
+   */
+
+  /* Backgrounds - LIGHT */
+  --color-bg-primary: var(--background); /* Quase branco */
+  --color-bg-secondary: var(--card); /* Card background */
+  --color-bg-tertiary: var(--muted); /* Muted background */
+  --color-bg-elevated: var(--popover); /* White elevated */
+  --color-bg-overlay: rgba(255, 255, 255, 0.95); /* White overlay */
+
+  /* Text Colors - DARK text on light bg */
+  --color-text-primary: var(--foreground); /* Dark text */
+  --color-text-secondary: var(--muted-foreground); /* Muted text */
+  --color-text-tertiary: var(--muted-foreground); /* Tertiary text */
+  --color-text-muted: var(--muted-foreground); /* Muted text */
+  --color-text-inverse: var(--primary-foreground); /* White on color */
+
+  /* Borders - Subtle on light */
+  --color-border-primary: var(--border); /* Subtle border */
+  --color-border-secondary: var(--border); /* Secondary border */
+  --color-border-focus: var(--ring); /* Focus ring verde */
+  --color-border-error: var(--destructive); /* Error border */
+
+  /* Accent Colors - PRIMARY = VERDE */
+  --color-accent-primary: var(--primary); /* Verde principal */
+  --color-accent-primary-hover: var(--brand-green-hover);
+  --color-accent-primary-active: var(--brand-green-active);
+  --color-accent-primary-light: rgba(16, 185, 129, 0.1);
+
+  /* Accent Colors - SECONDARY = Verde claro */
+  --color-accent-secondary: var(--accent); /* Accent verde */
+  --color-accent-secondary-hover: var(--brand-green-light);
+  --color-accent-secondary-active: var(--brand-green-hover);
+  --color-accent-secondary-light: rgba(52, 211, 153, 0.1);
+
+  /* Override gradients - GREEN instead of RED */
+  --gradient-primary: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  --gradient-secondary: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  --gradient-cyberpunk: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #34d399 50%,
+    #6ee7b7 100%
+  );
+
+  /* Override glow effects - GREEN */
+  --shadow-glow-purple:
+    0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
+  --shadow-glow-cyan:
+    0 0 20px rgba(52, 211, 153, 0.5), 0 0 40px rgba(52, 211, 153, 0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -409,7 +474,8 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
