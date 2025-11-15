@@ -74,8 +74,8 @@ vi.mock('react-leaflet', () => ({
   )
 }));
 
-vi.mock('../components/ThreatMarkers', () => ({
-  default: ({ threats, onThreatClick }) => (
+vi.mock('../components/ThreatMarkers', () => {
+  const ThreatMarkersComponent = ({ threats, onThreatClick }) => (
     <div data-testid="threat-markers">
       {threats.map((threat, index) => (
         <button
@@ -87,8 +87,12 @@ vi.mock('../components/ThreatMarkers', () => ({
         </button>
       ))}
     </div>
-  )
-}));
+  );
+  return {
+    __esModule: true,
+    default: ThreatMarkersComponent
+  };
+});
 
 vi.mock('../components/ThreatFilters', () => ({
   ThreatFilters: ({ filters, onFiltersChange }) => (
