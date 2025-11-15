@@ -1,0 +1,562 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CLAUDE CODE WEB - GLOBAL OVERRIDES (VERDE VARIANT)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Design Philosophy: code.claude.com aesthetic
+ * - Clean, minimal, focused
+ * - Light backgrounds (white/cream)
+ * - Serif typography
+ * - Subtle shadows (no glows)
+ * - Simple, intentional animations
+ * - GREEN (#10b981) accents instead of orange
+ *
+ * Strategy: FORCE via !important (nuclear option, but necessary)
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 1: REMOVE ALL CYBERPUNK EFFECTS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Remove ALL gradients (except explicit safe ones) */
+*:not(.safe-gradient):not(.chart):not(svg) {
+  background-image: none !important;
+}
+
+/* Remove ALL dramatic shadows/glows */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 2: FORCE LIGHT BACKGROUNDS (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Body - Pure white */
+body {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+/* Main containers - White/Cream */
+main,
+#root,
+.app,
+.page,
+.dashboard,
+.dashboard-container,
+.container,
+.content,
+.main-content {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+/* Sections - Subtle cream for variation */
+section,
+.section,
+.panel,
+.module {
+  background: #fafaf9 !important;
+  color: #1e293b !important;
+}
+
+/* Cards - White with subtle border */
+.card,
+.metric-card,
+.stat-card,
+.widget,
+.panel-card,
+[class*="Card"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e7e5e4 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  color: #1e293b !important;
+}
+
+/* Headers - White with bottom border */
+header,
+.header,
+.navbar,
+.nav,
+[class*="Header"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e7e5e4 !important;
+  box-shadow: none !important;
+}
+
+/* Sidebars - Subtle cream */
+aside,
+.sidebar,
+.side-panel,
+[class*="Sidebar"] {
+  background: #fafaf9 !important;
+  border-right: 1px solid #e7e5e4 !important;
+}
+
+/* Footer - White with top border */
+footer,
+.footer {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-top: 1px solid #e7e5e4 !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 3: FORCE SERIF TYPOGRAPHY (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* All text elements - Serif */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+a,
+button,
+input,
+textarea,
+select,
+label,
+li,
+td,
+th,
+.text,
+.title,
+.subtitle,
+.description,
+[class*="text-"],
+[class*="title"] {
+  font-family:
+    ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+}
+
+/* Headings - Serif + proper weights */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+[class*="heading"],
+[class*="title"] {
+  font-family: ui-serif, Georgia, Cambria, serif !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Code/Terminal - Keep monospace */
+code,
+pre,
+kbd,
+samp,
+.code,
+.terminal,
+.console,
+.monospace,
+[class*="code"],
+[class*="terminal"],
+[class*="mono"] {
+  font-family:
+    ui-monospace, "Cascadia Code", "Fira Code", Consolas, monospace !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 4: BUTTONS - GREEN PRIMARY (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Primary buttons - GREEN */
+button,
+.btn,
+.button,
+[type="button"],
+[type="submit"],
+[class*="button"],
+[class*="btn"] {
+  font-family: ui-serif, Georgia, Cambria, serif !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: none !important;
+}
+
+/* Primary/Default buttons - GREEN */
+button:not([class*="outline"]):not([class*="ghost"]):not([class*="secondary"]),
+.btn-primary,
+.button-primary,
+[class*="primary"] {
+  background: #10b981 !important;
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+button:not([class*="outline"]):not([class*="ghost"]):not(
+    [class*="secondary"]
+  ):hover,
+.btn-primary:hover {
+  background: #059669 !important;
+  transform: translateY(-0.5px) !important;
+}
+
+/* Outline buttons */
+[class*="outline"] {
+  background: transparent !important;
+  border: 1.5px solid #10b981 !important;
+  color: #10b981 !important;
+}
+
+[class*="outline"]:hover {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* Ghost buttons */
+[class*="ghost"] {
+  background: transparent !important;
+  border: none !important;
+  color: #1e293b !important;
+}
+
+[class*="ghost"]:hover {
+  background: #f5f5f4 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 5: INPUTS - GREEN FOCUS RING (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+input,
+textarea,
+select,
+.input,
+[class*="input"] {
+  background: #ffffff !important;
+  border: 1px solid #d6d3d1 !important;
+  border-radius: 0.5rem !important;
+  color: #1e293b !important;
+  font-family: ui-serif, Georgia, Cambria, serif !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.input:focus {
+  outline: none !important;
+  border-color: #10b981 !important;
+  ring: 2px solid #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 6: FOCUS STATES - GREEN RING (Claude Code accessibility)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+*:focus,
+*:focus-visible {
+  outline: 2px solid #10b981 !important;
+  outline-offset: 2px !important;
+}
+
+/* Remove default blue focus */
+*:focus-visible {
+  outline-color: #10b981 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 7: LINKS - SUBTLE GREEN (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+a,
+.link {
+  color: #10b981 !important;
+  text-decoration: none !important;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+a:hover,
+.link:hover {
+  color: #059669 !important;
+  text-decoration: underline !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 8: BORDERS - SUBTLE NEUTRAL (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* All borders - Subtle stone gray */
+*[class*="border"]:not([class*="border-green"]):not([class*="border-primary"]) {
+  border-color: #e7e5e4 !important;
+}
+
+/* Dividers */
+hr,
+.divider,
+[class*="divider"] {
+  border-color: #e7e5e4 !important;
+  border-width: 1px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 9: TRANSITIONS - SIMPLE & INTENTIONAL (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Default transition - Fast and smooth */
+* {
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* No dramatic animations */
+@keyframes none {
+  from,
+  to {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 10: TABLES - CLEAN (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+table {
+  background: #ffffff !important;
+  border-collapse: collapse !important;
+}
+
+thead {
+  background: #fafaf9 !important;
+  border-bottom: 1px solid #e7e5e4 !important;
+}
+
+th {
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  text-align: left !important;
+  padding: 0.75rem 1rem !important;
+}
+
+td {
+  padding: 0.75rem 1rem !important;
+  border-top: 1px solid #f5f5f4 !important;
+}
+
+tr:hover {
+  background: #fafaf9 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 11: BADGES - SEMANTIC COLORS (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.badge,
+[class*="badge"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  border-radius: 9999px !important;
+  padding: 0.25rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  font-family: ui-serif, Georgia, Cambria, serif !important;
+}
+
+/* Success badge - GREEN */
+.badge-success,
+[class*="badge"][class*="success"] {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+/* Warning badge - Amber */
+.badge-warning,
+[class*="badge"][class*="warning"] {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+/* Danger badge - Red */
+.badge-danger,
+[class*="badge"][class*="danger"] {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* Info badge - Blue */
+.badge-info,
+[class*="badge"][class*="info"] {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 12: SCROLLBARS - MINIMAL (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Webkit scrollbars */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #fafaf9 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6d3d1 !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a29e !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 13: REMOVE SPECIFIC CYBERPUNK ELEMENTS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* No dramatic effects */
+[class*="glow"],
+[class*="pulse"],
+[class*="neon"],
+[class*="cyber"],
+[class*="glitch"] {
+  animation: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* No dramatic transforms */
+[class*="scale"]:not(:hover),
+[class*="rotate"]:not(:hover) {
+  transform: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 14: MODALS/OVERLAYS - CLEAN (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.modal,
+.overlay,
+.dialog,
+[class*="modal"],
+[class*="dialog"] {
+  background: #ffffff !important;
+  border: 1px solid #e7e5e4 !important;
+  border-radius: 0.75rem !important;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Modal backdrop */
+.backdrop,
+.overlay-bg,
+[class*="backdrop"] {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 15: UTILITIES - TEXT COLORS
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.text-primary {
+  color: #0f172a !important;
+}
+.text-secondary {
+  color: #64748b !important;
+}
+.text-muted {
+  color: #94a3b8 !important;
+}
+.text-success {
+  color: #10b981 !important;
+}
+.text-warning {
+  color: #f59e0b !important;
+}
+.text-danger {
+  color: #ef4444 !important;
+}
+.text-info {
+  color: #3b82f6 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 16: DASHBOARD-SPECIFIC OVERRIDES
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Offensive Dashboard */
+.dashboard-offensive,
+.offensive-dashboard,
+[class*="offensive"] {
+  background: #fafaf9 !important;
+}
+
+/* Defensive Dashboard */
+.dashboard-defensive,
+.defensive-dashboard,
+[class*="defensive"] {
+  background: #fafaf9 !important;
+}
+
+/* Purple Team Dashboard */
+.dashboard-purple,
+.purple-team-dashboard,
+[class*="purple-team"] {
+  background: #fafaf9 !important;
+}
+
+/* Landing Page */
+.landing-page {
+  background: #ffffff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 17: ACTIVE/SELECTED STATES - GREEN (Claude Code style)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.active,
+[class*="active"],
+[aria-current="page"],
+[aria-selected="true"] {
+  color: #10b981 !important;
+  background: #dcfce7 !important;
+  border-color: #10b981 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * STEP 18: LOADING STATES - MINIMAL GREEN
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.spinner,
+.loading,
+[class*="spinner"],
+[class*="loading"] {
+  border-color: #e7e5e4 !important;
+  border-top-color: #10b981 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * END - CLAUDE CODE WEB GLOBAL OVERRIDES
+ * ═══════════════════════════════════════════════════════════════════════ */

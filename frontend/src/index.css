@@ -31,6 +31,14 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════════
+ * CLAUDE CODE WEB - GLOBAL OVERRIDES (MUST BE LAST!)
+ * ═══════════════════════════════════════════════════════════════════════
+ * CRITICAL: Loaded LAST to override everything with !important
+ * Forces Claude Code web aesthetic: clean, light, serif, green
+ */
+@import "./styles/claude-global-overrides.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
  * GLOBAL RESET - Remove espaço no topo e garantir 100% viewport
  * ═══════════════════════════════════════════════════════════════════════ */
 * {
