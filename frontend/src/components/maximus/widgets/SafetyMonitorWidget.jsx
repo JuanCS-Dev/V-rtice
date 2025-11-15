@@ -445,6 +445,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
               <label htmlFor="shutdown-reason" className="form-label">
                 Reason for shutdown (minimum 10 characters):
               </label>
+              {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
               <textarea
                 id="shutdown-reason"
                 className="form-textarea"
@@ -452,6 +453,7 @@ export const SafetyMonitorWidget = ({ systemHealth: _systemHealth }) => {
                 onChange={(e) => setShutdownReason(e.target.value)}
                 placeholder="Enter detailed reason for emergency shutdown..."
                 rows={4}
+                maxLength={500}
                 disabled={shutdownInProgress}
               />
               <div className="form-help">

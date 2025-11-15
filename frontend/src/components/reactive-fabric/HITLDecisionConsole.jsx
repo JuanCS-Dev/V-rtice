@@ -747,6 +747,7 @@ const AuthorizationPanel = ({
       </div>
 
       {/* Notes */}
+      {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
       <div className={styles.authNotes}>
         <label htmlFor="decision-notes-textarea" className={styles.notesLabel}>Decision Notes (Optional):</label>
         <textarea
@@ -756,6 +757,7 @@ const AuthorizationPanel = ({
           onChange={(e) => onNotesChange(e.target.value)}
           placeholder="Add context for audit trail..."
           rows={4}
+          maxLength={1000}
           disabled={isSubmitting}
         />
       </div>
@@ -892,12 +894,14 @@ const RejectionModal = ({ decision: _decision, reason, onReasonChange, onConfirm
             Please provide a reason for rejecting this decision (required for audit trail):
           </p>
 
+          {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
           <textarea
             className={styles.modalTextarea}
             value={reason}
             onChange={(e) => onReasonChange(e.target.value)}
             placeholder="Reason for rejection (e.g., 'False positive', 'Insufficient evidence', 'Alternative approach preferred')..."
             rows={4}
+            maxLength={500}
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             disabled={isSubmitting}

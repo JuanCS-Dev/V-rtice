@@ -173,12 +173,14 @@ export const BehavioralAnalyzer = () => {
 
         <div className={styles.formGroup}>
           <label htmlFor="metadata">Metadata (JSON)</label>
+          {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
           <textarea
             id="metadata"
             value={metadata}
             onChange={(e) => setMetadata(e.target.value)}
             placeholder='{"source_ip": "192.168.1.100", "bytes": 1024}'
             rows={3}
+            maxLength={5000}
             className={styles.textarea}
           />
         </div>

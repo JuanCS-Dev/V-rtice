@@ -270,12 +270,14 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
               </p>
 
               {/* Comment Textarea */}
+              {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Add optional comment (visible in audit trail)..."
                 className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:outline-none resize-none"
                 rows={3}
+                maxLength={1000}
               />
             </div>
 
@@ -322,12 +324,14 @@ export const HITLTab = ({ timeRange: _timeRange = '24h' }) => {
               Please provide a reason for rejection (required for audit trail):
             </p>
 
+            {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Reason for rejection (e.g., 'Patch introduces breaking changes', 'Security concerns', etc.)"
               className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-red-500 focus:outline-none resize-none mb-4"
               rows={4}
+              maxLength={500}
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />

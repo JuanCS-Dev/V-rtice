@@ -24,21 +24,24 @@ export const Button = ({
     className
   ].filter(Boolean).join(' ');
 
+  // Boris Cherny Standard - GAP #85 FIX: Add aria-busy for loading state
   return (
     <button
       className={buttonClasses}
       disabled={disabled || loading}
       onClick={onClick}
       type={type}
+      aria-busy={loading}
+      aria-disabled={disabled || loading}
       {...props}
     >
-      {loading && <span className={styles.spinner} />}
+      {loading && <span className={styles.spinner} aria-hidden="true" />}
       {!loading && icon && iconPosition === 'left' && (
-        <i className={`${styles.icon} ${icon}`} />
+        <i className={`${styles.icon} ${icon}`} aria-hidden="true" />
       )}
       <span className={styles.content}>{children}</span>
       {!loading && icon && iconPosition === 'right' && (
-        <i className={`${styles.icon} ${icon}`} />
+        <i className={`${styles.icon} ${icon}`} aria-hidden="true" />
       )}
     </button>
   );

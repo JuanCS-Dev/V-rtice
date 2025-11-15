@@ -36,8 +36,10 @@ export const POLLING_INTERVALS = {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Caching strategy
-      staleTime: 5 * 60 * 1000, // 5 minutes - data considered fresh
+      // Caching strategy - Boris Cherny Standard (GAP #102 FIX: Optimized staleTime)
+      // Reduced from 5min to 30s for better real-time data freshness
+      // Use query-specific staleTime for critical real-time data (see POLLING_INTERVALS)
+      staleTime: 30 * 1000, // 30 seconds - data considered fresh (was 5min)
       cacheTime: 10 * 60 * 1000, // 10 minutes - cache retention
 
       // Refetching strategy

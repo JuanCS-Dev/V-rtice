@@ -81,6 +81,7 @@ const AnomalyDetectionForm = ({
     <form onSubmit={handleSubmit} className={styles.formContainer}>
       <div className={styles.formGroup}>
         <label htmlFor="data-input">Dados (separados por vírgula):</label>
+        {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
         <textarea
           id="data-input"
           className={styles.textarea}
@@ -89,8 +90,8 @@ const AnomalyDetectionForm = ({
           onChange={handleDataInputChange}
           onBlur={handleDataInputBlur}
           rows={4}
+          maxLength={5000}
           disabled={loading}
-          maxLength={10000}
           aria-invalid={!!dataError}
           aria-describedby={dataError ? "data-error" : undefined}
         />

@@ -46,6 +46,7 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
     <div className={styles.inputContainer}>
       <div className={styles.inputWrapper}>
         <div className={styles.inputBox}>
+          {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
           <textarea
             ref={textareaRef}
             className={styles.textarea}
@@ -55,6 +56,7 @@ export const MessageInput = ({ onSendMessage, isDisabled }) => {
             placeholder="Pergunte algo ao Maximus... (Enter para enviar, Shift+Enter para nova linha)"
             disabled={isDisabled}
             rows={1}
+            maxLength={5000}
           />
           
           <button

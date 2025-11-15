@@ -122,12 +122,14 @@ export const ImmuneEnhancementWidget = () => {
             <label htmlFor="alerts-input" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
               Alerts (JSON Array):
             </label>
+            {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
             <textarea
               id="alerts-input"
               value={alertsInput}
               onChange={(e) => setAlertsInput(e.target.value)}
               placeholder='[{"id": "alert_001", "severity": "high", "entity": "192.168.1.10", "type": "port_scan"}]'
               rows={6}
+              maxLength={5000}
               style={{
                 width: '100%',
                 padding: '10px',

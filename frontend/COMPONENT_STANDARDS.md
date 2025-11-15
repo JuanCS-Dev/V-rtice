@@ -303,9 +303,353 @@ import { Alert } from '@/components/shared/Alert';
 
 ---
 
+---
+
+## Form Input Standards
+### Boris Cherny Standard - GAP #97 FIX
+
+#### RECOMMENDED: Use AccessibleForm Components
+
+**File:** `/src/components/shared/AccessibleForm.jsx`
+
+##### Input Fields
+```jsx
+import { FormInput } from '@/components/shared/AccessibleForm';
+
+<FormInput
+  label="Email Address"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  error={emailError}
+  helperText="We'll never share your email"
+  required
+/>
+```
+
+##### Textarea Fields
+```jsx
+import { FormTextarea } from '@/components/shared/AccessibleForm';
+
+<FormTextarea
+  label="Comments"
+  value={comments}
+  onChange={(e) => setComments(e.target.value)}
+  rows={4}
+  maxLength={1000}
+  helperText="Maximum 1000 characters"
+/>
+```
+
+#### Input Validation Requirements
+- ALL inputs MUST have associated `<label>` elements
+- ALL required inputs MUST show `required` attribute
+- ALL error states MUST use `aria-invalid` and `aria-describedby`
+- ALL inputs MUST have appropriate `maxLength` (see validation.js)
+  - Short text (usernames): 100 chars
+  - Medium text (emails, descriptions): 500 chars
+  - Long text (comments): 1000 chars
+  - Very long text (JSON data): 5000 chars
+
+#### Standard Input Patterns
+```jsx
+// Email input
+<input
+  type="email"
+  maxLength={500}
+  autoComplete="email"
+  required
+/>
+
+// Username input
+<input
+  type="text"
+  minLength={3}
+  maxLength={100}
+  autoComplete="username"
+  required
+/>
+
+// Password input
+<input
+  type="password"
+  minLength={8}
+  maxLength={100}
+  autoComplete="current-password"
+  required
+/>
+
+// Textarea (comments, notes)
+<textarea
+  rows={4}
+  maxLength={1000}
+  placeholder="Add your comments here..."
+/>
+
+// Textarea (JSON data)
+<textarea
+  rows={6}
+  maxLength={5000}
+  placeholder='{"key": "value"}'
+/>
+```
+
+---
+
+## HTTP Client Pattern
+### Boris Cherny Standard - GAP #104 FIX
+
+#### RECOMMENDED: Use Axios via API Client
+
+**File:** `/src/api/client.js`
+
+All API calls should go through the centralized API client which uses Axios:
+
+```javascript
+import apiClient from '@/api/client';
+
+// GET request
+const response = await apiClient.get('/defensive/metrics');
+
+// POST request
+const response = await apiClient.post('/offensive/scan', {
+  target: '192.168.1.1',
+  ports: '80,443'
+});
+
+// PUT request
+const response = await apiClient.put('/hitl/decision', {
+  patchId: '123',
+  decision: 'approved'
+});
+```
+
+#### Why Axios over Fetch?
+- **Automatic JSON parsing**: No need for `response.json()`
+- **Request/Response interceptors**: Centralized auth, error handling
+- **Timeout support**: Built-in request timeouts
+- **Progress tracking**: Upload/download progress
+- **XSRF protection**: Built-in CSRF token handling
+- **Better error handling**: Rejects on HTTP errors automatically
+
+#### DO NOT Use raw fetch() for API calls
+```javascript
+// ❌ WRONG - Don't use raw fetch
+fetch('/api/data')
+  .then(res => res.json())
+  .then(data => console.log(data));
+
+// ✅ CORRECT - Use API client
+import apiClient from '@/api/client';
+const { data } = await apiClient.get('/data');
+```
+
+#### Exception: fetch() is OK for non-API calls
+```javascript
+// OK: Loading static resources
+fetch('/config.json')
+
+// OK: External third-party APIs (not our backend)
+fetch('https://external-api.com/data')
+```
+
+---
+
+## Toast Notification Pattern
+### Boris Cherny Standard - GAP #105 FIX
+
+#### Current State: Using Alert Component (No Toast Library)
+
+We use the **Alert component** for notifications instead of a separate toast library:
+
+**File:** `/src/components/shared/Toast.jsx` or use inline Alert
+
+#### Pattern: Alert as Toast Alternative
+```jsx
+import { Alert } from '@/components/shared/Alert';
+
+// Success notification
+{showSuccess && (
+  <Alert variant="success" onClose={() => setShowSuccess(false)}>
+    ✓ Data saved successfully!
+  </Alert>
+)}
+
+// Error notification
+{showError && (
+  <Alert variant="error" onClose={() => setShowError(false)}>
+    ✗ Operation failed. Please try again.
+  </Alert>
+)}
+
+// Warning notification
+{showWarning && (
+  <Alert variant="warning">
+    ⚠ This action cannot be undone.
+  </Alert>
+)}
+```
+
+#### Accessibility Requirements for Notifications
+```jsx
+// Success/Info messages - polite announcement
+<div
+  role="status"
+  aria-live="polite"
+  className="alert alert-success"
+>
+  Data saved successfully
+</div>
+
+// Error/Warning messages - assertive announcement
+<div
+  role="alert"
+  aria-live="assertive"
+  className="alert alert-error"
+>
+  Error: Failed to save data
+</div>
+```
+
+#### DO NOT install react-toastify or similar
+- Adds unnecessary bundle size
+- Alert component handles all notification needs
+- Already accessible with proper ARIA attributes
+
+---
+
+## Disabled States Standard
+### Boris Cherny Standard - GAP #100 FIX
+
+All disabled states documented in design-tokens.css are:
+
+### Disabled Buttons
+```css
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+```
+
+### Disabled Inputs
+```css
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+}
+```
+
+### Usage in Components
+```jsx
+// Button
+<Button disabled={isLoading || !isValid}>
+  Submit
+</Button>
+
+// Input
+<input
+  type="text"
+  disabled={isProcessing}
+  aria-disabled={isProcessing}
+/>
+
+// With visual indication
+<button
+  disabled={!canSubmit}
+  className={!canSubmit ? 'opacity-50 cursor-not-allowed' : ''}
+>
+  Submit
+</button>
+```
+
+### Accessibility Requirements
+- ALL disabled elements MUST have `disabled` attribute (not just CSS)
+- ALL disabled interactive elements SHOULD have `aria-disabled="true"`
+- ALL disabled elements MUST show `cursor: not-allowed`
+- ALL disabled elements MUST have reduced opacity (0.5-0.6)
+
+---
+
+## Design Token Usage
+### Boris Cherny Standard - GAPS #94, #95, #99 FIX
+
+All design tokens are documented in `/src/styles/design-tokens.css`:
+
+### Spacing Values (GAP #94 ✓ Already Documented)
+```css
+--space-xs: 0.25rem;   /* 4px */
+--space-sm: 0.5rem;    /* 8px */
+--space-md: 1rem;      /* 16px */
+--space-lg: 1.5rem;    /* 24px */
+--space-xl: 2.5rem;    /* 40px */
+--space-2xl: 4rem;     /* 64px */
+```
+
+Usage:
+```css
+.card {
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
+}
+```
+
+### Typography Scale (GAP #95 ✓ Already Documented)
+```css
+--text-xs: 0.75rem;    /* 12px */
+--text-sm: 0.875rem;   /* 14px */
+--text-base: 1rem;     /* 16px */
+--text-lg: 1.125rem;   /* 18px */
+--text-xl: 1.25rem;    /* 20px */
+--text-2xl: 1.5rem;    /* 24px */
+--text-3xl: 1.875rem;  /* 30px */
+--text-4xl: 2.25rem;   /* 36px */
+```
+
+Font weights:
+```css
+--font-normal: 400;
+--font-medium: 500;
+--font-semibold: 600;
+--font-bold: 700;
+```
+
+### Responsive Breakpoints (GAP #99 ✓ Already Documented)
+```css
+--breakpoint-sm: 640px;   /* Mobile landscape */
+--breakpoint-md: 768px;   /* Tablet */
+--breakpoint-lg: 1024px;  /* Laptop */
+--breakpoint-xl: 1280px;  /* Desktop */
+--breakpoint-2xl: 1536px; /* Large desktop */
+```
+
+Usage in media queries:
+```css
+@media (min-width: 768px) {  /* Tablet and up */
+  .container {
+    max-width: var(--container-md);
+  }
+}
+
+@media (min-width: 1024px) {  /* Laptop and up */
+  .container {
+    max-width: var(--container-lg);
+  }
+}
+```
+
+---
+
 ## Questions?
 
 - Shadcn/UI Button: `/src/components/ui/button.tsx`
 - Legacy components marked as DEPRECATED in this doc
 - Always prefer documented RECOMMENDED components
+- Design tokens reference: `/src/styles/design-tokens.css`
+- Validation limits: `/src/utils/validation.js`
 - When in doubt, follow Boris Cherny Standard (type safety + accessibility)

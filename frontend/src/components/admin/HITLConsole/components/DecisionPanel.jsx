@@ -54,12 +54,14 @@ const DecisionPanel = ({ review, apvSelected, onSuccess }) => {
         </button>
       </div>
 
+      {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
       <textarea
         className={styles.textarea}
         placeholder="Justification (min 10 chars)..."
         value={justification}
         onChange={(e) => setJustification(e.target.value)}
         rows={4}
+        maxLength={500}
       />
 
       <div className={styles.slider}>

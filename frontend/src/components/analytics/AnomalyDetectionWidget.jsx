@@ -90,6 +90,7 @@ const AnomalyDetectionWidget = () => {
           {/* Data Input */}
           <div className="form-group">
             <label htmlFor="anomaly-data-input">Dados (separados por vírgula):</label>
+            {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
             <textarea
               id="anomaly-data-input"
               className="analytics-textarea"
@@ -97,6 +98,7 @@ const AnomalyDetectionWidget = () => {
               value={dataInput}
               onChange={(e) => setDataInput(e.target.value)}
               rows={4}
+              maxLength={5000}
               disabled={loading}
             />
             <button className="sample-button" onClick={generateSampleData} disabled={loading}>

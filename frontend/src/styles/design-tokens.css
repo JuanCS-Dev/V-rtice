@@ -303,6 +303,17 @@
   --grid-cols-4: repeat(4, minmax(0, 1fr));
   --grid-cols-6: repeat(6, minmax(0, 1fr));
   --grid-cols-12: repeat(12, minmax(0, 1fr));
+
+  /* ═══════════════════════════════════════════════════════════════════════
+   * DISABLED STATES - Boris Cherny Standard (GAP #100 FIX)
+   * ═══════════════════════════════════════════════════════════════════════
+   * Uso: disabled buttons, inputs, and other interactive elements
+   * Consistent disabled state styling across all components
+   */
+  --disabled-opacity: 0.5;
+  --disabled-cursor: not-allowed;
+  --disabled-bg: var(--color-bg-secondary);
+  --disabled-color: var(--color-text-tertiary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

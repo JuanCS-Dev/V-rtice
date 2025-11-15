@@ -1,12 +1,16 @@
 import React from 'react';
 import styles from './LoadingSpinner.module.css';
 
+/**
+ * Boris Cherny Standard - GAP #82 FIX: Add role="status" and aria-label for accessibility
+ */
 export const LoadingSpinner = ({
   size = 'md',
   variant = 'cyber',
   text,
   fullScreen = false,
   className = '',
+  ariaLabel,
   ...props
 }) => {
   const containerClasses = [
@@ -21,15 +25,26 @@ export const LoadingSpinner = ({
     styles[variant]
   ].filter(Boolean).join(' ');
 
+  // Determine aria-label: use custom ariaLabel, or fallback to text, or default
+  const accessibleLabel = ariaLabel || text || 'Loading...';
+
   return (
-    <div className={containerClasses} {...props}>
-      <div className={spinnerClasses}>
+    <div
+      className={containerClasses}
+      role="status"
+      aria-label={accessibleLabel}
+      aria-live="polite"
+      {...props}
+    >
+      <div className={spinnerClasses} aria-hidden="true">
         <div className={styles.ring}></div>
         <div className={styles.ring}></div>
         <div className={styles.ring}></div>
         <div className={styles.ring}></div>
       </div>
-      {text && <p className={styles.text}>{text}</p>}
+      {text && <p className={styles.text} aria-hidden="true">{text}</p>}
+      {/* Visually hidden text for screen readers */}
+      <span className="sr-only">{accessibleLabel}</span>
     </div>
   );
 };

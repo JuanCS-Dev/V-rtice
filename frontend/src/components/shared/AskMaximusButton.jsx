@@ -144,13 +144,15 @@ export const AskMaximusButton = ({
               {!prompt && (
                 <div className="prompt-section">
                   <label htmlFor="maximus-prompt-textarea">What would you like to know?</label>
-                  <textarea 
+                  {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
+                  <textarea
                     id="maximus-prompt-textarea"
                     className="prompt-input"
                     placeholder="E.g., 'Analyze this data for threats', 'What should I do next?', 'Explain these results'..."
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
                     rows={3}
+                    maxLength={1000}
                     disabled={isAnalyzing}
                   />
                 </div>

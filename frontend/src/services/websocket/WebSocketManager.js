@@ -370,12 +370,31 @@ class ConnectionManager {
 
   /**
    * Starts heartbeat mechanism
+   * Boris Cherny Standard - GAP #79 FIX: Add heartbeat timeout detection
    */
   startHeartbeat() {
     if (!this.config.heartbeatInterval) return;
 
+    // Initialize lastHeartbeat timestamp
+    this.lastHeartbeat = Date.now();
+
     this.heartbeatInterval = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
+        // Check if we've received a heartbeat/pong recently
+        const now = Date.now();
+        const timeSinceLastHeartbeat = now - (this.lastHeartbeat || now);
+        const timeout = this.config.heartbeatInterval * 2; // 2x heartbeat interval
+
+        if (timeSinceLastHeartbeat > timeout) {
+          // No heartbeat received - connection is dead
+          logger.warn('Heartbeat timeout detected - connection appears dead');
+          this.log('Heartbeat timeout - reconnecting');
+          this.handleError(new Error('Heartbeat timeout'));
+          this.disconnect();
+          return;
+        }
+
+        // Send heartbeat
         this.send(this.config.heartbeatMessage);
         this.log('Heartbeat sent');
       }

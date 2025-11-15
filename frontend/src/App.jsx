@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
+// Boris Cherny Standard - GAP #103 FIX: Add React Query DevTools for staging
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { LandingPage } from "./components/LandingPage";
 import { queryClient } from "./config/queryClient";
@@ -173,6 +175,10 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Boris Cherny Standard - GAP #103 FIX: React Query DevTools for staging/development */}
+      {(import.meta.env.DEV || import.meta.env.MODE === 'staging') && (
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+      )}
       <ToastProvider>
         <ErrorBoundary context="app-root" title="Application Error">
           <SkipLink href="#main-content" />

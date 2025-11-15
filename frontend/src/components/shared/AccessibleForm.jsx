@@ -121,6 +121,7 @@ export const Textarea = ({
         </label>
       )}
       
+      {/* Boris Cherny Standard - GAP #76 FIX: Add maxLength validation */}
       <textarea
         id={textareaId}
         value={value}
@@ -129,6 +130,7 @@ export const Textarea = ({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
+        maxLength={maxLength || 1000}
         className={`form-textarea w-full px-3 py-2 border rounded-lg transition-base ${
           hasError ? 'border-error focus:ring-error' : 'border-border focus:ring-primary'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
