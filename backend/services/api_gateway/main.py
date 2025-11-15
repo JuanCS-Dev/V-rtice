@@ -341,6 +341,113 @@ async def health_check() -> Dict[str, str]:
     return {"status": "healthy", "message": "Maximus API Gateway is operational."}
 
 
+# =============================================================================
+# FRONTEND ERROR LOGGING ENDPOINT
+# =============================================================================
+# Boris Cherny Pattern: Observability is critical for production
+
+
+@app.post("/api/errors/log")
+async def log_frontend_error(request: Request) -> Dict[str, str]:
+    """Log frontend errors for debugging and monitoring.
+
+    Receives error reports from frontend applications and logs them with
+    structured data for analysis.
+
+    Boris Cherny Pattern: Centralized error logging for observability
+
+    Request Body:
+        {
+            "level": "error" | "warn" | "info",
+            "message": str,
+            "stack": str (optional),
+            "context": dict (optional),
+            "url": str (optional - current page URL),
+            "userAgent": str (optional),
+            "timestamp": str (optional - ISO 8601)
+        }
+
+    Returns:
+        Dict[str, str]: Confirmation of log receipt
+
+    Example:
+        ```javascript
+        await fetch('/api/errors/log', {
+            method: 'POST',
+            body: JSON.stringify({
+                level: 'error',
+                message: 'Failed to load data',
+                stack: error.stack,
+                context: { component: 'Dashboard', action: 'fetchData' },
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            })
+        });
+        ```
+    """
+    try:
+        error_data = await request.json()
+
+        # Extract error details
+        level = error_data.get("level", "error")
+        message = error_data.get("message", "Unknown error")
+        stack = error_data.get("stack")
+        context = error_data.get("context", {})
+        url = error_data.get("url")
+        user_agent = error_data.get("userAgent")
+        timestamp = error_data.get("timestamp")
+
+        # Build structured log data
+        log_data = {
+            "source": "frontend",
+            "level": level,
+            "message": message,
+            "url": url,
+            "user_agent": user_agent,
+            "timestamp": timestamp,
+            "context": context,
+        }
+
+        # Add stack trace if available (truncate to prevent log flooding)
+        if stack:
+            log_data["stack"] = stack[:1000]  # First 1000 chars
+
+        # Log with appropriate level
+        if level == "error":
+            logger.error(
+                f"Frontend error: {message}",
+                extra=log_data,
+            )
+        elif level == "warn":
+            logger.warning(
+                f"Frontend warning: {message}",
+                extra=log_data,
+            )
+        else:
+            logger.info(
+                f"Frontend info: {message}",
+                extra=log_data,
+            )
+
+        return {
+            "status": "logged",
+            "message": "Error logged successfully",
+        }
+
+    except Exception as e:
+        # Don't let logging errors crash the endpoint
+        logger.error(
+            f"Failed to process frontend error log: {str(e)}",
+            extra={"error": str(e)},
+        )
+
+        # Still return success to prevent frontend errors
+        return {
+            "status": "partial",
+            "message": "Error received but logging failed",
+        }
+
+
 @app.get("/gateway/status")
 async def gateway_status() -> Dict:
     """Get gateway status including circuit breaker and cache info."""
