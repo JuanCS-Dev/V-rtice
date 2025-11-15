@@ -1,0 +1,541 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * FEATURES SECTION - CLEAN THEME - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Features como NARRATIVA VISUAL, não lista de specs
+ * Outcome-focused: foco em resultados, não em tecnologia
+ *
+ * Tone: Aggressive + Scientific (não corporate)
+ * Layout: Feature showcase cards com visual prominence
+ * Métricas: 92% edge, <100ms, <1s, 95% autonomous, 125 microservices, 9 cells
+ */
+
+import Card from '../DesignSystem/Card.astro';
+import Badge from '../DesignSystem/Badge.astro';
+import Icon from '../DesignSystem/Icon.astro';
+import Metric from '../DesignSystem/Metric.astro';
+---
+
+<section id="features" class="features-section section">
+  <div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <Badge variant="primary">Capabilities</Badge>
+      <h2 class="section-title">
+        Built Like Nature. <span class="text-accent">Operates Like Life</span>.
+      </h2>
+      <p class="section-description">
+        Not a collection of tools. An integrated organism with measurable outcomes.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- FEATURE SHOWCASES (Narrative, não lista) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="features-grid">
+
+      <!-- FEATURE 1: Never Fails (125 Microservices) -->
+      <Card class="feature-card feature-primary">
+        <div class="feature-icon-container">
+          <div class="feature-icon">
+            <Icon name="layers" size={48} />
+          </div>
+          <Badge variant="success">99.97% Uptime</Badge>
+        </div>
+
+        <h3 class="feature-title">Never Fails. Even Under Attack.</h3>
+
+        <p class="feature-description">
+          <strong>125 autonomous microservices</strong> organized as biological organs.
+          When one service falls, others compensate automatically.
+          <br /><br />
+          Like cells in a body, each has a purpose. Like organs, they coordinate.
+          Unlike traditional systems, <strong>there's no single point of failure</strong>.
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="125" label="Autonomous Services" />
+          <Metric value="99.97" suffix="%" label="Uptime Guarantee" />
+          <Metric value="<1" suffix="s" label="Auto-Heal Time" />
+        </div>
+
+        <div class="feature-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Operations never stop. Investigations never stall.</span>
+        </div>
+      </Card>
+
+      <!-- FEATURE 2: Edge Protection (92% Blocked) -->
+      <Card class="feature-card">
+        <div class="feature-icon-container">
+          <div class="feature-icon">
+            <Icon name="shield" size={48} />
+          </div>
+          <Badge variant="primary">Tegumentar Defense</Badge>
+        </div>
+
+        <h3 class="feature-title">92% Blocked Before They Enter.</h3>
+
+        <p class="feature-description">
+          <strong>Biomimetic firewall</strong> inspired by human skin. 3 layers (Epiderme, Derme, Hipoderme)
+          filter threats at the edge.
+          <br /><br />
+          <strong>9 specialized immune cells</strong> (Macrophages, T-cells, NK cells) hunt
+          the remaining 8%. <strong>Detection in &lt;100ms. Containment in &lt;1s.</strong>
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="92" suffix="%" label="Edge Block Rate" />
+          <Metric value="<100" suffix="ms" label="Detection Speed" />
+          <Metric value="9" label="Immune Cell Types" />
+        </div>
+
+        <div class="feature-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Most attacks never reach critical systems.</span>
+        </div>
+      </Card>
+
+      <!-- FEATURE 3: Autonomous Decisions (95%) -->
+      <Card class="feature-card">
+        <div class="feature-icon-container">
+          <div class="feature-icon">
+            <Icon name="dna" size={48} />
+          </div>
+          <Badge variant="primary">IIT-Validated</Badge>
+        </div>
+
+        <h3 class="feature-title">95% Decisions Without Humans.</h3>
+
+        <p class="feature-description">
+          <strong>IIT-validated consciousness</strong> (ECI 0.958) makes threat decisions autonomously.
+          <strong>Theory of Mind</strong> infers attacker intentions.
+          <br /><br />
+          Constitutional governance (4 ethical frameworks) ensures every action is proportional,
+          legal, and auditable. <strong>100% of responses validated.</strong> Zero unauthorized actions.
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="95" suffix="%" label="Autonomous Rate" />
+          <Metric value="0.958" label="IIT Consciousness (Φ)" />
+          <Metric value="100" suffix="%" label="Constitutional Approval" />
+        </div>
+
+        <div class="feature-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Threats neutralized in seconds, not hours. Legally defensible.</span>
+        </div>
+      </Card>
+
+      <!-- FEATURE 4: Adaptive Learning (Biomimetic) -->
+      <Card class="feature-card">
+        <div class="feature-icon-container">
+          <div class="feature-icon">
+            <Icon name="activity" size={48} />
+          </div>
+          <Badge variant="success">Self-Evolving</Badge>
+        </div>
+
+        <h3 class="feature-title">Learns From Every Attack.</h3>
+
+        <p class="feature-description">
+          <strong>Biomimetic immune system</strong> doesn't just block threats. It <strong>learns</strong> them.
+          <br /><br />
+          Memory cells store attack patterns. When similar threats return,
+          response is instant. <strong>Adaptive self-healing</strong> patches vulnerabilities
+          automatically. <strong>No manual updates needed.</strong>
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="∞" label="Pattern Memory" />
+          <Metric value="<1" suffix="%" label="False Positives" />
+          <Metric value="24/7" label="Auto-Evolution" />
+        </div>
+
+        <div class="feature-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Defenses strengthen with time, not weaken.</span>
+        </div>
+      </Card>
+
+      <!-- FEATURE 5: Counter-Attack (Offensive) -->
+      <Card class="feature-card feature-offensive">
+        <div class="feature-icon-container">
+          <div class="feature-icon offensive-icon">
+            <Icon name="zap" size={48} />
+          </div>
+          <Badge variant="primary">Constitutionally Governed</Badge>
+        </div>
+
+        <h3 class="feature-title">When Attacked, It Hunts Back.</h3>
+
+        <p class="feature-description">
+          Not passive defense. <strong>Active countermeasures</strong>.
+          <br /><br />
+          Honeypot network lures attackers. Behavioral analysis maps their tactics (MITRE ATT&CK).
+          Infrastructure mapping identifies C2 servers, pivots, campaigns.
+          <br /><br />
+          <strong>Their digital life ends.</strong> Capability neutralized. Intelligence captured.
+          Constitutional check ensures proportionality.
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="15" label="Neutralized Today" />
+          <Metric value="100" suffix="%" label="Proportionality Check" />
+          <Metric value="0" label="Unauthorized Actions" />
+        </div>
+
+        <div class="feature-outcome offensive-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Attackers leave with less than they came. Criminal intelligence gained.</span>
+        </div>
+      </Card>
+
+      <!-- FEATURE 6: Exponential Response (Coagulation) -->
+      <Card class="feature-card">
+        <div class="feature-icon-container">
+          <div class="feature-icon">
+            <Icon name="cpu" size={48} />
+          </div>
+          <Badge variant="neutral">Biomimetic</Badge>
+        </div>
+
+        <h3 class="feature-title">1 Breach Trigger → 1000+ Rules in &lt;1s.</h3>
+
+        <p class="feature-description">
+          <strong>Coagulation cascade</strong> inspired by blood clotting.
+          <br /><br />
+          When a breach is detected, response amplifies exponentially.
+          1 trigger validates → 10 factors activate → 100 platelets aggregate → 1000+ enforcement rules deploy.
+          <strong>Quarantine in &lt;1s.</strong> Spread contained.
+        </p>
+
+        <div class="feature-metrics">
+          <Metric value="1000" suffix="x" label="Amplification Ratio" />
+          <Metric value="<1" suffix="s" label="Quarantine Time" />
+          <Metric value="<1" suffix="%" label="False Positives" />
+        </div>
+
+        <div class="feature-outcome">
+          <Icon name="check" size={20} />
+          <span><strong>Outcome:</strong> Breaches contained before lateral movement. Damage minimized.</span>
+        </div>
+      </Card>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- COMPARISON CALLOUT (vs Traditional) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="comparison-callout">
+      <div class="comparison-column">
+        <h4 class="comparison-title">Traditional Security</h4>
+        <ul class="comparison-list">
+          <li>❌ Reacts to threats</li>
+          <li>❌ Humans make decisions</li>
+          <li>❌ Static defenses</li>
+          <li>❌ Single points of failure</li>
+          <li>❌ Needs constant updates</li>
+        </ul>
+      </div>
+
+      <div class="comparison-divider">
+        <Icon name="arrow-right" size={32} />
+      </div>
+
+      <div class="comparison-column comparison-solution">
+        <h4 class="comparison-title">VÉRTICE-MAXIMUS</h4>
+        <ul class="comparison-list">
+          <li>✅ Predicts and prevents</li>
+          <li>✅ 95% autonomous decisions</li>
+          <li>✅ Evolves with every attack</li>
+          <li>✅ Distributed resilience (125 services)</li>
+          <li>✅ Self-healing and auto-patching</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURES SECTION - LIGHT MODE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .features-section {
+    background: linear-gradient(
+      to bottom,
+      var(--color-bg-primary) 0%,
+      var(--color-white) 50%,
+      var(--color-bg-primary) 100%
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-16);
+  }
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .section-description {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURES GRID */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-8);
+    margin-bottom: var(--space-16);
+  }
+
+  @media (max-width: 768px) {
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURE CARDS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .feature-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-8);
+    border-left: 4px solid var(--color-accent-primary);
+  }
+
+  .feature-primary {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent-light) 0%,
+      var(--color-white) 100%
+    );
+    border-left-color: var(--color-accent-primary);
+    border-left-width: 6px;
+  }
+
+  .feature-offensive {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 163, 127, 0.05) 0%,
+      var(--color-white) 100%
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURE ICON & BADGE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .feature-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-xl);
+    background-color: var(--color-accent-light);
+    border: var(--border-width-2) solid var(--color-accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+  }
+
+  .offensive-icon {
+    background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-hover));
+    color: var(--color-white);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURE CONTENT */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .feature-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .feature-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .feature-description strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURE METRICS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .feature-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    padding: var(--space-6);
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  @media (max-width: 640px) {
+    .feature-metrics {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FEATURE OUTCOME */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .feature-outcome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--color-accent-light);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-accent-primary);
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+  }
+
+  .feature-outcome :global(svg) {
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+  }
+
+  .offensive-outcome {
+    background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-hover));
+    color: var(--color-white);
+    border-left-color: var(--color-white);
+  }
+
+  .offensive-outcome :global(svg) {
+    color: var(--color-white);
+  }
+
+  .offensive-outcome strong {
+    color: var(--color-white);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* COMPARISON CALLOUT */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .comparison-callout {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: var(--space-8);
+    align-items: center;
+    padding: var(--space-12);
+    background: var(--color-white);
+    border: var(--border-width-2) solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 1024px) {
+    .comparison-callout {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .comparison-divider {
+      display: none;
+    }
+  }
+
+  .comparison-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .comparison-solution {
+    background-color: var(--color-accent-light);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: var(--border-width) solid var(--color-accent-primary);
+  }
+
+  .comparison-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3) 0;
+  }
+
+  .comparison-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .comparison-list li {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+  }
+
+  .comparison-divider {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: var(--color-accent-primary);
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (min-width: 768px) {
+    .section-title {
+      font-size: var(--text-5xl);
+    }
+  }
+</style>

@@ -1,0 +1,431 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CONTACT FORM - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Formulário enterprise para qualificação de leads B2G/B2B
+ *
+ * Campos:
+ * - Nome completo (required)
+ * - Cargo/Posição (required)
+ * - Organização/Órgão (required)
+ * - Email institucional (required)
+ * - Telefone (optional)
+ * - Mensagem (optional)
+ *
+ * Design: Claude.ai clean style
+ * Validação: HTML5 + progressive enhancement
+ * Performance: No JavaScript required (progressive enhancement)
+ */
+
+import Button from '../DesignSystem/Button.astro';
+import Icon from '../DesignSystem/Icon.astro';
+---
+
+<form class="contact-form" method="POST" action="/api/contact" id="contact-form">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FORM HEADER -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="form-header">
+    <h3 class="form-title">Deploy the Organism</h3>
+    <p class="form-description">
+      Preencha os dados abaixo. Nossa equipe entrará em contato em até 24h úteis.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FORM FIELDS -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- Nome Completo -->
+  <div class="form-field">
+    <label for="name" class="form-label">
+      Nome Completo <span class="required">*</span>
+    </label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="form-input"
+      placeholder="João Silva"
+      required
+      autocomplete="name"
+      minlength="3"
+      maxlength="100"
+    />
+  </div>
+
+  <!-- Cargo/Posição -->
+  <div class="form-field">
+    <label for="role" class="form-label">
+      Cargo/Posição <span class="required">*</span>
+    </label>
+    <input
+      type="text"
+      id="role"
+      name="role"
+      class="form-input"
+      placeholder="Diretor de TI, CISO, Secretário..."
+      required
+      autocomplete="organization-title"
+      minlength="3"
+      maxlength="100"
+    />
+  </div>
+
+  <!-- Organização/Órgão -->
+  <div class="form-field">
+    <label for="organization" class="form-label">
+      Organização/Órgão <span class="required">*</span>
+    </label>
+    <input
+      type="text"
+      id="organization"
+      name="organization"
+      class="form-input"
+      placeholder="Ministério, Secretaria, Empresa..."
+      required
+      autocomplete="organization"
+      minlength="3"
+      maxlength="150"
+    />
+  </div>
+
+  <!-- Email Institucional -->
+  <div class="form-field">
+    <label for="email" class="form-label">
+      Email Institucional <span class="required">*</span>
+    </label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      class="form-input"
+      placeholder="voce@organizacao.gov.br"
+      required
+      autocomplete="email"
+    />
+    <p class="form-helper-text">
+      Use email corporativo/institucional para validação
+    </p>
+  </div>
+
+  <!-- Telefone (Opcional) -->
+  <div class="form-field">
+    <label for="phone" class="form-label">
+      Telefone
+    </label>
+    <input
+      type="tel"
+      id="phone"
+      name="phone"
+      class="form-input"
+      placeholder="+55 (61) 99999-9999"
+      autocomplete="tel"
+    />
+  </div>
+
+  <!-- Mensagem (Opcional) -->
+  <div class="form-field">
+    <label for="message" class="form-label">
+      Mensagem (Opcional)
+    </label>
+    <textarea
+      id="message"
+      name="message"
+      class="form-textarea"
+      placeholder="Conte mais sobre sua necessidade de segurança..."
+      rows="4"
+      maxlength="1000"
+    ></textarea>
+    <p class="form-helper-text">
+      Máximo 1000 caracteres
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SUBMIT BUTTON -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="form-actions">
+    <Button variant="primary" size="lg" type="submit">
+      <Icon name="zap" size={20} />
+      Solicitar Demonstração
+    </Button>
+    <p class="form-privacy-text">
+      Ao enviar, você concorda com nossa
+      <a href="/privacy" class="form-privacy-link">Política de Privacidade</a>.
+      Não compartilhamos seus dados com terceiros.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SUCCESS/ERROR MESSAGES (Hidden by default) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="form-message form-success" id="form-success" hidden>
+    <Icon name="check" size={20} />
+    <div>
+      <strong>Mensagem enviada com sucesso!</strong>
+      <p>Nossa equipe entrará em contato em breve.</p>
+    </div>
+  </div>
+
+  <div class="form-message form-error" id="form-error" hidden>
+    <Icon name="alert-circle" size={20} />
+    <div>
+      <strong>Erro ao enviar mensagem.</strong>
+      <p>Por favor, tente novamente ou envie email para contato@vertice-maximus.com</p>
+    </div>
+  </div>
+
+</form>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* CONTACT FORM STYLES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .contact-form {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-10);
+    box-shadow: var(--shadow-lg);
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FORM HEADER */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .form-header {
+    margin-bottom: var(--space-8);
+    text-align: center;
+  }
+
+  .form-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-3);
+  }
+
+  .form-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FORM FIELDS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .form-field {
+    margin-bottom: var(--space-6);
+  }
+
+  .form-label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  .required {
+    color: var(--color-error);
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-base);
+    font-family: var(--font-family-base);
+    color: var(--color-text-primary);
+    background-color: var(--color-white);
+    border: var(--border-width-2) solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--duration-fast) var(--ease-out),
+                box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .form-input:hover,
+  .form-textarea:hover {
+    border-color: var(--color-accent-primary);
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-helper-text {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-2);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* VALIDATION STATES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .form-input:invalid:not(:placeholder-shown),
+  .form-textarea:invalid:not(:placeholder-shown) {
+    border-color: var(--color-error);
+  }
+
+  .form-input:valid:not(:placeholder-shown),
+  .form-textarea:valid:not(:placeholder-shown) {
+    border-color: var(--color-success);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FORM ACTIONS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .form-actions {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .form-actions :global(.btn) {
+    width: 100%;
+  }
+
+  .form-privacy-text {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-align: center;
+    line-height: var(--leading-normal);
+  }
+
+  .form-privacy-link {
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    font-weight: var(--font-medium);
+  }
+
+  .form-privacy-link:hover {
+    text-decoration: underline;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SUCCESS/ERROR MESSAGES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .form-message {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-6);
+  }
+
+  .form-message :global(.icon) {
+    flex-shrink: 0;
+  }
+
+  .form-success {
+    background-color: var(--color-success-light);
+    color: var(--color-success-dark);
+    border: var(--border-width) solid var(--color-success);
+  }
+
+  .form-error {
+    background-color: var(--color-error-light);
+    color: var(--color-error-dark);
+    border: var(--border-width) solid var(--color-error);
+  }
+
+  .form-message strong {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .form-message p {
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (max-width: 640px) {
+    .contact-form {
+      padding: var(--space-6);
+    }
+
+    .form-title {
+      font-size: var(--text-xl);
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Progressive Enhancement: Form submission via fetch API
+   * Falls back to standard POST if JavaScript disabled
+   */
+
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const successMessage = document.getElementById('form-success');
+  const errorMessage = document.getElementById('form-error');
+
+  if (form && 'fetch' in window) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Hide previous messages
+      if (successMessage) successMessage.hidden = true;
+      if (errorMessage) errorMessage.hidden = true;
+
+      // Get form data
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          // Success
+          if (successMessage) {
+            successMessage.hidden = false;
+            successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          form.reset();
+        } else {
+          // Error
+          throw new Error('Form submission failed');
+        }
+      } catch (error) {
+        console.error('Form submission error:', error);
+        if (errorMessage) {
+          errorMessage.hidden = false;
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    });
+  }
+</script>

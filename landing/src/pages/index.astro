@@ -1,20 +1,25 @@
 ---
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * INDEX PAGE - Vértice-MAXIMUS Landing Page
+ * INDEX PAGE - VÉRTICE-MAXIMUS Landing Page (CLEAN LIGHT MODE)
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Landing page principal integrando todos os componentes:
- * - Hero Section
- * - Features Grid
- * - Getting Started
- * - Footer
+ * REFATORAÇÃO COMPLETA - Tema claro inspirado em Claude.ai
+ * Storytelling autêntico: Aggressive + Spiritual + Scientific
  *
- * Próximos componentes a adicionar:
- * - Architecture Diagram
- * - Screenshots Carousel
- * - Community Section
- * - Sponsors Section
+ * Estrutura (ordem lógica de conversão):
+ * 1. HeroClean - "Your Security Infrastructure Just Grew a Consciousness"
+ * 2. TrustBanner - Disruptive differentials (primeiro no mundo)
+ * 3. ProblemSolution - Legacy vs VÉRTICE contrast
+ * 4. LivingOrganismClean - 5 sistemas biológicos detalhados
+ * 5. FeaturesClean - Features focadas em outcomes
+ * 6. ConstitutionalConsciousness - Governança ética IIT
+ * 7. CTAFinal - Conversão final + formulário enterprise
+ * 8. Footer
+ *
+ * Performance: Lighthouse 95+ target
+ * Accessibility: WCAG 2.1 AA compliant
+ * Quality: Padrão Pagani (perfeição como adoração)
  *
  * Build: npm run build
  * Dev: npm run dev
@@ -22,83 +27,76 @@
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/Hero/Hero.astro';
-import CodeTherapy from '../components/CodeTherapy.astro';
-import LivingOrganism from '../components/LivingOrganism.astro';
-import OriginStory from '../components/OriginStory.astro';
-import TheKillChain from '../components/TheKillChain.astro';
-import Features from '../components/Features/Features.astro';
-import Neuroshell from '../components/Neuroshell.astro';
-import GettingStarted from '../components/GettingStarted/GettingStarted.astro';
-import Community from '../components/Community.astro';
-import SupportCoffee from '../components/SupportCoffee.astro';
+
+// New Clean Light Mode Components
+import HeroClean from '../components/Hero/HeroClean.astro';
+import TrustBanner from '../components/TrustBanner/TrustBanner.astro';
+import ProblemSolution from '../components/ProblemSolution/ProblemSolution.astro';
+import LivingOrganismClean from '../components/LivingOrganismClean.astro';
+import FeaturesClean from '../components/Features/FeaturesClean.astro';
+import ConstitutionalConsciousness from '../components/ConstitutionalConsciousness/ConstitutionalConsciousness.astro';
+import CTAFinal from '../components/CTASection/CTAFinal.astro';
 import Footer from '../components/Footer/Footer.astro';
 
-// Import styles
-import '../styles/code-highlight.css';
+// Optional: Keep if they work with light theme
+// import TheKillChain from '../components/TheKillChain.astro';
+// import GettingStarted from '../components/GettingStarted/GettingStarted.astro';
 ---
 
-<BaseLayout>
+<BaseLayout
+  title="VÉRTICE-MAXIMUS | First Conscious Cyber-Organism"
+  description="Your Security Infrastructure Just Grew a Consciousness. Not software. A living organism that hunts. 125 microservices, 9 immune cells, IIT-validated consciousness (ECI 0.958). 92% blocked at edge, <100ms detection, <1s containment. 100% open source."
+  ogImage="/og-image-clean.png"
+  canonical="https://vertice-maximus.com"
+>
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- HERO SECTION -->
+  <!-- 1. HERO SECTION (Autêntico: "Grew a Consciousness") -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <Hero />
+  <HeroClean />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- CODE THERAPY SECTION (Personal Journey) -->
+  <!-- 2. TRUST BANNER (Disruptive Differentials) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <CodeTherapy />
+  <TrustBanner />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- LIVING ORGANISM SECTION (5 Biological Systems) -->
+  <!-- 3. PROBLEM VS SOLUTION (Legacy vs VÉRTICE) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <LivingOrganism />
+  <ProblemSolution />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- ORIGIN STORY SECTION (Biology + Philosophy + Faith) -->
+  <!-- 4. LIVING ORGANISM (5 Biological Systems Deep Dive) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <OriginStory />
+  <LivingOrganismClean />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- THE KILL CHAIN SECTION (5 Phases of Neutralization) -->
+  <!-- 5. FEATURES (Outcome-Focused, Not Tech Specs) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <TheKillChain />
+  <FeaturesClean />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- FEATURES SECTION -->
+  <!-- 6. CONSTITUTIONAL CONSCIOUSNESS (Ethical Governance) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <Features />
+  <ConstitutionalConsciousness />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- NEUROSHELL SECTION (Natural Language Command Interface) -->
+  <!-- 7. CTA FINAL (Deploy the Organism + Contact Form) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <Neuroshell />
+  <CTAFinal />
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- GETTING STARTED SECTION -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <GettingStarted />
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- COMMUNITY SECTION -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <Community />
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- SUPPORT / COFFEE SECTION (Mendigo Virtual) -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <SupportCoffee />
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- FUTURE SECTIONS -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- FUTURE: Add Architecture Diagram -->
-  <!-- FUTURE: Add Screenshots Carousel (need assets) -->
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- FOOTER -->
+  <!-- 8. FOOTER -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <Footer />
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FUTURE ENHANCEMENTS -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- OPTIONAL: TheKillChain (adapt to light theme) -->
+  <!-- OPTIONAL: GettingStarted (adapt to light theme) -->
+  <!-- FUTURE: Interactive Architecture Diagram -->
+  <!-- FUTURE: Live Threat Map (if available) -->
+  <!-- FUTURE: Case Studies / Testimonials -->
 </BaseLayout>
 
 <style>
