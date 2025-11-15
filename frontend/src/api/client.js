@@ -18,6 +18,13 @@ const API_BASE = ServiceEndpoints.apiGateway;
 const API_KEY = AuthConfig.apiKey;
 
 /**
+ * Timeout configuration
+ * Boris Cherny Pattern: Explicit constants over magic numbers
+ */
+export const DEFAULT_TIMEOUT = 30000; // 30s - production-safe default
+export const HEALTH_CHECK_TIMEOUT = 3000; // 3s - fast health checks
+
+/**
  * Custom error classes for typed error handling
  */
 export class UnauthorizedError extends Error {
@@ -97,19 +104,52 @@ const checkCORSPreflight = async (endpoint) => {
 /**
  * Internal request function with auth interceptor
  * Boris Cherny Pattern: Single Responsibility - handles HTTP only
+ *
+ * Features:
+ * - Automatic timeout with AbortController
+ * - Configurable timeout via options.timeout
+ * - Proper cleanup (clearTimeout)
+ * - Clear error messages
  */
 const makeRequest = async (url, options) => {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": API_KEY,
-      "X-CSRF-Token": getCSRFToken(),
-      ...options.headers,
-    },
-  });
+  // Create AbortController for timeout
+  const controller = new AbortController();
+  const timeout = options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
 
-  return response;
+  // Set timeout - abort request if it takes too long
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": API_KEY,
+        "X-CSRF-Token": getCSRFToken(),
+        ...options.headers,
+      },
+    });
+
+    // Clear timeout on success
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    // Always clear timeout
+    clearTimeout(timeoutId);
+
+    // Differentiate timeout from other errors
+    if (error.name === "AbortError") {
+      const seconds = timeout / 1000;
+      logger.warn(`Request timeout after ${seconds}s: ${url}`);
+      throw new Error(`Request timeout after ${seconds}s`);
+    }
+
+    // Re-throw other errors
+    throw error;
+  }
 };
 
 /**
@@ -240,15 +280,26 @@ export const directClient = {
   async request(baseUrl, path, options = {}) {
     const url = `${baseUrl}${path}`;
 
+    // Create AbortController for timeout (same pattern as makeRequest)
+    const controller = new AbortController();
+    const timeout = options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
+
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
+
     try {
       const response = await fetch(url, {
         ...options,
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": API_KEY,
           ...options.headers,
         },
       });
+
+      clearTimeout(timeoutId);
 
       // Apply same auth error handling as main client
       if (response.status === 401) {
@@ -271,6 +322,16 @@ export const directClient = {
 
       return await response.json();
     } catch (error) {
+      // Always clear timeout
+      clearTimeout(timeoutId);
+
+      // Handle timeout errors
+      if (error.name === "AbortError") {
+        const seconds = timeout / 1000;
+        logger.warn(`Direct API request timeout after ${seconds}s: ${url}`);
+        throw new Error(`Request timeout after ${seconds}s`);
+      }
+
       // Re-throw custom errors
       if (
         error instanceof UnauthorizedError ||
