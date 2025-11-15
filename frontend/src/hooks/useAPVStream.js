@@ -26,6 +26,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import logger from '@/utils/logger';
 
 // WebSocket connection states
@@ -66,6 +67,10 @@ export const useAPVStream = ({
   onDisconnect = null,
   onError = null
 } = {}) => {
+  // GAP #50 FIX: Get queryClient for React Query invalidation
+  // Boris Cherny Standard: Invalidate cache when WebSocket updates received
+  const queryClient = useQueryClient();
+
   // State
   const [status, setStatus] = useState(WS_STATES.DISCONNECTED);
   const [apvs, setApvs] = useState([]);
@@ -125,35 +130,72 @@ export const useAPVStream = ({
       ws.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data);
+
+          // GAP #49 FIX: Validate message format (Boris Cherny Standard)
+          // Ensure message has required 'type' field
+          if (!message || typeof message !== 'object' || !message.type || typeof message.type !== 'string') {
+            logger.warn('[useAPVStream] Invalid message format: missing or invalid type field', message);
+            return;
+          }
+
           const { type, timestamp, payload } = message;
 
           logger.debug(`[useAPVStream] Message received: ${type}`, payload);
 
           switch (type) {
             case 'apv':
+              // Validate apv message has payload
+              if (!payload || typeof payload !== 'object') {
+                logger.warn('[useAPVStream] APV message missing or invalid payload');
+                break;
+              }
               // New APV detected
               setApvs(prev => [payload, ...prev].slice(0, 100)); // Keep last 100
               if (callbacksRef.current.onApv) {
                 callbacksRef.current.onApv(payload);
               }
+              // GAP #50 FIX: Invalidate APV queries on new detection
+              queryClient.invalidateQueries({ queryKey: ['apv'] });
+              queryClient.invalidateQueries({ queryKey: ['defensive', 'alerts'] });
               break;
 
             case 'patch':
+              // Validate patch message has payload
+              if (!payload || typeof payload !== 'object') {
+                logger.warn('[useAPVStream] Patch message missing or invalid payload');
+                break;
+              }
               // Patch status update
               if (callbacksRef.current.onPatch) {
                 callbacksRef.current.onPatch(payload);
               }
+              // GAP #50 FIX: Invalidate patch queries
+              queryClient.invalidateQueries({ queryKey: ['patches'] });
+              queryClient.invalidateQueries({ queryKey: ['patch', 'status'] });
               break;
 
             case 'metrics':
+              // Validate metrics message has payload
+              if (!payload || typeof payload !== 'object') {
+                logger.warn('[useAPVStream] Metrics message missing or invalid payload');
+                break;
+              }
               // System metrics snapshot
               setMetrics(payload);
               if (callbacksRef.current.onMetrics) {
                 callbacksRef.current.onMetrics(payload);
               }
+              // GAP #50 FIX: Invalidate metrics queries
+              queryClient.invalidateQueries({ queryKey: ['metrics'] });
+              queryClient.invalidateQueries({ queryKey: ['defensive', 'metrics'] });
               break;
 
             case 'heartbeat':
+              // Validate timestamp exists for heartbeat
+              if (!timestamp) {
+                logger.warn('[useAPVStream] Heartbeat message missing timestamp');
+                break;
+              }
               // Keep-alive signal
               setLastHeartbeat(new Date(timestamp));
               break;

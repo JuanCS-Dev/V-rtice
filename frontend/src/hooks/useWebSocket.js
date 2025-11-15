@@ -259,14 +259,17 @@ export const useWebSocket = (url, options = {}) => {
     setIsConnected(false);
   }, [stopHeartbeat, stopPolling, log]);
 
-  // Initial connection
+  // GAP #56 FIX: Initial connection with stable dependencies
+  // Boris Cherny Standard: Prevent infinite loops by carefully managing deps
+  // Memoized opts ensures callback identities remain stable between renders
   useEffect(() => {
     connect();
 
     return () => {
       disconnect();
     };
-  }, [url, connect, disconnect]); // Add dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]); // Only url should trigger reconnection, connect/disconnect are stable via memoization
 
   return {
     data,

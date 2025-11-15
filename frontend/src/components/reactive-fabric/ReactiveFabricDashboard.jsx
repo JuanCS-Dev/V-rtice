@@ -14,19 +14,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import logger from "@/utils/logger";
 import { formatDateTime, formatDate, formatTime, getTimestamp } from '@/utils/dateHelpers';
-import logger from "@/utils/logger";
 import styles from './ReactiveFabricDashboard.module.css';
-import logger from "@/utils/logger";
 import { DashboardFooter } from '../shared/DashboardFooter';
-import logger from "@/utils/logger";
 import DecoyBayouMap from './DecoyBayouMap';
-import logger from "@/utils/logger";
 import IntelligenceFusionPanel from './IntelligenceFusionPanel';
-import logger from "@/utils/logger";
 import ThreatTimelineWidget from './ThreatTimelineWidget';
-import logger from "@/utils/logger";
 import HoneypotStatusGrid from './HoneypotStatusGrid';
-import logger from "@/utils/logger";
 
 /**
  * Main dashboard component orchestrating all reactive fabric visualizations

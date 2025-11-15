@@ -14,13 +14,9 @@
  */
 
 import React from 'react';
-import logger from "@/utils/logger";
 import PropTypes from 'prop-types';
-import logger from "@/utils/logger";
 import { useQueryErrorResetBoundary } from '@tanstack/react-query';
-import logger from "@/utils/logger";
 import { withTranslation } from 'react-i18next';
-import logger from "@/utils/logger";
 import './QueryErrorBoundary.css';
 
 class QueryErrorBoundaryComponent extends React.Component {

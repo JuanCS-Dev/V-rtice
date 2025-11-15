@@ -5,38 +5,40 @@ import TerminalEmulator from './TerminalEmulator';
 import TerminalHeader from './TerminalHeader';
 import styles from './TerminalDashboard.module.css';
 
+// GAP #59 FIX: Move themes object outside component to prevent recreation on every render
+// Boris Cherny Standard: Object recreation causes unnecessary child re-renders
+const TERMINAL_THEMES = {
+  matrix: {
+    background: '#000000',
+    foreground: '#00ff41',
+    cursor: '#00ff41',
+    selection: 'rgba(0, 255, 65, 0.3)'
+  },
+  hacker: {
+    background: '#0d1117',
+    foreground: '#00d4aa',
+    cursor: '#00d4aa',
+    selection: 'rgba(0, 212, 170, 0.3)'
+  },
+  cyberpunk: {
+    background: '#1a0d2e',
+    foreground: '#e94560',
+    cursor: '#e94560',
+    selection: 'rgba(233, 69, 96, 0.3)'
+  },
+  classic: {
+    background: '#000000',
+    foreground: '#ffffff',
+    cursor: '#ffffff',
+    selection: 'rgba(255, 255, 255, 0.3)'
+  }
+};
+
 const TerminalDashboard = ({ setCurrentView }) => {
   const { user } = useContext(AuthContext);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [terminalTheme, setTerminalTheme] = useState('matrix');
   const containerRef = useRef(null);
-
-  const themes = {
-    matrix: {
-      background: '#000000',
-      foreground: '#00ff41',
-      cursor: '#00ff41',
-      selection: 'rgba(0, 255, 65, 0.3)'
-    },
-    hacker: {
-      background: '#0d1117',
-      foreground: '#00d4aa',
-      cursor: '#00d4aa',
-      selection: 'rgba(0, 212, 170, 0.3)'
-    },
-    cyberpunk: {
-      background: '#1a0d2e',
-      foreground: '#e94560',
-      cursor: '#e94560',
-      selection: 'rgba(233, 69, 96, 0.3)'
-    },
-    classic: {
-      background: '#000000',
-      foreground: '#ffffff',
-      cursor: '#ffffff',
-      selection: 'rgba(255, 255, 255, 0.3)'
-    }
-  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -62,8 +64,8 @@ const TerminalDashboard = ({ setCurrentView }) => {
       ref={containerRef}
       className={`${styles.container} ${isFullscreen ? styles.fullscreen : ''}`}
       style={{
-        backgroundColor: themes[terminalTheme].background,
-        color: themes[terminalTheme].foreground,
+        backgroundColor: TERMINAL_THEMES[terminalTheme].background,
+        color: TERMINAL_THEMES[terminalTheme].foreground,
       }}
     >
       {/* Header */}
@@ -73,14 +75,14 @@ const TerminalDashboard = ({ setCurrentView }) => {
         onThemeChange={setTerminalTheme}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
-        themes={themes}
+        themes={TERMINAL_THEMES}
         setCurrentView={setCurrentView}
       />
 
       {/* Main Terminal Area */}
       <div className={styles.mainArea}>
         <TerminalEmulator
-          theme={themes[terminalTheme]}
+          theme={TERMINAL_THEMES[terminalTheme]}
           isFullscreen={isFullscreen}
         />
       </div>

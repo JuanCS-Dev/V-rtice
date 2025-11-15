@@ -22,29 +22,19 @@
 import React, { useState } from "react";
 import logger from "@/utils/logger";
 import { useMABAStats } from "../../hooks/maba/useMABAStats";
-import logger from "@/utils/logger";
 import { useCognitiveMap } from "../../hooks/maba/useCognitiveMap";
-import logger from "@/utils/logger";
 import { useBrowserSessions } from "../../hooks/maba/useBrowserSessions";
-import logger from "@/utils/logger";
 import { useWebSocket } from "../../hooks/useWebSocket";
-import logger from "@/utils/logger";
 import { WS_ENDPOINTS } from "../../config/api";
-import logger from "@/utils/logger";
 
 // Components
 import { CognitiveMapViewer } from "./components/CognitiveMapViewer";
-import logger from "@/utils/logger";
 import { BrowserSessionManager } from "./components/BrowserSessionManager";
-import logger from "@/utils/logger";
 import { NavigationTimeline } from "./components/NavigationTimeline";
-import logger from "@/utils/logger";
 import { StatsOverview } from "./components/StatsOverview";
-import logger from "@/utils/logger";
 
 // Styles
 import styles from "./MABADashboard.module.css";
-import logger from "@/utils/logger";
 
 export const MABADashboard = ({ setCurrentView }) => {
   const [activeView, setActiveView] = useState("cognitive-map"); // cognitive-map, sessions, timeline

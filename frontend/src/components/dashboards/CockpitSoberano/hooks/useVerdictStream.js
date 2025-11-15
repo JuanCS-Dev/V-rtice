@@ -56,7 +56,21 @@ export const useVerdictStream = () => {
       ws.onmessage = (event) => {
         try {
           const verdict = JSON.parse(event.data);
-          
+
+          // GAP #49 FIX: Validate message format (Boris Cherny Standard)
+          // Ensure message has required fields before processing
+          if (!verdict || typeof verdict !== 'object' || !verdict.id || !verdict.severity) {
+            logger.warn('[VerdictStream] Invalid verdict format:', verdict);
+            return;
+          }
+
+          // Validate severity is one of expected values
+          const validSeverities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
+          if (!validSeverities.includes(verdict.severity)) {
+            logger.warn('[VerdictStream] Invalid severity value:', verdict.severity);
+            return;
+          }
+
           setVerdicts(prev => {
             const updated = [verdict, ...prev].slice(0, MAX_VERDICTS);
             return updated;

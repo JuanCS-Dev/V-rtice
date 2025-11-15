@@ -8,11 +8,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import logger from "@/utils/logger";
 import axios from 'axios';
-import logger from "@/utils/logger";
 import { API_ENDPOINTS } from '@/config/api';
-import logger from "@/utils/logger";
 
 const API_URL = API_ENDPOINTS.narrativeFilter;
 const POLL_INTERVAL = 10000; // 10 seconds

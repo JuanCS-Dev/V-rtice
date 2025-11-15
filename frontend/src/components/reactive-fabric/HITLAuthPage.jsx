@@ -24,13 +24,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import logger from "@/utils/logger";
 import { useNavigate } from 'react-router-dom';
-import logger from "@/utils/logger";
 import { API_ENDPOINTS } from '@/config/api';
-import logger from "@/utils/logger";
 import styles from './HITLAuthPage.module.css';
-import logger from "@/utils/logger";
 
 const HITLAuthPage = ({ onAuthSuccess }) => {
   const [step, setStep] = useState('login'); // 'login' | '2fa' | 'success'

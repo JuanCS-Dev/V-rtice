@@ -31,9 +31,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import logger from "@/utils/logger";
 import { WS_ENDPOINTS } from '@/config/api';
-import logger from "@/utils/logger";
 import styles from './HITLDecisionConsole.module.css';
-import logger from "@/utils/logger";
 
 /**
  * Priority levels with tactical color coding

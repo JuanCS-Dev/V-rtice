@@ -17,7 +17,7 @@
  * const { data, isConnected, send, status } = useWebSocketManager('maximus.stream');
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { webSocketManager, ConnectionState } from '@/services/websocket';
 import logger from '@/utils/logger';
 
@@ -50,6 +50,15 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
 
   const unsubscribeRef = useRef(null);
 
+  // GAP #46 FIX: Use useMemo for connectionOptions to prevent unnecessary reconnects
+  // Boris Cherny Standard: Object recreation in deps causes reconnects when parent re-renders
+  const memoizedConnectionOptions = useMemo(() => connectionOptions, [
+    connectionOptions.reconnect,
+    connectionOptions.maxAttempts,
+    connectionOptions.timeout
+  ]);
+
+  // GAP #47 FIX: Increase polling from 1s to 5s (Boris Cherny Standard: 1s is wasteful)
   // Update status periodically
   useEffect(() => {
     if (!enabled) return;
@@ -62,8 +71,8 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
     // Initial status
     updateStatus();
 
-    // Update every second
-    const interval = setInterval(updateStatus, 1000);
+    // Update every 5 seconds instead of 1 second (GAP #47 FIX)
+    const interval = setInterval(updateStatus, 5000);
 
     return () => {
       clearInterval(interval);
@@ -96,6 +105,7 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
   );
 
   // Subscribe to WebSocket
+  // GAP #46 FIX: Use memoizedConnectionOptions instead of connectionOptions in deps
   useEffect(() => {
     if (!enabled) return;
 
@@ -104,7 +114,7 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
     unsubscribeRef.current = webSocketManager.subscribe(
       endpointPath,
       handleMessage,
-      connectionOptions
+      memoizedConnectionOptions
     );
 
     // Cleanup on unmount
@@ -115,7 +125,7 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
         unsubscribeRef.current = null;
       }
     };
-  }, [endpointPath, enabled, handleMessage, connectionOptions]);
+  }, [endpointPath, enabled, handleMessage, memoizedConnectionOptions]);
 
   // Send message
   const send = useCallback(
@@ -180,8 +190,8 @@ export const useWebSocketStatus = () => {
     // Initial status
     updateStatus();
 
-    // Update every second
-    const interval = setInterval(updateStatus, 1000);
+    // GAP #47 FIX: Update every 5 seconds instead of 1 second (Boris Cherny Standard: 1s is wasteful)
+    const interval = setInterval(updateStatus, 5000);
 
     return () => {
       clearInterval(interval);

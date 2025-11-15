@@ -20,6 +20,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import logger from '@/utils/logger';
 
 const WS_BASE_URL = 
@@ -62,10 +63,14 @@ export const useHITLWebSocket = ({
   autoConnect = true,
   autoReconnect = true,
 } = {}) => {
+  // GAP #50 FIX: Get queryClient for React Query invalidation
+  // Boris Cherny Standard: Invalidate cache when WebSocket updates received
+  const queryClient = useQueryClient();
+
   const [connectionState, setConnectionState] = useState(WS_STATE.DISCONNECTED);
   const [lastMessage, setLastMessage] = useState(null);
   const [connectionId, setConnectionId] = useState(null);
-  
+
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
@@ -126,32 +131,65 @@ export const useHITLWebSocket = ({
   const handleMessage = useCallback((event) => {
     try {
       const data = JSON.parse(event.data);
+
+      // GAP #49 FIX: Validate message format (Boris Cherny Standard)
+      // Ensure message has required 'type' field
+      if (!data || typeof data !== 'object' || !data.type || typeof data.type !== 'string') {
+        logger.warn('[useHITLWebSocket] Invalid message format: missing or invalid type field', data);
+        return;
+      }
+
       setLastMessage(data);
 
       logger.debug('WebSocket message received:', data.type);
 
       switch (data.type) {
         case 'welcome':
+          if (!data.connection_id) {
+            logger.warn('[useHITLWebSocket] Welcome message missing connection_id');
+            break;
+          }
           setConnectionId(data.connection_id);
           logger.info('WebSocket connected:', data.connection_id);
           break;
 
         case 'new_patch':
+          if (!data.data) {
+            logger.warn('[useHITLWebSocket] new_patch message missing data field');
+            break;
+          }
           if (onNewPatch) {
             onNewPatch(data.data);
           }
+          // GAP #50 FIX: Invalidate patch queries on new patch
+          queryClient.invalidateQueries({ queryKey: ['hitl', 'patches'] });
+          queryClient.invalidateQueries({ queryKey: ['hitl', 'queue'] });
           break;
 
         case 'decision_update':
+          if (!data.data) {
+            logger.warn('[useHITLWebSocket] decision_update message missing data field');
+            break;
+          }
           if (onDecisionUpdate) {
             onDecisionUpdate(data.data);
           }
+          // GAP #50 FIX: Invalidate decision queries
+          queryClient.invalidateQueries({ queryKey: ['hitl', 'decisions'] });
+          queryClient.invalidateQueries({ queryKey: ['hitl', 'queue'] });
           break;
 
         case 'system_status':
+          if (!data.data) {
+            logger.warn('[useHITLWebSocket] system_status message missing data field');
+            break;
+          }
           if (onSystemStatus) {
             onSystemStatus(data.data);
           }
+          // GAP #50 FIX: Invalidate system status queries
+          queryClient.invalidateQueries({ queryKey: ['hitl', 'status'] });
+          queryClient.invalidateQueries({ queryKey: ['system', 'health'] });
           break;
 
         case 'heartbeat':
@@ -165,6 +203,10 @@ export const useHITLWebSocket = ({
           break;
 
         case 'error':
+          if (typeof data.message !== 'string') {
+            logger.error('Server error: invalid message format');
+            break;
+          }
           logger.error('Server error:', data.message);
           break;
 

@@ -14,7 +14,7 @@
  * - Click para detalhes
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 // GAP #30 FIX: Tree-shake D3 imports - import only what we use
 // Boris Cherny Standard: `import * as d3` = 300KB, specific imports = ~100KB
 // Saves 200KB in bundle by importing only needed functions
@@ -27,12 +27,26 @@ import { schemeCategory10 } from 'd3-scale-chromatic';
 import { formatDateTime } from "../../../utils/dateHelpers";
 import styles from "./CognitiveMapViewer.module.css";
 
+// GAP #60 FIX: Simple debounce helper (avoid importing lodash for just one function)
+// Boris Cherny Standard: Prevents resize from recreating graph too frequently
+const debounce = (func, delay) => {
+  let timeoutId = null;
+  return function debounced(...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+      timeoutId = null;
+    }, delay);
+  };
+};
+
 export const CognitiveMapViewer = ({ graph, isLoading }) => {
   const svgRef = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Update dimensions on mount and resize
+  // GAP #60 FIX: Update dimensions on mount and resize with debounce
+  // Boris Cherny Standard: Debounce resize handler to prevent recreating graph too frequently
   useEffect(() => {
     const updateDimensions = () => {
       if (svgRef.current) {
@@ -44,9 +58,19 @@ export const CognitiveMapViewer = ({ graph, isLoading }) => {
       }
     };
 
+    // Debounce resize handler with 300ms delay (GAP #60 FIX)
+    // This prevents graph recreation on every pixel of resize
+    const debouncedUpdateDimensions = debounce(updateDimensions, 300);
+
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
+    window.addEventListener("resize", debouncedUpdateDimensions);
+    return () => {
+      window.removeEventListener("resize", debouncedUpdateDimensions);
+      // Clean up any pending debounced calls
+      if (debouncedUpdateDimensions.timeoutId) {
+        clearTimeout(debouncedUpdateDimensions.timeoutId);
+      }
+    };
   }, []);
 
   // Render D3 graph
