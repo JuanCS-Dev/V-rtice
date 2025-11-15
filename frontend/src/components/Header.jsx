@@ -178,7 +178,12 @@ const Header = ({
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 {loading && (
-                  <div className="w-6 h-6 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+                  <div
+                    className="w-6 h-6 border-2 border-green-400 border-t-transparent rounded-full animate-spin"
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Processing vehicle search"
+                  ></div>
                 )}
               </div>
             </div>

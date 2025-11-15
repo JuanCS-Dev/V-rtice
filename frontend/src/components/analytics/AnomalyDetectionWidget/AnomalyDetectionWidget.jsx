@@ -50,7 +50,12 @@ export const AnomalyDetectionWidget = () => {
                 />
 
                 {error && (
-                    <Alert variant="error" icon={<i className="fas fa-exclamation-triangle"></i>}>
+                    <Alert
+                        variant="error"
+                        icon={<i className="fas fa-exclamation-triangle"></i>}
+                        role="alert"
+                        aria-live="assertive"
+                    >
                         {error}
                     </Alert>
                 )}

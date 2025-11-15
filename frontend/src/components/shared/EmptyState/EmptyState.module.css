@@ -1,0 +1,206 @@
+/* EmptyState Component Styles */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-2xl);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border-secondary);
+  transition: all var(--transition-base);
+}
+
+.container:hover {
+  border-color: var(--color-border-primary);
+  background: var(--color-bg-tertiary);
+}
+
+/* Icon Wrapper */
+.iconWrapper {
+  margin-bottom: var(--space-lg);
+}
+
+.icon {
+  font-size: 4rem;
+  display: block;
+  opacity: 0.6;
+  transition: all var(--transition-base);
+}
+
+.container:hover .icon {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+/* Content */
+.content {
+  max-width: 400px;
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-sm) 0;
+  letter-spacing: var(--tracking-wide);
+}
+
+.message {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+/* Action */
+.action {
+  margin-top: var(--space-md);
+}
+
+/* ===============================================
+   VARIANTS
+   =============================================== */
+
+/* Cyber Variant */
+.cyber {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.cyber:hover {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.cyber .title {
+  color: #ef4444;
+}
+
+/* OSINT Variant */
+.osint {
+  border-color: rgba(168, 85, 247, 0.3);
+  background: rgba(168, 85, 247, 0.05);
+}
+
+.osint:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.osint .title {
+  color: #a855f7;
+}
+
+/* Analytics Variant */
+.analytics {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.analytics:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.analytics .title {
+  color: #3b82f6;
+}
+
+/* ===============================================
+   SIZES
+   =============================================== */
+
+/* Small */
+.sm {
+  padding: var(--space-lg);
+}
+
+.sm .iconWrapper {
+  margin-bottom: var(--space-md);
+}
+
+.sm .icon {
+  font-size: 2.5rem;
+}
+
+.sm .title {
+  font-size: var(--text-lg);
+}
+
+.sm .message {
+  font-size: var(--text-xs);
+}
+
+/* Medium (default) */
+.md {
+  padding: var(--space-2xl);
+}
+
+.md .icon {
+  font-size: 4rem;
+}
+
+.md .title {
+  font-size: var(--text-xl);
+}
+
+.md .message {
+  font-size: var(--text-sm);
+}
+
+/* Large */
+.lg {
+  padding: var(--space-3xl);
+}
+
+.lg .iconWrapper {
+  margin-bottom: var(--space-xl);
+}
+
+.lg .icon {
+  font-size: 6rem;
+}
+
+.lg .title {
+  font-size: var(--text-3xl);
+}
+
+.lg .message {
+  font-size: var(--text-base);
+}
+
+/* ===============================================
+   RESPONSIVE
+   =============================================== */
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-lg);
+  }
+
+  .lg {
+    padding: var(--space-xl);
+  }
+
+  .icon {
+    font-size: 3rem;
+  }
+
+  .lg .icon {
+    font-size: 4rem;
+  }
+
+  .title {
+    font-size: var(--text-lg);
+  }
+
+  .message {
+    font-size: var(--text-xs);
+  }
+}

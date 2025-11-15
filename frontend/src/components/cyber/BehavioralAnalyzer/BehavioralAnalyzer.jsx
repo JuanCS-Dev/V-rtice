@@ -195,7 +195,11 @@ export const BehavioralAnalyzer = () => {
 
       {/* Error Display */}
       {error && (
-        <div className={styles.error}>
+        <div
+          className={styles.error}
+          role="alert"
+          aria-live="assertive"
+        >
           <span className={styles.errorIcon}>⚠️</span>
           {error}
         </div>

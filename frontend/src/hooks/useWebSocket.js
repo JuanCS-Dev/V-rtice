@@ -8,9 +8,18 @@
  * - Connection state management
  * - Message queue for offline resilience
  * - Error handling and logging
+ * - Data sync on reconnect (GAP #73 FIX)
  *
  * Usage:
  * const { data, isConnected, send, reconnect } = useWebSocket(url, options);
+ *
+ * GAP #73 FIX: Sync missed data on reconnect
+ * const { data, isConnected } = useWebSocket(wsUrl, {
+ *   onReconnect: async () => {
+ *     const missedData = await fetchMissedData(lastTimestamp);
+ *     return missedData;
+ *   }
+ * });
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -26,6 +35,7 @@ const DEFAULT_OPTIONS = {
   onMessage: null,
   onClose: null,
   onError: null,
+  onReconnect: null, // GAP #73 FIX: Callback to fetch missed data on reconnect
   fallbackToPolling: true,
   pollingInterval: 5000,
   debug: false
@@ -39,6 +49,7 @@ export const useWebSocket = (url, options = {}) => {
   const [error, setError] = useState(null);
   const [usePolling, setUsePolling] = useState(false);
   const [queuedMessages, setQueuedMessages] = useState(0);
+  const [lastDisconnectTime, setLastDisconnectTime] = useState(null); // GAP #73 FIX: Track disconnect time
 
   const wsRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
@@ -46,6 +57,7 @@ export const useWebSocket = (url, options = {}) => {
   const pollingIntervalRef = useRef(null);
   const messageQueueRef = useRef([]);
   const reconnectTimeoutRef = useRef(null);
+  const lastMessageTimeRef = useRef(Date.now()); // GAP #73 FIX: Track last message time
 
   // Log helper
   const log = useCallback((...args) => {
@@ -156,10 +168,13 @@ export const useWebSocket = (url, options = {}) => {
       const ws = new WebSocket(url);
       wsRef.current = ws;
 
-      ws.onopen = () => {
+      ws.onopen = async () => {
         log('Connected');
         setIsConnected(true);
         setError(null);
+
+        // GAP #73 FIX: Fetch missed data on reconnect
+        const wasReconnect = reconnectAttemptsRef.current > 0;
         reconnectAttemptsRef.current = 0;
 
         // Stop polling if active
@@ -171,6 +186,28 @@ export const useWebSocket = (url, options = {}) => {
         // Process queued messages
         processQueue();
 
+        // GAP #73 FIX: Sync missed data if this is a reconnection
+        if (wasReconnect && opts.onReconnect && lastDisconnectTime) {
+          log('Fetching missed data since disconnect...');
+          try {
+            const missedData = await opts.onReconnect({
+              lastDisconnectTime,
+              lastMessageTime: lastMessageTimeRef.current,
+              downtime: Date.now() - lastDisconnectTime
+            });
+
+            if (missedData) {
+              log('Received missed data:', missedData);
+              setData(missedData);
+            }
+          } catch (err) {
+            logger.error('[useWebSocket] Failed to fetch missed data:', err);
+          }
+        }
+
+        // Reset disconnect time
+        setLastDisconnectTime(null);
+
         if (opts.onOpen) opts.onOpen();
       };
 
@@ -180,6 +217,9 @@ export const useWebSocket = (url, options = {}) => {
 
           // Ignore pong responses
           if (parsedData.type === 'pong') return;
+
+          // GAP #73 FIX: Track last message time for data sync
+          lastMessageTimeRef.current = Date.now();
 
           setData(parsedData);
           if (opts.onMessage) opts.onMessage(event);
@@ -200,6 +240,9 @@ export const useWebSocket = (url, options = {}) => {
         log('Disconnected', event.code, event.reason);
         setIsConnected(false);
         stopHeartbeat();
+
+        // GAP #73 FIX: Track disconnect time for data sync
+        setLastDisconnectTime(Date.now());
 
         if (opts.onClose) opts.onClose(event);
 

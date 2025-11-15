@@ -164,7 +164,12 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
           {/* Login Form */}
           <form className={styles.authForm} onSubmit={handleLogin}>
             {error && (
-              <div className={styles.errorBanner}>
+              <div
+                id="login-error"
+                className={styles.errorBanner}
+                role="alert"
+                aria-live="assertive"
+              >
                 <span className={styles.errorIcon}>⚠️</span>
                 <span className={styles.errorText}>{error}</span>
               </div>
@@ -181,6 +186,8 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 placeholder="analyst"
                 autoComplete="username"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? 'login-error' : undefined}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />
@@ -197,6 +204,8 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? 'login-error' : undefined}
               />
             </div>
 
@@ -259,7 +268,12 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
 
           <form className={styles.authForm} onSubmit={handleTwoFactorVerify}>
             {error && (
-              <div className={styles.errorBanner}>
+              <div
+                id="2fa-error"
+                className={styles.errorBanner}
+                role="alert"
+                aria-live="assertive"
+              >
                 <span className={styles.errorIcon}>⚠️</span>
                 <span className={styles.errorText}>{error}</span>
               </div>
@@ -278,6 +292,8 @@ const HITLAuthPage = ({ onAuthSuccess }) => {
                 pattern="[0-9]{6}"
                 autoComplete="one-time-code"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? '2fa-error' : undefined}
                 // eslint-disable-next-line jsx-a11y/no-autofocus
                 autoFocus
               />

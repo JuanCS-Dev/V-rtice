@@ -201,24 +201,32 @@ const ThreatTimelineWidget = ({ events = [], compact = false }) => {
             <button
               className={`${styles.filterButton} ${filter === 'all' ? styles.active : ''}`}
               onClick={() => setFilter('all')}
+              aria-label={`Show all ${events.length} threat events`}
+              aria-pressed={filter === 'all'}
             >
               All ({events.length})
             </button>
             <button
               className={`${styles.filterButton} ${filter === 'critical' ? styles.active : ''}`}
               onClick={() => setFilter('critical')}
+              aria-label="Filter by critical severity threats"
+              aria-pressed={filter === 'critical'}
             >
               Critical
             </button>
             <button
               className={`${styles.filterButton} ${filter === 'high' ? styles.active : ''}`}
               onClick={() => setFilter('high')}
+              aria-label="Filter by high severity threats"
+              aria-pressed={filter === 'high'}
             >
               High
             </button>
             <button
               className={`${styles.filterButton} ${filter === 'medium' ? styles.active : ''}`}
               onClick={() => setFilter('medium')}
+              aria-label="Filter by medium severity threats"
+              aria-pressed={filter === 'medium'}
             >
               Medium
             </button>
