@@ -1,8 +1,9 @@
 # PLANO MASTER COMPLETO - VÉRTICE FRONTEND v3.3.1
 
 **Data de Criação**: 2025-01-16
-**Versão**: 2.0
-**Status**: Em Progresso - Dashboard Completa com Refinamentos
+**Última Atualização**: 2025-01-16 (18:32 PM)
+**Versão**: 2.1
+**Status**: PRIORIDADE 2 COMPLETA - Opção B Implementada (65-70 páginas)
 **Filosofia**: "Cada pixel importa. Cada transição encanta."
 
 ---
@@ -15,7 +16,7 @@
 4. [Stack Tecnológica](#stack-tecnológica)
 5. [Arquitetura Frontend](#arquitetura-frontend)
 6. [Mapeamento Backend → Frontend](#mapeamento-backend-frontend)
-7. [Estrutura de Páginas (45-50 páginas)](#estrutura-de-páginas)
+7. [Estrutura de Páginas (65-70 páginas - Opção B)](#estrutura-de-páginas)
 8. [Componentes Principais](#componentes-principais)
 9. [Plano de Implementação por Fases](#plano-de-implementação)
 10. [Progresso Atual](#progresso-atual)
@@ -440,25 +441,25 @@ frontend/
 
 **NOTA**: Plano revisado para **65-70 páginas** após análise detalhada do backend (100+ serviços).
 
-| Backend Category             | Frontend Page/Feature      | Endpoints/Serviços     | Páginas | Prioridade  |
-| ---------------------------- | -------------------------- | ---------------------- | ------- | ----------- |
-| **Auth**                     | `/login`, `/auth`          | 5 endpoints            | 2       | ✅ FASE 2   |
-| **Dashboard**                | `/dashboard`               | Métricas agregadas     | 1       | ✅ COMPLETO |
-| **Offensive Security**       | `/offensive`               | 11 endpoints           | 7       | FASE 5-6    |
-| **Defensive Security**       | `/defensive`               | 9 endpoints            | 4       | FASE 7-8    |
-| **OSINT**                    | `/osint`                   | 17 endpoints           | 8       | FASE 9-10   |
-| **Maximus AI Ecosystem** ⭐  | `/maximus`                 | 8 serviços + WS        | **9**   | FASE 11-12  |
-| **Adaptive Immune System** ⭐ | `/immunis`                 | 12 serviços, 14 endp.  | **10**  | FASE 13-14  |
-| **HCL/HITL Workflow** ⭐      | `/hitl`                    | 6 serviços             | **5**   | FASE 15     |
-| **Reactive Fabric** ⭐        | `/reactive-fabric`         | WebSocket RT           | **6**   | FASE 16     |
-| **Aurora Orchestrator** ⭐    | `/aurora`                  | 4 endpoints            | **3**   | FASE 17     |
-| **Digital Thalamus** ⭐       | `/thalamus`                | 1 serviço              | **2**   | FASE 18     |
-| **Narrative Analysis** ⭐     | `/narrative`               | 4 serviços             | **3**   | FASE 19     |
-| **Wargaming/Simulation** ⭐   | `/wargaming`               | 3 serviços             | **2**   | FASE 20     |
-| **SINESP (Brasil)**          | `/sinesp`                  | 3 endpoints            | 2       | FASE 21     |
-| **Admin**                    | `/admin`                   | User/Roles CRUD        | 2       | FASE 22     |
-| **Settings**                 | `/settings`                | Profile/Preferences    | 3       | FASE 22     |
-|                              |                            | **TOTAL**              | **65-70** | 22 fases    |
+| Backend Category              | Frontend Page/Feature | Endpoints/Serviços    | Páginas   | Prioridade  |
+| ----------------------------- | --------------------- | --------------------- | --------- | ----------- |
+| **Auth**                      | `/login`, `/auth`     | 5 endpoints           | 2         | ✅ FASE 2   |
+| **Dashboard**                 | `/dashboard`          | Métricas agregadas    | 1         | ✅ COMPLETO |
+| **Offensive Security**        | `/offensive`          | 11 endpoints          | 7         | FASE 5-6    |
+| **Defensive Security**        | `/defensive`          | 9 endpoints           | 4         | FASE 7-8    |
+| **OSINT**                     | `/osint`              | 17 endpoints          | 8         | FASE 9-10   |
+| **Maximus AI Ecosystem** ⭐   | `/maximus`            | 8 serviços + WS       | **9**     | FASE 11-12  |
+| **Adaptive Immune System** ⭐ | `/immunis`            | 12 serviços, 14 endp. | **10**    | FASE 13-14  |
+| **HCL/HITL Workflow** ⭐      | `/hitl`               | 6 serviços            | **5**     | FASE 15     |
+| **Reactive Fabric** ⭐        | `/reactive-fabric`    | WebSocket RT          | **6**     | FASE 16     |
+| **Aurora Orchestrator** ⭐    | `/aurora`             | 4 endpoints           | **3**     | FASE 17     |
+| **Digital Thalamus** ⭐       | `/thalamus`           | 1 serviço             | **2**     | FASE 18     |
+| **Narrative Analysis** ⭐     | `/narrative`          | 4 serviços            | **3**     | FASE 19     |
+| **Wargaming/Simulation** ⭐   | `/wargaming`          | 3 serviços            | **2**     | FASE 20     |
+| **SINESP (Brasil)**           | `/sinesp`             | 3 endpoints           | 2         | FASE 21     |
+| **Admin**                     | `/admin`              | User/Roles CRUD       | 2         | FASE 22     |
+| **Settings**                  | `/settings`           | Profile/Preferences   | 3         | FASE 22     |
+|                               |                       | **TOTAL**             | **65-70** | 22 fases    |
 
 ⭐ = Expandido ou Novo na Revisão
 
@@ -1211,9 +1212,9 @@ TOTAL: 65-70 páginas (22 fases de implementação)
 
 ## <a name="progresso-atual"></a>10. PROGRESSO ATUAL
 
-### Status: PRIORIDADE 1 COMPLETA ✅
+### Status: PRIORIDADE 2 COMPLETA ✅ | Opção B Implementada (65-70 páginas)
 
-**Última Atualização**: 2025-01-16
+**Última Atualização**: 2025-01-16 (18:32 PM)
 
 #### Completado
 
@@ -1267,13 +1268,80 @@ TOTAL: 65-70 páginas (22 fases de implementação)
 
 - ✅ `useWebSocket.ts` com reconnect automático
 
+##### 5 Novos Módulos Críticos (PRIORIDADE 2) - **COMPLETO** ✅
+
+- ✅ **HITL Workflow** (`/hitl`) - Human-in-the-Loop
+  - Página principal criada com 4 cards de estatísticas
+  - Backend: 6 serviços (Analysis, Planning, Execution, KB, LLM Integration, RAG)
+  - Próximo: 5 sub-páginas (Analysis, Planning, Execution, KB, Decisions)
+
+- ✅ **Aurora Orchestrator** (`/aurora`) - Automated Investigation
+  - Página principal com 3 cards de estatísticas
+  - Backend: 4 endpoints para orquestração de OSINT
+  - Próximo: 3 sub-páginas (Active, History, Services)
+
+- ✅ **Digital Thalamus** (`/thalamus`) - Neural Gatekeeper
+  - Página principal com latency display
+  - Backend: 1 serviço core de roteamento
+  - Próximo: 2 sub-páginas (Routes, Metrics)
+
+- ✅ **Narrative Analysis** (`/narrative`) - Manipulation Detection
+  - Página principal com detection metrics
+  - Backend: 4 serviços (BERTimbau, credibility, propaganda)
+  - Próximo: 3 sub-páginas (Detection, Techniques, Reports)
+
+- ✅ **Wargaming & Simulation** (`/wargaming`) - Strategic Planning
+  - Página principal com simulation stats
+  - Backend: 3 serviços (Crisol, Strategic Planning)
+  - Próximo: 2 sub-páginas (Scenarios, Results)
+
+##### Navegação & Routing Expandido
+
+- ✅ **Sidebar reorganizada** por prioridade:
+  - P0 Critical: Dashboard, Offensive, Defensive, OSINT, Maximus, Immunis
+  - P1 High Priority: HITL, Reactive Fabric, Aurora, Thalamus
+  - P2 Medium Priority: Narrative, Wargaming, SINESP
+  - Admin: Admin, Settings
+- ✅ **6 novos ícones** (Users, Radar, Zap, FileText, Gamepad2)
+- ✅ **Router.tsx atualizado** com 5 novas rotas lazy-loaded
+- ✅ **Todos os módulos navegáveis** via sidebar
+
 ##### Documentação
 
 - ✅ PLANO_MESTRE_FRONTEND.md criado
 - ✅ .claude/commands/retomar.md atualizado
-- ✅ PLANO_MASTER_COMPLETO.md (este arquivo)
+- ✅ PLANO_MASTER_COMPLETO.md (este arquivo) - v2.1
+- ✅ DASHBOARDS_PROPOSAL.md criado (análise Opção B)
 
-#### Arquivos Modificados
+#### Arquivos Criados/Modificados (PRIORIDADE 2)
+
+```
+src/pages/HITL/
+- HITLPage.tsx          # NOVO - Página principal HITL Workflow
+
+src/pages/Aurora/
+- AuroraPage.tsx        # NOVO - Página principal Aurora Orchestrator
+
+src/pages/Thalamus/
+- ThalamusPage.tsx      # NOVO - Página principal Digital Thalamus
+
+src/pages/Narrative/
+- NarrativePage.tsx     # NOVO - Página principal Narrative Analysis
+
+src/pages/Wargaming/
+- WargamingPage.tsx     # NOVO - Página principal Wargaming
+
+src/components/layout/Sidebar/
+- Sidebar.tsx           # MODIFICADO - 6 novos itens, reorganizado por prioridade
+
+src/app/
+- Router.tsx            # MODIFICADO - 5 novas rotas lazy-loaded
+
+PLANO_MASTER_COMPLETO.md  # MODIFICADO - v2.1 com progresso
+DASHBOARDS_PROPOSAL.md    # NOVO - Análise Opção B (65-70 páginas)
+```
+
+#### Arquivos Modificados (PRIORIDADE 1)
 
 ```
 src/components/charts/
@@ -1287,7 +1355,7 @@ src/components/ui/Card/
 
 src/components/layout/
 - Header/Header.tsx     # Micro-animações, sizing preciso
-- Sidebar/Sidebar.tsx   # Micro-animações, nav items refinados
+- Sidebar/Sidebar.tsx   # Micro-animações, nav items refinados (P1)
 - Footer/Footer.tsx     # Simplificado, centralizado
 
 src/pages/Dashboard/
@@ -1296,13 +1364,59 @@ src/pages/Dashboard/
 src/index.css           # Design tokens refinados
 ```
 
-### Próximas Tarefas (PRIORIDADE 2)
+### Próximas Tarefas (PRIORIDADE 3)
 
-1. **Páginas dos Serviços** (Offensive, Defensive, OSINT, etc)
-2. **Admin & Settings**
-3. **Integrações WebSocket Real**
-4. **Tabelas de Dados** (TanStack Table)
-5. **Formulários** (React Hook Form + Zod)
+**Conforme PLANO_MASTER_COMPLETO v2.1 - Opção B (65-70 páginas)**
+
+#### FASE 11-12: Expandir Maximus AI (1→9 páginas)
+
+1. Maximus Overview (já existe)
+2. AI Chat Interface
+3. Tool Calling
+4. Oracle Predictions
+5. Adaptive Security
+6. Sentinel Real-time
+7. Threat Intelligence
+8. Analytics
+9. Settings
+
+#### FASE 13-14: Expandir Immunis (1→10 páginas)
+
+1. Immunis Overview (já existe)
+2. Threat Detection
+3. Behavioral Analysis
+4. Anomaly Detection
+5. Pattern Recognition
+6. ML Models
+7. Response Actions
+8. Vaccines (Auto-remediation)
+9. System Health
+10. Reports
+
+#### FASE 15: Implementar HITL Sub-páginas (5 páginas)
+
+1. HITL Overview (✅ já existe)
+2. Analysis Queue
+3. Planning Board
+4. Execution Monitor
+5. Knowledge Base
+6. Decision History
+
+#### FASE 16: Expandir Reactive Fabric (1→6 páginas)
+
+1. Fabric Overview (já existe)
+2. Event Stream
+3. Triggers & Rules
+4. Orchestration
+5. Playbooks
+6. Metrics
+
+#### FASE 17-20: Implementar Sub-páginas dos Novos Módulos
+
+- Aurora: Active, History, Services (3 páginas)
+- Thalamus: Routes, Metrics (2 páginas)
+- Narrative: Detection, Techniques, Reports (3 páginas)
+- Wargaming: Scenarios, Results (2 páginas)
 
 ---
 
@@ -1563,17 +1677,17 @@ npm run lint
 
 ### Números do Projeto (REVISADO - OPÇÃO B)
 
-| Métrica                         | Valor Anterior   | **Valor Revisado**     | Diferença  |
-| ------------------------------- | ---------------- | ---------------------- | ---------- |
-| **Total de Páginas Planejadas** | 45-50 páginas    | **65-70 páginas** ⭐    | +20 págs   |
-| **Backend Endpoints Mapeados**  | 250+ endpoints   | 250+ endpoints         | -          |
-| **Backend Services Integrados** | 100+ serviços    | 100+ serviços          | -          |
-| **Componentes UI Planejados**   | 30+ componentes  | 30+ componentes        | -          |
-| **Features Principais**         | 9 módulos        | **15 módulos** ⭐       | +6 módulos |
-| **Páginas Completas**           | 1 (Dashboard)    | 1 (Dashboard)          | -          |
-| **Fases Totais**                | 18 fases         | **22 fases** ⭐         | +4 fases   |
-| **Tempo Estimado Total**        | 20 semanas       | **26-28 semanas** ⭐    | +6-8 sem   |
-| **Progresso Atual**             | ~5%              | **~2%** (proporc.)     | -          |
+| Métrica                         | Valor Anterior  | **Valor Revisado**   | Diferença  |
+| ------------------------------- | --------------- | -------------------- | ---------- |
+| **Total de Páginas Planejadas** | 45-50 páginas   | **65-70 páginas** ⭐ | +20 págs   |
+| **Backend Endpoints Mapeados**  | 250+ endpoints  | 250+ endpoints       | -          |
+| **Backend Services Integrados** | 100+ serviços   | 100+ serviços        | -          |
+| **Componentes UI Planejados**   | 30+ componentes | 30+ componentes      | -          |
+| **Features Principais**         | 9 módulos       | **15 módulos** ⭐    | +6 módulos |
+| **Páginas Completas**           | 1 (Dashboard)   | 1 (Dashboard)        | -          |
+| **Fases Totais**                | 18 fases        | **22 fases** ⭐      | +4 fases   |
+| **Tempo Estimado Total**        | 20 semanas      | **26-28 semanas** ⭐ | +6-8 sem   |
+| **Progresso Atual**             | ~5%             | **~2%** (proporc.)   | -          |
 
 ⭐ = Alterado na Revisão (OPÇÃO B escolhida)
 
@@ -1612,39 +1726,67 @@ Tables: TanStack Table (futuro)
 
 ## PRÓXIMOS PASSOS IMEDIATOS
 
-1. ✅ **COMPLETO**: Dashboard inicial refinado
+1. ✅ **COMPLETO**: Dashboard inicial refinado (PRIORIDADE 1)
 2. ✅ **COMPLETO**: Documentação master plan
 3. ✅ **COMPLETO**: Análise e revisão de dashboards (OPÇÃO B escolhida)
-4. **PRÓXIMO**: Implementar autenticação (FASE 2)
-5. **PRÓXIMO**: Componentes UI restantes (FASE 4)
-6. **PRÓXIMO**: Páginas de serviços (FASE 5+)
-7. **PRIORITÁRIO**: Adaptive Immune System (10 páginas - P0)
-8. **PRIORITÁRIO**: Maximus AI Ecosystem (9 páginas - P0)
-9. **PRIORITÁRIO**: HCL/HITL Workflow (5 páginas - P0)
+4. ✅ **COMPLETO**: 5 novos módulos criados (HITL, Aurora, Thalamus, Narrative, Wargaming) - PRIORIDADE 2
+5. ✅ **COMPLETO**: Sidebar reorganizada por prioridade
+6. ✅ **COMPLETO**: Router atualizado com novas rotas
+7. **PRÓXIMO**: Expandir Maximus AI (1→9 páginas - FASE 11-12)
+8. **PRÓXIMO**: Expandir Immunis (1→10 páginas - FASE 13-14)
+9. **PRÓXIMO**: Implementar sub-páginas HITL (5 páginas - FASE 15)
 
 ---
 
-## NOVIDADES NESTA REVISÃO (v2.1 - OPÇÃO B)
+## HISTÓRICO DE VERSÕES
 
-### Adicionado:
-- ⭐ **+20 páginas** para melhor representação do backend
-- ⭐ **6 novos módulos**: HITL, Aurora, Thalamus, Narrative, Wargaming
+### v2.1 - PRIORIDADE 2 COMPLETA (2025-01-16 18:32)
+
+#### Implementado:
+
+- ✅ **5 novos módulos criados** com páginas principais:
+  - HITL Workflow (`/hitl`) - Human-in-the-Loop workflow
+  - Aurora Orchestrator (`/aurora`) - Automated OSINT investigations
+  - Digital Thalamus (`/thalamus`) - Neural signal routing
+  - Narrative Analysis (`/narrative`) - Propaganda detection
+  - Wargaming & Simulation (`/wargaming`) - Strategic scenarios
+- ✅ **Sidebar reorganizada** por prioridade (P0, P1, P2, Admin)
+- ✅ **Router atualizado** com 5 novas rotas lazy-loaded
+- ✅ **Todos módulos navegáveis** e compilando sem erros
+
+#### Commit:
+
+- `26c03264` - feat(frontend): add 5 new critical modules
+
+### v2.0 - OPÇÃO B ESCOLHIDA (2025-01-16)
+
+#### Planejado:
+
+- ⭐ **+20 páginas** para melhor representação do backend (45-50 → 65-70)
+- ⭐ **6 novos módulos** identificados: HITL, Aurora, Thalamus, Narrative, Wargaming, ReactiveFabric expansion
 - ⭐ **Expansões**: Maximus (6→9), Immunis (5→10), Reactive Fabric (4→6)
-- ⭐ **+4 fases** de implementação (18→22 fases)
-- ⭐ **DASHBOARDS_PROPOSAL.md** com análise detalhada
+- ⭐ **+4 fases** de implementação adicionadas
+- ⭐ **DASHBOARDS_PROPOSAL.md** criado com análise detalhada
 
-### Justificativa:
+#### Justificativa:
+
 O Vértice possui **100+ serviços** e sistemas extremamente complexos como:
+
 - Adaptive Immune System (12 serviços especializados)
 - Maximus AI (8 serviços distintos)
 - HCL/HITL (6 serviços de workflow)
 
 Dashboards genéricas não fariam jus à arquitetura. A filosofia **"Cada pixel importa"** se aplica também à **arquitetura de dashboards** - cada sistema complexo merece sua dashboard especializada.
 
+#### Commit:
+
+- `b6ca05fc` - docs: add DASHBOARDS_PROPOSAL and update master plan to v2.1
+
 ---
 
-**Versão**: 2.1 (REVISADO - OPÇÃO B)
-**Data**: 2025-01-16
+**Versão**: 2.1 (PRIORIDADE 2 COMPLETA)
+**Data**: 2025-01-16 (18:32 PM)
 **Autor**: Claude + Juan
+**Status**: 5 novos módulos implementados | 65-70 páginas planejadas | Sidebar reorganizada | Router atualizado
 **Filosofia**: "Cada pixel importa. Cada transição encanta. Cada dashboard representa fielmente seu sistema."
 **SOLI DEO GLORIA**
