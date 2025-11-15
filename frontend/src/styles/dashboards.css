@@ -14,7 +14,7 @@
   --defensive-primary: #10b981;
   --defensive-secondary: #0ea5e9;
   --defensive-accent: #38bdf8;
-  --defensive-bg: linear-gradient(135deg, #0a1929 0%, #001e3c 100%);
+  --defensive-bg: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   --defensive-card-bg: rgba(16, 185, 129, 0.05);
   --defensive-border: rgba(16, 185, 129, 0.3);
 
@@ -35,7 +35,7 @@
   --purple-border: rgba(16, 185, 129, 0.3);
 
   /* COMMON COLORS */
-  --bg-black: #0a0e1a;
+  --bg-black: #f9fafb;
   --bg-dark: #1a1f35;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;

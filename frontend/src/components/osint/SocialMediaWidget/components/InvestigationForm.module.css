@@ -35,7 +35,7 @@
 .input:focus {
   border-color: var(--color-osint-primary);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .input:disabled {

@@ -6,7 +6,7 @@
 
 .dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a1929 0%, #1a2332 50%, #0d1b2a 100%);
+  background: linear-gradient(135deg, #f9fafb 0%, #1a2332 50%, #0d1b2a 100%);
   color: #fff;
   padding: 2rem;
   position: relative;

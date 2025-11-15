@@ -118,7 +118,7 @@
 }
 
 .messageText :global(code) {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.875rem;
@@ -127,7 +127,7 @@
 }
 
 .messageText :global(pre) {
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(249, 250, 251, 0.9);
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;

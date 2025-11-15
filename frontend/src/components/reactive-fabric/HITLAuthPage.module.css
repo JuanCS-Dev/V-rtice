@@ -86,8 +86,8 @@
   max-width: 450px;
   background: linear-gradient(
     135deg,
-    rgba(30, 41, 59, 0.95) 0%,
-    rgba(15, 23, 42, 0.95) 100%
+    rgba(243, 244, 246, 0.95) 0%,
+    rgba(249, 250, 251, 0.95) 100%
   );
   border-radius: 1.5rem;
   border: 2px solid rgba(16, 185, 129, 0.3);
@@ -186,7 +186,7 @@
 .formInput {
   width: 100%;
   padding: 0.875rem 1rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 2px solid rgba(16, 185, 129, 0.3);
   border-radius: 0.75rem;
   color: #e5e7eb;
@@ -365,7 +365,7 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(15, 23, 42, 0.3) 100%
+    rgba(249, 250, 251, 0.3) 100%
   );
 }
 
@@ -483,7 +483,7 @@
   bottom: 1.5rem;
   right: 1.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 0.5rem;
   font-size: 0.75rem;

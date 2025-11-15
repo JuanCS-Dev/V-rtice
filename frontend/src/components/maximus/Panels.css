@@ -21,7 +21,7 @@
 
 /* Analysis Control */
 .analysis-control {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
@@ -107,7 +107,7 @@
   display: flex;
   justify-content: space-between;
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(249, 250, 251, 0.5);
   border-radius: 6px;
 }
 
@@ -132,7 +132,7 @@
 
 /* Pending Approvals */
 .pending-approvals {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
@@ -180,11 +180,11 @@
 
 .approvals-empty small {
   font-size: 0.75rem;
-  color: #475569;
+  color: #d1d5db;
 }
 
 .approval-card {
-  background: rgba(30, 27, 75, 0.8);
+  background: rgba(243, 244, 246, 0.8);
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: 8px;
   padding: 1.25rem;
@@ -337,7 +337,7 @@
 
 .mode-btn {
   padding: 0.75rem 2rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 8px;
   color: #94a3b8;
@@ -375,7 +375,7 @@
 .upload-card {
   width: 100%;
   max-width: 900px;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 2px dashed rgba(16, 185, 129, 0.4);
   border-radius: 12px;
   padding: 2rem;
@@ -409,7 +409,7 @@
 .patterns-info {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: rgba(30, 27, 75, 0.5);
+  background: rgba(243, 244, 246, 0.5);
   border-radius: 8px;
 }
 
@@ -471,7 +471,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;
@@ -493,7 +493,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: rgba(30, 27, 75, 0.5);
+  background: rgba(243, 244, 246, 0.5);
   border-radius: 6px;
 }
 
@@ -616,7 +616,7 @@
 .iocs-card,
 .playbook-card,
 .hashes-card {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
@@ -639,7 +639,7 @@
 }
 
 .pattern-item {
-  background: rgba(30, 27, 75, 0.8);
+  background: rgba(243, 244, 246, 0.8);
   border-left: 4px solid;
   border-radius: 6px;
   padding: 1rem;
@@ -691,7 +691,7 @@
 }
 
 .ioc-item {
-  background: rgba(30, 27, 75, 0.8);
+  background: rgba(243, 244, 246, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 6px;
   padding: 1rem;
@@ -767,7 +767,7 @@
 .results-empty {
   text-align: center;
   padding: 5rem 2rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(249, 250, 251, 0.5);
   border-radius: 12px;
 }
 
@@ -809,7 +809,7 @@
 
 /* System Overview */
 .system-overview {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;
@@ -981,7 +981,7 @@
 
 /* Workflows Section */
 .workflows-section {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;
@@ -1007,7 +1007,7 @@
 }
 
 .workflow-card {
-  background: rgba(30, 27, 75, 0.8);
+  background: rgba(243, 244, 246, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
@@ -1061,7 +1061,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(249, 250, 251, 0.5);
   border-radius: 6px;
 }
 
@@ -1107,7 +1107,7 @@
 
 /* Live Stream */
 .live-stream-section {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;
@@ -1149,7 +1149,7 @@
 
 .stream-item {
   padding: 0.75rem 1rem;
-  background: rgba(30, 27, 75, 0.8);
+  background: rgba(243, 244, 246, 0.8);
   border-left: 3px solid;
   border-radius: 6px;
   display: flex;
@@ -1203,7 +1203,7 @@
 
 /* Architecture */
 .architecture-section {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;
@@ -1226,7 +1226,7 @@
 }
 
 .arch-component {
-  background: rgba(30, 27, 75, 0.9);
+  background: rgba(243, 244, 246, 0.9);
   border: 2px solid rgba(16, 185, 129, 0.5);
   border-radius: 12px;
   padding: 1.5rem;
@@ -1314,7 +1314,7 @@
 
 /* Quick Actions */
 .quick-actions-section {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 2rem;

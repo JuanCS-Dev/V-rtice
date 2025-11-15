@@ -672,7 +672,7 @@
 }
 
 .logsFilter {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--admin-border, var(--status-border));
   color: var(--color-warning);
   padding: var(--space-md);

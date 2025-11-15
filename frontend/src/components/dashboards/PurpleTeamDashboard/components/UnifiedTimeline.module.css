@@ -134,7 +134,7 @@
   height: 16px;
   border-radius: 50%;
   border: 3px solid var(--color-accent-primary);
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow-glow-purple);
   z-index: 1;
 }

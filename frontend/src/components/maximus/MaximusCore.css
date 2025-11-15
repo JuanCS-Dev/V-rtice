@@ -10,7 +10,7 @@
  * - Success: Green (#10b981)
  * - Warning: Orange (#f59e0b)
  * - Danger: Red (#10b981)
- * - Background: Dark (#0a0e1a, #1a1f35)
+ * - Background: Dark (#f9fafb, #1a1f35)
  */
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -22,7 +22,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 600px;
-  background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+  background: linear-gradient(135deg, #f9fafb 0%, #1a1f35 100%);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border-primary);
   overflow: hidden;

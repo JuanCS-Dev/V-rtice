@@ -79,9 +79,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, 
-    var(--color-bg-primary, #0a1929) 0%, 
-    var(--color-bg-secondary, #001e3c) 100%
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-primary, #f9fafb) 0%,
+    var(--color-bg-secondary, #f3f4f6) 100%
   );
   z-index: 9999;
   animation: fadeIn var(--duration-normal) var(--ease-decelerate);
@@ -95,7 +96,7 @@
 .loaderText {
   margin-top: 1.5rem;
   color: var(--color-primary);
-  font-family: var(--font-mono, 'Courier New', monospace);
+  font-family: var(--font-mono, "Courier New", monospace);
   font-size: 1.25rem;
   letter-spacing: 0.2em;
   animation: pulse 2s ease-in-out infinite;
@@ -204,7 +205,8 @@
   background: var(--color-bg-secondary, rgba(255, 255, 255, 0.05));
   border-radius: 8px;
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-  animation: slide-in-left var(--duration-moderate) var(--ease-decelerate) backwards;
+  animation: slide-in-left var(--duration-moderate) var(--ease-decelerate)
+    backwards;
 }
 
 .skeletonItemIcon {
@@ -292,7 +294,7 @@
 
 /* Progress bar shimmer effect */
 .progressBar::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -355,7 +357,9 @@
 }
 
 @keyframes pulse-dot {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }

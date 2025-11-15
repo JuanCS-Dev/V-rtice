@@ -23,8 +23,8 @@
   min-height: 100vh;
   background: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.95) 0%,
-    rgba(30, 41, 59, 0.95) 100%
+    rgba(249, 250, 251, 0.95) 0%,
+    rgba(243, 244, 246, 0.95) 100%
   );
   color: #e2e8f0;
   font-family:
@@ -147,7 +147,7 @@
   font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 2px solid;
   min-width: 80px;
   text-align: center;
@@ -200,7 +200,7 @@
 }
 
 .kpi-metric {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 12px;
   padding: 1.25rem;
@@ -360,7 +360,7 @@
 .view-mode-nav {
   display: flex;
   gap: 0.5rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   padding: 0.5rem;
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.3);
@@ -441,7 +441,7 @@
 .status-bar-live {
   display: flex;
   gap: 2rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   padding: 1rem 1.5rem;
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.3);
@@ -561,7 +561,7 @@
 
 .apv-preview-item,
 .apv-card {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid;
   border-radius: 12px;
   padding: 1.25rem;
@@ -775,7 +775,7 @@ button {
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px dashed rgba(148, 163, 184, 0.3);
   border-radius: 12px;
   backdrop-filter: blur(10px);
@@ -815,7 +815,7 @@ button {
 
 .biological-analogy-card,
 .biological-analogy {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
@@ -887,7 +887,7 @@ button {
 
 .form-select {
   padding: 0.75rem;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(249, 250, 251, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-radius: 8px;
   color: #e2e8f0;

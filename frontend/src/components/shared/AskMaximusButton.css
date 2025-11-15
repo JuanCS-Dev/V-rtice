@@ -47,7 +47,7 @@
 /* Variants */
 .ask-maximus-primary {
   background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
-  color: #0a0e1a;
+  color: #f9fafb;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
@@ -89,7 +89,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -108,7 +108,7 @@
 }
 
 .ask-maximus-modal {
-  background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+  background: linear-gradient(135deg, #f9fafb 0%, #1a1f35 100%);
   border: 2px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   width: 90%;
@@ -401,7 +401,7 @@
 
 .btn-analyze {
   background: linear-gradient(135deg, #10b981 0%, #10b981 100%);
-  color: #0a0e1a;
+  color: #f9fafb;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 

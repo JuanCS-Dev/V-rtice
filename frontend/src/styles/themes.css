@@ -10,7 +10,7 @@
  */
 
 /* Import Enterprise Design Tokens */
-@import './tokens/enterprise-tokens.css';
+@import "./tokens/enterprise-tokens.css";
 
 /* ============================================================================
    TEMA 1: CYBERPUNK (DEFAULT) - Current
@@ -18,7 +18,7 @@
 :root,
 [data-theme="cyberpunk"] {
   /* Colors */
-  --color-bg-primary: #0a0e1a;
+  --color-bg-primary: #f9fafb;
   --color-bg-secondary: #141927;
   --color-bg-tertiary: #1e2433;
   --color-bg-card: rgba(20, 25, 39, 0.8);
@@ -58,8 +58,8 @@
   --shadow-neon: 0 0 20px rgba(99, 102, 241, 0.3);
 
   /* Typography */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+  --font-primary: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Fira Code", "JetBrains Mono", monospace;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -86,7 +86,6 @@
   --z-tooltip: 3000;
   --z-notification: 4000;
 }
-
 
 /* ============================================================================
    TEMA 2: ENTERPRISE - Clean, Sóbrio, Profissional
@@ -134,8 +133,8 @@
   --shadow-neon: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   /* Typography - Segoe UI like */
-  --font-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+  --font-primary: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", monospace;
 
   /* Border Radius - Softer, Windows 11 style */
   --radius-sm: 4px;
@@ -148,7 +147,6 @@
   --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 /* ============================================================================
    DARK MODE VARIANT - Enterprise Dark
@@ -180,7 +178,6 @@
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
   --shadow-neon: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
-
 
 /* ============================================================================
    UTILITY CLASSES
@@ -273,7 +270,6 @@
   color: var(--color-accent-danger);
 }
 
-
 /* ============================================================================
    SCROLLBAR CUSTOMIZATION
    ============================================================================ */
@@ -330,14 +326,14 @@
   background-clip: content-box;
 }
 
-
 /* ============================================================================
    ANIMATIONS
    ============================================================================ */
 
 /* Cyberpunk glow animation */
 @keyframes neon-pulse {
-  0%, 100% {
+  0%,
+  100% {
     filter: brightness(1);
   }
   50% {
@@ -364,7 +360,6 @@
 [data-theme="enterprise"] .animate-fade-in {
   animation: fade-in var(--transition-normal) ease-out;
 }
-
 
 /* ============================================================================
    RESPONSIVE ADJUSTMENTS

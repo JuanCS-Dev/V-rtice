@@ -89,7 +89,7 @@ a:focus-visible {
   /* High contrast colors */
   --color-text-primary: #ffffff;
   --color-text-secondary: #cbd5e0;
-  --color-bg-primary: #0a1929;
+  --color-bg-primary: #f9fafb;
   --color-bg-secondary: #1a2332;
 
   /* Contrast ratios validated */
@@ -127,7 +127,7 @@ a:focus {
 
 /* Buttons - ensure high contrast */
 .btn {
-  color: #0a1929;
+  color: #f9fafb;
   background: #10b981;
   border: 2px solid #10b981;
 }
