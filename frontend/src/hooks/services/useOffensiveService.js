@@ -116,6 +116,7 @@ export const useScanStatus = (scanId, options = {}) => {
 
 /**
  * Hook to execute network scan
+ * Boris Cherny Standard - GAP #33 FIX: Optimistic updates
  * @returns {Object} Mutation object with mutate function
  */
 export const useScanNetwork = () => {
@@ -125,13 +126,73 @@ export const useScanNetwork = () => {
   return useMutation({
     mutationFn: ({ target, scanType, ports }) =>
       service.scanNetwork(target, scanType, ports),
-    onSuccess: () => {
-      // Invalidate scans list
+    // Boris Cherny Standard - GAP #33 FIX: Optimistic update
+    onMutate: async ({ target, scanType, ports }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: offensiveQueryKeys.scans });
+      await queryClient.cancelQueries({ queryKey: offensiveQueryKeys.metrics });
+
+      // Snapshot previous values
+      const previousScans = queryClient.getQueryData(offensiveQueryKeys.scans);
+      const previousMetrics = queryClient.getQueryData(offensiveQueryKeys.metrics);
+
+      // Create optimistic scan entry
+      const optimisticScan = {
+        id: `scan-${Date.now()}-optimistic`,
+        target,
+        scan_type: scanType,
+        ports,
+        status: 'running',
+        created_at: new Date().toISOString(),
+        _optimistic: true, // Flag to identify optimistic updates
+      };
+
+      // Optimistically add scan to list
+      if (previousScans) {
+        queryClient.setQueryData(offensiveQueryKeys.scans, (old) => {
+          if (!old) return [optimisticScan];
+          return [optimisticScan, ...old];
+        });
+      }
+
+      // Optimistically update metrics
+      if (previousMetrics) {
+        queryClient.setQueryData(offensiveQueryKeys.metrics, (old) => ({
+          ...old,
+          activeScans: (old?.activeScans || 0) + 1,
+          networkScans: (old?.networkScans || 0) + 1,
+        }));
+      }
+
+      // Return context for rollback
+      return { previousScans, previousMetrics, optimisticScan };
+    },
+    onError: (error, variables, context) => {
+      logger.error('[useScanNetwork] Scan failed:', error);
+      // Rollback on error
+      if (context?.previousScans) {
+        queryClient.setQueryData(offensiveQueryKeys.scans, context.previousScans);
+      }
+      if (context?.previousMetrics) {
+        queryClient.setQueryData(offensiveQueryKeys.metrics, context.previousMetrics);
+      }
+    },
+    onSuccess: (data, variables, context) => {
+      // Replace optimistic scan with real data
+      if (context?.optimisticScan && data) {
+        queryClient.setQueryData(offensiveQueryKeys.scans, (old) => {
+          if (!old) return [data];
+          // Replace optimistic entry with real data
+          return old.map((scan) =>
+            scan.id === context.optimisticScan.id ? data : scan
+          );
+        });
+      }
+    },
+    onSettled: () => {
+      // Always refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.scans });
       queryClient.invalidateQueries({ queryKey: offensiveQueryKeys.metrics });
-    },
-    onError: (error) => {
-      logger.error('[useScanNetwork] Scan failed:', error);
     },
   });
 };

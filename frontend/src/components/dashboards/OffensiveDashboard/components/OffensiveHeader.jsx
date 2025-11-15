@@ -34,12 +34,25 @@ import styles from './OffensiveHeader.module.css';
 export const OffensiveHeader = React.memo(({
   metrics,
   loading,
+  metricsRefetching, // Boris Cherny Standard - GAP #38 FIX
+  metricsUpdatedAt, // Boris Cherny Standard - GAP #38 FIX
   onBack,
   activeModule,
   modules,
   onModuleChange
 }) => {
   const { t } = useTranslation();
+
+  // Boris Cherny Standard - GAP #38 FIX: Format last update time
+  const formatLastUpdate = (timestamp) => {
+    if (!timestamp) return null;
+    const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
+    if (secondsAgo < 60) return `${secondsAgo}s ago`;
+    const minutesAgo = Math.floor(secondsAgo / 60);
+    if (minutesAgo < 60) return `${minutesAgo}m ago`;
+    const hoursAgo = Math.floor(minutesAgo / 60);
+    return `${hoursAgo}h ago`;
+  };
 
   const { getItemProps } = useKeyboardNavigation({
     itemCount: modules.length,
@@ -80,6 +93,30 @@ export const OffensiveHeader = React.memo(({
           aria-label={t('dashboard.offensive.metrics.title', 'Offensive metrics')}
           data-maximus-section="metrics"
           data-maximus-metrics="offensive">
+
+          {/* Boris Cherny Standard - GAP #38 FIX: Stale data indicator */}
+          {metricsRefetching && (
+            <div
+              className={styles.staleIndicator}
+              role="status"
+              aria-live="polite"
+              data-maximus-status="updating"
+            >
+              <span className={styles.spinner} aria-hidden="true">⟳</span>
+              <span>{t("common.updating", "Updating")}...</span>
+            </div>
+          )}
+          {!metricsRefetching && metricsUpdatedAt && (
+            <div
+              className={styles.lastUpdate}
+              title={new Date(metricsUpdatedAt).toLocaleString()}
+              data-maximus-timestamp={metricsUpdatedAt}
+            >
+              <span aria-label={t("common.last_updated", "Last updated")}>
+                ⚔️ {formatLastUpdate(metricsUpdatedAt)}
+              </span>
+            </div>
+          )}
 
           <MemoizedMetricCard
             label={t('dashboard.offensive.metrics.activeScans')}
@@ -146,6 +183,8 @@ OffensiveHeader.propTypes = {
     c2Sessions: PropTypes.number
   }),
   loading: PropTypes.bool,
+  metricsRefetching: PropTypes.bool, // Boris Cherny Standard - GAP #38 FIX
+  metricsUpdatedAt: PropTypes.number, // Boris Cherny Standard - GAP #38 FIX
   onBack: PropTypes.func.isRequired,
   activeModule: PropTypes.string.isRequired,
   modules: PropTypes.arrayOf(

@@ -276,6 +276,7 @@ export const useAlert = (alertId, options = {}) => {
 
 /**
  * Hook to update alert status
+ * Boris Cherny Standard - GAP #33 FIX: Optimistic updates
  * @returns {Object} Mutation object with mutate function
  */
 export const useUpdateAlertStatus = () => {
@@ -285,16 +286,60 @@ export const useUpdateAlertStatus = () => {
   return useMutation({
     mutationFn: ({ alertId, status, notes }) =>
       service.updateAlertStatus(alertId, status, notes),
-    onSuccess: (data, variables) => {
-      // Invalidate alerts list
+    // Boris Cherny Standard - GAP #33 FIX: Optimistic update
+    onMutate: async ({ alertId, status, notes }) => {
+      // Cancel any outgoing refetches to prevent overwriting optimistic update
+      await queryClient.cancelQueries({ queryKey: defensiveQueryKeys.alerts });
+      await queryClient.cancelQueries({ queryKey: defensiveQueryKeys.alert(alertId) });
+
+      // Snapshot previous values
+      const previousAlerts = queryClient.getQueryData(defensiveQueryKeys.alerts);
+      const previousAlert = queryClient.getQueryData(defensiveQueryKeys.alert(alertId));
+
+      // Optimistically update alerts list
+      if (previousAlerts) {
+        queryClient.setQueryData(defensiveQueryKeys.alerts, (old) => {
+          if (!old) return old;
+          return old.map((alert) =>
+            alert.id === alertId
+              ? { ...alert, status, notes, updated_at: new Date().toISOString() }
+              : alert
+          );
+        });
+      }
+
+      // Optimistically update specific alert
+      if (previousAlert) {
+        queryClient.setQueryData(defensiveQueryKeys.alert(alertId), (old) => ({
+          ...old,
+          status,
+          notes,
+          updated_at: new Date().toISOString(),
+        }));
+      }
+
+      // Return context with previous values for rollback
+      return { previousAlerts, previousAlert };
+    },
+    onError: (error, variables, context) => {
+      logger.error('[useUpdateAlertStatus] Update failed:', error);
+      // Rollback on error
+      if (context?.previousAlerts) {
+        queryClient.setQueryData(defensiveQueryKeys.alerts, context.previousAlerts);
+      }
+      if (context?.previousAlert) {
+        queryClient.setQueryData(
+          defensiveQueryKeys.alert(variables.alertId),
+          context.previousAlert
+        );
+      }
+    },
+    onSettled: (data, error, variables) => {
+      // Always refetch after error or success to ensure consistency
       queryClient.invalidateQueries({ queryKey: defensiveQueryKeys.alerts });
-      // Invalidate specific alert
       queryClient.invalidateQueries({
         queryKey: defensiveQueryKeys.alert(variables.alertId),
       });
-    },
-    onError: (error) => {
-      logger.error('[useUpdateAlertStatus] Update failed:', error);
     },
   });
 };

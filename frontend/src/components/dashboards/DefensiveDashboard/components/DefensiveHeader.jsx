@@ -42,8 +42,21 @@ const DefensiveHeader = React.memo(
     modules,
     metrics,
     metricsLoading,
+    metricsRefetching, // Boris Cherny Standard - GAP #38 FIX
+    metricsUpdatedAt, // Boris Cherny Standard - GAP #38 FIX
   }) => {
     const { t } = useTranslation();
+
+    // Boris Cherny Standard - GAP #38 FIX: Format last update time
+    const formatLastUpdate = (timestamp) => {
+      if (!timestamp) return null;
+      const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
+      if (secondsAgo < 60) return `${secondsAgo}s ago`;
+      const minutesAgo = Math.floor(secondsAgo / 60);
+      if (minutesAgo < 60) return `${minutesAgo}m ago`;
+      const hoursAgo = Math.floor(minutesAgo / 60);
+      return `${hoursAgo}h ago`;
+    };
 
     return (
       <header
@@ -94,6 +107,29 @@ const DefensiveHeader = React.memo(
             data-maximus-section="metrics"
             data-maximus-metrics="defensive"
           >
+            {/* Boris Cherny Standard - GAP #38 FIX: Stale data indicator */}
+            {metricsRefetching && (
+              <div
+                className={styles.staleIndicator}
+                role="status"
+                aria-live="polite"
+                data-maximus-status="updating"
+              >
+                <span className={styles.spinner} aria-hidden="true">⟳</span>
+                <span>{t("common.updating", "Updating")}...</span>
+              </div>
+            )}
+            {!metricsRefetching && metricsUpdatedAt && (
+              <div
+                className={styles.lastUpdate}
+                title={new Date(metricsUpdatedAt).toLocaleString()}
+                data-maximus-timestamp={metricsUpdatedAt}
+              >
+                <span aria-label={t("common.last_updated", "Last updated")}>
+                  📊 {formatLastUpdate(metricsUpdatedAt)}
+                </span>
+              </div>
+            )}
             <MemoizedMetricCard
               label={t("dashboard.defensive.metrics.threats", "THREATS")}
               value={metrics.threats || 0}
@@ -179,6 +215,8 @@ DefensiveHeader.propTypes = {
     monitored: PropTypes.number,
   }).isRequired,
   metricsLoading: PropTypes.bool.isRequired,
+  metricsRefetching: PropTypes.bool, // Boris Cherny Standard - GAP #38 FIX
+  metricsUpdatedAt: PropTypes.number, // Boris Cherny Standard - GAP #38 FIX
 };
 
 export default DefensiveHeader;

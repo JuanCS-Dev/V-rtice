@@ -9,10 +9,15 @@
  * - Execution history
  * - Active module management
  * - Real-time updates
+ *
+ * Boris Cherny Standard - GAP #39 FIX: localStorage with expiration timestamps
  */
 
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools, persist, createJSONStorage } from 'zustand/middleware';
+
+// Boris Cherny Standard - GAP #39 FIX: Expiration time for persisted data
+const STORE_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const useOffensiveStore = create(
   devtools(
@@ -154,10 +159,29 @@ export const useOffensiveStore = create(
       }),
       {
         name: 'offensive-store',
+        storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({
           activeModule: state.activeModule,
-          executions: state.executions.slice(0, 20) // Persist last 20 executions
-        })
+          executions: state.executions.slice(0, 20), // Persist last 20 executions
+          // Boris Cherny Standard - GAP #39 FIX: Add expiration timestamp
+          _expiresAt: Date.now() + STORE_EXPIRATION_MS,
+        }),
+        version: 1,
+        // Boris Cherny Standard - GAP #39 FIX: Check expiration on load
+        migrate: (persistedState, version) => {
+          // Check if data has expired
+          const expiresAt = persistedState?._expiresAt;
+          if (expiresAt && Date.now() > expiresAt) {
+            // Data expired, return empty state (will use defaults)
+            return {
+              activeModule: 'network-scanner',
+              executions: [],
+            };
+          }
+          // Data still valid, return as-is (without _expiresAt in state)
+          const { _expiresAt, ...validState } = persistedState || {};
+          return validState;
+        },
       }
     ),
     { name: 'OffensiveStore' }

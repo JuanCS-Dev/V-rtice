@@ -22,6 +22,7 @@ const ReviewQueue = ({
   onSelectAPV,
   filters,
   onFiltersChange,
+  isRefetching, // Boris Cherny Standard - GAP #38 FIX
 }) => {
   const { t } = useTranslation();
 
@@ -62,9 +63,18 @@ const ReviewQueue = ({
         <h2 className={styles.title}>
           {t('hitl.queue.title', 'REVIEW QUEUE')}
         </h2>
-        <span className={styles.count}>
-          {reviews.length} {t('hitl.queue.pending', 'Pending')}
-        </span>
+        <div className={styles.headerRight}>
+          {/* Boris Cherny Standard - GAP #38 FIX: Stale data indicator */}
+          {isRefetching && (
+            <span className={styles.refreshingIndicator} role="status" aria-live="polite">
+              <span className={styles.spinner} aria-hidden="true">⟳</span>
+              {t('common.updating', 'Updating')}...
+            </span>
+          )}
+          <span className={styles.count}>
+            {reviews.length} {t('hitl.queue.pending', 'Pending')}
+          </span>
+        </div>
       </div>
 
       {/* Filters */}
@@ -194,6 +204,7 @@ ReviewQueue.propTypes = {
     wargame_verdict: PropTypes.string,
   }),
   onFiltersChange: PropTypes.func.isRequired,
+  isRefetching: PropTypes.bool, // Boris Cherny Standard - GAP #38 FIX
 };
 
 ReviewQueue.defaultProps = {
@@ -202,6 +213,7 @@ ReviewQueue.defaultProps = {
   error: null,
   selectedAPV: null,
   filters: {},
+  isRefetching: false, // Boris Cherny Standard - GAP #38 FIX
 };
 
 export default ReviewQueue;

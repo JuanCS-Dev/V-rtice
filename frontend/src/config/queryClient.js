@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * React Query Configuration
  *
  * Centralized configuration for API caching and data fetching
@@ -10,9 +9,27 @@ import logger from '@/utils/logger';
  * - Optimistic updates support
  * - Background refetching
  * - Error handling
+ *
+ * Boris Cherny Standard - GAP #35 FIX: Standardized polling intervals
  */
 
 import { QueryClient } from '@tanstack/react-query';
+import logger from '@/utils/logger';
+
+// ============================================================================
+// POLLING INTERVALS - Boris Cherny Standard (GAP #35 FIX)
+// ============================================================================
+/**
+ * Standardized polling intervals for consistent data freshness
+ * Use these constants instead of hardcoded values
+ */
+export const POLLING_INTERVALS = {
+  REAL_TIME: 1000,      // 1s - Critical real-time data (active scans, live metrics)
+  FREQUENT: 5000,       // 5s - Frequently changing data (alerts, scan status)
+  NORMAL: 30000,        // 30s - Normal updates (metrics, health checks)
+  INFREQUENT: 60000,    // 60s - Slow changing data (HITL reviews, static configs)
+  MANUAL: false,        // No automatic polling - manual refresh only
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,7 +76,15 @@ export const queryClient = new QueryClient({
   }
 });
 
-// Query keys factory (for consistency)
+// ============================================================================
+// QUERY KEYS - Boris Cherny Standard (GAP #34 FIX)
+// ============================================================================
+/**
+ * DEPRECATED: Use centralized queryKeys from '@/config/queryKeys' instead
+ * This export is kept for backward compatibility only
+ *
+ * @deprecated Import from '@/config/queryKeys' instead
+ */
 export const queryKeys = {
   // Defensive
   defensiveMetrics: ['defensive', 'metrics'],
@@ -88,3 +113,6 @@ export const queryKeys = {
   serviceHealth: (serviceId) => ['service', 'health', serviceId],
   serviceMetrics: (serviceId) => ['service', 'metrics', serviceId]
 };
+
+// Export centralized query keys (GAP #34 FIX)
+export { queryKeys as centralizedQueryKeys } from './queryKeys';

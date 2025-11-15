@@ -68,7 +68,13 @@ const LoadingFallback = () => {
 
 export const OffensiveDashboard = ({ setCurrentView }) => {
   const { t } = useTranslation();
-  const { data: metricsData, isLoading: metricsLoading } = useOffensiveMetrics();
+  // Boris Cherny Standard - GAP #38 FIX: Expose isRefetching and dataUpdatedAt
+  const {
+    data: metricsData,
+    isLoading: metricsLoading,
+    isRefetching: metricsRefetching,
+    dataUpdatedAt: metricsUpdatedAt,
+  } = useOffensiveMetrics();
   const { executions } = useRealTimeExecutions();
   const [activeModule, setActiveModule] = React.useState('network-recon');
 
@@ -117,6 +123,8 @@ export const OffensiveDashboard = ({ setCurrentView }) => {
         <OffensiveHeader
           metrics={metrics}
           loading={metricsLoading}
+          metricsRefetching={metricsRefetching}
+          metricsUpdatedAt={metricsUpdatedAt}
           onBack={handleBack}
           activeModule={activeModule}
           modules={modules}

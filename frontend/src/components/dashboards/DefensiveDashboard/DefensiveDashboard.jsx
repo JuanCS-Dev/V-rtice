@@ -65,7 +65,13 @@ const DefensiveDashboard = ({ setCurrentView }) => {
   const [activeModule, setActiveModule] = useState('threats');
 
   // Real data hooks (NO MOCKS)
-  const { data: metricsData, isLoading: metricsLoading } = useDefensiveMetrics();
+  // Boris Cherny Standard - GAP #38 FIX: Expose isRefetching and dataUpdatedAt
+  const {
+    data: metricsData,
+    isLoading: metricsLoading,
+    isRefetching: metricsRefetching,
+    dataUpdatedAt: metricsUpdatedAt,
+  } = useDefensiveMetrics();
   const { alerts, addAlert: _addAlert } = useRealTimeAlerts();
 
   // Provide default metrics if loading or undefined
@@ -109,6 +115,8 @@ const DefensiveDashboard = ({ setCurrentView }) => {
         modules={DEFENSIVE_MODULES}
         metrics={metrics}
         metricsLoading={metricsLoading}
+        metricsRefetching={metricsRefetching}
+        metricsUpdatedAt={metricsUpdatedAt}
       />
 
       {/* Main Content Area */}

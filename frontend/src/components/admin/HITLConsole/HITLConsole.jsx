@@ -32,7 +32,14 @@ const HITLConsole = () => {
   });
 
   // Fetch review queue
-  const { reviews, loading: queueLoading, error: queueError, refetch: refetchQueue } = useReviewQueue(filters);
+  // Boris Cherny Standard - GAP #38 FIX: Expose isRefetching for stale indicator
+  const {
+    reviews,
+    loading: queueLoading,
+    error: queueError,
+    refetch: refetchQueue,
+    isRefetching: queueRefetching,
+  } = useReviewQueue(filters);
 
   // Fetch selected APV details
   const { review: selectedReview, loading: detailsLoading } = useReviewDetails(selectedAPV);
@@ -168,6 +175,7 @@ const HITLConsole = () => {
             onSelectAPV={handleSelectAPV}
             filters={filters}
             onFiltersChange={setFilters}
+            isRefetching={queueRefetching}
           />
         </div>
 

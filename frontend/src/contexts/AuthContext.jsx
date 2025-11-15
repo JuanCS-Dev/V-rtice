@@ -276,6 +276,65 @@ export const AuthProvider = ({ children }) => {
   }, [refreshAuthToken]);
 
   /**
+   * Cross-Tab Synchronization - Boris Cherny Standard (GAP #36 FIX)
+   *
+   * Listens for logout events in other tabs and syncs auth state
+   * This prevents security issues where user logs out in one tab
+   * but remains authenticated in others
+   *
+   * How it works:
+   * 1. Listen to 'storage' events (fires when localStorage changes in another tab)
+   * 2. If auth token is removed (logout in another tab), clear auth in this tab
+   * 3. If auth token is added (login in another tab), update auth in this tab
+   */
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      // Only handle vertice_auth_token changes
+      if (e.key !== 'vertice_auth_token') return;
+
+      // Case 1: Token removed in another tab (logout)
+      if (!e.newValue && e.oldValue) {
+        logger.info('Cross-tab sync: Logout detected in another tab');
+        clearAuthData();
+        setUser(null);
+        return;
+      }
+
+      // Case 2: Token added/changed in another tab (login or refresh)
+      if (e.newValue && e.newValue !== e.oldValue) {
+        logger.info('Cross-tab sync: Login/refresh detected in another tab');
+
+        // Get updated user data
+        const storedUser = safeLocalStorage.getItem('vertice_user');
+        const tokenExpiry = safeLocalStorage.getItem('vertice_token_expiry');
+
+        if (storedUser && tokenExpiry) {
+          const expiryDate = new Date(tokenExpiry);
+
+          if (new Date() < expiryDate) {
+            const userData = safeJSONParse(storedUser);
+            if (userData) {
+              setUser(userData);
+              setToken(e.newValue);
+
+              // Schedule token refresh for this tab
+              const expiresIn = Math.floor((expiryDate - new Date()) / 1000);
+              scheduleTokenRefresh(expiresIn);
+            }
+          }
+        }
+      }
+    };
+
+    // Add storage event listener (only fires for changes from OTHER tabs)
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [scheduleTokenRefresh]);
+
+  /**
    * Login usando Google OAuth2
    * Conecta com auth_service backend REAL
    */
