@@ -14,14 +14,21 @@
 | **Frontend Unit** | 150+ | 66 | 66 | 65 | ~20% |
 | **Frontend Integration** | 20 | 3 | 3 | 3 | - |
 | **Frontend E2E** | 10 | 0 | 0 | 0 | - |
-| **Backend Unit** | 500+ | 454 | 454 | ? | ~40% |
+| **Backend Unit** | 500+ | 454 | ⏳ | ⏳ | ~40% |
 | **Backend Integration** | 30 | 0 | 0 | 0 | - |
 | **Performance** | 5 | 0 | 0 | 0 | - |
-| **TOTAL** | **715+** | **523** | **523** | **~520** | **~30%** |
+| **TOTAL** | **715+** | **523** | **69** | **68** | **~30%** |
 
 **Meta de Coverage:** 85%+
 **Coverage Atual Estimado:** ~30%
 **Gap:** 55%
+
+**⚠️ ATENÇÃO: Testes criados nesta sessão AINDA NÃO FORAM SALVOS em arquivos!**
+- offensiveStore.test.js (47 testes) - CRIADO MAS NÃO COMMITADO
+- test_auth_security_edge_cases.py (50+ testes) - CRIADO MAS NÃO COMMITADO
+- ThreatMap.test.jsx (60+ testes) - CRIADO MAS NÃO COMMITADO
+- QueryErrorBoundary.test.jsx (40+ testes) - CRIADO MAS NÃO COMMITADO
+- VirtualList.test.jsx (50+ testes) - CRIADO MAS NÃO COMMITADO
 
 ---
 
