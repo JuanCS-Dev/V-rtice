@@ -48,6 +48,11 @@ from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
 # DISABLED: case_middleware.py was removed
 # from case_middleware import CaseTransformationMiddleware
 
+# Import input sanitization middleware
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
+from shared.middleware.input_sanitizer import InputSanitizationMiddleware
+
 logger = logging.getLogger(__name__)
 
 # =============================================================================
@@ -124,6 +129,16 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 logger.info("✅ CORS middleware enabled for Cloud Run frontend")
+
+# Add input sanitization middleware (security layer)
+# Boris Cherny Pattern: Defense in depth - validate at gateway level
+app.add_middleware(
+    InputSanitizationMiddleware,
+    max_payload_size=5 * 1024 * 1024,  # 5MB max
+    enable_sanitization=True,
+    exempt_paths=["/docs", "/redoc", "/openapi.json", "/health", "/gateway/status"],
+)
+logger.info("✅ Input sanitization middleware enabled (XSS, SQL injection, command injection prevention)")
 
 # Add case transformation middleware (snake_case ↔ camelCase)
 # DISABLED: middleware file missing
