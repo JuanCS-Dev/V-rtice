@@ -1,0 +1,48 @@
+---
+/**
+ * Badge Component - VÉRTICE-MAXIMUS Design System
+ * Badge/Tag para certificações, status, categorias
+ *
+ * Props:
+ * - variant: 'primary' | 'neutral' | 'success' | 'error' (default: 'neutral')
+ * - icon: string (opcional - nome do ícone para exibir antes do texto)
+ * - class: classes CSS adicionais
+ */
+
+interface Props {
+  variant?: 'primary' | 'neutral' | 'success' | 'error';
+  icon?: string;
+  class?: string;
+}
+
+const {
+  variant = 'neutral',
+  icon,
+  class: className = '',
+} = Astro.props;
+
+const baseClass = 'badge';
+const variantClass = `badge-${variant}`;
+
+const classes = [baseClass, variantClass, className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span class={classes}>
+  {icon && (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+      <!-- Ícone placeholder - substituir por ícone real conforme necessário -->
+      <circle cx="6" cy="6" r="4" />
+    </svg>
+  )}
+  <slot />
+</span>
+
+<style>
+  /* Estilos já definidos em design-system-clean.css */
+
+  .badge svg {
+    flex-shrink: 0;
+  }
+</style>

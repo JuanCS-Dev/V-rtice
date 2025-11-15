@@ -1,0 +1,59 @@
+---
+/**
+ * Metric Component - VÉRTICE-MAXIMUS Design System
+ * Display de números/métricas com label
+ *
+ * Props:
+ * - value: string | number (valor a ser exibido)
+ * - label: string (descrição da métrica)
+ * - suffix: string (opcional - ex: "%", "ms", "+")
+ * - prefix: string (opcional - ex: "$", "#")
+ * - class: classes CSS adicionais
+ */
+
+interface Props {
+  value: string | number;
+  label: string;
+  suffix?: string;
+  prefix?: string;
+  class?: string;
+}
+
+const {
+  value,
+  label,
+  suffix = '',
+  prefix = '',
+  class: className = '',
+} = Astro.props;
+
+const classes = ['metric', className].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <div class="metric-value">
+    {prefix && <span class="metric-prefix">{prefix}</span>}
+    {value}
+    {suffix && <span class="metric-suffix">{suffix}</span>}
+  </div>
+  <div class="metric-label">{label}</div>
+</div>
+
+<style>
+  /* Estilos já definidos em design-system-clean.css */
+
+  .metric {
+    text-align: center;
+  }
+
+  .metric-prefix,
+  .metric-suffix {
+    font-size: 0.7em;
+    opacity: 0.8;
+  }
+
+  /* Animação de contagem (opcional) */
+  .metric-value {
+    /* Pode adicionar animação de count-up aqui com JavaScript */
+  }
+</style>
