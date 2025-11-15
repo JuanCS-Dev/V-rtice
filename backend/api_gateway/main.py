@@ -27,6 +27,18 @@ from reactive_fabric_integration import (
     register_reactive_fabric_routes,
 )
 
+# P0-4: Request ID Tracing and Error Standardization
+from middleware.tracing import RequestTracingMiddleware, get_request_id
+from models.errors import (
+    ErrorCodes,
+    ErrorResponse,
+    ValidationErrorDetail,
+    ValidationErrorResponse,
+    create_error_response,
+)
+from starlette.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+
 # Configuração de logs estruturados
 structlog.configure(
     processors=[
@@ -60,11 +72,128 @@ RESPONSE_TIME = Histogram(
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)
 
-# FastAPI app
+# ============================================================================
+# FastAPI Application with Comprehensive OpenAPI Specification
+# ============================================================================
+# P0-2: Complete OpenAPI spec for contract testing and documentation
+# Following Boris Cherny's principle: "Documentation is code"
 app = FastAPI(
     title="Projeto VÉRTICE - API Gateway",
-    description="Ponto de entrada unificado com cache, rate limiting, observability, cyber security e OSINT completo.",
-    version="3.3.1",  # Version bump para correção do Redis
+    description="""
+    ## API Gateway Centralizado - Projeto VÉRTICE-MAXIMUS
+
+    Ponto de entrada unificado para todos os serviços de cyber security,
+    OSINT, e inteligência de ameaças.
+
+    ### Recursos Principais
+
+    #### 🔐 Segurança
+    - **Autenticação JWT**: Tokens Bearer com validação rigorosa
+    - **Rate Limiting**: Proteção contra abuso e DoS
+    - **CORS**: Configurado para origens autorizadas
+
+    #### 🎯 Cyber Security
+    - **Vulnerability Scanning**: Análise de vulnerabilidades
+    - **Threat Intelligence**: Inteligência de ameaças em tempo real
+    - **Malware Analysis**: Análise estática e dinâmica
+    - **SSL/TLS Monitoring**: Monitoramento de certificados
+
+    #### 🔍 OSINT (Open Source Intelligence)
+    - **Domain Intelligence**: Análise completa de domínios
+    - **IP Intelligence**: Geolocalização e reputação
+    - **Social Engineering**: Análise de vetores de ataque
+    - **Google OSINT**: Pesquisas avançadas automatizadas
+
+    #### 🧠 AI/ML (MAXIMUS Core)
+    - **Behavioral Analysis**: Detecção comportamental de ameaças
+    - **Predictive Analytics**: Aurora Predict (ML forecasting)
+    - **Orchestration**: MAXIMUS Orchestrator (AI-driven)
+    - **Adaptive Defense**: Active Immune Core
+
+    #### 🛡️ Defensive Systems
+    - **Reactive Fabric**: Orquestração de resposta a incidentes
+    - **Network Monitoring**: Detecção de anomalias em tempo real
+    - **Penetration Testing**: Penelope automated pentesting
+    - **MAV Detection**: Micro Aerial Vehicle threat detection
+
+    ### Versionamento
+
+    Todas as rotas principais estão sob `/api/v1/` para facilitar
+    migrações futuras e garantir compatibilidade backward.
+
+    ### Rate Limits
+
+    - **Global**: 100 requests/minuto por IP
+    - **Authenticated**: 1000 requests/minuto por usuário
+    - **Scanning endpoints**: 10 requests/minuto
+
+    ### Autenticação
+
+    Use o header `Authorization: Bearer <token>` em todas as requisições
+    que requerem autenticação.
+
+    Token JWT pode ser obtido via endpoint `/auth/token`.
+
+    ### Observabilidade
+
+    - **Metrics**: Prometheus metrics em `/metrics`
+    - **Health**: Health check em `/health`
+    - **Distributed Tracing**: Request IDs automáticos
+
+    ### Documentação
+
+    - **Swagger UI**: `/docs` (interativo)
+    - **ReDoc**: `/redoc` (documentação limpa)
+    - **OpenAPI JSON**: `/openapi.json` (schema máquina-legível)
+    """,
+    version="3.3.1",
+    openapi_url="/openapi.json",  # ← P0-2: Expose OpenAPI schema
+    docs_url="/docs",  # Swagger UI (interactive)
+    redoc_url="/redoc",  # ReDoc (clean docs)
+    contact={
+        "name": "Vértice Security Team",
+        "email": "security@vertice.com",
+        "url": "https://vertice.com/security",
+    },
+    license_info={
+        "name": "Proprietary - Vértice Platform",
+        "url": "https://vertice.com/license",
+    },
+    terms_of_service="https://vertice.com/terms",
+    openapi_tags=[
+        {
+            "name": "health",
+            "description": "Health checks and service status",
+        },
+        {
+            "name": "auth",
+            "description": "Authentication and authorization",
+        },
+        {
+            "name": "cyber-security",
+            "description": "Vulnerability scanning and security analysis",
+        },
+        {
+            "name": "osint",
+            "description": "Open Source Intelligence gathering",
+        },
+        {
+            "name": "threat-intel",
+            "description": "Threat intelligence and IOC enrichment",
+        },
+        {
+            "name": "reactive-fabric",
+            "description": "Reactive Fabric - Threat orchestration",
+        },
+        {
+            "name": "maximus",
+            "description": "MAXIMUS AI Core - Intelligent decision making",
+        },
+        {
+            "name": "metrics",
+            "description": "Prometheus metrics and observability",
+        },
+    ],
 )
 
 app.state.limiter = limiter
@@ -85,6 +214,343 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============================================================================
+# Request Tracing Middleware (P0-4)
+# ============================================================================
+# IMPORTANT: Add RequestTracingMiddleware AFTER CORS so it runs FIRST
+# Middleware execution order is LIFO (Last In, First Out)
+app.add_middleware(RequestTracingMiddleware)
+
+
+# ============================================================================
+# Custom OpenAPI Schema with Security Definitions
+# ============================================================================
+# P0-2: Enhanced OpenAPI with JWT security scheme and comprehensive examples
+def custom_openapi():
+    """Generate custom OpenAPI schema with security definitions.
+
+    This function enhances the default FastAPI OpenAPI schema with:
+    - JWT Bearer authentication scheme
+    - Comprehensive security requirements
+    - Request/response examples
+    - Error response schemas
+
+    Following Boris Cherny's principle: "Schema is the contract"
+    """
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    from fastapi.openapi.utils import get_openapi
+
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        tags=app.openapi_tags,
+        contact=app.contact,
+        license_info=app.license_info,
+        terms_of_service=app.terms_of_service,
+    )
+
+    # ========================================================================
+    # Security Schemes
+    # ========================================================================
+    openapi_schema.setdefault("components", {})
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": """
+                JWT token obtained from `/auth/token` endpoint.
+
+                **How to use:**
+                1. Call `/auth/token` with credentials
+                2. Copy the `access_token` from response
+                3. Add header: `Authorization: Bearer <access_token>`
+
+                **Example:**
+                ```
+                Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                ```
+
+                **Token expiration:** 30 minutes (configurable)
+            """,
+        },
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key",
+            "description": """
+                API Key for service-to-service communication.
+
+                **Usage:**
+                Add header: `X-API-Key: <your-api-key>`
+
+                **Note:** Only for internal microservice communication.
+            """,
+        },
+    }
+
+    # ========================================================================
+    # Global Security (applied to all endpoints except public ones)
+    # ========================================================================
+    # Don't apply global security - let each endpoint define its own
+    # This gives fine-grained control per route
+
+    # ========================================================================
+    # Common Response Schemas
+    # ========================================================================
+    openapi_schema["components"].setdefault("schemas", {})
+
+    openapi_schema["components"]["schemas"]["ErrorResponse"] = {
+        "type": "object",
+        "required": ["detail", "error_code", "timestamp", "request_id", "path"],
+        "properties": {
+            "detail": {
+                "type": "string",
+                "description": "Human-readable error message",
+                "example": "Invalid authentication credentials",
+            },
+            "error_code": {
+                "type": "string",
+                "description": "Machine-readable error code",
+                "example": "AUTH_001",
+            },
+            "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO 8601 timestamp of error",
+                "example": "2025-11-15T12:34:56.789Z",
+            },
+            "request_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Request correlation ID for tracing",
+                "example": "550e8400-e29b-41d4-a716-446655440000",
+            },
+            "path": {
+                "type": "string",
+                "description": "API path that caused the error",
+                "example": "/api/v1/scan/start",
+            },
+        },
+        "example": {
+            "detail": "Invalid authentication credentials",
+            "error_code": "AUTH_001",
+            "timestamp": "2025-11-15T12:34:56.789Z",
+            "request_id": "550e8400-e29b-41d4-a716-446655440000",
+            "path": "/api/v1/auth/login",
+        },
+    }
+
+    openapi_schema["components"]["schemas"]["HealthResponse"] = {
+        "type": "object",
+        "required": ["status", "timestamp", "services"],
+        "properties": {
+            "status": {
+                "type": "string",
+                "enum": ["healthy", "degraded", "unhealthy"],
+                "description": "Overall system health status",
+            },
+            "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Health check timestamp",
+            },
+            "services": {
+                "type": "object",
+                "description": "Individual service health status",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "status": {"type": "string"},
+                        "latency_ms": {"type": "number"},
+                    },
+                },
+            },
+        },
+    }
+
+    # ========================================================================
+    # Metadata
+    # ========================================================================
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://vertice.com/logo.png",
+        "altText": "Vértice Platform Logo",
+    }
+
+    openapi_schema["servers"] = [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development server",
+        },
+        {
+            "url": "https://staging-api.vertice.com",
+            "description": "Staging environment",
+        },
+        {
+            "url": "https://api.vertice.com",
+            "description": "Production environment",
+        },
+    ]
+
+    # Cache the schema
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+# Override the default OpenAPI schema
+app.openapi = custom_openapi
+
+
+# ============================================================================
+# Exception Handlers (P0-4)
+# ============================================================================
+# Standardized error responses with request ID tracing
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Handle Pydantic validation errors (422 Unprocessable Entity).
+
+    This handler converts Pydantic validation errors into standardized
+    ValidationErrorResponse format with request ID for debugging.
+
+    Args:
+        request: The request that failed validation
+        exc: The validation exception
+
+    Returns:
+        JSONResponse with ValidationErrorResponse payload
+    """
+    request_id = get_request_id(request)
+
+    # Convert Pydantic errors to our format
+    validation_errors = [
+        ValidationErrorDetail(
+            loc=[str(loc) for loc in error["loc"]],
+            msg=error["msg"],
+            type=error["type"],
+        )
+        for error in exc.errors()
+    ]
+
+    error_response = ValidationErrorResponse(
+        detail="Request validation failed",
+        error_code=ErrorCodes.VAL_UNPROCESSABLE_ENTITY,
+        request_id=request_id,
+        path=str(request.url.path),
+        validation_errors=validation_errors,
+    )
+
+    log.warning(
+        "validation_error",
+        request_id=request_id,
+        path=str(request.url.path),
+        errors=validation_errors,
+    )
+
+    return JSONResponse(
+        status_code=422,
+        content=error_response.model_dump(),
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(
+    request: Request, exc: HTTPException
+) -> JSONResponse:
+    """Handle FastAPI HTTPException with standardized error format.
+
+    Args:
+        request: The request that triggered the exception
+        exc: The HTTP exception
+
+    Returns:
+        JSONResponse with ErrorResponse payload
+    """
+    request_id = get_request_id(request)
+
+    # Map HTTP status codes to error codes
+    status_to_error_code = {
+        401: ErrorCodes.AUTH_MISSING_TOKEN,
+        403: ErrorCodes.AUTH_INSUFFICIENT_PERMISSIONS,
+        404: "NOT_FOUND",
+        429: ErrorCodes.RATE_LIMIT_EXCEEDED,
+        500: ErrorCodes.SYS_INTERNAL_ERROR,
+        503: ErrorCodes.SYS_SERVICE_UNAVAILABLE,
+        504: ErrorCodes.SYS_TIMEOUT,
+    }
+
+    error_code = status_to_error_code.get(
+        exc.status_code, f"HTTP_{exc.status_code}"
+    )
+
+    error_response = create_error_response(
+        detail=str(exc.detail),
+        error_code=error_code,
+        request_id=request_id,
+        path=str(request.url.path),
+    )
+
+    log.error(
+        "http_exception",
+        request_id=request_id,
+        status_code=exc.status_code,
+        detail=str(exc.detail),
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=error_response.model_dump(),
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Handle all unhandled exceptions with standardized error format.
+
+    This is the last-resort handler for any exception not caught by
+    more specific handlers. It ensures all errors are logged with
+    request IDs and returned in consistent format.
+
+    Args:
+        request: The request that triggered the exception
+        exc: The unhandled exception
+
+    Returns:
+        JSONResponse with ErrorResponse payload (500 Internal Server Error)
+    """
+    request_id = get_request_id(request)
+
+    error_response = create_error_response(
+        detail="Internal server error. Please contact support with this request ID.",
+        error_code=ErrorCodes.SYS_INTERNAL_ERROR,
+        request_id=request_id,
+        path=str(request.url.path),
+    )
+
+    log.error(
+        "unhandled_exception",
+        request_id=request_id,
+        error_type=type(exc).__name__,
+        error_message=str(exc),
+        path=str(request.url.path),
+        exc_info=True,
+    )
+
+    return JSONResponse(
+        status_code=500,
+        content=error_response.model_dump(),
+    )
+
 
 # ============================
 # REACTIVE FABRIC INTEGRATION

@@ -1,0 +1,154 @@
+name: Contract Tests
+
+on:
+  push:
+    branches: [main, develop, feature/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend/api_gateway
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Generate JWT secret for testing
+        run: |
+          echo "JWT_SECRET_KEY=$(openssl rand -hex 32)" >> $GITHUB_ENV
+
+      - name: Start API Gateway
+        run: |
+          cd backend/api_gateway
+          python main.py &
+          echo $! > /tmp/api_gateway.pid
+
+          # Wait for API to be ready
+          timeout 30 bash -c 'until curl -f http://localhost:8000/api/v1/health; do sleep 1; done'
+
+      - name: Run backend contract tests
+        run: |
+          cd backend
+          pytest tests/contract/ -v --tb=short
+
+      - name: Export OpenAPI schema
+        run: |
+          curl http://localhost:8000/openapi.json > /tmp/openapi.json
+
+      - name: Upload OpenAPI schema artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-schema
+          path: /tmp/openapi.json
+          retention-days: 7
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run frontend contract tests
+        run: |
+          cd frontend
+          npm run test:contract
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Stop API Gateway
+        if: always()
+        run: |
+          if [ -f /tmp/api_gateway.pid ]; then
+            kill $(cat /tmp/api_gateway.pid) || true
+          fi
+
+  breaking-changes:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          path: pr
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+
+      - name: Set up Python (PR)
+        run: |
+          cd pr/backend/api_gateway
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          python main.py &
+          echo $! > /tmp/api_pr.pid
+          sleep 5
+          curl http://localhost:8000/openapi.json > /tmp/openapi-pr.json
+          kill $(cat /tmp/api_pr.pid)
+
+      - name: Set up Python (Base)
+        run: |
+          cd base/backend/api_gateway
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          python main.py &
+          echo $! > /tmp/api_base.pid
+          sleep 5
+          curl http://localhost:8001/openapi.json > /tmp/openapi-base.json
+          kill $(cat /tmp/api_base.pid)
+
+      - name: Check for breaking changes
+        uses: oasdiff/oasdiff-action@v0.0.19
+        with:
+          base: /tmp/openapi-base.json
+          revision: /tmp/openapi-pr.json
+          fail-on-breaking: true
+          format: text
+
+      - name: Comment on PR if breaking changes detected
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: '⚠️ **BREAKING CHANGES DETECTED** in API contract. Please review the changes and update the API version if necessary.'
+            })

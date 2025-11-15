@@ -10,6 +10,7 @@ secure access to all Maximus AI services. This service is critical for maintaini
 the security and integrity of the entire Maximus AI ecosystem.
 """
 
+import os
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -30,10 +31,80 @@ from shared.constitutional_logging import configure_constitutional_logging
 from shared.health_checks import ConstitutionalHealthCheck
 
 
-# Configuration for JWT
-SECRET_KEY = "your-super-secret-key"  # In production, use a strong, environment-variable-based key
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# ============================================================================
+# JWT Configuration - Secure Secret Management
+# ============================================================================
+# Load from environment with type safety
+SECRET_KEY: Optional[str] = os.getenv("JWT_SECRET_KEY")
+ALGORITHM: str = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRATION_MINUTES", "30"))
+
+
+def validate_secrets() -> None:
+    """Validate all required secrets on startup.
+
+    This function implements fail-fast validation of critical security
+    configuration. It ensures the JWT secret key meets minimum security
+    requirements before the service accepts any requests.
+
+    Raises:
+        ValueError: If JWT_SECRET_KEY is missing, too short, or appears weak.
+
+    Security Requirements:
+        - JWT_SECRET_KEY must be set (non-empty)
+        - Minimum length: 32 characters (256 bits)
+        - Must not be a known weak/default value
+
+    Example:
+        Generate a secure key:
+        $ openssl rand -hex 32
+        $ python -c "import secrets; print(secrets.token_hex(32))"
+    """
+    if not SECRET_KEY:
+        raise ValueError(
+            "JWT_SECRET_KEY environment variable is required.\n"
+            "Generate a secure key with one of:\n"
+            "  - openssl rand -hex 32\n"
+            "  - python -c \"import secrets; print(secrets.token_hex(32))\"\n"
+            "Then set: export JWT_SECRET_KEY=<generated-key>"
+        )
+
+    if len(SECRET_KEY) < 32:
+        raise ValueError(
+            f"JWT_SECRET_KEY must be at least 32 characters for security.\n"
+            f"Current length: {len(SECRET_KEY)} characters.\n"
+            f"Generate a secure key with: openssl rand -hex 32"
+        )
+
+    # Check for known weak/default values
+    weak_keys: List[str] = [
+        "secret",
+        "password",
+        "your-super-secret-key",
+        "change-me",
+        "default",
+        "test",
+        "development",
+    ]
+
+    if SECRET_KEY.lower() in weak_keys:
+        raise ValueError(
+            f"JWT_SECRET_KEY appears to be a weak/default value.\n"
+            f"Never use default keys in production.\n"
+            f"Generate a secure key with: openssl rand -hex 32"
+        )
+
+    # Warn if using obviously weak patterns
+    if SECRET_KEY == SECRET_KEY.lower() or SECRET_KEY == SECRET_KEY.upper():
+        # Key is all lowercase or all uppercase - potentially weak
+        import warnings
+        warnings.warn(
+            "JWT_SECRET_KEY appears to have low entropy (all same case). "
+            "Consider using a cryptographically random key.",
+            SecurityWarning,
+            stacklevel=2
+        )
+# ============================================================================
 
 app = FastAPI(title="Maximus Authentication Service", version="1.0.0")
 
@@ -184,8 +255,24 @@ async def get_current_active_user(
 @app.on_event("startup")
 async def startup_event():
     """Performs startup tasks for the Authentication Service."""
+    import logging
+    logger = logging.getLogger(__name__)
 
-    # Constitutional v3.0 Initialization
+    # ========================================================================
+    # STEP 1: Validate Secrets (Fail-Fast Security Check)
+    # ========================================================================
+    # This MUST be first - if secrets are invalid, service must not start
+    try:
+        validate_secrets()
+        logger.info("✅ Secret validation passed - JWT configuration secure")
+    except ValueError as e:
+        logger.critical(f"🔥 CRITICAL SECURITY ERROR: {e}")
+        logger.critical("🛑 Service startup aborted - fix configuration and restart")
+        raise  # Re-raise to prevent service from starting
+
+    # ========================================================================
+    # STEP 2: Constitutional v3.0 Initialization
+    # ========================================================================
     global metrics_exporter, constitutional_tracer, health_checker
     service_version = os.getenv("SERVICE_VERSION", "1.0.0")
 
@@ -225,6 +312,9 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ Constitutional initialization failed: {e}", exc_info=True)
 
+    # ========================================================================
+    # STEP 3: Database Initialization
+    # ========================================================================
     # Mark startup complete
     if health_checker:
         health_checker.mark_startup_complete()

@@ -100,7 +100,8 @@ const checkCORSPreflight = async (endpoint) => {
         signal: controller.signal,
         headers: {
           "Access-Control-Request-Method": "POST",
-          "Access-Control-Request-Headers": "content-type,x-api-key,x-csrf-token",
+          "Access-Control-Request-Headers":
+            "content-type,x-api-key,x-csrf-token",
         },
       });
 
@@ -116,18 +117,15 @@ const checkCORSPreflight = async (endpoint) => {
       });
 
       if (!allowed) {
-        logger.warn(
-          `CORS preflight failed for ${endpoint}`,
-          {
-            status: response.status,
-            statusText: response.statusText,
-            attempt: attempt + 1,
-          }
-        );
+        logger.warn(`CORS preflight failed for ${endpoint}`, {
+          status: response.status,
+          statusText: response.statusText,
+          attempt: attempt + 1,
+        });
 
         if (CORS_STRICT_MODE) {
           throw new Error(
-            `CORS preflight failed: ${response.status} ${response.statusText}`
+            `CORS preflight failed: ${response.status} ${response.statusText}`,
           );
         }
       } else {
@@ -137,48 +135,50 @@ const checkCORSPreflight = async (endpoint) => {
       }
 
       return allowed;
-
     } catch (error) {
       lastError = error;
 
       // Timeout error
-      if (error.name === 'AbortError') {
-        logger.warn(`CORS preflight timeout for ${endpoint} (attempt ${attempt + 1}/2)`);
+      if (error.name === "AbortError") {
+        logger.warn(
+          `CORS preflight timeout for ${endpoint} (attempt ${attempt + 1}/2)`,
+        );
 
         if (attempt === 0) {
           // Retry once on timeout
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           continue;
         }
 
         if (CORS_STRICT_MODE) {
-          throw new Error(`CORS preflight timeout after ${PREFLIGHT_TIMEOUT}ms`);
+          throw new Error(
+            `CORS preflight timeout after ${PREFLIGHT_TIMEOUT}ms`,
+          );
         }
       }
 
       // Network error
       logger.warn(
         `CORS preflight network error for ${endpoint} (attempt ${attempt + 1}/2)`,
-        { error: error.message }
+        { error: error.message },
       );
 
       if (attempt === 0) {
         // Retry once on network error
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         continue;
       }
     }
   }
 
   // All attempts failed
-  logger.error(
-    `CORS preflight failed after all attempts for ${endpoint}`,
-    { error: lastError?.message }
-  );
+  logger.error(`CORS preflight failed after all attempts for ${endpoint}`, {
+    error: lastError?.message,
+  });
 
   if (CORS_STRICT_MODE) {
     throw new Error(
-      `CORS preflight failed: ${lastError?.message || 'Unknown error'}`
+      `CORS preflight failed: ${lastError?.message || "Unknown error"}`,
     );
   }
 
@@ -193,6 +193,24 @@ const checkCORSPreflight = async (endpoint) => {
 };
 
 /**
+ * Generate a unique request ID (UUID v4)
+ * Used for distributed tracing across frontend and backend
+ */
+const generateRequestId = () => {
+  // Use crypto.randomUUID if available (modern browsers)
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  // Fallback to manual UUID v4 generation
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+/**
  * Internal request function with auth interceptor
  * Boris Cherny Pattern: Single Responsibility - handles HTTP only
  *
@@ -201,11 +219,16 @@ const checkCORSPreflight = async (endpoint) => {
  * - Configurable timeout via options.timeout
  * - Proper cleanup (clearTimeout)
  * - Clear error messages
+ * - P0-4: Added X-Request-ID for distributed tracing
  */
 const makeRequest = async (url, options) => {
+  // Generate request ID if not provided
+  const requestId = options.requestId || generateRequestId();
+
   // Create AbortController for timeout
   const controller = new AbortController();
-  const timeout = options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
+  const timeout =
+    options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
 
   // Set timeout - abort request if it takes too long
   const timeoutId = setTimeout(() => {
@@ -220,12 +243,20 @@ const makeRequest = async (url, options) => {
         "Content-Type": "application/json",
         "X-API-Key": API_KEY,
         "X-CSRF-Token": getCSRFToken(),
+        "X-Request-ID": requestId, // P0-4: Add request ID for tracing
         ...options.headers,
       },
     });
 
     // Clear timeout on success
     clearTimeout(timeoutId);
+
+    // Extract request ID from response headers for logging
+    const responseRequestId = response.headers.get("X-Request-ID") || requestId;
+
+    // Store request ID in response for error handling
+    response.requestId = responseRequestId;
+
     return response;
   } catch (error) {
     // Always clear timeout
@@ -318,9 +349,26 @@ const request = async (endpoint, options = {}, isRetry = false) => {
         logger.warn("Failed to parse error response:", parseError);
         return {};
       });
-      throw new Error(
+
+      // P0-4: Log request ID for debugging
+      const requestId = response.requestId || error.request_id || "unknown";
+      logger.error(`API Error [Request ID: ${requestId}]:`, {
+        status: response.status,
+        endpoint,
+        detail: error.detail,
+        error_code: error.error_code,
+        request_id: requestId,
+      });
+
+      // Create enhanced error with request ID
+      const enhancedError = new Error(
         error.detail || `API Error: ${response.status} ${response.statusText}`,
       );
+      enhancedError.requestId = requestId;
+      enhancedError.errorCode = error.error_code;
+      enhancedError.status = response.status;
+
+      throw enhancedError;
     }
 
     return await response.json();
@@ -373,24 +421,32 @@ export const directClient = {
 
     // Create AbortController for timeout (same pattern as makeRequest)
     const controller = new AbortController();
-    const timeout = options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
+    const timeout =
+      options.timeout !== undefined ? options.timeout : DEFAULT_TIMEOUT;
 
     const timeoutId = setTimeout(() => {
       controller.abort();
     }, timeout);
 
     try {
+      // P0-4: Add request ID for direct client as well
+      const requestId = options.requestId || generateRequestId();
+
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": API_KEY,
+          "X-Request-ID": requestId, // P0-4: Add request ID
           ...options.headers,
         },
       });
 
       clearTimeout(timeoutId);
+
+      // Store request ID in response
+      response.requestId = response.headers.get("X-Request-ID") || requestId;
 
       // Apply same auth error handling as main client
       if (response.status === 401) {
@@ -408,7 +464,25 @@ export const directClient = {
           logger.warn("Failed to parse direct API error response:", parseError);
           return {};
         });
-        throw new Error(error.detail || `API Error: ${response.status}`);
+
+        // P0-4: Log request ID for debugging
+        const requestId = response.requestId || error.request_id || "unknown";
+        logger.error(`Direct API Error [Request ID: ${requestId}]:`, {
+          status: response.status,
+          url,
+          detail: error.detail,
+          error_code: error.error_code,
+          request_id: requestId,
+        });
+
+        const enhancedError = new Error(
+          error.detail || `API Error: ${response.status}`,
+        );
+        enhancedError.requestId = requestId;
+        enhancedError.errorCode = error.error_code;
+        enhancedError.status = response.status;
+
+        throw enhancedError;
       }
 
       return await response.json();
