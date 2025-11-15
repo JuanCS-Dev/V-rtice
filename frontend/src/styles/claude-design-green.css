@@ -330,18 +330,22 @@
    */
 
   /* Backgrounds - LIGHT */
-  --color-bg-primary: var(--background); /* Quase branco */
-  --color-bg-secondary: var(--card); /* Card background */
-  --color-bg-tertiary: var(--muted); /* Muted background */
-  --color-bg-elevated: var(--popover); /* White elevated */
-  --color-bg-overlay: rgba(255, 255, 255, 0.95); /* White overlay */
+  --color-bg-primary: oklch(
+    0.98 0.01 95.1
+  ) !important; /* Quase branco - FORCE OVERRIDE */
+  --color-bg-secondary: oklch(0.98 0.01 95.1) !important; /* Card background */
+  --color-bg-tertiary: oklch(0.93 0.02 90.24) !important; /* Muted background */
+  --color-bg-elevated: oklch(1 0 0) !important; /* White elevated */
+  --color-bg-overlay: rgba(255, 255, 255, 0.95) !important; /* White overlay */
 
   /* Text Colors - DARK text on light bg */
-  --color-text-primary: var(--foreground); /* Dark text */
-  --color-text-secondary: var(--muted-foreground); /* Muted text */
-  --color-text-tertiary: var(--muted-foreground); /* Tertiary text */
-  --color-text-muted: var(--muted-foreground); /* Muted text */
-  --color-text-inverse: var(--primary-foreground); /* White on color */
+  --color-text-primary: oklch(
+    0.34 0.03 95.72
+  ) !important; /* Dark text - FORCE */
+  --color-text-secondary: oklch(0.61 0.01 97.42) !important; /* Muted text */
+  --color-text-tertiary: oklch(0.61 0.01 97.42) !important; /* Tertiary text */
+  --color-text-muted: oklch(0.61 0.01 97.42) !important; /* Muted text */
+  --color-text-inverse: oklch(1 0 0) !important; /* White on color */
 
   /* Borders - Subtle on light */
   --color-border-primary: var(--border); /* Subtle border */

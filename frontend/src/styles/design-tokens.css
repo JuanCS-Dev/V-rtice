@@ -284,41 +284,63 @@
   --color-warning-text: #facc15;
 
   /* Semantic Colors - Info */
-  --color-info: #f97316;
-  --color-info-hover: #ea580c;
-  --color-info-light: rgba(249, 115, 22, 0.1);
-  --color-info-text: #fb923c;
+  --color-info: oklch(0.62 0.14 155); /* Verde */
+  --color-info-hover: oklch(0.56 0.15 159.97); /* Verde hover */
+  --color-info-light: rgba(16, 185, 129, 0.1); /* Verde translúcido */
+  --color-info-text: oklch(0.69 0.16 164.15); /* Verde claro */
 
   /* ═══════════════════════════════════════════════════════════════════════
-   * GRADIENTS - Premium Visual Effects
+   * GRADIENTS - Premium Visual Effects (VERDE - Claude.ai)
    * ═══════════════════════════════════════════════════════════════════════
    * Uso: background, background-image
    * Gradientes premium para hero sections e cards
    */
-  --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
-  --gradient-secondary: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
-  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  --gradient-primary: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #059669 100%
+  ); /* Verde */
+  --gradient-secondary: linear-gradient(
+    135deg,
+    #34d399 0%,
+    #10b981 100%
+  ); /* Verde claro */
+  --gradient-danger: linear-gradient(
+    135deg,
+    #ef4444 0%,
+    #dc2626 100%
+  ); /* Vermelho para erros */
+  --gradient-orange: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #059669 100%
+  ); /* VERDE (substituindo laranja) */
+  --gradient-red: linear-gradient(
+    135deg,
+    #10b981 0%,
+    #059669 100%
+  ); /* VERDE (substituindo vermelho) */
   --gradient-dark: linear-gradient(
     135deg,
-    rgba(15, 23, 42, 0.98) 0%,
-    rgba(30, 27, 75, 0.98) 100%
-  );
+    rgba(249, 250, 251, 0.98) 0%,
+    rgba(243, 244, 246, 0.98) 100%
+  ); /* Light gradient */
   --gradient-cyberpunk: linear-gradient(
     135deg,
-    #ef4444 0%,
-    #f97316 50%,
-    #fb923c 100%
-  );
+    #10b981 0%,
+    #059669 50%,
+    #047857 100%
+  ); /* Verde gradient */
 
-  /* Radial Gradients */
+  /* Radial Gradients - VERDE */
   --gradient-radial-primary: radial-gradient(
     circle at center,
-    #ef4444 0%,
+    #10b981 0%,
     transparent 70%
   );
   --gradient-radial-secondary: radial-gradient(
     circle at center,
-    #f97316 0%,
+    #34d399 0%,
     transparent 70%
   );
 
