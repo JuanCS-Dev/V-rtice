@@ -20,6 +20,31 @@ const OffensivePage = lazy(() => import("@/pages/Offensive/OffensivePage"));
 const DefensivePage = lazy(() => import("@/pages/Defensive/DefensivePage"));
 const OSINTPage = lazy(() => import("@/pages/OSINT/OSINTPage"));
 const MaximusPage = lazy(() => import("@/pages/Maximus/MaximusPage"));
+const MaximusOverview = lazy(() => import("@/pages/Maximus/MaximusOverview"));
+const MaximusChatPage = lazy(
+  () => import("@/pages/Maximus/Chat/MaximusChatPage"),
+);
+const MaximusToolsPage = lazy(
+  () => import("@/pages/Maximus/Tools/MaximusToolsPage"),
+);
+const MaximusOraclePage = lazy(
+  () => import("@/pages/Maximus/Oracle/MaximusOraclePage"),
+);
+const MaximusSentinelPage = lazy(
+  () => import("@/pages/Maximus/Sentinel/MaximusSentinelPage"),
+);
+const MaximusIntelligencePage = lazy(
+  () => import("@/pages/Maximus/Intelligence/MaximusIntelligencePage"),
+);
+const MaximusAnalyticsPage = lazy(
+  () => import("@/pages/Maximus/Analytics/MaximusAnalyticsPage"),
+);
+const MaximusMemoryPage = lazy(
+  () => import("@/pages/Maximus/Memory/MaximusMemoryPage"),
+);
+const MaximusSettingsPage = lazy(
+  () => import("@/pages/Maximus/Settings/MaximusSettingsPage"),
+);
 const ImmunisPage = lazy(() => import("@/pages/Immunis/ImmunisPage"));
 const ReactiveFabricPage = lazy(
   () => import("@/pages/ReactiveFabric/ReactiveFabricPage"),
@@ -101,7 +126,44 @@ const router = createBrowserRouter([
           },
           {
             path: "maximus",
-            element: <MaximusPage />,
+            children: [
+              {
+                index: true,
+                element: <MaximusOverview />,
+              },
+              {
+                path: "chat",
+                element: <MaximusChatPage />,
+              },
+              {
+                path: "tools",
+                element: <MaximusToolsPage />,
+              },
+              {
+                path: "oracle",
+                element: <MaximusOraclePage />,
+              },
+              {
+                path: "sentinel",
+                element: <MaximusSentinelPage />,
+              },
+              {
+                path: "intelligence",
+                element: <MaximusIntelligencePage />,
+              },
+              {
+                path: "analytics",
+                element: <MaximusAnalyticsPage />,
+              },
+              {
+                path: "memory",
+                element: <MaximusMemoryPage />,
+              },
+              {
+                path: "settings",
+                element: <MaximusSettingsPage />,
+              },
+            ],
           },
           {
             path: "immunis",
