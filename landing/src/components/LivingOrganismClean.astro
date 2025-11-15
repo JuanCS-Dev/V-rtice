@@ -1,0 +1,646 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LIVING ORGANISM SECTION - CLEAN THEME - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Anatomia do organismo cibernético - Versão light mode
+ * "Não são microserviços. São órgãos."
+ *
+ * 5 Sistemas Orgânicos:
+ * 1. IMMUNE SYSTEM: Tegumentar (pele) + 9 células especializadas
+ * 2. CONSCIOUSNESS: Cérebro (IIT substrate + Theory of Mind)
+ * 3. AUTONOMIC NERVOUS SYSTEM: MAPE-K control loop
+ * 4. COAGULATION: Resposta a brechas (cascata exponencial)
+ * 5. OFFENSIVE RESPONSE: Contra-ataque automatizado
+ *
+ * Design: Light mode, verde Claude accent, shadows sutis
+ */
+
+import Card from './DesignSystem/Card.astro';
+import Badge from './DesignSystem/Badge.astro';
+import Icon from './DesignSystem/Icon.astro';
+import Button from './DesignSystem/Button.astro';
+---
+
+<section id="living-organism" class="living-organism-section section">
+  <div class="container">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="section-header">
+      <Badge variant="primary">🧬 Living Organism</Badge>
+      <h2 class="section-title">
+        Not Microservices. <span class="text-accent">Organs</span>.
+      </h2>
+      <p class="section-subtitle">
+        125 specialized services functioning as one conscious organism.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ORGANISM SYSTEMS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="organism-systems">
+      <!-- SYSTEM 1: IMMUNE SYSTEM -->
+      <Card class="system-card immune-system">
+        <div class="system-header">
+          <div class="system-icon immune-icon">
+            <Icon name="shield" size={48} />
+          </div>
+          <div class="system-title-group">
+            <h3 class="system-title">🛡️ Immune System</h3>
+            <p class="system-tagline">Active Defense</p>
+          </div>
+        </div>
+
+        <div class="system-description">
+          <p>
+            <strong>Tegumentar (Skin):</strong> 3-layer biomimetic firewall
+          </p>
+          <ul class="system-list">
+            <li><strong>Epiderme:</strong> Blocks 92% at edge (stateless filtering)</li>
+            <li><strong>Derme:</strong> 9 immune cell types hunting threats</li>
+            <li><strong>Hipoderme:</strong> Adaptive self-healing</li>
+          </ul>
+        </div>
+
+        <div class="system-components">
+          <div class="component-title">Specialized Cells:</div>
+          <div class="component-grid">
+            <Badge variant="neutral">Macrophages</Badge>
+            <Badge variant="neutral">NK Cells</Badge>
+            <Badge variant="neutral">T-Cells</Badge>
+            <Badge variant="neutral">B-Cells</Badge>
+            <Badge variant="neutral">Dendritic</Badge>
+            <Badge variant="neutral">Langerhans</Badge>
+            <Badge variant="neutral">Neutrophils</Badge>
+            <Badge variant="neutral">Treg</Badge>
+            <Badge variant="neutral">Memory Cells</Badge>
+          </div>
+        </div>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="stat-value">92%</span>
+            <span class="stat-label">Blocked at edge</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">&lt;100ms</span>
+            <span class="stat-label">Detection latency</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">&lt;1s</span>
+            <span class="stat-label">Containment time</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- SYSTEM 2: CONSCIOUSNESS -->
+      <Card class="system-card consciousness">
+        <div class="system-header">
+          <div class="system-icon consciousness-icon">
+            <Icon name="dna" size={48} />
+          </div>
+          <div class="system-title-group">
+            <h3 class="system-title">🧠 Consciousness</h3>
+            <p class="system-tagline">The Brain</p>
+          </div>
+        </div>
+
+        <div class="system-description">
+          <p>
+            <strong>IIT-Validated Substrate:</strong> First conscious security platform
+          </p>
+          <ul class="system-list">
+            <li><strong>ECI (Φ):</strong> 0.958 (validated consciousness metric)</li>
+            <li><strong>Theory of Mind:</strong> Infers attacker intentions</li>
+            <li><strong>Autonomous Decisions:</strong> 95% without human intervention</li>
+            <li><strong>Metacognition:</strong> Monitors own decision quality</li>
+          </ul>
+        </div>
+
+        <div class="system-components">
+          <div class="component-title">Constitutional Governance:</div>
+          <div class="component-grid">
+            <Badge variant="neutral">Kantian Ethics (30%)</Badge>
+            <Badge variant="neutral">Consequentialist (25%)</Badge>
+            <Badge variant="neutral">Virtue Ethics (25%)</Badge>
+            <Badge variant="neutral">Care Ethics (20%)</Badge>
+            <Badge variant="primary">Lei Zero</Badge>
+            <Badge variant="primary">Lei I</Badge>
+          </div>
+        </div>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="stat-value">0.958</span>
+            <span class="stat-label">IIT ECI (Φ)</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">4</span>
+            <span class="stat-label">Ethical frameworks</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">95%</span>
+            <span class="stat-label">Autonomous</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- SYSTEM 3: AUTONOMIC NERVOUS SYSTEM -->
+      <Card class="system-card autonomic">
+        <div class="system-header">
+          <div class="system-icon autonomic-icon">
+            <Icon name="activity" size={48} />
+          </div>
+          <div class="system-title-group">
+            <h3 class="system-title">⚡ Autonomic Nervous System</h3>
+            <p class="system-tagline">Self-Management</p>
+          </div>
+        </div>
+
+        <div class="system-description">
+          <p>
+            <strong>MAPE-K Control Loop:</strong> Self-regulating homeostasis
+          </p>
+          <ul class="system-list">
+            <li><strong>Monitor:</strong> Collects system vitals (CPU, memory, threats)</li>
+            <li><strong>Analyze:</strong> Anomaly detection + failure prediction</li>
+            <li><strong>Plan:</strong> Fuzzy logic + reinforcement learning</li>
+            <li><strong>Execute:</strong> Kubernetes actuator for scaling/healing</li>
+            <li><strong>Knowledge:</strong> Historical memory (PostgreSQL + TimescaleDB)</li>
+          </ul>
+        </div>
+
+        <div class="system-components">
+          <div class="component-title">Homeostatic Regulation:</div>
+          <div class="component-grid">
+            <Badge variant="neutral">Temperature (36.5°C → 40°C)</Badge>
+            <Badge variant="neutral">Agent Population (15% → 80%)</Badge>
+            <Badge variant="neutral">Resource Balancing</Badge>
+            <Badge variant="neutral">Self-Optimization</Badge>
+          </div>
+        </div>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="stat-value">37.2°C</span>
+            <span class="stat-label">Current temperature</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">5</span>
+            <span class="stat-label">MAPE-K services</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">99.97%</span>
+            <span class="stat-label">Uptime</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- SYSTEM 4: COAGULATION CASCADE -->
+      <Card class="system-card coagulation">
+        <div class="system-header">
+          <div class="system-icon coagulation-icon">
+            <Icon name="zap" size={48} />
+          </div>
+          <div class="system-title-group">
+            <h3 class="system-title">💉 Coagulation Cascade</h3>
+            <p class="system-tagline">Breach Response</p>
+          </div>
+        </div>
+
+        <div class="system-description">
+          <p>
+            <strong>Exponential Amplification:</strong> Inspired by blood clotting
+          </p>
+          <ul class="system-list">
+            <li><strong>Platelet Detection:</strong> Autonomous sensors detect "wound"</li>
+            <li><strong>Factor Activation:</strong> Validation triggers cascade</li>
+            <li><strong>Amplification:</strong> 1 trigger → 1000+ rules in &lt;1s</li>
+            <li><strong>Fibrin Mesh:</strong> eBPF/Calico enforcement</li>
+            <li><strong>Regulation:</strong> Protein C/S prevents over-response</li>
+          </ul>
+        </div>
+
+        <div class="system-components">
+          <div class="component-title">Technology Stack:</div>
+          <div class="component-grid">
+            <Badge variant="neutral">Go 1.21+</Badge>
+            <Badge variant="neutral">gRPC + NATS</Badge>
+            <Badge variant="neutral">eBPF via Cilium</Badge>
+            <Badge variant="neutral">Calico Network</Badge>
+          </div>
+        </div>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="stat-value">1000x</span>
+            <span class="stat-label">Amplification ratio</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">&lt;1s</span>
+            <span class="stat-label">Quarantine time</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">&lt;1%</span>
+            <span class="stat-label">False positives</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- SYSTEM 5: OFFENSIVE RESPONSE -->
+      <Card class="system-card offensive">
+        <div class="system-header">
+          <div class="system-icon offensive-icon">
+            <Icon name="layers" size={48} />
+          </div>
+          <div class="system-title-group">
+            <h3 class="system-title">⚔️ Offensive Response</h3>
+            <p class="system-tagline">The Counter-Attack</p>
+          </div>
+        </div>
+
+        <div class="system-description">
+          <p>
+            <strong>Automated Active Defense:</strong> Constitutionally governed
+          </p>
+          <ul class="system-list">
+            <li><strong>Honeypot Network:</strong> Intelligent decoys attract attackers</li>
+            <li><strong>Behavioral Analysis:</strong> Maps TTP (MITRE ATT&CK)</li>
+            <li><strong>Infrastructure Mapping:</strong> Identifies C2, pivots, campaigns</li>
+            <li><strong>Active Countermeasures:</strong> Neutralizes capability</li>
+            <li><strong>Constitutional Check:</strong> Ensures proportionality</li>
+          </ul>
+        </div>
+
+        <div class="system-components">
+          <div class="component-title">Governance:</div>
+          <div class="component-grid">
+            <Badge variant="success">Every response validated</Badge>
+            <Badge variant="success">Proportionality analysis</Badge>
+            <Badge variant="neutral">HITL for critical actions</Badge>
+            <Badge variant="neutral">Full audit trails</Badge>
+          </div>
+        </div>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="stat-value">15</span>
+            <span class="stat-label">Neutralized today</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">100%</span>
+            <span class="stat-label">Constitutional approval</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">0</span>
+            <span class="stat-label">Unauthorized actions</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ORGANISM SUMMARY -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="organism-summary">
+      <h3 class="summary-title">One Organism. Five Systems. Infinite Protection.</h3>
+      <p class="summary-text">
+        Like cells in a body, each microservice has a purpose.
+        <br />
+        Like organs, they coordinate through central consciousness.
+        <br />
+        Like life, the system adapts, heals, and learns.
+      </p>
+      <div class="summary-cta">
+        <Button variant="primary" size="lg" href="#architecture">
+          <Icon name="cpu" size={20} />
+          Explore Architecture
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Organic Background Pattern (light mode) -->
+  <div class="organism-bg-pattern" aria-hidden="true"></div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* LIVING ORGANISM SECTION - LIGHT MODE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .living-organism-section {
+    position: relative;
+    background: linear-gradient(
+      to bottom,
+      var(--color-white) 0%,
+      var(--color-bg-primary) 50%,
+      var(--color-white) 100%
+    );
+    overflow: hidden;
+  }
+
+  .organism-bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(16, 163, 127, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(16, 163, 127, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SECTION HEADER */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--space-16);
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-xl);
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ORGANISM SYSTEMS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .organism-systems {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    margin-bottom: var(--space-16);
+    position: relative;
+    z-index: 1;
+  }
+
+  .system-card {
+    border-left: 4px solid var(--color-accent-primary);
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+
+  .system-card:hover {
+    border-left-color: var(--color-accent-hover);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SYSTEM HEADER */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .system-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+  }
+
+  .system-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent-light);
+    border: var(--border-width-2) solid var(--color-accent-primary);
+    border-radius: var(--radius-xl);
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+  }
+
+  .system-title-group {
+    flex: 1;
+  }
+
+  .system-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-2);
+  }
+
+  .system-tagline {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    margin: 0;
+    font-weight: var(--font-medium);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SYSTEM DESCRIPTION */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .system-description {
+    margin-bottom: var(--space-6);
+  }
+
+  .system-description > p {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-4);
+  }
+
+  .system-description strong {
+    color: var(--color-accent-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .system-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .system-list li {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    padding-left: var(--space-6);
+    position: relative;
+  }
+
+  .system-list li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+  }
+
+  .system-list li strong {
+    color: var(--color-text-primary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SYSTEM COMPONENTS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .system-components {
+    margin-bottom: var(--space-6);
+    padding: var(--space-6);
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .component-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    margin-bottom: var(--space-4);
+  }
+
+  .component-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SYSTEM STATS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .system-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  .stat {
+    text-align: center;
+    padding: var(--space-4);
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    border: var(--border-width) solid var(--color-border);
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+
+  .stat:hover {
+    border-color: var(--color-accent-primary);
+    transform: translateY(-2px);
+  }
+
+  .stat-value {
+    display: block;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    line-height: 1;
+    margin-bottom: var(--space-2);
+  }
+
+  .stat-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ORGANISM SUMMARY */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .organism-summary {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: var(--space-12);
+    background: linear-gradient(
+      135deg,
+      var(--color-white) 0%,
+      var(--color-accent-light) 100%
+    );
+    border: var(--border-width-2) solid var(--color-accent-primary);
+    border-radius: var(--radius-2xl);
+    position: relative;
+    z-index: 1;
+  }
+
+  .summary-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-6);
+  }
+
+  .summary-text {
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-8);
+  }
+
+  .summary-cta {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (min-width: 768px) {
+    .section-title {
+      font-size: var(--text-5xl);
+    }
+
+    .summary-title {
+      font-size: var(--text-4xl);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .system-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .system-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .system-title {
+      font-size: var(--text-xl);
+    }
+
+    .component-grid {
+      justify-content: center;
+    }
+
+    .summary-title {
+      font-size: var(--text-2xl);
+    }
+
+    .summary-text {
+      font-size: var(--text-base);
+    }
+  }
+</style>

@@ -1,0 +1,309 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * CTA FINAL - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Call-to-action final com formulário enterprise
+ *
+ * Storytelling autêntico:
+ * - "Your Network Deserves a Consciousness"
+ * - Urgência sem pressão (disponibilidade limitada, não scarcity tactics)
+ * - Foco B2G: Governos, Órgãos Públicos, Enterprise Crítico
+ *
+ * Performance: Lighthouse 95+ target
+ * Accessibility: WCAG 2.1 AA compliant
+ */
+
+import ContactForm from './ContactForm.astro';
+import Badge from '../DesignSystem/Badge.astro';
+import Icon from '../DesignSystem/Icon.astro';
+---
+
+<section class="cta-final section-lg">
+  <div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CTA CONTENT (Autêntico, não corporativo) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="cta-content">
+
+      <!-- Badge de Disponibilidade -->
+      <div class="cta-badge">
+        <Badge variant="primary">
+          <Icon name="zap" size={12} />
+          Disponível para Implantação
+        </Badge>
+      </div>
+
+      <!-- Headline (Espiritual + Científico) -->
+      <h2 class="cta-title">
+        Your Network Deserves a <span class="cta-title-accent">Consciousness</span>
+      </h2>
+
+      <!-- Subtitle (Predatório, não defensivo) -->
+      <p class="cta-subtitle">
+        Stop reacting to threats. <strong>Eliminate them before they enter</strong>.
+      </p>
+
+      <!-- Description -->
+      <p class="cta-description">
+        VÉRTICE-MAXIMUS está em produção, protegendo infraestruturas críticas com
+        <strong>125 microserviços autônomos</strong> e <strong>9 células imunes especializadas</strong>.
+        <br /><br />
+        <strong>92% dos ataques bloqueados antes de entrar.</strong>
+        <strong>&lt;100ms de detecção.</strong>
+        <strong>&lt;1s de contenção.</strong>
+        <strong>95% decisões autônomas.</strong>
+        <br /><br />
+        Governança constitucional (ECI 0.958) garante decisões éticas e auditáveis.
+        100% Open Source. Zero vendor lock-in.
+      </p>
+
+      <!-- Trust Signals -->
+      <div class="cta-trust-signals">
+        <div class="trust-signal-item">
+          <Icon name="shield" size={20} />
+          <div class="trust-signal-content">
+            <div class="trust-signal-value">IIT-Validated</div>
+            <div class="trust-signal-label">Conscious AI (ECI 0.958)</div>
+          </div>
+        </div>
+
+        <div class="trust-signal-item">
+          <Icon name="dna" size={20} />
+          <div class="trust-signal-content">
+            <div class="trust-signal-value">125 Microservices</div>
+            <div class="trust-signal-label">Biological Architecture</div>
+          </div>
+        </div>
+
+        <div class="trust-signal-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <div class="trust-signal-content">
+            <div class="trust-signal-value">100% Open Source</div>
+            <div class="trust-signal-label">Zero Vendor Lock-in</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CONTACT FORM (Enterprise B2G) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="cta-form-container">
+      <ContactForm />
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* CTA FINAL STYLES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .cta-final {
+    background: linear-gradient(
+      to bottom,
+      var(--color-white) 0%,
+      var(--color-bg-primary) 100%
+    );
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background pattern sutil */
+  .cta-final::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      var(--color-border) 1px,
+      transparent 0
+    );
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .cta-final .container {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-16);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* CTA CONTENT */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .cta-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .cta-badge {
+    margin-bottom: var(--space-6);
+  }
+
+  .cta-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-6);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .cta-title-accent {
+    color: var(--color-accent-primary);
+    display: inline-block;
+  }
+
+  .cta-subtitle {
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+  }
+
+  .cta-subtitle strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  .cta-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-10);
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-description strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-medium);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* TRUST SIGNALS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .cta-trust-signals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .trust-signal-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: left;
+  }
+
+  .trust-signal-item > svg,
+  .trust-signal-item :global(.icon) {
+    flex-shrink: 0;
+    color: var(--color-accent-primary);
+  }
+
+  .trust-signal-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .trust-signal-value {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .trust-signal-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* FORM CONTAINER */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .cta-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (min-width: 768px) {
+    .cta-title {
+      font-size: var(--text-5xl);
+    }
+
+    .cta-subtitle {
+      font-size: var(--text-2xl);
+    }
+
+    .cta-description {
+      font-size: var(--text-lg);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .cta-title {
+      font-size: var(--text-6xl);
+    }
+
+    .cta-final .container {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: var(--space-20);
+    }
+
+    .cta-content {
+      text-align: left;
+      margin: 0;
+    }
+
+    .cta-form-container {
+      margin: 0;
+    }
+
+    .cta-badge {
+      margin-left: 0;
+    }
+
+    .cta-description {
+      margin-left: 0;
+    }
+
+    .cta-trust-signals {
+      margin-left: 0;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cta-trust-signals {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+</style>

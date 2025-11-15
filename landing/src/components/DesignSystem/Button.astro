@@ -1,0 +1,57 @@
+---
+/**
+ * Button Component - VÉRTICE-MAXIMUS Design System
+ * Botão reutilizável com variantes primário/secundário/ghost
+ *
+ * Props:
+ * - variant: 'primary' | 'secondary' | 'ghost' (default: 'primary')
+ * - size: 'sm' | 'md' | 'lg' (default: 'md')
+ * - href: string (opcional - se presente, renderiza como <a>)
+ * - block: boolean (full width)
+ * - class: classes CSS adicionais
+ */
+
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  block?: boolean;
+  class?: string;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  block = false,
+  class: className = '',
+  type = 'button',
+} = Astro.props;
+
+const baseClass = 'btn';
+const variantClass = `btn-${variant}`;
+const sizeClass = size !== 'md' ? `btn-${size}` : '';
+const blockClass = block ? 'btn-block' : '';
+
+const classes = [baseClass, variantClass, sizeClass, blockClass, className]
+  .filter(Boolean)
+  .join(' ');
+
+const Tag = href ? 'a' : 'button';
+---
+
+{Tag === 'a' ? (
+  <a href={href} class={classes}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class={classes}>
+    <slot />
+  </button>
+)}
+
+<style>
+  /* Estilos já definidos em design-system-clean.css */
+  /* Este arquivo apenas garante que os estilos sejam aplicados */
+</style>

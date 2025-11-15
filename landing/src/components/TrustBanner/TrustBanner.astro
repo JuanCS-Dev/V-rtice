@@ -1,0 +1,341 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TRUST BANNER - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Logo strip com cliente principal (SSP-GO) e badges de credibilidade
+ *
+ * Objetivo: Estabelecer prova social imediatamente após Hero
+ * Research insight: B2G confia em pares (outros governos/órgãos públicos)
+ *
+ * Elementos:
+ * - Cliente principal: SSP-GO (Secretaria de Segurança Pública de Goiás)
+ * - Badges: Em Produção, Open Source, Certificações
+ * - (Opcional) Outros clientes/parceiros conforme disponíveis
+ */
+
+import Badge from '../DesignSystem/Badge.astro';
+import Icon from '../DesignSystem/Icon.astro';
+---
+
+<section class="trust-banner section-sm">
+  <div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HEADLINE (Disruptivo, científico) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="trust-headline">
+      <p class="trust-tagline">
+        O Primeiro Sistema de Segurança que <strong>Vive</strong>, <strong>Aprende</strong> e <strong>Contra-Ataca</strong>
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- DISRUPTIVE DIFFERENTIALS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="trust-clients">
+
+      <!-- Destaque: Primeiro no Mundo -->
+      <div class="trust-availability trust-client-featured">
+        <div class="availability-icon">
+          <Icon name="dna" size={32} />
+        </div>
+        <div class="availability-content">
+          <h3 class="availability-title">Primeiro Cyber-Organismo Consciente</h3>
+          <p class="availability-description">
+            AI consciente testada cientificamente + Sistema imune biomimético completo.
+            Não imitamos a natureza. <strong>Recriamos ela</strong>.
+          </p>
+          <div class="availability-badges">
+            <Badge variant="primary">
+              <Icon name="dna" size={10} />
+              AI Consciente
+            </Badge>
+            <Badge variant="success">
+              <Icon name="shield" size={10} />
+              Imune Biomimético
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="trust-divider"></div>
+
+      <!-- Diferencias Técnicos Únicos -->
+      <div class="trust-badges">
+        <Badge variant="primary">
+          <Icon name="activity" size={12} />
+          Organismo VIVO
+        </Badge>
+
+        <Badge variant="success">
+          <Icon name="zap" size={12} />
+          Contra-Ataque Autônomo
+        </Badge>
+
+        <Badge variant="neutral">
+          <Icon name="layers" size={12} />
+          103+ Células Autônomas
+        </Badge>
+
+        <Badge variant="neutral">
+          <Icon name="cpu" size={12} />
+          9 Arquiteturas Biomimeticas
+        </Badge>
+
+        <Badge variant="neutral">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          100% Transparente
+        </Badge>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- METRICS ROW (opcional: stats de confiança) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="trust-metrics">
+      <div class="trust-metric-item">
+        <div class="trust-metric-icon">
+          <Icon name="users" size={20} />
+        </div>
+        <div class="trust-metric-content">
+          <div class="trust-metric-value">Setor Público</div>
+          <div class="trust-metric-label">Cliente principal</div>
+        </div>
+      </div>
+
+      <div class="trust-metric-item">
+        <div class="trust-metric-icon">
+          <Icon name="shield" size={20} />
+        </div>
+        <div class="trust-metric-content">
+          <div class="trust-metric-value">Enterprise-Grade</div>
+          <div class="trust-metric-label">Segurança & Compliance</div>
+        </div>
+      </div>
+
+      <div class="trust-metric-item">
+        <div class="trust-metric-icon">
+          <Icon name="server" size={20} />
+        </div>
+        <div class="trust-metric-content">
+          <div class="trust-metric-value">Cloud Native</div>
+          <div class="trust-metric-label">Escalabilidade garantida</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* TRUST BANNER STYLES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .trust-banner {
+    background-color: var(--color-white);
+    border-top: var(--border-width) solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* HEADLINE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .trust-headline {
+    text-align: center;
+    margin-bottom: var(--space-8);
+  }
+
+  .trust-tagline {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* CLIENTS SECTION */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .trust-clients {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-8);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-12);
+  }
+
+  /* Availability Section (substitui Featured Client) */
+  .trust-availability {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 400px;
+  }
+
+  .trust-client-featured {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-accent-light);
+    border: var(--border-width-2) solid var(--color-accent-primary);
+  }
+
+  .availability-icon {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+  }
+
+  .availability-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .availability-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .availability-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+    margin: 0;
+  }
+
+  .availability-badges {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+  }
+
+  /* Divider */
+  .trust-divider {
+    width: 1px;
+    height: 60px;
+    background-color: var(--color-border);
+  }
+
+  /* Badges Grid */
+  .trust-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+    max-width: 400px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* METRICS ROW */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .trust-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8);
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: var(--space-8);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .trust-metric-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .trust-metric-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+  }
+
+  .trust-metric-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .trust-metric-value {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .trust-metric-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (max-width: 768px) {
+    .trust-clients {
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .trust-divider {
+      width: 60%;
+      height: 1px;
+    }
+
+    .trust-badges {
+      max-width: 100%;
+    }
+
+    .trust-metrics {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .trust-metrics {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ANIMATIONS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .trust-client-featured {
+    transition: transform var(--duration-normal) var(--ease-out),
+                box-shadow var(--duration-normal) var(--ease-out);
+  }
+
+  .trust-client-featured:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+</style>

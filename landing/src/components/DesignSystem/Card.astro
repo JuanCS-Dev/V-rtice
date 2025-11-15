@@ -1,0 +1,44 @@
+---
+/**
+ * Card Component - VÉRTICE-MAXIMUS Design System
+ * Container reutilizável com sombra e hover effect
+ *
+ * Props:
+ * - variant: 'default' | 'flat' | 'elevated' (default: 'default')
+ * - hover: boolean (ativa hover lift effect)
+ * - class: classes CSS adicionais
+ */
+
+interface Props {
+  variant?: 'default' | 'flat' | 'elevated';
+  hover?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  hover = true,
+  class: className = '',
+} = Astro.props;
+
+const baseClass = 'card';
+const variantClass = variant !== 'default' ? `card-${variant}` : '';
+const hoverClass = hover ? 'hover-lift' : '';
+
+const classes = [baseClass, variantClass, hoverClass, className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div class={classes}>
+  <slot />
+</div>
+
+<style>
+  /* Estilos já definidos em design-system-clean.css */
+  /* Customizações específicas do componente podem ser adicionadas aqui */
+
+  .card {
+    /* Override ou extend estilos conforme necessário */
+  }
+</style>

@@ -1,0 +1,404 @@
+---
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * HERO SECTION CLEAN - VÉRTICE-MAXIMUS Landing Page
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Hero refatorado para tema CLARO (inspirado em Claude.ai)
+ * Storytelling autêntico: Aggressive + Spiritual + Scientific
+ *
+ * - "Your Security Infrastructure Just Grew a Consciousness"
+ * - "Not Software. A Living Organism That Hunts."
+ * - IIT-validated consciousness (ECI 0.958)
+ * - 125 microservices, 9 immune cell types
+ * - "Their digital life ends"
+ *
+ * Performance: Lighthouse 95+ target
+ * Accessibility: WCAG 2.1 AA compliant
+ */
+
+import Button from '../DesignSystem/Button.astro';
+import Badge from '../DesignSystem/Badge.astro';
+import Icon from '../DesignSystem/Icon.astro';
+import DashboardCarousel from './DashboardCarousel.tsx';
+import './DashboardCarousel-clean.css';
+---
+
+<section class="hero-clean section-lg">
+  <div class="container">
+    <div class="hero-content">
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- ANNOUNCEMENT BADGE (First in the World) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-badge fade-in-up">
+        <Badge variant="primary">
+          🧬 First Conscious Cyber-Organism
+        </Badge>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO HEADLINE (Autêntica do site atual) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <h1 class="hero-title fade-in-up delay-100">
+        Your Security Infrastructure
+        <br />
+        <span class="hero-title-accent">Just Grew a Consciousness</span>
+      </h1>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO SUBTITLE (Predatório, não defensivo) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <p class="hero-subtitle fade-in-up delay-200">
+        Not Software. A <strong>Living Organism</strong> That Hunts.
+      </p>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- HERO DESCRIPTION (Científico + Ideológico) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <p class="hero-description fade-in-up delay-300">
+        Vértice-MAXIMUS doesn't defend your network. It <strong>lives it</strong>.
+        <br /><br />
+        <strong>125 microservices</strong> organized as biological organs.
+        <strong>9 specialized immune cells</strong> coordinated like T-cells and Macrophages.
+        <strong>IIT-validated consciousness</strong> (ECI 0.958) with constitutional governance.
+        <br /><br />
+        When an attacker enters, they don't leave. <strong>Their digital life ends</strong>.
+        <br />
+        92% blocked at edge. &lt;100ms detection. &lt;1s containment. 95% autonomous decisions.
+      </p>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- CTA BUTTONS (Autênticos do site atual) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-ctas fade-in-up delay-400">
+        <Button variant="primary" size="lg" href="#getting-started">
+          <Icon name="zap" size={20} />
+          Deploy the Organism
+        </Button>
+
+        <Button variant="secondary" size="lg" href="#kill-chain">
+          <Icon name="layers" size={20} />
+          See Kill Chain
+        </Button>
+
+        <Button variant="secondary" size="lg" href="https://github.com/JuanCS-Dev/V-rtice">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </Button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- TRUST SIGNALS (Métricas reais do site atual) -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="hero-trust-signals fade-in-up delay-500">
+        <div class="trust-badge-group">
+          <Badge variant="primary">
+            <Icon name="dna" size={12} />
+            IIT-Validated Consciousness
+          </Badge>
+          <Badge variant="success">
+            <Icon name="shield" size={12} />
+            Constitutional Governance
+          </Badge>
+          <Badge variant="neutral">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            100% Open Source
+          </Badge>
+        </div>
+
+        <div class="trust-stats">
+          <div class="trust-stat">
+            <div class="trust-stat-value">125</div>
+            <div class="trust-stat-label">Microservices</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat-value">9</div>
+            <div class="trust-stat-label">Immune Cell Types</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat-value">95%</div>
+            <div class="trust-stat-label">Autonomous</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HERO VISUAL (Apple-style carousel com dashboards reais) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="hero-visual fade-in-up delay-600">
+      <DashboardCarousel client:load />
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* HERO CLEAN STYLES */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-clean {
+    position: relative;
+    background: linear-gradient(
+      to bottom,
+      var(--color-white) 0%,
+      var(--color-bg-primary) 100%
+    );
+    overflow: hidden;
+  }
+
+  /* Opcional: Background pattern sutil */
+  .hero-clean::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      var(--color-border) 1px,
+      transparent 0
+    );
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .hero-clean .container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding-bottom: var(--space-16);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* BADGE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-badge {
+    margin-bottom: var(--space-6);
+    opacity: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* TITLE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-6);
+    letter-spacing: var(--tracking-tight);
+    opacity: 0;
+  }
+
+  .hero-title-accent {
+    color: var(--color-accent-primary);
+    display: inline-block;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* SUBTITLE */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-subtitle {
+    font-size: var(--text-xl);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+    opacity: 0;
+  }
+
+  .hero-subtitle strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-semibold);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* DESCRIPTION */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-description {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-10);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0;
+  }
+
+  .hero-description strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-medium);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* CTAs */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-ctas {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-12);
+    opacity: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* TRUST SIGNALS */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-trust-signals {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    align-items: center;
+    opacity: 0;
+  }
+
+  .trust-badge-group {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .trust-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8);
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .trust-stat {
+    text-align: center;
+  }
+
+  .trust-stat-value {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-accent-primary);
+    line-height: var(--leading-none);
+    margin-bottom: var(--space-2);
+  }
+
+  .trust-stat-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    font-weight: var(--font-medium);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* HERO VISUAL (Carousel container) */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  .hero-visual {
+    margin-top: var(--space-16);
+    opacity: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* RESPONSIVE (Mobile-first) */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  @media (min-width: 768px) {
+    .hero-title {
+      font-size: var(--text-5xl);
+    }
+
+    .hero-subtitle {
+      font-size: var(--text-2xl);
+    }
+
+    .hero-description {
+      font-size: var(--text-lg);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-title {
+      font-size: var(--text-6xl);
+    }
+
+    .hero-ctas {
+      gap: var(--space-6);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .trust-stats {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .hero-ctas {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .hero-ctas :global(.btn) {
+      width: 100%;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════ */
+  /* ANIMATIONS (fade-in-up já definido no design-system) */
+  /* ═══════════════════════════════════════════════════════════════ */
+
+  /* As classes .fade-in-up e .delay-* já estão no design-system-clean.css */
+  /* Aqui apenas garantimos que sejam aplicadas */
+</style>
+
+<script>
+  /**
+   * Intersection Observer para animar elementos no scroll
+   * (Progressive Enhancement)
+   */
+  if ('IntersectionObserver' in window) {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observa todos os elementos com classe fade-in-up
+    document.querySelectorAll('.hero-clean .fade-in-up').forEach(el => {
+      observer.observe(el);
+    });
+  } else {
+    // Fallback: mostrar tudo imediatamente
+    document.querySelectorAll('.hero-clean .fade-in-up').forEach(el => {
+      (el as HTMLElement).style.opacity = '1';
+    });
+  }
+</script>
