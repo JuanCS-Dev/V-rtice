@@ -1,6 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 // frontend/src/contexts/ThemeContext.jsx
-import React, { createContext, useContext } from 'react';
+/**
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #3 FIXED: Context value memoized to prevent unnecessary re-renders
+ */
+import React, { createContext, useContext, useMemo } from 'react';
 
 const ThemeContext = createContext(undefined);
 
@@ -10,15 +14,15 @@ const ThemeContext = createContext(undefined);
  * Tema único fixo: Preto + Vermelho
  */
 export const ThemeProvider = ({ children }) => {
-  // Tema fixo - não há mais troca de temas
-  const value = {
+  // GAP #3 FIX: Memoize value to prevent 100+ components re-rendering
+  const value = useMemo(() => ({
     currentTheme: 'core',
     availableThemes: [],
     categories: {},
     changeTheme: () => {}, // No-op
     getThemeData: () => ({ id: 'core', name: 'Core Theme' }),
     getThemesByCategory: () => ({})
-  };
+  }), []); // Empty deps - value never changes
 
   return (
     <ThemeContext.Provider value={value}>

@@ -1,5 +1,4 @@
 /**
-import logger from '@/utils/logger';
  * useRealTimeExecutions Hook
  * Real-time monitoring of offensive operations (scans, exploits, attacks)
  *
@@ -9,19 +8,25 @@ import logger from '@/utils/logger';
  * - Polling fallback
  * - Message queueing
  *
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #1 FIXED: Prevents state updates after unmount
+ *
  * NO MOCKS - Real data from:
  * - WebSocket connection to Offensive Gateway
  * - Polling fallback for execution updates
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useWebSocket } from '../../../../hooks/useWebSocket';
+import logger from '@/utils/logger';
 
 import { WS_ENDPOINTS } from '../../../../config/api';
 const GATEWAY_WS = WS_ENDPOINTS.executions;
 
 export const useRealTimeExecutions = () => {
   const [executions, setExecutions] = useState([]);
+  // GAP #1 FIX: Track component mount status
+  const isMountedRef = useRef(true);
 
   // Use optimized WebSocket hook
   const { data: wsData, isConnected } = useWebSocket(GATEWAY_WS, {
@@ -34,6 +39,9 @@ export const useRealTimeExecutions = () => {
   });
 
   const addExecution = useCallback((execution) => {
+    // GAP #1 FIX: Only update state if component is still mounted
+    if (!isMountedRef.current) return;
+
     setExecutions(prev => {
       // Check if execution already exists
       const exists = prev.some(e => e.id === execution.id);
@@ -47,12 +55,15 @@ export const useRealTimeExecutions = () => {
   }, []);
 
   const removeExecution = useCallback((executionId) => {
+    // GAP #1 FIX: Only update state if component is still mounted
+    if (!isMountedRef.current) return;
+
     setExecutions(prev => prev.filter(e => e.id !== executionId));
   }, []);
 
   // Handle WebSocket data
   useEffect(() => {
-    if (!wsData) return;
+    if (!wsData || !isMountedRef.current) return;
 
     try {
       if (wsData.type === 'execution_update') {
@@ -62,12 +73,21 @@ export const useRealTimeExecutions = () => {
         addExecution({ ...wsData.execution, status: 'completed' });
       } else if (wsData.type === 'executions_list' && wsData.executions) {
         // Polling fallback data
-        setExecutions(wsData.executions.slice(0, 20));
+        if (isMountedRef.current) {
+          setExecutions(wsData.executions.slice(0, 20));
+        }
       }
     } catch (err) {
       logger.error('Error processing execution data:', err);
     }
   }, [wsData, addExecution]);
+
+  // GAP #1 FIX: Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   return {
     executions,

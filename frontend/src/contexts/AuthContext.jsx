@@ -1,5 +1,10 @@
 import { API_BASE_URL } from "@/config/api";
 /* eslint-disable react-refresh/only-export-components */
+/**
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #5 FIXED: Safe localStorage with error handling
+ * - GAP #8 FIXED: Token refresh race condition prevention
+ */
 import React, {
   createContext,
   useContext,
@@ -12,6 +17,36 @@ import logger from "@/utils/logger";
 import { safeJSONParse } from "@/utils/security";
 import { setTokenRefreshHandler } from "@/api/client";
 import secureTokenStore from "@/utils/SecureTokenStore";
+
+// GAP #5 FIX: Safe localStorage helpers (Safari private mode, storage full, etc.)
+const safeLocalStorage = {
+  getItem: (key) => {
+    try {
+      return safeLocalStorage.getItem(key);
+    } catch (error) {
+      logger.warn(`safeLocalStorage.getItem("${key}") failed:`, error);
+      return null;
+    }
+  },
+  setItem: (key, value) => {
+    try {
+      safeLocalStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      logger.warn(`safeLocalStorage.setItem("${key}") failed:`, error);
+      return false;
+    }
+  },
+  removeItem: (key) => {
+    try {
+      safeLocalStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      logger.warn(`safeLocalStorage.removeItem("${key}") failed:`, error);
+      return false;
+    }
+  },
+};
 
 const AuthContext = createContext();
 
@@ -33,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(
-    localStorage.getItem("vertice_auth_token"),
+    safeLocalStorage.getItem("vertice_auth_token"),
   );
 
   // Refs for auto-refresh timer (doesn't trigger re-renders)
@@ -67,9 +102,10 @@ export const AuthProvider = ({ children }) => {
   // Check if user is authenticated on app start
   useEffect(() => {
     const checkAuth = () => {
-      const storedUser = localStorage.getItem("vertice_user");
-      const storedToken = localStorage.getItem("vertice_auth_token");
-      const tokenExpiry = localStorage.getItem("vertice_token_expiry");
+      // GAP #5 FIX: Using safe localStorage wrapper
+      const storedUser = safeLocalStorage.getItem("vertice_user");
+      const storedToken = safeLocalStorage.getItem("vertice_auth_token");
+      const tokenExpiry = safeLocalStorage.getItem("vertice_token_expiry");
 
       if (storedToken && storedUser && tokenExpiry) {
         const expiryDate = new Date(tokenExpiry);
@@ -101,10 +137,10 @@ export const AuthProvider = ({ children }) => {
     secureTokenStore.removeToken("refresh_token");
 
     // Legacy cleanup: Remove from localStorage (migration path)
-    localStorage.removeItem("vertice_auth_token");
-    localStorage.removeItem("vertice_user");
-    localStorage.removeItem("vertice_token_expiry");
-    localStorage.removeItem("vertice_refresh_token");
+    safeLocalStorage.removeItem("vertice_auth_token");
+    safeLocalStorage.removeItem("vertice_user");
+    safeLocalStorage.removeItem("vertice_token_expiry");
+    safeLocalStorage.removeItem("vertice_refresh_token");
 
     setToken(null);
     setUser(null);
@@ -193,10 +229,10 @@ export const AuthProvider = ({ children }) => {
       secureTokenStore.setToken("access_token", newToken, expiresIn);
 
       // Legacy: Also update localStorage for gradual migration
-      localStorage.setItem("vertice_auth_token", newToken);
+      safeLocalStorage.setItem("vertice_auth_token", newToken);
       const expiryDate = new Date();
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
-      localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+      safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
 
       // Update refresh token if provided
       if (data.refresh_token) {
@@ -205,7 +241,7 @@ export const AuthProvider = ({ children }) => {
           data.refresh_token,
           30 * 24 * 3600,
         ); // 30 days
-        localStorage.setItem("vertice_refresh_token", data.refresh_token);
+        safeLocalStorage.setItem("vertice_refresh_token", data.refresh_token);
       }
 
       setToken(newToken);
@@ -275,10 +311,10 @@ export const AuthProvider = ({ children }) => {
         // Legacy: Also store in localStorage for gradual migration
         const expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 1);
-        localStorage.setItem("vertice_auth_token", authToken);
-        localStorage.setItem("vertice_user", JSON.stringify(userData));
-        localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
-        localStorage.setItem("vertice_refresh_token", mockRefreshToken);
+        safeLocalStorage.setItem("vertice_auth_token", authToken);
+        safeLocalStorage.setItem("vertice_user", JSON.stringify(userData));
+        safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+        safeLocalStorage.setItem("vertice_refresh_token", mockRefreshToken);
 
         setToken(authToken);
         setUser(userData);
@@ -344,11 +380,11 @@ export const AuthProvider = ({ children }) => {
       // Legacy: Also store in localStorage for gradual migration
       const expiryDate = new Date();
       expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
-      localStorage.setItem("vertice_auth_token", authToken);
-      localStorage.setItem("vertice_user", JSON.stringify(userData));
-      localStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
+      safeLocalStorage.setItem("vertice_auth_token", authToken);
+      safeLocalStorage.setItem("vertice_user", JSON.stringify(userData));
+      safeLocalStorage.setItem("vertice_token_expiry", expiryDate.toISOString());
       if (data.refresh_token) {
-        localStorage.setItem("vertice_refresh_token", data.refresh_token);
+        safeLocalStorage.setItem("vertice_refresh_token", data.refresh_token);
       }
 
       setToken(authToken);
