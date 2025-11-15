@@ -5,13 +5,13 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Hero refatorado para tema CLARO (inspirado em Claude.ai)
- * Filosofia: Hospital Cibernético - Clean, Professional, Trustworthy
+ * Storytelling autêntico: Aggressive + Spiritual + Scientific
  *
- * Storytelling B2G:
- * - Headline impactante mas objetivo (não agressivo)
- * - Foco em proteção e inteligência (não ataque)
- * - CTAs claros e específicos
- * - Trust signals com SSP-GO
+ * - "Your Security Infrastructure Just Grew a Consciousness"
+ * - "Not Software. A Living Organism That Hunts."
+ * - IIT-validated consciousness (ECI 0.958)
+ * - 125 microservices, 9 immune cell types
+ * - "Their digital life ends"
  *
  * Performance: Lighthouse 95+ target
  * Accessibility: WCAG 2.1 AA compliant
@@ -20,6 +20,8 @@
 import Button from '../DesignSystem/Button.astro';
 import Badge from '../DesignSystem/Badge.astro';
 import Icon from '../DesignSystem/Icon.astro';
+import DashboardCarousel from './DashboardCarousel.tsx';
+import './DashboardCarousel-clean.css';
 ---
 
 <section class="hero-clean section-lg">
@@ -27,88 +29,100 @@ import Icon from '../DesignSystem/Icon.astro';
     <div class="hero-content">
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- ANNOUNCEMENT BADGE (Launch) -->
+      <!-- ANNOUNCEMENT BADGE (First in the World) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="hero-badge fade-in-up">
         <Badge variant="primary">
-          🧬 Cybersecurity Biomimética para Segurança Pública
+          🧬 First Conscious Cyber-Organism
         </Badge>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- HERO HEADLINE (8 palavras max, objetivo) -->
+      <!-- HERO HEADLINE (Autêntica do site atual) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <h1 class="hero-title fade-in-up delay-100">
-        Defesa Cibernética Biomimética
+        Your Security Infrastructure
         <br />
-        <span class="hero-title-accent">para Segurança Pública</span>
+        <span class="hero-title-accent">Just Grew a Consciousness</span>
       </h1>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- HERO SUBTITLE (valor mensurável, 1 linha) -->
+      <!-- HERO SUBTITLE (Predatório, não defensivo) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <p class="hero-subtitle fade-in-up delay-200">
-        Plataforma inteligente que aprende, adapta e protege
-        <strong>operações críticas de investigação criminal</strong>
+        Not Software. A <strong>Living Organism</strong> That Hunts.
       </p>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- HERO DESCRIPTION (contexto adicional, objetivo) -->
+      <!-- HERO DESCRIPTION (Científico + Ideológico) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <p class="hero-description fade-in-up delay-300">
-        VÉRTICE-MAXIMUS não é apenas software. É um <strong>organismo cibernético</strong>
-        que opera como sistema imunológico digital: detecta ameaças, aprende padrões,
-        e fortalece defesas automaticamente.
+        Vértice-MAXIMUS doesn't defend your network. It <strong>lives it</strong>.
         <br /><br />
-        Arquitetura biomimética com 103+ microserviços autônomos garante disponibilidade
-        contínua mesmo sob ataque. <strong>Quando adversários entram, suas ações são
-        rastreadas, neutralizadas e documentadas para inteligência criminal.</strong>
+        <strong>125 microservices</strong> organized as biological organs.
+        <strong>9 specialized immune cells</strong> coordinated like T-cells and Macrophages.
+        <strong>IIT-validated consciousness</strong> (ECI 0.958) with constitutional governance.
+        <br /><br />
+        When an attacker enters, they don't leave. <strong>Their digital life ends</strong>.
+        <br />
+        92% blocked at edge. <100ms detection. <1s containment. 95% autonomous decisions.
       </p>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- CTA BUTTONS (claros, específicos, não genéricos) -->
+      <!-- CTA BUTTONS (Autênticos do site atual) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="hero-ctas fade-in-up delay-400">
-        <Button variant="primary" size="lg" href="#contato">
-          Agendar Demonstração
-          <Icon name="arrow-right" size={20} />
+        <Button variant="primary" size="lg" href="#getting-started">
+          <Icon name="zap" size={20} />
+          Deploy the Organism
         </Button>
 
-        <Button variant="secondary" size="lg" href="#arquitetura">
-          Ver Arquitetura
+        <Button variant="secondary" size="lg" href="#kill-chain">
           <Icon name="layers" size={20} />
+          See Kill Chain
+        </Button>
+
+        <Button variant="secondary" size="lg" href="https://github.com/JuanCS-Dev/V-rtice">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
         </Button>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- TRUST SIGNALS (SSP-GO + métricas) -->
+      <!-- TRUST SIGNALS (Métricas reais do site atual) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="hero-trust-signals fade-in-up delay-500">
         <div class="trust-badge-group">
+          <Badge variant="primary">
+            <Icon name="dna" size={12} />
+            IIT-Validated Consciousness
+          </Badge>
           <Badge variant="success">
-            <Icon name="check" size={12} />
-            Cliente: SSP-GO
+            <Icon name="shield" size={12} />
+            Constitutional Governance
           </Badge>
           <Badge variant="neutral">
-            Em Produção desde 2024
-          </Badge>
-          <Badge variant="neutral">
-            103+ Microserviços
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            100% Open Source
           </Badge>
         </div>
 
         <div class="trust-stats">
           <div class="trust-stat">
+            <div class="trust-stat-value">125</div>
+            <div class="trust-stat-label">Microservices</div>
+          </div>
+          <div class="trust-stat">
             <div class="trust-stat-value">9</div>
-            <div class="trust-stat-label">Arquiteturas Biomimeticas</div>
+            <div class="trust-stat-label">Immune Cell Types</div>
           </div>
           <div class="trust-stat">
-            <div class="trust-stat-value">24/7</div>
-            <div class="trust-stat-label">Disponibilidade</div>
-          </div>
-          <div class="trust-stat">
-            <div class="trust-stat-value">100%</div>
-            <div class="trust-stat-label">Código Aberto</div>
+            <div class="trust-stat-value">95%</div>
+            <div class="trust-stat-label">Autonomous</div>
           </div>
         </div>
       </div>
@@ -116,54 +130,10 @@ import Icon from '../DesignSystem/Icon.astro';
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- HERO VISUAL (screenshot/diagrama clean) -->
+    <!-- HERO VISUAL (Apple-style carousel com dashboards reais) -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="hero-visual fade-in-up delay-600">
-      <div class="hero-visual-container">
-        <!-- Placeholder: substituir por screenshot real do dashboard ou diagrama -->
-        <div class="hero-visual-placeholder">
-          <svg viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Dashboard mockup placeholder -->
-            <rect width="1200" height="800" fill="var(--color-bg-secondary)" rx="12"/>
-
-            <!-- Header bar -->
-            <rect x="0" y="0" width="1200" height="60" fill="var(--color-white)" />
-            <circle cx="30" cy="30" r="8" fill="var(--color-accent-primary)" opacity="0.3"/>
-            <rect x="50" y="20" width="150" height="20" fill="var(--color-text-tertiary)" opacity="0.2" rx="4"/>
-
-            <!-- Sidebar -->
-            <rect x="0" y="60" width="250" height="740" fill="var(--color-white)" opacity="0.5"/>
-
-            <!-- Main content area with cards -->
-            <rect x="280" y="90" width="350" height="200" fill="var(--color-white)" rx="8" opacity="0.8"/>
-            <rect x="660" y="90" width="510" height="200" fill="var(--color-white)" rx="8" opacity="0.8"/>
-
-            <rect x="280" y="320" width="510" height="250" fill="var(--color-white)" rx="8" opacity="0.8"/>
-            <rect x="820" y="320" width="350" height="250" fill="var(--color-white)" rx="8" opacity="0.8"/>
-
-            <!-- Accent elements -->
-            <circle cx="450" cy="150" r="40" fill="var(--color-accent-primary)" opacity="0.1"/>
-            <circle cx="900" cy="160" r="60" fill="var(--color-accent-primary)" opacity="0.08"/>
-            <circle cx="550" cy="450" r="80" fill="var(--color-accent-primary)" opacity="0.06"/>
-
-            <!-- Text placeholder lines -->
-            <rect x="300" y="110" width="200" height="12" fill="var(--color-text-tertiary)" opacity="0.2" rx="2"/>
-            <rect x="300" y="135" width="150" height="8" fill="var(--color-text-tertiary)" opacity="0.15" rx="2"/>
-
-            <rect x="680" y="110" width="180" height="12" fill="var(--color-text-tertiary)" opacity="0.2" rx="2"/>
-            <rect x="680" y="135" width="220" height="8" fill="var(--color-text-tertiary)" opacity="0.15" rx="2"/>
-
-            <!-- Chart elements -->
-            <polyline points="300,510 370,480 440,500 510,460 580,470 650,440 720,450"
-                      stroke="var(--color-accent-primary)" stroke-width="3" fill="none" opacity="0.6"/>
-          </svg>
-        </div>
-
-        <div class="hero-visual-label">
-          <Icon name="shield" size={16} />
-          <span>Dashboard de Investigação Criminal</span>
-        </div>
-      </div>
+      <DashboardCarousel client:load />
     </div>
 
   </div>
@@ -340,51 +310,12 @@ import Icon from '../DesignSystem/Icon.astro';
   }
 
   /* ═══════════════════════════════════════════════════════════════ */
-  /* HERO VISUAL */
+  /* HERO VISUAL (Carousel container) */
   /* ═══════════════════════════════════════════════════════════════ */
 
   .hero-visual {
     margin-top: var(--space-16);
     opacity: 0;
-  }
-
-  .hero-visual-container {
-    position: relative;
-    border-radius: var(--radius-2xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-    border: var(--border-width) solid var(--color-border);
-    background: var(--color-white);
-  }
-
-  .hero-visual-placeholder {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .hero-visual-placeholder svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .hero-visual-label {
-    position: absolute;
-    bottom: var(--space-6);
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) var(--space-4);
-    background: var(--color-backdrop);
-    backdrop-filter: blur(8px);
-    border-radius: var(--radius-full);
-    font-size: var(--text-sm);
-    color: var(--color-text-secondary);
-    font-weight: var(--font-medium);
-    border: var(--border-width) solid var(--color-border);
   }
 
   /* ═══════════════════════════════════════════════════════════════ */

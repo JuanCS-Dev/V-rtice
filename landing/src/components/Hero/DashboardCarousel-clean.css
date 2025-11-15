@@ -1,0 +1,288 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DASHBOARD CAROUSEL STYLES - LIGHT MODE (Claude.ai Inspired)
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Apple-style vertical perspective carousel adaptado para tema claro
+ */
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  perspective: 1500px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--color-bg-primary), var(--color-white));
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+}
+
+.carousel-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.carousel-slide {
+  position: absolute;
+  width: 90%;
+  max-width: 700px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  /* Light mode shadows: sutis, não agressivas */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08),
+              0 0 40px rgba(16, 163, 127, 0.1); /* Verde Claude glow sutil */
+  border: var(--border-width) solid var(--color-border);
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  backface-visibility: hidden;
+  background: var(--color-white);
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-4) var(--space-6);
+  /* Light mode gradient: branco para transparente */
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+  backdrop-filter: blur(8px);
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  text-align: center;
+  border-top: var(--border-width) solid var(--color-border);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* NAVIGATION BUTTONS (Verde Claude) */
+/* ═══════════════════════════════════════════════════════════ */
+
+.carousel-button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  /* Light mode: borda verde Claude sutil */
+  border: var(--border-width-2) solid var(--color-border);
+  background: var(--color-white);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  color: var(--color-accent-primary); /* Verde Claude */
+  cursor: pointer;
+  z-index: 40;
+  transition: all var(--duration-normal) var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.carousel-button:hover {
+  background: var(--color-accent-light); /* Verde Claude light */
+  border-color: var(--color-accent-primary);
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.carousel-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.carousel-button:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+.carousel-button-prev {
+  top: 20px;
+}
+
+.carousel-button-next {
+  bottom: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* INDICATORS (Verde Claude) */
+/* ═══════════════════════════════════════════════════════════ */
+
+.carousel-indicators {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  z-index: 40;
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  /* Light mode: borda sutil */
+  border: var(--border-width-2) solid var(--color-border);
+  background: var(--color-white);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.carousel-indicator:hover {
+  border-color: var(--color-accent-primary);
+  transform: scale(1.2);
+  background: var(--color-accent-light);
+}
+
+.carousel-indicator:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+.carousel-indicator.active {
+  background: var(--color-accent-primary); /* Verde Claude */
+  border-color: var(--color-accent-primary);
+  height: 32px;
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(16, 163, 127, 0.3); /* Glow sutil */
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* RESPONSIVE */
+/* ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .carousel-container {
+    height: 500px;
+    padding: var(--space-6);
+  }
+
+  .carousel-slide {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-container {
+    height: 400px;
+    perspective: 1000px;
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+
+  .carousel-slide {
+    width: 95%;
+    max-width: 500px;
+  }
+
+  .carousel-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-button-prev {
+    top: 10px;
+  }
+
+  .carousel-button-next {
+    bottom: 10px;
+  }
+
+  .carousel-indicators {
+    right: 12px;
+    gap: var(--space-2);
+  }
+
+  .carousel-indicator.active {
+    height: 24px;
+  }
+
+  .carousel-caption {
+    font-size: var(--text-sm);
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .carousel-container {
+    height: 350px;
+  }
+
+  .carousel-indicators {
+    bottom: 12px;
+    right: auto;
+    left: 50%;
+    top: auto;
+    transform: translateX(-50%);
+    flex-direction: row;
+  }
+
+  .carousel-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* ANIMATIONS */
+/* ═══════════════════════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pause indicator on hover */
+.carousel-container:hover .carousel-slide {
+  animation-play-state: paused;
+}
+
+/* Accessibility: Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-slide,
+  .carousel-button,
+  .carousel-indicator {
+    transition: none !important;
+  }
+
+  .carousel-caption {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* DARK MODE THEME OVERRIDE (se implementado futuramente) */
+/* ═══════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  /* Se o usuário preferir dark mode no sistema, podemos oferecer suporte */
+  /* Por enquanto, mantemos light forçado conforme especificação */
+}
