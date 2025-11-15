@@ -33,9 +33,9 @@
  * Governed by: Constituição Vértice v2.7 - ADR-002
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import WebSocketManager from '@/services/websocket/WebSocketManager';
-import logger from '@/utils/logger';
+import { useState, useEffect, useRef, useCallback } from "react";
+import WebSocketManager from "@/services/websocket/WebSocketManager";
+import logger from "@/utils/logger";
 
 /**
  * React hook for WebSocketManager
@@ -66,7 +66,7 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
   // State
   const [data, setData] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionState, setConnectionState] = useState('IDLE');
+  const [connectionState, setConnectionState] = useState("IDLE");
   const [error, setError] = useState(null);
 
   // Refs
@@ -84,11 +84,11 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
       try {
         WebSocketManager.send(endpointPath, message);
       } catch (err) {
-        logger.error(\`[useWebSocketManager] Failed to send message:\`, err);
+        logger.error(`[useWebSocketManager] Failed to send message:`, err);
         setError(err);
       }
     },
-    [endpointPath]
+    [endpointPath],
   );
 
   // Disconnect
@@ -100,34 +100,37 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
 
     WebSocketManager.disconnect(endpointPath);
     setIsConnected(false);
-    setConnectionState('DISCONNECTED');
+    setConnectionState("DISCONNECTED");
   }, [endpointPath]);
 
   // Subscribe to WebSocket messages
   useEffect(() => {
     if (!endpointPath) {
-      logger.warn('[useWebSocketManager] No endpoint provided');
+      logger.warn("[useWebSocketManager] No endpoint provided");
       return;
     }
 
     // Message handler
     const handleMessage = (message) => {
       // Handle different message types
-      if (message.type === 'state') {
+      if (message.type === "state") {
         // Connection state update
         setConnectionState(message.state);
-        setIsConnected(message.state === 'CONNECTED');
+        setIsConnected(message.state === "CONNECTED");
 
         // Call user callbacks
-        if (message.state === 'CONNECTED' && optionsRef.current.onOpen) {
+        if (message.state === "CONNECTED" && optionsRef.current.onOpen) {
           optionsRef.current.onOpen();
-        } else if (message.state === 'DISCONNECTED' && optionsRef.current.onClose) {
+        } else if (
+          message.state === "DISCONNECTED" &&
+          optionsRef.current.onClose
+        ) {
           optionsRef.current.onClose();
-        } else if (message.state === 'ERROR' && optionsRef.current.onError) {
+        } else if (message.state === "ERROR" && optionsRef.current.onError) {
           optionsRef.current.onError(message.error);
           setError(message.error);
         }
-      } else if (message.type === 'error') {
+      } else if (message.type === "error") {
         // Error message
         setError(message.error);
         if (optionsRef.current.onError) {
@@ -147,7 +150,7 @@ export const useWebSocketManager = (endpointPath, options = {}) => {
     const unsubscribe = WebSocketManager.subscribe(
       endpointPath,
       handleMessage,
-      options
+      options,
     );
 
     unsubscribeRef.current = unsubscribe;
