@@ -64,7 +64,7 @@ section,
   color: #1e293b !important;
 }
 
-/* Cards - White with subtle border */
+/* Cards - White with subtle border (Claude Code breathing room) */
 .card,
 .metric-card,
 .stat-card,
@@ -73,10 +73,21 @@ section,
 [class*="Card"] {
   background: #ffffff !important;
   background-color: #ffffff !important;
-  border: 1px solid #e7e5e4 !important;
-  border-radius: 0.5rem !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #f5f5f4 !important; /* Quase invisível */
+  border-radius: 0.75rem !important; /* Um pouco mais arredondado */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03) !important; /* Quase imperceptível */
   color: #1e293b !important;
+  padding: 1.5rem !important; /* Generous padding - Claude style */
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Card hover - Very subtle lift */
+.card:hover,
+.metric-card:hover,
+.stat-card:hover {
+  border-color: #e7e5e4 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Headers - White with bottom border */
@@ -143,7 +154,7 @@ th,
     ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
 }
 
-/* Headings - Serif + proper weights */
+/* Headings - Serif + proper weights + hierarchy */
 h1,
 h2,
 h3,
@@ -161,7 +172,37 @@ h6,
   font-family: ui-serif, Georgia, Cambria, serif !important;
   font-weight: 600 !important;
   color: #0f172a !important;
-  letter-spacing: -0.01em !important;
+  letter-spacing: -0.02em !important; /* Tight tracking - Claude style */
+  line-height: 1.2 !important; /* Tighter leading */
+  margin-bottom: 0.75em !important; /* Breathing room */
+}
+
+/* H1 - Display */
+h1,
+.h1 {
+  font-size: 2.25rem !important; /* 36px */
+  font-weight: 700 !important;
+}
+
+/* H2 - Section headers */
+h2,
+.h2 {
+  font-size: 1.875rem !important; /* 30px */
+  font-weight: 600 !important;
+  margin-top: 2rem !important;
+}
+
+/* H3 - Subsections */
+h3,
+.h3 {
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 600 !important;
+}
+
+/* Body text - Legible line height */
+p {
+  line-height: 1.6 !important; /* Claude style legibility */
+  margin-bottom: 1em !important;
 }
 
 /* Code/Terminal - Keep monospace */
@@ -559,4 +600,210 @@ tr:hover {
 
 /* ═══════════════════════════════════════════════════════════════════════
  * END - CLAUDE CODE WEB GLOBAL OVERRIDES
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * CLAUDE CODE DETAILS - The subtle touches that matter
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* MAX-WIDTH for readability (Claude Code constraint) */
+.container:not(.container-full),
+.content:not(.content-full),
+main > *:not(.full-width) {
+  max-width: 1280px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}
+
+/* GENEROUS SPACING - sections need to breathe */
+section,
+.section {
+  padding-top: 4rem !important; /* 64px */
+  padding-bottom: 4rem !important;
+}
+
+/* LISTS - Clean styling */
+ul,
+ol {
+  padding-left: 1.5rem !important;
+  margin-bottom: 1em !important;
+}
+
+li {
+  margin-bottom: 0.5em !important;
+  line-height: 1.6 !important;
+}
+
+/* BUTTONS - Refined details */
+button,
+.btn {
+  font-size: 0.9375rem !important; /* 15px - Claude specific size */
+  padding: 0.625rem 1.25rem !important; /* 10px 20px */
+  letter-spacing: -0.01em !important;
+  font-weight: 500 !important;
+}
+
+/* Small buttons */
+button[class*="small"],
+.btn-sm {
+  font-size: 0.875rem !important; /* 14px */
+  padding: 0.5rem 1rem !important; /* 8px 16px */
+}
+
+/* INPUT REFINEMENTS */
+input,
+textarea,
+select {
+  font-size: 0.9375rem !important; /* 15px - matches buttons */
+  padding: 0.625rem 0.875rem !important; /* 10px 14px */
+  line-height: 1.5 !important;
+}
+
+/* LABELS - Clear hierarchy */
+label {
+  display: block !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important; /* 14px */
+  color: #44403c !important; /* Slightly darker for contrast */
+}
+
+/* HR - Subtle dividers */
+hr {
+  margin: 2rem 0 !important;
+  border: none !important;
+  border-top: 1px solid #f5f5f4 !important;
+}
+
+/* CODE BLOCKS - Refined */
+pre {
+  background: #fafaf9 !important;
+  border: 1px solid #f5f5f4 !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+  overflow-x: auto !important;
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.6 !important;
+}
+
+code:not(pre code) {
+  background: #fafaf9 !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.875em !important;
+  color: #10b981 !important; /* Green for inline code */
+}
+
+/* TOOLTIPS - Minimal */
+[title]:hover::after,
+.tooltip {
+  background: #292524 !important;
+  color: #ffffff !important;
+  font-size: 0.75rem !important;
+  padding: 0.375rem 0.625rem !important;
+  border-radius: 0.375rem !important;
+  font-family: ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* FOCUS STATES - More prominent for accessibility */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #10b981 !important;
+  outline-offset: 2px !important;
+}
+
+/* SELECTION - Green highlight */
+::selection {
+  background: #dcfce7 !important; /* Light green */
+  color: #166534 !important; /* Dark green text */
+}
+
+/* DISABLED STATES - Clear but not dramatic */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* PLACEHOLDER - Subtle */
+::placeholder {
+  color: #a8a29e !important;
+  opacity: 1 !important;
+}
+
+/* NAV LINKS - Clean hover */
+nav a,
+.nav-link {
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.375rem !important;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+nav a:hover,
+.nav-link:hover {
+  background: #fafaf9 !important;
+  color: #10b981 !important;
+}
+
+nav a.active,
+.nav-link.active {
+  background: #dcfce7 !important;
+  color: #10b981 !important;
+  font-weight: 500 !important;
+}
+
+/* FORM GROUPS - Breathing room */
+.form-group,
+.input-group,
+[class*="form"] > * + * {
+  margin-top: 1.5rem !important;
+}
+
+/* EMPTY STATES - Centered, calm */
+.empty-state,
+[class*="empty"] {
+  text-align: center !important;
+  padding: 4rem 2rem !important;
+  color: #78716c !important;
+}
+
+.empty-state h3,
+[class*="empty"] h3 {
+  color: #44403c !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* LOADING STATES - Minimal spinner */
+.loading-spinner,
+[class*="loading"][class*="spin"] {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border: 2px solid #e7e5e4 !important;
+  border-top-color: #10b981 !important;
+  border-radius: 50% !important;
+  animation: spin 0.6s linear infinite !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* MICRO-INTERACTIONS - Button press */
+button:active:not(:disabled) {
+  transform: translateY(0) !important; /* Reset lift on press */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * END CLAUDE CODE DETAILS
  * ═══════════════════════════════════════════════════════════════════════ */
