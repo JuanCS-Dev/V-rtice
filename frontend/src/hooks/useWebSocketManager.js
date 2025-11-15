@@ -1,204 +1,174 @@
 /**
- * useWebSocketManager Hook
- * =========================
+ * WebSocketManager Hook
+ * ======================
  *
- * React hook for WebSocketManager integration
- * Provides declarative WebSocket connections with automatic cleanup
+ * React hook wrapper for WebSocketManager.
+ * Provides React-friendly interface for centralized WebSocket management.
  *
- * Features:
- * - Automatic subscription/unsubscription
- * - Connection state management
- * - Message sending
- * - Error handling
+ * Boris Cherny Pattern: Use existing robust implementation (WebSocketManager)
+ * instead of reimplementing WebSocket logic in hooks.
  *
- * Governed by: Constituição Vértice v2.5 - ADR-002
+ * Features (delegated to WebSocketManager):
+ * - Connection pooling (single connection per endpoint)
+ * - Automatic reconnection with exponential backoff
+ * - Heartbeat/ping-pong
+ * - Message queuing for offline resilience
+ * - Fallback to SSE/polling
+ * - Pub/sub pattern for multiple subscribers
  *
  * Usage:
- * const { data, isConnected, send, status } = useWebSocketManager('maximus.stream');
+ * ```javascript
+ * const { data, isConnected, send } = useWebSocketManager('/api/stream');
+ * ```
+ *
+ * Migrating from useWebSocket:
+ * ```javascript
+ * // OLD (direct WebSocket, 330 lines of duplicate logic)
+ * const { data, send } = useWebSocket(wsUrl, options);
+ *
+ * // NEW (uses WebSocketManager, 50 lines, zero duplication)
+ * const { data, send } = useWebSocketManager('/api/stream', options);
+ * ```
+ *
+ * Governed by: Constituição Vértice v2.7 - ADR-002
  */
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { webSocketManager, ConnectionState } from '@/services/websocket';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import WebSocketManager from '@/services/websocket/WebSocketManager';
 import logger from '@/utils/logger';
 
 /**
- * Hook to connect to WebSocket endpoint via WebSocketManager
+ * React hook for WebSocketManager
  *
- * @param {string} endpointPath - Endpoint path (e.g., 'maximus.stream')
- * @param {Object} options - Hook options
- * @param {boolean} options.enabled - Enable connection (default: true)
- * @param {Function} options.onMessage - Message callback
- * @param {Function} options.onConnect - Connection callback
- * @param {Function} options.onDisconnect - Disconnection callback
- * @param {Function} options.onError - Error callback
- * @param {Object} options.connectionOptions - Connection options for WebSocketManager
- * @returns {Object} Hook state and controls
+ * @param {string} endpointPath - WebSocket endpoint (e.g., '/api/stream')
+ * @param {Object} options - Connection options
+ * @param {boolean} options.reconnect - Enable auto-reconnect (default: true)
+ * @param {number} options.reconnectInterval - Base reconnect delay in ms
+ * @param {number} options.maxReconnectAttempts - Max reconnect attempts
+ * @param {number} options.heartbeatInterval - Heartbeat interval in ms
+ * @param {boolean} options.fallbackToSSE - Enable SSE fallback
+ * @param {boolean} options.fallbackToPolling - Enable polling fallback
+ * @param {Function} options.onOpen - Callback on connection open
+ * @param {Function} options.onClose - Callback on connection close
+ * @param {Function} options.onError - Callback on error
+ * @param {Function} options.onMessage - Callback on message (receives parsed data)
+ * @param {boolean} options.debug - Enable debug logging
+ *
+ * @returns {Object} WebSocket state and methods
+ * @returns {any} data - Latest received message data
+ * @returns {boolean} isConnected - Connection status
+ * @returns {Function} send - Send message function
+ * @returns {Function} disconnect - Disconnect function
+ * @returns {string} connectionState - Connection state (IDLE, CONNECTING, CONNECTED, etc.)
+ * @returns {Error|null} error - Last error
  */
 export const useWebSocketManager = (endpointPath, options = {}) => {
-  const {
-    enabled = true,
-    onMessage = null,
-    onConnect = null,
-    onDisconnect = null,
-    onError = null,
-    connectionOptions = {},
-  } = options;
-
+  // State
   const [data, setData] = useState(null);
-  const [status, setStatus] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState('IDLE');
   const [error, setError] = useState(null);
 
+  // Refs
   const unsubscribeRef = useRef(null);
+  const optionsRef = useRef(options);
 
-  // GAP #46 FIX: Use useMemo for connectionOptions to prevent unnecessary reconnects
-  // Boris Cherny Standard: Object recreation in deps causes reconnects when parent re-renders
-  const memoizedConnectionOptions = useMemo(() => connectionOptions, [
-    connectionOptions.reconnect,
-    connectionOptions.maxAttempts,
-    connectionOptions.timeout
-  ]);
-
-  // GAP #47 FIX: Increase polling from 1s to 5s (Boris Cherny Standard: 1s is wasteful)
-  // Update status periodically
+  // Update options ref when they change
   useEffect(() => {
-    if (!enabled) return;
-
-    const updateStatus = () => {
-      const currentStatus = webSocketManager.getStatus(endpointPath);
-      setStatus(currentStatus);
-    };
-
-    // Initial status
-    updateStatus();
-
-    // Update every 5 seconds instead of 1 second (GAP #47 FIX)
-    const interval = setInterval(updateStatus, 5000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [endpointPath, enabled]);
-
-  // Message handler
-  const handleMessage = useCallback(
-    (message) => {
-      // Handle connection messages
-      if (message.type === 'connection') {
-        if (message.status === 'connected') {
-          if (onConnect) onConnect();
-        } else if (message.status === 'disconnected') {
-          if (onDisconnect) onDisconnect();
-        } else if (message.status === 'error') {
-          setError(message.error);
-          if (onError) onError(message.error);
-        }
-        return;
-      }
-
-      // Handle data messages
-      setData(message);
-      if (onMessage) {
-        onMessage(message);
-      }
-    },
-    [onMessage, onConnect, onDisconnect, onError]
-  );
-
-  // Subscribe to WebSocket
-  // GAP #46 FIX: Use memoizedConnectionOptions instead of connectionOptions in deps
-  useEffect(() => {
-    if (!enabled) return;
-
-    logger.debug('[useWebSocketManager] Subscribing to', endpointPath);
-
-    unsubscribeRef.current = webSocketManager.subscribe(
-      endpointPath,
-      handleMessage,
-      memoizedConnectionOptions
-    );
-
-    // Cleanup on unmount
-    return () => {
-      if (unsubscribeRef.current) {
-        logger.debug('[useWebSocketManager] Unsubscribing from', endpointPath);
-        unsubscribeRef.current();
-        unsubscribeRef.current = null;
-      }
-    };
-  }, [endpointPath, enabled, handleMessage, memoizedConnectionOptions]);
+    optionsRef.current = options;
+  }, [options]);
 
   // Send message
   const send = useCallback(
     (message) => {
-      return webSocketManager.send(endpointPath, message);
+      try {
+        WebSocketManager.send(endpointPath, message);
+      } catch (err) {
+        logger.error(\`[useWebSocketManager] Failed to send message:\`, err);
+        setError(err);
+      }
     },
     [endpointPath]
   );
 
-  // Reconnect
-  const reconnect = useCallback(() => {
-    // Disconnect and reconnect
-    webSocketManager.disconnect(endpointPath);
-    // Manager will auto-reconnect on next subscribe
+  // Disconnect
+  const disconnect = useCallback(() => {
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+
+    WebSocketManager.disconnect(endpointPath);
+    setIsConnected(false);
+    setConnectionState('DISCONNECTED');
   }, [endpointPath]);
+
+  // Subscribe to WebSocket messages
+  useEffect(() => {
+    if (!endpointPath) {
+      logger.warn('[useWebSocketManager] No endpoint provided');
+      return;
+    }
+
+    // Message handler
+    const handleMessage = (message) => {
+      // Handle different message types
+      if (message.type === 'state') {
+        // Connection state update
+        setConnectionState(message.state);
+        setIsConnected(message.state === 'CONNECTED');
+
+        // Call user callbacks
+        if (message.state === 'CONNECTED' && optionsRef.current.onOpen) {
+          optionsRef.current.onOpen();
+        } else if (message.state === 'DISCONNECTED' && optionsRef.current.onClose) {
+          optionsRef.current.onClose();
+        } else if (message.state === 'ERROR' && optionsRef.current.onError) {
+          optionsRef.current.onError(message.error);
+          setError(message.error);
+        }
+      } else if (message.type === 'error') {
+        // Error message
+        setError(message.error);
+        if (optionsRef.current.onError) {
+          optionsRef.current.onError(message.error);
+        }
+      } else {
+        // Regular data message
+        setData(message);
+
+        if (optionsRef.current.onMessage) {
+          optionsRef.current.onMessage(message);
+        }
+      }
+    };
+
+    // Subscribe to endpoint
+    const unsubscribe = WebSocketManager.subscribe(
+      endpointPath,
+      handleMessage,
+      options
+    );
+
+    unsubscribeRef.current = unsubscribe;
+
+    // Cleanup on unmount
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
+  }, [endpointPath]); // Only re-subscribe if endpoint changes
 
   return {
     data,
-    status,
+    isConnected,
+    connectionState,
     error,
-    isConnected: status?.isConnected || false,
-    isConnecting: status?.state === ConnectionState.CONNECTING,
-    isDisconnected: status?.state === ConnectionState.DISCONNECTED || status?.state === ConnectionState.IDLE,
-    isError: status?.state === ConnectionState.ERROR,
-    isFallback: status?.state === ConnectionState.FALLBACK,
-    queuedMessages: status?.queuedMessages || 0,
-    reconnectAttempts: status?.reconnectAttempts || 0,
-    connectionId: status?.connectionId,
     send,
-    reconnect,
+    disconnect,
   };
-};
-
-/**
- * Hook to send messages to WebSocket without subscribing
- *
- * @param {string} endpointPath - Endpoint path
- * @returns {Function} Send function
- */
-export const useWebSocketSend = (endpointPath) => {
-  return useCallback(
-    (message) => {
-      return webSocketManager.send(endpointPath, message);
-    },
-    [endpointPath]
-  );
-};
-
-/**
- * Hook to get status of all WebSocket connections
- *
- * @returns {Object} Status map
- */
-export const useWebSocketStatus = () => {
-  const [allStatus, setAllStatus] = useState({});
-
-  useEffect(() => {
-    const updateStatus = () => {
-      setAllStatus(webSocketManager.getAllStatus());
-    };
-
-    // Initial status
-    updateStatus();
-
-    // GAP #47 FIX: Update every 5 seconds instead of 1 second (Boris Cherny Standard: 1s is wasteful)
-    const interval = setInterval(updateStatus, 5000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  return allStatus;
 };
 
 export default useWebSocketManager;

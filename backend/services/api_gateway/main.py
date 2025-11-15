@@ -48,7 +48,72 @@ from shared.metrics_exporter import MetricsExporter, auto_update_sabbath_status
 # DISABLED: case_middleware.py was removed
 # from case_middleware import CaseTransformationMiddleware
 
+# Import input sanitization middleware
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
+from shared.middleware.input_sanitizer import InputSanitizationMiddleware
+
+# Import JWT authentication (GAP #4 - FINAL BOSS)
+from shared.auth.jwt_handler import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    get_current_user,
+    require_scope,
+    require_tenant,
+)
+
 logger = logging.getLogger(__name__)
+
+# =============================================================================
+# TIMEOUT CONFIGURATION - Boris Cherny Pattern: Explicit Configuration
+# =============================================================================
+# Follow httpx best practices (2025): connect, read, write, pool timeouts
+# Reference: https://www.restack.io/p/fastapi-answer-timeout-middleware
+
+# Default timeout for backend proxying (production-safe)
+DEFAULT_BACKEND_TIMEOUT = httpx.Timeout(
+    timeout=60.0,  # Overall timeout: 60s
+    connect=5.0,  # Connection timeout: 5s
+    read=60.0,  # Read timeout: 60s (allow for slow processing)
+    write=10.0,  # Write timeout: 10s
+    pool=5.0,  # Pool connection timeout: 5s
+)
+
+# Endpoint-specific timeout overrides (for operations that need more time)
+ENDPOINT_TIMEOUTS = {
+    "/api/osint": httpx.Timeout(timeout=120.0, read=120.0),  # OSINT can be slow
+    "/api/malware/analyze": httpx.Timeout(
+        timeout=180.0, read=180.0
+    ),  # Malware analysis is intensive
+    "/api/scan": httpx.Timeout(timeout=90.0, read=90.0),  # Scans take time
+    "/api/offensive/scan": httpx.Timeout(timeout=90.0, read=90.0),
+    "/api/defensive/analyze": httpx.Timeout(timeout=90.0, read=90.0),
+}
+
+
+def get_timeout_for_endpoint(path: str) -> httpx.Timeout:
+    """Get timeout configuration for a specific endpoint.
+
+    Args:
+        path: The request path (e.g., "/api/osint/search")
+
+    Returns:
+        httpx.Timeout: Configured timeout for the endpoint
+
+    Boris Cherny Pattern: Explicit over implicit configuration
+    """
+    for pattern, timeout in ENDPOINT_TIMEOUTS.items():
+        if path.startswith(pattern):
+            logger.debug(
+                f"Using custom timeout for {path}: {timeout.timeout}s",
+                extra={"path": path, "timeout": timeout.timeout},
+            )
+            return timeout
+
+    # Default timeout for all other endpoints
+    return DEFAULT_BACKEND_TIMEOUT
+
 
 # Global health cache instance
 health_cache: HealthCheckCache = None
@@ -74,6 +139,16 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 logger.info("✅ CORS middleware enabled for Cloud Run frontend")
+
+# Add input sanitization middleware (security layer)
+# Boris Cherny Pattern: Defense in depth - validate at gateway level
+app.add_middleware(
+    InputSanitizationMiddleware,
+    max_payload_size=5 * 1024 * 1024,  # 5MB max
+    enable_sanitization=True,
+    exempt_paths=["/docs", "/redoc", "/openapi.json", "/health", "/gateway/status"],
+)
+logger.info("✅ Input sanitization middleware enabled (XSS, SQL injection, command injection prevention)")
 
 # Add case transformation middleware (snake_case ↔ camelCase)
 # DISABLED: middleware file missing
@@ -289,6 +364,425 @@ async def health_check() -> Dict[str, str]:
         Dict[str, str]: A dictionary indicating the service status.
     """
     return {"status": "healthy", "message": "Maximus API Gateway is operational."}
+
+
+# =============================================================================
+# FRONTEND ERROR LOGGING ENDPOINT
+# =============================================================================
+# Boris Cherny Pattern: Observability is critical for production
+
+
+@app.post("/api/errors/log")
+async def log_frontend_error(request: Request) -> Dict[str, str]:
+    """Log frontend errors for debugging and monitoring.
+
+    Receives error reports from frontend applications and logs them with
+    structured data for analysis.
+
+    Boris Cherny Pattern: Centralized error logging for observability
+
+    Request Body:
+        {
+            "level": "error" | "warn" | "info",
+            "message": str,
+            "stack": str (optional),
+            "context": dict (optional),
+            "url": str (optional - current page URL),
+            "userAgent": str (optional),
+            "timestamp": str (optional - ISO 8601)
+        }
+
+    Returns:
+        Dict[str, str]: Confirmation of log receipt
+
+    Example:
+        ```javascript
+        await fetch('/api/errors/log', {
+            method: 'POST',
+            body: JSON.stringify({
+                level: 'error',
+                message: 'Failed to load data',
+                stack: error.stack,
+                context: { component: 'Dashboard', action: 'fetchData' },
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            })
+        });
+        ```
+    """
+    try:
+        error_data = await request.json()
+
+        # Extract error details
+        level = error_data.get("level", "error")
+        message = error_data.get("message", "Unknown error")
+        stack = error_data.get("stack")
+        context = error_data.get("context", {})
+        url = error_data.get("url")
+        user_agent = error_data.get("userAgent")
+        timestamp = error_data.get("timestamp")
+
+        # Build structured log data
+        log_data = {
+            "source": "frontend",
+            "level": level,
+            "message": message,
+            "url": url,
+            "user_agent": user_agent,
+            "timestamp": timestamp,
+            "context": context,
+        }
+
+        # Add stack trace if available (truncate to prevent log flooding)
+        if stack:
+            log_data["stack"] = stack[:1000]  # First 1000 chars
+
+        # Log with appropriate level
+        if level == "error":
+            logger.error(
+                f"Frontend error: {message}",
+                extra=log_data,
+            )
+        elif level == "warn":
+            logger.warning(
+                f"Frontend warning: {message}",
+                extra=log_data,
+            )
+        else:
+            logger.info(
+                f"Frontend info: {message}",
+                extra=log_data,
+            )
+
+        return {
+            "status": "logged",
+            "message": "Error logged successfully",
+        }
+
+    except Exception as e:
+        # Don't let logging errors crash the endpoint
+        logger.error(
+            f"Failed to process frontend error log: {str(e)}",
+            extra={"error": str(e)},
+        )
+
+        # Still return success to prevent frontend errors
+        return {
+            "status": "partial",
+            "message": "Error received but logging failed",
+        }
+
+
+# =============================================================================
+# JWT AUTHENTICATION ENDPOINTS - GAP #4 (FINAL BOSS - 13 pontos)
+# =============================================================================
+# Boris Cherny Pattern: Security-first, multi-tenant, scope-based auth
+
+
+@app.post("/api/auth/login")
+async def login(request: Request) -> Dict:
+    """Authenticate user and return JWT tokens.
+
+    Boris Cherny Pattern: Type-safe authentication with explicit scopes.
+
+    Request Body:
+        {
+            "username": str,
+            "password": str,
+            "tenant_id": str
+        }
+
+    Returns:
+        {
+            "access_token": str,
+            "refresh_token": str,
+            "token_type": "Bearer",
+            "expires_in": int (seconds),
+            "user": {
+                "user_id": str,
+                "email": str,
+                "tenant_id": str,
+                "scopes": List[str]
+            }
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: 'user@example.com',
+                password: 'secure_password',
+                tenant_id: 'tenant-abc'
+            })
+        });
+        const { access_token, refresh_token } = await response.json();
+        ```
+    """
+    try:
+        body = await request.json()
+
+        username = body.get("username")
+        password = body.get("password")
+        tenant_id = body.get("tenant_id")
+
+        # Validation
+        if not username or not password or not tenant_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing required fields: username, password, tenant_id",
+            )
+
+        # TODO: Replace with real user authentication (database lookup)
+        # For now, this is a demo implementation
+        # In production, you would:
+        # 1. Hash and verify password
+        # 2. Check user exists in database
+        # 3. Verify tenant_id matches user's tenant
+        # 4. Load user's scopes from database
+
+        # Demo user authentication (REPLACE IN PRODUCTION)
+        if username == "admin@example.com" and password == "admin123":
+            user_id = "admin-001"
+            email = username
+            scopes = ["*"]  # Wildcard = all permissions
+        elif username == "user@example.com" and password == "user123":
+            user_id = "user-001"
+            email = username
+            scopes = ["read:data", "write:data"]
+        elif username == "readonly@example.com" and password == "readonly123":
+            user_id = "readonly-001"
+            email = username
+            scopes = ["read:data"]
+        else:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid username or password",
+            )
+
+        # Create tokens
+        access_token = create_access_token(
+            user_id=user_id,
+            email=email,
+            tenant_id=tenant_id,
+            scopes=scopes,
+        )
+
+        refresh_token = create_refresh_token(
+            user_id=user_id,
+            tenant_id=tenant_id,
+        )
+
+        logger.info(
+            f"User logged in successfully: {email}",
+            extra={
+                "user_id": user_id,
+                "tenant_id": tenant_id,
+                "scopes": scopes,
+            },
+        )
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,  # 1 hour (from jwt_handler.py ACCESS_TOKEN_EXPIRE_MINUTES)
+            "user": {
+                "user_id": user_id,
+                "email": email,
+                "tenant_id": tenant_id,
+                "scopes": scopes,
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Authentication error: {str(e)}",
+        )
+
+
+@app.post("/api/auth/refresh")
+async def refresh_token_endpoint(request: Request) -> Dict:
+    """Refresh access token using refresh token.
+
+    Request Body:
+        {
+            "refresh_token": str
+        }
+
+    Returns:
+        {
+            "access_token": str,
+            "token_type": "Bearer",
+            "expires_in": int
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/refresh', {
+            method: 'POST',
+            body: JSON.stringify({
+                refresh_token: stored_refresh_token
+            })
+        });
+        const { access_token } = await response.json();
+        ```
+    """
+    try:
+        body = await request.json()
+        refresh_token = body.get("refresh_token")
+
+        if not refresh_token:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing refresh_token",
+            )
+
+        # Decode and validate refresh token
+        payload = decode_token(refresh_token)
+
+        # Verify it's a refresh token
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token type. Expected refresh token.",
+            )
+
+        # Extract user info from refresh token
+        user_id = payload["sub"]
+        tenant_id = payload["tenant_id"]
+
+        # TODO: In production, load user's current scopes from database
+        # For now, use default scopes
+        # This allows revoking permissions without invalidating refresh tokens
+        scopes = ["read:data", "write:data"]  # Demo scopes
+
+        # Create new access token
+        access_token = create_access_token(
+            user_id=user_id,
+            email=f"{user_id}@example.com",  # TODO: Load from DB
+            tenant_id=tenant_id,
+            scopes=scopes,
+        )
+
+        logger.info(
+            f"Access token refreshed: {user_id}",
+            extra={
+                "user_id": user_id,
+                "tenant_id": tenant_id,
+            },
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Token refresh failed: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired refresh token",
+        )
+
+
+@app.get("/api/auth/me")
+async def get_current_user_info(user: Dict = Depends(get_current_user)) -> Dict:
+    """Get current authenticated user information.
+
+    Requires: Valid JWT access token in Authorization header
+
+    Returns:
+        {
+            "user_id": str,
+            "email": str,
+            "tenant_id": str,
+            "scopes": List[str]
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/me', {
+            headers: {
+                'Authorization': `Bearer ${access_token}`
+            }
+        });
+        const user = await response.json();
+        ```
+    """
+    return {
+        "user_id": user["sub"],
+        "email": user.get("email"),
+        "tenant_id": user.get("tenant_id"),
+        "scopes": user.get("scopes", []),
+    }
+
+
+# Example: Protected endpoint requiring specific scope
+@app.get("/api/auth/protected/admin")
+async def protected_admin_endpoint(
+    user: Dict = Depends(require_scope("admin:access"))
+) -> Dict:
+    """Example protected endpoint requiring 'admin:access' scope.
+
+    This demonstrates scope-based authorization.
+    Only users with 'admin:access' scope or wildcard '*' can access.
+
+    Requires: JWT token with 'admin:access' scope
+
+    Returns:
+        {
+            "message": str,
+            "accessed_by": str,
+            "tenant_id": str
+        }
+    """
+    return {
+        "message": "Welcome to admin area!",
+        "accessed_by": user["sub"],
+        "tenant_id": user["tenant_id"],
+    }
+
+
+# Example: Tenant-isolated endpoint
+@app.get("/api/auth/protected/tenant/{tenant_id}/data")
+async def tenant_isolated_endpoint(
+    tenant_id: str,
+    user: Dict = Depends(get_current_user),
+) -> Dict:
+    """Example tenant-isolated endpoint.
+
+    Verifies that user belongs to the requested tenant.
+    This prevents cross-tenant data access.
+
+    Requires: JWT token with matching tenant_id
+
+    Returns:
+        {
+            "tenant_id": str,
+            "data": str,
+            "accessed_by": str
+        }
+    """
+    # Verify user belongs to this tenant
+    if user["tenant_id"] != tenant_id:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access denied. You belong to tenant '{user['tenant_id']}', not '{tenant_id}'",
+        )
+
+    return {
+        "tenant_id": tenant_id,
+        "data": f"Sensitive data for tenant {tenant_id}",
+        "accessed_by": user["sub"],
+    }
 
 
 @app.get("/gateway/status")
@@ -1475,6 +1969,14 @@ async def stream_apv_ws(websocket: WebSocket):
 async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResponse:
     """Proxies the incoming request to the specified backend service.
 
+    Boris Cherny Pattern: Production-ready timeout with intelligent error handling
+
+    Features:
+    - Endpoint-specific timeout configuration
+    - Granular error handling (timeout, connection, HTTP status)
+    - Structured logging for debugging
+    - Clear error messages for clients
+
     Args:
         base_url (str): The base URL of the target backend service.
         path (str): The specific path for the request.
@@ -1484,10 +1986,18 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
         JSONResponse: The response from the backend service.
 
     Raises:
-        HTTPException: If there is an error communicating with the backend service.
+        HTTPException:
+            - 504: Timeout errors
+            - 503: Connection errors
+            - 500: Generic request errors
+            - 4xx/5xx: Proxied from backend
     """
     url = f"{base_url}/{path}"
-    async with httpx.AsyncClient() as client:
+
+    # Get timeout configuration for this endpoint
+    timeout_config = get_timeout_for_endpoint(f"/{path}")
+
+    async with httpx.AsyncClient(timeout=timeout_config) as client:
         try:
             # Reconstruct headers, excluding host and content-length which httpx handles
             headers = {
@@ -1518,11 +2028,74 @@ async def _proxy_request(base_url: str, path: str, request: Request) -> JSONResp
             return JSONResponse(
                 content=response.json(), status_code=response.status_code
             )
-        except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=500, detail=f"Service communication error: {e}"
+
+        except httpx.TimeoutException as e:
+            # Log timeout with details for debugging
+            logger.error(
+                f"Backend timeout: {base_url}/{path}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "timeout_config": timeout_config.timeout,
+                    "error": str(e),
+                },
             )
+
+            raise HTTPException(
+                status_code=504,
+                detail=f"Backend service timeout after {timeout_config.timeout}s. "
+                f"The operation is taking longer than expected. Please try again later.",
+            )
+
+        except httpx.ConnectError as e:
+            # Connection refused, DNS failure, etc.
+            logger.error(
+                f"Backend connection error: {base_url}/{path} - {e}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "error": str(e),
+                },
+            )
+
+            raise HTTPException(
+                status_code=503,
+                detail=f"Cannot connect to backend service at {base_url}. "
+                f"Service may be down or unreachable.",
+            )
+
+        except httpx.RequestError as e:
+            # Generic request errors (network issues, etc.)
+            logger.error(
+                f"Backend request error: {base_url}/{path} - {e}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "error": str(e),
+                },
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Service communication error: {str(e)}",
+            )
+
         except httpx.HTTPStatusError as e:
+            # Backend returned 4xx/5xx status
+            logger.warning(
+                f"Backend HTTP error: {base_url}/{path} - {e.response.status_code}",
+                extra={
+                    "base_url": base_url,
+                    "path": path,
+                    "method": request.method,
+                    "status_code": e.response.status_code,
+                    "response_text": e.response.text[:200],  # First 200 chars
+                },
+            )
+
             raise HTTPException(
                 status_code=e.response.status_code,
                 detail=f"Backend service error: {e.response.text}",

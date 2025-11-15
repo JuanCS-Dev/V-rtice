@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiClient, directClient, getWebSocketUrl } from '../client';
+import { apiClient, directClient, getWebSocketUrl, DEFAULT_TIMEOUT, HEALTH_CHECK_TIMEOUT } from '../client';
 import * as security from '../../utils/security';
 
 // Mock dependencies
@@ -333,6 +333,155 @@ describe('getWebSocketUrl', () => {
     const wsUrl = getWebSocketUrl('/ws/stream?channel=alerts');
 
     expect(wsUrl).toBe('ws://34.148.161.131:8000/ws/stream?channel=alerts&api_key=test-api-key');
+  });
+});
+
+// ============================================================================
+// TIMEOUT BEHAVIOR TESTS
+// ============================================================================
+
+describe('Timeout Behavior', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.spyOn(security, 'getCSRFToken').mockReturnValue('csrf-token');
+    vi.spyOn(security, 'checkRateLimit').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should timeout after default timeout (30s)', async () => {
+    // Mock slow endpoint that never resolves
+    global.fetch = vi.fn(() => new Promise(() => {})); // Never resolves
+
+    const promise = apiClient.get('/slow-endpoint');
+
+    // Fast-forward time to just before timeout
+    await vi.advanceTimersByTimeAsync(29000);
+
+    // Should not have rejected yet
+    const isStillPending = await Promise.race([
+      promise.then(() => 'resolved', () => 'rejected'),
+      Promise.resolve('pending')
+    ]);
+    expect(isStillPending).toBe('pending');
+
+    // Now advance past timeout
+    await vi.advanceTimersByTimeAsync(2000); // Total: 31s
+
+    // Should reject with timeout error
+    await expect(promise).rejects.toThrow('Request timeout after 30s');
+  });
+
+  it('should allow custom timeout', async () => {
+    // Mock endpoint that responds after 8s
+    global.fetch = vi.fn(() =>
+      new Promise(resolve => {
+        setTimeout(() => {
+          resolve({
+            ok: true,
+            json: async () => ({ data: 'success' })
+          });
+        }, 8000);
+      })
+    );
+
+    // Use custom timeout of 10s (should succeed)
+    const promise = apiClient.get('/slow-endpoint', { timeout: 10000 });
+
+    // Advance to 8s (response arrives)
+    await vi.advanceTimersByTimeAsync(8000);
+
+    // Should succeed
+    const result = await promise;
+    expect(result).toEqual({ data: 'success' });
+  });
+
+  it('should reject on custom timeout expiry', async () => {
+    // Mock endpoint that never responds
+    global.fetch = vi.fn(() => new Promise(() => {}));
+
+    // Custom timeout of 5s
+    const promise = apiClient.get('/endpoint', { timeout: 5000 });
+
+    // Advance to timeout
+    await vi.advanceTimersByTimeAsync(5100);
+
+    // Should reject
+    await expect(promise).rejects.toThrow('Request timeout after 5s');
+  });
+
+  it('should clear timeout on successful response', async () => {
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({ data: 'fast' })
+      })
+    );
+
+    await apiClient.get('/fast-endpoint');
+
+    // clearTimeout should have been called
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+  });
+
+  it('should clear timeout on error response', async () => {
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
+
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        json: async () => ({ detail: 'Server error' })
+      })
+    );
+
+    await expect(apiClient.get('/error-endpoint')).rejects.toThrow();
+
+    // clearTimeout should still be called
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+  });
+
+  it('should use HEALTH_CHECK_TIMEOUT constant for health checks', () => {
+    // Verify constant exists and has correct value
+    expect(HEALTH_CHECK_TIMEOUT).toBe(3000);
+    expect(DEFAULT_TIMEOUT).toBe(30000);
+  });
+
+  describe('directClient timeout', () => {
+    it('should timeout after default timeout', async () => {
+      global.fetch = vi.fn(() => new Promise(() => {}));
+
+      const promise = directClient.request('http://test', '/slow');
+
+      await vi.advanceTimersByTimeAsync(31000);
+
+      await expect(promise).rejects.toThrow('Request timeout after 30s');
+    });
+
+    it('should support custom timeout', async () => {
+      global.fetch = vi.fn(() =>
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve({
+              ok: true,
+              json: async () => ({ result: 'ok' })
+            });
+          }, 2000);
+        })
+      );
+
+      const promise = directClient.request('http://test', '/endpoint', { timeout: 5000 });
+
+      await vi.advanceTimersByTimeAsync(2000);
+
+      const result = await promise;
+      expect(result).toEqual({ result: 'ok' });
+    });
   });
 });
 

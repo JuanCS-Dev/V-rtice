@@ -40,17 +40,34 @@ export class BaseService {
 
   /**
    * Makes a GET request
+   * Boris Cherny Pattern: GET is idempotent → automatic retry
+   *
    * @param {string} path - Endpoint path relative to baseEndpoint
    * @param {Object} options - Request options
+   * @param {number} options.retry - Max retries (default: 3). Set to 0 to disable retry.
+   * @param {number} options.retryDelay - Base retry delay in ms (default: 1000)
    * @returns {Promise<any>} Response data
    */
   async get(path = "", options = {}) {
     const endpoint = this.buildEndpoint(path);
 
-    try {
+    // Wrapper for retry
+    const fetchFn = async () => {
       logger.debug(`[${this.constructor.name}] GET ${endpoint}`);
       const response = await this.client.get(endpoint, options);
       return this.transformResponse(response);
+    };
+
+    try {
+      // GET is idempotent → retry automatically (unless explicitly disabled)
+      const maxRetries = options.retry !== undefined ? options.retry : 3;
+      const baseDelay = options.retryDelay || 1000;
+
+      if (maxRetries > 0) {
+        return await this.retry(fetchFn, maxRetries, baseDelay);
+      } else {
+        return await fetchFn();
+      }
     } catch (error) {
       return this.handleError(error, "GET", endpoint);
     }
@@ -58,9 +75,14 @@ export class BaseService {
 
   /**
    * Makes a POST request
+   * Boris Cherny Pattern: POST is NOT idempotent → no retry by default
+   *
    * @param {string} path - Endpoint path
    * @param {Object} data - Request body
    * @param {Object} options - Request options
+   * @param {boolean} options.retry - Enable retry (default: false)
+   * @param {number} options.maxRetries - Max retries when enabled (default: 2)
+   * @param {number} options.retryDelay - Base retry delay in ms (default: 1000)
    * @returns {Promise<any>} Response data
    */
   async post(path = "", data = {}, options = {}) {
@@ -70,9 +92,25 @@ export class BaseService {
       // Validate data before sending (override in subclasses)
       this.validateRequest(data);
 
-      logger.debug(`[${this.constructor.name}] POST ${endpoint}`, data);
-      const response = await this.client.post(endpoint, data, options);
-      return this.transformResponse(response);
+      const fetchFn = async () => {
+        logger.debug(`[${this.constructor.name}] POST ${endpoint}`, data);
+        const response = await this.client.post(endpoint, data, options);
+        return this.transformResponse(response);
+      };
+
+      // POST/PUT/DELETE are NOT idempotent by default
+      // Retry only if explicitly requested
+      if (options.retry === true) {
+        const maxRetries = options.maxRetries || 2; // More conservative
+        const baseDelay = options.retryDelay || 1000;
+
+        logger.debug(
+          `[${this.constructor.name}] POST with retry enabled (max: ${maxRetries})`,
+        );
+        return await this.retry(fetchFn, maxRetries, baseDelay);
+      } else {
+        return await fetchFn();
+      }
     } catch (error) {
       return this.handleError(error, "POST", endpoint);
     }
@@ -80,9 +118,14 @@ export class BaseService {
 
   /**
    * Makes a PUT request
+   * Boris Cherny Pattern: PUT is NOT idempotent → no retry by default
+   *
    * @param {string} path - Endpoint path
    * @param {Object} data - Request body
    * @param {Object} options - Request options
+   * @param {boolean} options.retry - Enable retry (default: false)
+   * @param {number} options.maxRetries - Max retries when enabled (default: 2)
+   * @param {number} options.retryDelay - Base retry delay in ms (default: 1000)
    * @returns {Promise<any>} Response data
    */
   async put(path = "", data = {}, options = {}) {
@@ -91,9 +134,24 @@ export class BaseService {
     try {
       this.validateRequest(data);
 
-      logger.debug(`[${this.constructor.name}] PUT ${endpoint}`, data);
-      const response = await this.client.put(endpoint, data, options);
-      return this.transformResponse(response);
+      const fetchFn = async () => {
+        logger.debug(`[${this.constructor.name}] PUT ${endpoint}`, data);
+        const response = await this.client.put(endpoint, data, options);
+        return this.transformResponse(response);
+      };
+
+      // PUT is NOT idempotent by default - retry only if explicit
+      if (options.retry === true) {
+        const maxRetries = options.maxRetries || 2;
+        const baseDelay = options.retryDelay || 1000;
+
+        logger.debug(
+          `[${this.constructor.name}] PUT with retry enabled (max: ${maxRetries})`,
+        );
+        return await this.retry(fetchFn, maxRetries, baseDelay);
+      } else {
+        return await fetchFn();
+      }
     } catch (error) {
       return this.handleError(error, "PUT", endpoint);
     }
@@ -101,17 +159,37 @@ export class BaseService {
 
   /**
    * Makes a DELETE request
+   * Boris Cherny Pattern: DELETE is NOT idempotent → no retry by default
+   *
    * @param {string} path - Endpoint path
    * @param {Object} options - Request options
+   * @param {boolean} options.retry - Enable retry (default: false)
+   * @param {number} options.maxRetries - Max retries when enabled (default: 2)
+   * @param {number} options.retryDelay - Base retry delay in ms (default: 1000)
    * @returns {Promise<any>} Response data
    */
   async delete(path = "", options = {}) {
     const endpoint = this.buildEndpoint(path);
 
     try {
-      logger.debug(`[${this.constructor.name}] DELETE ${endpoint}`);
-      const response = await this.client.delete(endpoint, options);
-      return this.transformResponse(response);
+      const fetchFn = async () => {
+        logger.debug(`[${this.constructor.name}] DELETE ${endpoint}`);
+        const response = await this.client.delete(endpoint, options);
+        return this.transformResponse(response);
+      };
+
+      // DELETE is NOT idempotent by default - retry only if explicit
+      if (options.retry === true) {
+        const maxRetries = options.maxRetries || 2;
+        const baseDelay = options.retryDelay || 1000;
+
+        logger.debug(
+          `[${this.constructor.name}] DELETE with retry enabled (max: ${maxRetries})`,
+        );
+        return await this.retry(fetchFn, maxRetries, baseDelay);
+      } else {
+        return await fetchFn();
+      }
     } catch (error) {
       return this.handleError(error, "DELETE", endpoint);
     }
@@ -224,6 +302,8 @@ export class BaseService {
 
   /**
    * Retries a function with exponential backoff
+   * Boris Cherny Pattern: Smart retry with auth error detection
+   *
    * @param {Function} fn - Function to retry
    * @param {number} maxRetries - Maximum retry attempts
    * @param {number} baseDelay - Base delay in ms
@@ -235,16 +315,48 @@ export class BaseService {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        return await fn();
+        const result = await fn();
+
+        // Log success after retry
+        if (attempt > 0) {
+          logger.info(
+            `[${this.constructor.name}] Success after ${attempt} retry attempt(s)`,
+          );
+        }
+
+        return result;
       } catch (error) {
         lastError = error;
 
-        if (attempt < maxRetries - 1) {
-          const delay = baseDelay * Math.pow(2, attempt);
+        // Don't retry on auth errors (401/403)
+        const errorMsg = this.extractErrorMessage(error);
+        if (
+          errorMsg.includes("401") ||
+          errorMsg.includes("403") ||
+          errorMsg.includes("Unauthorized") ||
+          errorMsg.includes("Forbidden")
+        ) {
           logger.warn(
-            `[${this.constructor.name}] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`,
+            `[${this.constructor.name}] Auth error detected, skipping retry`,
           );
+          throw error;
+        }
+
+        if (attempt < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(2, attempt); // Exponential: 1s, 2s, 4s
+
+          logger.warn(
+            `[${this.constructor.name}] Attempt ${attempt + 1}/${maxRetries} failed. ` +
+              `Retrying in ${delay}ms...`,
+            { error: errorMsg },
+          );
+
           await new Promise((resolve) => setTimeout(resolve, delay));
+        } else {
+          logger.error(
+            `[${this.constructor.name}] All ${maxRetries} retry attempts exhausted`,
+            { error: errorMsg },
+          );
         }
       }
     }
