@@ -60,11 +60,128 @@ RESPONSE_TIME = Histogram(
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)
 
-# FastAPI app
+# ============================================================================
+# FastAPI Application with Comprehensive OpenAPI Specification
+# ============================================================================
+# P0-2: Complete OpenAPI spec for contract testing and documentation
+# Following Boris Cherny's principle: "Documentation is code"
 app = FastAPI(
     title="Projeto VÉRTICE - API Gateway",
-    description="Ponto de entrada unificado com cache, rate limiting, observability, cyber security e OSINT completo.",
-    version="3.3.1",  # Version bump para correção do Redis
+    description="""
+    ## API Gateway Centralizado - Projeto VÉRTICE-MAXIMUS
+
+    Ponto de entrada unificado para todos os serviços de cyber security,
+    OSINT, e inteligência de ameaças.
+
+    ### Recursos Principais
+
+    #### 🔐 Segurança
+    - **Autenticação JWT**: Tokens Bearer com validação rigorosa
+    - **Rate Limiting**: Proteção contra abuso e DoS
+    - **CORS**: Configurado para origens autorizadas
+
+    #### 🎯 Cyber Security
+    - **Vulnerability Scanning**: Análise de vulnerabilidades
+    - **Threat Intelligence**: Inteligência de ameaças em tempo real
+    - **Malware Analysis**: Análise estática e dinâmica
+    - **SSL/TLS Monitoring**: Monitoramento de certificados
+
+    #### 🔍 OSINT (Open Source Intelligence)
+    - **Domain Intelligence**: Análise completa de domínios
+    - **IP Intelligence**: Geolocalização e reputação
+    - **Social Engineering**: Análise de vetores de ataque
+    - **Google OSINT**: Pesquisas avançadas automatizadas
+
+    #### 🧠 AI/ML (MAXIMUS Core)
+    - **Behavioral Analysis**: Detecção comportamental de ameaças
+    - **Predictive Analytics**: Aurora Predict (ML forecasting)
+    - **Orchestration**: MAXIMUS Orchestrator (AI-driven)
+    - **Adaptive Defense**: Active Immune Core
+
+    #### 🛡️ Defensive Systems
+    - **Reactive Fabric**: Orquestração de resposta a incidentes
+    - **Network Monitoring**: Detecção de anomalias em tempo real
+    - **Penetration Testing**: Penelope automated pentesting
+    - **MAV Detection**: Micro Aerial Vehicle threat detection
+
+    ### Versionamento
+
+    Todas as rotas principais estão sob `/api/v1/` para facilitar
+    migrações futuras e garantir compatibilidade backward.
+
+    ### Rate Limits
+
+    - **Global**: 100 requests/minuto por IP
+    - **Authenticated**: 1000 requests/minuto por usuário
+    - **Scanning endpoints**: 10 requests/minuto
+
+    ### Autenticação
+
+    Use o header `Authorization: Bearer <token>` em todas as requisições
+    que requerem autenticação.
+
+    Token JWT pode ser obtido via endpoint `/auth/token`.
+
+    ### Observabilidade
+
+    - **Metrics**: Prometheus metrics em `/metrics`
+    - **Health**: Health check em `/health`
+    - **Distributed Tracing**: Request IDs automáticos
+
+    ### Documentação
+
+    - **Swagger UI**: `/docs` (interativo)
+    - **ReDoc**: `/redoc` (documentação limpa)
+    - **OpenAPI JSON**: `/openapi.json` (schema máquina-legível)
+    """,
+    version="3.3.1",
+    openapi_url="/openapi.json",  # ← P0-2: Expose OpenAPI schema
+    docs_url="/docs",  # Swagger UI (interactive)
+    redoc_url="/redoc",  # ReDoc (clean docs)
+    contact={
+        "name": "Vértice Security Team",
+        "email": "security@vertice.com",
+        "url": "https://vertice.com/security",
+    },
+    license_info={
+        "name": "Proprietary - Vértice Platform",
+        "url": "https://vertice.com/license",
+    },
+    terms_of_service="https://vertice.com/terms",
+    openapi_tags=[
+        {
+            "name": "health",
+            "description": "Health checks and service status",
+        },
+        {
+            "name": "auth",
+            "description": "Authentication and authorization",
+        },
+        {
+            "name": "cyber-security",
+            "description": "Vulnerability scanning and security analysis",
+        },
+        {
+            "name": "osint",
+            "description": "Open Source Intelligence gathering",
+        },
+        {
+            "name": "threat-intel",
+            "description": "Threat intelligence and IOC enrichment",
+        },
+        {
+            "name": "reactive-fabric",
+            "description": "Reactive Fabric - Threat orchestration",
+        },
+        {
+            "name": "maximus",
+            "description": "MAXIMUS AI Core - Intelligent decision making",
+        },
+        {
+            "name": "metrics",
+            "description": "Prometheus metrics and observability",
+        },
+    ],
 )
 
 app.state.limiter = limiter
@@ -85,6 +202,190 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ============================================================================
+# Custom OpenAPI Schema with Security Definitions
+# ============================================================================
+# P0-2: Enhanced OpenAPI with JWT security scheme and comprehensive examples
+def custom_openapi():
+    """Generate custom OpenAPI schema with security definitions.
+
+    This function enhances the default FastAPI OpenAPI schema with:
+    - JWT Bearer authentication scheme
+    - Comprehensive security requirements
+    - Request/response examples
+    - Error response schemas
+
+    Following Boris Cherny's principle: "Schema is the contract"
+    """
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    from fastapi.openapi.utils import get_openapi
+
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        tags=app.openapi_tags,
+        contact=app.contact,
+        license_info=app.license_info,
+        terms_of_service=app.terms_of_service,
+    )
+
+    # ========================================================================
+    # Security Schemes
+    # ========================================================================
+    openapi_schema.setdefault("components", {})
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": """
+                JWT token obtained from `/auth/token` endpoint.
+
+                **How to use:**
+                1. Call `/auth/token` with credentials
+                2. Copy the `access_token` from response
+                3. Add header: `Authorization: Bearer <access_token>`
+
+                **Example:**
+                ```
+                Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                ```
+
+                **Token expiration:** 30 minutes (configurable)
+            """,
+        },
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key",
+            "description": """
+                API Key for service-to-service communication.
+
+                **Usage:**
+                Add header: `X-API-Key: <your-api-key>`
+
+                **Note:** Only for internal microservice communication.
+            """,
+        },
+    }
+
+    # ========================================================================
+    # Global Security (applied to all endpoints except public ones)
+    # ========================================================================
+    # Don't apply global security - let each endpoint define its own
+    # This gives fine-grained control per route
+
+    # ========================================================================
+    # Common Response Schemas
+    # ========================================================================
+    openapi_schema["components"].setdefault("schemas", {})
+
+    openapi_schema["components"]["schemas"]["ErrorResponse"] = {
+        "type": "object",
+        "required": ["detail", "error_code", "timestamp", "request_id", "path"],
+        "properties": {
+            "detail": {
+                "type": "string",
+                "description": "Human-readable error message",
+                "example": "Invalid authentication credentials",
+            },
+            "error_code": {
+                "type": "string",
+                "description": "Machine-readable error code",
+                "example": "AUTH_001",
+            },
+            "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO 8601 timestamp of error",
+                "example": "2025-11-15T12:34:56.789Z",
+            },
+            "request_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Request correlation ID for tracing",
+                "example": "550e8400-e29b-41d4-a716-446655440000",
+            },
+            "path": {
+                "type": "string",
+                "description": "API path that caused the error",
+                "example": "/api/v1/scan/start",
+            },
+        },
+        "example": {
+            "detail": "Invalid authentication credentials",
+            "error_code": "AUTH_001",
+            "timestamp": "2025-11-15T12:34:56.789Z",
+            "request_id": "550e8400-e29b-41d4-a716-446655440000",
+            "path": "/api/v1/auth/login",
+        },
+    }
+
+    openapi_schema["components"]["schemas"]["HealthResponse"] = {
+        "type": "object",
+        "required": ["status", "timestamp", "services"],
+        "properties": {
+            "status": {
+                "type": "string",
+                "enum": ["healthy", "degraded", "unhealthy"],
+                "description": "Overall system health status",
+            },
+            "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Health check timestamp",
+            },
+            "services": {
+                "type": "object",
+                "description": "Individual service health status",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "status": {"type": "string"},
+                        "latency_ms": {"type": "number"},
+                    },
+                },
+            },
+        },
+    }
+
+    # ========================================================================
+    # Metadata
+    # ========================================================================
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://vertice.com/logo.png",
+        "altText": "Vértice Platform Logo",
+    }
+
+    openapi_schema["servers"] = [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development server",
+        },
+        {
+            "url": "https://staging-api.vertice.com",
+            "description": "Staging environment",
+        },
+        {
+            "url": "https://api.vertice.com",
+            "description": "Production environment",
+        },
+    ]
+
+    # Cache the schema
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+# Override the default OpenAPI schema
+app.openapi = custom_openapi
+
 
 # ============================
 # REACTIVE FABRIC INTEGRATION
