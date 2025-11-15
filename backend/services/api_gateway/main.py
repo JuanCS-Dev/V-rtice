@@ -53,6 +53,16 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
 from shared.middleware.input_sanitizer import InputSanitizationMiddleware
 
+# Import JWT authentication (GAP #4 - FINAL BOSS)
+from shared.auth.jwt_handler import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    get_current_user,
+    require_scope,
+    require_tenant,
+)
+
 logger = logging.getLogger(__name__)
 
 # =============================================================================
@@ -461,6 +471,318 @@ async def log_frontend_error(request: Request) -> Dict[str, str]:
             "status": "partial",
             "message": "Error received but logging failed",
         }
+
+
+# =============================================================================
+# JWT AUTHENTICATION ENDPOINTS - GAP #4 (FINAL BOSS - 13 pontos)
+# =============================================================================
+# Boris Cherny Pattern: Security-first, multi-tenant, scope-based auth
+
+
+@app.post("/api/auth/login")
+async def login(request: Request) -> Dict:
+    """Authenticate user and return JWT tokens.
+
+    Boris Cherny Pattern: Type-safe authentication with explicit scopes.
+
+    Request Body:
+        {
+            "username": str,
+            "password": str,
+            "tenant_id": str
+        }
+
+    Returns:
+        {
+            "access_token": str,
+            "refresh_token": str,
+            "token_type": "Bearer",
+            "expires_in": int (seconds),
+            "user": {
+                "user_id": str,
+                "email": str,
+                "tenant_id": str,
+                "scopes": List[str]
+            }
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: 'user@example.com',
+                password: 'secure_password',
+                tenant_id: 'tenant-abc'
+            })
+        });
+        const { access_token, refresh_token } = await response.json();
+        ```
+    """
+    try:
+        body = await request.json()
+
+        username = body.get("username")
+        password = body.get("password")
+        tenant_id = body.get("tenant_id")
+
+        # Validation
+        if not username or not password or not tenant_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing required fields: username, password, tenant_id",
+            )
+
+        # TODO: Replace with real user authentication (database lookup)
+        # For now, this is a demo implementation
+        # In production, you would:
+        # 1. Hash and verify password
+        # 2. Check user exists in database
+        # 3. Verify tenant_id matches user's tenant
+        # 4. Load user's scopes from database
+
+        # Demo user authentication (REPLACE IN PRODUCTION)
+        if username == "admin@example.com" and password == "admin123":
+            user_id = "admin-001"
+            email = username
+            scopes = ["*"]  # Wildcard = all permissions
+        elif username == "user@example.com" and password == "user123":
+            user_id = "user-001"
+            email = username
+            scopes = ["read:data", "write:data"]
+        elif username == "readonly@example.com" and password == "readonly123":
+            user_id = "readonly-001"
+            email = username
+            scopes = ["read:data"]
+        else:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid username or password",
+            )
+
+        # Create tokens
+        access_token = create_access_token(
+            user_id=user_id,
+            email=email,
+            tenant_id=tenant_id,
+            scopes=scopes,
+        )
+
+        refresh_token = create_refresh_token(
+            user_id=user_id,
+            tenant_id=tenant_id,
+        )
+
+        logger.info(
+            f"User logged in successfully: {email}",
+            extra={
+                "user_id": user_id,
+                "tenant_id": tenant_id,
+                "scopes": scopes,
+            },
+        )
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,  # 1 hour (from jwt_handler.py ACCESS_TOKEN_EXPIRE_MINUTES)
+            "user": {
+                "user_id": user_id,
+                "email": email,
+                "tenant_id": tenant_id,
+                "scopes": scopes,
+            },
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Authentication error: {str(e)}",
+        )
+
+
+@app.post("/api/auth/refresh")
+async def refresh_token_endpoint(request: Request) -> Dict:
+    """Refresh access token using refresh token.
+
+    Request Body:
+        {
+            "refresh_token": str
+        }
+
+    Returns:
+        {
+            "access_token": str,
+            "token_type": "Bearer",
+            "expires_in": int
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/refresh', {
+            method: 'POST',
+            body: JSON.stringify({
+                refresh_token: stored_refresh_token
+            })
+        });
+        const { access_token } = await response.json();
+        ```
+    """
+    try:
+        body = await request.json()
+        refresh_token = body.get("refresh_token")
+
+        if not refresh_token:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing refresh_token",
+            )
+
+        # Decode and validate refresh token
+        payload = decode_token(refresh_token)
+
+        # Verify it's a refresh token
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token type. Expected refresh token.",
+            )
+
+        # Extract user info from refresh token
+        user_id = payload["sub"]
+        tenant_id = payload["tenant_id"]
+
+        # TODO: In production, load user's current scopes from database
+        # For now, use default scopes
+        # This allows revoking permissions without invalidating refresh tokens
+        scopes = ["read:data", "write:data"]  # Demo scopes
+
+        # Create new access token
+        access_token = create_access_token(
+            user_id=user_id,
+            email=f"{user_id}@example.com",  # TODO: Load from DB
+            tenant_id=tenant_id,
+            scopes=scopes,
+        )
+
+        logger.info(
+            f"Access token refreshed: {user_id}",
+            extra={
+                "user_id": user_id,
+                "tenant_id": tenant_id,
+            },
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Token refresh failed: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired refresh token",
+        )
+
+
+@app.get("/api/auth/me")
+async def get_current_user_info(user: Dict = Depends(get_current_user)) -> Dict:
+    """Get current authenticated user information.
+
+    Requires: Valid JWT access token in Authorization header
+
+    Returns:
+        {
+            "user_id": str,
+            "email": str,
+            "tenant_id": str,
+            "scopes": List[str]
+        }
+
+    Example:
+        ```javascript
+        const response = await fetch('/api/auth/me', {
+            headers: {
+                'Authorization': `Bearer ${access_token}`
+            }
+        });
+        const user = await response.json();
+        ```
+    """
+    return {
+        "user_id": user["sub"],
+        "email": user.get("email"),
+        "tenant_id": user.get("tenant_id"),
+        "scopes": user.get("scopes", []),
+    }
+
+
+# Example: Protected endpoint requiring specific scope
+@app.get("/api/auth/protected/admin")
+async def protected_admin_endpoint(
+    user: Dict = Depends(require_scope("admin:access"))
+) -> Dict:
+    """Example protected endpoint requiring 'admin:access' scope.
+
+    This demonstrates scope-based authorization.
+    Only users with 'admin:access' scope or wildcard '*' can access.
+
+    Requires: JWT token with 'admin:access' scope
+
+    Returns:
+        {
+            "message": str,
+            "accessed_by": str,
+            "tenant_id": str
+        }
+    """
+    return {
+        "message": "Welcome to admin area!",
+        "accessed_by": user["sub"],
+        "tenant_id": user["tenant_id"],
+    }
+
+
+# Example: Tenant-isolated endpoint
+@app.get("/api/auth/protected/tenant/{tenant_id}/data")
+async def tenant_isolated_endpoint(
+    tenant_id: str,
+    user: Dict = Depends(get_current_user),
+) -> Dict:
+    """Example tenant-isolated endpoint.
+
+    Verifies that user belongs to the requested tenant.
+    This prevents cross-tenant data access.
+
+    Requires: JWT token with matching tenant_id
+
+    Returns:
+        {
+            "tenant_id": str,
+            "data": str,
+            "accessed_by": str
+        }
+    """
+    # Verify user belongs to this tenant
+    if user["tenant_id"] != tenant_id:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access denied. You belong to tenant '{user['tenant_id']}', not '{tenant_id}'",
+        )
+
+    return {
+        "tenant_id": tenant_id,
+        "data": f"Sensitive data for tenant {tenant_id}",
+        "accessed_by": user["sub"],
+    }
 
 
 @app.get("/gateway/status")
