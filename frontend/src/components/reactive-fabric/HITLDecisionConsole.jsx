@@ -122,8 +122,9 @@ const HITLDecisionConsole = () => {
     const username = localStorage.getItem('hitl_username') || 'analyst';
     const ws = new WebSocket(`${WS_ENDPOINTS.hitl}/${username}`);
 
+    // Boris Cherny Standard - GAP #83: Replace console.log with logger
     ws.onopen = () => {
-      console.log('🔗 WebSocket connected');
+      logger.debug('🔗 WebSocket connected');
       setWsConnected(true);
     };
 
@@ -131,7 +132,7 @@ const HITLDecisionConsole = () => {
       // Boris Cherny Standard: Protected JSON.parse (GAP #19 fix)
       try {
         const data = JSON.parse(event.data);
-        console.log('📨 WebSocket message:', data);
+        logger.debug('📨 WebSocket message:', data);
 
         if (data.type === 'alert' && data.alert.alert_type === 'new_decision') {
           // New decision arrived - refetch
@@ -154,7 +155,7 @@ const HITLDecisionConsole = () => {
     };
 
     ws.onclose = () => {
-      console.log('WebSocket closed');
+      logger.debug('WebSocket closed');
       setWsConnected(false);
     };
 

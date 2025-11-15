@@ -180,7 +180,8 @@ export const orchestratorAPI = {
       }
 
       const data = await response.json();
-      console.log('✅ Workflow started:', data.workflow_id);
+      // Boris Cherny Standard - GAP #83: Replace console.log with logger
+      logger.debug('✅ Workflow started:', data.workflow_id);
       return data;
     });
   },

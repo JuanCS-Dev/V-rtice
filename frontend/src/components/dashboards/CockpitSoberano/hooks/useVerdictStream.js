@@ -42,12 +42,13 @@ export const useVerdictStream = () => {
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0); // Boris Cherny Standard: Track attempts without causing re-renders
 
+  // Boris Cherny Standard - GAP #83: Replace console.log with logger
   const connect = useCallback(() => {
     try {
       const ws = new WebSocket(WS_URL);
 
       ws.onopen = () => {
-        console.log('[VerdictStream] Connected to Verdict Engine');
+        logger.debug('[VerdictStream] Connected to Verdict Engine');
         setIsConnected(true);
         setError(null);
         reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
@@ -98,7 +99,7 @@ export const useVerdictStream = () => {
 
         // Boris Cherny Standard: Exponential backoff (GAP #18 fix)
         const delay = getReconnectDelay(reconnectAttemptsRef.current);
-        console.log(`[VerdictStream] Disconnected, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`);
+        logger.debug(`[VerdictStream] Disconnected, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`);
 
         reconnectAttemptsRef.current += 1;
 

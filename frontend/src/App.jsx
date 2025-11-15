@@ -13,6 +13,7 @@ import { ToastProvider } from "./components/shared/Toast";
 import { DashboardLoader } from "./components/shared/LoadingStates";
 import { register as registerServiceWorker } from "./utils/serviceWorkerRegistration";
 import { ServiceWorkerUpdateNotification } from "./components/shared/ServiceWorkerUpdateNotification";
+import logger from "./utils/logger";
 import "./i18n/config"; // Initialize i18n
 
 // Import new animation & micro-interaction styles
@@ -69,14 +70,15 @@ function App() {
   useModuleNavigation(setCurrentView);
 
   // Register Service Worker for PWA (offline-first, caching)
+  // Boris Cherny Standard - GAP #83: Replace console.log with logger
   useEffect(() => {
     registerServiceWorker({
       onSuccess: () =>
-        console.log("[SW] Service Worker registered successfully"),
+        logger.debug("[SW] Service Worker registered successfully"),
       onUpdate: () =>
-        console.log("[SW] New content available, reload to update"),
-      onOffline: () => console.log("[SW] App is offline"),
-      onOnline: () => console.log("[SW] App is back online"),
+        logger.info("[SW] New content available, reload to update"),
+      onOffline: () => logger.info("[SW] App is offline"),
+      onOnline: () => logger.info("[SW] App is back online"),
     });
   }, []);
 

@@ -5,15 +5,15 @@
  * Updates AI status (core, oraculo, eureka) based on health response
  *
  * INTEGRATION: Uses ServiceEndpoints for environment-aware URLs
+ * Boris Cherny Standard - GAP #93 FIX: Use standardized POLLING_INTERVALS
  *
  * @returns {Object} { aiStatus, setAiStatus } - AI service status object
  */
 
 import { useState, useEffect } from 'react';
 import { ServiceEndpoints } from '@/config/endpoints';
+import { POLLING_INTERVALS } from '@/config/queryClient';
 import logger from '@/utils/logger';
-
-const HEALTH_CHECK_INTERVAL = 30000; // 30s
 
 export const useMaximusHealth = () => {
   const [aiStatus, setAiStatus] = useState({
@@ -52,8 +52,9 @@ export const useMaximusHealth = () => {
     // Initial check
     checkHealth();
 
+    // Boris Cherny Standard - GAP #93 FIX: Use POLLING_INTERVALS.NORMAL for consistency
     // Periodic checks
-    const interval = setInterval(checkHealth, HEALTH_CHECK_INTERVAL);
+    const interval = setInterval(checkHealth, POLLING_INTERVALS.NORMAL);
 
     return () => clearInterval(interval);
   }, []);

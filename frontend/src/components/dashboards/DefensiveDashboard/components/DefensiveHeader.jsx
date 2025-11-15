@@ -26,7 +26,7 @@
  * @version 2.0.0 (Maximus Vision)
  */
 
-import React from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { MemoizedMetricCard } from "../../../optimized/MemoizedMetricCard";
@@ -46,6 +46,15 @@ const DefensiveHeader = React.memo(
     metricsUpdatedAt, // Boris Cherny Standard - GAP #38 FIX
   }) => {
     const { t } = useTranslation();
+
+    // Boris Cherny Standard - GAP #88 FIX: Extract inline functions to useCallback
+    const handleBackToMain = useCallback(() => {
+      setCurrentView("main");
+    }, [setCurrentView]);
+
+    const handleModuleClick = useCallback((moduleId) => {
+      setActiveModule(moduleId);
+    }, [setActiveModule]);
 
     // Boris Cherny Standard - GAP #38 FIX: Format last update time
     const formatLastUpdate = (timestamp) => {
@@ -68,7 +77,7 @@ const DefensiveHeader = React.memo(
         <div className={styles.topBar}>
           <div className={styles.titleSection}>
             <button
-              onClick={() => setCurrentView("main")}
+              onClick={handleBackToMain}
               className={styles.backButton}
               aria-label={t("navigation.back_to_hub")}
               data-maximus-action="back"
@@ -173,7 +182,7 @@ const DefensiveHeader = React.memo(
           {modules.map((module) => (
             <button
               key={module.id}
-              onClick={() => setActiveModule(module.id)}
+              onClick={() => handleModuleClick(module.id)}
               className={`${styles.moduleButton} ${activeModule === module.id ? styles.active : ""}`}
               aria-label={`${t("navigation.access_module", "Access module")}: ${module.name}`}
               aria-current={activeModule === module.id ? "page" : undefined}

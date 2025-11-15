@@ -1,5 +1,4 @@
 /**
-import logger from "@/utils/logger";
  * useWebSocket - Custom hook for WebSocket connection to HITL API.
  *
  * Manages WebSocket connection, subscriptions, and message handling.
@@ -7,6 +6,7 @@ import logger from "@/utils/logger";
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import logger from "@/utils/logger";
 
 /**
  * WebSocket connection states
@@ -128,6 +128,7 @@ export const useWebSocket = ({
   /**
    * Connect to WebSocket server
    */
+  // Boris Cherny Standard - GAP #83: Replace console.log with logger
   const connect = useCallback(() => {
     // Don't connect if already connecting or connected
     if (
@@ -135,18 +136,18 @@ export const useWebSocket = ({
       (wsRef.current.readyState === WebSocket.CONNECTING ||
        wsRef.current.readyState === WebSocket.OPEN)
     ) {
-      console.log('[useWebSocket] Already connected or connecting');
+      logger.debug('[useWebSocket] Already connected or connecting');
       return;
     }
 
-    console.log('[useWebSocket] Connecting to:', url);
+    logger.debug('[useWebSocket] Connecting to:', url);
     setStatus(WebSocketStatus.CONNECTING);
 
     try {
       const ws = new WebSocket(url);
 
       ws.onopen = () => {
-        console.log('[useWebSocket] Connected');
+        logger.debug('[useWebSocket] Connected');
         setStatus(WebSocketStatus.CONNECTED);
         reconnectAttemptsRef.current = 0;
 
@@ -165,12 +166,12 @@ export const useWebSocket = ({
           // Handle connection acknowledgment
           if (message.type === MessageType.CONNECTION_ACK) {
             setClientId(message.client_id);
-            console.log('[useWebSocket] Client ID assigned:', message.client_id);
+            logger.debug('[useWebSocket] Client ID assigned:', message.client_id);
           }
 
           // Handle pong
           if (message.type === MessageType.PONG) {
-            console.log('[useWebSocket] Pong received');
+            logger.debug('[useWebSocket] Pong received');
           }
 
           // Forward message to callback
@@ -188,7 +189,7 @@ export const useWebSocket = ({
       };
 
       ws.onclose = (event) => {
-        console.log('[useWebSocket] Connection closed:', event.code, event.reason);
+        logger.debug('[useWebSocket] Connection closed:', event.code, event.reason);
         setStatus(WebSocketStatus.DISCONNECTED);
         setClientId(null);
         subscribedChannelsRef.current.clear();
@@ -196,7 +197,7 @@ export const useWebSocket = ({
         // Attempt reconnection if not a clean close
         if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current += 1;
-          console.log(
+          logger.debug(
             `[useWebSocket] Reconnecting... Attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts}`
           );
           setStatus(WebSocketStatus.RECONNECTING);
@@ -221,7 +222,7 @@ export const useWebSocket = ({
    * Disconnect from WebSocket server
    */
   const disconnect = useCallback(() => {
-    console.log('[useWebSocket] Disconnecting');
+    logger.debug('[useWebSocket] Disconnecting');
 
     // Clear reconnection timeout
     if (reconnectTimeoutRef.current) {

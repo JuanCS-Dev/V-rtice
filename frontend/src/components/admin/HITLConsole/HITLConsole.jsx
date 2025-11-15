@@ -11,6 +11,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import logger from '@/utils/logger';
 import ReviewQueue from './components/ReviewQueue';
 import ReviewDetails from './components/ReviewDetails';
 import DecisionPanel from './components/DecisionPanel';
@@ -47,33 +48,34 @@ const HITLConsole = () => {
   // Fetch HITL stats
   const { stats, loading: statsLoading } = useHITLStats();
 
+  // Boris Cherny Standard - GAP #83: Replace console.log with logger
   // WebSocket message handler
   const handleWebSocketMessage = useCallback((message) => {
-    console.log('[HITLConsole] WebSocket message received:', message);
+    logger.debug('[HITLConsole] WebSocket message received:', message);
 
     switch (message.type) {
       case MessageType.NEW_APV:
         // New APV added to queue - invalidate review queue cache
-        console.log('[HITLConsole] New APV:', message.apv_code);
+        logger.debug('[HITLConsole] New APV:', message.apv_code);
         queryClient.invalidateQueries({ queryKey: ['hitl-reviews'] });
         queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
         break;
 
       case MessageType.DECISION_MADE:
         // Decision made - invalidate caches
-        console.log('[HITLConsole] Decision made:', message.decision, 'on', message.apv_code);
+        logger.debug('[HITLConsole] Decision made:', message.decision, 'on', message.apv_code);
         queryClient.invalidateQueries({ queryKey: ['hitl-reviews'] });
         queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
         break;
 
       case MessageType.STATS_UPDATE:
         // Stats updated - invalidate stats cache
-        console.log('[HITLConsole] Stats updated:', message);
+        logger.debug('[HITLConsole] Stats updated:', message);
         queryClient.invalidateQueries({ queryKey: ['hitl-stats'] });
         break;
 
       case MessageType.CONNECTION_ACK:
-        console.log('[HITLConsole] Connected with client ID:', message.client_id);
+        logger.debug('[HITLConsole] Connected with client ID:', message.client_id);
         break;
 
       default:

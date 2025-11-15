@@ -8,6 +8,7 @@
 
 import React from "react";
 import PropTypes from "prop-types";
+import logger from "@/utils/logger";
 import styles from "./MessageBubble.module.css";
 import { formatTime } from "@/utils/dateHelpers";
 
@@ -39,9 +40,10 @@ export const MessageBubble = ({ message, isUser }) => {
     navigator.clipboard.writeText(message.content);
   };
 
+  // Boris Cherny Standard - GAP #83: Replace console.log with logger
   const handleRegenerate = () => {
     // Regenerate functionality will be enabled when backend is ready
-    console.log("[MaximusChat] Regenerate requested for message:", message.id);
+    logger.debug("[MaximusChat] Regenerate requested for message:", message.id);
   };
 
   return (

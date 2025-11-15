@@ -12,6 +12,8 @@
  * onClick={debouncedRefetch} // Won't fire more than once per 300ms
  */
 
+import logger from './logger';
+
 /**
  * Creates a debounced function that delays invoking func until after wait milliseconds
  * have elapsed since the last time the debounced function was invoked.
@@ -117,6 +119,7 @@ export function throttle(func, wait = 300) {
  * @param {number} wait - Debounce delay in milliseconds
  * @returns {Function} Debounced refetch function
  */
+// Boris Cherny Standard - GAP #83: Replace console.error with logger
 export function debounceRefetch(refetchFn, wait = 300) {
   return debounce(
     async () => {
@@ -124,7 +127,7 @@ export function debounceRefetch(refetchFn, wait = 300) {
         await refetchFn();
       } catch (error) {
         // React Query handles errors, just prevent throw
-        console.error('[Debounce] Refetch error:', error);
+        logger.error('[Debounce] Refetch error:', error);
       }
     },
     wait,

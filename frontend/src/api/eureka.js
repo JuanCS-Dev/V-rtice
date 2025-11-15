@@ -175,7 +175,8 @@ export const eurekaAPI = {
       }
 
       const data = await response.json();
-      console.log(`✅ Eureka ML metrics fetched (${timeframe})`);
+      // Boris Cherny Standard - GAP #83: Replace console.log with logger
+      logger.debug(`✅ Eureka ML metrics fetched (${timeframe})`);
       return data;
     });
   },

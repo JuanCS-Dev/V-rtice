@@ -11,6 +11,8 @@
  * - Use getServiceEndpoint() to access endpoints (with validation)
  */
 
+import logger from '@/utils/logger';
+
 // ============================================================================
 // CONFIGURATION ERROR
 // ============================================================================
@@ -195,8 +197,9 @@ Production deployment cannot proceed without proper configuration.
     throw new ConfigurationError(errorMessage);
   }
 
+  // Boris Cherny Standard - GAP #83: Replace console.info with logger
   if (isDev) {
-    console.info('✅ Configuration validated (development mode)');
+    logger.info('✅ Configuration validated (development mode)');
   }
 }
 

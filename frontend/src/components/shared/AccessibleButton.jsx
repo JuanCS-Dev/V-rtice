@@ -1,12 +1,13 @@
 /**
  * Accessible Button Component
  * MAXIMUS Vértice - Phase 4C
- * 
+ *
  * Drop-in replacement for buttons that ensures accessibility
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import logger from '@/utils/logger';
 
 /**
  * Accessible Button - Always use this instead of <button>
@@ -39,13 +40,14 @@ export const Button = ({
 
   const baseClasses = 'rounded-lg font-medium transition-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed';
 
+  // Boris Cherny Standard - GAP #83: Replace console.warn with logger
   // If children is only an icon, require aria-label
-  const hasOnlyIcon = React.Children.count(children) === 1 && 
-    typeof children === 'object' && 
+  const hasOnlyIcon = React.Children.count(children) === 1 &&
+    typeof children === 'object' &&
     children.type?.name?.includes('Icon');
 
   if (hasOnlyIcon && !ariaLabel && !rest['aria-label']) {
-    console.warn('Button with only icon needs aria-label');
+    logger.warn('Button with only icon needs aria-label');
   }
 
   return (
