@@ -8,7 +8,11 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.6) 0%, rgba(15, 15, 15, 0.6) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.6) 0%,
+    rgba(15, 15, 15, 0.6) 100%
+  );
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 12px;
   overflow: hidden;
@@ -34,7 +38,7 @@
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #059669;
   margin: 0;
   letter-spacing: 0.05em;
 }
@@ -59,13 +63,17 @@
 
 .filterButton:hover {
   border-color: rgba(220, 38, 38, 0.4);
-  color: #dc2626;
+  color: #059669;
 }
 
 .filterButton.active {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.3) 0%, rgba(153, 27, 27, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.3) 0%,
+    rgba(153, 27, 27, 0.3) 100%
+  );
   border-color: rgba(220, 38, 38, 0.5);
-  color: #dc2626;
+  color: #059669;
 }
 
 /* ==================== TIMELINE ==================== */
@@ -102,7 +110,7 @@
 .groupTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #059669;
   margin: 0;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -115,8 +123,8 @@
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #dc2626;
-  font-family: 'Courier New', monospace;
+  color: #059669;
+  font-family: "Courier New", monospace;
 }
 
 .groupEvents {
@@ -130,7 +138,7 @@
   padding: 1rem;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid #059669;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -172,7 +180,7 @@
 .eventTime {
   font-size: 0.85rem;
   color: var(--text-tertiary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .eventBody {
@@ -208,9 +216,9 @@
 }
 
 .detailValue {
-  color: #dc2626;
+  color: #059669;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* ==================== EXPANDED DETAILS ==================== */
@@ -238,7 +246,7 @@
 .expandedValue {
   font-size: 0.9rem;
   color: var(--text-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .payloadCode {
@@ -249,7 +257,7 @@
   border-radius: 6px;
   font-size: 0.85rem;
   color: #00ff00;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -303,20 +311,20 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .filters {
     width: 100%;
   }
-  
+
   .filterButton {
     flex: 1;
   }
-  
+
   .eventDetails {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .expandedRow {
     flex-direction: column;
     gap: 0.5rem;

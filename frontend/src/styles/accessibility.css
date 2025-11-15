@@ -57,9 +57,9 @@ a:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 3px solid #ef4444;
+  outline: 3px solid #10b981;
   outline-offset: 2px;
-  border-color: #ef4444;
+  border-color: #10b981;
 }
 
 /* Remove default focus on mouse click, keep for keyboard */
@@ -76,7 +76,7 @@ a:focus-visible {
 
 /* Focus within (for containers) */
 .focus-within:focus-within {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #10b981;
   outline-offset: 2px;
 }
 
@@ -95,8 +95,8 @@ a:focus-visible {
   /* Contrast ratios validated */
   --color-success: #10b981; /* 3.7:1 on dark bg (large text AA) */
   --color-warning: #f59e0b; /* 5.2:1 on dark bg (AA) */
-  --color-error: #ef4444;   /* 4.9:1 on dark bg (AA) */
-  --color-info: #ef4444;    /* 8.2:1 on dark bg (AAA) */
+  --color-error: #10b981; /* 4.9:1 on dark bg (AA) */
+  --color-info: #10b981; /* 8.2:1 on dark bg (AAA) */
 
   /* Focus colors */
   --color-focus: #f59e0b;
@@ -115,7 +115,7 @@ body {
 
 /* Links - minimum 4.5:1 */
 a {
-  color: #ef4444; /* 8.2:1 on dark background */
+  color: #10b981; /* 8.2:1 on dark background */
   text-decoration: underline;
 }
 
@@ -128,8 +128,8 @@ a:focus {
 /* Buttons - ensure high contrast */
 .btn {
   color: #0a1929;
-  background: #ef4444;
-  border: 2px solid #ef4444;
+  background: #10b981;
+  border: 2px solid #10b981;
 }
 
 .btn:hover,
@@ -141,12 +141,12 @@ a:focus {
 .btn-secondary {
   color: #ffffff;
   background: transparent;
-  border: 2px solid #ef4444;
+  border: 2px solid #10b981;
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
   border-color: #33f3ff;
 }
 
@@ -164,7 +164,12 @@ p {
   line-height: 1.6; /* At least 1.5 */
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.3;
   margin-bottom: 0.5em;
 }
@@ -174,7 +179,12 @@ body {
   letter-spacing: 0.02em; /* At least 0.12x font size */
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   letter-spacing: 0.05em;
 }
 
@@ -184,7 +194,8 @@ p + p {
 }
 
 /* Word spacing */
-p, li {
+p,
+li {
   word-spacing: 0.08em; /* At least 0.16x font size */
 }
 
@@ -300,7 +311,8 @@ h3 {
 }
 
 /* Lists */
-ul, ol {
+ul,
+ol {
   padding-left: 1.5em;
 }
 
@@ -316,15 +328,15 @@ li {
 [required]::after,
 [aria-required="true"]::after {
   content: " *";
-  color: #ef4444;
+  color: #10b981;
   font-weight: bold;
 }
 
 /* Error states */
 [aria-invalid="true"],
 .input-error {
-  border-color: #ef4444;
-  outline-color: #ef4444;
+  border-color: #10b981;
+  outline-color: #10b981;
 }
 
 /* Helper text */
@@ -338,7 +350,7 @@ li {
 /* Error messages */
 .form-error,
 [role="alert"] {
-  color: #ef4444;
+  color: #10b981;
   font-size: 0.875rem;
   margin-top: 0.25rem;
   font-weight: 500;
@@ -421,7 +433,7 @@ img[alt=""] {
 
 /* Missing alt text (dev warning) */
 img:not([alt]) {
-  border: 3px dashed #ef4444;
+  border: 3px dashed #10b981;
 }
 
 /* ============================================

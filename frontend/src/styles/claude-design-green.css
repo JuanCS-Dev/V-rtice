@@ -150,9 +150,9 @@
   --color-warning-text: #fbbf24;
 
   /* Danger - Red */
-  --color-danger: #ef4444;
-  --color-danger-hover: #dc2626;
-  --color-danger-light: rgba(239, 68, 68, 0.1);
+  --color-danger: #10b981;
+  --color-danger-hover: #059669;
+  --color-danger-light: rgba(16, 185, 129, 0.1);
   --color-danger-text: #f87171;
 
   /* Info - Blue */
@@ -368,7 +368,7 @@
   /* Override gradients - GREEN instead of RED */
   --gradient-primary: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   --gradient-secondary: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
-  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  --gradient-danger: linear-gradient(135deg, #10b981 0%, #f87171 100%);
   --gradient-cyberpunk: linear-gradient(
     135deg,
     #10b981 0%,

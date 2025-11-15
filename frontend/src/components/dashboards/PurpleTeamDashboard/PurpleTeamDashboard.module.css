@@ -10,7 +10,7 @@
   flex-direction: column;
   background: var(--dashboard-bg);
   color: var(--color-text-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
   margin: 0;
   padding: 0;
@@ -37,10 +37,11 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
   }
 }

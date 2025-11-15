@@ -1,4 +1,3 @@
-
 .widgetContainer {
   display: flex;
   flex-direction: column;
@@ -22,8 +21,8 @@
 }
 
 .resourcesSection {
-  background: rgba(239, 68, 68, 0.1); /* --color-osint-primary with alpha */
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.1); /* --color-osint-primary with alpha */
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
 }
@@ -48,7 +47,7 @@
 }
 
 .resourcesList li::before {
-  content: '• ';
+  content: "• ";
   color: var(--color-osint-primary);
   font-weight: var(--font-bold);
 }

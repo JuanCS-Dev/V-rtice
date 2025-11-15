@@ -1,6 +1,6 @@
 /**
  * GapAnalysis Styles - Design System Compliant
- * SOURCE OF TRUTH: Purple (#ef4444) + Design Tokens
+ * SOURCE OF TRUTH: Purple (#10b981) + Design Tokens
  */
 
 .analysisContainer {
@@ -17,7 +17,7 @@
   align-items: center;
   margin-bottom: var(--space-2xl);
   padding-bottom: var(--space-lg);
-  border-bottom: 2px solid rgba(239, 68, 68, 0.2);
+  border-bottom: 2px solid rgba(16, 185, 129, 0.2);
 }
 
 .title {
@@ -27,7 +27,7 @@
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-accent-primary);
-  text-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
   letter-spacing: 0.05em;
   margin: 0;
 }
@@ -41,22 +41,26 @@
   flex-direction: column;
   align-items: center;
   padding: var(--space-lg);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
-  border: 2px solid rgba(239, 68, 68, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(220, 38, 38, 0.2) 100%
+  );
+  border: 2px solid rgba(16, 185, 129, 0.4);
   border-radius: var(--radius-lg);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 .coverageValue {
   font-size: var(--text-4xl);
   font-weight: 700;
   color: var(--color-accent-primary);
-  text-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+  text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
 }
 
 .coverageLabel {
   font-size: var(--text-xs);
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-top: var(--space-xs);
@@ -76,7 +80,7 @@
 }
 
 .content::-webkit-scrollbar-thumb {
-  background: rgba(239, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.3);
   border-radius: var(--radius-sm);
 }
 
@@ -86,14 +90,14 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: rgba(239, 68, 68, 0.5);
+  color: rgba(16, 185, 129, 0.5);
   text-align: center;
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 3px solid rgba(239, 68, 68, 0.2);
+  border: 3px solid rgba(16, 185, 129, 0.2);
   border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -123,7 +127,7 @@
 }
 
 .totalAttacks {
-  border: 2px solid rgba(239, 68, 68, 0.3);
+  border: 2px solid rgba(16, 185, 129, 0.3);
 }
 
 .detected {
@@ -131,7 +135,7 @@
 }
 
 .undetected {
-  border: 2px solid rgba(239, 68, 68, 0.3);
+  border: 2px solid rgba(16, 185, 129, 0.3);
 }
 
 .falsePositives {
@@ -165,7 +169,7 @@
 
 .summaryLabel {
   font-size: var(--text-xs);
-  color: rgba(239, 68, 68, 0.6);
+  color: rgba(16, 185, 129, 0.6);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-align: center;
@@ -200,7 +204,7 @@
 
 .gapCard {
   background: rgba(139, 0, 0, 0.1);
-  border: 2px solid rgba(239, 68, 68, 0.3);
+  border: 2px solid rgba(16, 185, 129, 0.3);
   border-left: 4px solid var(--color-status-danger);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
@@ -213,7 +217,7 @@
   align-items: center;
   margin-bottom: var(--space-md);
   padding-bottom: var(--space-md);
-  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .gapType {
@@ -229,9 +233,9 @@
   font-weight: 700;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-full);
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: var(--color-status-danger);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.4);
   letter-spacing: 0.05em;
 }
 
@@ -249,7 +253,7 @@
 }
 
 .gapLabel {
-  color: rgba(239, 68, 68, 0.6);
+  color: rgba(16, 185, 129, 0.6);
   font-weight: 600;
   min-width: 100px;
 }
@@ -315,7 +319,7 @@
 
 .techniqueCard {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: var(--radius-md);
   padding: var(--space-lg);
 }
@@ -334,7 +338,7 @@
   background: rgba(0, 0, 0, 0.5);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .coverageFill {
@@ -344,15 +348,27 @@
 }
 
 .coverageFill.good {
-  background: linear-gradient(90deg, var(--color-status-success) 0%, #00cc66 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-status-success) 0%,
+    #00cc66 100%
+  );
 }
 
 .coverageFill.medium {
-  background: linear-gradient(90deg, var(--color-status-warning) 0%, #ff7700 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-status-warning) 0%,
+    #ff7700 100%
+  );
 }
 
 .coverageFill.poor {
-  background: linear-gradient(90deg, var(--color-status-danger) 0%, #ff0000 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-status-danger) 0%,
+    #ff0000 100%
+  );
 }
 
 .coverageText {
@@ -367,7 +383,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {

@@ -92,7 +92,7 @@
 .logoSubtitle {
   margin: 0.25rem 0 0;
   font-size: 0.7rem;
-  color: var(--color-text-secondary, #94A3B8);
+  color: var(--color-text-secondary, #94a3b8);
   letter-spacing: 1px;
   font-family: monospace;
 }
@@ -145,7 +145,7 @@
 
 .statusLabel {
   font-size: 0.55rem;
-  color: var(--color-text-muted, #94A3B8);
+  color: var(--color-text-muted, #94a3b8);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -200,7 +200,7 @@
 
 .clockDate {
   font-size: 0.65rem;
-  color: var(--color-text-muted, #94A3B8);
+  color: var(--color-text-muted, #94a3b8);
   font-family: monospace;
 }
 
@@ -265,22 +265,22 @@
 .navButton.inactive {
   background: var(--nav-button-inactive-bg);
   border: var(--nav-button-inactive-border);
-  color: var(--color-text-secondary, #94A3B8);
+  color: var(--color-text-secondary, #94a3b8);
   font-weight: normal;
 }
 
 .navButton.active {
   background: var(--nav-button-active-bg);
   border: var(--nav-button-active-border);
-  color: var(--color-text-primary, #E2E8F0);
+  color: var(--color-text-primary, #e2e8f0);
   font-weight: bold;
   box-shadow: var(--nav-button-active-shadow);
 }
 
 .navButton:hover:not(.active) {
   background: var(--nav-button-hover-bg);
-  border-color: var(--color-accent-primary, #ef4444);
-  color: var(--color-text-primary, #E2E8F0);
+  border-color: var(--color-accent-primary, #10b981);
+  color: var(--color-text-primary, #e2e8f0);
 }
 
 .navUnderline {
@@ -312,7 +312,8 @@
  * ANIMATIONS
  * ═══════════════════════════════════════════════════════════════════════ */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

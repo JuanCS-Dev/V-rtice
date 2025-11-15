@@ -14,10 +14,10 @@
   z-index: 10000;
 
   padding: 0.75rem 1.5rem;
-  background: #ef4444;
+  background: #10b981;
   color: #0a1929;
 
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
@@ -28,7 +28,9 @@
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 
-  transition: top 0.3s ease, transform 0.2s ease;
+  transition:
+    top 0.3s ease,
+    transform 0.2s ease;
 }
 
 /* Visible on keyboard focus */
@@ -69,7 +71,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .skip-link {
-    background: #ef4444;
+    background: #10b981;
     color: #000;
     border-color: #fff;
   }

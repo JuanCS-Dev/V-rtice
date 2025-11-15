@@ -7,11 +7,11 @@
 .error {
   margin-top: var(--space-1, 0.25rem);
   padding: var(--space-2, 0.5rem);
-  background: rgba(239, 68, 68, 0.15);
-  border-left: 3px solid #ef4444;
+  background: rgba(16, 185, 129, 0.15);
+  border-left: 3px solid #10b981;
   border-radius: var(--radius-sm, 0.25rem);
-  color: #ef4444;
-  font-family: var(--font-mono, 'Courier New', monospace);
+  color: #10b981;
+  font-family: var(--font-mono, "Courier New", monospace);
   font-size: var(--text-xs, 0.75rem);
   font-weight: 500;
   line-height: 1.4;

@@ -51,9 +51,9 @@
 }
 
 .view-tab.active {
-  color: #ef4444;
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  color: #10b981;
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .view-icon {
@@ -93,9 +93,9 @@
 }
 
 .overview-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
 }
 
 .card-icon {
@@ -109,7 +109,7 @@
 
 .card-action {
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -120,9 +120,9 @@
 }
 
 .card-action:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: linear-gradient(135deg, #059669, #b91c1c);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Recent Risks */
@@ -222,9 +222,9 @@
 .resource-card:hover,
 .approval-card:hover,
 .plan-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .policy-header,
@@ -375,8 +375,8 @@
 .metric-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
 }
 
 .risk-mitigation {
@@ -475,15 +475,19 @@
 .bio-inspiration {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ef4444;
+  color: #10b981;
   margin: 0 0 1rem 0;
 }
 

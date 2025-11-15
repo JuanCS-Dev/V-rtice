@@ -5,15 +5,15 @@
 
 .module-status-card {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.2s ease;
 }
 
 .module-status-card:hover {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .module-status-header {
@@ -24,7 +24,7 @@
 }
 
 .module-status-name {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -66,13 +66,14 @@
 
 .module-status-activity {
   font-size: 0.75rem;
-  color: rgba(239, 68, 68, 0.5);
+  color: rgba(16, 185, 129, 0.5);
   line-height: 1.4;
 }
 
 /* Animations */
 @keyframes pulse-online {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -81,7 +82,8 @@
 }
 
 @keyframes pulse-warning {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -90,7 +92,8 @@
 }
 
 @keyframes pulse-running {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

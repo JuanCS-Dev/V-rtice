@@ -78,7 +78,7 @@
   font-weight: var(--font-extrabold);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-wider);
-  font-family: 'Orbitron', monospace;
+  font-family: "Orbitron", monospace;
   text-transform: uppercase;
 }
 
@@ -159,7 +159,7 @@
   flex-direction: column;
   gap: var(--space-xs);
   animation: slideInLeft 1s var(--transition-smooth);
-  font-family: 'Orbitron', monospace;
+  font-family: "Orbitron", monospace;
 }
 
 .titleMain {
@@ -173,7 +173,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-transform: uppercase;
-  filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.5));
+  filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.5));
   animation: glow 3s ease-in-out infinite;
 }
 
@@ -336,7 +336,7 @@
 
   /* Glow effect */
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -2px;
     background: var(--gradient-primary);
@@ -478,7 +478,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -487,7 +488,8 @@
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     filter: brightness(1);
   }
@@ -504,7 +506,8 @@
 @media (prefers-color-scheme: dark) {
   .hero {
     /* Increase contrast for dark backgrounds */
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-md:
+      0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
   }
 }
 

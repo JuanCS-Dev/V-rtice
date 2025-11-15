@@ -20,7 +20,11 @@
 
 .card {
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.8) 0%,
+    rgba(15, 15, 15, 0.8) 100%
+  );
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 12px;
   display: flex;
@@ -57,8 +61,8 @@
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
-  color: #dc2626;
-  font-family: 'Courier New', monospace;
+  color: #059669;
+  font-family: "Courier New", monospace;
 }
 
 .cardValue.warning {
@@ -76,7 +80,11 @@
 
 /* ==================== PANEL ==================== */
 .panel {
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.6) 0%, rgba(15, 15, 15, 0.6) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.6) 0%,
+    rgba(15, 15, 15, 0.6) 100%
+  );
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 12px;
   display: flex;
@@ -96,19 +104,19 @@
 .panelTitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #059669;
   margin: 0;
   letter-spacing: 0.05em;
 }
 
 .badge {
   padding: 0.4rem 0.8rem;
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  background: linear-gradient(135deg, #059669 0%, #991b1b 100%);
   border-radius: 8px;
   color: white;
   font-size: 0.85rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .panelContent {
@@ -148,7 +156,7 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .itemConfidence {
@@ -178,9 +186,9 @@
 }
 
 .itemStatValue {
-  color: #dc2626;
+  color: #059669;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .itemTechniques {
@@ -229,9 +237,9 @@
 
 .barCount {
   font-size: 0.9rem;
-  color: #dc2626;
+  color: #059669;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .barTrack {
@@ -244,7 +252,7 @@
 
 .barFill {
   height: 100%;
-  background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+  background: linear-gradient(90deg, #059669 0%, #991b1b 100%);
   border-radius: 6px;
   transition: width 0.5s ease;
   box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
@@ -274,7 +282,7 @@
   font-size: 0.95rem;
   color: var(--text-primary);
   font-weight: 600;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .clusterDuration {
@@ -292,7 +300,7 @@
 }
 
 .clusterStat strong {
-  color: #dc2626;
+  color: #059669;
   font-weight: 700;
 }
 
@@ -306,7 +314,7 @@
 
 .clusterBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #ff4000 0%, #ff0040 100%);
+  background: linear-gradient(90deg, #ff4000 0%, #10b981 100%);
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -322,7 +330,8 @@
 
 /* ==================== ANIMATIONS ==================== */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -341,15 +350,15 @@
   .overviewGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .card {
     padding: 1rem;
   }
-  
+
   .panelContent {
     padding: 1rem;
   }
-  
+
   .itemStats {
     flex-direction: column;
     gap: 0.5rem;

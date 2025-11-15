@@ -1,10 +1,14 @@
 /**
  * DefensiveHeader Styles - Landing Page Pattern
- * SOURCE OF TRUTH: Purple (#ef4444) + Cyan (#f97316)
+ * SOURCE OF TRUTH: Purple (#10b981) + Cyan (#10b981)
  */
 
 .header {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
   border-bottom: 2px solid var(--color-border-primary);
   box-shadow: 0 4px 20px var(--shadow-glow-purple);
 }
@@ -34,7 +38,7 @@
   cursor: pointer;
   transition: all var(--transition-base);
   border-radius: var(--radius-md);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .backButton:hover {
@@ -52,7 +56,7 @@
 
 .icon {
   font-size: var(--text-5xl);
-  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
   animation: pulseGlow 3s ease-in-out infinite;
 }
 
@@ -60,10 +64,10 @@
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-accent-primary);
-  text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
   letter-spacing: 0.05em;
   margin: 0;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .subtitle {
@@ -109,8 +113,8 @@
   font-weight: 700;
   color: var(--color-accent-primary);
   margin-top: var(--space-xs);
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-  font-family: 'Orbitron', system-ui, sans-serif;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  font-family: "Orbitron", system-ui, sans-serif;
 }
 
 .moduleNav {
@@ -149,7 +153,7 @@
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -163,7 +167,7 @@
   color: var(--color-accent-primary);
   border-bottom-color: var(--color-accent-primary);
   background: var(--color-bg-active);
-  box-shadow: 0 -3px 10px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 -3px 10px rgba(16, 185, 129, 0.2);
 }
 
 .moduleIcon {
@@ -172,11 +176,12 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));
   }
   50% {
-    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.8));
+    filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.8));
   }
 }
 

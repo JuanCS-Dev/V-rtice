@@ -1,7 +1,6 @@
-
 .container {
   padding: var(--space-4);
-  border-bottom: var(--border-1) solid rgba(239, 68, 68, 0.3);
+  border-bottom: var(--border-1) solid rgba(16, 185, 129, 0.3);
 }
 
 .title {
@@ -38,8 +37,8 @@
 
 /* Variants */
 .critical {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
   color: var(--color-critical);
 }
 
@@ -50,13 +49,13 @@
 }
 
 .high {
-  background: rgba(249, 115, 22, 0.2);
-  border-color: rgba(249, 115, 22, 0.5);
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
   color: var(--color-high);
 }
 
 .cyber {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
   color: var(--color-cyber-primary);
 }

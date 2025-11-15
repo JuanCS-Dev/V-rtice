@@ -8,7 +8,11 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.6) 0%, rgba(15, 15, 15, 0.6) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.6) 0%,
+    rgba(15, 15, 15, 0.6) 100%
+  );
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 12px;
   overflow: hidden;
@@ -29,7 +33,7 @@
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #059669;
   margin: 0;
   letter-spacing: 0.05em;
 }
@@ -56,7 +60,7 @@
 
 .select:focus {
   outline: none;
-  border-color: #dc2626;
+  border-color: #059669;
   box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
 }
 
@@ -73,7 +77,11 @@
 
 /* ==================== CARD ==================== */
 .card {
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.8) 0%,
+    rgba(15, 15, 15, 0.8) 100%
+  );
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 1.5rem;
@@ -102,7 +110,7 @@
 }
 
 .card.error {
-  border-color: rgba(255, 0, 64, 0.4);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .cardHeader {
@@ -166,7 +174,7 @@
   font-size: 0.95rem;
   color: var(--text-primary);
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .infoValue.uptime {
@@ -194,8 +202,8 @@
 .metricValue {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #dc2626;
-  font-family: 'Courier New', monospace;
+  color: #059669;
+  font-family: "Courier New", monospace;
 }
 
 .metricLabel {
@@ -232,7 +240,7 @@
 .footerText {
   font-size: 0.85rem;
   color: var(--text-tertiary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* ==================== SUMMARY ==================== */
@@ -261,8 +269,8 @@
 .summaryValue {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #dc2626;
-  font-family: 'Courier New', monospace;
+  color: #059669;
+  font-family: "Courier New", monospace;
 }
 
 .summaryValue.active {
@@ -323,21 +331,21 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .controls {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .select {
     width: 100%;
   }
-  
+
   .grid {
     grid-template-columns: 1fr;
     padding: 1rem;
   }
-  
+
   .summary {
     flex-direction: column;
     align-items: flex-start;

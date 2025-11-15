@@ -32,8 +32,8 @@
 }
 
 .mode-badge.sleep {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #10b981;
+  color: #10b981;
   animation: pulse 3s ease-in-out infinite;
 }
 
@@ -43,8 +43,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* Mode Controls */
@@ -72,9 +77,9 @@
 }
 
 .btn-mode:hover:not(:disabled) {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
 .btn-mode.active {
@@ -139,7 +144,7 @@
 }
 
 .buffer-stat-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
 }
 
@@ -155,8 +160,8 @@
 .stat-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
   margin-bottom: 0.25rem;
 }
 
@@ -206,8 +211,8 @@
 .priority-stats {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 8px;
 }
 
@@ -236,7 +241,7 @@
 
 .priority-value {
   color: #e5e7eb;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: 600;
 }
 
@@ -264,7 +269,7 @@
 }
 
 .consolidation-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
 }
 
@@ -288,8 +293,8 @@
 .card-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
   margin-bottom: 0.75rem;
 }
 
@@ -313,7 +318,7 @@
 
 .breakdown-value {
   color: #e5e7eb;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: 600;
 }
 
@@ -378,8 +383,8 @@
 }
 
 .sleep-bar {
-  background: linear-gradient(90deg, #ef4444, #fca5a5);
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  background: linear-gradient(90deg, #10b981, #fca5a5);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
 }
 
 .wake-bar {
@@ -389,7 +394,7 @@
 
 .bar-value {
   color: #fff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .comparison-legend {
@@ -413,7 +418,7 @@
 }
 
 .sleep-color {
-  background: linear-gradient(90deg, #ef4444, #fca5a5);
+  background: linear-gradient(90deg, #10b981, #fca5a5);
 }
 
 .wake-color {
@@ -423,15 +428,19 @@
 /* Bio Inspiration */
 .bio-inspiration {
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ef4444;
+  color: #10b981;
   margin: 0 0 1rem 0;
 }
 

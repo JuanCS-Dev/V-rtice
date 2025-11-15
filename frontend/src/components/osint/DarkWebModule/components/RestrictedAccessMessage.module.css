@@ -1,6 +1,5 @@
-
 .restrictedMessage {
-  background: rgba(255, 0, 64, 0.1); /* Using --color-critical with alpha */
+  background: rgba(16, 185, 129, 0.1); /* Using --color-critical with alpha */
   border: 1px solid var(--color-critical);
   border-radius: var(--radius-lg);
   padding: var(--space-6);

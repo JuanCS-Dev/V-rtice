@@ -12,7 +12,7 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
   position: relative;
   background: var(--dashboard-bg);
@@ -68,11 +68,12 @@
    CUSTOM ANIMATIONS (Landing Page Standard)
    ============================================ */
 @keyframes defensive-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: var(--shadow-glow-purple);
   }
   50% {
-    box-shadow: 0 0 40px rgba(239, 68, 68, 1);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 1);
   }
 }
 
@@ -86,7 +87,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

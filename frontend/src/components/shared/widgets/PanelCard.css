@@ -55,11 +55,11 @@
 
 /* Variants */
 .panel-card-primary {
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .panel-card-primary .panel-card-header {
-  border-bottom-color: rgba(239, 68, 68, 0.3);
+  border-bottom-color: rgba(16, 185, 129, 0.3);
 }
 
 .panel-card-primary .panel-card-title {
@@ -67,11 +67,11 @@
 }
 
 .panel-card-secondary {
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .panel-card-secondary .panel-card-header {
-  border-bottom-color: rgba(239, 68, 68, 0.3);
+  border-bottom-color: rgba(16, 185, 129, 0.3);
 }
 
 .panel-card-secondary .panel-card-title {

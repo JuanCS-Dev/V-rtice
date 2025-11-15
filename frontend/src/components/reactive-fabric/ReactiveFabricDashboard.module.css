@@ -51,7 +51,11 @@
 
 .phase {
   padding: var(--space-sm) var(--space-lg);
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(220, 38, 38, 0.2) 100%
+  );
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -90,7 +94,7 @@
 .lastUpdate {
   font-size: var(--text-sm);
   color: var(--text-tertiary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* ==================== METRICS BAR ==================== */
@@ -105,7 +109,11 @@
 
 .metric {
   padding: var(--space-lg) var(--space-xl);
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.8) 0%,
+    rgba(15, 15, 15, 0.8) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   display: flex;
@@ -132,7 +140,7 @@
   font-size: var(--text-4xl);
   font-weight: 700;
   color: var(--color-accent-primary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-shadow: var(--shadow-glow-purple);
 }
 
@@ -214,7 +222,7 @@
 .spinner {
   width: 80px;
   height: 80px;
-  border: 4px solid rgba(239, 68, 68, 0.2);
+  border: 4px solid rgba(16, 185, 129, 0.2);
   border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -256,7 +264,7 @@
   font-size: var(--text-base);
   color: var(--text-secondary);
   margin-bottom: var(--space-2xl);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .retryButton {
@@ -278,7 +286,8 @@
 
 /* ==================== ANIMATIONS ==================== */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -287,7 +296,8 @@
 }
 
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -302,7 +312,8 @@
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   25% {
@@ -318,7 +329,7 @@
   .overviewGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .metricsBar {
     grid-template-columns: repeat(2, 1fr);
   }

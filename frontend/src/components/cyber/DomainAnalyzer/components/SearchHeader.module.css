@@ -1,8 +1,7 @@
-
 .container {
-  border: var(--border-1) solid rgba(239, 68, 68, 0.5);
+  border: var(--border-1) solid rgba(16, 185, 129, 0.5);
   border-radius: var(--radius-lg);
-  background: rgba(239, 68, 68, 0.05);
+  background: rgba(16, 185, 129, 0.05);
   padding: var(--space-6);
 }
 
@@ -36,7 +35,7 @@
 }
 
 .historyLabel {
-  color: rgba(239, 68, 68, 0.5);
+  color: rgba(16, 185, 129, 0.5);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
 }
@@ -49,8 +48,8 @@
 
 .historyItem {
   padding: var(--space-1) var(--space-2);
-  background: rgba(239, 68, 68, 0.1);
-  color: rgba(239, 68, 68, 0.7);
+  background: rgba(16, 185, 129, 0.1);
+  color: rgba(16, 185, 129, 0.7);
   border: none;
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
@@ -59,6 +58,6 @@
 }
 
 .historyItem:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: var(--color-cyber-primary);
 }

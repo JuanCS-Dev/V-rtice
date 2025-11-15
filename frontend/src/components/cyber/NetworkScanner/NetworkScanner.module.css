@@ -3,7 +3,7 @@
   background: linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%);
   border-radius: 12px;
   border: 1px solid #ff4444;
-  box-shadow: 0 0 20px rgba(255, 68, 68, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
   color: #ffffff;
 }
 
@@ -16,7 +16,7 @@
   font-size: 28px;
   margin: 0 0 8px 0;
   color: #ff4444;
-  text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
 .subtitle {
@@ -58,7 +58,7 @@
 }
 
 .infoBadge {
-  background: rgba(255, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: #ff4444;
 }
 
@@ -103,10 +103,10 @@
   width: 100%;
   padding: 12px;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 6px;
   color: #ffffff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   transition: border-color 0.3s;
 }
@@ -116,7 +116,7 @@
 .textarea:focus {
   outline: none;
   border-color: #ff4444;
-  box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .textarea {
@@ -134,12 +134,14 @@
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(255, 68, 68, 0.4);
+  box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
 }
 
 .submitBtn:disabled {
@@ -234,8 +236,8 @@
 }
 
 .portCard {
-  background: rgba(255, 68, 68, 0.1);
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 6px;
   padding: 12px;
   display: flex;
@@ -248,7 +250,7 @@
   font-size: 20px;
   font-weight: bold;
   color: #ff4444;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .portStatus {
@@ -276,7 +278,7 @@
 
 .servicePort {
   color: #ff4444;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: bold;
 }
 
@@ -301,7 +303,7 @@
 .value {
   color: #ffffff;
   font-weight: 500;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* Risk Level Badges */
@@ -321,7 +323,7 @@
 }
 
 .riskBadge.high {
-  background: rgba(255, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: #ff4444;
 }
 

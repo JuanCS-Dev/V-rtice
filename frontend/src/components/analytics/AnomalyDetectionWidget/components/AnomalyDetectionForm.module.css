@@ -1,4 +1,3 @@
-
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -35,12 +34,12 @@
 .textarea:focus {
   outline: none;
   border-color: var(--color-analytics-primary);
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); /* --color-analytics-primary with alpha */
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); /* --color-analytics-primary with alpha */
 }
 
 .sampleButton {
   align-self: flex-start;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
   border: 1px solid var(--border-primary);
   color: var(--color-analytics-primary);
   padding: var(--space-2) var(--space-3);
@@ -55,7 +54,7 @@
 }
 
 .sampleButton:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   border-color: var(--color-analytics-primary);
 }
 
@@ -92,7 +91,7 @@
   border-radius: 50%;
   background: var(--color-analytics-primary);
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
   border: 2px solid var(--bg-primary);
 }
 
@@ -105,7 +104,7 @@
 }
 
 .error {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, #10b981);
   font-size: var(--text-sm);
   margin-top: var(--space-1);
   display: flex;

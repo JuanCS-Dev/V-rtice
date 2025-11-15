@@ -110,7 +110,7 @@
   border: 1px solid rgba(0, 255, 136, 0.3);
   border-radius: 6px;
   color: #ffffff;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 14px;
   transition: border-color 0.3s;
 }
@@ -146,7 +146,9 @@
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -262,7 +264,7 @@
 .value {
   color: #ffffff;
   font-weight: 500;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* Coordination Signals */
@@ -281,7 +283,9 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .coordinationCard:hover {
@@ -342,13 +346,13 @@
 }
 
 .accountId {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #ffffff;
   font-weight: 500;
 }
 
 .accountScore {
-  color: #dc2626;
+  color: #059669;
   font-weight: bold;
   font-size: 14px;
 }
@@ -376,7 +380,7 @@
 }
 
 .recommendationItem::before {
-  content: '✓';
+  content: "✓";
   position: absolute;
   left: -20px;
   color: #00ff88;

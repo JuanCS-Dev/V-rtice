@@ -12,7 +12,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(20, 25, 39, 0.98), rgba(10, 15, 30, 0.98));
+  background: linear-gradient(
+    135deg,
+    rgba(20, 25, 39, 0.98),
+    rgba(10, 15, 30, 0.98)
+  );
   backdrop-filter: blur(10px);
   z-index: 9999;
   padding: 2rem;
@@ -22,7 +26,7 @@
   max-width: 600px;
   width: 100%;
   background: rgba(30, 35, 50, 0.9);
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
   padding: 3rem 2rem;
   text-align: center;
@@ -36,7 +40,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -51,7 +56,7 @@
   font-weight: 600;
   color: #ff4444;
   margin-bottom: 1rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .error-boundary-message {
@@ -85,8 +90,8 @@
   padding: 1rem;
   overflow-x: auto;
   font-size: 0.875rem;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
   max-height: 200px;
 }
 
@@ -106,7 +111,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .error-boundary-btn-primary {

@@ -1,8 +1,7 @@
-
 .container {
-  border: var(--border-1) solid rgba(239, 68, 68, 0.5);
+  border: var(--border-1) solid rgba(16, 185, 129, 0.5);
   border-radius: var(--radius-lg);
-  background: rgba(239, 68, 68, 0.05);
+  background: rgba(16, 185, 129, 0.05);
   padding: var(--space-6);
 }
 
@@ -27,11 +26,11 @@
 }
 
 .description {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   margin: var(--space-1) 0 0 0;
 }
 
 .update {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   font-size: var(--text-sm);
 }

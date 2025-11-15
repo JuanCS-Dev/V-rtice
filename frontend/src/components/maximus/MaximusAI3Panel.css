@@ -37,9 +37,9 @@
 }
 
 .widget-tab:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
 .widget-tab-active {
@@ -96,8 +96,8 @@
 }
 
 .widget-status.status-offline {
-  background: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 .widget-status.status-checking {
@@ -106,13 +106,23 @@
 }
 
 @keyframes pulse-online {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes pulse-checking {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Widget Content */
@@ -165,7 +175,7 @@
 
 .gauge-text {
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   fill: #fff;
 }
 
@@ -196,15 +206,15 @@
 }
 
 .stat-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: scale(1.05);
 }
 
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
 }
 
 .stat-label {
@@ -232,9 +242,9 @@
 }
 
 .service-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
 }
 
 .service-card.status-online {
@@ -246,7 +256,7 @@
 }
 
 .service-card.status-offline {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #10b981;
 }
 
 .service-header {
@@ -274,7 +284,7 @@
 .service-port {
   font-size: 0.75rem;
   color: #9ca3af;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .status-indicator {
@@ -295,8 +305,8 @@
 }
 
 .status-indicator.status-offline {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #10b981;
+  color: #10b981;
 }
 
 .status-indicator.status-checking {
@@ -321,7 +331,7 @@
 
 .btn-service-details {
   padding: 0.75rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -332,9 +342,9 @@
 }
 
 .btn-service-details:hover:not(:disabled) {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: linear-gradient(135deg, #059669, #b91c1c);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-service-details:disabled {
@@ -391,7 +401,7 @@
 }
 
 .activity-item.activity-info {
-  border-left-color: #ef4444;
+  border-left-color: #10b981;
 }
 
 .activity-item.activity-warning {
@@ -399,13 +409,18 @@
 }
 
 .activity-item.activity-critical {
-  border-left-color: #ef4444;
+  border-left-color: #10b981;
   animation: pulse-critical 2s ease-in-out infinite;
 }
 
 @keyframes pulse-critical {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .activity-icon {
@@ -414,7 +429,7 @@
 
 .activity-time {
   color: #6b7280;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .activity-module {

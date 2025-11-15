@@ -117,7 +117,7 @@
   font-size: var(--text-4xl);
   font-weight: var(--font-extrabold);
   color: var(--color-text-primary);
-  font-family: 'Orbitron', monospace;
+  font-family: "Orbitron", monospace;
   line-height: var(--leading-none);
   letter-spacing: var(--tracking-tight);
 }
@@ -226,12 +226,20 @@
 }
 
 .card.info .progressFill {
-  background: linear-gradient(90deg, var(--color-accent-secondary), var(--color-info));
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-secondary),
+    var(--color-info)
+  );
   box-shadow: 0 0 10px var(--color-accent-secondary);
 }
 
 .card.info:hover .borderGlow {
-  background: linear-gradient(135deg, var(--color-accent-secondary), var(--color-info));
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-secondary),
+    var(--color-info)
+  );
 }
 
 /* Success - Green/Networks */
@@ -262,12 +270,20 @@
 }
 
 .card.warning .progressFill {
-  background: linear-gradient(90deg, var(--color-warning), var(--color-success));
+  background: linear-gradient(
+    90deg,
+    var(--color-warning),
+    var(--color-success)
+  );
   box-shadow: 0 0 10px var(--color-warning);
 }
 
 .card.warning:hover .borderGlow {
-  background: linear-gradient(135deg, var(--color-warning), var(--color-success));
+  background: linear-gradient(
+    135deg,
+    var(--color-warning),
+    var(--color-success)
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -290,10 +306,10 @@
     box-shadow: 0 0 0 0 var(--color-accent-primary);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
 

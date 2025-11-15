@@ -25,7 +25,7 @@
 }
 
 .badge {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -75,7 +75,7 @@
 .predict-btn {
   align-self: end;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -83,12 +83,12 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
 }
 
 .predict-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
 }
 
 .predict-btn:disabled {
@@ -105,7 +105,7 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   padding: 15px;
-  border-left: 3px solid #ef4444;
+  border-left: 3px solid #10b981;
 }
 
 .result-section h4 {
@@ -165,7 +165,7 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   margin-bottom: 8px;
-  border-left: 3px solid #f97316;
+  border-left: 3px solid #10b981;
   transition: all 0.2s;
 }
 

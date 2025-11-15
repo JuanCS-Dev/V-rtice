@@ -1,6 +1,5 @@
-
 .container {
-  border: var(--border-1) solid rgba(239, 68, 68, 0.3);
+  border: var(--border-1) solid rgba(16, 185, 129, 0.3);
   border-radius: var(--radius-lg);
   background: rgba(0, 0, 0, 0.2);
   padding: var(--space-4);
@@ -27,7 +26,7 @@
 }
 
 .label {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   font-family: var(--font-mono);
   font-size: var(--text-sm);
 }
@@ -46,7 +45,7 @@
 
 .serviceCard {
   background: rgba(0, 0, 0, 0.4);
-  border: var(--border-1) solid rgba(239, 68, 68, 0.2);
+  border: var(--border-1) solid rgba(16, 185, 129, 0.2);
   border-radius: var(--radius-md);
   padding: var(--space-2);
 }
@@ -65,11 +64,11 @@
 }
 
 .serviceName {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   font-size: var(--text-xs);
 }
 
 .serviceVersion {
-  color: rgba(239, 68, 68, 0.5);
+  color: rgba(16, 185, 129, 0.5);
   font-size: var(--text-xs);
 }

@@ -30,13 +30,13 @@
 .metric-card-value {
   font-size: 1.875rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* Variants */
 .metric-card-primary {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .metric-card-primary .metric-card-label {
@@ -74,8 +74,8 @@
 }
 
 .metric-card-danger {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .metric-card-danger .metric-card-label {
@@ -87,8 +87,8 @@
 }
 
 .metric-card-info {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .metric-card-info .metric-card-label {

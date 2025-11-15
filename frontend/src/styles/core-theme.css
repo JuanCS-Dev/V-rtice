@@ -11,15 +11,19 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-@import './tokens/colors.css';
-@import './tokens/typography.css';
-@import './tokens/spacing.css';
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
 
 :root {
   /* ========================================
      DASHBOARD SPECIFIC
      ======================================== */
-  --dashboard-bg: linear-gradient(135deg, var(--color-bg-primary) 0%, #0a1c0a 100%);
+  --dashboard-bg: linear-gradient(
+    135deg,
+    var(--color-bg-primary) 0%,
+    #0a1c0a 100%
+  );
   --dashboard-text-color: var(--color-text-primary);
 
   /* ========================================
@@ -38,20 +42,20 @@
   --header-border-bottom: 1px solid rgba(220, 38, 38, 0.3);
   --header-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
 
-  --logo-gradient: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+  --logo-gradient: linear-gradient(135deg, #059669 0%, #f59e0b 100%);
   --logo-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
   --logo-pulse-color: rgba(220, 38, 38, 0.6);
 
-  --title-gradient: linear-gradient(90deg, #dc2626 0%, #f59e0b 100%);
+  --title-gradient: linear-gradient(90deg, #059669 0%, #f59e0b 100%);
 
   --nav-bg: rgba(23, 23, 23, 0.95);
   --nav-button-active-bg: rgba(220, 38, 38, 0.2);
-  --nav-button-active-border: 1px solid #dc2626;
+  --nav-button-active-border: 1px solid #059669;
   --nav-button-active-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
   --nav-button-inactive-bg: transparent;
   --nav-button-inactive-border: 1px solid transparent;
   --nav-button-hover-bg: rgba(220, 38, 38, 0.1);
-  --nav-underline: #dc2626;
+  --nav-underline: #059669;
 
   /* ========================================
      STATUS INDICATORS
@@ -62,8 +66,8 @@
   /* ========================================
      BUTTONS
      ======================================== */
-  --button-bg-primary: #dc2626;
-  --button-bg-primary-hover: #ef4444;
+  --button-bg-primary: #059669;
+  --button-bg-primary-hover: #10b981;
   --button-text-primary: #fafafa;
   --button-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
   --button-shadow-hover: 0 0 30px rgba(220, 38, 38, 0.8);
@@ -80,7 +84,7 @@
      ALERTS
      ======================================== */
   --alert-critical-bg: rgba(220, 38, 38, 0.2);
-  --alert-critical-border: #dc2626;
+  --alert-critical-border: #059669;
   --alert-warning-bg: rgba(245, 158, 11, 0.2);
   --alert-warning-border: #f59e0b;
   --alert-success-bg: rgba(16, 185, 129, 0.2);
@@ -96,7 +100,7 @@
      ======================================== */
   /* AdminDashboard */
   --admin-primary: #fafafa;
-  --admin-accent: #dc2626;
+  --admin-accent: #059669;
   --admin-subtitle: #d4d4d4;
   --admin-border: rgba(220, 38, 38, 0.3);
   --admin-border-subtle: rgba(220, 38, 38, 0.1);
@@ -114,13 +118,13 @@
 
   /* OSINTDashboard */
   --osint-primary: #fafafa;
-  --osint-accent: #dc2626;
+  --osint-accent: #059669;
   --osint-border: rgba(220, 38, 38, 0.3);
   --osint-sidebar-bg: #171717;
 
   /* CyberDashboard */
   --cyber-primary: #fafafa;
-  --cyber-accent: #dc2626;
+  --cyber-accent: #059669;
   --cyber-border: rgba(220, 38, 38, 0.3);
   --cyber-sidebar-bg: #171717;
   --cyber-subtitle: #d4d4d4;
@@ -140,7 +144,7 @@
 body {
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-family: 'Courier New', 'Consolas', monospace;
+  font-family: "Courier New", "Consolas", monospace;
   margin: 0;
   padding: 0;
 }
@@ -157,7 +161,7 @@ body {
    ======================================== */
 .leaflet-container {
   background: #0a0a0a !important;
-  font-family: 'Courier New', monospace !important;
+  font-family: "Courier New", monospace !important;
 }
 
 .leaflet-popup-content-wrapper {
@@ -185,12 +189,12 @@ body {
 }
 
 .leaflet-popup-close-button {
-  color: #dc2626 !important;
+  color: #059669 !important;
   font-weight: bold !important;
 }
 
 .leaflet-popup-close-button:hover {
-  color: #ef4444 !important;
+  color: #10b981 !important;
 }
 
 .leaflet-tooltip {
@@ -202,7 +206,7 @@ body {
 
 /* Threat popup específico */
 .threat-popup {
-  font-family: 'Courier New', monospace !important;
+  font-family: "Courier New", monospace !important;
   min-width: 220px;
   background: transparent !important;
   color: #fafafa !important;
@@ -226,7 +230,7 @@ body {
 }
 
 .threat-popup-body strong {
-  color: #dc2626 !important;
+  color: #059669 !important;
   margin-right: 4px;
 }
 
@@ -257,13 +261,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+  background: linear-gradient(180deg, #059669 0%, #991b1b 100%);
   border-radius: 6px;
   border: 2px solid #171717;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
   box-shadow: 0 0 10px rgba(220, 38, 38, 0.8);
 }
 
@@ -271,7 +275,8 @@ body {
    ANIMATIONS
    ======================================== */
 @keyframes tactical-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
     border-color: rgba(220, 38, 38, 0.8);
   }
@@ -282,7 +287,8 @@ body {
 }
 
 @keyframes critical-alert {
-  0%, 100% {
+  0%,
+  100% {
     background: rgba(220, 38, 38, 0.2);
   }
   50% {

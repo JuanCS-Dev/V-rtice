@@ -41,12 +41,20 @@
 }
 
 .avatar.user {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(249, 115, 22, 0.2));
-  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(16, 185, 129, 0.2)
+  );
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .avatar.assistant {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(249, 115, 22, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(16, 185, 129, 0.2)
+  );
   border-color: rgba(16, 185, 129, 0.4);
 }
 
@@ -85,8 +93,12 @@
 }
 
 .messageBubble.user .messageText {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.15));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.15),
+    rgba(16, 185, 129, 0.15)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: #fafafa;
 }
 
@@ -110,8 +122,8 @@
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.875rem;
-  color: #f97316;
-  border: 1px solid rgba(249, 115, 22, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .messageText :global(pre) {
@@ -120,7 +132,7 @@
   border-radius: 8px;
   overflow-x: auto;
   margin: 0.75rem 0;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .messageText :global(pre code) {
@@ -146,27 +158,27 @@
 }
 
 .messageText :global(em) {
-  color: #f97316;
+  color: #10b981;
 }
 
 .messageText :global(a) {
-  color: #f97316;
+  color: #10b981;
   text-decoration: underline;
   transition: color 0.2s ease;
 }
 
 .messageText :global(a:hover) {
-  color: #ef4444;
+  color: #10b981;
 }
 
 /* Error state */
 .messageBubble.error .messageText {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 .errorIcon {
-  color: #ef4444;
+  color: #10b981;
   margin-right: 0.5rem;
 }
 
@@ -195,7 +207,7 @@
 }
 
 .actionButton:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
   color: #fafafa;
 }

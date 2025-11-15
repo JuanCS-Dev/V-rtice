@@ -1,4 +1,3 @@
-
 .form {
   display: flex;
   flex-direction: column;
@@ -19,7 +18,7 @@
   width: 100%;
   padding: var(--space-3) var(--space-4);
   background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  border: 1px solid rgba(16, 185, 129, 0.5);
   border-radius: var(--radius-md);
   color: #fff;
   font-family: var(--font-mono);
@@ -29,13 +28,13 @@
 }
 
 .input::placeholder {
-  color: rgba(239, 68, 68, 0.5);
+  color: rgba(16, 185, 129, 0.5);
   font-family: var(--font-mono);
 }
 
 .input:focus {
   border-color: var(--color-osint-primary);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
   background: rgba(0, 0, 0, 0.7);
 }
 
@@ -94,10 +93,10 @@
 }
 
 .platformButton.active {
-  background: rgba(239, 68, 68, 0.2); /* --color-osint-primary with alpha */
+  background: rgba(16, 185, 129, 0.2); /* --color-osint-primary with alpha */
   border-color: var(--color-osint-primary);
   color: var(--color-osint-primary);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
 .platformButton:disabled {
@@ -131,7 +130,7 @@
 }
 
 .error {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, #10b981);
   font-size: var(--text-sm);
   margin-top: var(--space-1);
   display: flex;

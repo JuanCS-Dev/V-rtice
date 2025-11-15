@@ -15,7 +15,11 @@
 .header h2 {
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent, #ef4444));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent, #10b981)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -211,7 +215,7 @@
 }
 
 .logTarget {
-  color: var(--color-accent, #ef4444);
+  color: var(--color-accent, #10b981);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

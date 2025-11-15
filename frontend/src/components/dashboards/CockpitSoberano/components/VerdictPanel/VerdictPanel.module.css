@@ -30,7 +30,7 @@
   font-weight: var(--font-bold);
   color: var(--color-text-primary, #ffffff);
   margin: 0;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   letter-spacing: 0.05em;
 }
 
@@ -56,8 +56,8 @@
 }
 
 .disconnected {
-  background: var(--color-danger, #ef4444);
-  box-shadow: 0 0 10px var(--color-danger, #ef4444);
+  background: var(--color-danger, #10b981);
+  box-shadow: 0 0 10px var(--color-danger, #10b981);
 }
 
 .statusText {
@@ -65,7 +65,7 @@
   font-weight: var(--font-semibold);
   color: var(--color-text-secondary, #9ca3af);
   letter-spacing: 0.05em;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .filterBar {
@@ -82,7 +82,7 @@
   color: var(--color-text-secondary, #9ca3af);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   cursor: pointer;
   transition: all var(--transition-base);
   display: flex;
@@ -131,7 +131,7 @@
 }
 
 .verdictTimeline::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ef4444 0%, #f97316 100%);
+  background: linear-gradient(180deg, #10b981 0%, #10b981 100%);
   border-radius: 4px;
 }
 
@@ -157,17 +157,18 @@
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
   margin: 0;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .emptyState small {
   font-size: var(--text-sm);
   opacity: 0.7;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

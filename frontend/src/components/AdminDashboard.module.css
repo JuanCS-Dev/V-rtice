@@ -10,7 +10,7 @@
   width: 100vw;
   background: var(--dashboard-bg);
   color: var(--admin-primary, var(--color-text-primary));
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   overflow: hidden;
 }
 
@@ -430,7 +430,7 @@
 
 .alertItem.critical {
   border-color: var(--status-offline-color);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
   color: var(--status-offline-color);
 }
 
@@ -448,7 +448,7 @@
 
 .alertItem.info {
   border-color: var(--color-info);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
   color: var(--color-info);
 }
 
@@ -677,7 +677,7 @@
   color: var(--color-warning);
   padding: var(--space-md);
   border-radius: var(--radius-sm);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: var(--text-sm);
   cursor: pointer;
 }
@@ -688,7 +688,7 @@
   padding: var(--space-lg);
   height: 384px;
   overflow-y: auto;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: var(--text-sm);
 }
 
@@ -810,7 +810,8 @@
    ANIMATIONS
    ============================================ */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

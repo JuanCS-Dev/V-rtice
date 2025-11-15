@@ -1,4 +1,3 @@
-
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -27,20 +26,20 @@
 
 .typeButton:hover:not(:disabled) {
   border-color: var(--color-critical);
-  background: rgba(255, 0, 64, 0.1); /* --color-critical with alpha */
+  background: rgba(16, 185, 129, 0.1); /* --color-critical with alpha */
 }
 
 .typeButton.active {
-  background: rgba(255, 0, 64, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   border-color: var(--color-critical);
   color: var(--color-critical);
   font-weight: var(--font-bold);
-  box-shadow: 0 0 15px rgba(255, 0, 64, 0.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
 .typeButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .typeIcon {
@@ -85,7 +84,7 @@
 }
 
 .error {
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, #10b981);
   font-size: var(--text-sm);
   margin-top: var(--space-1);
   display: flex;

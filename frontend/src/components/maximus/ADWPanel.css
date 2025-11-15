@@ -12,7 +12,7 @@
   background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
   color: #00ff9f;
   padding: 2rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   animation: fadeIn 0.5s ease-in;
 }
 
@@ -105,11 +105,11 @@
 
 .status-badge.red-team {
   border-color: #ff4444;
-  background: rgba(255, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .status-badge.red-team.active {
-  box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
 }
 
 .status-badge.blue-team {
@@ -161,7 +161,7 @@
   border: none;
   border-bottom: 3px solid transparent;
   color: #6c757d;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s;
@@ -408,7 +408,7 @@
   border: 2px solid rgba(0, 255, 159, 0.3);
   border-radius: 6px;
   color: #00ff9f;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.9rem;
   transition: all 0.3s;
 }
@@ -425,11 +425,15 @@
 
 .control-button {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, rgba(0, 255, 159, 0.2), rgba(0, 255, 159, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 159, 0.2),
+    rgba(0, 255, 159, 0.1)
+  );
   border: 2px solid #00ff9f;
   border-radius: 8px;
   color: #00ff9f;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
@@ -438,7 +442,11 @@
 }
 
 .control-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(0, 255, 159, 0.3), rgba(0, 255, 159, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 159, 0.3),
+    rgba(0, 255, 159, 0.2)
+  );
   box-shadow: 0 0 20px rgba(0, 255, 159, 0.4);
   transform: translateY(-2px);
 }
@@ -803,7 +811,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

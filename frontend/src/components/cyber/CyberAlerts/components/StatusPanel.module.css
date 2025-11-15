@@ -1,7 +1,6 @@
-
 .container {
   padding: var(--space-4);
-  border-bottom: var(--border-1) solid rgba(239, 68, 68, 0.3);
+  border-bottom: var(--border-1) solid rgba(16, 185, 129, 0.3);
 }
 
 .title {
@@ -25,7 +24,7 @@
 }
 
 .label {
-  color: rgba(239, 68, 68, 0.7);
+  color: rgba(16, 185, 129, 0.7);
   font-size: var(--text-sm);
 }
 
@@ -43,7 +42,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

@@ -21,14 +21,18 @@
   width: 50px;
   height: 50px;
   border: 4px solid #1f2937;
-  border-top: 4px solid #ef4444;
+  border-top: 4px solid #10b981;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Widget Header */
@@ -78,8 +82,8 @@
 }
 
 .system-state-badge[data-state="exploring"] {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #10b981;
+  color: #10b981;
 }
 
 .system-state-badge[data-state="exploiting"] {
@@ -93,8 +97,8 @@
 }
 
 .system-state-badge[data-state="critical"] {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #10b981;
+  color: #10b981;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -115,15 +119,27 @@
 }
 
 .modulator-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
 }
 
-.dopamine-card:hover { border-color: #ec4899; box-shadow: 0 8px 24px rgba(236, 72, 153, 0.2); }
-.serotonin-card:hover { border-color: #ef4444; box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2); }
-.acetylcholine-card:hover { border-color: #10b981; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2); }
-.noradrenaline-card:hover { border-color: #f59e0b; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2); }
+.dopamine-card:hover {
+  border-color: #ec4899;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.2);
+}
+.serotonin-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+}
+.acetylcholine-card:hover {
+  border-color: #10b981;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+}
+.noradrenaline-card:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+}
 
 .modulator-header {
   display: flex;
@@ -165,8 +181,8 @@
 .value-current {
   font-size: 2rem;
   font-weight: 700;
-  color: #ef4444;
-  font-family: 'Courier New', monospace;
+  color: #10b981;
+  font-family: "Courier New", monospace;
 }
 
 .value-unit {
@@ -186,10 +202,12 @@
 
 .bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ef4444, #ef4444);
+  background: linear-gradient(90deg, #10b981, #10b981);
   border-radius: 6px;
-  transition: width 0.5s ease, background-color 0.5s ease;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  transition:
+    width 0.5s ease,
+    background-color 0.5s ease;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
 }
 
 .modulator-stats {
@@ -214,7 +232,7 @@
 
 .stat-value {
   color: #e5e7eb;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: 600;
 }
 
@@ -284,16 +302,24 @@
 }
 
 .legend-item::before {
-  content: '';
+  content: "";
   width: 20px;
   height: 4px;
   border-radius: 2px;
 }
 
-.legend-dopamine::before { background: #ec4899; }
-.legend-serotonin::before { background: #ef4444; }
-.legend-acetylcholine::before { background: #10b981; }
-.legend-noradrenaline::before { background: #f59e0b; }
+.legend-dopamine::before {
+  background: #ec4899;
+}
+.legend-serotonin::before {
+  background: #10b981;
+}
+.legend-acetylcholine::before {
+  background: #10b981;
+}
+.legend-noradrenaline::before {
+  background: #f59e0b;
+}
 
 .chart-grid {
   display: flex;
@@ -325,10 +351,18 @@
   transform: scaleY(1.05);
 }
 
-.bar-dopamine { background: linear-gradient(to top, #ec4899, #f472b6); }
-.bar-serotonin { background: linear-gradient(to top, #ef4444, #f87171); }
-.bar-acetylcholine { background: linear-gradient(to top, #10b981, #34d399); }
-.bar-noradrenaline { background: linear-gradient(to top, #f59e0b, #fbbf24); }
+.bar-dopamine {
+  background: linear-gradient(to top, #ec4899, #f472b6);
+}
+.bar-serotonin {
+  background: linear-gradient(to top, #10b981, #f87171);
+}
+.bar-acetylcholine {
+  background: linear-gradient(to top, #10b981, #34d399);
+}
+.bar-noradrenaline {
+  background: linear-gradient(to top, #f59e0b, #fbbf24);
+}
 
 .chart-empty {
   display: flex;
@@ -343,15 +377,19 @@
 .bio-inspiration {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ef4444;
+  color: #10b981;
   margin: 0 0 1rem 0;
 }
 

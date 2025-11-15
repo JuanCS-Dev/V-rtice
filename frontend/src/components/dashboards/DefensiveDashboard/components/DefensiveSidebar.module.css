@@ -3,7 +3,7 @@
  * DEFENSIVE SIDEBAR - Landing Page Pattern
  * ═══════════════════════════════════════════════════════════════════════════
  * Real-time Alerts & Activity Feed
- * SOURCE OF TRUTH: Purple (#ef4444) + Cyan (#f97316)
+ * SOURCE OF TRUTH: Purple (#10b981) + Cyan (#10b981)
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -13,7 +13,11 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
   border-left: 2px solid var(--color-border-primary);
 }
 
@@ -32,14 +36,14 @@
   color: var(--color-accent-primary);
   margin: 0 0 var(--space-xs) 0;
   letter-spacing: 0.05em;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .count {
   font-size: var(--text-xs);
   opacity: 0.7;
   color: var(--color-text-secondary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -109,7 +113,7 @@
 .alertType {
   font-weight: bold;
   font-size: var(--text-xs);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   letter-spacing: 0.05em;
 }
 
@@ -119,7 +123,7 @@
   font-weight: 600;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   letter-spacing: 0.05em;
 }
 
@@ -134,7 +138,7 @@
 .alertSource {
   font-size: var(--text-xs);
   opacity: 0.7;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: var(--color-text-muted);
 }
 
@@ -151,17 +155,17 @@
  * SEVERITY COLORS
  * ═══════════════════════════════════════════════════════════════════════ */
 .alertItem.critical {
-  border-left-color: var(--severity-critical, #ef4444);
+  border-left-color: var(--severity-critical, #10b981);
 }
 
 .alertItem.critical .alertType {
-  color: var(--severity-critical, #ef4444);
+  color: var(--severity-critical, #10b981);
 }
 
 .alertItem.critical .alertSeverityBadge {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--severity-critical, #ef4444);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--severity-critical, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 .alertItem.high {
@@ -179,17 +183,17 @@
 }
 
 .alertItem.medium {
-  border-left-color: var(--severity-medium, #ef4444);
+  border-left-color: var(--severity-medium, #10b981);
 }
 
 .alertItem.medium .alertType {
-  color: var(--severity-medium, #ef4444);
+  color: var(--severity-medium, #10b981);
 }
 
 .alertItem.medium .alertSeverityBadge {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--severity-medium, #ef4444);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--severity-medium, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
 .alertItem.low {
@@ -236,7 +240,7 @@
   opacity: 0.7;
   font-weight: 600;
   letter-spacing: 0.1em;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: var(--color-text-muted);
 }
 
@@ -259,11 +263,11 @@
 
 .statValue {
   font-weight: bold;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .statValue.critical {
-  color: var(--severity-critical, #ef4444);
+  color: var(--severity-critical, #10b981);
 }
 
 .statValue.high {

@@ -36,7 +36,7 @@
   box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
 }
 .pulseCircle.orange {
-  border-color: #ffa500;
+  border-color: #34d399;
   box-shadow: 0 0 40px rgba(255, 165, 0, 0.4);
 }
 .pulseCircle.red {
@@ -101,7 +101,7 @@
   color: #ffd700;
 }
 .heartbeatLine.orange {
-  color: #ffa500;
+  color: #34d399;
 }
 .heartbeatLine.red {
   color: #ff6b6b;
@@ -178,7 +178,7 @@
   background: #ffd700;
 }
 .vitalFill.orange {
-  background: #ffa500;
+  background: #34d399;
 }
 .vitalFill.red {
   background: #ff6b6b;

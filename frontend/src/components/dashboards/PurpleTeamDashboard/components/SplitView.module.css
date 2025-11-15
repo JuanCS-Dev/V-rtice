@@ -33,14 +33,14 @@
 
 .headerIcon {
   font-size: var(--text-4xl);
-  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5));
 }
 
 .redTitle {
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-status-danger);
-  text-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
   letter-spacing: 0.05em;
   margin: 0;
 }
@@ -49,7 +49,7 @@
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-accent-secondary);
-  text-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
   letter-spacing: 0.05em;
   margin: 0;
 }
@@ -62,7 +62,11 @@
 }
 
 .headerBadge {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(220, 38, 38, 0.2) 100%
+  );
   border: 1px solid var(--color-border-primary);
   color: var(--color-accent-primary);
   padding: var(--space-md) var(--space-lg);
@@ -88,7 +92,7 @@
 }
 
 .panelContent::-webkit-scrollbar-thumb {
-  background: rgba(239, 68, 68, 0.3);
+  background: rgba(16, 185, 129, 0.3);
   border-radius: 4px;
 }
 
@@ -106,7 +110,7 @@
 .spinner {
   width: 50px;
   height: 50px;
-  border: 3px solid rgba(239, 68, 68, 0.2);
+  border: 3px solid rgba(16, 185, 129, 0.2);
   border-top-color: var(--color-accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -135,24 +139,24 @@
 }
 
 .attackCard {
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   border-left: 4px solid var(--color-status-danger);
 }
 
 .attackCard:hover {
   border-color: var(--color-status-danger);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
   transform: translateY(-10px) scale(1.02);
 }
 
 .detectionCard {
-  border: 1px solid rgba(249, 115, 22, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   border-left: 4px solid var(--color-accent-secondary);
 }
 
 .detectionCard:hover {
   border-color: var(--color-accent-secondary);
-  box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
   transform: translateY(-10px) scale(1.02);
 }
 
@@ -211,13 +215,13 @@
 .severity.critical {
   background: rgba(139, 0, 0, 0.3);
   color: var(--color-status-danger);
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .severity.high {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   color: var(--color-status-danger);
-  border-color: rgba(239, 68, 68, 0.5);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .severity.medium {
@@ -268,15 +272,23 @@
 
 .progressBar {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-status-warning) 0%, var(--color-status-danger) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--color-status-warning) 0%,
+    var(--color-status-danger) 100%
+  );
   transition: width var(--transition-base);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
 }
 
 .correlationIndicator {
   margin-top: var(--space-md);
   padding: var(--space-md);
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(16, 185, 129, 0.2) 0%,
+    rgba(220, 38, 38, 0.1) 100%
+  );
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-sm);
   text-align: center;
@@ -293,7 +305,11 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-lg);
-  background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(16, 185, 129, 0.05) 0%,
+    rgba(220, 38, 38, 0.05) 100%
+  );
   border-left: 1px solid var(--color-border-primary);
   border-right: 1px solid var(--color-border-primary);
   position: relative;
@@ -304,13 +320,18 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg, transparent 0%, var(--color-accent-primary) 50%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--color-accent-primary) 50%,
+    transparent 100%
+  );
   animation: flowDown 3s ease-in-out infinite;
 }
 
 .connectorIcon {
   font-size: var(--text-5xl);
-  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+  filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8));
   animation: pulseScale 2s ease-in-out infinite;
   z-index: 1;
 }
@@ -327,7 +348,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
@@ -342,7 +365,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -351,16 +375,18 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
   }
   50% {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
   }
 }
 
 @keyframes pulseScale {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {

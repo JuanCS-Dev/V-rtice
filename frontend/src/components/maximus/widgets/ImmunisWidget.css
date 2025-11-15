@@ -46,7 +46,7 @@
 
 .gauge-text {
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .gauge-label {
@@ -73,9 +73,9 @@
 }
 
 .immune-stat-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 /* Immunity Comparison */
@@ -92,13 +92,21 @@
 }
 
 .innate-column {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(5, 150, 105, 0.1)
+  );
   border-color: rgba(16, 185, 129, 0.5);
 }
 
 .adaptive-column {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(124, 58, 237, 0.1));
-  border-color: rgba(239, 68, 68, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(124, 58, 237, 0.1)
+  );
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .column-title {
@@ -156,7 +164,7 @@
 .btn-view-details {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #10b981, #059669);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -167,9 +175,9 @@
 }
 
 .btn-view-details:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: linear-gradient(135deg, #059669, #b91c1c);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* Innate View */
@@ -203,7 +211,7 @@
 }
 
 .stat-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
 }
 
@@ -213,14 +221,14 @@
 }
 
 .stat-card span {
-  color: #ef4444;
+  color: #10b981;
   font-size: 1.25rem;
   font-weight: 700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .inflammation-high {
-  color: #ef4444 !important;
+  color: #10b981 !important;
 }
 
 .inflammation-low {
@@ -281,20 +289,20 @@
   padding: 1rem;
   background: linear-gradient(135deg, #1f2937, #111827);
   border: 1px solid #374151;
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #10b981;
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .cytokine-signal-item:hover {
   border-left-color: #f87171;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(16, 185, 129, 0.1);
   transform: translateX(4px);
 }
 
 .signal-type {
   font-weight: 700;
-  color: #ef4444;
+  color: #10b981;
 }
 
 .signal-path {
@@ -304,7 +312,7 @@
 
 .signal-effect {
   padding: 0.25rem 0.75rem;
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(16, 185, 129, 0.2);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -315,7 +323,7 @@
 .signal-concentration {
   font-size: 0.85rem;
   color: #6b7280;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* Antibodies */
@@ -359,7 +367,7 @@
 .antibody-affinity {
   font-size: 0.8rem;
   color: #9ca3af;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .antibody-body {
@@ -397,9 +405,9 @@
 }
 
 .memory-cell-card:hover {
-  border-color: #ef4444;
+  border-color: #10b981;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .memory-header {
@@ -411,7 +419,7 @@
 
 .cell-type {
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #10b981, #059669);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -445,15 +453,19 @@
 .bio-inspiration {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 12px;
 }
 
 .bio-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ef4444;
+  color: #10b981;
   margin: 0 0 1rem 0;
 }
 
