@@ -399,7 +399,9 @@ const AnomalyDetectionWidget = () => {
         }
 
         .analytics-textarea:focus {
-          outline: none;
+          /* Boris Cherny Standard - WCAG 2.1 AAA: Focus Indicator (GAP #26) */
+          outline: 3px solid #00aaff;
+          outline-offset: 2px;
           border-color: #00aaff;
           box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
         }
@@ -435,7 +437,9 @@ const AnomalyDetectionWidget = () => {
         }
 
         .analytics-select:focus {
-          outline: none;
+          /* Boris Cherny Standard - WCAG 2.1 AAA: Focus Indicator (GAP #26) */
+          outline: 3px solid #00aaff;
+          outline-offset: 2px;
           border-color: #00aaff;
         }
 
@@ -444,8 +448,17 @@ const AnomalyDetectionWidget = () => {
           height: 6px;
           border-radius: 3px;
           background: rgba(0, 170, 255, 0.1);
-          outline: none;
+          /* Boris Cherny Standard - WCAG 2.1 AAA: Focus Indicator (GAP #26) */
+          outline: 3px solid transparent;
+          outline-offset: 2px;
           -webkit-appearance: none;
+        }
+
+        .analytics-slider:focus {
+          /* Boris Cherny Standard - WCAG 2.1 AAA: Focus Indicator (GAP #26) */
+          outline: 3px solid #00aaff;
+          outline-offset: 2px;
+          box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
         }
 
         .analytics-slider::-webkit-slider-thumb {

@@ -31,7 +31,14 @@ export const Alert = ({
   };
 
   return (
-    <div className={alertClasses} {...props}>
+    <div
+      className={alertClasses}
+      {/* Boris Cherny Standard - WCAG 2.1 AAA: Alert role (GAP #25) */}
+      role="alert"
+      aria-live={variant === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+      {...props}
+    >
       <div className={styles.icon}>
         {icon || getDefaultIcon()}
       </div>

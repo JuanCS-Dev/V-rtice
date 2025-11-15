@@ -161,12 +161,18 @@ const Header = ({
         <div className="p-4 bg-gradient-to-r from-green-900/20 to-orange-900/20">
           <div className="flex items-center space-x-4">
             <div className="flex-1 relative">
+              {/* Boris Cherny Standard - WCAG 2.1 AAA: Input Label (GAP #24) */}
+              <label htmlFor="vehicle-plate-input" className="sr-only">
+                Vehicle Plate
+              </label>
               <input
+                id="vehicle-plate-input"
                 type="text"
                 value={placa}
                 onChange={(e) => setPlaca(e.target.value.toUpperCase())}
                 onKeyPress={handleKeyPress}
                 placeholder=">>> INSERIR PLACA DO VEÍCULO"
+                aria-label="Vehicle plate number"
                 className="w-full bg-black/70 border border-green-400/50 text-green-400 placeholder-green-400/50 p-3 rounded-lg focus:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/50"
                 disabled={loading}
               />
