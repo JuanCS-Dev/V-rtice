@@ -193,17 +193,57 @@ export const getConsciousnessMetrics = async () => {
  * @param {Function} onMessage - Callback para mensagens (message) => {}
  * @param {Function} onError - Callback para erros (error) => {}
  * @returns {WebSocket} Conexão WebSocket
+ *
+ * Boris Cherny Standard: API key sent after connection, not in URL (GAP #23 fix)
+ * SECURITY: Never expose credentials in WebSocket URLs (visible in logs/proxies)
+ *
+ * Boris Cherny Standard: CLEANUP RESPONSIBILITY (GAP #21 documentation)
+ * The caller MUST clean up the returned WebSocket to prevent memory leaks.
+ *
+ * @example React Hook Cleanup
+ * ```javascript
+ * useEffect(() => {
+ *   const ws = connectConsciousnessWebSocket(handleMessage, handleError);
+ *
+ *   return () => {
+ *     if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+ *       ws.close(1000, 'Component unmount');
+ *     }
+ *   };
+ * }, []);
+ * ```
+ *
+ * @example Manual Cleanup
+ * ```javascript
+ * const ws = connectConsciousnessWebSocket(handleMessage, handleError);
+ * // ... use WebSocket ...
+ * // When done:
+ * if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+ *   ws.close(1000, 'Manual disconnect');
+ * }
+ * ```
  */
 export const connectConsciousnessWebSocket = (onMessage, onError = null) => {
   const apiKey = getApiKey();
   const wsBase = CONSCIOUSNESS_GATEWAY_URL.replace(/^http/, "ws");
-  const wsUrl = `${wsBase}/stream/consciousness/ws${apiKey ? `?api_key=${apiKey}` : ""}`;
+  const wsUrl = `${wsBase}/stream/consciousness/ws`; // Boris Cherny Standard: NO API key in URL (GAP #23 fix)
 
   try {
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       logger.debug("🧠 Consciousness WebSocket connected");
+
+      // Boris Cherny Standard: Send API key after connection (GAP #23 fix)
+      // SECURITY: Credentials sent in message payload, not URL
+      if (apiKey) {
+        ws.send(
+          JSON.stringify({
+            type: "auth",
+            api_key: apiKey,
+          }),
+        );
+      }
     };
 
     ws.onmessage = (event) => {

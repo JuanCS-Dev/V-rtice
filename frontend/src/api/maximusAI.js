@@ -302,6 +302,36 @@ export const chatWithMaximus = async (message, context = {}, onChunk = null) => 
 
 /**
  * WebSocket connection para streaming real-time
+ *
+ * Boris Cherny Standard: CLEANUP RESPONSIBILITY (GAP #21 documentation)
+ * The caller MUST clean up the returned WebSocket to prevent memory leaks.
+ *
+ * @param {Function} onMessage - Callback para mensagens recebidas
+ * @param {Function} onError - Callback para erros (opcional)
+ * @returns {WebSocket} Conexão WebSocket - CALLER MUST CLEAN UP!
+ *
+ * @example React Hook Cleanup
+ * ```javascript
+ * useEffect(() => {
+ *   const ws = connectMaximusStream(handleMessage, handleError);
+ *
+ *   return () => {
+ *     if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+ *       ws.close(1000, 'Component unmount');
+ *     }
+ *   };
+ * }, []);
+ * ```
+ *
+ * @example Manual Cleanup
+ * ```javascript
+ * const ws = connectMaximusStream(handleMessage, handleError);
+ * // ... use WebSocket ...
+ * // When done:
+ * if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+ *   ws.close(1000, 'Manual disconnect');
+ * }
+ * ```
  */
 export const connectMaximusStream = (onMessage, onError = null) => {
   const wsUrl = getWebSocketEndpoint('maximus.stream');

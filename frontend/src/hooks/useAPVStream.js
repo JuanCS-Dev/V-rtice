@@ -72,11 +72,12 @@ export const useAPVStream = ({
   const [metrics, setMetrics] = useState(null);
   const [lastHeartbeat, setLastHeartbeat] = useState(null);
   const [error, setError] = useState(null);
-  const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
   // Refs (persist across renders)
+  // Boris Cherny Standard: Use ref for reconnectAttempts to avoid stale closure (GAP #22 fix)
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const reconnectAttemptsRef = useRef(0);
   const callbacksRef = useRef({ onApv, onPatch, onMetrics, onConnect, onDisconnect, onError });
 
   // Update callbacks ref when they change
@@ -112,9 +113,9 @@ export const useAPVStream = ({
       ws.onopen = () => {
         logger.info('[useAPVStream] ✅ Connected');
         setStatus(WS_STATES.CONNECTED);
-        setReconnectAttempts(0);
+        reconnectAttemptsRef.current = 0; // Boris Cherny Standard: Reset via ref
         setError(null);
-        
+
         if (callbacksRef.current.onConnect) {
           callbacksRef.current.onConnect();
         }
@@ -175,19 +176,19 @@ export const useAPVStream = ({
           callbacksRef.current.onDisconnect(event);
         }
 
+        // Boris Cherny Standard: Use ref to avoid stale closure (GAP #22 fix)
         // Attempt reconnect if not at max attempts
-        if (reconnectAttempts < maxReconnectAttempts && autoConnect) {
-          const attempt = reconnectAttempts + 1;
-          setReconnectAttempts(attempt);
+        if (reconnectAttemptsRef.current < maxReconnectAttempts && autoConnect) {
+          reconnectAttemptsRef.current += 1;
           setStatus(WS_STATES.RECONNECTING);
-          
-          logger.info(`[useAPVStream] Reconnecting in ${reconnectDelay}ms (attempt ${attempt}/${maxReconnectAttempts})`);
-          
+
+          logger.info(`[useAPVStream] Reconnecting in ${reconnectDelay}ms (attempt ${reconnectAttemptsRef.current}/${maxReconnectAttempts})`);
+
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, reconnectDelay);
         } else {
-          if (reconnectAttempts >= maxReconnectAttempts) {
+          if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
             logger.error('[useAPVStream] Max reconnect attempts reached');
             setError('Max reconnect attempts reached');
           }
@@ -211,7 +212,8 @@ export const useAPVStream = ({
       setStatus(WS_STATES.ERROR);
       setError(err.message);
     }
-  }, [url, reconnectDelay, maxReconnectAttempts, autoConnect, reconnectAttempts]);
+    // Boris Cherny Standard: Remove reconnectAttempts from deps (GAP #22 fix)
+  }, [url, reconnectDelay, maxReconnectAttempts, autoConnect]);
 
   /**
    * Disconnect from WebSocket
@@ -232,7 +234,7 @@ export const useAPVStream = ({
     }
 
     setStatus(WS_STATES.DISCONNECTED);
-    setReconnectAttempts(0);
+    reconnectAttemptsRef.current = 0; // Boris Cherny Standard: Reset via ref
   }, []);
 
   /**
@@ -279,14 +281,14 @@ export const useAPVStream = ({
     metrics,
     lastHeartbeat,
     error,
-    reconnectAttempts,
-    
+    reconnectAttempts: reconnectAttemptsRef.current, // Boris Cherny Standard: Expose ref value
+
     // Computed
     isConnected: status === WS_STATES.CONNECTED,
     isConnecting: status === WS_STATES.CONNECTING,
     isReconnecting: status === WS_STATES.RECONNECTING,
     hasError: status === WS_STATES.ERROR,
-    
+
     // Controls
     connect,
     disconnect,

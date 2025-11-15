@@ -11,8 +11,20 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import logger from "@/utils/logger";
 
 const WS_URL = import.meta.env.VITE_VERDICT_ENGINE_WS || 'ws://34.148.161.131:8000/ws/verdicts';
-const RECONNECT_DELAY = 3000;
 const MAX_VERDICTS = 100;
+
+/**
+ * Boris Cherny Standard: Exponential backoff for reconnection
+ * Fixes GAP #18: No exponential backoff
+ * @param {number} attempt - Current reconnection attempt (0-indexed)
+ * @returns {number} Delay in milliseconds
+ */
+const getReconnectDelay = (attempt) => {
+  return Math.min(
+    1000 * Math.pow(2, attempt), // 1s, 2s, 4s, 8s, 16s, 32s...
+    60000 // Max 60 seconds
+  );
+};
 
 export const useVerdictStream = () => {
   const [verdicts, setVerdicts] = useState([]);
@@ -28,6 +40,7 @@ export const useVerdictStream = () => {
 
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const reconnectAttemptsRef = useRef(0); // Boris Cherny Standard: Track attempts without causing re-renders
 
   const connect = useCallback(() => {
     try {
@@ -37,6 +50,7 @@ export const useVerdictStream = () => {
         console.log('[VerdictStream] Connected to Verdict Engine');
         setIsConnected(true);
         setError(null);
+        reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
       };
 
       ws.onmessage = (event) => {
@@ -66,12 +80,17 @@ export const useVerdictStream = () => {
       };
 
       ws.onclose = () => {
-        console.log('[VerdictStream] Disconnected, reconnecting in 3s...');
         setIsConnected(false);
-        
+
+        // Boris Cherny Standard: Exponential backoff (GAP #18 fix)
+        const delay = getReconnectDelay(reconnectAttemptsRef.current);
+        console.log(`[VerdictStream] Disconnected, reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`);
+
+        reconnectAttemptsRef.current += 1;
+
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
-        }, RECONNECT_DELAY);
+        }, delay);
       };
 
       wsRef.current = ws;
@@ -92,7 +111,10 @@ export const useVerdictStream = () => {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [connect]);
+    // Boris Cherny Standard: Only depend on URL, not connect function
+    // Fixes GAP #4: Infinite loop caused by connect in dependency array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const dismissVerdict = useCallback((verdictId) => {
     setVerdicts(prev => prev.filter(v => v.id !== verdictId));

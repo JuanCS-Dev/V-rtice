@@ -130,18 +130,23 @@ const HITLDecisionConsole = () => {
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log('📨 WebSocket message:', data);
+      // Boris Cherny Standard: Protected JSON.parse (GAP #19 fix)
+      try {
+        const data = JSON.parse(event.data);
+        console.log('📨 WebSocket message:', data);
 
-      if (data.type === 'alert' && data.alert.alert_type === 'new_decision') {
-        // New decision arrived - refetch
-        fetchPendingDecisions();
-        fetchStats();
+        if (data.type === 'alert' && data.alert.alert_type === 'new_decision') {
+          // New decision arrived - refetch
+          fetchPendingDecisions();
+          fetchStats();
 
-        // Play sound for critical decisions
-        if (data.alert.priority === 'critical') {
-          playAlertSound();
+          // Play sound for critical decisions
+          if (data.alert.priority === 'critical') {
+            playAlertSound();
+          }
         }
+      } catch (error) {
+        logger.error('Failed to parse WebSocket message:', error);
       }
     };
 
@@ -157,8 +162,11 @@ const HITLDecisionConsole = () => {
 
     setWsConnection(ws);
 
+    // Boris Cherny Standard: Proper cleanup on unmount (GAP #20 fix)
     return () => {
-      ws.close();
+      if (ws?.readyState === WebSocket.OPEN || ws?.readyState === WebSocket.CONNECTING) {
+        ws.close(1000, 'Component unmount');
+      }
     };
   }, [fetchPendingDecisions, fetchStats]);
 

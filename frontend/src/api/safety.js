@@ -123,16 +123,29 @@ export const executeEmergencyShutdown = async (
  */
 
 /**
+ * Boris Cherny Standard: Maximum reconnection attempts
+ * Fixes GAP #17: Infinite reconnection without limit
+ */
+const MAX_RECONNECT_ATTEMPTS = 10;
+
+/**
  * Conecta ao WebSocket de consciência para receber atualizações de segurança
  * @param {function} onMessage - Callback para mensagens recebidas
  * @param {function} onError - Callback para erros
+ * @param {number} reconnectAttempts - Internal counter for reconnection attempts
  */
-export const connectSafetyWebSocket = (onMessage, onError) => {
+export const connectSafetyWebSocket = (
+  onMessage,
+  onError,
+  reconnectAttempts = 0,
+) => {
   try {
     const ws = new WebSocket(`${WS_BASE_URL}/ws`);
 
     ws.onopen = () => {
       logger.debug("🔌 Safety WebSocket connected");
+      // Reset reconnect attempts on successful connection
+      reconnectAttempts = 0;
     };
 
     ws.onmessage = (event) => {
@@ -151,10 +164,24 @@ export const connectSafetyWebSocket = (onMessage, onError) => {
 
     ws.onclose = () => {
       logger.debug("🔌 Safety WebSocket disconnected");
+
+      // Boris Cherny Standard: Check max attempts before reconnecting (GAP #17 fix)
+      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        logger.error(
+          `❌ Max reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached. Stopping reconnection.`,
+        );
+        if (onError) onError(new Error("Max reconnect attempts reached"));
+        return;
+      }
+
       // Auto-reconnect after 5 seconds
+      const nextAttempt = reconnectAttempts + 1;
+      logger.debug(
+        `🔄 Reconnecting Safety WebSocket... (attempt ${nextAttempt}/${MAX_RECONNECT_ATTEMPTS})`,
+      );
+
       setTimeout(() => {
-        logger.debug("🔄 Reconnecting Safety WebSocket...");
-        connectSafetyWebSocket(onMessage, onError);
+        connectSafetyWebSocket(onMessage, onError, nextAttempt);
       }, 5000);
     };
 
