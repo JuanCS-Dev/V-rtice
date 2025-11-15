@@ -10,19 +10,33 @@ import {
   Database,
   Settings,
   Lock,
+  Users,
+  Radar,
+  Zap,
+  FileText,
+  Gamepad2,
 } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  // P0 - Critical Systems
   { name: "Offensive", href: "/offensive", icon: ShieldAlert },
   { name: "Defensive", href: "/defensive", icon: Shield },
   { name: "OSINT", href: "/osint", icon: Search },
-  { name: "MAXIMUS", href: "/maximus", icon: Brain },
+  { name: "MAXIMUS AI", href: "/maximus", icon: Brain },
   { name: "Immunis", href: "/immunis", icon: HeartPulse },
+  // P1 - High Priority (New/Expanded)
+  { name: "HITL Workflow", href: "/hitl", icon: Users },
   { name: "Reactive Fabric", href: "/reactive-fabric", icon: Network },
+  { name: "Aurora", href: "/aurora", icon: Radar },
+  { name: "Thalamus", href: "/thalamus", icon: Zap },
+  // P2 - Medium Priority (New)
+  { name: "Narrative", href: "/narrative", icon: FileText },
+  { name: "Wargaming", href: "/wargaming", icon: Gamepad2 },
   { name: "SINESP", href: "/sinesp", icon: Database },
+  // Admin
   { name: "Admin", href: "/admin", icon: Lock },
   { name: "Settings", href: "/settings", icon: Settings },
 ];

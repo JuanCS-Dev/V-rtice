@@ -25,6 +25,11 @@ const ReactiveFabricPage = lazy(
   () => import("@/pages/ReactiveFabric/ReactiveFabricPage"),
 );
 const SINESPPage = lazy(() => import("@/pages/SINESP/SINESPPage"));
+const HITLPage = lazy(() => import("@/pages/HITL/HITLPage"));
+const AuroraPage = lazy(() => import("@/pages/Aurora/AuroraPage"));
+const ThalamusPage = lazy(() => import("@/pages/Thalamus/ThalamusPage"));
+const NarrativePage = lazy(() => import("@/pages/Narrative/NarrativePage"));
+const WargamingPage = lazy(() => import("@/pages/Wargaming/WargamingPage"));
 const AdminPage = lazy(() => import("@/pages/Admin/AdminPage"));
 const SettingsPage = lazy(() => import("@/pages/Settings/SettingsPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFound/NotFoundPage"));
@@ -109,6 +114,26 @@ const router = createBrowserRouter([
           {
             path: "sinesp",
             element: <SINESPPage />,
+          },
+          {
+            path: "hitl",
+            element: <HITLPage />,
+          },
+          {
+            path: "aurora",
+            element: <AuroraPage />,
+          },
+          {
+            path: "thalamus",
+            element: <ThalamusPage />,
+          },
+          {
+            path: "narrative",
+            element: <NarrativePage />,
+          },
+          {
+            path: "wargaming",
+            element: <WargamingPage />,
           },
           {
             path: "admin",
