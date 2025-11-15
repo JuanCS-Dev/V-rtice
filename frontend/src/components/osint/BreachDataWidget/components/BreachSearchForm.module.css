@@ -83,3 +83,12 @@
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+.error {
+  color: var(--color-danger, #ef4444);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}

@@ -17,16 +17,63 @@
  * - Keyboard accessible
  * - Security warning visible
  *
- * @version 2.0.0 (Maximus Vision)
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #42 FIXED: URL validation
+ * - maxLength on all inputs
+ * - Sanitization of user input
+ *
+ * @version 3.0.0 (Security Hardened)
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { validateURL } from '../../../../utils/validation';
+import { sanitizePlainText } from '../../../../utils/sanitization';
 
 export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
+  // Error state for validation feedback
+  const [urlError, setUrlError] = useState(null);
+
+  // Secure URL input handler
+  const handleUrlChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    onChange({ ...config, url: sanitized });
+    if (urlError) setUrlError(null);
+  };
+
+  // Validate URL on blur
+  const handleUrlBlur = () => {
+    if (!config.url.trim()) {
+      return;
+    }
+
+    const result = validateURL(config.url);
+    if (!result.valid) {
+      setUrlError(result.error);
+    } else {
+      setUrlError(null);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit();
+
+    // Validate before submission
+    if (!config.url.trim()) {
+      setUrlError('URL is required');
+      return;
+    }
+
+    const result = validateURL(config.url);
+    if (!result.valid) {
+      setUrlError(result.error);
+      return;
+    }
+
+    // Only proceed if no errors
+    if (!urlError && !isScanning) {
+      onSubmit();
+    }
   };
 
   const updateConfig = (field, value) => {
@@ -68,13 +115,28 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
             id="web-attack-url"
             type="url"
             value={config.url}
-            onChange={(e) => updateConfig('url', e.target.value)}
+            onChange={handleUrlChange}
+            onBlur={handleUrlBlur}
             placeholder="https://target.com"
             className="w-full bg-black/30 border-2 border-orange-400/30 rounded-lg px-4 py-3 text-orange-400 font-mono text-lg focus:outline-none focus:border-orange-400 transition-all placeholder-orange-400/30"
             required
             disabled={isScanning}
+            maxLength={500}
             aria-required="true"
+            aria-invalid={!!urlError}
+            aria-describedby={urlError ? "url-error" : undefined}
           />
+          {urlError && (
+            <div
+              id="url-error"
+              className="text-orange-400 text-xs mt-2 flex items-center gap-1"
+              role="alert"
+              aria-live="polite"
+            >
+              <span aria-hidden="true">⚠️</span>
+              {urlError}
+            </div>
+          )}
         </label>
       </div>
 

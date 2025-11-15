@@ -103,3 +103,12 @@
   font-family: var(--font-mono);
   color: var(--text-tertiary);
 }
+
+.error {
+  color: var(--color-danger, #ef4444);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}

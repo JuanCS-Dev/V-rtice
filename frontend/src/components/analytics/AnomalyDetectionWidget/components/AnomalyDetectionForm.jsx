@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../../../shared";
+import { validateNumericCSV } from '../../../../utils/validation';
+import { sanitizePlainText } from '../../../../utils/sanitization';
 import styles from "./AnomalyDetectionForm.module.css";
 
 const METHODS = [
@@ -11,6 +13,13 @@ const METHODS = [
 
 /**
  * Form for submitting anomaly detection jobs.
+ *
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #43 FIXED: Numeric CSV validation
+ * - maxLength on all inputs
+ * - Sanitization of user input
+ *
+ * @version 2.0.0 (Security Hardened)
  */
 const AnomalyDetectionForm = ({
   dataInput,
@@ -23,9 +32,49 @@ const AnomalyDetectionForm = ({
   onDetect,
   onGenerateSample,
 }) => {
+  // Error state for validation feedback
+  const [dataError, setDataError] = useState(null);
+
+  // Secure data input handler
+  const handleDataInputChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    setDataInput(sanitized);
+    if (dataError) setDataError(null);
+  };
+
+  // Validate data on blur
+  const handleDataInputBlur = () => {
+    if (!dataInput.trim()) {
+      return;
+    }
+
+    const result = validateNumericCSV(dataInput);
+    if (!result.valid) {
+      setDataError(result.error);
+    } else {
+      setDataError(null);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onDetect();
+
+    // Validate before submission
+    if (!dataInput.trim()) {
+      setDataError('Data is required');
+      return;
+    }
+
+    const result = validateNumericCSV(dataInput);
+    if (!result.valid) {
+      setDataError(result.error);
+      return;
+    }
+
+    // Only proceed if no errors
+    if (!dataError && !loading) {
+      onDetect();
+    }
   };
 
   return (
@@ -37,10 +86,24 @@ const AnomalyDetectionForm = ({
           className={styles.textarea}
           placeholder="1.2, 1.3, 1.1, 15.7, 1.4, 1.3, 1.2, ..."
           value={dataInput}
-          onChange={(e) => setDataInput(e.target.value)}
+          onChange={handleDataInputChange}
+          onBlur={handleDataInputBlur}
           rows={4}
           disabled={loading}
+          maxLength={10000}
+          aria-invalid={!!dataError}
+          aria-describedby={dataError ? "data-error" : undefined}
         />
+        {dataError && (
+          <div
+            id="data-error"
+            className={styles.error}
+            role="alert"
+            aria-live="polite"
+          >
+            {dataError}
+          </div>
+        )}
         <button
           type="button"
           className={styles.sampleButton}

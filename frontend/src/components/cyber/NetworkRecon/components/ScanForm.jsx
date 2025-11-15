@@ -16,20 +16,118 @@
  * - Loading status announced
  * - Keyboard accessible
  *
- * @version 2.0.0 (Maximus Vision)
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #10 FIXED: IP address validation
+ * - GAP #13 FIXED: Port validation
+ * - maxLength on all inputs
+ * - Sanitization of user input
+ *
+ * @version 3.0.0 (Security Hardened)
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { validateIP, validateDomain, validatePorts } from '../../../../utils/validation';
+import { sanitizePlainText } from '../../../../utils/sanitization';
 
 export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
+  // Error states for validation feedback
+  const [targetError, setTargetError] = useState(null);
+  const [portsError, setPortsError] = useState(null);
+
   const handleChange = (field, value) => {
     onChange({ ...config, [field]: value });
+    // Clear errors on change
+    if (field === 'target' && targetError) setTargetError(null);
+    if (field === 'ports' && portsError) setPortsError(null);
+  };
+
+  // Secure target input handler
+  const handleTargetChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    handleChange('target', sanitized);
+  };
+
+  // Secure ports input handler
+  const handlePortsChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    handleChange('ports', sanitized);
+  };
+
+  // Validate target on blur
+  const handleTargetBlur = () => {
+    if (!config.target.trim()) {
+      return;
+    }
+
+    // Try IP validation first
+    const ipResult = validateIP(config.target);
+    if (ipResult.valid) {
+      setTargetError(null);
+      return;
+    }
+
+    // Try domain validation
+    const domainResult = validateDomain(config.target);
+    if (domainResult.valid) {
+      setTargetError(null);
+      return;
+    }
+
+    // Check if it's a CIDR notation
+    if (/^[\d.]+\/\d+$/.test(config.target)) {
+      const ipPart = config.target.split('/')[0];
+      const ipCheck = validateIP(ipPart);
+      if (ipCheck.valid) {
+        setTargetError(null);
+        return;
+      }
+    }
+
+    setTargetError('Invalid target. Use IP address, domain, or CIDR notation');
+  };
+
+  // Validate ports on blur
+  const handlePortsBlur = () => {
+    if (!config.ports.trim()) {
+      setPortsError(null);
+      return;
+    }
+
+    const result = validatePorts(config.ports);
+    if (!result.valid) {
+      setPortsError(result.error);
+    } else {
+      setPortsError(null);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (config.target && !isScanning) {
+
+    // Validate before submission
+    let hasErrors = false;
+
+    // Validate target
+    if (!config.target.trim()) {
+      setTargetError('Target is required');
+      hasErrors = true;
+    } else {
+      handleTargetBlur();
+      if (targetError) hasErrors = true;
+    }
+
+    // Validate ports
+    if (config.ports.trim()) {
+      const result = validatePorts(config.ports);
+      if (!result.valid) {
+        setPortsError(result.error);
+        hasErrors = true;
+      }
+    }
+
+    // Only proceed if no errors
+    if (!hasErrors && !isScanning) {
       onSubmit();
     }
   };
@@ -85,16 +183,31 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           id="recon-target-input"
           type="text"
           value={config.target}
-          onChange={(e) => handleChange('target', e.target.value)}
+          onChange={handleTargetChange}
+          onBlur={handleTargetBlur}
           placeholder="192.168.1.0/24, 10.0.0.1, example.com"
           className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-3 text-red-400 font-mono focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
+          maxLength={500}
           aria-required="true"
-          aria-describedby="target-hint"
+          aria-invalid={!!targetError}
+          aria-describedby={targetError ? "target-error" : "target-hint"}
         />
-        <p id="target-hint" className="text-red-400/50 text-xs mt-2">
-          IP, CIDR range, or hostname
-        </p>
+        {targetError ? (
+          <div
+            id="target-error"
+            className="text-red-400 text-xs mt-2 flex items-center gap-1"
+            role="alert"
+            aria-live="polite"
+          >
+            <span aria-hidden="true">⚠️</span>
+            {targetError}
+          </div>
+        ) : (
+          <p id="target-hint" className="text-red-400/50 text-xs mt-2">
+            IP, CIDR range, or hostname
+          </p>
+        )}
       </div>
 
       {/* Scan Type Selection */}
@@ -175,11 +288,26 @@ export const ScanForm = ({ config, onChange, onSubmit, isScanning }) => {
           id="port-input"
           type="text"
           value={config.ports}
-          onChange={(e) => handleChange('ports', e.target.value)}
+          onChange={handlePortsChange}
+          onBlur={handlePortsBlur}
           placeholder="1-1000, 8000-9000, 80,443"
           className="w-full bg-black/50 border border-red-400/30 rounded px-4 py-2 text-red-400 font-mono text-sm focus:outline-none focus:border-red-400 transition-all"
           disabled={isScanning}
+          maxLength={100}
+          aria-invalid={!!portsError}
+          aria-describedby={portsError ? "ports-error" : undefined}
         />
+        {portsError && (
+          <div
+            id="ports-error"
+            className="text-red-400 text-xs mt-2 flex items-center gap-1"
+            role="alert"
+            aria-live="polite"
+          >
+            <span aria-hidden="true">⚠️</span>
+            {portsError}
+          </div>
+        )}
       </fieldset>
 
       {/* Advanced Options */}

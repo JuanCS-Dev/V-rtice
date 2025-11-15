@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Input } from '../../../shared';
+import { validateUsername } from '../../../../utils/validation';
+import { sanitizePlainText } from '../../../../utils/sanitization';
 import styles from './InvestigationForm.module.css';
 
 const PLATFORM_ICONS = {
@@ -16,12 +18,41 @@ const PLATFORM_ICONS = {
 /**
  * Form for submitting a social media investigation.
  * Handles target input and platform selection.
+ *
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #45 FIXED: Username validation
+ * - maxLength on all inputs
+ * - Sanitization of user input
+ *
+ * @version 2.0.0 (Security Hardened)
  */
 const InvestigationForm = ({ onInvestigate, loading, error }) => {
   const [target, setTarget] = useState('');
   const [platforms, setPlatforms] = useState(['twitter', 'linkedin', 'github']);
+  const [targetError, setTargetError] = useState(null);
 
   const availablePlatforms = ['twitter', 'linkedin', 'github', 'instagram', 'reddit', 'facebook'];
+
+  // Secure target input handler
+  const handleTargetChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    setTarget(sanitized);
+    if (targetError) setTargetError(null);
+  };
+
+  // Validate target on blur
+  const handleTargetBlur = () => {
+    if (!target.trim()) {
+      return;
+    }
+
+    const result = validateUsername(target);
+    if (!result.valid) {
+      setTargetError(result.error);
+    } else {
+      setTargetError(null);
+    }
+  };
 
   const togglePlatform = (platform) => {
     setPlatforms(prev =>
@@ -33,7 +64,27 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onInvestigate(target, platforms);
+
+    // Validate before submission
+    if (!target.trim()) {
+      setTargetError('Username is required');
+      return;
+    }
+
+    const result = validateUsername(target);
+    if (!result.valid) {
+      setTargetError(result.error);
+      return;
+    }
+
+    if (platforms.length === 0) {
+      return;
+    }
+
+    // Only proceed if no errors
+    if (!targetError && !loading) {
+      onInvestigate(target, platforms);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -52,11 +103,25 @@ const InvestigationForm = ({ onInvestigate, loading, error }) => {
             type="text"
             placeholder="@ssimone"
             value={target}
-            onChange={(e) => setTarget(e.target.value)}
+            onChange={handleTargetChange}
+            onBlur={handleTargetBlur}
             onKeyPress={handleKeyPress}
             disabled={loading}
             className={styles.input}
+            maxLength={200}
+            aria-invalid={!!targetError}
+            aria-describedby={targetError ? "target-error" : undefined}
           />
+          {targetError && (
+            <div
+              id="target-error"
+              className={styles.error}
+              role="alert"
+              aria-live="polite"
+            >
+              {targetError}
+            </div>
+          )}
         </div>
 
         <Button

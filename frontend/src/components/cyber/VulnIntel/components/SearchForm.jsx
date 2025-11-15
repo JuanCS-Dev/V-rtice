@@ -15,18 +15,75 @@
  * - Keyboard accessible
  * - Quick searches as shortcuts
  *
- * @version 2.0.0 (Maximus Vision)
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #14 FIXED: CVE validation
+ * - maxLength on all inputs
+ * - Sanitization of user input
+ *
+ * @version 3.0.0 (Security Hardened)
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { validateCVE } from '../../../../utils/validation';
+import { sanitizePlainText } from '../../../../utils/sanitization';
 
 export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearch, isLoading }) => {
+  // Error state for validation feedback
+  const [queryError, setQueryError] = useState(null);
+
+  // Secure query input handler
+  const handleQueryChange = (e) => {
+    const sanitized = sanitizePlainText(e.target.value);
+    setQuery(sanitized);
+    if (queryError) setQueryError(null);
+  };
+
+  // Validate query on blur
+  const handleQueryBlur = () => {
+    if (!query.trim()) {
+      return;
+    }
+
+    // Only validate CVE format if searchType is 'cve'
+    if (searchType === 'cve') {
+      const result = validateCVE(query);
+      if (!result.valid) {
+        setQueryError(result.error);
+      } else {
+        setQueryError(null);
+      }
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
+
+    // Validate before submission
+    if (!query.trim()) {
+      setQueryError('Search query is required');
+      return;
+    }
+
+    // Validate CVE format if searchType is 'cve'
+    if (searchType === 'cve') {
+      const result = validateCVE(query);
+      if (!result.valid) {
+        setQueryError(result.error);
+        return;
+      }
+    }
+
+    // Only proceed if no errors
+    if (!queryError && !isLoading) {
       onSearch();
     }
+  };
+
+  // Clear error when search type changes
+  const handleSearchTypeChange = (newType) => {
+    setSearchType(newType);
+    setQueryError(null);
   };
 
   const searchTypes = [
@@ -53,7 +110,7 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
               type="button"
               role="radio"
               aria-checked={searchType === type.id}
-              onClick={() => setSearchType(type.id)}
+              onClick={() => handleSearchTypeChange(type.id)}
               aria-label={`Search by ${type.name}`}
               className={`
                 px-4 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2
@@ -82,12 +139,26 @@ export const SearchForm = ({ query, setQuery, searchType, setSearchType, onSearc
           id="vuln-search-input"
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleQueryChange}
+          onBlur={handleQueryBlur}
           placeholder={activeSearchType?.placeholder || 'Enter search query...'}
           className="w-full bg-gradient-to-r from-red-900/20 to-pink-900/20 border-2 border-red-400/30 rounded-lg pl-16 pr-32 py-4 text-red-400 font-mono text-lg focus:outline-none focus:border-red-400 transition-all placeholder-red-400/30"
           disabled={isLoading}
-          aria-describedby="vuln-search-quick"
+          maxLength={500}
+          aria-invalid={!!queryError}
+          aria-describedby={queryError ? "query-error" : "vuln-search-quick"}
         />
+        {queryError && (
+          <div
+            id="query-error"
+            className="text-red-400 text-xs mt-2 flex items-center gap-1"
+            role="alert"
+            aria-live="polite"
+          >
+            <span aria-hidden="true">⚠️</span>
+            {queryError}
+          </div>
+        )}
         <button
           type="submit"
           disabled={isLoading || !query.trim()}

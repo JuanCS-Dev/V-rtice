@@ -46,3 +46,24 @@
   border-color: var(--color-cyber-primary);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
+
+.error {
+  color: var(--color-danger, #ef4444);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
