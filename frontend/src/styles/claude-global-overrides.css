@@ -807,3 +807,101 @@ button:active:not(:disabled) {
 /* ═══════════════════════════════════════════════════════════════════════
  * END CLAUDE CODE DETAILS
  * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * CRITICAL FIXES - No space at top, no gradients
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* REMOVE ALL TOP SPACING - Header must be glued to top */
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Headers/Navbars - GLUED to top */
+header,
+.header,
+.navbar,
+nav,
+[class*="Header"],
+[class*="Navbar"],
+[class*="Nav"] {
+  margin: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  top: 0 !important;
+  position: sticky !important;
+  z-index: 50 !important;
+}
+
+/* FORCE REMOVE ALL BACKGROUND GRADIENTS - No exceptions */
+* {
+  background-image: none !important;
+  background: initial !important;
+}
+
+/* Then re-apply solid backgrounds */
+body {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+header,
+.header,
+.navbar,
+nav {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+.dashboard,
+.dashboard-offensive,
+.dashboard-defensive,
+main,
+.page {
+  background: #fafaf9 !important;
+  background-color: #fafaf9 !important;
+}
+
+.card,
+.panel,
+.widget {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+/* Remove any ::before or ::after pseudo-gradients */
+*::before,
+*::after {
+  background-image: none !important;
+  background: none !important;
+}
+
+/* Offensive dashboard - NO gradients, just solid light */
+.offensive-dashboard,
+.dashboard-offensive,
+[class*="offensive"] {
+  background: #fafaf9 !important;
+  background-color: #fafaf9 !important;
+  background-image: none !important;
+}
+
+/* Stats cards - NO gradients */
+.stat-card,
+.metric-card,
+[class*="stat"],
+[class*="metric"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * END CRITICAL FIXES
+ * ═══════════════════════════════════════════════════════════════════════ */
