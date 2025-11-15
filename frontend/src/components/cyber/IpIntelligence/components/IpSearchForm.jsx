@@ -13,12 +13,20 @@
  * - Screen reader friendly
  * - Focus indicators
  *
- * @version 2.0.0 (Maximus Vision)
+ * SECURITY (Boris Cherny Standard):
+ * - GAP #10 FIXED: IP address validation
+ * - GAP #9 FIXED: Input sanitization
+ * - GAP #15 FIXED: maxLength on inputs
+ * - GAP #16 FIXED: Whitespace-only prevention
+ *
+ * @version 3.0.0 (Security Hardened)
  * @see MAXIMUS_VISION_PROTOCOL_HTML_BLUEPRINT.md
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Input } from '../../../shared';
+import { validateIP } from '../../../../utils/validation';
+import { sanitizeIP } from '../../../../utils/sanitization';
 import styles from './IpSearchForm.module.css';
 
 const IpSearchForm = ({
@@ -30,11 +38,48 @@ const IpSearchForm = ({
   handleAnalyzeIP,
   handleAnalyzeMyIP,
 }) => {
+  const [error, setError] = useState(null);
+
+  // Secure IP input handler - GAP #10 FIX
+  const handleIPChange = (e) => {
+    const sanitized = sanitizeIP(e.target.value);
+    setIpAddress(sanitized);
+    // Clear error on change
+    if (error) setError(null);
+  };
+
+  // Validate IP on blur
+  const handleIPBlur = () => {
+    if (!ipAddress.trim()) {
+      setError(null);
+      return; // Empty is OK
+    }
+
+    const result = validateIP(ipAddress);
+    if (!result.valid) {
+      setError(result.error);
+    } else {
+      setError(null);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!loading && !loadingMyIp && ipAddress.trim()) {
-      handleAnalyzeIP(ipAddress);
+
+    // Validate before submission
+    if (!ipAddress.trim()) {
+      setError('IP address is required');
+      return;
+    }
+
+    const result = validateIP(ipAddress);
+    if (!result.valid) {
+      setError(result.error);
+      return;
+    }
+
+    if (!loading && !loadingMyIp) {
+      handleAnalyzeIP(result.sanitized);
     }
   };
 
@@ -49,23 +94,38 @@ const IpSearchForm = ({
         <label htmlFor="ip-address-input" className={styles.visuallyHidden}>
           IP Address
         </label>
-        <Input
-          id="ip-address-input"
-          type="text"
-          value={ipAddress}
-          onChange={(e) => setIpAddress(e.target.value)}
-          placeholder=">>> INSERIR ENDEREÇO IP PARA ANÁLISE"
-          variant="cyber"
-          size="lg"
-          disabled={loading || loadingMyIp}
-          icon={loading && <div className={styles.loadingSpinner}></div>}
-          aria-describedby={loading ? "ip-search-status" : undefined}
-        />
+        <div>
+          <Input
+            id="ip-address-input"
+            type="text"
+            value={ipAddress}
+            onChange={handleIPChange}
+            onBlur={handleIPBlur}
+            placeholder=">>> INSERIR ENDEREÇO IP PARA ANÁLISE"
+            variant="cyber"
+            size="lg"
+            maxLength={45}
+            disabled={loading || loadingMyIp}
+            icon={loading && <div className={styles.loadingSpinner}></div>}
+            aria-invalid={!!error}
+            aria-describedby={error ? "ip-input-error" : (loading ? "ip-search-status" : undefined)}
+          />
+          {error && (
+            <div
+              id="ip-input-error"
+              className={styles.error}
+              role="alert"
+              aria-live="polite"
+            >
+              ⚠️ {error}
+            </div>
+          )}
+        </div>
 
         <div className={styles.buttonGroup} role="group" aria-label="Search actions">
           <Button
             type="submit"
-            disabled={loading || loadingMyIp || !ipAddress.trim()}
+            disabled={loading || loadingMyIp || !ipAddress.trim() || !!error}
             variant="cyber"
             size="lg"
             className={styles.analyzeButton}
